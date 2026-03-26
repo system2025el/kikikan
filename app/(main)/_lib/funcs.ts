@@ -1,9 +1,40 @@
 'use server';
 
 import { supabase } from '@/app/_lib/db/supabase';
+import { selectDic } from '@/app/_lib/db/tables/m-dic';
 import { deleteLock, insertLock, selectLock, updateLock } from '@/app/_lib/db/tables/t-lock';
 
 import { LockValues } from './types';
+
+/**
+ * インデント文字取得
+ * @param dicId 辞書id
+ * @returns
+ */
+export const getDic = async (dicId: number) => {
+  try {
+    const { data, error } = await selectDic(dicId);
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return '';
+      }
+      throw new Error('[selectDic] DBエラー:', { cause: error });
+    }
+
+    return data.dic_val as string;
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
+    throw e;
+  }
+};
 
 /**
  * ロック情報取得

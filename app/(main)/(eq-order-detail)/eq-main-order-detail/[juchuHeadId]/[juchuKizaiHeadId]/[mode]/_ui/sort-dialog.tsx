@@ -32,21 +32,38 @@ export const SortDialog = ({
   onSave: (sortJuchuKizaiMeisai: JuchuKizaiMeisaiValues[]) => void;
 }) => {
   const [isSave, setIsSave] = useState(false);
-  const [localItems, setLocalItems] = useState<JuchuKizaiMeisaiValues[]>(juchuKizaiMeisai);
+  // ソート用のid付与した明細データ
+  const [localData, setLocalData] = useState(() =>
+    juchuKizaiMeisai.map((data, index) => ({ ...data, sortId: `item-${index}` }))
+  );
+
+  // 表示データ
+  const visibleData = localData.filter((d) => !d.delFlag);
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-    if (!over) return;
+    if (!over || active.id === over.id) return;
 
-    const oldIndex = Number(String(active.id).replace('sortable-', ''));
-    const newIndex = Number(String(over.id).replace('sortable-', ''));
+    const oldIndex = visibleData.findIndex((data) => data.sortId === active.id);
+    const newIndex = visibleData.findIndex((data) => data.sortId === over.id);
 
-    setLocalItems(arrayMove(localItems, oldIndex, newIndex));
+    if (oldIndex !== -1 && newIndex !== -1) {
+      // 表示されているものだけで並び替え
+      const newVisibleData = arrayMove(visibleData, oldIndex, newIndex);
+
+      // 削除済みデータ
+      const deletedData = localData.filter((d) => d.delFlag);
+
+      // 合体させて更新
+      setLocalData([...newVisibleData, ...deletedData]);
+    }
   };
 
   const handleOK = () => {
     setIsSave(true);
-    onSave(localItems);
+    // sortIdを除外して元の型に戻す
+    const removeIdData = localData.map(({ sortId, ...data }) => data);
+    onSave(removeIdData);
   };
 
   return (
@@ -89,15 +106,10 @@ export const SortDialog = ({
                 </TableRow>
               </TableHead>
               <TableBody>
-                <SortableContext
-                  items={localItems.map((_, index) => `sortable-${index}`)}
-                  strategy={verticalListSortingStrategy}
-                >
-                  {localItems
-                    .filter((d) => !d.delFlag)
-                    .map((data, index) => (
-                      <SortableItem key={`sortable-${index}`} id={`sortable-${index}`} index={index} item={data} />
-                    ))}
+                <SortableContext items={visibleData.map((data) => data.sortId)} strategy={verticalListSortingStrategy}>
+                  {visibleData.map((data) => (
+                    <SortableItem key={data.sortId} id={data.sortId} data={data} />
+                  ))}
                 </SortableContext>
               </TableBody>
             </Table>
@@ -124,7 +136,7 @@ export const SortDialog = ({
   );
 };
 
-const SortableItem = ({ id, index, item }: { id: string; index: number; item: JuchuKizaiMeisaiValues }) => {
+const SortableItem = ({ id, data }: { id: string; data: JuchuKizaiMeisaiValues }) => {
   const { attributes, listeners, setNodeRef, transform } = useSortable({ id: id });
 
   const style = {
@@ -136,10 +148,10 @@ const SortableItem = ({ id, index, item }: { id: string; index: number; item: Ju
       <TableCell style={styles.row}>
         <DragHandleIcon sx={{ cursor: 'move' }} />
       </TableCell>
-      <TableCell style={styles.row}>{item.kizaiNam}</TableCell>
-      <TableCell style={styles.row}>{item.planKizaiQty}</TableCell>
-      <TableCell style={styles.row}>{item.planYobiQty}</TableCell>
-      <TableCell style={styles.row}>{item.planQty}</TableCell>
+      <TableCell style={styles.row}>{data.kizaiNam}</TableCell>
+      <TableCell style={styles.row}>{data.planKizaiQty}</TableCell>
+      <TableCell style={styles.row}>{data.planYobiQty}</TableCell>
+      <TableCell style={styles.row}>{data.planQty}</TableCell>
     </TableRow>
   );
 };

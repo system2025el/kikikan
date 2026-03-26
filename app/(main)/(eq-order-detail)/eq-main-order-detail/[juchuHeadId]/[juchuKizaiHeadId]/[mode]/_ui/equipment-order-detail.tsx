@@ -42,7 +42,7 @@ import { TextFieldElement } from 'react-hook-form-mui';
 import { useUserStore } from '@/app/_lib/stores/usestore';
 import { toJapanTimeString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { getNyukoDate, getRange, getShukoDate } from '@/app/(main)/_lib/date-funcs';
-import { addLock, getLock } from '@/app/(main)/_lib/funcs';
+import { addLock, getDic, getLock } from '@/app/(main)/_lib/funcs';
 import { useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
 import { lockCheck, lockRelease } from '@/app/(main)/_lib/lock';
 import { permission } from '@/app/(main)/_lib/permission';
@@ -55,7 +55,6 @@ import { PermissionGuard } from '@/app/(main)/_ui/permission-guard';
 import {
   getALLStockList,
   getDetailJuchuHead,
-  getDic,
   getJuchuContainerMeisai,
   getNyushukoFixFlag,
 } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
@@ -69,7 +68,7 @@ import {
   getJuchuKizaiHead,
   getJuchuKizaiMeisai,
   juchuMeisaiCopy,
-  juchuMeisaiseparation,
+  juchuMeisaiSeparation,
   saveJuchuKizai,
   saveNewJuchuKizaiHead,
 } from '../_lib/funcs';
@@ -2104,7 +2103,7 @@ const EquipmentOrderDetail = (props: {
     );
 
     // 分離処理
-    const newJuchuKizaiHeadId = await juchuMeisaiseparation(
+    const newJuchuKizaiHeadId = await juchuMeisaiSeparation(
       newJuchuKizaiHead,
       shukoDate,
       nyukoDate,

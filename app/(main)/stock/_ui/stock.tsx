@@ -149,7 +149,7 @@ export const Stock = () => {
       const uniqueKizaiIds = Array.from(new Set(kizaiIds));
 
       try {
-        const allStockData: StockTableValues[] = await getAllStockData(uniqueKizaiIds, subDays(selectDate, 1));
+        const allStockData: StockTableValues[] = await getAllStockData(uniqueKizaiIds, subDays(date.toDate(), 1));
 
         const stockMap = new Map<number, StockTableValues[]>();
         for (const row of allStockData) {
