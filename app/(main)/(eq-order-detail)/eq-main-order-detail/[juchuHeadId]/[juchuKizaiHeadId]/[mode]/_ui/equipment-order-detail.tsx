@@ -68,7 +68,7 @@ import {
   getJuchuKizaiHead,
   getJuchuKizaiMeisai,
   juchuMeisaiCopy,
-  juchuMeisaiseparation,
+  juchuMeisaiSeparation,
   saveJuchuKizai,
   saveNewJuchuKizaiHead,
 } from '../_lib/funcs';
@@ -2103,7 +2103,7 @@ const EquipmentOrderDetail = (props: {
     );
 
     // 分離処理
-    const newJuchuKizaiHeadId = await juchuMeisaiseparation(
+    const newJuchuKizaiHeadId = await juchuMeisaiSeparation(
       newJuchuKizaiHead,
       shukoDate,
       nyukoDate,
