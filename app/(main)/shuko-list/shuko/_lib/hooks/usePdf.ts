@@ -12,7 +12,7 @@ export type PdfModel = {
   item5: string; //貸出日
   item6: string; //返却日
   item7: string; //公演場所
-  item8: number; //本番日数
+  item8: number | null; //本番日数
   item9: string; //担当
   item10: string; //備考
   item11: string; //ご担当者様

@@ -164,11 +164,11 @@ export const getPdfData = async (
 
     const honbanbiCalcQty =
       sqlHeader.juchu_kizai_head_kbn !== 1
-        ? ''
-        : (sqlHeader?.juchu_honbanbi_calc_qty ??
+        ? null
+        : /*(sqlHeader?.juchu_honbanbi_calc_qty ??*/
           juchuKizaiHeadData.reduce((max, current) => {
             return (current.juchu_honbanbi_calc_qty ?? 0) > (max.juchu_honbanbi_calc_qty ?? 0) ? current : max;
-          }, juchuKizaiHeadData[0] || {}).juchu_honbanbi_calc_qty);
+          }, juchuKizaiHeadData[0] || {}).juchu_honbanbi_calc_qty; /*)*/
 
     const shukoDat =
       nyushukoBashoId === 1
@@ -190,7 +190,7 @@ export const getPdfData = async (
       item5: shukoDat ? toJapanYMDString(shukoDat) : '',
       item6: toJapanYMDString(nyushukoDat),
       item7: juchuHeadData.koenbasho_nam ?? '',
-      item8: honbanbiCalcQty ?? 0,
+      item8: honbanbiCalcQty,
       item9: juchuHeadData.nyuryoku_user ?? '',
       item10: '',
       item11: juchuHeadData.kokyaku_tanto_nam ?? '',
