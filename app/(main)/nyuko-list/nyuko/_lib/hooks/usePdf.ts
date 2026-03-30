@@ -652,7 +652,6 @@ const splitTextIntoLines = (text: string, font: PDFFont, fontSize: number, maxWi
     const subLines = line.split('\n'); // 「\n」でも分割
     rawLines.push(...subLines);
   });
-  //const rawLines = text.split('\n'); // まず明示的な改行で分ける
 
   rawLines.forEach((rawLine) => {
     let currentLine = '';

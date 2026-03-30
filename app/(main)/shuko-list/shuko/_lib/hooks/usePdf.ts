@@ -432,7 +432,7 @@ export const usePdf = (): [(params: PdfModel[]) => Promise<Blob>] => {
         const planQtyText = `${item.plan_qty ?? ''}`;
         const planQtyTextWidth = customFont.widthOfTextAtSize(planQtyText, 10);
         page.drawText(planQtyText, {
-          x: colX + tableColWidths[1] - planQtyTextWidth - 3, // 3pxのパディング
+          x: colX + tableColWidths[1] - planQtyTextWidth - 3, // 右寄せ + 3pxのパディング
           y: y + (tableRowHeight - 10) / 2,
           font: customFont,
           size: 10,
@@ -452,10 +452,9 @@ export const usePdf = (): [(params: PdfModel[]) => Promise<Blob>] => {
         const planYobiQty = item.plan_yobi_qty ?? 0;
         // 予備数量が 0 または "0" のときは表示しない
         if (Number(planYobiQty) !== 0) {
-          const planYobiQtyText = ` 予備:${planYobiQty}`;
-          const planYobiQtyWidth = customFont.widthOfTextAtSize(planYobiQtyText, 10);
+          const planYobiQtyText = `+予備:${planYobiQty}`;
           page.drawText(planYobiQtyText, {
-            x: colX + tableColWidths[1] - planYobiQtyWidth - 3, // 右寄せ + 3pxパディング
+            x: colX + 3, // 3pxパディング
             y: y + (tableRowHeight - 10) / 2,
             font: customFont,
             size: 10,
