@@ -281,6 +281,7 @@ export const selectNyukoPdfJuchuKizaiMeisai = async (
           ,v_juchu_kizai_meisai.kizai_nam
           ,(coalesce( v_juchu_kizai_meisai.plan_kizai_qty,0)) + (coalesce(v_juchu_kizai_meisai.keep_qty,0)) as plan_qty
           ,(coalesce(v_juchu_kizai_meisai.plan_yobi_qty,0)) as plan_yobi_qty
+          ,v_juchu_kizai_meisai.mem2
           --ソート用カラム
           ,v_juchu_kizai_head_lst.juchu_kizai_head_id
           ,0 as ctn_flg
@@ -311,6 +312,7 @@ export const selectNyukoPdfJuchuKizaiMeisai = async (
   --コンテナはYARD+YARD両方を合算
           
           ,0 as plan_yobi_qty
+          ,'' as mem2
 
   --ソート用カラム
           ,v_juchu_kizai_head_lst.juchu_kizai_head_id

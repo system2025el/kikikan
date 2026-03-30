@@ -133,6 +133,7 @@ export const getPdfData = async (
           existing.planKizaiQty += item.planKizaiQty;
           existing.plan_yobi_qty += item.plan_yobi_qty;
           existing.plan_qty += item.plan_qty;
+          existing.mem2 += existing.mem2 && item.mem2 ? `,${item.mem2}` : item.mem2 || '';
           // 最初のものはMapに追加して位置を記録
         } else {
           summaryMap.set(item.kizai_id, { ...item });
@@ -197,6 +198,8 @@ export const getPdfData = async (
       item12: sortKizaiData,
       item13: '',
     };
+
+    console.log(sortKizaiData);
 
     return pdjData;
   } catch (e) {
