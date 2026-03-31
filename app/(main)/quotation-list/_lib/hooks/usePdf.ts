@@ -189,26 +189,40 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
     let fontSize = 10;
     let maxWidth = 100;
 
-    // const client = param.kokyaku ?? '';
-    // const clientCharge = param.kokyakuTantoNam ?? '';
+    // 取引先名
+    const client = param.kokyaku ?? '';
+    // 担当者名
+    const clientCharge = param.kokyakuTantoNam ?? '';
 
-    const client = `${param.kokyaku ?? ''}    ${param.kokyakuTantoNam ?? ''} 様`;
+    fontSize = 12;
+    maxWidth = 435; // 全体の最大幅
+    const clientMaxWidth = 350; // 会社名の個別上限
+    const chargeMaxWidth = 60; // 担当者名の個別上限
 
-    fontSize = 14;
-    //maxWidth = 330;
-    maxWidth = 420;
+    const fullText = `${client}   ${clientCharge} 様`.trim();
+
+    let finalText = '';
+
+    if (customFont.widthOfTextAtSize(fullText, fontSize) <= maxWidth) {
+      // 全体で収まるならそのまま採用
+      finalText = fullText;
+    } else {
+      // 超えている場合は、個別に指定された幅でカットして結合
+      const truncatedClient = formatTextLine(client, customFont, fontSize, clientMaxWidth);
+      const truncatedCharge = formatTextLine(clientCharge, customFont, fontSize, chargeMaxWidth);
+
+      finalText = `${truncatedClient}    ${truncatedCharge} 様`;
+    }
+
     const startX = 80;
 
-    // 表示テキスト
-    const textToDraw = formatTextLine(client, customFont, fontSize, maxWidth);
-
     // テキスト幅
-    const textWidth = customFont.widthOfTextAtSize(textToDraw, fontSize);
+    const textWidth = customFont.widthOfTextAtSize(finalText, fontSize);
 
     // 中央寄せのX座標
     const centerX = startX + (maxWidth - textWidth) / 2;
 
-    page.drawText(formatTextLine(client, customFont, fontSize, maxWidth), {
+    page.drawText(finalText, {
       x: centerX /*80*/,
       y: 746,
       font: customFont, // カスタムフォントの設定
