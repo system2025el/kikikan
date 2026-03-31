@@ -30,4 +30,5 @@ export type ShukoKizai = {
   planKizaiQty: number;
   plan_yobi_qty: number;
   plan_qty: number;
+  mem2: string;
 };
