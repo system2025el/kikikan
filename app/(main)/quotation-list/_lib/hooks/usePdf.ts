@@ -189,13 +189,27 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
     let fontSize = 10;
     let maxWidth = 100;
 
-    const client = param.kokyaku ?? '';
-    const clientCharge = param.kokyakuTantoNam ?? '';
+    // const client = param.kokyaku ?? '';
+    // const clientCharge = param.kokyakuTantoNam ?? '';
+
+    const client = `${param.kokyaku ?? ''}    ${param.kokyakuTantoNam ?? ''} 様`;
 
     fontSize = 14;
-    maxWidth = 330;
+    //maxWidth = 330;
+    maxWidth = 420;
+    const startX = 80;
+
+    // 表示テキスト
+    const textToDraw = formatTextLine(client, customFont, fontSize, maxWidth);
+
+    // テキスト幅
+    const textWidth = customFont.widthOfTextAtSize(textToDraw, fontSize);
+
+    // 中央寄せのX座標
+    const centerX = startX + (maxWidth - textWidth) / 2;
+
     page.drawText(formatTextLine(client, customFont, fontSize, maxWidth), {
-      x: 80,
+      x: centerX /*80*/,
       y: 746,
       font: customFont, // カスタムフォントの設定
       size: fontSize,
@@ -206,19 +220,19 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
       //opacity: 1,
     });
 
-    fontSize = 14;
-    maxWidth = 80;
-    page.drawText(`${formatTextLine(clientCharge, customFont, fontSize, maxWidth)} 様`, {
-      x: 420,
-      y: 746,
-      font: customFont, // カスタムフォントの設定
-      size: fontSize,
-      //maxWidth: maxWidth,
-      //wordBreaks: [''],
-      //color: rgb(0, 0, 0),
-      //lineHeight: 10,
-      //opacity: 1,
-    });
+    // fontSize = 14;
+    // maxWidth = 80;
+    // page.drawText(`${formatTextLine(clientCharge, customFont, fontSize, maxWidth)} 様`, {
+    //   x: 420,
+    //   y: 746,
+    //   font: customFont, // カスタムフォントの設定
+    //   size: fontSize,
+    //   //maxWidth: maxWidth,
+    //   //wordBreaks: [''],
+    //   //color: rgb(0, 0, 0),
+    //   //lineHeight: 10,
+    //   //opacity: 1,
+    // });
 
     page.drawText('下記の通り御見積申し上げます。', {
       x: 50,
