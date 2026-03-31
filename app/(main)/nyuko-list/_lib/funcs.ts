@@ -199,8 +199,6 @@ export const getPdfData = async (
       item13: '',
     };
 
-    console.log(sortKizaiData);
-
     return pdjData;
   } catch (e) {
     if (e instanceof Error) {
