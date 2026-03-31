@@ -20,7 +20,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import { grey } from '@mui/material/colors';
+import { blue, grey, lightBlue } from '@mui/material/colors';
 import { Dayjs } from 'dayjs';
 import React, { useRef, useState } from 'react';
 
@@ -225,13 +225,13 @@ export const EqTable: React.FC<EqTableProps> = ({
               機材名
             </TableCell>
             <TableCell align="right" size="small" style={styles.header}>
+              合計
+            </TableCell>
+            <TableCell align="right" size="small" style={styles.header}>
               受注
             </TableCell>
             <TableCell align="right" size="small" style={styles.header}>
               予備
-            </TableCell>
-            <TableCell align="right" size="small" style={styles.header}>
-              合計
             </TableCell>
             <TableCell align="left" size="small" style={styles.header}>
               連絡
@@ -324,13 +324,16 @@ const EqTableRow = React.memo(
         <TableCell style={styles.row} align="left" size="small">
           <Button
             variant="text"
-            sx={{ p: 0, justifyContent: 'start', textTransform: 'none' }}
+            sx={{ p: 0, justifyContent: 'start', textTransform: 'none', color: 'text.primary' }}
             onClick={() =>
               window.open(`/loan-situation/${row.kizaiId}?date=${shukoDate ? shukoDate.toISOString() : ''}`)
             }
           >
             {row.kizaiNam}
           </Button>
+        </TableCell>
+        <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: lightBlue[100] }}>
+          {row.planQty}
         </TableCell>
         <TableCell style={styles.row} align="right" size="small">
           <TextField
@@ -417,9 +420,6 @@ const EqTableRow = React.memo(
             onFocus={(e) => e.target.select()}
             disabled={!edit || fixFlag}
           />
-        </TableCell>
-        <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200] }}>
-          {row.planQty}
         </TableCell>
         <TableCell style={styles.row} align="center" size="small">
           <MemoTooltip
