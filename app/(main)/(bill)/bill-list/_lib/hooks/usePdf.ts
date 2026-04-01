@@ -566,13 +566,11 @@ export const usePdf = (): [(param: BillHeadValues) => Promise<Blob>] => {
 
       const tableData = [
         ['項　　　　　　　目', '数量', '本番日数', '単価', '金額'],
-        ...meisaiList.map((item) => [
-          item.nam ?? '',
-          item.qty ?? 0,
-          item.honbanbiQty ?? 0,
-          item.tankaAmt ?? 0,
-          item.shokeiAmt ?? 0,
-        ]),
+        ...meisaiList.map((item) => {
+          return !item.nam && !item.tankaAmt
+            ? ['', '', '', '', '']
+            : [item.nam ?? '', item.qty ?? 0, item.honbanbiQty ?? 0, item.tankaAmt ?? 0, item.shokeiAmt ?? 0];
+        }),
         ...(meisai?.nebikiAmt && meisai.nebikiAmt !== 0
           ? [
               [
