@@ -44,9 +44,9 @@ export const selectJuchuKizaiHeadNamList = async (juchuHeadId: number) => {
     return await supabase
       .schema(SCHEMA)
       .from('v_juchu_kizai_head_lst')
-      .select('juchu_head_id, juchu_kizai_head_id, head_nam, nebiki_amt')
+      .select('juchu_head_id, juchu_kizai_head_id, head_nam, nebiki_amt, juchu_kizai_head_kbn')
       .eq('juchu_head_id', juchuHeadId)
-      .eq('juchu_kizai_head_kbn', 1)
+      .neq('juchu_kizai_head_kbn', 3)
       .not('juchu_kizai_head_id', 'is', null);
   } catch (e) {
     throw new Error('[selectJuchuKizaiHeadNamList] DBエラー:', { cause: e });

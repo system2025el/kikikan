@@ -189,13 +189,41 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
     let fontSize = 10;
     let maxWidth = 100;
 
+    // 取引先名
     const client = param.kokyaku ?? '';
+    // 担当者名
     const clientCharge = param.kokyakuTantoNam ?? '';
 
-    fontSize = 14;
-    maxWidth = 330;
-    page.drawText(formatTextLine(client, customFont, fontSize, maxWidth), {
-      x: 80,
+    fontSize = 12;
+    maxWidth = 435; // 全体の最大幅
+    const clientMaxWidth = 350; // 会社名の個別上限
+    const chargeMaxWidth = 60; // 担当者名の個別上限
+
+    const fullText = `${client}   ${clientCharge} 様`.trim();
+
+    let finalText = '';
+
+    if (customFont.widthOfTextAtSize(fullText, fontSize) <= maxWidth) {
+      // 全体で収まるならそのまま採用
+      finalText = fullText;
+    } else {
+      // 超えている場合は、個別に指定された幅でカットして結合
+      const truncatedClient = formatTextLine(client, customFont, fontSize, clientMaxWidth);
+      const truncatedCharge = formatTextLine(clientCharge, customFont, fontSize, chargeMaxWidth);
+
+      finalText = `${truncatedClient}    ${truncatedCharge} 様`;
+    }
+
+    const startX = 80;
+
+    // テキスト幅
+    const textWidth = customFont.widthOfTextAtSize(finalText, fontSize);
+
+    // 中央寄せのX座標
+    const centerX = startX + (maxWidth - textWidth) / 2;
+
+    page.drawText(finalText, {
+      x: centerX /*80*/,
       y: 746,
       font: customFont, // カスタムフォントの設定
       size: fontSize,
@@ -206,19 +234,19 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
       //opacity: 1,
     });
 
-    fontSize = 14;
-    maxWidth = 80;
-    page.drawText(`${formatTextLine(clientCharge, customFont, fontSize, maxWidth)} 様`, {
-      x: 420,
-      y: 746,
-      font: customFont, // カスタムフォントの設定
-      size: fontSize,
-      //maxWidth: maxWidth,
-      //wordBreaks: [''],
-      //color: rgb(0, 0, 0),
-      //lineHeight: 10,
-      //opacity: 1,
-    });
+    // fontSize = 14;
+    // maxWidth = 80;
+    // page.drawText(`${formatTextLine(clientCharge, customFont, fontSize, maxWidth)} 様`, {
+    //   x: 420,
+    //   y: 746,
+    //   font: customFont, // カスタムフォントの設定
+    //   size: fontSize,
+    //   //maxWidth: maxWidth,
+    //   //wordBreaks: [''],
+    //   //color: rgb(0, 0, 0),
+    //   //lineHeight: 10,
+    //   //opacity: 1,
+    // });
 
     page.drawText('下記の通り御見積申し上げます。', {
       x: 50,
@@ -1098,80 +1126,138 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
     ) {
       fontSize = 8;
       maxWidth = 310;
-      workPage.drawText(formatTextLine(item1 ?? '', customFont, fontSize, maxWidth), {
-        x: 35,
-        y: startY - rowHeight * (index + 1) + 3,
-        font: customFont, // カスタムフォントの設定
-        size: fontSize,
-        // color: rgb(0, 0, 0),
-        // lineHeight: 24,
-        // opacity: 1,
-      });
 
-      let qty = '';
-      if (item2 !== undefined && item2 != null) {
-        qty = item2.toLocaleString();
+      if (!item1 && !item4) {
+        workPage.drawText(formatTextLine('', customFont, fontSize, maxWidth), {
+          x: 35,
+          y: startY - rowHeight * (index + 1) + 3,
+          font: customFont, // カスタムフォントの設定
+          size: fontSize,
+          // color: rgb(0, 0, 0),
+          // lineHeight: 24,
+          // opacity: 1,
+        });
+
+        const qtyWidth = customFont.widthOfTextAtSize('', fontSize);
+
+        workPage.drawText('', {
+          x: 385 - qtyWidth,
+          y: startY - 20 * (index + 1) + 3,
+          font: customFont, // カスタムフォントの設定
+          size: fontSize,
+          // color: rgb(0, 0, 0),
+          // lineHeight: 24,
+          // opacity: 1,
+        });
+
+        const honbanbiQtyWidth = customFont.widthOfTextAtSize('', fontSize);
+
+        workPage.drawText('', {
+          x: 425 - honbanbiQtyWidth,
+          y: startY - 20 * (index + 1) + 3,
+          font: customFont, // カスタムフォントの設定
+          size: fontSize,
+          // color: rgb(0, 0, 0),
+          // lineHeight: 24,
+          // opacity: 1,
+        });
+
+        const tankaAmtWidth = customFont.widthOfTextAtSize('', fontSize);
+
+        workPage.drawText('', {
+          x: 485 - tankaAmtWidth,
+          y: startY - 20 * (index + 1) + 3,
+          font: customFont, // カスタムフォントの設定
+          size: fontSize,
+          // color: rgb(0, 0, 0),
+          // lineHeight: 24,
+          // opacity: 1,
+        });
+
+        const shokeiAmtWidth = customFont.widthOfTextAtSize('', fontSize);
+
+        workPage.drawText('', {
+          x: 555 - shokeiAmtWidth,
+          y: startY - 20 * (index + 1) + 3,
+          font: customFont, // カスタムフォントの設定
+          size: fontSize,
+        });
+      } else {
+        workPage.drawText(formatTextLine(item1 ?? '', customFont, fontSize, maxWidth), {
+          x: 35,
+          y: startY - rowHeight * (index + 1) + 3,
+          font: customFont, // カスタムフォントの設定
+          size: fontSize,
+          // color: rgb(0, 0, 0),
+          // lineHeight: 24,
+          // opacity: 1,
+        });
+
+        let qty = '';
+        if (item2 !== undefined && item2 != null) {
+          qty = item2.toLocaleString();
+        }
+
+        const qtyWidth = customFont.widthOfTextAtSize(qty, fontSize);
+
+        workPage.drawText(qty, {
+          x: 385 - qtyWidth,
+          y: startY - 20 * (index + 1) + 3,
+          font: customFont, // カスタムフォントの設定
+          size: fontSize,
+          // color: rgb(0, 0, 0),
+          // lineHeight: 24,
+          // opacity: 1,
+        });
+
+        let honbanbiQty = '';
+        if (item3 !== undefined && item3 != null) {
+          honbanbiQty = item3.toLocaleString();
+        }
+
+        const honbanbiQtyWidth = customFont.widthOfTextAtSize(honbanbiQty, fontSize);
+
+        workPage.drawText(honbanbiQty, {
+          x: 425 - honbanbiQtyWidth,
+          y: startY - 20 * (index + 1) + 3,
+          font: customFont, // カスタムフォントの設定
+          size: fontSize,
+          // color: rgb(0, 0, 0),
+          // lineHeight: 24,
+          // opacity: 1,
+        });
+
+        let tankaAmt = '';
+        if (item4 !== undefined && item4 != null) {
+          tankaAmt = numberFormat(item4);
+        }
+
+        const tankaAmtWidth = customFont.widthOfTextAtSize(tankaAmt, fontSize);
+
+        workPage.drawText(tankaAmt ?? '', {
+          x: 485 - tankaAmtWidth,
+          y: startY - 20 * (index + 1) + 3,
+          font: customFont, // カスタムフォントの設定
+          size: fontSize,
+          // color: rgb(0, 0, 0),
+          // lineHeight: 24,
+          // opacity: 1,
+        });
+
+        let shokeiAmt = '';
+        if (item5 !== undefined && item5 != null) {
+          shokeiAmt = numberFormat(item5);
+        }
+
+        const shokeiAmtWidth = customFont.widthOfTextAtSize(shokeiAmt, fontSize);
+
+        workPage.drawText(shokeiAmt ?? '', {
+          x: 555 - shokeiAmtWidth,
+          y: startY - 20 * (index + 1) + 3,
+          font: customFont, // カスタムフォントの設定
+          size: fontSize,
+        });
       }
-
-      const qtyWidth = customFont.widthOfTextAtSize(qty, fontSize);
-
-      workPage.drawText(qty, {
-        x: 385 - qtyWidth,
-        y: startY - 20 * (index + 1) + 3,
-        font: customFont, // カスタムフォントの設定
-        size: fontSize,
-        // color: rgb(0, 0, 0),
-        // lineHeight: 24,
-        // opacity: 1,
-      });
-
-      let honbanbiQty = '';
-      if (item3 !== undefined && item3 != null) {
-        honbanbiQty = item3.toLocaleString();
-      }
-
-      const honbanbiQtyWidth = customFont.widthOfTextAtSize(honbanbiQty, fontSize);
-
-      workPage.drawText(honbanbiQty, {
-        x: 425 - honbanbiQtyWidth,
-        y: startY - 20 * (index + 1) + 3,
-        font: customFont, // カスタムフォントの設定
-        size: fontSize,
-        // color: rgb(0, 0, 0),
-        // lineHeight: 24,
-        // opacity: 1,
-      });
-
-      let tankaAmt = '';
-      if (item4 !== undefined && item4 != null) {
-        tankaAmt = numberFormat(item4);
-      }
-
-      const tankaAmtWidth = customFont.widthOfTextAtSize(tankaAmt, fontSize);
-
-      workPage.drawText(tankaAmt ?? '', {
-        x: 485 - tankaAmtWidth,
-        y: startY - 20 * (index + 1) + 3,
-        font: customFont, // カスタムフォントの設定
-        size: fontSize,
-        // color: rgb(0, 0, 0),
-        // lineHeight: 24,
-        // opacity: 1,
-      });
-
-      let shokeiAmt = '';
-      if (item5 !== undefined && item5 != null) {
-        shokeiAmt = numberFormat(item5);
-      }
-
-      const shokeiAmtWidth = customFont.widthOfTextAtSize(shokeiAmt, fontSize);
-
-      workPage.drawText(shokeiAmt ?? '', {
-        x: 555 - shokeiAmtWidth,
-        y: startY - 20 * (index + 1) + 3,
-        font: customFont, // カスタムフォントの設定
-        size: fontSize,
-      });
     }
 
     function drawShokei(

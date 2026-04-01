@@ -381,6 +381,7 @@ export const getJuchuKizaiHeadNamListForQuot = async (juchuId: number) => {
     return data.map((d) => ({
       juchuHeadId: d.juchu_head_id,
       juchuKizaiHeadId: d.juchu_kizai_head_id,
+      juchuKizaiHeadKbn: d.juchu_kizai_head_kbn,
       headNam: d.head_nam,
       nebikiAmt: d.nebiki_amt,
     }));

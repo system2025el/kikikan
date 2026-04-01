@@ -97,6 +97,11 @@ export const MeisaiTblHeader = ({
             <Grid2 container alignItems={'end'} spacing={1} mr={1}>
               <TextField
                 type="number"
+                slotProps={{
+                  htmlInput: {
+                    step: 'any',
+                  },
+                }}
                 sx={{
                   width: '60px',
                   '& .MuiInputBase-input': {
