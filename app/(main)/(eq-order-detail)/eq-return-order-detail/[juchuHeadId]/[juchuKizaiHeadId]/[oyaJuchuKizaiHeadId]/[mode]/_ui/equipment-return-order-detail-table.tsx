@@ -347,7 +347,7 @@ const ReturnEqTableRow = React.memo(
         <TableCell style={styles.row} align="left" size="small">
           <Button
             variant="text"
-            sx={{ p: 0, justifyContent: 'start', textTransform: 'none' }}
+            sx={{ p: 0, justifyContent: 'start', textTransform: 'none', color: 'text.primary' }}
             onClick={() =>
               window.open(`/loan-situation/${row.kizaiId}?date=${returnNyukoDate ? returnNyukoDate.toISOString() : ''}`)
             }
