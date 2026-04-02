@@ -85,7 +85,13 @@ export const SecondDialogPage = ({
 
   /* 表示する明細ヘッド名リスト */
   const [meisaiHeadNamList, setMeisaiHeadNamList] = useState<
-    { juchuHeadId: number; juchuKizaiHeadId: number; nebikiAmt: number | null; headNam: string }[]
+    {
+      juchuHeadId: number;
+      juchuKizaiHeadId: number;
+      juchuKizaiHeadKbn: number;
+      nebikiAmt: number | null;
+      headNam: string;
+    }[]
   >([]);
 
   /* methods ------------------------------------------------ */
@@ -180,6 +186,7 @@ export const SecondDialogPage = ({
                         handleClickHeadNam(l.juchuHeadId, l.juchuKizaiHeadId, l.headNam, l.nebikiAmt, checked);
                       }}
                       dense
+                      sx={{ color: l.juchuKizaiHeadKbn === 2 ? 'red' : 'primary.main' }}
                     >
                       <ListItemText primary={l.headNam} />
                     </ListItemButton>

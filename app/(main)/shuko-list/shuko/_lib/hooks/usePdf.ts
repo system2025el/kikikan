@@ -374,68 +374,171 @@ export const usePdf = (): [(params: PdfModel[]) => Promise<Blob>] => {
       drawTableHeader(page, customFont, tableStartX, tableCurrentY, tableRowHeight, tableColWidths, headerTexts);
 
       const tableData =
-        param.item12 && param.item12.length > 0 ? param.item12 : [{ kizai_nam: '', plan_qty: '', plan_yobi_qty: '' }];
+        param.item12 && param.item12.length > 0
+          ? param.item12
+          : [{ kizai_nam: '', plan_qty: '', plan_yobi_qty: '', mem2: '' }];
 
       let currentBottomY = tableStartY - tableRowHeight;
       //ループで機材データを描画
+      // for (const item of tableData) {
+      //   // 次の行がページに収まるかをチェック
+      //   if (currentBottomY - tableRowHeight < marginBottom) {
+      //     // スペースがなければ新しいページを追加
+      //     page = pdfDoc.addPage();
+      //     // Y座標を新しいページの開始位置にリセット
+      //     const newPageY = pageStartY;
+      //     // 新しいページにヘッダーを描画
+      //     drawTableHeader(page, customFont, tableStartX, newPageY, tableRowHeight, tableColWidths, headerTexts);
+      //     // Y座標も新しいヘッダーの底辺にリセット
+      //     currentBottomY = newPageY - tableRowHeight;
+      //   }
+
+      //   // 現在の行を描画するためにY座標を更新
+      //   currentBottomY -= tableRowHeight;
+      //   const y = currentBottomY; // 現在行の底辺のY座標
+      //   let colX = tableStartX;
+      //   const textMaxWidth = tableColWidths[0] - 6;
+      //   const truncatedText = formatTextLine(
+      //     item.kizai_nam ?? '',
+      //     customFont,
+      //     10, // フォントサイズ
+      //     textMaxWidth
+      //   );
+      //   // 機材名セル
+      //   page.drawRectangle({
+      //     x: colX,
+      //     y,
+      //     width: tableColWidths[0],
+      //     height: tableRowHeight,
+      //     borderColor: rgb(0, 0, 0),
+      //     borderWidth: 1,
+      //   });
+      //   page.drawText(truncatedText, {
+      //     x: colX + 3,
+      //     y: y + (tableRowHeight - 10) / 2,
+      //     font: customFont,
+      //     size: 10,
+      //   });
+      //   colX += tableColWidths[0];
+
+      //   // 合計数セル
+      //   page.drawRectangle({
+      //     x: colX,
+      //     y,
+      //     width: tableColWidths[1],
+      //     height: tableRowHeight,
+      //     borderColor: rgb(0, 0, 0),
+      //     borderWidth: 1,
+      //   });
+
+      //   const planQtyText = `${item.plan_qty ?? ''}`;
+      //   const planQtyTextWidth = customFont.widthOfTextAtSize(planQtyText, 10);
+      //   page.drawText(planQtyText, {
+      //     x: colX + tableColWidths[1] - planQtyTextWidth - 3, // 右寄せ + 3pxのパディング
+      //     y: y + (tableRowHeight - 10) / 2,
+      //     font: customFont,
+      //     size: 10,
+      //   });
+      //   colX += tableColWidths[1];
+
+      //   // 備考セル
+      //   page.drawRectangle({
+      //     x: colX,
+      //     y,
+      //     width: tableColWidths[2],
+      //     height: tableRowHeight,
+      //     borderColor: rgb(0, 0, 0),
+      //     borderWidth: 1,
+      //   });
+
+      //   const planYobiQty = item.plan_yobi_qty ?? 0;
+      //   // 予備数量が 0 または "0" のときは表示しない
+      //   if (Number(planYobiQty) !== 0) {
+      //     const planYobiQtyText = `+予備:${planYobiQty}`;
+      //     page.drawText(planYobiQtyText, {
+      //       x: colX + 3, // 3pxパディング
+      //       y: y + (tableRowHeight - 10) / 2,
+      //       font: customFont,
+      //       size: 10,
+      //     });
+      //   }
+
+      //   colX += tableColWidths[2];
+      // }
+
       for (const item of tableData) {
-        // 次の行がページに収まるかをチェック
-        if (currentBottomY - tableRowHeight < marginBottom) {
-          // スペースがなければ新しいページを追加
-          page = pdfDoc.addPage();
-          // Y座標を新しいページの開始位置にリセット
-          const newPageY = pageStartY;
-          // 新しいページにヘッダーを描画
-          drawTableHeader(page, customFont, tableStartX, newPageY, tableRowHeight, tableColWidths, headerTexts);
-          // Y座標も新しいヘッダーの底辺にリセット
-          currentBottomY = newPageY - tableRowHeight;
+        const fontSize = 10; // フォントサイズ
+        const lineSpacing = 2; // 行間
+        const lineHeight = fontSize + lineSpacing; // 1行の専有高さ
+        const rowVerticalPadding = 8; // セル内の上下余白の合計
+
+        // 備考テキストの準備と行数計算
+        const planYobiQty = Number(item.plan_yobi_qty ?? 0);
+        const rawMem2 = (item.mem2 ?? '').trim();
+        let fullNoteText = '';
+
+        if (planYobiQty !== 0) fullNoteText += `+予備:${planYobiQty}`;
+        if (rawMem2) {
+          // 予備がある場合は改行してメモを入れる、なければ直接入れる
+          fullNoteText += fullNoteText ? `\n${rawMem2}` : `${rawMem2}`;
         }
 
-        // 現在の行を描画するためにY座標を更新
-        currentBottomY -= tableRowHeight;
-        const y = currentBottomY; // 現在行の底辺のY座標
+        const paddingX = 6;
+        const noteMaxWidth = tableColWidths[2] - paddingX;
+
+        // 自動折り返しを含めた全行を取得
+        const noteLines = splitTextIntoLines(fullNoteText, customFont, fontSize, noteMaxWidth);
+
+        // 動的な行高の決定
+        const totalTextHeight = noteLines.length * lineHeight;
+        // (テキスト合計高さ + 上下余白) と 最小高さ(20) の大きい方を採用
+        const dynamicRowHeight = Math.max(tableRowHeight, totalTextHeight + rowVerticalPadding);
+
+        // ページ跨ぎチェック
+        if (currentBottomY - dynamicRowHeight < marginBottom) {
+          page = pdfDoc.addPage();
+          drawTableHeader(page, customFont, tableStartX, pageStartY, tableRowHeight, tableColWidths, headerTexts);
+          currentBottomY = pageStartY - tableRowHeight;
+        }
+
+        // 描画基準となるY座標（セルの下端）を確定
+        const y = currentBottomY - dynamicRowHeight;
         let colX = tableStartX;
-        const textMaxWidth = tableColWidths[0] - 6;
-        const truncatedText = formatTextLine(
-          item.kizai_nam ?? '',
-          customFont,
-          10, // フォントサイズ
-          textMaxWidth
-        );
+
         // 機材名セル
+        const kizaiText = formatTextLine(item.kizai_nam ?? '', customFont, fontSize, tableColWidths[0] - 6);
         page.drawRectangle({
           x: colX,
           y,
           width: tableColWidths[0],
-          height: tableRowHeight,
+          height: dynamicRowHeight,
           borderColor: rgb(0, 0, 0),
           borderWidth: 1,
         });
-        page.drawText(truncatedText, {
+        page.drawText(kizaiText, {
           x: colX + 3,
-          y: y + (tableRowHeight - 10) / 2,
+          y: y + (dynamicRowHeight - fontSize) / 2 + 1, // 垂直中央寄せ
           font: customFont,
-          size: 10,
+          size: fontSize,
         });
         colX += tableColWidths[0];
 
         // 合計数セル
+        const planQtyText = `${item.plan_qty ?? ''}`;
+        const planQtyTextWidth = customFont.widthOfTextAtSize(planQtyText, fontSize);
         page.drawRectangle({
           x: colX,
           y,
           width: tableColWidths[1],
-          height: tableRowHeight,
+          height: dynamicRowHeight,
           borderColor: rgb(0, 0, 0),
           borderWidth: 1,
         });
-
-        const planQtyText = `${item.plan_qty ?? ''}`;
-        const planQtyTextWidth = customFont.widthOfTextAtSize(planQtyText, 10);
         page.drawText(planQtyText, {
-          x: colX + tableColWidths[1] - planQtyTextWidth - 3, // 3pxのパディング
-          y: y + (tableRowHeight - 10) / 2,
+          x: colX + tableColWidths[1] - planQtyTextWidth - 3,
+          y: y + (dynamicRowHeight - fontSize) / 2 + 1, // 垂直中央寄せ
           font: customFont,
-          size: 10,
+          size: fontSize,
         });
         colX += tableColWidths[1];
 
@@ -444,25 +547,26 @@ export const usePdf = (): [(params: PdfModel[]) => Promise<Blob>] => {
           x: colX,
           y,
           width: tableColWidths[2],
-          height: tableRowHeight,
+          height: dynamicRowHeight,
           borderColor: rgb(0, 0, 0),
           borderWidth: 1,
         });
 
-        const planYobiQty = item.plan_yobi_qty ?? 0;
-        // 予備数量が 0 または "0" のときは表示しない
-        if (Number(planYobiQty) !== 0) {
-          const planYobiQtyText = ` 予備:${planYobiQty}`;
-          const planYobiQtyWidth = customFont.widthOfTextAtSize(planYobiQtyText, 10);
-          page.drawText(planYobiQtyText, {
-            x: colX + tableColWidths[1] - planYobiQtyWidth - 3, // 右寄せ + 3pxパディング
-            y: y + (tableRowHeight - 10) / 2,
-            font: customFont,
-            size: 10,
-          });
-        }
+        // 備考セルの垂直中央寄せ用パディング計算
+        // (セルの高さ - 実際のテキスト合計高さ) / 2
+        const topOffset = (dynamicRowHeight - totalTextHeight) / 2;
 
-        colX += tableColWidths[2];
+        noteLines.forEach((line, index) => {
+          page.drawText(line, {
+            x: colX + 3,
+            y: y + dynamicRowHeight - topOffset - index * lineHeight - fontSize,
+            font: customFont,
+            size: fontSize,
+          });
+        });
+
+        // 次の行のために座標を更新
+        currentBottomY = y;
       }
     }
 
@@ -496,4 +600,27 @@ const formatTextLine = (text: string, font: PDFFont, fontSize: number, maxWidth:
   }
 
   return currentText;
+};
+
+const splitTextIntoLines = (text: string, font: PDFFont, fontSize: number, maxWidth: number): string[] => {
+  const lines: string[] = [];
+  const rawLines = text.split('\n'); // 「\n」で分割
+
+  rawLines.forEach((rawLine) => {
+    let currentLine = '';
+    const chars = rawLine.split('');
+
+    for (const char of chars) {
+      const testLine = currentLine + char;
+      const width = font.widthOfTextAtSize(testLine, fontSize);
+      if (width > maxWidth && currentLine !== '') {
+        lines.push(currentLine);
+        currentLine = char;
+      } else {
+        currentLine = testLine;
+      }
+    }
+    lines.push(currentLine);
+  });
+  return lines;
 };
