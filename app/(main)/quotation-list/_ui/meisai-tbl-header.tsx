@@ -42,7 +42,7 @@ export const MeisaiTblHeader = ({
   };
 
   /* useForm ------------------------------------------------------- */
-  const { control, setValue } = useFormContext<QuotHeadValues>();
+  const { control, setValue, getValues } = useFormContext<QuotHeadValues>();
 
   // 明細の監視
   const meisaiList = useWatch({
@@ -83,6 +83,39 @@ export const MeisaiTblHeader = ({
     });
   };
 
+  /* 明細一括合算 */
+  const handleMerge = () => {
+    const target = getValues(`meisaiHeads.${sectionNam}.${index - 1}.meisai`);
+    if (!target) return;
+    meisaiList?.map((d) => {
+      const targetIndex = target?.findIndex((t) => t.nam === d.nam);
+      if (targetIndex !== undefined && targetIndex !== -1) {
+        setValue(
+          `meisaiHeads.${sectionNam}.${index - 1}.meisai.${targetIndex}.qty`,
+          Number(target[targetIndex].qty) + Number(d.qty),
+          {
+            shouldDirty: true,
+            shouldValidate: true,
+          }
+        );
+        setValue(
+          `meisaiHeads.${sectionNam}.${index - 1}.meisai.${targetIndex}.honbanbiQty`,
+          Number(target[targetIndex].honbanbiQty) - Number(d.honbanbiQty),
+          {
+            shouldDirty: true,
+            shouldValidate: true,
+          }
+        );
+      } else {
+        setValue(`meisaiHeads.${sectionNam}.${index - 1}.meisai`, [...target, d], {
+          shouldDirty: true,
+          shouldValidate: true,
+        });
+      }
+    });
+    sectionFields.remove(index);
+  };
+
   /* useEffect ---------------------------------------------------- */
   useEffect(() => {
     // 計算結果が現在の値と異なる場合のみ更新
@@ -115,6 +148,7 @@ export const MeisaiTblHeader = ({
         <Grid2 size={'grow'} justifyItems={'end'}>
           <Box display={'flex'} alignItems={'end'}>
             <Grid2 container alignItems={'end'} spacing={1} mr={1}>
+              {index !== 0 && sectionNam === 'kizai' && <Button onClick={handleMerge}>一括合算</Button>}
               <TextField
                 type="number"
                 slotProps={{

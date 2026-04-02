@@ -28,7 +28,7 @@ export const MeisaiLines = ({
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
   /* useForm ----------------------------------------------------- */
-  const { control, setValue } = useFormContext<QuotHeadValues>();
+  const { control, setValue, getValues } = useFormContext<QuotHeadValues>();
   // フォームのフィールド（明細）
   const meisaiFields = useFieldArray({ control, name: `meisaiHeads.${sectionNam}.${index}.meisai` });
   // 明細行の監視
@@ -41,6 +41,38 @@ export const MeisaiLines = ({
   /** 明細項目の順番を帰るボタン押下時 */
   const moveRow = (i: number, direction: number) => {
     meisaiFields.move(i, i + direction);
+  };
+
+  /* 明細行の合算 */
+  const mergeRow = (i: number) => {
+    const target = getValues(`meisaiHeads.${sectionNam}.${index - 1}.meisai`);
+    if (!target) return;
+    const targetIndex = target.findIndex((d) => d.nam === watchedMeisai?.[i].nam);
+    if (targetIndex !== undefined && targetIndex !== -1) {
+      setValue(
+        `meisaiHeads.${sectionNam}.${index - 1}.meisai.${targetIndex}.qty`,
+        Number(target[targetIndex].qty ?? 0) + Number(watchedMeisai?.[i].qty ?? 0),
+        {
+          shouldDirty: true,
+          shouldValidate: true,
+        }
+      );
+      setValue(
+        `meisaiHeads.${sectionNam}.${index - 1}.meisai.${targetIndex}.honbanbiQty`,
+        Number(target[targetIndex].honbanbiQty ?? 0) - Number(watchedMeisai?.[i].honbanbiQty ?? 0),
+        {
+          shouldDirty: true,
+          shouldValidate: true,
+        }
+      );
+    } else {
+      setValue(`meisaiHeads.${sectionNam}.${index - 1}.meisai`, [...target, watchedMeisai![i]], {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+    }
+
+    meisaiFields.remove(i);
   };
 
   /* useEffect ---------------------------------------------------- */
@@ -102,6 +134,7 @@ export const MeisaiLines = ({
                 />
               )}
             </Grid2>
+            {index !== 0 && sectionNam === 'kizai' && <Button onClick={() => mergeRow(i)}>合算</Button>}
             <Grid2 size={1}>
               <TextFieldElement
                 name={`meisaiHeads.${sectionNam}.${index}.meisai.${i}.qty`}
