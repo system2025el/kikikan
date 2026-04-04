@@ -45,32 +45,30 @@ export const MeisaiLines = ({
 
   /* 明細行の合算 */
   const mergeRow = (i: number) => {
-    const target = getValues(`meisaiHeads.${sectionNam}.${index - 1}.meisai`);
-    if (!target) return;
-    const targetIndex = target.findIndex((d) => d.nam === watchedMeisai?.[i].nam);
-    if (targetIndex !== undefined && targetIndex !== -1) {
-      setValue(
-        `meisaiHeads.${sectionNam}.${index - 1}.meisai.${targetIndex}.qty`,
-        Number(target[targetIndex].qty ?? 0) + Number(watchedMeisai?.[i].qty ?? 0),
-        {
-          shouldDirty: true,
-          shouldValidate: true,
-        }
-      );
-      setValue(
-        `meisaiHeads.${sectionNam}.${index - 1}.meisai.${targetIndex}.honbanbiQty`,
-        Number(target[targetIndex].honbanbiQty ?? 0) - Number(watchedMeisai?.[i].honbanbiQty ?? 0),
-        {
-          shouldDirty: true,
-          shouldValidate: true,
-        }
-      );
+    const targetPath = `meisaiHeads.${sectionNam}.${index - 1}.meisai` as const;
+    const target = getValues(targetPath);
+
+    const currentItem = watchedMeisai?.[i];
+
+    if (!target || !currentItem) return;
+
+    const newTargetMeisai = [...target];
+    const targetIndex = newTargetMeisai.findIndex((d) => d.nam === currentItem.nam);
+    if (targetIndex !== -1) {
+      newTargetMeisai[targetIndex] = {
+        ...newTargetMeisai[targetIndex],
+        qty: (Number(newTargetMeisai[targetIndex].qty) || 0) + (Number(currentItem.qty) || 0),
+        honbanbiQty: (Number(newTargetMeisai[targetIndex].honbanbiQty) || 0) - (Number(currentItem.honbanbiQty) || 0),
+      };
     } else {
-      setValue(`meisaiHeads.${sectionNam}.${index - 1}.meisai`, [...target, watchedMeisai![i]], {
-        shouldDirty: true,
-        shouldValidate: true,
-      });
+      // 一致する名称がない場合は、新しく追加
+      newTargetMeisai.push(currentItem);
     }
+
+    setValue(targetPath, newTargetMeisai, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
 
     meisaiFields.remove(i);
   };
@@ -267,7 +265,13 @@ export const MeisaiLines = ({
       ))}
       <Grid2 container px={2} alignItems={'center'}>
         <Grid2 size={0.5} />
-        <Button size="small" onClick={() => meisaiFields.append({ nam: null })} disabled={!editable}>
+        <Button
+          size="small"
+          onClick={() =>
+            meisaiFields.append({ nam: null, qty: null, honbanbiQty: null, tankaAmt: null, shokeiAmt: null })
+          }
+          disabled={!editable}
+        >
           <AddIcon fontSize="small" />
           項目
         </Button>

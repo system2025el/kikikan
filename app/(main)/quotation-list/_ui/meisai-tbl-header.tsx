@@ -37,7 +37,7 @@ export const MeisaiTblHeader = ({
 
   /* methods ------------------------------------------------------- */
   /* 明細テーブルの順番を変えるボタン押下時 */
-  const moveRow = (index: number, direction: number) => {
+  const moveRow = (direction: number) => {
     sectionFields.move(index, index + direction);
   };
 
@@ -85,34 +85,33 @@ export const MeisaiTblHeader = ({
 
   /* 明細一括合算 */
   const handleMerge = () => {
-    const target = getValues(`meisaiHeads.${sectionNam}.${index - 1}.meisai`);
-    if (!target) return;
-    meisaiList?.map((d) => {
-      const targetIndex = target?.findIndex((t) => t.nam === d.nam);
-      if (targetIndex !== undefined && targetIndex !== -1) {
-        setValue(
-          `meisaiHeads.${sectionNam}.${index - 1}.meisai.${targetIndex}.qty`,
-          Number(target[targetIndex].qty) + Number(d.qty),
-          {
-            shouldDirty: true,
-            shouldValidate: true,
-          }
-        );
-        setValue(
-          `meisaiHeads.${sectionNam}.${index - 1}.meisai.${targetIndex}.honbanbiQty`,
-          Number(target[targetIndex].honbanbiQty) - Number(d.honbanbiQty),
-          {
-            shouldDirty: true,
-            shouldValidate: true,
-          }
-        );
+    const targetPath = `meisaiHeads.${sectionNam}.${index - 1}.meisai` as const;
+    const target = getValues(targetPath);
+
+    if (!target || !meisaiList) return;
+
+    const newMeisai = [...target];
+
+    meisaiList.forEach((m) => {
+      const targetIndex = newMeisai.findIndex((t) => t.nam === m.nam);
+
+      if (targetIndex !== -1) {
+        newMeisai[targetIndex] = {
+          ...newMeisai[targetIndex],
+          qty: (Number(newMeisai[targetIndex].qty) || 0) + (Number(m.qty) || 0),
+          honbanbiQty: (Number(newMeisai[targetIndex].honbanbiQty) || 0) - (Number(m.honbanbiQty) || 0),
+        };
       } else {
-        setValue(`meisaiHeads.${sectionNam}.${index - 1}.meisai`, [...target, d], {
-          shouldDirty: true,
-          shouldValidate: true,
-        });
+        // 一致する名称がない場合は、新しく追加
+        newMeisai.push(m);
       }
     });
+
+    setValue(targetPath, newMeisai, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+
     sectionFields.remove(index);
   };
 
@@ -187,10 +186,10 @@ export const MeisaiTblHeader = ({
         </Grid2>
         <Grid2 size={1} justifyItems={'end'}>
           <Stack spacing={1}>
-            <Button disabled={index === 0 || !editable} onClick={() => moveRow(index, -1)}>
+            <Button disabled={index === 0 || !editable} onClick={() => moveRow(-1)}>
               <ArrowUpwardIcon fontSize="small" />
             </Button>
-            <Button disabled={index === sectionFields.fields.length - 1 || !editable} onClick={() => moveRow(index, 1)}>
+            <Button disabled={index === sectionFields.fields.length - 1 || !editable} onClick={() => moveRow(1)}>
               <ArrowDownwardIcon fontSize="small" />
             </Button>
           </Stack>
