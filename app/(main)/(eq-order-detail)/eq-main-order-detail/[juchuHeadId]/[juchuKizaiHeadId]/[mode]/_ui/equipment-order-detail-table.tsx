@@ -545,7 +545,7 @@ export const IdoEqTable: React.FC<IdoEqTableProps> = ({
               <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200] }}>
                 {row.planYobiQty}
               </TableCell>
-              <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200] }}>
+              <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: lightBlue[100] }}>
                 {row.planQty}
               </TableCell>
             </TableRow>
@@ -641,7 +641,11 @@ export const ContainerTable = (props: {
           {visibleRows.map((row, rowIndex) => (
             <TableRow key={rowIndex} hover>
               <TableCell align="center" width={'min-content'} sx={{ padding: 0, border: '1px solid black' }}>
-                <IconButton onClick={() => handleMeisaiDelete(row)} sx={{ padding: 0, color: 'red' }} disabled={!edit}>
+                <IconButton
+                  onClick={() => handleMeisaiDelete(row)}
+                  sx={{ padding: 0, color: 'red' }}
+                  disabled={!edit || fixFlag}
+                >
                   <Delete fontSize="small" />
                 </IconButton>
               </TableCell>
@@ -760,7 +764,7 @@ export const ContainerTable = (props: {
                   disabled={!edit || fixFlag}
                 />
               </TableCell>
-              <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200] }}>
+              <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: lightBlue[100] }}>
                 {row.planQty}
               </TableCell>
             </TableRow>

@@ -21,7 +21,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import { grey } from '@mui/material/colors';
+import { grey, lightBlue } from '@mui/material/colors';
 import { Dayjs } from 'dayjs';
 import React, { useRef, useState } from 'react';
 
@@ -725,7 +725,7 @@ export const ReturnContainerTable = (props: {
                   disabled={!edit}
                 />
               </TableCell>
-              <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200], color: 'red' }}>
+              <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: lightBlue[100], color: 'red' }}>
                 {row.planQty}
               </TableCell>
             </TableRow>
