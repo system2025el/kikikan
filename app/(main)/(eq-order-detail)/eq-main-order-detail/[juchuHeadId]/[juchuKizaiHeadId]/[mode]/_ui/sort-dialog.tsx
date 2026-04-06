@@ -95,13 +95,13 @@ export const SortDialog = ({
                     機材名
                   </TableCell>
                   <TableCell align="right" size="small" style={styles.header}>
+                    合計
+                  </TableCell>
+                  <TableCell align="right" size="small" style={styles.header}>
                     受注
                   </TableCell>
                   <TableCell align="right" size="small" style={styles.header}>
                     予備
-                  </TableCell>
-                  <TableCell align="right" size="small" style={styles.header}>
-                    合計
                   </TableCell>
                 </TableRow>
               </TableHead>
@@ -149,9 +149,9 @@ const SortableItem = ({ id, data }: { id: string; data: JuchuKizaiMeisaiValues }
         <DragHandleIcon sx={{ cursor: 'move' }} />
       </TableCell>
       <TableCell style={styles.row}>{data.kizaiNam}</TableCell>
+      <TableCell style={styles.row}>{data.planQty}</TableCell>
       <TableCell style={styles.row}>{data.planKizaiQty}</TableCell>
       <TableCell style={styles.row}>{data.planYobiQty}</TableCell>
-      <TableCell style={styles.row}>{data.planQty}</TableCell>
     </TableRow>
   );
 };

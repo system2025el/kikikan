@@ -21,7 +21,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import { grey } from '@mui/material/colors';
+import { grey, lightBlue } from '@mui/material/colors';
 import { Dayjs } from 'dayjs';
 import React, { useRef, useState } from 'react';
 
@@ -347,7 +347,7 @@ const ReturnEqTableRow = React.memo(
         <TableCell style={styles.row} align="left" size="small">
           <Button
             variant="text"
-            sx={{ p: 0, justifyContent: 'start', textTransform: 'none' }}
+            sx={{ p: 0, justifyContent: 'start', textTransform: 'none', color: 'text.primary' }}
             onClick={() =>
               window.open(`/loan-situation/${row.kizaiId}?date=${returnNyukoDate ? returnNyukoDate.toISOString() : ''}`)
             }
@@ -605,7 +605,7 @@ export const ReturnContainerTable = (props: {
               <TableCell style={styles.row} align="left" size="small">
                 <Button
                   variant="text"
-                  sx={{ p: 0, justifyContent: 'start', textTransform: 'none' }}
+                  sx={{ p: 0, justifyContent: 'start', textTransform: 'none', color: 'text.primary' }}
                   onClick={() =>
                     window.open(
                       `/loan-situation/${row.kizaiId}?date=${returnNyukoDate ? returnNyukoDate.toISOString() : ''}`
@@ -725,7 +725,7 @@ export const ReturnContainerTable = (props: {
                   disabled={!edit}
                 />
               </TableCell>
-              <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200], color: 'red' }}>
+              <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: lightBlue[100], color: 'red' }}>
                 {row.planQty}
               </TableCell>
             </TableRow>
