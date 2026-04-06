@@ -164,10 +164,18 @@ export const OrderEqTable: React.FC<OrderEqTableProps> = ({
 type OrderVehicleTableProps = {
   orderVehicleRows: VehicleTableValues[];
   selected: number[];
+  edit: boolean;
   setSelected: React.Dispatch<React.SetStateAction<number[]>>;
 };
 
-export const OrderVehicleTable: React.FC<OrderVehicleTableProps> = ({ selected, orderVehicleRows, setSelected }) => {
+export const OrderVehicleTable: React.FC<OrderVehicleTableProps> = ({
+  selected,
+  orderVehicleRows,
+  edit,
+  setSelected,
+}) => {
+  const mode = edit ? 'edit' : 'view';
+
   const handleSelect = (id: number) => {
     const newSelected = selected.includes(id) ? selected.filter((item) => item !== id) : [...selected, id];
 
@@ -228,7 +236,7 @@ export const OrderVehicleTable: React.FC<OrderVehicleTableProps> = ({ selected, 
               <TableCell padding="none">{index + 1}</TableCell>
               <TableCell align="left">
                 <Button
-                  onClick={() => window.open(`/vehicle-order-detail/${row.juchuHeadId}/${row.sharyoHeadId}/view`)}
+                  onClick={() => window.open(`/vehicle-order-detail/${row.juchuHeadId}/${row.sharyoHeadId}/${mode}`)}
                   variant="text"
                   sx={{
                     color: 'primary',

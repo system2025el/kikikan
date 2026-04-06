@@ -1378,6 +1378,7 @@ export const Order = (props: {
                 <OrderVehicleTable
                   selected={selectedVehs}
                   orderVehicleRows={vehicleHeaderList}
+                  edit={edit}
                   setSelected={setSelectedVehs}
                 />
               ) : (
