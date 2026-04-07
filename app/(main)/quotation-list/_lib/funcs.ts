@@ -452,9 +452,9 @@ export const getJuchuIsshikiMeisai = async (juchuId: number, kizaiHeadId: number
     }
     return data.map((d) => ({
       nam: d.kizai_nam,
-      qty: d.plan_kizai_qty,
+      qty: (d.kizai_tanka_amt ?? 0) < 0 ? -1 * (d.plan_kizai_qty ?? 0) : d.plan_kizai_qty,
       honbanbiQty: d.juchu_honbanbi_calc_qty,
-      tankaAmt: d.kizai_tanka_amt,
+      tankaAmt: (d.kizai_tanka_amt ?? 0) < 0 ? -1 * (d.kizai_tanka_amt ?? 0) : d.kizai_tanka_amt,
       shokeiAmt: Math.round(
         Number(d.plan_kizai_qty ?? 0) * Number(d.juchu_honbanbi_calc_qty ?? 0) * Number(d.kizai_tanka_amt ?? 0)
       ),
