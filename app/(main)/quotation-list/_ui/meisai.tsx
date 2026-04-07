@@ -54,12 +54,108 @@ export const MeisaiLines = ({
 
     const newTargetMeisai = [...target];
     const targetIndex = newTargetMeisai.findIndex((d) => d.nam === currentItem.nam);
+
     if (targetIndex !== -1) {
-      newTargetMeisai[targetIndex] = {
-        ...newTargetMeisai[targetIndex],
-        qty: (Number(newTargetMeisai[targetIndex].qty) || 0) + (Number(currentItem.qty) || 0),
-        honbanbiQty: (Number(newTargetMeisai[targetIndex].honbanbiQty) || 0) - (Number(currentItem.honbanbiQty) || 0),
-      };
+      const targetQty = Number(newTargetMeisai[targetIndex].qty) || 0;
+      const targetHonbanbiQty = Number(newTargetMeisai[targetIndex].honbanbiQty) || 0;
+      const targetTankaAmt = Number(newTargetMeisai[targetIndex].tankaAmt) || 0;
+
+      // 返却明細
+      if ((currentItem.qty ?? 0) < 0) {
+        // 単価一致
+        if (targetTankaAmt === (currentItem.tankaAmt ?? 0)) {
+          if (targetQty === -1 * (currentItem.qty ?? 0) && targetHonbanbiQty === (currentItem.honbanbiQty ?? 0)) {
+            // 数量、本番日数一致対象から削除
+            newTargetMeisai.splice(targetIndex, 1);
+          } else if (
+            targetQty === -1 * (currentItem.qty ?? 0) &&
+            targetHonbanbiQty !== (currentItem.honbanbiQty ?? 0)
+          ) {
+            // 数量一致、本番日数不一致なら本番日数のみ減らす
+            newTargetMeisai[targetIndex] = {
+              ...newTargetMeisai[targetIndex],
+              honbanbiQty: targetHonbanbiQty - (currentItem.honbanbiQty ?? 0),
+            };
+          } else if (
+            targetQty !== -1 * (currentItem.qty ?? 0) &&
+            targetHonbanbiQty === (currentItem.honbanbiQty ?? 0)
+          ) {
+            // 数量不一致、本番日数一致なら数量のみ減らす
+            newTargetMeisai[targetIndex] = {
+              ...newTargetMeisai[targetIndex],
+              qty: targetQty + (currentItem.qty ?? 0),
+            };
+          } else if (
+            targetQty !== -1 * (currentItem.qty ?? 0) &&
+            targetHonbanbiQty !== (currentItem.honbanbiQty ?? 0)
+          ) {
+            // 数量不一致、本番日数不一致なら本番日数を減らし、数量を減らして本番日数が返却分の項目を追加
+            newTargetMeisai[targetIndex] = {
+              ...newTargetMeisai[targetIndex],
+              honbanbiQty: targetHonbanbiQty - (currentItem.honbanbiQty ?? 0),
+            };
+            newTargetMeisai.push({
+              ...currentItem,
+              qty: targetQty + (currentItem.qty ?? 0),
+              honbanbiQty: currentItem.honbanbiQty,
+            });
+          }
+          // 単価不一致
+        } else {
+          if (targetQty === -1 * (currentItem.qty ?? 0) && targetHonbanbiQty === (currentItem.honbanbiQty ?? 0)) {
+            // 数量、本番日数一致なら単価のみ減らす
+            newTargetMeisai[targetIndex] = {
+              ...newTargetMeisai[targetIndex],
+              tankaAmt: targetTankaAmt - (currentItem.tankaAmt ?? 0),
+            };
+          } else if (
+            targetQty === -1 * (currentItem.qty ?? 0) &&
+            targetHonbanbiQty !== (currentItem.honbanbiQty ?? 0)
+          ) {
+            // 数量一致、本番日数不一致なら本番日数を減らし、単価を減らした返却分の本番日数で項目追加
+            newTargetMeisai[targetIndex] = {
+              ...newTargetMeisai[targetIndex],
+              honbanbiQty: targetHonbanbiQty - (currentItem.honbanbiQty ?? 0),
+            };
+            newTargetMeisai.push({
+              ...newTargetMeisai[targetIndex],
+              honbanbiQty: currentItem.honbanbiQty,
+              tankaAmt: targetTankaAmt - (currentItem.tankaAmt ?? 0),
+            });
+          } else if (targetQty !== -1 * (currentItem.qty ?? 0)) {
+            // 数量不一致なら項目追加
+            newTargetMeisai.push(currentItem);
+          }
+        }
+
+        // 追加明細
+      } else {
+        // 単価一致
+        if (targetTankaAmt === (currentItem.tankaAmt ?? 0)) {
+          if (targetHonbanbiQty === (currentItem.honbanbiQty ?? 0)) {
+            // 本番日数一致なら数量のみ増やす
+            newTargetMeisai[targetIndex] = {
+              ...newTargetMeisai[targetIndex],
+              qty: targetQty + (currentItem.qty ?? 0),
+            };
+          } else if (targetHonbanbiQty !== (currentItem.honbanbiQty ?? 0)) {
+            // 本番日数不一致なら項目追加
+            newTargetMeisai.push(currentItem);
+          }
+          // 単価不一致
+        } else {
+          if (targetHonbanbiQty === (currentItem.honbanbiQty ?? 0)) {
+            // 本番日数一致なら単価のみ増やす
+            newTargetMeisai[targetIndex] = {
+              ...newTargetMeisai[targetIndex],
+              tankaAmt: targetTankaAmt + (currentItem.tankaAmt ?? 0),
+            };
+          } else if (targetHonbanbiQty !== (currentItem.honbanbiQty ?? 0)) {
+            // 本番日数不一致なら項目追加
+            newTargetMeisai.push(currentItem);
+          }
+        }
+      }
     } else {
       // 一致する名称がない場合は、新しく追加
       newTargetMeisai.push(currentItem);
