@@ -211,7 +211,7 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
       const truncatedClient = formatTextLine(client, customFont, fontSize, clientMaxWidth);
       const truncatedCharge = formatTextLine(clientCharge, customFont, fontSize, chargeMaxWidth);
 
-      finalText = `${truncatedClient}    ${truncatedCharge} 様`;
+      finalText = `${truncatedClient}   ${truncatedCharge} 様`;
     }
 
     const startX = 80;
@@ -408,7 +408,9 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
       qty = param.mituHonbanbiQty.toLocaleString();
     }
 
-    page.drawText(qty, {
+    const qtyText = qty ? `${qty}日` : '';
+
+    page.drawText(qtyText, {
       x: x2,
       y: y4,
       font: customFont, // カスタムフォントの設定
@@ -751,12 +753,19 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
             });
 
             // 小計行1
-            checkPageBreak(rowHeight);
-            drawColumnLine();
-            drawShokei(detail.biko1, '小計', detail.shokeiAmt);
-            //drawShokei(detail.biko1, detail.shokeiMei, detail.shokeiAmt);
-            drawUnderLine();
-            index++;
+            // 値引きがある、または備考がある場合小計表示
+            if ((detail.nebikiAmt && Number(detail.nebikiAmt) !== 0) || (detail.biko1 && detail.biko1.trim() !== '')) {
+              checkPageBreak(rowHeight);
+              drawColumnLine();
+
+              const shokeiDisplayNam = detail.nebikiAmt && Number(detail.nebikiAmt) !== 0 ? '小計' : '';
+
+              const shokeiDisplayAmt = detail.nebikiAmt && Number(detail.nebikiAmt) !== 0 ? detail.shokeiAmt : null;
+
+              drawShokei(detail.biko1, shokeiDisplayNam, shokeiDisplayAmt);
+              drawUnderLine();
+              index++;
+            }
 
             // 小計行2
             if ((detail.nebikiAmt && Number(detail.nebikiAmt) !== 0) || (detail.biko2 && detail.biko2.trim() !== '')) {
@@ -866,12 +875,18 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
             });
 
             // 小計行1
-            checkPageBreak(rowHeight);
-            drawColumnLine();
-            drawShokei(detail.biko1, '小計', detail.shokeiAmt);
-            //drawShokei(detail.biko1, detail.shokeiMei, detail.shokeiAmt);
-            drawUnderLine();
-            index++;
+            if ((detail.nebikiAmt && Number(detail.nebikiAmt) !== 0) || (detail.biko1 && detail.biko1.trim() !== '')) {
+              checkPageBreak(rowHeight);
+              drawColumnLine();
+
+              const shokeiDisplayNam = detail.nebikiAmt && Number(detail.nebikiAmt) !== 0 ? '小計' : '';
+
+              const shokeiDisplayAmt = detail.nebikiAmt && Number(detail.nebikiAmt) !== 0 ? detail.shokeiAmt : null;
+
+              drawShokei(detail.biko1, shokeiDisplayNam, shokeiDisplayAmt);
+              drawUnderLine();
+              index++;
+            }
 
             // 小計行2
             if ((detail.nebikiAmt && Number(detail.nebikiAmt) !== 0) || (detail.biko2 && detail.biko2.trim() !== '')) {
@@ -969,12 +984,18 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
             });
 
             // 小計行1
-            checkPageBreak(rowHeight);
-            drawColumnLine();
-            drawShokei(detail.biko1, '小計', detail.shokeiAmt);
-            //drawShokei(detail.biko1, detail.shokeiMei, detail.shokeiAmt);
-            drawUnderLine();
-            index++;
+            if ((detail.nebikiAmt && Number(detail.nebikiAmt) !== 0) || (detail.biko1 && detail.biko1.trim() !== '')) {
+              checkPageBreak(rowHeight);
+              drawColumnLine();
+
+              const shokeiDisplayNam = detail.nebikiAmt && Number(detail.nebikiAmt) !== 0 ? '小計' : '';
+
+              const shokeiDisplayAmt = detail.nebikiAmt && Number(detail.nebikiAmt) !== 0 ? detail.shokeiAmt : null;
+
+              drawShokei(detail.biko1, shokeiDisplayNam, shokeiDisplayAmt);
+              drawUnderLine();
+              index++;
+            }
 
             // 小計行2
             if ((detail.nebikiAmt && Number(detail.nebikiAmt) !== 0) || (detail.biko2 && detail.biko2.trim() !== '')) {
@@ -1436,10 +1457,11 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
     //担当者名
     if (param.nyuryokuUser) {
       const text = param.nyuryokuUser;
+      const textWidth = customFont.widthOfTextAtSize(text, 12);
       workPage.drawText(text, {
-        x: 365,
+        x: 355 + (70 - textWidth) / 2, // 中央寄せ
         y: startY - 20 * (index + 1) - 14,
-        size: 8,
+        size: 12,
         font: customFont,
       });
     }

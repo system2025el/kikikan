@@ -47,6 +47,7 @@ import { toJapanTimeString, toJapanYMDString } from '@/app/(main)/_lib/date-conv
 import { addLock, delLock, getLock } from '@/app/(main)/_lib/funcs';
 import { useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
 import { lockCheck, lockRelease } from '@/app/(main)/_lib/lock';
+import { permission } from '@/app/(main)/_lib/permission';
 import { LockValues } from '@/app/(main)/_lib/types';
 import { BackButton, CloseMasterDialogButton } from '@/app/(main)/_ui/buttons';
 import { DateTime, TestDate } from '@/app/(main)/_ui/date';
@@ -465,8 +466,12 @@ const VehicleOrderDetail = ({
       setIsLoading(false);
     };
 
-    if (sharyoHeadId !== 0) {
+    if (user?.permission.juchu === permission.juchu_ref) setEditable(false);
+
+    if (edit && user?.permission.juchu && !!(user?.permission.juchu & permission.juchu_upd)) {
       asyncProcess();
+    } else {
+      setIsLoading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);

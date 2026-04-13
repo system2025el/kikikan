@@ -1368,7 +1368,7 @@ export const Order = (props: {
                     disabled={!edit || selectedVehs.length === 0}
                   >
                     <Delete fontSize="small" />
-                    受注明細削除
+                    車両明細削除
                   </Button>
                 </Grid2>
               </Grid2>
@@ -1378,6 +1378,7 @@ export const Order = (props: {
                 <OrderVehicleTable
                   selected={selectedVehs}
                   orderVehicleRows={vehicleHeaderList}
+                  edit={edit}
                   setSelected={setSelectedVehs}
                 />
               ) : (

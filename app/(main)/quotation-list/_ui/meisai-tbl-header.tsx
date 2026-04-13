@@ -37,12 +37,12 @@ export const MeisaiTblHeader = ({
 
   /* methods ------------------------------------------------------- */
   /* 明細テーブルの順番を変えるボタン押下時 */
-  const moveRow = (index: number, direction: number) => {
+  const moveRow = (direction: number) => {
     sectionFields.move(index, index + direction);
   };
 
   /* useForm ------------------------------------------------------- */
-  const { control, setValue } = useFormContext<QuotHeadValues>();
+  const { control, setValue, getValues } = useFormContext<QuotHeadValues>();
 
   // 明細の監視
   const meisaiList = useWatch({
@@ -83,6 +83,121 @@ export const MeisaiTblHeader = ({
     });
   };
 
+  /* 明細一括合算 */
+  const handleMerge = () => {
+    const targetPath = `meisaiHeads.${sectionNam}.${index - 1}.meisai` as const;
+    const target = getValues(targetPath);
+
+    if (!target || !meisaiList) return;
+
+    const newMeisai = [...target];
+
+    meisaiList.forEach((m) => {
+      const targetIndex = newMeisai.findIndex((t) => t.nam === m.nam);
+
+      if (targetIndex !== -1) {
+        const targetQty = Number(newMeisai[targetIndex].qty) || 0;
+        const targetHonbanbiQty = Number(newMeisai[targetIndex].honbanbiQty) || 0;
+        const targetTankaAmt = Number(newMeisai[targetIndex].tankaAmt) || 0;
+
+        // 返却明細
+        if ((m.qty ?? 0) < 0) {
+          // 単価一致
+          if (targetTankaAmt === (m.tankaAmt ?? 0)) {
+            if (targetQty === -1 * (m.qty ?? 0) && targetHonbanbiQty === (m.honbanbiQty ?? 0)) {
+              // 数量、本番日数一致対象から削除
+              newMeisai.splice(targetIndex, 1);
+            } else if (targetQty === -1 * (m.qty ?? 0) && targetHonbanbiQty !== (m.honbanbiQty ?? 0)) {
+              // 数量一致、本番日数不一致なら本番日数のみ減らす
+              newMeisai[targetIndex] = {
+                ...newMeisai[targetIndex],
+                honbanbiQty: targetHonbanbiQty - (m.honbanbiQty ?? 0),
+              };
+            } else if (targetQty !== -1 * (m.qty ?? 0) && targetHonbanbiQty === (m.honbanbiQty ?? 0)) {
+              // 数量不一致、本番日数一致なら数量のみ減らす
+              newMeisai[targetIndex] = {
+                ...newMeisai[targetIndex],
+                qty: targetQty + (m.qty ?? 0),
+              };
+            } else if (targetQty !== -1 * (m.qty ?? 0) && targetHonbanbiQty !== (m.honbanbiQty ?? 0)) {
+              // 数量不一致、本番日数不一致なら本番日数を減らし、数量を減らして本番日数が返却分の項目を追加
+              newMeisai[targetIndex] = {
+                ...newMeisai[targetIndex],
+                honbanbiQty: targetHonbanbiQty - (m.honbanbiQty ?? 0),
+              };
+              newMeisai.push({
+                ...m,
+                qty: targetQty + (m.qty ?? 0),
+                honbanbiQty: m.honbanbiQty,
+              });
+            }
+            // 単価不一致
+          } else {
+            if (targetQty === -1 * (m.qty ?? 0) && targetHonbanbiQty === (m.honbanbiQty ?? 0)) {
+              // 数量、本番日数一致なら単価のみ減らす
+              newMeisai[targetIndex] = {
+                ...newMeisai[targetIndex],
+                tankaAmt: targetTankaAmt - (m.tankaAmt ?? 0),
+              };
+            } else if (targetQty === -1 * (m.qty ?? 0) && targetHonbanbiQty !== (m.honbanbiQty ?? 0)) {
+              // 数量一致、本番日数不一致なら本番日数を減らし、単価を減らした返却分の本番日数で項目追加
+              newMeisai[targetIndex] = {
+                ...newMeisai[targetIndex],
+                honbanbiQty: targetHonbanbiQty - (m.honbanbiQty ?? 0),
+              };
+              newMeisai.push({
+                ...newMeisai[targetIndex],
+                honbanbiQty: m.honbanbiQty,
+                tankaAmt: targetTankaAmt - (m.tankaAmt ?? 0),
+              });
+            } else if (targetQty !== -1 * (m.qty ?? 0)) {
+              // 数量不一致なら項目追加
+              newMeisai.push(m);
+            }
+          }
+
+          // 追加明細
+        } else {
+          // 単価一致
+          if (targetTankaAmt === (m.tankaAmt ?? 0)) {
+            if (targetHonbanbiQty === (m.honbanbiQty ?? 0)) {
+              // 本番日数一致なら数量のみ増やす
+              newMeisai[targetIndex] = {
+                ...newMeisai[targetIndex],
+                qty: targetQty + (m.qty ?? 0),
+              };
+            } else if (targetHonbanbiQty !== (m.honbanbiQty ?? 0)) {
+              // 本番日数不一致なら項目追加
+              newMeisai.push(m);
+            }
+            // 単価不一致
+          } else {
+            if (targetHonbanbiQty === (m.honbanbiQty ?? 0)) {
+              // 本番日数一致なら単価のみ増やす
+              newMeisai[targetIndex] = {
+                ...newMeisai[targetIndex],
+                tankaAmt: targetTankaAmt + (m.tankaAmt ?? 0),
+              };
+            } else if (targetHonbanbiQty !== (m.honbanbiQty ?? 0)) {
+              // 本番日数不一致なら項目追加
+              newMeisai.push(m);
+            }
+          }
+        }
+      } else {
+        // 一致する名称がない場合は、新しく追加
+        newMeisai.push(m);
+      }
+    });
+
+    setValue(targetPath, newMeisai, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+
+    sectionFields.remove(index);
+  };
+
   /* useEffect ---------------------------------------------------- */
   useEffect(() => {
     // 計算結果が現在の値と異なる場合のみ更新
@@ -115,6 +230,7 @@ export const MeisaiTblHeader = ({
         <Grid2 size={'grow'} justifyItems={'end'}>
           <Box display={'flex'} alignItems={'end'}>
             <Grid2 container alignItems={'end'} spacing={1} mr={1}>
+              {index !== 0 && sectionNam === 'kizai' && <Button onClick={handleMerge}>一括合算</Button>}
               <TextField
                 type="number"
                 slotProps={{
@@ -153,10 +269,10 @@ export const MeisaiTblHeader = ({
         </Grid2>
         <Grid2 size={1} justifyItems={'end'}>
           <Stack spacing={1}>
-            <Button disabled={index === 0 || !editable} onClick={() => moveRow(index, -1)}>
+            <Button disabled={index === 0 || !editable} onClick={() => moveRow(-1)}>
               <ArrowUpwardIcon fontSize="small" />
             </Button>
-            <Button disabled={index === sectionFields.fields.length - 1 || !editable} onClick={() => moveRow(index, 1)}>
+            <Button disabled={index === sectionFields.fields.length - 1 || !editable} onClick={() => moveRow(1)}>
               <ArrowDownwardIcon fontSize="small" />
             </Button>
           </Stack>

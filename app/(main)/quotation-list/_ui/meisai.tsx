@@ -28,7 +28,7 @@ export const MeisaiLines = ({
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
   /* useForm ----------------------------------------------------- */
-  const { control, setValue } = useFormContext<QuotHeadValues>();
+  const { control, setValue, getValues } = useFormContext<QuotHeadValues>();
   // フォームのフィールド（明細）
   const meisaiFields = useFieldArray({ control, name: `meisaiHeads.${sectionNam}.${index}.meisai` });
   // 明細行の監視
@@ -41,6 +41,132 @@ export const MeisaiLines = ({
   /** 明細項目の順番を帰るボタン押下時 */
   const moveRow = (i: number, direction: number) => {
     meisaiFields.move(i, i + direction);
+  };
+
+  /* 明細行の合算 */
+  const mergeRow = (i: number) => {
+    const targetPath = `meisaiHeads.${sectionNam}.${index - 1}.meisai` as const;
+    const target = getValues(targetPath);
+
+    const currentItem = watchedMeisai?.[i];
+
+    if (!target || !currentItem) return;
+
+    const newTargetMeisai = [...target];
+    const targetIndex = newTargetMeisai.findIndex((d) => d.nam === currentItem.nam);
+
+    if (targetIndex !== -1) {
+      const targetQty = Number(newTargetMeisai[targetIndex].qty) || 0;
+      const targetHonbanbiQty = Number(newTargetMeisai[targetIndex].honbanbiQty) || 0;
+      const targetTankaAmt = Number(newTargetMeisai[targetIndex].tankaAmt) || 0;
+
+      // 返却明細
+      if ((currentItem.qty ?? 0) < 0) {
+        // 単価一致
+        if (targetTankaAmt === (currentItem.tankaAmt ?? 0)) {
+          if (targetQty === -1 * (currentItem.qty ?? 0) && targetHonbanbiQty === (currentItem.honbanbiQty ?? 0)) {
+            // 数量、本番日数一致対象から削除
+            newTargetMeisai.splice(targetIndex, 1);
+          } else if (
+            targetQty === -1 * (currentItem.qty ?? 0) &&
+            targetHonbanbiQty !== (currentItem.honbanbiQty ?? 0)
+          ) {
+            // 数量一致、本番日数不一致なら本番日数のみ減らす
+            newTargetMeisai[targetIndex] = {
+              ...newTargetMeisai[targetIndex],
+              honbanbiQty: targetHonbanbiQty - (currentItem.honbanbiQty ?? 0),
+            };
+          } else if (
+            targetQty !== -1 * (currentItem.qty ?? 0) &&
+            targetHonbanbiQty === (currentItem.honbanbiQty ?? 0)
+          ) {
+            // 数量不一致、本番日数一致なら数量のみ減らす
+            newTargetMeisai[targetIndex] = {
+              ...newTargetMeisai[targetIndex],
+              qty: targetQty + (currentItem.qty ?? 0),
+            };
+          } else if (
+            targetQty !== -1 * (currentItem.qty ?? 0) &&
+            targetHonbanbiQty !== (currentItem.honbanbiQty ?? 0)
+          ) {
+            // 数量不一致、本番日数不一致なら本番日数を減らし、数量を減らして本番日数が返却分の項目を追加
+            newTargetMeisai[targetIndex] = {
+              ...newTargetMeisai[targetIndex],
+              honbanbiQty: targetHonbanbiQty - (currentItem.honbanbiQty ?? 0),
+            };
+            newTargetMeisai.push({
+              ...currentItem,
+              qty: targetQty + (currentItem.qty ?? 0),
+              honbanbiQty: currentItem.honbanbiQty,
+            });
+          }
+          // 単価不一致
+        } else {
+          if (targetQty === -1 * (currentItem.qty ?? 0) && targetHonbanbiQty === (currentItem.honbanbiQty ?? 0)) {
+            // 数量、本番日数一致なら単価のみ減らす
+            newTargetMeisai[targetIndex] = {
+              ...newTargetMeisai[targetIndex],
+              tankaAmt: targetTankaAmt - (currentItem.tankaAmt ?? 0),
+            };
+          } else if (
+            targetQty === -1 * (currentItem.qty ?? 0) &&
+            targetHonbanbiQty !== (currentItem.honbanbiQty ?? 0)
+          ) {
+            // 数量一致、本番日数不一致なら本番日数を減らし、単価を減らした返却分の本番日数で項目追加
+            newTargetMeisai[targetIndex] = {
+              ...newTargetMeisai[targetIndex],
+              honbanbiQty: targetHonbanbiQty - (currentItem.honbanbiQty ?? 0),
+            };
+            newTargetMeisai.push({
+              ...newTargetMeisai[targetIndex],
+              honbanbiQty: currentItem.honbanbiQty,
+              tankaAmt: targetTankaAmt - (currentItem.tankaAmt ?? 0),
+            });
+          } else if (targetQty !== -1 * (currentItem.qty ?? 0)) {
+            // 数量不一致なら項目追加
+            newTargetMeisai.push(currentItem);
+          }
+        }
+
+        // 追加明細
+      } else {
+        // 単価一致
+        if (targetTankaAmt === (currentItem.tankaAmt ?? 0)) {
+          if (targetHonbanbiQty === (currentItem.honbanbiQty ?? 0)) {
+            // 本番日数一致なら数量のみ増やす
+            newTargetMeisai[targetIndex] = {
+              ...newTargetMeisai[targetIndex],
+              qty: targetQty + (currentItem.qty ?? 0),
+            };
+          } else if (targetHonbanbiQty !== (currentItem.honbanbiQty ?? 0)) {
+            // 本番日数不一致なら項目追加
+            newTargetMeisai.push(currentItem);
+          }
+          // 単価不一致
+        } else {
+          if (targetHonbanbiQty === (currentItem.honbanbiQty ?? 0)) {
+            // 本番日数一致なら単価のみ増やす
+            newTargetMeisai[targetIndex] = {
+              ...newTargetMeisai[targetIndex],
+              tankaAmt: targetTankaAmt + (currentItem.tankaAmt ?? 0),
+            };
+          } else if (targetHonbanbiQty !== (currentItem.honbanbiQty ?? 0)) {
+            // 本番日数不一致なら項目追加
+            newTargetMeisai.push(currentItem);
+          }
+        }
+      }
+    } else {
+      // 一致する名称がない場合は、新しく追加
+      newTargetMeisai.push(currentItem);
+    }
+
+    setValue(targetPath, newTargetMeisai, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+
+    meisaiFields.remove(i);
   };
 
   /* useEffect ---------------------------------------------------- */
@@ -102,6 +228,7 @@ export const MeisaiLines = ({
                 />
               )}
             </Grid2>
+            {index !== 0 && sectionNam === 'kizai' && <Button onClick={() => mergeRow(i)}>合算</Button>}
             <Grid2 size={1}>
               <TextFieldElement
                 name={`meisaiHeads.${sectionNam}.${index}.meisai.${i}.qty`}
@@ -234,7 +361,13 @@ export const MeisaiLines = ({
       ))}
       <Grid2 container px={2} alignItems={'center'}>
         <Grid2 size={0.5} />
-        <Button size="small" onClick={() => meisaiFields.append({ nam: null })} disabled={!editable}>
+        <Button
+          size="small"
+          onClick={() =>
+            meisaiFields.append({ nam: null, qty: null, honbanbiQty: null, tankaAmt: null, shokeiAmt: null })
+          }
+          disabled={!editable}
+        >
           <AddIcon fontSize="small" />
           項目
         </Button>
