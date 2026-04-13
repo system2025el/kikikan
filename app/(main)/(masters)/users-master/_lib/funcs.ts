@@ -128,7 +128,7 @@ export const addNewUser = async (data: UsersMasterDialogValues, user: string) =>
   const insertData: MUserDBValues = {
     user_nam: data.tantouNam,
     shain_cod: data.shainCod ?? null,
-    mail_adr: data.mailAdr,
+    mail_adr: data.mailAdr.toLowerCase(),
     permission: permissionNum,
     del_flg: Number(data.delFlg),
     mem: data.mem ?? null,
