@@ -46,7 +46,9 @@ FROM (
   ORDER BY
     cal.cal_dat
     )AS test
-WHERE test.juchu_head_id IS NOT NULL;
+  WHERE 
+    test.juchu_head_id IS NOT NULL
+    AND test.kokyaku_id <> 1013 --(株)エンジニア・ライティングを除外
   `;
   try {
     return await pool.query(query, [startDate, daysParam]);
