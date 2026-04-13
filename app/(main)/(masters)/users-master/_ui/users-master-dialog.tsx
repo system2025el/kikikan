@@ -122,7 +122,7 @@ export const UsersMasterDialog = ({
       // 新規処理
       // メールアドレスと社員コードの重複確認
       try {
-        const adr = await checkMailAdr(data.mailAdr);
+        const adr = await checkMailAdr(data.mailAdr.toLowerCase());
         // 社員コードは入力されていれば重複チェック
         const cod = data.shainCod ? await checkShainCod(data.shainCod) : { data: null };
         if (!adr.data && !cod.data) {
