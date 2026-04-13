@@ -424,9 +424,11 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
 
     const lines = formatTextArray(param.biko ?? '', customFont, fontSize, maxWidth);
 
-    const originalText = lines[0] ?? ''; //配列の最初を取得
-    const actualLines = originalText.split('\n'); //文字列を分割して新しい配列を作成
-    const linesToDraw = actualLines.slice(0, 2); //最初の2行だけを抽出
+    // const originalText = lines[0] ?? ''; //配列の最初を取得
+    // const actualLines = originalText.split('\n'); //文字列を分割して新しい配列を作成
+    // const linesToDraw = actualLines.slice(0, 2); //最初の2行だけを抽出
+
+    const linesToDraw = lines.slice(0, 2); //最初の2行だけを抽出
 
     if (0 < linesToDraw.length) {
       page.drawText(linesToDraw[0], {
@@ -655,7 +657,7 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
     });
 
     page.drawText('数　量', {
-      x: 355,
+      x: 357,
       y: y_detail_3,
       font: customFont, // カスタムフォントの設定
       size: 9,
@@ -675,7 +677,7 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
     });
 
     page.drawText('単　価', {
-      x: 445,
+      x: 447,
       y: y_detail_3,
       font: customFont, // カスタムフォントの設定
       size: 9,
@@ -685,7 +687,7 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
     });
 
     page.drawText('小　計', {
-      x: 510,
+      x: 514,
       y: y_detail_3,
       font: customFont, // カスタムフォントの設定
       size: 9,
@@ -1132,8 +1134,8 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
 
     function drawUnderLine() {
       workPage.drawLine({
-        start: { x: whiteSpace, y: startY - 15 * (index + 1) },
-        end: { x: width - whiteSpace, y: startY - 15 * (index + 1) },
+        start: { x: whiteSpace, y: startY - rowHeight * (index + 1) },
+        end: { x: width - whiteSpace, y: startY - rowHeight * (index + 1) },
         thickness: 1,
       });
     }
@@ -1163,7 +1165,7 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
 
         workPage.drawText('', {
           x: 385 - qtyWidth,
-          y: startY - 15 * (index + 1) + 3,
+          y: startY - rowHeight * (index + 1) + 3,
           font: customFont, // カスタムフォントの設定
           size: fontSize,
           // color: rgb(0, 0, 0),
@@ -1175,7 +1177,7 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
 
         workPage.drawText('', {
           x: 425 - honbanbiQtyWidth,
-          y: startY - 15 * (index + 1) + 3,
+          y: startY - rowHeight * (index + 1) + 3,
           font: customFont, // カスタムフォントの設定
           size: fontSize,
           // color: rgb(0, 0, 0),
@@ -1187,7 +1189,7 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
 
         workPage.drawText('', {
           x: 485 - tankaAmtWidth,
-          y: startY - 15 * (index + 1) + 3,
+          y: startY - rowHeight * (index + 1) + 3,
           font: customFont, // カスタムフォントの設定
           size: fontSize,
           // color: rgb(0, 0, 0),
@@ -1198,8 +1200,8 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
         const shokeiAmtWidth = customFont.widthOfTextAtSize('', fontSize);
 
         workPage.drawText('', {
-          x: 555 - shokeiAmtWidth,
-          y: startY - 15 * (index + 1) + 3,
+          x: 560 - shokeiAmtWidth,
+          y: startY - rowHeight * (index + 1) + 3,
           font: customFont, // カスタムフォントの設定
           size: fontSize,
         });
@@ -1223,7 +1225,7 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
 
         workPage.drawText(qty, {
           x: 385 - qtyWidth,
-          y: startY - 15 * (index + 1) + 3,
+          y: startY - rowHeight * (index + 1) + 3,
           font: customFont, // カスタムフォントの設定
           size: fontSize,
           // color: rgb(0, 0, 0),
@@ -1240,7 +1242,7 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
 
         workPage.drawText(honbanbiQty, {
           x: 425 - honbanbiQtyWidth,
-          y: startY - 15 * (index + 1) + 3,
+          y: startY - rowHeight * (index + 1) + 3,
           font: customFont, // カスタムフォントの設定
           size: fontSize,
           // color: rgb(0, 0, 0),
@@ -1257,7 +1259,7 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
 
         workPage.drawText(tankaAmt ?? '', {
           x: 485 - tankaAmtWidth,
-          y: startY - 15 * (index + 1) + 3,
+          y: startY - rowHeight * (index + 1) + 3,
           font: customFont, // カスタムフォントの設定
           size: fontSize,
           // color: rgb(0, 0, 0),
@@ -1273,8 +1275,8 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
         const shokeiAmtWidth = customFont.widthOfTextAtSize(shokeiAmt, fontSize);
 
         workPage.drawText(shokeiAmt ?? '', {
-          x: 555 - shokeiAmtWidth,
-          y: startY - 15 * (index + 1) + 3,
+          x: 560 - shokeiAmtWidth,
+          y: startY - rowHeight * (index + 1) + 3,
           font: customFont, // カスタムフォントの設定
           size: fontSize,
         });
@@ -1302,7 +1304,7 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
 
       workPage.drawText(item2 ?? '', {
         x: 485 - shokeiMeiWidth,
-        y: startY - 15 * (index + 1) + 3,
+        y: startY - rowHeight * (index + 1) + 3,
         font: customFont, // カスタムフォントの設定
         size: fontSize,
         // color: rgb(0, 0, 0),
@@ -1318,8 +1320,8 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
       const shokeiAmtWidth = customFont.widthOfTextAtSize(shokeiAmt, fontSize);
 
       workPage.drawText(shokeiAmt ?? '', {
-        x: 555 - shokeiAmtWidth,
-        y: startY - 15 * (index + 1) + 3,
+        x: 560 - shokeiAmtWidth,
+        y: startY - rowHeight * (index + 1) + 3,
         font: customFont, // カスタムフォントの設定
         size: fontSize,
         // color: rgb(0, 0, 0),
@@ -1375,8 +1377,8 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
 
     function drawColumnLine2() {
       workPage.drawLine({
-        start: { x: 430, y: startY - 15 * index },
-        end: { x: 430, y: startY - 15 * (index + 1) },
+        start: { x: 430, y: startY - rowHeight * index },
+        end: { x: 430, y: startY - rowHeight * (index + 1) },
         thickness: 1,
       });
     }
@@ -1388,7 +1390,7 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
 
       workPage.drawText(item1, {
         x: 425 - item1Width,
-        y: startY - 15 * (index + 1) + 3,
+        y: startY - rowHeight * (index + 1) + 3,
         font: customFont, // カスタムフォントの設定
         size: fontSize,
         color: color,
@@ -1400,8 +1402,8 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
       const item2Width = customFont.widthOfTextAtSize(displayText, fontSize);
 
       workPage.drawText(displayText, {
-        x: 555 - item2Width,
-        y: startY - 15 * (index + 1) + 3,
+        x: 560 - item2Width,
+        y: startY - rowHeight * (index + 1) + 3,
         font: customFont,
         size: fontSize,
         color: color,
@@ -1416,7 +1418,7 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
 
     let commentIndex = index;
     let innerIndex = 0;
-    const innerH = startY - 15 * (index + 1) + 7;
+    const innerH = startY - rowHeight * index - 12;
     textArray.forEach(() => {
       if (innerIndex < 5) {
         workPage.drawText(textArray[innerIndex], {
@@ -1435,7 +1437,7 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
 
     workPage.drawText('担当', {
       x: 355,
-      y: startY - 15 * (index + 1) + 5,
+      y: startY - rowHeight * index - 12,
       font: customFont, // カスタムフォントの設定
       size: 8,
       //color: rgb(0, 0, 0),
@@ -1444,14 +1446,14 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
     });
     //担当左
     workPage.drawLine({
-      start: { x: 350, y: startY - 15 * index },
-      end: { x: 350, y: startY - 15 * (index + 3) },
+      start: { x: 350, y: startY - rowHeight * index },
+      end: { x: 350, y: startY - rowHeight * index - 60 },
       thickness: 1,
     });
     //担当右
     workPage.drawLine({
-      start: { x: 430, y: startY - 15 * index },
-      end: { x: 430, y: startY - 15 * (index + 3) },
+      start: { x: 430, y: startY - rowHeight * index },
+      end: { x: 430, y: startY - rowHeight * index - 60 },
       thickness: 1,
     });
     //担当者名
@@ -1460,12 +1462,12 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
       const textWidth = customFont.widthOfTextAtSize(text, 12);
       workPage.drawText(text, {
         x: 355 + (70 - textWidth) / 2, // 中央寄せ
-        y: startY - 15 * (index + 1) - 14,
+        y: startY - rowHeight * index - 35,
         size: 12,
         font: customFont,
       });
     }
-    const yBottom = startY - 15 * (index + 3); // 最終的なY座標
+    const yBottom = startY - rowHeight * index - 60; // 最終的なY座標
     const xLeft = whiteSpace; // 統一したX座標
     const xRight = width - whiteSpace; // 統一したX座標
     const yTop = height - whiteSpace; // 統一したY座標
@@ -1529,31 +1531,50 @@ const formatTextLine = (text: string, font: PDFFont, fontSize: number, maxWidth:
 };
 
 const formatTextArray = (text: string, font: PDFFont, fontSize: number, maxWidth: number) => {
-  const textArray = [];
+  const textArray: string[] = [];
 
-  // 1行に収まる場合
-  if (font.widthOfTextAtSize(text, fontSize) <= maxWidth) {
-    textArray.push(text);
-    return textArray;
-  }
+  // // 1行に収まる場合
+  // if (font.widthOfTextAtSize(text, fontSize) <= maxWidth) {
+  //   textArray.push(text);
+  //   return textArray;
+  // }
 
-  let currentText = '';
-  let currentWidth = 0;
+  // let currentText = '';
+  // let currentWidth = 0;
 
-  const items = text.split('');
+  // const items = text.split('');
 
-  for (const item of items) {
-    const wordWidth = font.widthOfTextAtSize(item, fontSize);
-    if (currentWidth + wordWidth <= maxWidth) {
-      currentText += item;
-      currentWidth += wordWidth;
-    } else {
-      // 1行分のテキスト確定
-      textArray.push(currentText);
-      currentText = item;
-      currentWidth = wordWidth;
+  // for (const item of items) {
+  //   const wordWidth = font.widthOfTextAtSize(item, fontSize);
+  //   if (currentWidth + wordWidth <= maxWidth) {
+  //     currentText += item;
+  //     currentWidth += wordWidth;
+  //   } else {
+  //     // 1行分のテキスト確定
+  //     textArray.push(currentText);
+  //     currentText = item;
+  //     currentWidth = wordWidth;
+  //   }
+  // }
+
+  const rawLines = text.split('\n'); // 「\n」で分割
+
+  rawLines.forEach((rawLine) => {
+    let currentLine = '';
+    const chars = rawLine.split('');
+
+    for (const char of chars) {
+      const testLine = currentLine + char;
+      const width = font.widthOfTextAtSize(testLine, fontSize);
+      if (width > maxWidth && currentLine !== '') {
+        textArray.push(currentLine);
+        currentLine = char;
+      } else {
+        currentLine = testLine;
+      }
     }
-  }
+    textArray.push(currentLine);
+  });
 
   return textArray;
 };
