@@ -1,6 +1,7 @@
 'use client';
 
 import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
+import WarningIcon from '@mui/icons-material/Warning';
 import {
   Box,
   Button,
@@ -46,6 +47,8 @@ export const NyukoDetail = (props: {
   // 処理中制御
   const [isProcessing, setIsProcessing] = useState(false);
 
+  // 到着確認ダイアログ制御
+  const [arrivalOpen, setArrivalOpen] = useState(false);
   // スナックバー制御
   const [snackBarOpen, setSnackBarOpen] = useState(false);
   // スナックバーメッセージ
@@ -55,7 +58,7 @@ export const NyukoDetail = (props: {
    * 到着ボタン押下
    * @returns
    */
-  const handleDeparture = async () => {
+  const executeArrival = async () => {
     if (!user || isProcessing) return;
 
     setIsProcessing(true);
@@ -68,12 +71,14 @@ export const NyukoDetail = (props: {
     const updateResult = await updNyukoDetail(nyukoDetailData, nyukoDetailTableData, user.name);
 
     if (updateResult) {
+      setArrivalOpen(false);
       setFixFlag(true);
       setSnackBarMessage('到着しました');
       setSnackBarOpen(true);
       setIsProcessing(false);
       router.push('/nyuko-list');
     } else {
+      setArrivalOpen(false);
       setSnackBarMessage('到着に失敗しました');
       setSnackBarOpen(true);
       setIsProcessing(false);
@@ -104,7 +109,7 @@ export const NyukoDetail = (props: {
             <Grid2 container alignItems={'center'} spacing={2}>
               {fixFlag && <Typography>到着済</Typography>}
               <Button
-                onClick={handleDeparture}
+                onClick={() => setArrivalOpen(true)}
                 disabled={fixFlag || user?.permission.nyushuko === permission.nyushuko_ref}
               >
                 到着
@@ -173,6 +178,17 @@ export const NyukoDetail = (props: {
             {nyukoDetailTableData.length > 0 && <NyukoDetailTable datas={nyukoDetailTableData} />}
           </Box>
         </Paper>
+        <Dialog open={arrivalOpen}>
+          <Typography p={5}>到着してよろしいでしょうか？</Typography>
+          <DialogActions>
+            <Button onClick={executeArrival} loading={isProcessing}>
+              到着
+            </Button>
+            <Button onClick={() => setArrivalOpen(false)} loading={isProcessing}>
+              戻る
+            </Button>
+          </DialogActions>
+        </Dialog>
         <Snackbar
           open={snackBarOpen}
           autoHideDuration={6000}
