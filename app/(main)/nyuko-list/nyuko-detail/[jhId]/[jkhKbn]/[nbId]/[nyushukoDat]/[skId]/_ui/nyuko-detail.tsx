@@ -111,6 +111,7 @@ export const NyukoDetail = (props: {
               <Button
                 onClick={() => setArrivalOpen(true)}
                 disabled={fixFlag || user?.permission.nyushuko === permission.nyushuko_ref}
+                sx={{ backgroundColor: 'yellow', color: 'black' }}
               >
                 到着
               </Button>
@@ -179,9 +180,17 @@ export const NyukoDetail = (props: {
           </Box>
         </Paper>
         <Dialog open={arrivalOpen}>
-          <Typography p={5}>到着してよろしいでしょうか？</Typography>
+          <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
+            <WarningIcon color="warning" />
+            <Box>到着確認</Box>
+          </DialogTitle>
+          <DialogContentText m={2} p={2}>
+            到着は戻せません。
+            <br />
+            到着済みにしてよろしいですか？
+          </DialogContentText>
           <DialogActions>
-            <Button onClick={executeArrival} loading={isProcessing}>
+            <Button onClick={executeArrival} loading={isProcessing} sx={{ backgroundColor: 'yellow', color: 'black' }}>
               到着
             </Button>
             <Button onClick={() => setArrivalOpen(false)} loading={isProcessing}>
