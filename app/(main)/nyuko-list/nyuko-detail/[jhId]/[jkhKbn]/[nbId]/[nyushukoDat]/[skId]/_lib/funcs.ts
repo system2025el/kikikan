@@ -364,7 +364,7 @@ export const updKeepNyukoDetail = async (
         nyushuko_basho_id: nyukoDetailData.nyushukoBashoId,
       });
 
-      if (shukoDat.data) {
+      if (shukoDat.data && shukoDat.data.length === 1) {
         await upsShukoDen(nyukoDetailTableData, shukoDat.data[0].nyushuko_dat, userNam, connection);
       }
     }

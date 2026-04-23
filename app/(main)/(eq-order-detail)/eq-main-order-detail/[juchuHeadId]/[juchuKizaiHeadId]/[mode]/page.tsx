@@ -28,9 +28,10 @@ const Page = async (props: { params: Promise<{ juchuHeadId: string; juchuKizaiHe
   const juchuKizaiHeadId = Number(params.juchuKizaiHeadId);
 
   // 受注ヘッダーデータ、出発フラグ、本番日背景色
-  const [juchuHeadData, fixFlag, honbanbiColor] = await Promise.all([
+  const [juchuHeadData, shukoFixFlag, nyukoFixFlag, honbanbiColor] = await Promise.all([
     getDetailJuchuHead(juchuHeadId),
     getNyushukoFixFlag(juchuHeadId, juchuKizaiHeadId, 60),
+    getNyushukoFixFlag(juchuHeadId, juchuKizaiHeadId, 70),
     getColor(),
   ]);
 
@@ -67,7 +68,8 @@ const Page = async (props: { params: Promise<{ juchuHeadId: string; juchuKizaiHe
         juchuKizaiHeadData={newJuchuKizaiHeadData}
         juchuHonbanbiData={newJuchuHonbanbiData}
         edit={edit}
-        fixFlag={fixFlag}
+        shukoFixFlag={shukoFixFlag}
+        nyukoFixFlag={nyukoFixFlag}
         honbanbiColor={honbanbiColor}
       />
     );
@@ -90,7 +92,8 @@ const Page = async (props: { params: Promise<{ juchuHeadId: string; juchuKizaiHe
         juchuKizaiHeadData={juchuKizaiHeadData}
         juchuHonbanbiData={juchuHonbanbiData}
         edit={edit}
-        fixFlag={fixFlag}
+        shukoFixFlag={shukoFixFlag}
+        nyukoFixFlag={nyukoFixFlag}
         honbanbiColor={honbanbiColor}
       />
     );

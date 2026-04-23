@@ -64,6 +64,7 @@ import { selectActiveBumons } from '@/app/_lib/db/tables/v_bumon_lst';
 import { selectJuchuKizaiMeisai } from '@/app/_lib/db/tables/v-juchu-kizai-meisai';
 import { selectIdoJuchuKizaiMeisai } from '@/app/_lib/db/tables/v-juchu-kizai-meisai-sum';
 import { selectActiveEqpts, selectChosenEqptsDetails } from '@/app/_lib/db/tables/v-kizai-list';
+import { selectFinishedReturn } from '@/app/_lib/db/tables/v-nyushuko-den2-lst-oyako';
 import { JuchuCtnMeisai } from '@/app/_lib/db/types/t_juchu_ctn_meisai-type';
 import { IdoDenJuchu } from '@/app/_lib/db/types/t-ido-den-juchu-type';
 import { IdoDen } from '@/app/_lib/db/types/t-ido-den-type';
@@ -1009,6 +1010,7 @@ export const upsShukoDen = async (
  */
 export const upsNyukoDen = async (
   juchuKizaiMeisaiData: JuchuKizaiMeisaiValues[],
+  returnData: { kizaiId: number; planQty: number; dspOrdNumMeisai: number; nyushukoBashoId: number }[],
   nyukoDat: Date,
   sagyoId: number,
   userNam: string,
@@ -1022,7 +1024,11 @@ export const upsNyukoDen = async (
     sagyo_den_dat: nyukoDat.toISOString(),
     sagyo_id: sagyoId,
     kizai_id: d.kizaiId,
-    plan_qty: d.planQty,
+    plan_qty:
+      returnData.length > 0
+        ? d.planQty -
+          (returnData.find((r) => r.kizaiId === d.kizaiId && r.dspOrdNumMeisai === d.dspOrdNum)?.planQty ?? 0)
+        : d.planQty,
     dsp_ord_num: d.dspOrdNum,
     indent_num: d.indentNum,
     add_dat: new Date().toISOString(),
@@ -1570,26 +1576,45 @@ export const upsCtnShukoDen = async (
  */
 export const upsCtnNyukoDen = async (
   juchuContainerMeisaiData: JuchuContainerMeisaiValues[],
+  returnData: { kizaiId: number; planQty: number; dspOrdNumMeisai: number; nyushukoBashoId: number }[],
   nyukoDat: Date,
   sagyoId: number,
   planQtyId: number,
   userNam: string,
   connection: PoolClient
 ) => {
-  const upsertCtnNyukoData: NyushukoDen[] = juchuContainerMeisaiData.map((d) => ({
-    juchu_head_id: d.juchuHeadId,
-    juchu_kizai_head_id: d.juchuKizaiHeadId,
-    juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
-    sagyo_kbn_id: 30,
-    sagyo_den_dat: nyukoDat.toISOString(),
-    sagyo_id: sagyoId,
-    kizai_id: d.kizaiId,
-    plan_qty: planQtyId === 1 ? d.planKicsKizaiQty : planQtyId === 2 ? d.planYardKizaiQty : d.planQty,
-    dsp_ord_num: d.dspOrdNum,
-    indent_num: d.indentNum,
-    add_dat: new Date().toISOString(),
-    add_user: userNam,
-  }));
+  const upsertCtnNyukoData: NyushukoDen[] = juchuContainerMeisaiData.map((d) => {
+    let planQty = planQtyId === 1 ? d.planKicsKizaiQty : planQtyId === 2 ? d.planYardKizaiQty : d.planQty;
+    if (returnData.length > 0) {
+      const childData = returnData.find((r) => r.kizaiId === d.kizaiId && r.dspOrdNumMeisai === d.dspOrdNum);
+      const oyaPlanQty = childData?.nyushukoBashoId === 1 ? d.planKicsKizaiQty : d.planYardKizaiQty;
+
+      planQty -=
+        sagyoId === childData?.nyushukoBashoId && planQtyId !== 3 && oyaPlanQty < childData.planQty
+          ? oyaPlanQty
+          : sagyoId === childData?.nyushukoBashoId && planQtyId !== 3 && oyaPlanQty >= childData?.planQty
+            ? childData?.planQty
+            : sagyoId !== childData?.nyushukoBashoId && planQtyId !== 3 && oyaPlanQty < (childData?.planQty ?? 0)
+              ? (childData?.planQty ?? 0) - oyaPlanQty
+              : sagyoId !== childData?.nyushukoBashoId && planQtyId !== 3 && oyaPlanQty >= (childData?.planQty ?? 0)
+                ? 0
+                : (childData?.planQty ?? 0);
+    }
+    return {
+      juchu_head_id: d.juchuHeadId,
+      juchu_kizai_head_id: d.juchuKizaiHeadId,
+      juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
+      sagyo_kbn_id: 30,
+      sagyo_den_dat: nyukoDat.toISOString(),
+      sagyo_id: sagyoId,
+      kizai_id: d.kizaiId,
+      plan_qty: planQty,
+      dsp_ord_num: d.dspOrdNum,
+      indent_num: d.indentNum,
+      add_dat: new Date().toISOString(),
+      add_user: userNam,
+    };
+  });
 
   try {
     await upsertNyushukoDen(upsertCtnNyukoData, connection);
@@ -3472,6 +3497,9 @@ export const saveJuchuKizai = async (
         }
       }
 
+      // 返却データ
+      const returnData = await selectFinishedReturn(data.juchuHeadId, data.juchuKizaiHeadId, connection);
+
       // 入庫追加更新
       if (data.kicsNyukoDat && data.yardNyukoDat) {
         // KICS入庫明細
@@ -3480,11 +3508,25 @@ export const saveJuchuKizai = async (
         const yardNyukoData = newJuchuKizaiMeisaiData.filter((d) => !d.delFlag && d.mShozokuId === 2);
 
         if (kicsNyukoData.length > 0) {
-          const upsertKicsNyukoDenResult = await upsNyukoDen(kicsNyukoData, data.kicsNyukoDat, 1, userNam, connection);
+          const upsertKicsNyukoDenResult = await upsNyukoDen(
+            kicsNyukoData,
+            returnData,
+            data.kicsNyukoDat,
+            1,
+            userNam,
+            connection
+          );
         }
 
         if (yardNyukoData.length > 0) {
-          const upsertYardNyukoDenResult = await upsNyukoDen(yardNyukoData, data.yardNyukoDat, 2, userNam, connection);
+          const upsertYardNyukoDenResult = await upsNyukoDen(
+            yardNyukoData,
+            returnData,
+            data.yardNyukoDat,
+            2,
+            userNam,
+            connection
+          );
         }
 
         // コンテナ入庫明細
@@ -3493,6 +3535,7 @@ export const saveJuchuKizai = async (
           if (data.kicsShukoDat && data.yardShukoDat) {
             const upsertKicsCtnNyukoDenResult = await upsCtnNyukoDen(
               ctnNyukoData,
+              returnData,
               data.kicsNyukoDat,
               1,
               1,
@@ -3502,6 +3545,7 @@ export const saveJuchuKizai = async (
 
             const upsertYardCtnNyukoDenResult = await upsCtnNyukoDen(
               ctnNyukoData,
+              returnData,
               data.yardNyukoDat,
               2,
               2,
@@ -3511,6 +3555,7 @@ export const saveJuchuKizai = async (
           } else if (data.kicsShukoDat && !data.yardShukoDat) {
             const upsertKicsCtnNyukoDenResult = await upsCtnNyukoDen(
               ctnNyukoData,
+              returnData,
               data.kicsNyukoDat,
               1,
               1,
@@ -3520,6 +3565,7 @@ export const saveJuchuKizai = async (
           } else if (!data.kicsShukoDat && data.yardShukoDat) {
             const upsertYardCtnNyukoDenResult = await upsCtnNyukoDen(
               ctnNyukoData,
+              returnData,
               data.yardNyukoDat,
               2,
               2,
@@ -3533,7 +3579,14 @@ export const saveJuchuKizai = async (
         const kicsNyukoData = newJuchuKizaiMeisaiData.filter((d) => !d.delFlag);
 
         if (kicsNyukoData.length > 0) {
-          const upsertKicsNyukoDenResult = await upsNyukoDen(kicsNyukoData, data.kicsNyukoDat, 1, userNam, connection);
+          const upsertKicsNyukoDenResult = await upsNyukoDen(
+            kicsNyukoData,
+            returnData,
+            data.kicsNyukoDat,
+            1,
+            userNam,
+            connection
+          );
         }
 
         // KICSコンテナ入庫明細
@@ -3542,6 +3595,7 @@ export const saveJuchuKizai = async (
           if (data.kicsShukoDat && data.yardShukoDat) {
             const upsertCtnNyukoDenResult = await upsCtnNyukoDen(
               ctnNyukoData,
+              returnData,
               data.kicsNyukoDat,
               1,
               3,
@@ -3551,6 +3605,7 @@ export const saveJuchuKizai = async (
           } else if (data.kicsShukoDat && !data.yardShukoDat) {
             const upsertCtnNyukoDenResult = await upsCtnNyukoDen(
               ctnNyukoData,
+              returnData,
               data.kicsNyukoDat,
               1,
               1,
@@ -3560,6 +3615,7 @@ export const saveJuchuKizai = async (
           } else if (!data.kicsShukoDat && data.yardShukoDat) {
             const upsertCtnNyukoDenResult = await upsCtnNyukoDen(
               ctnNyukoData,
+              returnData,
               data.kicsNyukoDat,
               1,
               2,
@@ -3573,7 +3629,14 @@ export const saveJuchuKizai = async (
         const yardNyukoData = newJuchuKizaiMeisaiData.filter((d) => !d.delFlag);
 
         if (yardNyukoData.length > 0) {
-          const upsertNyukoDenResult = await upsNyukoDen(yardNyukoData, data.yardNyukoDat, 2, userNam, connection);
+          const upsertNyukoDenResult = await upsNyukoDen(
+            yardNyukoData,
+            returnData,
+            data.yardNyukoDat,
+            2,
+            userNam,
+            connection
+          );
         }
 
         // YARDコンテナ入庫明細
@@ -3582,6 +3645,7 @@ export const saveJuchuKizai = async (
           if (data.kicsShukoDat && data.yardShukoDat) {
             const upsertCtnNyukoDenResult = await upsCtnNyukoDen(
               ctnNyukoData,
+              returnData,
               data.yardNyukoDat,
               2,
               3,
@@ -3591,6 +3655,7 @@ export const saveJuchuKizai = async (
           } else if (data.kicsShukoDat && !data.yardShukoDat) {
             const upsertCtnNyukoDenResult = await upsCtnNyukoDen(
               ctnNyukoData,
+              returnData,
               data.yardNyukoDat,
               2,
               1,
@@ -3600,6 +3665,7 @@ export const saveJuchuKizai = async (
           } else if (!data.kicsShukoDat && data.yardShukoDat) {
             const upsertCtnNyukoDenResult = await upsCtnNyukoDen(
               ctnNyukoData,
+              returnData,
               data.yardNyukoDat,
               2,
               2,
