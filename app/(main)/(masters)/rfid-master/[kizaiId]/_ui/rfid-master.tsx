@@ -411,7 +411,7 @@ export const RfidMaster = ({ kizaiId }: { kizaiId: number }) => {
                         const isItemSelected = selectedTags.includes(row.rfidTagId);
 
                         return (
-                          <TableRow key={row.rfidTagId} selected={isItemSelected}>
+                          <TableRow key={row.rfidTagId} hover selected={isItemSelected}>
                             <TableCell
                               padding="checkbox"
                               onClick={(event) => handleSelectRfidTags(event, row.rfidTagId)}
