@@ -1,7 +1,6 @@
 'use client';
 
 import 'dayjs/locale/ja';
-import 'rsuite/dist/rsuite.min.css';
 
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import ClearIcon from '@mui/icons-material/Clear';
@@ -139,6 +138,7 @@ export const TestDate = (props: {
           sx: {
             bgcolor: disabled ? grey[200] : 'white',
             width: 160,
+            minWidth: 160,
             padding: 0,
             '.Mui-disabled': {
               WebkitTextFillColor: 'black',

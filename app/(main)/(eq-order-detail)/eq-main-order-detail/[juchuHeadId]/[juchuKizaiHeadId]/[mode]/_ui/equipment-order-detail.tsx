@@ -28,6 +28,7 @@ import {
   Popper,
   Select,
   Snackbar,
+  Stack,
   TextField,
   Typography,
 } from '@mui/material';
@@ -2514,60 +2515,47 @@ const EquipmentOrderDetail = (props: {
                 </AccordionSummary>
                 <AccordionDetails sx={{ padding: 0 }}>
                   <Divider />
-                  <Grid2 container display="flex">
-                    <Grid2>
-                      <Grid2 container margin={2} spacing={2}>
-                        <Grid2 container display="flex" direction="row" alignItems="center">
-                          <Grid2 display="flex" direction="row" alignItems="center">
-                            <Typography marginRight={3} whiteSpace="nowrap">
-                              受注番号
-                            </Typography>
-                            <TextField value={juchuHeadData.juchuHeadId} disabled sx={{ width: 120 }}></TextField>
-                          </Grid2>
-                          <Grid2 display="flex" direction="row" alignItems="center">
-                            <Typography mr={2}>受注ステータス</Typography>
-                            <FormControl size="small" sx={{ width: 120 }}>
-                              <Select value={juchuHeadData.juchuSts} disabled>
-                                <MenuItem value={0}>入力中</MenuItem>
-                                <MenuItem value={1}>仮受注</MenuItem>
-                                <MenuItem value={2}>処理中</MenuItem>
-                                <MenuItem value={3}>確定</MenuItem>
-                                <MenuItem value={4}>貸出済み</MenuItem>
-                                <MenuItem value={5}>返却済み</MenuItem>
-                                <MenuItem value={9}>受注キャンセル</MenuItem>
-                              </Select>
-                            </FormControl>
-                          </Grid2>
-                        </Grid2>
-                      </Grid2>
+                  <Grid2 container>
+                    <Grid2 size={{ xs: 12, sm: 12, md: 5 }}>
                       <Box sx={styles.container}>
-                        <Typography marginRight={5} whiteSpace="nowrap">
+                        <Typography marginRight={8} whiteSpace="nowrap">
+                          受注番号
+                        </Typography>
+                        <TextField value={juchuHeadData.juchuHeadId} disabled sx={{ width: 120 }}></TextField>
+                      </Box>
+                      <Box sx={styles.container}>
+                        <Typography mr={2}>受注ステータス</Typography>
+                        <FormControl size="small" sx={{ width: 160 }}>
+                          <Select value={juchuHeadData.juchuSts} disabled>
+                            <MenuItem value={0}>入力中</MenuItem>
+                            <MenuItem value={1}>仮受注</MenuItem>
+                            <MenuItem value={2}>処理中</MenuItem>
+                            <MenuItem value={3}>確定</MenuItem>
+                            <MenuItem value={4}>貸出済み</MenuItem>
+                            <MenuItem value={5}>返却済み</MenuItem>
+                            <MenuItem value={9}>受注キャンセル</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </Box>
+                      <Box sx={styles.container}>
+                        <Typography marginRight={10} whiteSpace="nowrap">
                           受注日
                         </Typography>
                         <TestDate date={juchuHeadData.juchuDat} onChange={() => {}} disabled />
                       </Box>
                       <Box sx={styles.container}>
-                        <Typography marginRight={5} whiteSpace="nowrap">
+                        <Typography marginRight={10} whiteSpace="nowrap">
                           入力者
                         </Typography>
                         <TextField value={juchuHeadData.nyuryokuUser} disabled></TextField>
                       </Box>
-                      <Box sx={styles.container}>
-                        <Typography marginRight={5} whiteSpace="nowrap">
-                          割引率
-                        </Typography>
-                        <TextField
-                          value={juchuHeadData.nebikiRat ? `${juchuHeadData.nebikiRat} %` : ''}
-                          disabled
-                        ></TextField>
-                      </Box>
                     </Grid2>
-                    <Grid2>
-                      <Box sx={{ display: 'flex', alignItems: 'center', ml: 2, mt: { xs: 0, sm: 0, md: 2 } }}>
+                    <Grid2 size={{ xs: 12, sm: 12, md: 7 }}>
+                      <Box sx={styles.container}>
                         <Typography marginRight={5} whiteSpace="nowrap">
                           公演名
                         </Typography>
-                        <TextField value={juchuHeadData.koenNam} disabled></TextField>
+                        <TextField value={juchuHeadData.koenNam} disabled fullWidth></TextField>
                       </Box>
                       <Box sx={styles.container}>
                         <Typography marginRight={3} whiteSpace="nowrap">
@@ -2576,13 +2564,24 @@ const EquipmentOrderDetail = (props: {
                         <TextField
                           value={juchuHeadData.koenbashoNam ? juchuHeadData.koenbashoNam : ''}
                           disabled
+                          fullWidth
                         ></TextField>
                       </Box>
                       <Box sx={styles.container}>
                         <Typography marginRight={7} whiteSpace="nowrap">
                           顧客
                         </Typography>
-                        <TextField value={juchuHeadData.kokyaku.kokyakuNam} disabled></TextField>
+                        <TextField value={juchuHeadData.kokyaku.kokyakuNam} disabled fullWidth></TextField>
+                      </Box>
+                      <Box sx={styles.container}>
+                        <Typography marginRight={5} whiteSpace="nowrap">
+                          割引率
+                        </Typography>
+                        <TextField
+                          value={juchuHeadData.nebikiRat ? `${juchuHeadData.nebikiRat} %` : ''}
+                          disabled
+                          sx={{ width: 120 }}
+                        ></TextField>
                       </Box>
                     </Grid2>
                   </Grid2>
