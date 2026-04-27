@@ -166,18 +166,6 @@ const EquipmentOrderDetail = (props: {
   const [juchuHonbanbiList, setJuchuHonbanbiList] = useState<JuchuKizaiHonbanbiValues[]>(props.juchuHonbanbiData ?? []);
   // 受注本番日削除リスト
   const [juchuHonbanbiDeleteList, setJuchuHonbanbiDeleteList] = useState<JuchuKizaiHonbanbiValues[]>([]);
-  // 受注機材明細元合計数
-  const originPlanQty = originJuchuKizaiMeisaiList.reduce((acc, current) => {
-    const key = current.kizaiId;
-    const total = acc.get(key);
-    if (total) {
-      const currentTotal = total + current.planQty;
-      acc.set(key, currentTotal);
-    } else {
-      acc.set(key, current.planQty);
-    }
-    return acc;
-  }, new Map<number, number>());
   // 削除機材
   const [deleteEq, setDeleteEq] = useState<{ rowIndex: number; row: JuchuKizaiMeisaiValues } | null>(null);
   // 削除コンテナ
@@ -234,6 +222,21 @@ const EquipmentOrderDetail = (props: {
   const [isNebikiRatEditing, setIsNebikiRatEditing] = useState(false);
   // 編集中かどうか
   const [isNebikiAmtEditing, setIsNebikiAmtEditing] = useState(false);
+
+  // 受注機材明細元合計数
+  const originPlanQty = useMemo(() => {
+    return originJuchuKizaiMeisaiList.reduce((acc, current) => {
+      const key = current.kizaiId;
+      const total = acc.get(key);
+      if (total) {
+        const currentTotal = total + current.planQty;
+        acc.set(key, currentTotal);
+      } else {
+        acc.set(key, current.planQty);
+      }
+      return acc;
+    }, new Map<number, number>());
+  }, [originJuchuKizaiMeisaiList]);
 
   // 本番日種別Map
   const shubetuColorMap = useMemo(() => {
@@ -311,10 +314,12 @@ const EquipmentOrderDetail = (props: {
   const nebikiAmt = watch('nebikiAmt');
 
   // 合計金額
-  const priceTotal = juchuKizaiMeisaiList.reduce(
-    (sum, row) => sum + row.kizaiTankaAmt * row.planKizaiQty * (juchuHonbanbiQty ?? 0),
-    0
-  );
+  const priceTotal = useMemo(() => {
+    return juchuKizaiMeisaiList.reduce(
+      (sum, row) => sum + row.kizaiTankaAmt * row.planKizaiQty * (juchuHonbanbiQty ?? 0),
+      0
+    );
+  }, [juchuKizaiMeisaiList, juchuHonbanbiQty]);
 
   // 割引率（金額）
   const waribikiRatAmt = priceTotal * ((nebikiRat ?? 0) / 100);
@@ -1725,13 +1730,6 @@ const EquipmentOrderDetail = (props: {
             stock = bulkStockMap.get(id) || [];
           }
 
-          const originQty = originPlanQty.get(id);
-          if (originQty && stock.length > 0) {
-            return stock.map((d) =>
-              dateRange.includes(toJapanYMDString(d.calDat)) ? { ...d, zaikoQty: d.zaikoQty + originQty } : d
-            );
-          }
-
           return stock;
         });
 
@@ -2524,7 +2522,7 @@ const EquipmentOrderDetail = (props: {
                             <Typography marginRight={3} whiteSpace="nowrap">
                               受注番号
                             </Typography>
-                            <TextField value={juchuHeadData.juchuHeadId} disabled></TextField>
+                            <TextField value={juchuHeadData.juchuHeadId} disabled sx={{ width: 120 }}></TextField>
                           </Grid2>
                           <Grid2 display="flex" direction="row" alignItems="center">
                             <Typography mr={2}>受注ステータス</Typography>
