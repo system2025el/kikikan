@@ -206,6 +206,7 @@ export const MeisaiLines = ({
                   name={`meisaiHeads.${sectionNam}.${index}.meisai.${i}.nam`}
                   control={control}
                   disabled={!editable}
+                  fullWidth
                 />
               ) : (
                 <SelectElement
