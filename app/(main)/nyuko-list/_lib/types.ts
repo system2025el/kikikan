@@ -27,8 +27,6 @@ export type NyukoKizai = {
   juchu_kizai_head_kbn: number;
   kizai_id: number;
   kizai_nam: string;
-  planKizaiQty: number;
-  plan_yobi_qty: number;
   plan_qty: number;
   mem2: string;
 };

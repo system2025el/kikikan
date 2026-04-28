@@ -515,21 +515,13 @@ export const usePdf = (): [(params: PdfModel[]) => Promise<Blob>] => {
         const rowVerticalPadding = 8; // セル内の上下余白の合計
 
         // 備考テキストの準備と行数計算
-        const planYobiQty = Number(item.plan_yobi_qty ?? 0);
         const rawMem2 = (item.mem2 ?? '').trim();
-        let fullNoteText = '';
-
-        if (planYobiQty !== 0) fullNoteText += `+予備:${planYobiQty}`;
-        if (rawMem2) {
-          // 予備がある場合は改行してメモを入れる、なければ直接入れる
-          fullNoteText += fullNoteText ? `\n${rawMem2}` : `${rawMem2}`;
-        }
 
         const paddingX = 6;
         const noteMaxWidth = tableColWidths[2] - paddingX;
 
         // 自動折り返しを含めた全行を取得
-        const noteLines = splitTextIntoLines(fullNoteText, customFont, fontSize, noteMaxWidth);
+        const noteLines = splitTextIntoLines(rawMem2, customFont, fontSize, noteMaxWidth);
 
         // 動的な行高の決定
         const totalTextHeight = noteLines.length * lineHeight;
@@ -565,7 +557,7 @@ export const usePdf = (): [(params: PdfModel[]) => Promise<Blob>] => {
         });
         colX += tableColWidths[0];
 
-        // 合計数セル
+        // 数量セル
         const planQtyText = `${item.plan_qty ?? ''}`;
         const planQtyTextWidth = customFont.widthOfTextAtSize(planQtyText, fontSize);
         page.drawRectangle({

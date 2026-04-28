@@ -1,7 +1,7 @@
 'use server';
 
+import { selectPdfJuchuKizaiMeisai } from '@/app/_lib/db/tables/nyushuko-pdf';
 import { selectPdfJuchuKizaiHead } from '@/app/_lib/db/tables/v-juchu-kizai-head-lst';
-import { selectPdfJuchuKizaiMeisai } from '@/app/_lib/db/tables/v-juchu-kizai-meisai';
 import { selectPdfJuchuHead } from '@/app/_lib/db/tables/v-juchu-lst';
 import { selectFilteredShukoList } from '@/app/_lib/db/tables/v-nyushuko-den2';
 
