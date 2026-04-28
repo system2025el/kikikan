@@ -241,7 +241,7 @@ export const ShukoDetail = (props: {
             <Grid2 container size={{ xs: 12, sm: 12, md: 6 }} direction={'column'} p={{ sx: 1, sm: 1, md: 1 }}>
               <Box display={'flex'} alignItems={'center'}>
                 <Typography mr={4}>受注番号</Typography>
-                <TextField value={shukoDetailData.juchuHeadId} disabled />
+                <TextField value={shukoDetailData.juchuHeadId} sx={{ width: 120 }} disabled />
               </Box>
               <Box display={'flex'} alignItems={'center'}>
                 <Typography mr={4}>出庫日時</Typography>
@@ -258,7 +258,7 @@ export const ShukoDetail = (props: {
               </Box>
               <Box display={'flex'} alignItems={'center'}>
                 <Typography mr={2}>受注明細名</Typography>
-                <TextField value={shukoDetailData.headNamv ?? ''} disabled />
+                <TextField value={shukoDetailData.headNamv ?? ''} fullWidth disabled />
               </Box>
             </Grid2>
             <Grid2 container size={{ xs: 12, sm: 12, md: 6 }} direction={'column'} p={{ sx: 1, sm: 1, md: 1 }}>

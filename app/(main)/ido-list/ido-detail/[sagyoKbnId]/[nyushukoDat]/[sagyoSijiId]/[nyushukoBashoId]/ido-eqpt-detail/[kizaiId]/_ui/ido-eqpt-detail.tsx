@@ -214,7 +214,11 @@ export const IdoEqptDetail = (props: {
               <Button
                 color="error"
                 onClick={handleDelete}
-                disabled={fixFlag || selected.length === 0 || user?.permission.nyushuko === permission.nyushuko_ref}
+                disabled={
+                  (idoDenDetailData.sagyoKbnId === 40 ? fixFlag : false) ||
+                  selected.length === 0 ||
+                  user?.permission.nyushuko === permission.nyushuko_ref
+                }
                 loading={isLoading}
               >
                 実績クリア
@@ -243,7 +247,10 @@ export const IdoEqptDetail = (props: {
                           margin: 0,
                         },
                       }}
-                      disabled={fixFlag || user?.permission.nyushuko === permission.nyushuko_ref}
+                      disabled={
+                        (idoDenDetailData.sagyoKbnId === 40 ? fixFlag : false) ||
+                        user?.permission.nyushuko === permission.nyushuko_ref
+                      }
                       onFocus={(e) => e.target.select()}
                     />
                   )}
@@ -267,7 +274,12 @@ export const IdoEqptDetail = (props: {
                 color="primary"
                 type="submit"
                 sx={{ mr: 2 }}
-                disabled={fixFlag || !isDirty || isProcessing || user?.permission.nyushuko === permission.nyushuko_ref}
+                disabled={
+                  (idoDenDetailData.sagyoKbnId === 40 ? fixFlag : false) ||
+                  !isDirty ||
+                  isProcessing ||
+                  user?.permission.nyushuko === permission.nyushuko_ref
+                }
               >
                 <SaveAsIcon sx={{ mr: 1 }} />
                 保存

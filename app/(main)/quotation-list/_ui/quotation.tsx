@@ -630,7 +630,7 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
                     </Grid2>
                     <Box sx={styles.container}>
                       <Typography marginRight={5}>見積件名</Typography>
-                      <TextFieldElement name="mituHeadNam" control={control} sx={{ width: 300 }} disabled={!editable} />
+                      <TextFieldElement name="mituHeadNam" control={control} sx={{ width: 485 }} disabled={!editable} />
                     </Box>
                     <Box sx={styles.container}>
                       <Typography marginRight={7}>見積日</Typography>
@@ -722,14 +722,14 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
                   <Grid2 size={5.5}>
                     <Box sx={styles.container}>
                       <Typography marginRight={7}>作品名</Typography>
-                      <TextFieldElement name="koenNam" control={control} sx={{ width: 300 }} disabled={!editable} />
+                      <TextFieldElement name="koenNam" control={control} sx={{ width: 600 }} disabled={!editable} />
                     </Box>
                     <Box sx={styles.container}>
                       <Typography marginRight={5}>実施場所</Typography>
                       <TextFieldElement
                         name="koenbashoNam"
                         control={control}
-                        sx={{ width: 300 }}
+                        sx={{ width: 600 }}
                         disabled={!editable}
                       />
                     </Box>
@@ -787,7 +787,7 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
                     </Box>
                     <Box sx={styles.container}>
                       <Typography marginRight={9}>備考</Typography>
-                      <TextFieldElement name="biko" control={control} sx={{ width: 300 }} disabled={!editable} />
+                      <TextFieldElement name="biko" control={control} sx={{ width: 600 }} disabled={!editable} />
                     </Box>
                   </Grid2>
                 </Grid2>

@@ -75,6 +75,8 @@ export const IdoDetail = (props: {
   const [saveOpen, setSaveOpen] = useState(false);
   // 出発ダイアログ制御
   const [departureOpen, setDepartureOpen] = useState(false);
+  // 到着確認ダイアログ制御
+  const [arrivalOpen, setArrivalOpen] = useState(false);
   // スナックバー制御
   const [snackBarOpen, setSnackBarOpen] = useState(false);
   // スナックバーメッセージ
@@ -100,44 +102,65 @@ export const IdoDetail = (props: {
       return;
     }
 
-    const message = idoDetailData.sagyoKbnId === 40 ? '出発' : '到着';
-    let result = false;
-    if (idoDetailData.sagyoKbnId === 40) {
-      const diffCheck = idoDetailList.find((data) => data.diffQty !== 0);
-
-      if (diffCheck) {
-        setDepartureOpen(true);
-        setIsProcessing(false);
-        return;
-      }
-
-      result = await addIdoFix(
-        60,
-        idoDetailData.sagyoSijiId,
-        idoDetailData.nyushukoDat,
-        idoDetailData.nyushukoBashoId,
-        user.name
-      );
-    } else {
-      setIsProcessing(true);
-
-      result = await addIdoFix(
-        70,
-        idoDetailData.sagyoSijiId,
-        idoDetailData.nyushukoDat,
-        idoDetailData.nyushukoBashoId,
-        user.name
-      );
+    // 到着確認ダイアログ表示
+    if (idoDetailData.sagyoKbnId === 50) {
+      setIsProcessing(false);
+      setArrivalOpen(true);
+      return;
     }
+
+    const diffCheck = idoDetailList.find((data) => data.diffQty !== 0);
+
+    if (diffCheck) {
+      setDepartureOpen(true);
+      setIsProcessing(false);
+      return;
+    }
+
+    const result = await addIdoFix(
+      60,
+      idoDetailData.sagyoSijiId,
+      idoDetailData.nyushukoDat,
+      idoDetailData.nyushukoBashoId,
+      user.name
+    );
 
     if (result) {
       setFixFlag(true);
-      setSnackBarMessage(`${message}しました`);
+      setSnackBarMessage('出発しました');
       setSnackBarOpen(true);
       setIsProcessing(false);
       router.push('/ido-list');
     } else {
-      setSnackBarMessage(`${message}に失敗しました`);
+      setSnackBarMessage('出発に失敗しました');
+      setSnackBarOpen(true);
+      setIsProcessing(false);
+    }
+  };
+
+  // 到着処理
+  const executeArrival = async () => {
+    if (!user || isProcessing) return;
+    setIsProcessing(true);
+
+    const result = await addIdoFix(
+      70,
+      idoDetailData.sagyoSijiId,
+      idoDetailData.nyushukoDat,
+      idoDetailData.nyushukoBashoId,
+      user.name
+    );
+
+    if (result) {
+      setArrivalOpen(false);
+      setFixFlag(true);
+      setSnackBarMessage('到着しました');
+      setSnackBarOpen(true);
+      setIsProcessing(false);
+      router.push('/ido-list');
+    } else {
+      setArrivalOpen(false);
+      setSnackBarMessage('到着に失敗しました');
       setSnackBarOpen(true);
       setIsProcessing(false);
     }
@@ -316,6 +339,10 @@ export const IdoDetail = (props: {
                 disabled={
                   fixFlag || idoDetailList.length === 0 || user?.permission.nyushuko === permission.nyushuko_ref
                 }
+                sx={{
+                  backgroundColor: idoDetailData.sagyoKbnId === 40 ? 'primary' : 'yellow',
+                  color: idoDetailData.sagyoKbnId === 40 ? 'white' : 'black',
+                }}
               >
                 {idoDetailData.sagyoKbnId === 40 ? '出発' : '到着'}
               </Button>
@@ -461,6 +488,25 @@ export const IdoDetail = (props: {
           </DialogContentText>
           <DialogActions>
             <Button onClick={() => setSaveOpen(false)}>確認</Button>
+          </DialogActions>
+        </Dialog>
+        <Dialog open={arrivalOpen}>
+          <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
+            <WarningIcon color="warning" />
+            <Box>到着確認</Box>
+          </DialogTitle>
+          <DialogContentText m={2} p={2}>
+            到着は戻せません。
+            <br />
+            到着済みにしてよろしいですか？
+          </DialogContentText>
+          <DialogActions>
+            <Button onClick={executeArrival} loading={isProcessing} sx={{ backgroundColor: 'yellow', color: 'black' }}>
+              到着
+            </Button>
+            <Button onClick={() => setArrivalOpen(false)} loading={isProcessing}>
+              戻る
+            </Button>
           </DialogActions>
         </Dialog>
         <Snackbar

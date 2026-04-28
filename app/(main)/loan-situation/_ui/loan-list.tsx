@@ -7,6 +7,7 @@ import {
   Divider,
   Grid2,
   Paper,
+  Stack,
   Table,
   TableBody,
   TableCell,
@@ -104,11 +105,9 @@ export const LoanList = () => {
         </Grid2>
         <Divider />
         <form onSubmit={handleSubmit(onSubmit)}>
-          <Grid2 container alignItems={'center'} p={2} spacing={2}>
-            <Grid2 container display={'flex'} alignItems={'center'}>
-              <Typography>受注機材名キーワード</Typography>
-              <TextFieldElement name="query" control={control} />
-            </Grid2>
+          <Grid2 container alignItems={'center'} m={2} spacing={2}>
+            <Typography>受注機材名キーワード</Typography>
+            <TextFieldElement name="query" control={control} sx={{ width: 400 }} />
             <Button type="submit" loading={isLoading}>
               <SearchIcon fontSize="small" />
               検索

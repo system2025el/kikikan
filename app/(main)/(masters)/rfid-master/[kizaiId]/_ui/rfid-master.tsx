@@ -311,7 +311,7 @@ export const RfidMaster = ({ kizaiId }: { kizaiId: number }) => {
           <Box width={'100%'} pb={0.5}>
             <Box sx={styles.container}>
               <Typography mr={3}>機材名</Typography>
-              <TextField value={kizaiNam} disabled />
+              <TextField value={kizaiNam} sx={{ width: 400 }} disabled />
             </Box>
             <Box sx={styles.container}>
               <Typography mr={3}>機材ステータス一括変更</Typography>
