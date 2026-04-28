@@ -135,7 +135,7 @@ export const EqptSetsMaster = () => {
                 <Typography noWrap width={200}>
                   機材セット名キーワード
                 </Typography>
-                <TextFieldElement name="query" control={control} helperText={''} />
+                <TextFieldElement name="query" control={control} sx={{ width: 400 }} />
               </Stack>
               <Box alignSelf={'end'}>
                 <Button type="submit" loading={isLoading}>

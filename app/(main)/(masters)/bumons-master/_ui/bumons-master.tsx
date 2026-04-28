@@ -148,7 +148,7 @@ export const BumonsMaster = () => {
                 <Typography noWrap width={140}>
                   部門名キーワード
                 </Typography>
-                <TextFieldElement name="query" control={control} />
+                <TextFieldElement name="query" control={control} sx={{ width: 300 }} />
               </Stack>
               <Stack justifyContent={'space-between'} alignItems={'start'} mt={0.5}>
                 <Stack mt={0.5} spacing={1}>

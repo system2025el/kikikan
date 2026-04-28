@@ -131,9 +131,7 @@ export const ShukeibumonsMaster = () => {
           <Box width={'100%'} px={2} py={0.5} component={'form'} onSubmit={handleSubmit(onSubmit)}>
             <Stack justifyContent={'space-between'} alignItems={'start'}>
               <Stack alignItems={'baseline'}>
-                <Typography noWrap width={200}>
-                  集計部門名キーワード
-                </Typography>
+                <Typography noWrap>集計部門名キーワード</Typography>
                 <TextFieldElement name="query" control={control} helperText={''} />
               </Stack>
               <Box alignSelf={'end'}>

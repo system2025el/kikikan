@@ -122,7 +122,7 @@ export const NyukoDetail = (props: {
             <Grid2 container size={{ xs: 12, sm: 12, md: 6 }} direction={'column'} p={{ sx: 1, sm: 1, md: 1 }}>
               <Box display={'flex'} alignItems={'center'}>
                 <Typography mr={4}>受注番号</Typography>
-                <TextField value={nyukoDetailData.juchuHeadId} disabled />
+                <TextField value={nyukoDetailData.juchuHeadId} sx={{ width: 120 }} disabled />
               </Box>
               <Box display={'flex'} alignItems={'center'}>
                 <Typography mr={4}>入庫日時</Typography>
@@ -139,7 +139,7 @@ export const NyukoDetail = (props: {
               </Box>
               <Box display={'flex'} alignItems={'center'}>
                 <Typography mr={2}>受注明細名</Typography>
-                <TextField value={nyukoDetailData.headNamv ?? ''} disabled />
+                <TextField value={nyukoDetailData.headNamv ?? ''} fullWidth disabled />
               </Box>
             </Grid2>
             <Grid2 container size={{ xs: 12, sm: 12, md: 6 }} direction={'column'} p={{ sx: 1, sm: 1, md: 1 }}>

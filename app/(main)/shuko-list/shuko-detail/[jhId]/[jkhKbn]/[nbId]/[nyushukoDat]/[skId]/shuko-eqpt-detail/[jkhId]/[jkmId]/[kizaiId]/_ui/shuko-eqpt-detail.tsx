@@ -202,11 +202,12 @@ export const ShukoEqptDetail = (props: {
             </Box>
             <Divider />
             <Grid2 container spacing={5} p={2}>
-              <Box display={'flex'} alignItems={'center'}>
+              <Box display={'flex'} alignItems={'center'} sx={{ width: 450 }}>
                 <Typography mr={2}>機材名</Typography>
                 <TextField
                   value={'*'.repeat(shukoEqptDetailData.indentNum) + (shukoEqptDetailData.kizaiNam ?? '')}
                   disabled
+                  sx={{ width: '100%' }}
                 />
               </Box>
               <Box display={'flex'} alignItems={'center'}>

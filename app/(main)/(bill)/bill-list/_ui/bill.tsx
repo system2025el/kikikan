@@ -527,19 +527,19 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
                     </Grid2>
                     <Grid2 sx={styles.container}>
                       <Typography marginRight={1}>請求先住所（所在地）</Typography>
-                      <TextFieldElement name="adrShozai" control={control} sx={{ width: 500 }} disabled={!editable} />
+                      <TextFieldElement name="adrShozai" control={control} sx={{ width: 600 }} disabled={!editable} />
                     </Grid2>
                     <Grid2 sx={styles.container}>
                       <Typography marginRight={1}>請求先住所（建物名）</Typography>
-                      <TextFieldElement name="adrTatemono" control={control} sx={{ width: 500 }} disabled={!editable} />
+                      <TextFieldElement name="adrTatemono" control={control} sx={{ width: 600 }} disabled={!editable} />
                     </Grid2>
                     <Grid2 sx={styles.container}>
                       <Typography marginRight={1}>請求先住所（その他）</Typography>
-                      <TextFieldElement name="adrSonota" control={control} sx={{ width: 500 }} disabled={!editable} />
+                      <TextFieldElement name="adrSonota" control={control} sx={{ width: 600 }} disabled={!editable} />
                     </Grid2>
                     <Grid2 sx={styles.container}>
                       <Typography marginRight={3}>請求先名</Typography>
-                      <TextFieldElement name="kokyaku" control={control} sx={{ width: 400 }} disabled={!editable} />
+                      <TextFieldElement name="kokyaku" control={control} sx={{ width: 680 }} disabled={!editable} />
                     </Grid2>
                   </Grid2>
                 </AccordionDetails>

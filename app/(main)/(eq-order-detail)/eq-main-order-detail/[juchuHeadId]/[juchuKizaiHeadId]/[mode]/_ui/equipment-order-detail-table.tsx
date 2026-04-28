@@ -456,7 +456,6 @@ type IdoEqTableProps = {
 export const IdoEqTable: React.FC<IdoEqTableProps> = React.memo(
   ({ rows, edit, shukoFixFlag, shukoDate, handleCellDateChange, handleCellDateClear }) => {
     const visibleRows = rows.filter((row) => !row.delFlag);
-    console.log('再描画');
     return (
       <TableContainer style={{ overflow: 'scroll', maxHeight: '80vh' }}>
         <Table stickyHeader>
