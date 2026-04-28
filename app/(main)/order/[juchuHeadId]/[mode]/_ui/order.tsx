@@ -1116,11 +1116,11 @@ export const Order = (props: {
               <Grid2 size={{ xs: 12, sm: 12, md: 6 }}>
                 <Box sx={styles.container}>
                   <Typography marginRight={7}>公演名</Typography>
-                  <TextFieldElement name="koenNam" control={control} disabled={!edit}></TextFieldElement>
+                  <TextFieldElement name="koenNam" control={control} fullWidth disabled={!edit}></TextFieldElement>
                 </Box>
                 <Box sx={styles.container}>
                   <Typography marginRight={5}>公演場所</Typography>
-                  <TextFieldElement name="koenbashoNam" control={control} disabled={!edit}></TextFieldElement>
+                  <TextFieldElement name="koenbashoNam" control={control} fullWidth disabled={!edit}></TextFieldElement>
                   <Button style={{ marginLeft: 5 }} onClick={() => handleOpenLocationDialog()} disabled={!edit}>
                     検索
                   </Button>
@@ -1137,6 +1137,7 @@ export const Order = (props: {
                           slotProps={{ input: { readOnly: true } }}
                           error={!!fieldState.error}
                           helperText={fieldState.error?.message}
+                          fullWidth
                         />
                         <Button style={{ marginLeft: 5 }} onClick={() => handleOpenCustomerDialog()} disabled={!edit}>
                           検索

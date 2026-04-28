@@ -1,8 +1,8 @@
 'use server';
 
+import { selectNyukoPdfJuchuKizaiMeisai } from '@/app/_lib/db/tables/nyushuko-pdf';
 import { selectSagyoIdFilterNyushukoFixFlag } from '@/app/_lib/db/tables/t-nyushuko-fix';
 import { selectPdfJuchuKizaiHead } from '@/app/_lib/db/tables/v-juchu-kizai-head-lst';
-import { selectNyukoPdfJuchuKizaiMeisai } from '@/app/_lib/db/tables/v-juchu-kizai-meisai';
 import { selectPdfJuchuHead } from '@/app/_lib/db/tables/v-juchu-lst';
 import { selectFilteredNyukoList, selectFilteredShukoList } from '@/app/_lib/db/tables/v-nyushuko-den2';
 
@@ -56,7 +56,7 @@ export const getNyukoList = async (queries: NyukoListSearchValues) => {
 };
 
 /**
- * 納品書PDF用データ取得
+ * 員数票PDF用データ取得
  * @param juchuHeadId 受注ヘッダーid
  * @param juchuKizaiHeadIds 受注機材ヘッダーid
  * @param nyushukoBashoId 入出庫場所id
@@ -94,17 +94,17 @@ export const getPdfData = async (
     // ここで .meisai (meisaiQueryの結果) を kizaiData に入れる
     const kizaiData: NyukoKizai[] = nyukoResult.meisai;
 
-    const updatedKizaiData = kizaiData.map((item) => {
-      if (item.juchu_kizai_head_kbn === 2) {
-        return {
-          ...item,
-          planKizaiQty: item.planKizaiQty * -1,
-          plan_yobi_qty: item.plan_yobi_qty * -1,
-          plan_qty: item.plan_qty * -1,
-        };
-      }
-      return item;
-    });
+    // const updatedKizaiData = kizaiData.map((item) => {
+    //   if (item.juchu_kizai_head_kbn === 2) {
+    //     return {
+    //       ...item,
+    //       plan_qty: item.plan_qty * -1,
+    //     };
+    //   }
+    //   return item;
+    // });
+
+    const updatedKizaiData = kizaiData;
 
     // オプション機材のインデント文字
     const indentChara = await getDic(1);
@@ -130,8 +130,6 @@ export const getPdfData = async (
         const existing = summaryMap.get(item.kizai_id);
         // 既にあるものは合計
         if (existing) {
-          existing.planKizaiQty += item.planKizaiQty;
-          existing.plan_yobi_qty += item.plan_yobi_qty;
           existing.plan_qty += item.plan_qty;
           existing.mem2 += existing.mem2 && item.mem2 ? `,${item.mem2}` : item.mem2 || '';
           // 最初のものはMapに追加して位置を記録

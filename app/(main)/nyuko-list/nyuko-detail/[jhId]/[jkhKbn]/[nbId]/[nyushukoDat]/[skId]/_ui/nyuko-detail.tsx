@@ -21,7 +21,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
-import { statusColors } from '@/app/(main)/_lib/colors';
+import { dispColors, statusColors } from '@/app/(main)/_lib/colors';
 import { permission } from '@/app/(main)/_lib/permission';
 import { BackButton } from '@/app/(main)/_ui/buttons';
 import { DateTime, TestDate } from '@/app/(main)/_ui/date';
@@ -107,6 +107,9 @@ export const NyukoDetail = (props: {
           <Box display={'flex'} justifyContent={'space-between'} alignItems="center" px={2}>
             <Typography fontSize={'large'}>入庫明細(カウント)</Typography>
             <Grid2 container alignItems={'center'} spacing={2}>
+              {nyukoDetailData.juchuKizaiHeadKbn === 2 && (
+                <Typography color="red">※返却時は到着ボタンで親の入庫明細の数量に反映されます。</Typography>
+              )}
               {fixFlag && <Typography>到着済</Typography>}
               <Button
                 onClick={() => setArrivalOpen(true)}
@@ -139,7 +142,21 @@ export const NyukoDetail = (props: {
               </Box>
               <Box display={'flex'} alignItems={'center'}>
                 <Typography mr={2}>受注明細名</Typography>
-                <TextField value={nyukoDetailData.headNamv ?? ''} fullWidth disabled />
+                <TextField
+                  value={nyukoDetailData.headNamv ?? ''}
+                  fullWidth
+                  disabled
+                  sx={{
+                    '.MuiOutlinedInput-input.Mui-disabled': {
+                      WebkitTextFillColor:
+                        nyukoDetailData.juchuKizaiHeadKbn === 2
+                          ? dispColors.return
+                          : nyukoDetailData.juchuKizaiHeadKbn === 3
+                            ? dispColors.keep
+                            : 'inherit',
+                    },
+                  }}
+                />
               </Box>
             </Grid2>
             <Grid2 container size={{ xs: 12, sm: 12, md: 6 }} direction={'column'} p={{ sx: 1, sm: 1, md: 1 }}>

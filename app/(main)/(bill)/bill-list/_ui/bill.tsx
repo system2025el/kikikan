@@ -603,7 +603,7 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
                               nebikiAftAmt: null,
                               seikyuRange: { strt: null, end: null },
                               seikyuMeisaiHeadNam: null,
-                              zeiFlg: false,
+                              zeiFlg: true,
                               meisai: [],
                             })
                           }

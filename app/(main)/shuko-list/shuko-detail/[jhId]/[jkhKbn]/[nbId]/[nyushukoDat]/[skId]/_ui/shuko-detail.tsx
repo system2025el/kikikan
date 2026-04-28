@@ -22,7 +22,7 @@ import { useState } from 'react';
 import { set } from 'zod';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
-import { statusColors } from '@/app/(main)/_lib/colors';
+import { dispColors, statusColors } from '@/app/(main)/_lib/colors';
 import { permission } from '@/app/(main)/_lib/permission';
 import { BackButton } from '@/app/(main)/_ui/buttons';
 import { DateTime, TestDate } from '@/app/(main)/_ui/date';
@@ -258,7 +258,16 @@ export const ShukoDetail = (props: {
               </Box>
               <Box display={'flex'} alignItems={'center'}>
                 <Typography mr={2}>受注明細名</Typography>
-                <TextField value={shukoDetailData.headNamv ?? ''} fullWidth disabled />
+                <TextField
+                  value={shukoDetailData.headNamv ?? ''}
+                  fullWidth
+                  disabled
+                  sx={{
+                    '.MuiOutlinedInput-input.Mui-disabled': {
+                      WebkitTextFillColor: shukoDetailData.juchuKizaiHeadKbn === 3 ? dispColors.keep : 'inherit',
+                    },
+                  }}
+                />
               </Box>
             </Grid2>
             <Grid2 container size={{ xs: 12, sm: 12, md: 6 }} direction={'column'} p={{ sx: 1, sm: 1, md: 1 }}>

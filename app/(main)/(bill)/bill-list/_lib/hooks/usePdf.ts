@@ -523,7 +523,7 @@ export const usePdf = (): [(param: BillHeadValues) => Promise<Blob>] => {
           }
 
           // 描画
-          if (rowIndex === 0 && colIndex === 3) {
+          /*if (rowIndex === 0 && colIndex === 3) {
             currentPage.drawText(textToDrawFinal, {
               x: textX,
               y: drawPositionY - currentRowHeight + 18,
@@ -532,7 +532,7 @@ export const usePdf = (): [(param: BillHeadValues) => Promise<Blob>] => {
               color: rgb(0, 0, 0),
               lineHeight: fontSize + 2,
             });
-          } else if (rowIndex === 0) {
+          } else*/ if (rowIndex === 0) {
             currentPage.drawText(textToDrawFinal, {
               x: textX,
               y: drawPositionY - currentRowHeight + 12,

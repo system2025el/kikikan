@@ -280,7 +280,7 @@ export const getJuchuKizaiMeisaiHeadForBill = async (juchuHeadId: number, kizaiH
       },
       koenbashoNam: j.koenbasho_nam,
       kokyakuTantoNam: j.kokyaku_tanto_nam,
-      zeiFlg: false,
+      zeiFlg: true,
       meisai: Array.isArray(data.rows)
         ? data.rows.filter(
             (m) =>
@@ -354,7 +354,7 @@ export const getJuchuKizaiMeisaiDetailsForBill = async (juchuHeadId: number, kiz
           },
           koenbashoNam: currentRow.koenbasho_nam,
           kokyakuTantoNam: currentRow.kokyaku_tanto_nam,
-          zeiFlg: false,
+          zeiFlg: true,
           meisai: [], // 明細を入れるための空配列
         };
       }
