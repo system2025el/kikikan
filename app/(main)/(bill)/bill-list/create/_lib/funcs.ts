@@ -69,7 +69,7 @@ export const getJuchusForBill = async (queries: {
             },
             koenbashoNam: currentRow.koenbasho_nam,
             kokyakuTantoNam: currentRow.kokyaku_tanto_nam,
-            zeiFlg: false,
+            zeiFlg: true,
             meisai: [], // 明細を入れるための空配列
           };
         }
@@ -115,7 +115,7 @@ export const getJuchusForBill = async (queries: {
         },
         koenbashoNam: j.koenbasho_nam,
         kokyakuTantoNam: j.kokyaku_tanto_nam,
-        zeiFlg: false,
+        zeiFlg: true,
         meisai: Array.isArray(juchus.rows)
           ? juchus.rows.filter(
               (m) =>
