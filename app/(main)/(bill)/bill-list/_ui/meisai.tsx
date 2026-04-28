@@ -67,7 +67,12 @@ export const MeisaiLines = ({ index, editable }: { index: number; editable: bool
               </Box>
             </Grid2>
             <Grid2 size={'grow'}>
-              <TextFieldElement name={`meisaiHeads.${index}.meisai.${i}.nam`} control={control} disabled={!editable} />
+              <TextFieldElement
+                name={`meisaiHeads.${index}.meisai.${i}.nam`}
+                control={control}
+                disabled={!editable}
+                fullWidth
+              />
             </Grid2>
             <Grid2 size={1}>
               <TextFieldElement

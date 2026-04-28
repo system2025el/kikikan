@@ -1,6 +1,7 @@
 'use client';
 
 import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
+import WarningIcon from '@mui/icons-material/Warning';
 import {
   Box,
   Button,
@@ -46,6 +47,8 @@ export const NyukoDetail = (props: {
   // 処理中制御
   const [isProcessing, setIsProcessing] = useState(false);
 
+  // 到着確認ダイアログ制御
+  const [arrivalOpen, setArrivalOpen] = useState(false);
   // スナックバー制御
   const [snackBarOpen, setSnackBarOpen] = useState(false);
   // スナックバーメッセージ
@@ -55,7 +58,7 @@ export const NyukoDetail = (props: {
    * 到着ボタン押下
    * @returns
    */
-  const handleDeparture = async () => {
+  const executeArrival = async () => {
     if (!user || isProcessing) return;
 
     setIsProcessing(true);
@@ -68,12 +71,14 @@ export const NyukoDetail = (props: {
     const updateResult = await updNyukoDetail(nyukoDetailData, nyukoDetailTableData, user.name);
 
     if (updateResult) {
+      setArrivalOpen(false);
       setFixFlag(true);
       setSnackBarMessage('到着しました');
       setSnackBarOpen(true);
       setIsProcessing(false);
       router.push('/nyuko-list');
     } else {
+      setArrivalOpen(false);
       setSnackBarMessage('到着に失敗しました');
       setSnackBarOpen(true);
       setIsProcessing(false);
@@ -104,8 +109,9 @@ export const NyukoDetail = (props: {
             <Grid2 container alignItems={'center'} spacing={2}>
               {fixFlag && <Typography>到着済</Typography>}
               <Button
-                onClick={handleDeparture}
+                onClick={() => setArrivalOpen(true)}
                 disabled={fixFlag || user?.permission.nyushuko === permission.nyushuko_ref}
+                sx={{ backgroundColor: 'yellow', color: 'black' }}
               >
                 到着
               </Button>
@@ -116,7 +122,7 @@ export const NyukoDetail = (props: {
             <Grid2 container size={{ xs: 12, sm: 12, md: 6 }} direction={'column'} p={{ sx: 1, sm: 1, md: 1 }}>
               <Box display={'flex'} alignItems={'center'}>
                 <Typography mr={4}>受注番号</Typography>
-                <TextField value={nyukoDetailData.juchuHeadId} disabled />
+                <TextField value={nyukoDetailData.juchuHeadId} sx={{ width: 120 }} disabled />
               </Box>
               <Box display={'flex'} alignItems={'center'}>
                 <Typography mr={4}>入庫日時</Typography>
@@ -133,7 +139,7 @@ export const NyukoDetail = (props: {
               </Box>
               <Box display={'flex'} alignItems={'center'}>
                 <Typography mr={2}>受注明細名</Typography>
-                <TextField value={nyukoDetailData.headNamv ?? ''} disabled />
+                <TextField value={nyukoDetailData.headNamv ?? ''} fullWidth disabled />
               </Box>
             </Grid2>
             <Grid2 container size={{ xs: 12, sm: 12, md: 6 }} direction={'column'} p={{ sx: 1, sm: 1, md: 1 }}>
@@ -173,6 +179,25 @@ export const NyukoDetail = (props: {
             {nyukoDetailTableData.length > 0 && <NyukoDetailTable datas={nyukoDetailTableData} />}
           </Box>
         </Paper>
+        <Dialog open={arrivalOpen}>
+          <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
+            <WarningIcon color="warning" />
+            <Box>到着確認</Box>
+          </DialogTitle>
+          <DialogContentText m={2} p={2}>
+            到着は戻せません。
+            <br />
+            到着済みにしてよろしいですか？
+          </DialogContentText>
+          <DialogActions>
+            <Button onClick={executeArrival} loading={isProcessing} sx={{ backgroundColor: 'yellow', color: 'black' }}>
+              到着
+            </Button>
+            <Button onClick={() => setArrivalOpen(false)} loading={isProcessing}>
+              戻る
+            </Button>
+          </DialogActions>
+        </Dialog>
         <Snackbar
           open={snackBarOpen}
           autoHideDuration={6000}

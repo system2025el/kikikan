@@ -141,7 +141,7 @@ StockTableRow.displayName = 'StockTableRow';
 type EqTableProps = {
   rows: JuchuKizaiMeisaiValues[];
   edit: boolean;
-  fixFlag: boolean;
+  shukoFixFlag: boolean;
   shukoDate: Date | null;
   handleCellChange: (
     rowIndex: number,
@@ -159,7 +159,7 @@ type EqTableProps = {
 export const EqTable: React.FC<EqTableProps> = ({
   rows,
   edit,
-  fixFlag,
+  shukoFixFlag,
   shukoDate,
   handleCellChange,
   handleMeisaiDelete,
@@ -245,7 +245,7 @@ export const EqTable: React.FC<EqTableProps> = ({
               row={row}
               rowIndex={rowIndex}
               edit={edit}
-              fixFlag={fixFlag}
+              shukoFixFlag={shukoFixFlag}
               shukoDate={shukoDate}
               handleOrderRef={handleOrderRef(rowIndex)}
               handleYobiRef={handleYobiRef(rowIndex)}
@@ -267,7 +267,7 @@ type EqTableRowProps = {
   row: JuchuKizaiMeisaiValues;
   rowIndex: number;
   edit: boolean;
-  fixFlag: boolean;
+  shukoFixFlag: boolean;
   shukoDate: Date | null;
   handleOrderRef: (el: HTMLInputElement | null) => void;
   handleYobiRef: (el: HTMLInputElement | null) => void;
@@ -290,7 +290,7 @@ const EqTableRow = React.memo(
     row,
     rowIndex,
     edit,
-    fixFlag,
+    shukoFixFlag,
     shukoDate,
     handleOrderRef,
     handleYobiRef,
@@ -307,7 +307,7 @@ const EqTableRow = React.memo(
           <IconButton
             onClick={() => handleMeisaiDelete(rowIndex, row)}
             sx={{ padding: 0, color: 'red' }}
-            disabled={!edit || fixFlag}
+            disabled={!edit || shukoFixFlag}
           >
             <Delete fontSize="small" />
           </IconButton>
@@ -318,7 +318,7 @@ const EqTableRow = React.memo(
             memo={row.mem ? row.mem : ''}
             handleMemoChange={handleMemoChange}
             rowIndex={rowIndex}
-            disabled={!edit || fixFlag}
+            disabled={!edit || shukoFixFlag}
           />
         </TableCell>
         <TableCell style={styles.row} align="left" size="small">
@@ -375,7 +375,7 @@ const EqTableRow = React.memo(
               handleOrderKeyDown(e, rowIndex);
             }}
             onFocus={(e) => e.target.select()}
-            disabled={!edit || fixFlag}
+            disabled={!edit || shukoFixFlag}
           />
         </TableCell>
         <TableCell style={styles.row} align="right" size="small">
@@ -418,7 +418,7 @@ const EqTableRow = React.memo(
               handleYobiKeyDown(e, rowIndex);
             }}
             onFocus={(e) => e.target.select()}
-            disabled={!edit || fixFlag}
+            disabled={!edit || shukoFixFlag}
           />
         </TableCell>
         <TableCell style={styles.row} align="center" size="small">
@@ -427,7 +427,7 @@ const EqTableRow = React.memo(
             memo={row.mem2 ?? ''}
             handleMemoChange={handleMemo2Change}
             rowIndex={rowIndex}
-            disabled={!edit || fixFlag}
+            disabled={!edit || shukoFixFlag}
           />
         </TableCell>
       </TableRow>
@@ -435,7 +435,9 @@ const EqTableRow = React.memo(
   },
   (prevProps, nextProps) => {
     return (
-      prevProps.row === nextProps.row && prevProps.edit === nextProps.edit && prevProps.fixFlag === nextProps.fixFlag
+      prevProps.row === nextProps.row &&
+      prevProps.edit === nextProps.edit &&
+      prevProps.shukoFixFlag === nextProps.shukoFixFlag
     );
   }
 );
@@ -445,128 +447,138 @@ EqTableRow.displayName = 'EqTableRow';
 type IdoEqTableProps = {
   rows: IdoJuchuKizaiMeisaiValues[];
   edit: boolean;
-  fixFlag: boolean;
+  shukoFixFlag: boolean;
   shukoDate: Date | null;
   handleCellDateChange: (kizaiId: number, date: Dayjs | null) => void;
   handleCellDateClear: (kizaiId: number) => void;
 };
 
-export const IdoEqTable: React.FC<IdoEqTableProps> = ({
-  rows,
-  edit,
-  fixFlag,
-  shukoDate,
-  handleCellDateChange,
-  handleCellDateClear,
-}) => {
-  const visibleRows = rows.filter((row) => !row.delFlag);
-
-  return (
-    <TableContainer style={{ overflow: 'scroll', maxHeight: '80vh' }}>
-      <Table stickyHeader>
-        <TableHead>
-          <TableRow>
-            <TableCell size="small" style={styles.header} />
-            <TableCell align="left" size="small" style={styles.header}>
-              移動日
-            </TableCell>
-            <TableCell align="left" size="small" style={styles.header}>
-              YK
-            </TableCell>
-            <TableCell align="left" size="small" style={styles.header}>
-              機材名
-            </TableCell>
-            <TableCell align="right" size="small" style={styles.header}>
-              有効
-            </TableCell>
-            <TableCell align="right" size="small" style={styles.header}>
-              受注
-            </TableCell>
-            <TableCell align="right" size="small" style={styles.header}>
-              予備
-            </TableCell>
-            <TableCell align="right" size="small" style={styles.header}>
-              合計
-            </TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {visibleRows.map((row, rowIndex) => (
-            <TableRow key={rowIndex} hover>
-              <TableCell
-                align="right"
-                size="small"
-                sx={{ bgcolor: grey[200], py: 0, px: 1, border: '1px solid black' }}
-              >
-                {rowIndex + 1}
+export const IdoEqTable: React.FC<IdoEqTableProps> = React.memo(
+  ({ rows, edit, shukoFixFlag, shukoDate, handleCellDateChange, handleCellDateClear }) => {
+    const visibleRows = rows.filter((row) => !row.delFlag);
+    return (
+      <TableContainer style={{ overflow: 'scroll', maxHeight: '80vh' }}>
+        <Table stickyHeader>
+          <TableHead>
+            <TableRow>
+              <TableCell size="small" style={styles.header} />
+              <TableCell align="left" size="small" style={styles.header}>
+                移動日
               </TableCell>
-              <TableCell style={styles.row} size="small">
-                <Box display="flex" width={'200px'}>
-                  <TestDate
-                    sx={{
-                      '& .MuiPickersInputBase-root': {
-                        height: '23px',
-                      },
-                      '& .MuiPickersSectionList-root': {
-                        padding: 0,
-                      },
-                      '& .MuiButtonBase-root': {
-                        padding: 0,
-                      },
-                    }}
-                    date={row.sagyoDenDat}
-                    onChange={(date) => handleCellDateChange(row.kizaiId, date)}
-                    onClear={() => handleCellDateClear(row.kizaiId)}
-                    disabled={!edit || fixFlag}
-                  />
-                  {row.sagyoSijiId && <Typography>{row.sagyoSijiId === 1 ? 'K→Y' : 'Y→K'}</Typography>}
-                </Box>
+              <TableCell align="left" size="small" style={styles.header}>
+                YK
               </TableCell>
-              <TableCell style={styles.row} align="left" size="small" sx={{ bgcolor: grey[200] }}>
-                {row.shozokuId === 1 ? 'K' : 'Y'}
+              <TableCell align="left" size="small" style={styles.header}>
+                機材名
               </TableCell>
-              <TableCell style={styles.row} align="left" size="small">
-                <Button
-                  variant="text"
-                  sx={{ p: 0, justifyContent: 'start', textTransform: 'none', color: 'text.primary' }}
-                  onClick={() =>
-                    window.open(`/loan-situation/${row.kizaiId}?date=${shukoDate ? shukoDate.toISOString() : ''}`)
-                  }
-                >
-                  {row.kizaiNam}
-                </Button>
+              <TableCell align="right" size="small" style={styles.header}>
+                有効
               </TableCell>
-              <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200] }}>
-                {row.kizaiQty}
+              <TableCell align="right" size="small" style={styles.header}>
+                受注
               </TableCell>
-              <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200] }}>
-                {row.planKizaiQty}
+              <TableCell align="right" size="small" style={styles.header}>
+                予備
               </TableCell>
-              <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200] }}>
-                {row.planYobiQty}
-              </TableCell>
-              <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: lightBlue[100] }}>
-                {row.planQty}
+              <TableCell align="right" size="small" style={styles.header}>
+                合計
               </TableCell>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
-  );
-};
+          </TableHead>
+          <TableBody>
+            {visibleRows.map((row, rowIndex) => (
+              <TableRow key={rowIndex} hover>
+                <TableCell
+                  align="right"
+                  size="small"
+                  sx={{ bgcolor: grey[200], py: 0, px: 1, border: '1px solid black' }}
+                >
+                  {rowIndex + 1}
+                </TableCell>
+                <TableCell style={styles.row} size="small">
+                  <Box display="flex" width={'200px'}>
+                    <TestDate
+                      sx={{
+                        '& .MuiPickersInputBase-root': {
+                          height: '23px',
+                        },
+                        '& .MuiPickersSectionList-root': {
+                          padding: 0,
+                        },
+                        '& .MuiButtonBase-root': {
+                          padding: 0,
+                        },
+                      }}
+                      date={row.sagyoDenDat}
+                      onChange={(date) => handleCellDateChange(row.kizaiId, date)}
+                      onClear={() => handleCellDateClear(row.kizaiId)}
+                      disabled={!edit || shukoFixFlag}
+                    />
+                    {row.sagyoSijiId && <Typography>{row.sagyoSijiId === 1 ? 'K→Y' : 'Y→K'}</Typography>}
+                  </Box>
+                </TableCell>
+                <TableCell style={styles.row} align="left" size="small" sx={{ bgcolor: grey[200] }}>
+                  {row.shozokuId === 1 ? 'K' : 'Y'}
+                </TableCell>
+                <TableCell style={styles.row} align="left" size="small">
+                  <Button
+                    variant="text"
+                    sx={{ p: 0, justifyContent: 'start', textTransform: 'none', color: 'text.primary' }}
+                    onClick={() =>
+                      window.open(`/loan-situation/${row.kizaiId}?date=${shukoDate ? shukoDate.toISOString() : ''}`)
+                    }
+                  >
+                    {row.kizaiNam}
+                  </Button>
+                </TableCell>
+                <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200] }}>
+                  {row.kizaiQty}
+                </TableCell>
+                <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200] }}>
+                  {row.planKizaiQty}
+                </TableCell>
+                <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200] }}>
+                  {row.planYobiQty}
+                </TableCell>
+                <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: lightBlue[100] }}>
+                  {row.planQty}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    );
+  },
+  (prevProps, nextProps) => {
+    return (
+      prevProps.rows === nextProps.rows &&
+      prevProps.edit === nextProps.edit &&
+      prevProps.shukoFixFlag === nextProps.shukoFixFlag
+    );
+  }
+);
+
+IdoEqTable.displayName = 'IdoEqTable';
 
 export const ContainerTable = (props: {
   rows: JuchuContainerMeisaiValues[];
   edit: boolean;
-  fixFlag: boolean;
+  shukoFixFlag: boolean;
   shukoDate: Date | null;
   handleContainerMemoChange: (rowIndex: number, memo: string) => void;
   handleContainerCellChange: (rowIndex: number, kicsValue: number, yardValue: number) => void;
   handleMeisaiDelete: (row: JuchuContainerMeisaiValues) => void;
 }) => {
-  const { rows, edit, fixFlag, shukoDate, handleContainerMemoChange, handleContainerCellChange, handleMeisaiDelete } =
-    props;
+  const {
+    rows,
+    edit,
+    shukoFixFlag,
+    shukoDate,
+    handleContainerMemoChange,
+    handleContainerCellChange,
+    handleMeisaiDelete,
+  } = props;
 
   const inputKicsRefs = useRef<(HTMLInputElement | null)[]>([]);
   const inputYardRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -644,7 +656,7 @@ export const ContainerTable = (props: {
                 <IconButton
                   onClick={() => handleMeisaiDelete(row)}
                   sx={{ padding: 0, color: 'red' }}
-                  disabled={!edit || fixFlag}
+                  disabled={!edit || shukoFixFlag}
                 >
                   <Delete fontSize="small" />
                 </IconButton>
@@ -662,7 +674,7 @@ export const ContainerTable = (props: {
                   memo={row.mem ? row.mem : ''}
                   handleMemoChange={handleContainerMemoChange}
                   rowIndex={rowIndex}
-                  disabled={!edit || fixFlag}
+                  disabled={!edit || shukoFixFlag}
                 />
               </TableCell>
               <TableCell style={styles.row} align="left" size="small">
@@ -717,7 +729,7 @@ export const ContainerTable = (props: {
                     handleKicsKeyDown(e, rowIndex);
                   }}
                   onFocus={(e) => e.target.select()}
-                  disabled={!edit || fixFlag}
+                  disabled={!edit || shukoFixFlag}
                 />
               </TableCell>
               <TableCell style={styles.row} align="right" size="small">
@@ -761,7 +773,7 @@ export const ContainerTable = (props: {
                     handleYardKeyDown(e, rowIndex);
                   }}
                   onFocus={(e) => e.target.select()}
-                  disabled={!edit || fixFlag}
+                  disabled={!edit || shukoFixFlag}
                 />
               </TableCell>
               <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: lightBlue[100] }}>

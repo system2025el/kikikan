@@ -229,7 +229,7 @@ export const EqMasterDialog = ({
                   control={control}
                   label={editable ? formItems[0].exsample : ''}
                   fullWidth
-                  sx={{ maxWidth: '90%' }}
+                  sx={{ maxWidth: 500 }}
                   disabled={editable ? false : true}
                 />
               </FormBox>
@@ -238,6 +238,7 @@ export const EqMasterDialog = ({
                   value={kizaiQty ? String(Number(kizaiQty.yuko ?? 0) + Number(kizaiQty.ng ?? 0)) : ''}
                   disabled
                   sx={{
+                    width: 120,
                     '& .MuiInputBase-input': {
                       textAlign: 'right',
                     },
@@ -258,6 +259,7 @@ export const EqMasterDialog = ({
                   value={kizaiQty.ng ? String(kizaiQty.ng ?? 0) : 0}
                   disabled
                   sx={{
+                    width: 120,
                     '& .MuiInputBase-input': {
                       textAlign: 'right',
                     },
@@ -273,6 +275,7 @@ export const EqMasterDialog = ({
                   value={kizaiQty.yuko ? String(kizaiQty.yuko ?? 0) : 0}
                   disabled
                   sx={{
+                    width: 120,
                     '& .MuiInputBase-input': {
                       textAlign: 'right',
                     },
@@ -359,7 +362,7 @@ export const EqMasterDialog = ({
                   label={editable ? formItems[10].exsample : ''}
                   fullWidth
                   sx={{
-                    maxWidth: '20%',
+                    width: 120,
                     '& .MuiInputBase-input': {
                       textAlign: 'right',
                     },
@@ -438,7 +441,7 @@ export const EqMasterDialog = ({
                   label={editable ? formItems[16].exsample : ''}
                   fullWidth
                   sx={{
-                    maxWidth: '50%',
+                    width: 120,
                     '& .MuiInputBase-input': {
                       textAlign: 'right',
                     },

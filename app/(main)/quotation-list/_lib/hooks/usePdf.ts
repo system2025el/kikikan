@@ -41,7 +41,7 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
 
     // フォントの設定
     pdfDoc.registerFontkit(fontkit);
-    const customFont = await pdfDoc.embedFont(font);
+    const customFont = await pdfDoc.embedFont(font, { subset: true });
 
     /* ここから出力内容
      * -----------------------------------------------------------------*/

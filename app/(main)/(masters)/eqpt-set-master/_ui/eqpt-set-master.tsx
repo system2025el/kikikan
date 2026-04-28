@@ -132,10 +132,8 @@ export const EqptSetsMaster = () => {
           <Box width={'100%'} px={2} py={0.5} component={'form'} onSubmit={handleSubmit(onSubmit)}>
             <Stack justifyContent={'space-between'} alignItems={'start'}>
               <Stack alignItems={'baseline'}>
-                <Typography noWrap width={200}>
-                  機材セット名キーワード
-                </Typography>
-                <TextFieldElement name="query" control={control} helperText={''} />
+                <Typography noWrap>機材セット名キーワード</Typography>
+                <TextFieldElement name="query" control={control} sx={{ width: 400 }} />
               </Stack>
               <Box alignSelf={'end'}>
                 <Button type="submit" loading={isLoading}>

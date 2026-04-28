@@ -55,7 +55,7 @@ export const usePdf = (): [(params: PdfModel[]) => Promise<Blob>] => {
     pdfDoc.setTitle(tabTitle);
 
     pdfDoc.registerFontkit(fontkit);
-    const customFont = await pdfDoc.embedFont(font);
+    const customFont = await pdfDoc.embedFont(font, { subset: true });
 
     // 各注文情報ごとにページを生成
     for (const param of params) {

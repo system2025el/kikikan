@@ -28,6 +28,7 @@ import {
   Popper,
   Select,
   Snackbar,
+  Stack,
   TextField,
   Typography,
 } from '@mui/material';
@@ -94,7 +95,8 @@ const EquipmentOrderDetail = (props: {
   juchuKizaiHeadData: JuchuKizaiHeadValues;
   juchuHonbanbiData: JuchuKizaiHonbanbiValues[] | undefined;
   edit: boolean;
-  fixFlag: boolean;
+  shukoFixFlag: boolean;
+  nyukoFixFlag: boolean;
   honbanbiColor: HonbanbiColorValues[];
 }) => {
   const router = useRouter();
@@ -124,7 +126,9 @@ const EquipmentOrderDetail = (props: {
   // ロックデータ
   const [lockData, setLockData] = useState<LockValues | null>(null);
   // 出発フラグ
-  const [fixFlag, setFixFlag] = useState(props.fixFlag);
+  const [shukoFixFlag, setShukoFixFlag] = useState(props.shukoFixFlag);
+  // 到着フラグ
+  const [nyukoFixFlag, setNyukoFixFlag] = useState(props.nyukoFixFlag);
   // 受注ヘッダーデータ
   const [juchuHeadData, setJuchuHeadData] = useState(props.juchuHeadData);
   // 受注機材明細元データ
@@ -163,18 +167,6 @@ const EquipmentOrderDetail = (props: {
   const [juchuHonbanbiList, setJuchuHonbanbiList] = useState<JuchuKizaiHonbanbiValues[]>(props.juchuHonbanbiData ?? []);
   // 受注本番日削除リスト
   const [juchuHonbanbiDeleteList, setJuchuHonbanbiDeleteList] = useState<JuchuKizaiHonbanbiValues[]>([]);
-  // 受注機材明細元合計数
-  const originPlanQty = originJuchuKizaiMeisaiList.reduce((acc, current) => {
-    const key = current.kizaiId;
-    const total = acc.get(key);
-    if (total) {
-      const currentTotal = total + current.planQty;
-      acc.set(key, currentTotal);
-    } else {
-      acc.set(key, current.planQty);
-    }
-    return acc;
-  }, new Map<number, number>());
   // 削除機材
   const [deleteEq, setDeleteEq] = useState<{ rowIndex: number; row: JuchuKizaiMeisaiValues } | null>(null);
   // 削除コンテナ
@@ -231,6 +223,21 @@ const EquipmentOrderDetail = (props: {
   const [isNebikiRatEditing, setIsNebikiRatEditing] = useState(false);
   // 編集中かどうか
   const [isNebikiAmtEditing, setIsNebikiAmtEditing] = useState(false);
+
+  // 受注機材明細元合計数
+  const originPlanQty = useMemo(() => {
+    return originJuchuKizaiMeisaiList.reduce((acc, current) => {
+      const key = current.kizaiId;
+      const total = acc.get(key);
+      if (total) {
+        const currentTotal = total + current.planQty;
+        acc.set(key, currentTotal);
+      } else {
+        acc.set(key, current.planQty);
+      }
+      return acc;
+    }, new Map<number, number>());
+  }, [originJuchuKizaiMeisaiList]);
 
   // 本番日種別Map
   const shubetuColorMap = useMemo(() => {
@@ -308,10 +315,12 @@ const EquipmentOrderDetail = (props: {
   const nebikiAmt = watch('nebikiAmt');
 
   // 合計金額
-  const priceTotal = juchuKizaiMeisaiList.reduce(
-    (sum, row) => sum + row.kizaiTankaAmt * row.planKizaiQty * (juchuHonbanbiQty ?? 0),
-    0
-  );
+  const priceTotal = useMemo(() => {
+    return juchuKizaiMeisaiList.reduce(
+      (sum, row) => sum + row.kizaiTankaAmt * row.planKizaiQty * (juchuHonbanbiQty ?? 0),
+      0
+    );
+  }, [juchuKizaiMeisaiList, juchuHonbanbiQty]);
 
   // 割引率（金額）
   const waribikiRatAmt = priceTotal * ((nebikiRat ?? 0) / 100);
@@ -349,15 +358,17 @@ const EquipmentOrderDetail = (props: {
       setAlertOpen(true);
 
       // 受注ヘッダーデータ、出発フラグ
-      const [juchuHeadData, fixFlag] = await Promise.all([
+      const [juchuHeadData, shukoFixFlag, nyukoFixFlag] = await Promise.all([
         getDetailJuchuHead(getValues('juchuHeadId')),
         getNyushukoFixFlag(getValues('juchuHeadId'), getValues('juchuKizaiHeadId'), 60),
+        getNyushukoFixFlag(getValues('juchuHeadId'), getValues('juchuKizaiHeadId'), 70),
       ]);
       if (!juchuHeadData) {
         return <div>受注情報が見つかりません。</div>;
       }
       setJuchuHeadData(juchuHeadData);
-      setFixFlag(fixFlag);
+      setShukoFixFlag(shukoFixFlag);
+      setNyukoFixFlag(nyukoFixFlag);
 
       if (getValues('juchuKizaiHeadId') === 0) {
         const newJuchuKizaiHeadData: JuchuKizaiHeadValues = {
@@ -1720,13 +1731,6 @@ const EquipmentOrderDetail = (props: {
             stock = bulkStockMap.get(id) || [];
           }
 
-          const originQty = originPlanQty.get(id);
-          if (originQty && stock.length > 0) {
-            return stock.map((d) =>
-              dateRange.includes(toJapanYMDString(d.calDat)) ? { ...d, zaikoQty: d.zaikoQty + originQty } : d
-            );
-          }
-
           return stock;
         });
 
@@ -2448,10 +2452,16 @@ const EquipmentOrderDetail = (props: {
                       <Typography>編集中</Typography>
                     </Grid2>
                   )}
-                  {fixFlag && (
+                  {shukoFixFlag && nyukoFixFlag ? (
+                    <Box display={'flex'} alignItems={'center'}>
+                      <Typography>出発、到着済</Typography>
+                    </Box>
+                  ) : shukoFixFlag ? (
                     <Box display={'flex'} alignItems={'center'}>
                       <Typography>出発済</Typography>
                     </Box>
+                  ) : (
+                    <></>
                   )}
                   <Grid2 container display={saveKizaiHead ? 'flex' : 'none'} alignItems={'center'} spacing={1}>
                     {!edit ? <Typography>閲覧モード</Typography> : <Typography>編集モード</Typography>}
@@ -2505,60 +2515,47 @@ const EquipmentOrderDetail = (props: {
                 </AccordionSummary>
                 <AccordionDetails sx={{ padding: 0 }}>
                   <Divider />
-                  <Grid2 container display="flex">
-                    <Grid2>
-                      <Grid2 container margin={2} spacing={2}>
-                        <Grid2 container display="flex" direction="row" alignItems="center">
-                          <Grid2 display="flex" direction="row" alignItems="center">
-                            <Typography marginRight={3} whiteSpace="nowrap">
-                              受注番号
-                            </Typography>
-                            <TextField value={juchuHeadData.juchuHeadId} disabled></TextField>
-                          </Grid2>
-                          <Grid2 display="flex" direction="row" alignItems="center">
-                            <Typography mr={2}>受注ステータス</Typography>
-                            <FormControl size="small" sx={{ width: 120 }}>
-                              <Select value={juchuHeadData.juchuSts} disabled>
-                                <MenuItem value={0}>入力中</MenuItem>
-                                <MenuItem value={1}>仮受注</MenuItem>
-                                <MenuItem value={2}>処理中</MenuItem>
-                                <MenuItem value={3}>確定</MenuItem>
-                                <MenuItem value={4}>貸出済み</MenuItem>
-                                <MenuItem value={5}>返却済み</MenuItem>
-                                <MenuItem value={9}>受注キャンセル</MenuItem>
-                              </Select>
-                            </FormControl>
-                          </Grid2>
-                        </Grid2>
-                      </Grid2>
+                  <Grid2 container>
+                    <Grid2 size={{ xs: 12, sm: 12, md: 5 }}>
                       <Box sx={styles.container}>
-                        <Typography marginRight={5} whiteSpace="nowrap">
+                        <Typography marginRight={8} whiteSpace="nowrap">
+                          受注番号
+                        </Typography>
+                        <TextField value={juchuHeadData.juchuHeadId} disabled sx={{ width: 120 }}></TextField>
+                      </Box>
+                      <Box sx={styles.container}>
+                        <Typography mr={2}>受注ステータス</Typography>
+                        <FormControl size="small" sx={{ width: 160 }}>
+                          <Select value={juchuHeadData.juchuSts} disabled>
+                            <MenuItem value={0}>入力中</MenuItem>
+                            <MenuItem value={1}>仮受注</MenuItem>
+                            <MenuItem value={2}>処理中</MenuItem>
+                            <MenuItem value={3}>確定</MenuItem>
+                            <MenuItem value={4}>貸出済み</MenuItem>
+                            <MenuItem value={5}>返却済み</MenuItem>
+                            <MenuItem value={9}>受注キャンセル</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </Box>
+                      <Box sx={styles.container}>
+                        <Typography marginRight={10} whiteSpace="nowrap">
                           受注日
                         </Typography>
                         <TestDate date={juchuHeadData.juchuDat} onChange={() => {}} disabled />
                       </Box>
                       <Box sx={styles.container}>
-                        <Typography marginRight={5} whiteSpace="nowrap">
+                        <Typography marginRight={10} whiteSpace="nowrap">
                           入力者
                         </Typography>
                         <TextField value={juchuHeadData.nyuryokuUser} disabled></TextField>
                       </Box>
-                      <Box sx={styles.container}>
-                        <Typography marginRight={5} whiteSpace="nowrap">
-                          割引率
-                        </Typography>
-                        <TextField
-                          value={juchuHeadData.nebikiRat ? `${juchuHeadData.nebikiRat} %` : ''}
-                          disabled
-                        ></TextField>
-                      </Box>
                     </Grid2>
-                    <Grid2>
-                      <Box sx={{ display: 'flex', alignItems: 'center', ml: 2, mt: { xs: 0, sm: 0, md: 2 } }}>
+                    <Grid2 size={{ xs: 12, sm: 12, md: 7 }}>
+                      <Box sx={styles.container}>
                         <Typography marginRight={5} whiteSpace="nowrap">
                           公演名
                         </Typography>
-                        <TextField value={juchuHeadData.koenNam} disabled></TextField>
+                        <TextField value={juchuHeadData.koenNam} disabled fullWidth></TextField>
                       </Box>
                       <Box sx={styles.container}>
                         <Typography marginRight={3} whiteSpace="nowrap">
@@ -2567,13 +2564,24 @@ const EquipmentOrderDetail = (props: {
                         <TextField
                           value={juchuHeadData.koenbashoNam ? juchuHeadData.koenbashoNam : ''}
                           disabled
+                          fullWidth
                         ></TextField>
                       </Box>
                       <Box sx={styles.container}>
                         <Typography marginRight={7} whiteSpace="nowrap">
                           顧客
                         </Typography>
-                        <TextField value={juchuHeadData.kokyaku.kokyakuNam} disabled></TextField>
+                        <TextField value={juchuHeadData.kokyaku.kokyakuNam} disabled fullWidth></TextField>
+                      </Box>
+                      <Box sx={styles.container}>
+                        <Typography marginRight={5} whiteSpace="nowrap">
+                          割引率
+                        </Typography>
+                        <TextField
+                          value={juchuHeadData.nebikiRat ? `${juchuHeadData.nebikiRat} %` : ''}
+                          disabled
+                          sx={{ width: 120 }}
+                        ></TextField>
                       </Box>
                     </Grid2>
                   </Grid2>
@@ -2614,7 +2622,7 @@ const EquipmentOrderDetail = (props: {
                       control={control}
                       disabled={!edit}
                       slotProps={{
-                        input: { readOnly: fixFlag },
+                        input: { readOnly: shukoFixFlag },
                       }}
                     ></TextFieldElement>
                   </Grid2>
@@ -2685,7 +2693,7 @@ const EquipmentOrderDetail = (props: {
                                 },
                               }}
                               helperText={fieldState.error?.message}
-                              disabled={!edit || fixFlag}
+                              disabled={!edit || shukoFixFlag}
                             />
                           )}
                         />
@@ -2780,7 +2788,7 @@ const EquipmentOrderDetail = (props: {
                                 helperText={fieldState.error?.message}
                                 disabled={!edit}
                                 slotProps={{
-                                  input: { readOnly: fixFlag },
+                                  input: { readOnly: shukoFixFlag },
                                 }}
                               />
                             )}
@@ -2823,7 +2831,7 @@ const EquipmentOrderDetail = (props: {
                                 onChange={handleKicsShukoChange}
                                 onAccept={handleKicsShukoAccept}
                                 fieldstate={fieldState}
-                                disabled={!edit || fixFlag}
+                                disabled={!edit || shukoFixFlag}
                                 onClear={handleKicsClear}
                               />
                               <Button
@@ -2832,7 +2840,7 @@ const EquipmentOrderDetail = (props: {
                                     `/vehicle-order-detail/${juchuHeadData.juchuHeadId}/0/edit?kbn=1&date=${field.value?.toISOString()}&basho=1`
                                   )
                                 }
-                                disabled={!field.value ? true : false || !edit || fixFlag}
+                                disabled={!field.value ? true : false || !edit || shukoFixFlag}
                               >
                                 車両
                               </Button>
@@ -2857,7 +2865,7 @@ const EquipmentOrderDetail = (props: {
                                 onChange={handleYardShukoChange}
                                 onAccept={handleYardShukoAccept}
                                 fieldstate={fieldState}
-                                disabled={!edit || fixFlag}
+                                disabled={!edit || shukoFixFlag}
                                 onClear={handleYardClear}
                               />
                               <Button
@@ -2866,7 +2874,7 @@ const EquipmentOrderDetail = (props: {
                                     `/vehicle-order-detail/${juchuHeadData.juchuHeadId}/0/edit?kbn=1&date=${field.value?.toISOString()}&basho=2`
                                   )
                                 }
-                                disabled={!field.value ? true : false || !edit || fixFlag}
+                                disabled={!field.value ? true : false || !edit || shukoFixFlag}
                               >
                                 車両
                               </Button>
@@ -2894,7 +2902,7 @@ const EquipmentOrderDetail = (props: {
                                 onChange={handleKicsNyukoChange}
                                 onAccept={handleKicsNyukoAccept}
                                 fieldstate={fieldState}
-                                disabled={!edit}
+                                disabled={!edit || nyukoFixFlag}
                                 onClear={() => {
                                   field.onChange(null);
                                   trigger(['kicsNyukoDat', 'yardNyukoDat']);
@@ -2906,7 +2914,7 @@ const EquipmentOrderDetail = (props: {
                                     `/vehicle-order-detail/${juchuHeadData.juchuHeadId}/0/edit?kbn=2&date=${field.value?.toISOString()}&basho=1`
                                   )
                                 }
-                                disabled={!field.value ? true : false || !edit || fixFlag}
+                                disabled={!field.value ? true : false || !edit || nyukoFixFlag}
                               >
                                 車両
                               </Button>
@@ -2931,7 +2939,7 @@ const EquipmentOrderDetail = (props: {
                                 onChange={handleYardNyukoChange}
                                 onAccept={handleYardNyukoAccept}
                                 fieldstate={fieldState}
-                                disabled={!edit}
+                                disabled={!edit || nyukoFixFlag}
                                 onClear={() => {
                                   field.onChange(null);
                                   trigger(['kicsNyukoDat', 'yardNyukoDat']);
@@ -2943,7 +2951,7 @@ const EquipmentOrderDetail = (props: {
                                     `/vehicle-order-detail/${juchuHeadData.juchuHeadId}/0/edit?kbn=2&date=${field.value?.toISOString()}&basho=2`
                                   )
                                 }
-                                disabled={!field.value ? true : false || !edit || fixFlag}
+                                disabled={!field.value ? true : false || !edit || nyukoFixFlag}
                               >
                                 車両
                               </Button>
@@ -2987,7 +2995,7 @@ const EquipmentOrderDetail = (props: {
                       fullWidth
                       disabled={!edit}
                       slotProps={{
-                        input: { readOnly: fixFlag },
+                        input: { readOnly: shukoFixFlag },
                       }}
                       // sx={{
                       //   '& .MuiInputBase-root': {
@@ -3049,7 +3057,7 @@ const EquipmentOrderDetail = (props: {
                         !edit ||
                         (juchuKizaiMeisaiList.filter((d) => !d.delFlag).length === 0 &&
                           juchuContainerMeisaiList.filter((d) => !d.delFlag).length === 0) ||
-                        fixFlag ||
+                        shukoFixFlag ||
                         isLoading ||
                         isDetailLoading
                       }
@@ -3126,12 +3134,12 @@ const EquipmentOrderDetail = (props: {
                         }}
                       >
                         <Grid2 container my={1} mx={2} spacing={2}>
-                          <Button disabled={!edit || fixFlag} onClick={handleOpenEqDialog}>
+                          <Button disabled={!edit || shukoFixFlag} onClick={handleOpenEqDialog}>
                             <AddIcon fontSize="small" />
                             機材追加
                           </Button>
                           <Button
-                            disabled={!edit || fixFlag}
+                            disabled={!edit || shukoFixFlag}
                             onClick={handleOpenSortDialog}
                             sx={{
                               display:
@@ -3167,7 +3175,7 @@ const EquipmentOrderDetail = (props: {
                           <EqTable
                             rows={juchuKizaiMeisaiList}
                             edit={edit}
-                            fixFlag={fixFlag}
+                            shukoFixFlag={shukoFixFlag}
                             shukoDate={shukoDate}
                             handleCellChange={handleCellChange}
                             handleMeisaiDelete={handleEqMeisaiDelete}
@@ -3222,7 +3230,7 @@ const EquipmentOrderDetail = (props: {
                       <IdoEqTable
                         rows={idoJuchuKizaiMeisaiList}
                         edit={edit}
-                        fixFlag={fixFlag}
+                        shukoFixFlag={shukoFixFlag}
                         shukoDate={shukoDate}
                         handleCellDateChange={handleCellDateChange}
                         handleCellDateClear={handleCellDateClear}
@@ -3236,7 +3244,7 @@ const EquipmentOrderDetail = (props: {
                       <ContainerTable
                         rows={juchuContainerMeisaiList}
                         edit={edit}
-                        fixFlag={fixFlag}
+                        shukoFixFlag={shukoFixFlag}
                         shukoDate={shukoDate}
                         handleContainerMemoChange={handleContainerMemoChange}
                         handleContainerCellChange={handleContainerCellChange}

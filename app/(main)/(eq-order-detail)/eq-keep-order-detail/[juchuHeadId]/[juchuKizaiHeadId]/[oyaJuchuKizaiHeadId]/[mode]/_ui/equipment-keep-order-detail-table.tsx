@@ -31,7 +31,7 @@ import { KeepJuchuContainerMeisaiValues, KeepJuchuKizaiMeisaiValues } from '../_
 type KeepEqTableProps = {
   rows: KeepJuchuKizaiMeisaiValues[];
   edit: boolean;
-  shukoFixFlag: boolean;
+  nyukoFixFlag: boolean;
   oyaShukoDate: Date | null;
   handleMeisaiDelete: (rowIndex: number) => void;
   handleMemoChange: (rowIndex: number, memo: string) => void;
@@ -41,7 +41,7 @@ type KeepEqTableProps = {
 export const KeepEqTable: React.FC<KeepEqTableProps> = ({
   rows,
   edit,
-  shukoFixFlag,
+  nyukoFixFlag,
   oyaShukoDate,
   handleMeisaiDelete,
   handleMemoChange,
@@ -124,7 +124,7 @@ export const KeepEqTable: React.FC<KeepEqTableProps> = ({
               row={row}
               rowIndex={rowIndex}
               edit={edit}
-              shukoFixFlag={shukoFixFlag}
+              nyukoFixFlag={nyukoFixFlag}
               oyaShukoDate={oyaShukoDate}
               handleMeisaiDelete={handleMeisaiDelete}
               handleKeepRef={handleKeepRef(rowIndex)}
@@ -143,7 +143,7 @@ type KeepEqTableRowProps = {
   row: KeepJuchuKizaiMeisaiValues;
   rowIndex: number;
   edit: boolean;
-  shukoFixFlag: boolean;
+  nyukoFixFlag: boolean;
   oyaShukoDate: Date | null;
   handleMeisaiDelete: (rowIndex: number) => void;
   handleKeepRef: (el: HTMLInputElement | null) => void;
@@ -157,7 +157,7 @@ const KeepEqTableRow = React.memo(
     row,
     rowIndex,
     edit,
-    shukoFixFlag,
+    nyukoFixFlag,
     oyaShukoDate,
     handleMeisaiDelete,
     handleMemoChange,
@@ -171,7 +171,7 @@ const KeepEqTableRow = React.memo(
           <IconButton
             onClick={() => handleMeisaiDelete(rowIndex)}
             sx={{ padding: 0, color: 'red' }}
-            disabled={!edit || shukoFixFlag}
+            disabled={!edit || nyukoFixFlag}
           >
             <Delete fontSize="small" />
           </IconButton>
@@ -188,7 +188,7 @@ const KeepEqTableRow = React.memo(
             memo={row.mem ? row.mem : ''}
             handleMemoChange={handleMemoChange}
             rowIndex={rowIndex}
-            disabled={!edit || shukoFixFlag}
+            disabled={!edit || nyukoFixFlag}
           />
         </TableCell>
         <TableCell style={styles.row} align="left" size="small">
@@ -251,7 +251,7 @@ const KeepEqTableRow = React.memo(
               handleKeyDown(e, rowIndex);
             }}
             onFocus={(e) => e.target.select()}
-            disabled={!edit || shukoFixFlag}
+            disabled={!edit || nyukoFixFlag}
           />
         </TableCell>
       </TableRow>

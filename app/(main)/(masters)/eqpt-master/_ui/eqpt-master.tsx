@@ -161,7 +161,7 @@ export const EqptMaster = () => {
             <Stack justifyContent={'space-between'} alignItems={'start'}>
               <Stack>
                 <Typography noWrap>機材名キーワード</Typography>
-                <TextFieldElement name={'query'} control={control} />
+                <TextFieldElement name={'query'} control={control} sx={{ width: 400 }} />
               </Stack>
             </Stack>
             <Grid2 container justifyContent={'space-between'} alignItems={'start'} mt={0.5} spacing={1}>

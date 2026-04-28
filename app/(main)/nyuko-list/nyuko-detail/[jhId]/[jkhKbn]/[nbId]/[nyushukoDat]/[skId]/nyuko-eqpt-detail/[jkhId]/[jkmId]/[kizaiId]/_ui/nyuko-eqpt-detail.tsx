@@ -186,11 +186,12 @@ export const NyukoEqptDetail = (props: {
             </Box>
             <Divider />
             <Grid2 container spacing={5} p={2}>
-              <Box display={'flex'} alignItems={'center'}>
+              <Box display={'flex'} alignItems={'center'} sx={{ width: 450 }}>
                 <Typography mr={2}>機材名</Typography>
                 <TextField
                   value={'*'.repeat(nyukoEqptDetailData.indentNum) + (nyukoEqptDetailData.kizaiNam ?? '')}
                   disabled
+                  sx={{ width: '100%' }}
                 />
               </Box>
               <Box display={'flex'} alignItems={'center'}>
@@ -207,7 +208,7 @@ export const NyukoEqptDetail = (props: {
               <Button
                 color="error"
                 onClick={handleDelete}
-                disabled={fixFlag || selected.length === 0 || user?.permission.nyushuko === permission.nyushuko_ref}
+                disabled={/*fixFlag ||*/ selected.length === 0 || user?.permission.nyushuko === permission.nyushuko_ref}
                 loading={isLoading}
               >
                 実績クリア
@@ -236,7 +237,7 @@ export const NyukoEqptDetail = (props: {
                           margin: 0,
                         },
                       }}
-                      disabled={fixFlag || user?.permission.nyushuko === permission.nyushuko_ref}
+                      disabled={/*fixFlag ||*/ user?.permission.nyushuko === permission.nyushuko_ref}
                       onFocus={(e) => e.target.select()}
                     />
                   )}
@@ -257,7 +258,9 @@ export const NyukoEqptDetail = (props: {
                 color="primary"
                 type="submit"
                 sx={{ mr: 2 }}
-                disabled={fixFlag || !isDirty || isProcessing || user?.permission.nyushuko === permission.nyushuko_ref}
+                disabled={
+                  /*fixFlag ||*/ !isDirty || isProcessing || user?.permission.nyushuko === permission.nyushuko_ref
+                }
               >
                 <SaveAsIcon sx={{ mr: 1 }} />
                 保存

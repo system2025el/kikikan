@@ -132,7 +132,12 @@ export const LocationsMaster = () => {
               <Stack justifyContent={'space-between'} alignItems={'start'}>
                 <Stack alignItems={'baseline'}>
                   <Typography>キーワード</Typography>
-                  <TextFieldElement name="query" control={control} helperText={'場所、住所、Tel、Faxから検索'} />
+                  <TextFieldElement
+                    name="query"
+                    control={control}
+                    sx={{ width: 300 }}
+                    helperText={'場所、住所、Tel、Faxから検索'}
+                  />
                 </Stack>
                 <Box alignSelf={'end'}>
                   <Button type="submit" loading={isLoading}>

@@ -1231,9 +1231,9 @@ export const EquipmentKeepOrderDetail = (props: {
                       <Typography>編集中</Typography>
                     </Grid2>
                   )}
-                  {shukoFixFlag ? (
+                  {shukoFixFlag && nyukoFixFlag ? (
                     <Box display={'flex'} alignItems={'center'}>
-                      <Typography>出発済</Typography>
+                      <Typography>出発、到着済</Typography>
                     </Box>
                   ) : nyukoFixFlag ? (
                     <Box display={'flex'} alignItems={'center'}>
@@ -1507,7 +1507,7 @@ export const EquipmentKeepOrderDetail = (props: {
                               onChange={handleKicsShukoChange}
                               onAccept={handleKicsShukoAccept}
                               fieldstate={fieldState}
-                              disabled={!edit}
+                              disabled={!edit || shukoFixFlag}
                               onClear={() => {
                                 field.onChange(null);
                                 trigger(['kicsNyukoDat', 'kicsShukoDat', 'yardShukoDat']);
@@ -1529,7 +1529,7 @@ export const EquipmentKeepOrderDetail = (props: {
                               onChange={handleYardShukoChange}
                               onAccept={handleYardShukoAccept}
                               fieldstate={fieldState}
-                              disabled={!edit}
+                              disabled={!edit || shukoFixFlag}
                               onClear={() => {
                                 field.onChange(null);
                                 trigger(['yardNyukoDat', 'kicsShukoDat', 'yardShukoDat']);
@@ -1620,7 +1620,7 @@ export const EquipmentKeepOrderDetail = (props: {
                         <KeepEqTable
                           rows={keepJuchuKizaiMeisaiList}
                           edit={edit}
-                          shukoFixFlag={shukoFixFlag}
+                          nyukoFixFlag={nyukoFixFlag}
                           oyaShukoDate={oyaShukoDate}
                           handleMeisaiDelete={handleEqMeisaiDelete}
                           handleMemoChange={handleMemoChange}
