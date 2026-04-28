@@ -282,7 +282,7 @@ export const CustomersMasterDialog = ({
                   control={control}
                   label={editable ? formItems[6].exsample : ''}
                   fullWidth
-                  sx={{ maxWidth: '50%' }}
+                  sx={{ width: 200 }}
                   disabled={editable ? false : true}
                 />
               </FormBox>

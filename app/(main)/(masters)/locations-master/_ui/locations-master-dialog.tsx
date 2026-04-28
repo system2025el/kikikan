@@ -238,7 +238,7 @@ export const LocationsMasterDialog = ({
                   control={control}
                   label={editable ? formItems[3].exsample : ''}
                   fullWidth
-                  sx={{ maxWidth: '90%' }}
+                  sx={{ width: 200 }}
                   disabled={editable ? false : true}
                 />
               </FormBox>
@@ -278,7 +278,7 @@ export const LocationsMasterDialog = ({
                   control={control}
                   label={editable ? formItems[7].exsample : ''}
                   fullWidth
-                  sx={{ maxWidth: '90%' }}
+                  sx={{ width: 200 }}
                   disabled={editable ? false : true}
                 />
               </FormBox>
@@ -288,7 +288,7 @@ export const LocationsMasterDialog = ({
                   control={control}
                   label={editable ? formItems[8].exsample : ''}
                   fullWidth
-                  sx={{ maxWidth: '90%' }}
+                  sx={{ width: 200 }}
                   disabled={editable ? false : true}
                 />
               </FormBox>
@@ -298,7 +298,7 @@ export const LocationsMasterDialog = ({
                   control={control}
                   label={editable ? formItems[9].exsample : ''}
                   fullWidth
-                  sx={{ maxWidth: '90%' }}
+                  sx={{ width: 200 }}
                   disabled={editable ? false : true}
                 />
               </FormBox>
