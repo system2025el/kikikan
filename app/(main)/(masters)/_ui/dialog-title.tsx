@@ -62,9 +62,9 @@ export const MasterDialogTitle = ({
           <SubmitButton
             type="submit"
             disabled={
-              isDirty
-                ? false
-                : true || dialogTitle === '担当者マスタ登録'
+              !isDirty
+                ? true
+                : dialogTitle === '担当者マスタ登録'
                   ? !((user?.permission.loginSetting ?? 0) & permission.login)
                   : !((user?.permission.masters ?? 0) & permission.mst_upd)
             }
@@ -78,7 +78,7 @@ export const MasterDialogTitle = ({
                 disabled={
                   editable
                     ? true
-                    : false || dialogTitle === '担当者マスタ登録'
+                    : dialogTitle === '担当者マスタ登録'
                       ? !((user?.permission.loginSetting ?? 0) & permission.login)
                       : !((user?.permission.masters ?? 0) & permission.mst_upd)
                 }
@@ -87,7 +87,7 @@ export const MasterDialogTitle = ({
                 disabled={
                   isNew
                     ? true
-                    : false || dialogTitle === '担当者マスタ登録'
+                    : dialogTitle === '担当者マスタ登録'
                       ? !((user?.permission.loginSetting ?? 0) & permission.login)
                       : !((user?.permission.masters ?? 0) & permission.mst_upd)
                 }
