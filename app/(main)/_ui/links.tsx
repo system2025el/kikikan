@@ -188,19 +188,6 @@ export default function NavLinks() {
         </ListItemIcon>
         <ListItemText sx={{ color: pathname === '/schedule' ? 'primary.dark' : undefined }}>スケジュール</ListItemText>
       </ListItemButton>
-      {/* 機材 */}
-      <ListItemButton
-        onClick={() => handleNavigation('/eqpt-master')}
-        sx={{
-          backgroundColor: pathname === '/eqpt-master' ? currentPgColor : undefined,
-        }}
-        disabled={isPending}
-      >
-        <ListItemIcon>
-          <StopSharpIcon />
-        </ListItemIcon>
-        <ListItemText sx={{ color: pathname === '/eqpt-master' ? 'primary.dark' : undefined }}>機材マスタ</ListItemText>
-      </ListItemButton>
       {/* 受注管理 */}
       <ListItemButton
         onClick={orderClick}
@@ -303,6 +290,19 @@ export default function NavLinks() {
           ))}
         </List>
       </Collapse>
+      {/* 機材 */}
+      <ListItemButton
+        onClick={() => handleNavigation('/eqpt-master')}
+        sx={{
+          backgroundColor: pathname === '/eqpt-master' ? currentPgColor : undefined,
+        }}
+        disabled={isPending}
+      >
+        <ListItemIcon>
+          <StopSharpIcon />
+        </ListItemIcon>
+        <ListItemText sx={{ color: pathname === '/eqpt-master' ? 'primary.dark' : undefined }}>機材マスタ</ListItemText>
+      </ListItemButton>
       {/* マスタ管理 */}
       <ListItemButton
         onClick={masterClick}
