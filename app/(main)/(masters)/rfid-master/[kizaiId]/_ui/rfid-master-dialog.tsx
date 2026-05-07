@@ -9,6 +9,7 @@ import {
   Grid2,
   MenuItem,
   Select,
+  Snackbar,
   TextField,
   Typography,
 } from '@mui/material';
@@ -75,6 +76,10 @@ export const RfidMasterDialog = ({
   const [tagMessage, setTagMessage] = useState<string>('');
   /* ELナンバー重複メッセージ */
   const [elMessage, setElMessage] = useState<string>('');
+  // スナックバー制御
+  const [snackBarOpen, setSnackBarOpen] = useState(false);
+  // スナックバーメッセージ
+  const [snackBarMessage, setSnackBarMessage] = useState('');
 
   /* useForm ------------------------- */
   const {
@@ -108,22 +113,28 @@ export const RfidMasterDialog = ({
       if (rfidId === String(FAKE_NEW_ID)) {
         // 新規登録 -----------------------------
         //const [tagResult, elNumResult] = await Promise.all([selectOneRfid(data.tagId), selectElNumExists(data.elNum!)]);
-        const tagResult = await selectOneRfid(data.tagId);
-        if (tagResult.data) {
-          setTagMessage('このRFIDはすでに存在しています');
-        } else {
-          setTagMessage('');
-        }
-        // if (elNumResult.data) {
-        //   setElMessage('このEL No.は既に存在しています');
-        // } else {
-        //   setElMessage('');
-        // }
-        if (!tagResult.data /* && !elNumResult.data*/) {
-          await addNewRfid(data, kizaiId, user?.name ?? '');
-          handleCloseDialog();
+        try {
+          const tagResult = await selectOneRfid(data.tagId);
+          if (tagResult.data) {
+            setTagMessage('このRFIDはすでに存在しています');
+          } else {
+            setTagMessage('');
+          }
+          // if (elNumResult.data) {
+          //   setElMessage('このEL No.は既に存在しています');
+          // } else {
+          //   setElMessage('');
+          // }
+          if (!tagResult.data /* && !elNumResult.data*/) {
+            await addNewRfid(data, kizaiId, user?.name ?? '');
+            handleCloseDialog();
+            refetchRfids();
+          }
+        } catch (e) {
+          setSnackBarMessage('保存に失敗しました');
+          setSnackBarOpen(true);
+        } finally {
           setIsLoading(false);
-          refetchRfids();
         }
       } else {
         // 更新 -----------------------------
@@ -136,9 +147,16 @@ export const RfidMasterDialog = ({
         // if (!elNumResult.data ||  currentRfid.elNum === data.elNum) {
         if (action === 'save') {
           // 保存終了ボタン
-          await updateRfid(currentRfid, data, kizaiId, user?.name ?? '');
+          try {
+            await updateRfid(currentRfid, data, kizaiId, user?.name ?? '');
+          } catch (e) {
+            setSnackBarMessage('保存に失敗しました');
+            setSnackBarOpen(true);
+            return;
+          } finally {
+            setIsLoading(false);
+          }
           handleCloseDialog();
-          setIsLoading(false);
           refetchRfids();
         } else if (action === 'delete') {
           setIsLoading(false);
@@ -147,9 +165,16 @@ export const RfidMasterDialog = ({
           return;
         } else if (action === 'restore') {
           // 有効化ボタン
-          await updRfidDelFlg(getValues('tagId'), false, user?.name ?? '');
+          try {
+            await updRfidDelFlg(getValues('tagId'), false, user?.name ?? '');
+          } catch (e) {
+            setSnackBarMessage('有効化に失敗しました');
+            setSnackBarOpen(true);
+            return;
+          } finally {
+            setIsLoading(false);
+          }
           handleCloseDialog();
-          setIsLoading(false);
           refetchRfids();
         }
         // }
@@ -176,10 +201,17 @@ export const RfidMasterDialog = ({
   /* 削除確認ダイアログで削除選択時 */
   const handleConfirmDelete = async () => {
     setIsLoading(true);
-    await updRfidDelFlg(getValues('tagId'), true, user?.name ?? '');
-    setDeleteOpen(false);
+    try {
+      await updRfidDelFlg(getValues('tagId'), true, user?.name ?? '');
+    } catch (e) {
+      setSnackBarMessage('無効化に失敗しました');
+      setSnackBarOpen(true);
+      return;
+    } finally {
+      setDeleteOpen(false);
+      setIsLoading(false);
+    }
     handleCloseDialog();
-    setIsLoading(false);
     await refetchRfids();
   };
 
@@ -347,6 +379,14 @@ export const RfidMasterDialog = ({
           </>
         )}
       </form>
+      <Snackbar
+        open={snackBarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackBarOpen(false)}
+        message={snackBarMessage}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        sx={{ marginTop: '65px' }}
+      />
     </>
   );
 };

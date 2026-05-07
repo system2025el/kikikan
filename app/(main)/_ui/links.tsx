@@ -42,7 +42,7 @@ const stockList: MenuItem[] = [
 ];
 /* マスタ管理リスト */
 const masterList: MenuItem[] = [
-  { name: '機材マスタ', url: '/eqpt-master' },
+  // { name: '機材マスタ', url: '/eqpt-master' },
   { name: '顧客マスタ', url: '/customers-master' },
   { name: '車両マスタ', url: '/vehicles-master' },
   { name: '公演場所マスタ', url: '/locations-master' },
@@ -187,6 +187,19 @@ export default function NavLinks() {
           <StopSharpIcon />
         </ListItemIcon>
         <ListItemText sx={{ color: pathname === '/schedule' ? 'primary.dark' : undefined }}>スケジュール</ListItemText>
+      </ListItemButton>
+      {/* 機材 */}
+      <ListItemButton
+        onClick={() => handleNavigation('/eqpt-master')}
+        sx={{
+          backgroundColor: pathname === '/eqpt-master' ? currentPgColor : undefined,
+        }}
+        disabled={isPending}
+      >
+        <ListItemIcon>
+          <StopSharpIcon />
+        </ListItemIcon>
+        <ListItemText sx={{ color: pathname === '/eqpt-master' ? 'primary.dark' : undefined }}>機材マスタ</ListItemText>
       </ListItemButton>
       {/* 受注管理 */}
       <ListItemButton
