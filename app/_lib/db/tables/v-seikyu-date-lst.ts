@@ -35,41 +35,41 @@ export const selectFilteredBillingSituations = async (queries: BillingStsSearchV
     switch (selectedDate?.value) {
       case '1': {
         // '先月全て'
-        const startOfLastMonth = dayjs().tz('Asia/Tokyo').subtract(1, 'month').startOf('month').toISOString();
-        const startOfThisMonth = dayjs().tz('Asia/Tokyo').add(1, 'month').startOf('month').toISOString();
+        const startOfLastMonth = dayjs().tz('Asia/Tokyo').subtract(1, 'month').startOf('month').format('YYYY-MM-DD');
+        const startOfThisMonth = dayjs().tz('Asia/Tokyo').startOf('month').format('YYYY-MM-DD');
         builder.or(`and(${dateColumn}.gte.${startOfLastMonth},${dateColumn}.lt.${startOfThisMonth})`);
         break;
       }
       case '2': {
         // '今月全て'
-        const startOfThisMonth = dayjs().tz('Asia/Tokyo').startOf('month').toISOString();
-        const startOfNextMonth = dayjs().tz('Asia/Tokyo').add(1, 'month').startOf('month').toISOString();
-        builder.or(`and(${dateColumn}.gte.${startOfThisMonth},${dateColumn}.lt.${startOfNextMonth})`);
+        const startOfThisMonth = dayjs().tz('Asia/Tokyo').startOf('month').format('YYYY-MM-DD');
+        const startOfNextMonth = dayjs().tz('Asia/Tokyo').add(1, 'month').startOf('month').format('YYYY-MM-DD');
+        builder.or(`and(${dateColumn}.gt.${startOfThisMonth},${dateColumn}.lt.${startOfNextMonth})`);
         break;
       }
       case '3': {
         // '今日'
-        const startOfToday = dayjs().tz('Asia/Tokyo').startOf('day').toISOString();
-        const startOfTomorrow = dayjs().tz('Asia/Tokyo').add(1, 'day').startOf('day').toISOString();
+        const startOfToday = dayjs().tz('Asia/Tokyo').startOf('day').format('YYYY-MM-DD');
+        const startOfTomorrow = dayjs().tz('Asia/Tokyo').add(1, 'day').startOf('day').format('YYYY-MM-DD');
         builder.or(`and(${dateColumn}.gte.${startOfToday},${dateColumn}.lt.${startOfTomorrow})`);
         break;
       }
       case '4': {
         // '今日以降'
-        const startOfToday = dayjs().tz('Asia/Tokyo').startOf('day').toISOString();
+        const startOfToday = dayjs().tz('Asia/Tokyo').startOf('day').format('YYYY-MM-DD');
         builder.or(`${dateColumn}.gte.${startOfToday},${dateColumn}.gte.${startOfToday}`);
         break;
       }
       case '5': {
         // '明日'
-        const startOfTomorrow = dayjs().tz('Asia/Tokyo').add(1, 'day').startOf('day').toISOString();
-        const startOfDayAfterTomorrow = dayjs().tz('Asia/Tokyo').add(2, 'day').startOf('day').toISOString();
+        const startOfTomorrow = dayjs().tz('Asia/Tokyo').add(1, 'day').startOf('day').format('YYYY-MM-DD');
+        const startOfDayAfterTomorrow = dayjs().tz('Asia/Tokyo').add(2, 'day').startOf('day').format('YYYY-MM-DD');
         builder.or(`and(${dateColumn}.gte.${startOfTomorrow},${dateColumn}.lt.${startOfDayAfterTomorrow})`);
         break;
       }
       case '6': {
         // '明日以降'
-        const tomorrowAndAfter = dayjs().tz('Asia/Tokyo').add(1, 'day').startOf('day').toISOString();
+        const tomorrowAndAfter = dayjs().tz('Asia/Tokyo').add(1, 'day').startOf('day').format('YYYY-MM-DD');
         builder.or(`${dateColumn}.gte.${tomorrowAndAfter},${dateColumn}.gte.${tomorrowAndAfter}`);
 
         break;
@@ -78,21 +78,25 @@ export const selectFilteredBillingSituations = async (queries: BillingStsSearchV
         // '指定期間'
         if (selectedDate.range?.from && selectedDate.range.to) {
           // 指定日がどちらも入ってる場合
-          const startOfDay = dayjs(selectedDate.range.from).tz('Asia/Tokyo').startOf('day').toISOString();
+          const startOfDay = dayjs(selectedDate.range.from).tz('Asia/Tokyo').startOf('day').format('YYYY-MM-DD');
           const startOfnextDay = dayjs(selectedDate.range.to)
             .tz('Asia/Tokyo')
             .add(1, 'day')
             .startOf('day')
-            .toISOString();
+            .format('YYYY-MM-DD');
           builder.or(`and(${dateColumn}.gte.${startOfDay},${dateColumn}.lt.${startOfnextDay})`);
         } else if (selectedDate.range?.from) {
           // fromだけの場合
-          const startOfDay = dayjs(selectedDate.range.from).tz('Asia/Tokyo').startOf('day').toISOString();
+          const startOfDay = dayjs(selectedDate.range.from).tz('Asia/Tokyo').startOf('day').format('YYYY-MM-DD');
 
           builder.or(`${dateColumn}.gte.${startOfDay},${dateColumn}.gte.${startOfDay}`);
         } else if (selectedDate.range?.to) {
           // toだけの場合
-          const nextDay = dayjs(selectedDate.range.to).tz('Asia/Tokyo').add(1, 'day').startOf('day').toISOString();
+          const nextDay = dayjs(selectedDate.range.to)
+            .tz('Asia/Tokyo')
+            .add(1, 'day')
+            .startOf('day')
+            .format('YYYY-MM-DD');
 
           builder.or(`${dateColumn}.lt.${nextDay},${dateColumn}.lt.${nextDay}`);
         }
