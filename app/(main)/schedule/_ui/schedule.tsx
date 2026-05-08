@@ -228,7 +228,7 @@ export const Schedule = () => {
           </Button>
         </Grid2>
       </Paper>
-      <TableContainer>
+      <TableContainer style={{ overflow: 'scroll', maxHeight: '80vh' }}>
         {isLoading && <LoadingOverlay />}
         <Table padding="none" sx={{ border: '2px solid black' }}>
           <TableHead>
