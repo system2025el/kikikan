@@ -3249,19 +3249,17 @@ export const saveJuchuKizai = async (
       // 削除明細
       const deleteJuchuKizaiMeisaiData = newJuchuKizaiMeisaiData.filter((data) => data.delFlag && data.saveFlag);
 
-      if (checkJuchuKizaiMeisai) {
-        // 削除
-        if (deleteJuchuKizaiMeisaiData.length > 0) {
-          const deleteMeisaiResult = await delJuchuKizaiMeisai(deleteJuchuKizaiMeisaiData, connection);
-        }
-        // 追加
-        if (addJuchuKizaiMeisaiData.length > 0) {
-          const addMeisaiResult = await addJuchuKizaiMeisai(addJuchuKizaiMeisaiData, userNam, connection);
-        }
-        // 更新
-        if (updateJuchuKizaiMeisaiData.length > 0) {
-          const updateMeisaiResult = await updJuchuKizaiMeisai(updateJuchuKizaiMeisaiData, userNam, connection);
-        }
+      // 削除
+      if (deleteJuchuKizaiMeisaiData.length > 0) {
+        const deleteMeisaiResult = await delJuchuKizaiMeisai(deleteJuchuKizaiMeisaiData, connection);
+      }
+      // 追加
+      if (addJuchuKizaiMeisaiData.length > 0) {
+        const addMeisaiResult = await addJuchuKizaiMeisai(addJuchuKizaiMeisaiData, userNam, connection);
+      }
+      // 更新
+      if (updateJuchuKizaiMeisaiData.length > 0) {
+        const updateMeisaiResult = await updJuchuKizaiMeisai(updateJuchuKizaiMeisaiData, userNam, connection);
       }
 
       // 受注コンテナ明細id最大値
@@ -3291,29 +3289,27 @@ export const saveJuchuKizai = async (
         (data) => data.delFlag && data.saveFlag
       );
 
-      if (checkJuchuContainerMeisai) {
-        // 削除
-        if (deleteJuchuContainerMeisaiData.length > 0) {
-          const deleteKizaiiIds = deleteJuchuContainerMeisaiData.map((data) => data.kizaiId);
-          const deleteCtnMeisaiResult = await delJuchuContainerMeisai(
-            data.juchuHeadId,
-            data.juchuKizaiHeadId,
-            deleteKizaiiIds,
-            connection
-          );
-        }
-        // 追加
-        if (addJuchuContainerMeisaiData.length > 0) {
-          const addCtnMeisaiResult = await addJuchuContainerMeisai(addJuchuContainerMeisaiData, userNam, connection);
-        }
-        // 更新
-        if (updateJuchuContainerMeisaiData.length > 0) {
-          const updateContainerMeisaiResult = await updJuchuContainerMeisai(
-            updateJuchuContainerMeisaiData,
-            userNam,
-            connection
-          );
-        }
+      // 削除
+      if (deleteJuchuContainerMeisaiData.length > 0) {
+        const deleteKizaiiIds = deleteJuchuContainerMeisaiData.map((data) => data.kizaiId);
+        const deleteCtnMeisaiResult = await delJuchuContainerMeisai(
+          data.juchuHeadId,
+          data.juchuKizaiHeadId,
+          deleteKizaiiIds,
+          connection
+        );
+      }
+      // 追加
+      if (addJuchuContainerMeisaiData.length > 0) {
+        const addCtnMeisaiResult = await addJuchuContainerMeisai(addJuchuContainerMeisaiData, userNam, connection);
+      }
+      // 更新
+      if (updateJuchuContainerMeisaiData.length > 0) {
+        const updateContainerMeisaiResult = await updJuchuContainerMeisai(
+          updateJuchuContainerMeisaiData,
+          userNam,
+          connection
+        );
       }
 
       // 機材入出庫伝票、入出庫実績削除

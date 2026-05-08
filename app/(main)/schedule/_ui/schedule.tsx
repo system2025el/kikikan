@@ -230,7 +230,7 @@ export const Schedule = () => {
       </Paper>
       <TableContainer style={{ overflow: 'scroll', maxHeight: '80vh' }}>
         {isLoading && <LoadingOverlay />}
-        <Table padding="none" sx={{ border: '2px solid black' }}>
+        <Table padding="none" sx={{ border: '2px solid black' }} stickyHeader>
           <TableHead>
             <TableRow>
               {scheList &&
@@ -268,6 +268,17 @@ export const Schedule = () => {
                   </TableCell>
                 ))}
             </TableRow>
+          </TableHead>
+
+          {/** 日直入力ダイアログ */}
+          <TantoDialog
+            open={dialogOpen}
+            datas={selectedDatas}
+            setOpen={setDialogOpen}
+            refetch={() => onSubmit(getValues())}
+          />
+
+          <TableBody>
             <TableRow>
               {scheList &&
                 scheList.length > 0 &&
@@ -368,17 +379,6 @@ export const Schedule = () => {
                   </TableCell>
                 ))}
             </TableRow>
-          </TableHead>
-
-          {/** 日直入力ダイアログ */}
-          <TantoDialog
-            open={dialogOpen}
-            datas={selectedDatas}
-            setOpen={setDialogOpen}
-            refetch={() => onSubmit(getValues())}
-          />
-
-          <TableBody>
             <TableRow>
               {scheList &&
                 scheList.length > 0 &&

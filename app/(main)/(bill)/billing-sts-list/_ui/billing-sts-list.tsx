@@ -92,6 +92,7 @@ export const BillingStsList = () => {
     try {
       const theSts = await getFilteredBillingSituations(data);
       setBillSts(theSts);
+      setPage(1);
     } catch (e) {
       setIsError(e instanceof Error ? e : new Error(String(e)));
     }
@@ -104,6 +105,7 @@ export const BillingStsList = () => {
     try {
       const theSts = await getFilteredBillingSituations(getValues());
       setBillSts(theSts);
+      setPage(1);
     } catch (e) {
       setIsError(e instanceof Error ? e : new Error(String(e)));
     }
