@@ -1,5 +1,7 @@
 'use server';
 
+import { PoolClient } from 'pg';
+
 import { SCHEMA, supabase } from '../supabase';
 
 /**
@@ -49,5 +51,46 @@ export const selectIdoDenOne = async (
       .single();
   } catch (e) {
     throw new Error('[selectIdoDenOne] DBエラー:', { cause: e });
+  }
+};
+
+/**
+ * 移動伝票確認
+ * @param sagyoKbnId
+ * @param sagyoSijiId
+ * @param sagyoDenDat
+ * @param sagyoId
+ * @param kizaiId
+ * @param connection
+ * @returns
+ */
+export const selectConfirmIdoDen = async (
+  sagyoKbnId: number,
+  sagyoSijiId: number,
+  sagyoDenDat: string,
+  sagyoId: number,
+  kizaiId: number,
+  connection: PoolClient
+) => {
+  const query = `
+    SELECT
+      ido_den_id
+    FROM
+      ${SCHEMA}.v_ido_den3_lst
+    WHERE
+      sagyo_kbn_id = $1 
+      AND sagyo_siji_id = $2
+      AND nyushuko_dat = $3 
+      AND nyushuko_basho_id = $4 
+      AND kizai_id = $5
+  `;
+
+  const values = [sagyoKbnId, sagyoSijiId, sagyoDenDat, sagyoId, kizaiId];
+
+  try {
+    const result = await connection.query(query, values);
+    return result.rows;
+  } catch (e) {
+    throw new Error('[selectConfirmIdoDen] DBエラー:', { cause: e });
   }
 };

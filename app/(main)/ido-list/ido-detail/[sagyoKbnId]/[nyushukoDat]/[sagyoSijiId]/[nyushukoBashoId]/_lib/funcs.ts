@@ -9,7 +9,7 @@ import { selectBundledEqptIds } from '@/app/_lib/db/tables/m-kizai-set';
 import { deleteIdoDen, insertIdoDen, selectIdoDenMaxId, updateIdoDen } from '@/app/_lib/db/tables/t-ido-den';
 import { deleteIdoFix, insertIdoFix, selectIdoFix, selectIdoFixMaxId } from '@/app/_lib/db/tables/t-ido-fix';
 import { selectActiveBumons } from '@/app/_lib/db/tables/v_bumon_lst';
-import { selectIdoDen } from '@/app/_lib/db/tables/v-ido-den3-lst';
+import { selectConfirmIdoDen, selectIdoDen } from '@/app/_lib/db/tables/v-ido-den3-lst';
 import { selectActiveEqpts, selectChosenIdoEqptsDetails } from '@/app/_lib/db/tables/v-kizai-list';
 import { IdoDen } from '@/app/_lib/db/types/t-ido-den-type';
 import { IdoFix } from '@/app/_lib/db/types/t-ido-fix-type';
@@ -82,6 +82,40 @@ export const getIdoDen = async (sagyoKbnId: number, sagyoSijiId: number, sagyoDe
     }));
 
     return idoDetailTableList;
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
+    throw e;
+  }
+};
+
+/**
+ * 移動伝票確認
+ * @param sagyoKbnId
+ * @param sagyoSijiId
+ * @param sagyoDenDat
+ * @param sagyoId
+ * @param kizaiId
+ * @param connection
+ * @returns
+ */
+export const getConfirmIdoDen = async (
+  sagyoKbnId: number,
+  sagyoSijiId: number,
+  sagyoDenDat: string,
+  sagyoId: number,
+  kizaiId: number,
+  connection: PoolClient
+) => {
+  try {
+    const data = await selectConfirmIdoDen(sagyoKbnId, sagyoSijiId, sagyoDenDat, sagyoId, kizaiId, connection);
+    return data;
   } catch (e) {
     if (e instanceof Error) {
       console.error(`[ERROR] ${e.message}`);
@@ -348,9 +382,27 @@ export const saveIdoDen = async (idoDenData: IdoDetailTableValues[], userNam: st
       !data.saveFlag && !data.delFlag ? { ...data, idoDenId: ++newIdoDenId } : data
     );
 
-    const addIdoDenData = saveIdoDenData.filter((d) => !d.saveFlag && !d.delFlag);
-    const updIdoDenData = saveIdoDenData.filter((d) => d.saveFlag && !d.delFlag);
+    const upsIdoDenData = saveIdoDenData.filter((d) => !d.delFlag);
     const delIdoDenData = saveIdoDenData.filter((d) => d.saveFlag && d.delFlag);
+
+    const addIdoDenData: IdoDetailTableValues[] = [];
+    const updIdoDenData: IdoDetailTableValues[] = [];
+
+    for (const data of upsIdoDenData) {
+      const checkData = await getConfirmIdoDen(
+        data.sagyoKbnId,
+        data.sagyosijiId,
+        data.nyushukoDat,
+        data.nyushukoBashoId,
+        data.kizaiId,
+        connection
+      );
+      if (checkData.length > 0) {
+        updIdoDenData.push(data);
+      } else {
+        addIdoDenData.push(data);
+      }
+    }
 
     // 削除
     if (delIdoDenData.length > 0) {
