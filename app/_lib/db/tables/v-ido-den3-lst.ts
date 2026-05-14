@@ -76,12 +76,12 @@ export const selectConfirmIdoDen = async (
     SELECT
       ido_den_id
     FROM
-      ${SCHEMA}.v_ido_den3_lst
+      ${SCHEMA}.t_ido_den
     WHERE
       sagyo_kbn_id = $1 
       AND sagyo_siji_id = $2
-      AND nyushuko_dat = $3 
-      AND nyushuko_basho_id = $4 
+      AND sagyo_den_dat = $3 
+      AND sagyo_id = $4 
       AND kizai_id = $5
   `;
 
