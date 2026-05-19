@@ -96,6 +96,7 @@ export const MeisaiLines = ({
             };
             newTargetMeisai.push({
               ...currentItem,
+              id: null,
               qty: targetQty + (currentItem.qty ?? 0),
               honbanbiQty: currentItem.honbanbiQty,
             });
@@ -119,12 +120,13 @@ export const MeisaiLines = ({
             };
             newTargetMeisai.push({
               ...newTargetMeisai[targetIndex],
+              id: null,
               honbanbiQty: currentItem.honbanbiQty,
               tankaAmt: targetTankaAmt - (currentItem.tankaAmt ?? 0),
             });
           } else if (targetQty !== -1 * (currentItem.qty ?? 0)) {
             // 数量不一致なら項目追加
-            newTargetMeisai.push(currentItem);
+            newTargetMeisai.push({ ...currentItem, id: null });
           }
         }
 
@@ -138,27 +140,33 @@ export const MeisaiLines = ({
               ...newTargetMeisai[targetIndex],
               qty: targetQty + (currentItem.qty ?? 0),
             };
-          } else if (targetHonbanbiQty !== (currentItem.honbanbiQty ?? 0)) {
-            // 本番日数不一致なら項目追加
-            newTargetMeisai.push(currentItem);
+          } else if (targetQty === (currentItem.qty ?? 0)) {
+            // 数量一致なら本番日数のみ増やす
+            newTargetMeisai[targetIndex] = {
+              ...newTargetMeisai[targetIndex],
+              honbanbiQty: targetHonbanbiQty + (currentItem.honbanbiQty ?? 0),
+            };
+          } else {
+            // 数量、本番日数不一致なら項目追加
+            newTargetMeisai.push({ ...currentItem, id: null });
           }
           // 単価不一致
         } else {
-          if (targetHonbanbiQty === (currentItem.honbanbiQty ?? 0)) {
-            // 本番日数一致なら単価のみ増やす
+          if (targetQty === (currentItem.qty ?? 0) && targetHonbanbiQty === (currentItem.honbanbiQty ?? 0)) {
+            // 数量、本番日数一致なら単価のみ増やす
             newTargetMeisai[targetIndex] = {
               ...newTargetMeisai[targetIndex],
               tankaAmt: targetTankaAmt + (currentItem.tankaAmt ?? 0),
             };
-          } else if (targetHonbanbiQty !== (currentItem.honbanbiQty ?? 0)) {
-            // 本番日数不一致なら項目追加
-            newTargetMeisai.push(currentItem);
+          } else {
+            // 数量または本番日数不一致なら項目追加
+            newTargetMeisai.push({ ...currentItem, id: null });
           }
         }
       }
     } else {
       // 一致する名称がない場合は、新しく追加
-      newTargetMeisai.push(currentItem);
+      newTargetMeisai.push({ ...currentItem, id: null });
     }
 
     setValue(targetPath, newTargetMeisai, {
