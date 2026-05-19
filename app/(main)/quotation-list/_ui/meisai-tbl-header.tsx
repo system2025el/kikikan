@@ -15,6 +15,7 @@ import {
   useWatch,
 } from 'react-hook-form-mui';
 
+import { FAKE_NEW_ID } from '../../(masters)/_lib/constants';
 import { QuotHeadValues } from '../_lib/types';
 import { ReadOnlyYenNumberElement } from './yen';
 
@@ -127,6 +128,7 @@ export const MeisaiTblHeader = ({
               };
               newMeisai.push({
                 ...m,
+                id: null,
                 qty: targetQty + (m.qty ?? 0),
                 honbanbiQty: m.honbanbiQty,
               });
@@ -147,12 +149,13 @@ export const MeisaiTblHeader = ({
               };
               newMeisai.push({
                 ...newMeisai[targetIndex],
+                id: null,
                 honbanbiQty: m.honbanbiQty,
                 tankaAmt: targetTankaAmt - (m.tankaAmt ?? 0),
               });
             } else if (targetQty !== -1 * (m.qty ?? 0)) {
               // 数量不一致なら項目追加
-              newMeisai.push(m);
+              newMeisai.push({ ...m, id: null });
             }
           }
 
@@ -166,27 +169,33 @@ export const MeisaiTblHeader = ({
                 ...newMeisai[targetIndex],
                 qty: targetQty + (m.qty ?? 0),
               };
-            } else if (targetHonbanbiQty !== (m.honbanbiQty ?? 0)) {
-              // 本番日数不一致なら項目追加
-              newMeisai.push(m);
+            } else if (targetQty === (m.qty ?? 0)) {
+              // 数量一致なら本番日数のみ増やす
+              newMeisai[targetIndex] = {
+                ...newMeisai[targetIndex],
+                honbanbiQty: targetHonbanbiQty + (m.honbanbiQty ?? 0),
+              };
+            } else {
+              // 数量、本番日数不一致なら項目追加
+              newMeisai.push({ ...m, id: null });
             }
             // 単価不一致
           } else {
-            if (targetHonbanbiQty === (m.honbanbiQty ?? 0)) {
-              // 本番日数一致なら単価のみ増やす
+            if (targetQty === (m.qty ?? 0) && targetHonbanbiQty === (m.honbanbiQty ?? 0)) {
+              // 数量、本番日数一致なら単価のみ増やす
               newMeisai[targetIndex] = {
                 ...newMeisai[targetIndex],
                 tankaAmt: targetTankaAmt + (m.tankaAmt ?? 0),
               };
-            } else if (targetHonbanbiQty !== (m.honbanbiQty ?? 0)) {
-              // 本番日数不一致なら項目追加
-              newMeisai.push(m);
+            } else {
+              // 数量または本番日数不一致なら項目追加
+              newMeisai.push({ ...m, id: null });
             }
           }
         }
       } else {
         // 一致する名称がない場合は、新しく追加
-        newMeisai.push(m);
+        newMeisai.push({ ...m, id: null });
       }
     });
 
