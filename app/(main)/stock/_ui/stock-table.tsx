@@ -117,7 +117,7 @@ export const EqStockTable = (props: EqStockTableProps) => {
         <TableBody>
           {eqStockList.length > 0 &&
             eqStockList.map((row, rowIndex) => (
-              <TableRow key={rowIndex}>
+              <TableRow key={rowIndex} hover>
                 {row.map((cell, colIndex) => (
                   <TableCell
                     key={colIndex}

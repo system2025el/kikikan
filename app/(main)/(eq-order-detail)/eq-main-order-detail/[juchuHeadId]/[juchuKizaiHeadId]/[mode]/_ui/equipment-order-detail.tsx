@@ -2624,6 +2624,7 @@ const EquipmentOrderDetail = (props: {
                       slotProps={{
                         input: { readOnly: shukoFixFlag },
                       }}
+                      sx={{ width: 400 }}
                     ></TextFieldElement>
                   </Grid2>
                   <Grid2 container alignItems="baseline" spacing={2} py={1} px={2}>
