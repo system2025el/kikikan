@@ -131,7 +131,14 @@ export const getPdfData = async (
         // 既にあるものは合計
         if (existing) {
           existing.plan_qty += item.plan_qty;
-          existing.mem2 += existing.mem2 && item.mem2 ? `,${item.mem2}` : item.mem2 || '';
+          existing.mem2 =
+            existing.mem2 && item.mem2
+              ? `${existing.mem2},${item.mem2}`
+              : !existing.mem2 && item.mem2
+                ? item.mem2
+                : existing.mem2 && !item.mem2
+                  ? existing.mem2
+                  : '';
           // 最初のものはMapに追加して位置を記録
         } else {
           summaryMap.set(item.kizai_id, { ...item });
