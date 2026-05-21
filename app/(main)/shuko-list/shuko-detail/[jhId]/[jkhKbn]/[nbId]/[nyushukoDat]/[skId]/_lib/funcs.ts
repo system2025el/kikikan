@@ -221,6 +221,11 @@ export const updShukoDetail = async (
       ];
 
       for (const juchuKizaiHeadId of juchuKizaiHeadIds) {
+        // 対象のコンテナデータ
+        const targetCtnData = ctnData.filter((d) => d.juchuKizaiHeadId === juchuKizaiHeadId);
+        if (targetCtnData.length === 0) {
+          continue;
+        }
         // 出庫日取得
         const { data: shukoDat, error: shukoDataError } = await selectJuchuKizaiNyushukoConfirm({
           juchu_head_id: shukoDetailData.juchuHeadId,
@@ -245,7 +250,7 @@ export const updShukoDetail = async (
           const nyushukoDat = nyukoDat.find((d) => d.nyushuko_basho_id === shukoDetailData.nyushukoBashoId);
           if (nyushukoDat) {
             const upsertNyukoDenResult = await upsNyukoDen(
-              ctnData,
+              targetCtnData,
               null,
               nyushukoDat.nyushuko_dat,
               nyushukoDat.nyushuko_basho_id,
@@ -269,7 +274,7 @@ export const updShukoDetail = async (
           if (otherShukoDataError) throw otherShukoDataError;
 
           const upsertNyukoDenResult = await upsNyukoDen(
-            ctnData,
+            targetCtnData,
             otherShukoData,
             nyukoDat[0].nyushuko_dat,
             nyukoDat[0].nyushuko_basho_id,
@@ -278,7 +283,7 @@ export const updShukoDetail = async (
           );
         } else if (nyukoDat.length === 1 && shukoDat.length === 1) {
           const upsertNyukoDenResult = await upsNyukoDen(
-            ctnData,
+            targetCtnData,
             null,
             nyukoDat[0].nyushuko_dat,
             nyukoDat[0].nyushuko_basho_id,
