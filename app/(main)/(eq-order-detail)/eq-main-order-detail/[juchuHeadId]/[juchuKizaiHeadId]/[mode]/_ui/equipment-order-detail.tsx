@@ -603,19 +603,22 @@ const EquipmentOrderDetail = (props: {
 
       // 更新
     } else {
-      // const kicsMeisai = juchuKizaiMeisaiList.filter((d) => d.shozokuId === 1 && !d.delFlag);
-      // const yardMeisai = juchuKizaiMeisaiList.filter((d) => d.shozokuId === 2 && !d.delFlag);
+      const kicsMeisai = juchuKizaiMeisaiList.filter((d) => d.shozokuId === 1 && !d.delFlag);
+      const yardMeisai = juchuKizaiMeisaiList.filter((d) => d.shozokuId === 2 && !d.delFlag);
       const kicsContainer = juchuContainerMeisaiList.filter((d) => d.planKicsKizaiQty > 0 && !d.delFlag);
       const yardContainer = juchuContainerMeisaiList.filter((d) => d.planYardKizaiQty > 0 && !d.delFlag);
 
-      if ((kicsContainer.length > 0 && !data.kicsShukoDat) || (yardContainer.length > 0 && !data.yardShukoDat)) {
-        if (kicsContainer.length > 0 && !data.kicsShukoDat) {
+      if (
+        ((kicsMeisai.length > 0 || kicsContainer.length > 0) && !data.kicsShukoDat) ||
+        ((yardMeisai.length > 0 || yardContainer.length > 0) && !data.yardShukoDat)
+      ) {
+        if ((kicsMeisai.length > 0 || kicsContainer.length > 0) && !data.kicsShukoDat) {
           setError('kicsShukoDat', {
             type: 'manual',
             message: '',
           });
         }
-        if (yardContainer.length > 0 && !data.yardShukoDat) {
+        if ((yardMeisai.length > 0 || yardContainer.length > 0) && !data.yardShukoDat) {
           setError('yardShukoDat', {
             type: 'manual',
             message: '',
