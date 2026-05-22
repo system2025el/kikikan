@@ -176,7 +176,7 @@ export const updNyukoDetail = async (
 
     switch (nyukoDetailData.juchuKizaiHeadKbn) {
       case 1: // メイン
-        await updMainNyukoDetail(nyukoDetailData, nyukoDetailTableData, userNam, connection);
+        await updMainNyukoDetail(nyukoDetailData, userNam, connection);
         break;
       case 2: // 返却
         await updReturnNyukoDetail(nyukoDetailData, nyukoDetailTableData, userNam, connection);
@@ -220,13 +220,12 @@ export const updNyukoDetail = async (
  */
 export const updMainNyukoDetail = async (
   nyukoDetailData: NyukoDetailValues,
-  nyukoDetailTableData: NyukoDetailTableValues[],
   userNam: string,
   connection: PoolClient
 ) => {
   try {
     // 入庫確定追加
-    await addNyukoFix(nyukoDetailData, nyukoDetailTableData, userNam, connection);
+    await addNyukoFix(nyukoDetailData, userNam, connection);
   } catch (e) {
     throw e;
   }
@@ -323,7 +322,7 @@ export const updReturnNyukoDetail = async (
     }
 
     // 入庫確定追加
-    await addNyukoFix(nyukoDetailData, nyukoDetailTableData, userNam, connection);
+    await addNyukoFix(nyukoDetailData, userNam, connection);
   } catch (e) {
     throw e;
   }
@@ -380,7 +379,7 @@ export const updKeepNyukoDetail = async (
     }
 
     // 入庫確定追加
-    await addNyukoFix(nyukoDetailData, nyukoDetailTableData, userNam, connection);
+    await addNyukoFix(nyukoDetailData, userNam, connection);
   } catch (e) {
     throw e;
   }
@@ -759,15 +758,8 @@ export const updOyaCtnNyukoDen = async (
  * @param userNam ユーザー名
  * @param connection
  */
-export const addNyukoFix = async (
-  nyukoDetailData: NyukoDetailValues,
-  nyukoDetailTableData: NyukoDetailTableValues[],
-  userNam: string,
-  connection: PoolClient
-) => {
-  const juchuKizaiHeadIds = [
-    ...new Set(nyukoDetailTableData.map((d) => d.juchuKizaiHeadId).filter((id) => id !== null)),
-  ];
+export const addNyukoFix = async (nyukoDetailData: NyukoDetailValues, userNam: string, connection: PoolClient) => {
+  const juchuKizaiHeadIds = [...new Set(nyukoDetailData.juchuKizaiHeadIds.filter((id) => id !== null))];
 
   const newFixData: NyushukoFix[] = juchuKizaiHeadIds.map((id) => ({
     juchu_head_id: nyukoDetailData.juchuHeadId,

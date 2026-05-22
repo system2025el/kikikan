@@ -113,7 +113,9 @@ export const NyukoDetail = (props: {
               {fixFlag && <Typography>到着済</Typography>}
               <Button
                 onClick={() => setArrivalOpen(true)}
-                disabled={fixFlag || user?.permission.nyushuko === permission.nyushuko_ref}
+                disabled={
+                  fixFlag || user?.permission.nyushuko === permission.nyushuko_ref || nyukoDetailTableData.length === 0
+                }
                 sx={{ backgroundColor: 'yellow', color: 'black' }}
               >
                 到着

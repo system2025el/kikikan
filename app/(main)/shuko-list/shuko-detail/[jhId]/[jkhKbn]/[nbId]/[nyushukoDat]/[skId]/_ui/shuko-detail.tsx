@@ -221,7 +221,9 @@ export const ShukoDetail = (props: {
               {fixFlag && <Typography>出発済</Typography>}
               <Button
                 onClick={handleDeparture}
-                disabled={fixFlag || user?.permission.nyushuko === permission.nyushuko_ref}
+                disabled={
+                  fixFlag || user?.permission.nyushuko === permission.nyushuko_ref || shukoDetailList.length === 0
+                }
                 sx={{ display: shukoDetailData.sagyoKbnId === 20 ? 'block' : 'none' }}
               >
                 出発

@@ -1387,7 +1387,12 @@ export const EquipmentKeepOrderDetail = (props: {
                   <Grid2 container alignItems="center" spacing={2} p={2}>
                     <Grid2 container alignItems="center">
                       <Typography>受注明細名</Typography>
-                      <TextFieldElement name="headNam" control={control} disabled={!edit}></TextFieldElement>
+                      <TextFieldElement
+                        name="headNam"
+                        control={control}
+                        disabled={!edit}
+                        sx={{ width: 400 }}
+                      ></TextFieldElement>
                     </Grid2>
                   </Grid2>
                   <Grid2 container p={2} spacing={2}>
