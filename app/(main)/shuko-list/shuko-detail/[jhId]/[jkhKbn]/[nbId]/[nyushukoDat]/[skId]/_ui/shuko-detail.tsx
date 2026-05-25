@@ -306,7 +306,11 @@ export const ShukoDetail = (props: {
                 </Typography>
                 <Button
                   onClick={handleAdjust}
-                  disabled={!shukoDetailList.find((data) => data.diff !== 0) || fixFlag}
+                  disabled={
+                    !shukoDetailList.find((data) => data.diff !== 0) ||
+                    fixFlag ||
+                    user?.permission.nyushuko === permission.nyushuko_ref
+                  }
                   sx={{ ml: 2 }}
                 >
                   一括補正
