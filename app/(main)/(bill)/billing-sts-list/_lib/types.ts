@@ -34,3 +34,15 @@ export type BillingStsSearchValues = {
   kokyakuTantoNam: string | null;
   sts: string[];
 };
+
+export type UnbilledCustsSearchValues = {
+  kokyaku: string | null;
+  selectedDate?: {
+    value: string;
+    range?: {
+      from: Date | null;
+      to: Date | null;
+    };
+  };
+  radio: 'shuko' | 'nyuko';
+};

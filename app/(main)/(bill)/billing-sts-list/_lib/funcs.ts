@@ -7,7 +7,7 @@ import { selectFilteredBillingSituations, selectUnbilledCusts } from '@/app/_lib
 import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 
-import { BillingStsSearchValues, BillingStsTableValues } from './types';
+import { BillingStsSearchValues, BillingStsTableValues, UnbilledCustsSearchValues } from './types';
 
 /**
  * 受注請求状況一覧テーブルに表示する配列を取得・成形
@@ -108,9 +108,15 @@ export const changeSeikyuDat = async (
   }
 };
 
-export const getUnbilledCusts = async (query: string) => {
+export const getUnbilledCusts = async (
+  queries: UnbilledCustsSearchValues = {
+    kokyaku: '',
+    radio: 'shuko',
+    selectedDate: { value: '4', range: { from: null, to: null } },
+  }
+) => {
   try {
-    const { data, error } = await selectUnbilledCusts(query);
+    const { data, error } = await selectUnbilledCusts(queries);
     if (error) {
       throw new Error('[selectUnbilledCusts] DBエラー:', { cause: error });
     }

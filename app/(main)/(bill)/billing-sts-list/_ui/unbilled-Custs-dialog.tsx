@@ -21,18 +21,29 @@ import {
   Typography,
 } from '@mui/material';
 import { ChangeEvent, useEffect, useState } from 'react';
-import { TextFieldElement, useForm } from 'react-hook-form-mui';
+import { Controller, RadioButtonGroup, SelectElement, TextFieldElement, useForm } from 'react-hook-form-mui';
 
+import { FormDateX } from '@/app/(main)/_ui/date';
 import { Loading } from '@/app/(main)/_ui/loading';
 
+import { radioData } from '../_lib/datas';
 import { getUnbilledCusts } from '../_lib/funcs';
+import { UnbilledCustsSearchValues } from '../_lib/types';
 
 export const UnbilledCustsDialog = (props: {
   unbilledCusts: string[];
+  radio: 'shuko' | 'nyuko';
+  selectedDate: {
+    value: string;
+    range?: {
+      from: Date | null;
+      to: Date | null;
+    };
+  };
   handleConfirmed: (selectedCusts: string[]) => void;
   onClose: () => void;
 }) => {
-  const { unbilledCusts, handleConfirmed, onClose } = props;
+  const { unbilledCusts, radio, selectedDate, handleConfirmed, onClose } = props;
 
   const [isLoading, setIsLoading] = useState(true);
 
@@ -45,17 +56,17 @@ export const UnbilledCustsDialog = (props: {
   const [snackBarMessage, setSnackBarMessage] = useState('');
 
   /* useForm ------------------- */
-  const { control, handleSubmit } = useForm({
+  const { control, getValues, handleSubmit } = useForm<UnbilledCustsSearchValues>({
     mode: 'onSubmit',
-    defaultValues: { query: '' },
+    defaultValues: { kokyaku: '', radio: radio, selectedDate: selectedDate },
   });
 
   /* 検索ボタン押下 */
-  const onSubmit = async (data: { query: string }) => {
+  const onSubmit = async (data: UnbilledCustsSearchValues) => {
     setIsLoading(true);
 
     try {
-      const newList = await getUnbilledCusts(data.query!);
+      const newList = await getUnbilledCusts(data);
       newList.sort((a, b) => {
         const aSelected = selectCusts.includes(a);
         const bselected = selectCusts.includes(b);
@@ -88,7 +99,7 @@ export const UnbilledCustsDialog = (props: {
     const getCusts = async () => {
       setIsLoading(true);
       try {
-        const data = await getUnbilledCusts('');
+        const data = await getUnbilledCusts(getValues());
         data.sort((a, b) => {
           const aSelected = selectCusts.includes(a);
           const bselected = selectCusts.includes(b);
@@ -122,7 +133,7 @@ export const UnbilledCustsDialog = (props: {
               <Stack justifyContent={'space-between'} alignItems={'center'}>
                 <Stack alignItems={'center'}>
                   <Typography>キーワード</Typography>
-                  <TextFieldElement name="query" control={control} />
+                  <TextFieldElement name="kokyaku" control={control} />
                 </Stack>
                 <Button type="submit" loading={isLoading}>
                   <SearchIcon />

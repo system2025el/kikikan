@@ -4,7 +4,7 @@ import dayjs from 'dayjs';
 
 import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { escapeLikeString } from '@/app/(main)/_lib/escape-string';
-import { BillingStsSearchValues } from '@/app/(main)/(bill)/billing-sts-list/_lib/types';
+import { BillingStsSearchValues, UnbilledCustsSearchValues } from '@/app/(main)/(bill)/billing-sts-list/_lib/types';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 
 import pool from '../postgres';
@@ -524,7 +524,9 @@ export const selectJuchuKizaiMeisaiDetailsForBill = async (juchuId: number, kiza
   }
 };
 
-export const selectUnbilledCusts = async (query: string) => {
+export const selectUnbilledCusts = async (queries: UnbilledCustsSearchValues) => {
+  const { kokyaku, radio, selectedDate } = queries;
+
   const builder = supabase
     .schema(SCHEMA)
     .from('v_seikyu_date_lst')
@@ -532,9 +534,96 @@ export const selectUnbilledCusts = async (query: string) => {
     .eq('shuko_fix_flg', 1)
     .in('seikyu_jokyo_sts_id', [0, 1]);
 
-  if (query && query.trim() !== '') {
-    const escapedQuery = escapeLikeString(query);
-    builder.ilike('kokyaku_nam', `%${escapedQuery}%`);
+  // 検索条件日付
+  let dateColumn = '';
+  switch (radio) {
+    case 'shuko': // '出庫日が'
+      dateColumn = 'shuko_dat';
+      break;
+    case 'nyuko': // '入庫日が'
+      dateColumn = 'nyuko_dat';
+      break;
+  }
+
+  if (dateColumn) {
+    switch (selectedDate?.value) {
+      case '1': {
+        // '先月全て'
+        const startOfLastMonth = dayjs().tz('Asia/Tokyo').subtract(1, 'month').startOf('month').format('YYYY-MM-DD');
+        const startOfThisMonth = dayjs().tz('Asia/Tokyo').startOf('month').format('YYYY-MM-DD');
+        builder.or(`and(${dateColumn}.gte.${startOfLastMonth},${dateColumn}.lt.${startOfThisMonth})`);
+        break;
+      }
+      case '2': {
+        // '今月全て'
+        const startOfThisMonth = dayjs().tz('Asia/Tokyo').startOf('month').format('YYYY-MM-DD');
+        const startOfNextMonth = dayjs().tz('Asia/Tokyo').add(1, 'month').startOf('month').format('YYYY-MM-DD');
+        builder.or(`and(${dateColumn}.gt.${startOfThisMonth},${dateColumn}.lt.${startOfNextMonth})`);
+        break;
+      }
+      case '3': {
+        // '今日'
+        const startOfToday = dayjs().tz('Asia/Tokyo').startOf('day').format('YYYY-MM-DD');
+        const startOfTomorrow = dayjs().tz('Asia/Tokyo').add(1, 'day').startOf('day').format('YYYY-MM-DD');
+        builder.or(`and(${dateColumn}.gte.${startOfToday},${dateColumn}.lt.${startOfTomorrow})`);
+        break;
+      }
+      case '4': {
+        // '今日以降'
+        const startOfToday = dayjs().tz('Asia/Tokyo').startOf('day').format('YYYY-MM-DD');
+        builder.or(`${dateColumn}.gte.${startOfToday},${dateColumn}.gte.${startOfToday}`);
+        break;
+      }
+      case '5': {
+        // '明日'
+        const startOfTomorrow = dayjs().tz('Asia/Tokyo').add(1, 'day').startOf('day').format('YYYY-MM-DD');
+        const startOfDayAfterTomorrow = dayjs().tz('Asia/Tokyo').add(2, 'day').startOf('day').format('YYYY-MM-DD');
+        builder.or(`and(${dateColumn}.gte.${startOfTomorrow},${dateColumn}.lt.${startOfDayAfterTomorrow})`);
+        break;
+      }
+      case '6': {
+        // '明日以降'
+        const tomorrowAndAfter = dayjs().tz('Asia/Tokyo').add(1, 'day').startOf('day').format('YYYY-MM-DD');
+        builder.or(`${dateColumn}.gte.${tomorrowAndAfter},${dateColumn}.gte.${tomorrowAndAfter}`);
+
+        break;
+      }
+      case '7': {
+        // '指定期間'
+        if (selectedDate.range?.from && selectedDate.range.to) {
+          // 指定日がどちらも入ってる場合
+          const startOfDay = dayjs(selectedDate.range.from).tz('Asia/Tokyo').startOf('day').format('YYYY-MM-DD');
+          const startOfnextDay = dayjs(selectedDate.range.to)
+            .tz('Asia/Tokyo')
+            .add(1, 'day')
+            .startOf('day')
+            .format('YYYY-MM-DD');
+          builder.or(`and(${dateColumn}.gte.${startOfDay},${dateColumn}.lt.${startOfnextDay})`);
+        } else if (selectedDate.range?.from) {
+          // fromだけの場合
+          const startOfDay = dayjs(selectedDate.range.from).tz('Asia/Tokyo').startOf('day').format('YYYY-MM-DD');
+
+          builder.or(`${dateColumn}.gte.${startOfDay},${dateColumn}.gte.${startOfDay}`);
+        } else if (selectedDate.range?.to) {
+          // toだけの場合
+          const nextDay = dayjs(selectedDate.range.to)
+            .tz('Asia/Tokyo')
+            .add(1, 'day')
+            .startOf('day')
+            .format('YYYY-MM-DD');
+
+          builder.or(`${dateColumn}.lt.${nextDay},${dateColumn}.lt.${nextDay}`);
+        }
+        break;
+      }
+      default:
+        break;
+    }
+
+    if (kokyaku && kokyaku.trim() !== '') {
+      const escapedQuery = escapeLikeString(kokyaku);
+      builder.ilike('kokyaku_nam', `%${escapedQuery}%`);
+    }
   }
   try {
     return await builder;
