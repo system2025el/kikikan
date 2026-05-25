@@ -210,7 +210,6 @@ export const MeisaiTblHeader = ({
                 value={field.value}
                 onChange={field.onChange}
                 sx={{ mr: 1 }}
-                readonly
                 error={!!error}
                 helperText={error?.message}
                 disabled={!editable}

@@ -277,7 +277,7 @@ export const updateBill = async (data: BillHeadValues, user: string): Promise<nu
           connection
         );
       }
-      if (seikyuDatList && seikyuDatList.length !== 0) {
+      if (seikyuDatList && seikyuDatList.length !== 0 && billHead.seikyu_sts === 9) {
         await delAndInsertSeikyuDat(seikyuDatList, connection);
       }
 
