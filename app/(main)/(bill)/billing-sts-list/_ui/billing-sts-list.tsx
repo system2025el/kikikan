@@ -204,6 +204,7 @@ export const BillingStsList = () => {
                 options={[
                   { id: 'shuko', label: '出庫日が' },
                   { id: 'nyuko', label: '入庫日が' },
+                  { id: 'tour', label: 'ツアー日が' },
                 ]}
                 sx={{ bgcolor: 'white', minWidth: 150 }}
               />

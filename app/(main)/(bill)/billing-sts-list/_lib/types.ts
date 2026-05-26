@@ -30,7 +30,7 @@ export type BillingStsSearchValues = {
       to: Date | null;
     };
   };
-  radio: 'shuko' | 'nyuko';
+  radio: 'shuko' | 'nyuko' | 'tour';
   kokyakuTantoNam: string | null;
   sts: string[];
 };
@@ -44,5 +44,5 @@ export type UnbilledCustsSearchValues = {
       to: Date | null;
     };
   };
-  radio: 'shuko' | 'nyuko';
+  radio: 'shuko' | 'nyuko' | 'tour';
 };

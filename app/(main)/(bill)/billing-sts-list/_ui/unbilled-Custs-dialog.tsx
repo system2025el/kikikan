@@ -32,7 +32,7 @@ import { UnbilledCustsSearchValues } from '../_lib/types';
 
 export const UnbilledCustsDialog = (props: {
   unbilledCusts: string[];
-  radio: 'shuko' | 'nyuko';
+  radio: 'shuko' | 'nyuko' | 'tour';
   selectedDate: {
     value: string;
     range?: {
