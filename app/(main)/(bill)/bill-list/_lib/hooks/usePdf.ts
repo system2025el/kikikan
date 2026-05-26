@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { BillHeadValues } from '../types';
 
 // PDFデータ生成フック
-export const usePdf = (): [(param: BillHeadValues) => Promise<Blob>] => {
+export const usePdf = (): [(param: BillHeadValues, keisho: string) => Promise<Blob>] => {
   // フォント
   const [font, setFont] = useState<ArrayBuffer>(new ArrayBuffer(0));
   // イメージ
@@ -35,7 +35,7 @@ export const usePdf = (): [(param: BillHeadValues) => Promise<Blob>] => {
       .finally(() => {});
   }, []);
 
-  const printBill = async (param: BillHeadValues): Promise<Blob> => {
+  const printBill = async (param: BillHeadValues, keisho: string): Promise<Blob> => {
     // PDFドキュメント作成
     const pdfDoc = await PDFDocument.create();
 
@@ -213,7 +213,7 @@ export const usePdf = (): [(param: BillHeadValues) => Promise<Blob>] => {
     } else {
       // 会社名
       clientInfoY -= 25; // 会社名だけ少し間隔をあける
-      const companyName = `${param.aite.nam}御中`;
+      const companyName = param.aite.nam ? `${param.aite.nam}${keisho}` : '';
       drawTextWithAutoResize(companyName, clientInfoX, clientInfoY, formatSize, maxWidth);
 
       // 顧客番号
@@ -428,7 +428,7 @@ export const usePdf = (): [(param: BillHeadValues) => Promise<Blob>] => {
           '貸出期間',
           `${formatDate(meisai?.seikyuRange?.strt)}～${formatDate(meisai?.seikyuRange?.end)}`,
           '御担当',
-          `${meisai?.kokyakuTantoNam ?? ''} 様`,
+          meisai?.kokyakuTantoNam ? `${meisai?.kokyakuTantoNam} 様` : '',
         ],
       ];
 

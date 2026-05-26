@@ -189,13 +189,58 @@ export const BillingStsList = () => {
           <Grid2
             container
             direction={'column'}
-            spacing={0.5}
+            spacing={1}
             width={'100%'}
             px={2}
-            py={0.5}
+            py={1}
             component={'form'}
             onSubmit={handleSubmit(onSubmit)}
           >
+            <Grid2 container spacing={1}>
+              <SelectElement
+                name="radio"
+                label="検索条件"
+                control={control}
+                options={[
+                  { id: 'shuko', label: '出庫日が' },
+                  { id: 'nyuko', label: '入庫日が' },
+                  { id: 'tour', label: 'ツアー日が' },
+                ]}
+                sx={{ bgcolor: 'white', minWidth: 150 }}
+              />
+              <Grid2 container sx={{ display: 'flex', alignItems: 'center' }} ml={1}>
+                <RadioButtonGroup control={control} name="selectedDate.value" options={radioData} row />
+                {selectedDateValue === '7' && (
+                  <Stack direction="row" spacing={2} alignItems="center">
+                    <Controller
+                      control={control}
+                      name="selectedDate.range.from"
+                      render={({ field, fieldState: { error } }) => (
+                        <FormDateX
+                          value={field.value}
+                          onChange={field.onChange}
+                          error={!!error}
+                          helperText={error?.message}
+                        />
+                      )}
+                    />
+                    <span>～</span>
+                    <Controller
+                      control={control}
+                      name="selectedDate.range.to"
+                      render={({ field, fieldState: { error } }) => (
+                        <FormDateX
+                          value={field.value}
+                          onChange={field.onChange}
+                          error={!!error}
+                          helperText={error?.message}
+                        />
+                      )}
+                    />
+                  </Stack>
+                )}
+              </Grid2>
+            </Grid2>
             <Grid2 display={'flex'} alignItems={'center'}>
               <RadioButtonGroup
                 control={control}
@@ -263,7 +308,7 @@ export const BillingStsList = () => {
               </Typography>
               <TextFieldElement name="kokyakuTantoNam" control={control} type="text" sx={{ width: 200 }} />
             </Grid2>
-            <Grid2 container spacing={1}>
+            {/* <Grid2 container spacing={1}>
               <SelectElement
                 name="radio"
                 label="検索条件"
@@ -306,9 +351,9 @@ export const BillingStsList = () => {
                   </Stack>
                 )}
               </Grid2>
-            </Grid2>
-            <Grid2 size={12} display={'flex'} alignItems={'baseline'}>
-              <Grid2 container size={'grow'} alignItems={'baseline'}>
+            </Grid2> */}
+            <Grid2 size={12} display={'flex'}>
+              <Grid2 container size={'grow'} alignItems={'center'}>
                 <Typography noWrap mr={5}>
                   請求状況
                 </Typography>
@@ -352,6 +397,8 @@ export const BillingStsList = () => {
       <Dialog open={unbilledCustsDialog}>
         <UnbilledCustsDialog
           unbilledCusts={getValues('unbilledCusts')}
+          radio={getValues('radio')}
+          selectedDate={getValues('selectedDate')!}
           handleConfirmed={handleConfirmed}
           onClose={handleCloseUnbilledCustsDialog}
         />

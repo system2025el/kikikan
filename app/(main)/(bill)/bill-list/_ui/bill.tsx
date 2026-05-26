@@ -45,7 +45,7 @@ import { PermissionGuard } from '@/app/(main)/_ui/permission-guard';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 import { getUsersSelection } from '@/app/(main)/quotation-list/_lib/funcs';
 
-import { getBillingStsSelection } from '../_lib/funcs';
+import { getBillingStsSelection, getKeisho } from '../_lib/funcs';
 import { usePdf } from '../_lib/hooks/usePdf';
 import { BillHeadSchema, BillHeadValues } from '../_lib/types';
 import { addBill } from '../create/_lib/funcs';
@@ -297,8 +297,9 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
     await new Promise((resolve) => setTimeout(resolve, 100));
 
     try {
+      const keisho = await getKeisho(getValues('aite.id'));
       // PDFデータ生成
-      const blob = await printBill(pdfModel);
+      const blob = await printBill(pdfModel, keisho);
       // ダウンロードもしくはブラウザ表示するためのURL
       const url = URL.createObjectURL(blob);
 
@@ -445,11 +446,11 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
                           control={control}
                           sx={{
                             width: 400,
-                            pointerEvents: 'none', // クリック不可にする
-                            backgroundColor: '#f5f5f5', // グレー背景で無効っぽく
-                            color: '#888',
+                            // pointerEvents: 'none', // クリック不可にする
+                            // backgroundColor: '#f5f5f5', // グレー背景で無効っぽく
+                            // color: '#888',
                           }}
-                          slotProps={{ input: { readOnly: true, onFocus: (e) => e.target.blur() } }}
+                          //slotProps={{ input: { readOnly: true, onFocus: (e) => e.target.blur() } }}
                           disabled={!editable}
                         />
                       </Grid2>
@@ -537,10 +538,10 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
                       <Typography marginRight={1}>請求先住所（その他）</Typography>
                       <TextFieldElement name="adrSonota" control={control} sx={{ width: 600 }} disabled={!editable} />
                     </Grid2>
-                    <Grid2 sx={styles.container}>
+                    {/* <Grid2 sx={styles.container}>
                       <Typography marginRight={3}>請求先名</Typography>
                       <TextFieldElement name="kokyaku" control={control} sx={{ width: 680 }} disabled={!editable} />
-                    </Grid2>
+                    </Grid2> */}
                   </Grid2>
                 </AccordionDetails>
               </Accordion>

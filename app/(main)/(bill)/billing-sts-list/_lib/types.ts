@@ -30,7 +30,19 @@ export type BillingStsSearchValues = {
       to: Date | null;
     };
   };
-  radio: 'shuko' | 'nyuko';
+  radio: 'shuko' | 'nyuko' | 'tour';
   kokyakuTantoNam: string | null;
   sts: string[];
+};
+
+export type UnbilledCustsSearchValues = {
+  kokyaku: string | null;
+  selectedDate?: {
+    value: string;
+    range?: {
+      from: Date | null;
+      to: Date | null;
+    };
+  };
+  radio: 'shuko' | 'nyuko' | 'tour';
 };

@@ -332,6 +332,10 @@ const BundleDialog = ({
   const [bundles, setBundles] = useState<EqptSelection[]>([]);
   /* ローディング */
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  // スナックバー制御
+  const [snackBarOpen, setSnackBarOpen] = useState(false);
+  // スナックバーメッセージ
+  const [snackBarMessage, setSnackBarMessage] = useState('');
 
   /* methods -------------------------------------------------------- */
   /** 行押下時（選択時）の処理 */
@@ -356,10 +360,15 @@ const BundleDialog = ({
     setIsLoading(true);
     // 今機材が選択されてたら配列にpush
     if (selected && selected.length > 0) {
-      const sets = await getSelectedEqpts(selected);
-      // セットなので、blankQtyを1にする
-      const setList = sets!.map((d) => ({ ...d, indentNum: 1 }));
-      selectedEqptListRef.current.push(...setList);
+      try {
+        const sets = await getSelectedEqpts(selected);
+        // セットなので、blankQtyを1にする
+        const setList = sets!.map((d) => ({ ...d, indentNum: 1 }));
+        selectedEqptListRef.current.push(...setList);
+      } catch (e) {
+        setSnackBarMessage('サーバー接続エラー');
+        setSnackBarOpen(true);
+      }
     }
     // 選択リセット
     setSelected([]);
@@ -385,12 +394,17 @@ const BundleDialog = ({
   /** 別セット選択ボタン押下時 */
   const handleClickAnother = async () => {
     setIsLoading(true);
-    const [sets, oya] = await Promise.all([getSelectedEqpts(selected), getSelectedEqpts([eqptsWSet[currentIndex]])]);
-    // セットなので、indentNumを1にする
-    const setList = sets!.map((d) => ({ ...d, indentNum: 1 }));
-    selectedEqptListRef.current.push(...setList);
-    selectedEqptListRef.current.push(...oya);
-    setSelected([]);
+    try {
+      const [sets, oya] = await Promise.all([getSelectedEqpts(selected), getSelectedEqpts([eqptsWSet[currentIndex]])]);
+      // セットなので、indentNumを1にする
+      const setList = sets!.map((d) => ({ ...d, indentNum: 1 }));
+      selectedEqptListRef.current.push(...setList);
+      selectedEqptListRef.current.push(...oya);
+      setSelected([]);
+    } catch (e) {
+      setSnackBarMessage('サーバー接続エラー');
+      setSnackBarOpen(true);
+    }
     setIsLoading(false);
   };
 
@@ -403,22 +417,27 @@ const BundleDialog = ({
         // ダイアログが開いた時、最初のデータ（index: 0）を取得
         setIsLoading(true);
         const getSet = async () => {
-          // セット有機材詳細と表示するセット機材を取得
-          const [oya, sets] = await Promise.all([
-            getSelectedEqpts([eqptsWSet[0]]), // 0番目を決め打ちで取得
-            getSetOptions(eqptsWSet[0]),
-          ]);
-          setBundles(sets.setList);
-          setOyakizaiNam(sets.eqptNam);
+          try {
+            // セット有機材詳細と表示するセット機材を取得
+            const [oya, sets] = await Promise.all([
+              getSelectedEqpts([eqptsWSet[0]]), // 0番目を決め打ちで取得
+              getSetOptions(eqptsWSet[0]),
+            ]);
+            setBundles(sets.setList);
+            setOyakizaiNam(sets.eqptNam);
 
-          // セットがない単独の機材
-          const solo = await getSelectedEqpts(eqptsAll.filter((d) => !eqptsWSet.includes(d)));
+            // セットがない単独の機材
+            const solo = await getSelectedEqpts(eqptsAll.filter((d) => !eqptsWSet.includes(d)));
 
-          // 配列をリセットしてから親機材と単独機材をpush
-          selectedEqptListRef.current = [];
+            // 配列をリセットしてから親機材と単独機材をpush
+            selectedEqptListRef.current = [];
 
-          selectedEqptListRef.current.push(...solo);
-          selectedEqptListRef.current.push(...oya);
+            selectedEqptListRef.current.push(...solo);
+            selectedEqptListRef.current.push(...oya);
+          } catch (e) {
+            setSnackBarMessage('サーバー接続エラー');
+            setSnackBarOpen(true);
+          }
           setIsLoading(false);
         };
         getSet();
@@ -439,14 +458,19 @@ const BundleDialog = ({
     if (currentIndex > 0) {
       setIsLoading(true);
       const getSet = async () => {
-        const [oya, sets] = await Promise.all([
-          getSelectedEqpts([eqptsWSet[currentIndex]]), // 変更後の currentIndex を使用
-          getSetOptions(eqptsWSet[currentIndex]),
-        ]);
-        setBundles(sets.setList);
-        setOyakizaiNam(sets.eqptNam);
-        // 選択された機材配列に親機材をpush
-        selectedEqptListRef.current.push(...oya);
+        try {
+          const [oya, sets] = await Promise.all([
+            getSelectedEqpts([eqptsWSet[currentIndex]]), // 変更後の currentIndex を使用
+            getSetOptions(eqptsWSet[currentIndex]),
+          ]);
+          setBundles(sets.setList);
+          setOyakizaiNam(sets.eqptNam);
+          // 選択された機材配列に親機材をpush
+          selectedEqptListRef.current.push(...oya);
+        } catch (e) {
+          setSnackBarMessage('サーバー接続エラー');
+          setSnackBarOpen(true);
+        }
         setIsLoading(false);
       };
       getSet();
@@ -531,6 +555,14 @@ const BundleDialog = ({
           )}
         </TableContainer>
       </DialogContent>
+      <Snackbar
+        open={snackBarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackBarOpen(false)}
+        message={snackBarMessage}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        sx={{ marginTop: '65px' }}
+      />
     </Dialog>
   );
 };

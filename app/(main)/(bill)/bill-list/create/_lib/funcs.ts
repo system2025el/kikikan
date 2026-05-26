@@ -263,7 +263,7 @@ export const addBill = async (data: BillHeadValues, user: string): Promise<numbe
       if (meisais && Object.keys(meisais).length !== 0) {
         await insertBillMeisai(meisais, connection);
       }
-      if (seikyuDatList && seikyuDatList.length !== 0) {
+      if (seikyuDatList && seikyuDatList.length !== 0 && billHead.seikyu_sts === 9) {
         await delAndInsertSeikyuDat(seikyuDatList, connection);
       }
       await connection.query('COMMIT');

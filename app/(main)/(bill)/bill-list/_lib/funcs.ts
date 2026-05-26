@@ -5,6 +5,7 @@ import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
 import { revalidatePath } from 'next/cache';
 
+import { selectOneCustomer } from '@/app/_lib/db/tables/m-kokyaku';
 import { selectActiveSeikyuSts } from '@/app/_lib/db/tables/m-seikyu-sts';
 import { selectChosenSeikyu, updBillHeadDelFlg } from '@/app/_lib/db/tables/t-seikyu-head';
 import { selectBillMeisai } from '@/app/_lib/db/tables/t-seikyu-meisai';
@@ -397,6 +398,31 @@ export const updBillDelFlg = async (ids: number[]) => {
   try {
     await updBillHeadDelFlg(ids);
     await revalidatePath('/bill-list');
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
+    throw e;
+  }
+};
+
+/**
+ * PDF出力の際に、請求先の敬称を取得する関数
+ * @param kokyakuId 顧客id
+ * @returns
+ */
+export const getKeisho = async (kokyakuId: number) => {
+  try {
+    const { data, error } = await selectOneCustomer(kokyakuId);
+    if (error) {
+      throw new Error('[selectOneCustomer] DBエラー:', { cause: error });
+    }
+    return data.keisho ?? '';
   } catch (e) {
     if (e instanceof Error) {
       console.error(`[ERROR] ${e.message}`);
