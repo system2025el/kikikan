@@ -3293,7 +3293,7 @@ const EquipmentOrderDetail = (props: {
                     width={75}
                     bgcolor={shubetuColorMap.get(10)}
                   >
-                    <Typography fontSize={'small'} py={1} px={3} sx={{ color: 'white' }}>
+                    <Typography fontSize={'small'} py={1} px={3}>
                       仕込
                     </Typography>
                   </Box>
@@ -3342,7 +3342,7 @@ const EquipmentOrderDetail = (props: {
                     width={75}
                     bgcolor={shubetuColorMap.get(20)}
                   >
-                    <Typography fontSize={'small'} py={1} px={3} sx={{ color: 'white' }}>
+                    <Typography fontSize={'small'} py={1} px={3}>
                       RH
                     </Typography>
                   </Box>
@@ -3399,7 +3399,7 @@ const EquipmentOrderDetail = (props: {
                     width={75}
                     bgcolor={shubetuColorMap.get(30)}
                   >
-                    <Typography fontSize={'small'} py={1} px={3} sx={{ color: 'white' }}>
+                    <Typography fontSize={'small'} py={1} px={3}>
                       GP
                     </Typography>
                   </Box>
@@ -3456,7 +3456,7 @@ const EquipmentOrderDetail = (props: {
                     width={75}
                     bgcolor={shubetuColorMap.get(40)}
                   >
-                    <Typography fontSize={'small'} py={1} px={3} sx={{ color: 'white' }}>
+                    <Typography fontSize={'small'} py={1} px={3}>
                       本番
                     </Typography>
                   </Box>
