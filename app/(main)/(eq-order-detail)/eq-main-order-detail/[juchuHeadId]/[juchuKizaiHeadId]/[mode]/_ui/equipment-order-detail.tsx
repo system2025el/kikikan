@@ -3278,6 +3278,7 @@ const EquipmentOrderDetail = (props: {
                         nyukoDate={nyukoDate}
                         juchuHonbanbiList={juchuHonbanbiList}
                         juchuHonbanbiDeleteList={juchuHonbanbiDeleteList}
+                        shubetuColorMap={shubetuColorMap}
                         scrollRef={scrollRef}
                         onClose={handleCloseDateDialog}
                         onSave={handleSave}

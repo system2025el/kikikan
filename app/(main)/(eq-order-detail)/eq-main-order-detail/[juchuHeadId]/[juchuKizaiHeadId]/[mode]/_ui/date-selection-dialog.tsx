@@ -26,6 +26,7 @@ type DateDialogProps = {
   nyukoDate: Date | null;
   juchuHonbanbiList: JuchuKizaiHonbanbiValues[];
   juchuHonbanbiDeleteList: JuchuKizaiHonbanbiValues[];
+  shubetuColorMap: Map<number, string>;
   scrollRef: React.RefObject<HTMLDivElement | null>;
   onClose: () => void;
   onSave: (juchuHonbanbiList: JuchuKizaiHonbanbiValues[], juchuHonbanbiDeleteList: JuchuKizaiHonbanbiValues[]) => void;
@@ -49,6 +50,7 @@ export const DateSelectDialog = ({
   nyukoDate,
   juchuHonbanbiList,
   juchuHonbanbiDeleteList,
+  shubetuColorMap,
   scrollRef,
   onClose,
   onSave,
@@ -325,10 +327,10 @@ export const DateSelectDialog = ({
       <Paper variant="outlined" sx={{ mt: 2 }}>
         <Grid2 container spacing={2} pt={2}>
           <Tabs value={value} onChange={handleChange}>
-            <Tab value={10} label="仕込" sx={{ bgcolor: 'mediumpurple' }} />
-            <Tab value={20} label="RH" sx={{ bgcolor: 'orange' }} />
-            <Tab value={30} label="GP" sx={{ bgcolor: 'lightgreen' }} />
-            <Tab value={40} label="本番" sx={{ bgcolor: 'pink' }} />
+            <Tab value={10} label="仕込" sx={{ bgcolor: shubetuColorMap.get(10) }} />
+            <Tab value={20} label="RH" sx={{ bgcolor: shubetuColorMap.get(20) }} />
+            <Tab value={30} label="GP" sx={{ bgcolor: shubetuColorMap.get(30) }} />
+            <Tab value={40} label="本番" sx={{ bgcolor: shubetuColorMap.get(40) }} />
           </Tabs>
           <Box ml={10}>
             <RSuiteDateRangePicker
