@@ -1,5 +1,6 @@
 'use server';
 
+import { selectOneCustomer } from '@/app/_lib/db/tables/m-kokyaku';
 import { selectNyukoPdfJuchuKizaiMeisai } from '@/app/_lib/db/tables/nyushuko-pdf';
 import { selectSagyoIdFilterNyushukoFixFlag } from '@/app/_lib/db/tables/t-nyushuko-fix';
 import { selectPdfJuchuKizaiHead } from '@/app/_lib/db/tables/v-juchu-kizai-head-lst';
@@ -56,6 +57,31 @@ export const getNyukoList = async (queries: NyukoListSearchValues) => {
 };
 
 /**
+ * PDF出力の際に、顧客の敬称を取得する関数
+ * @param kokyakuId 顧客id
+ * @returns
+ */
+export const getKeisho = async (kokyakuId: number) => {
+  try {
+    const { data, error } = await selectOneCustomer(kokyakuId);
+    if (error) {
+      throw new Error('[selectOneCustomer] DBエラー:', { cause: error });
+    }
+    return data.keisho ?? '';
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
+    throw e;
+  }
+};
+
+/**
  * 員数票PDF用データ取得
  * @param juchuHeadId 受注ヘッダーid
  * @param juchuKizaiHeadIds 受注機材ヘッダーid
@@ -73,6 +99,12 @@ export const getPdfData = async (
     if (juchuHeadDataError) {
       throw new Error('[selectPdfJuchuHead] DBエラー:', { cause: juchuHeadDataError });
     }
+
+    if (!juchuHeadData.kokyaku_id) {
+      throw new Error('[getPdfData] 顧客IDが見つかりません');
+    }
+
+    const keisho = await getKeisho(juchuHeadData.kokyaku_id);
 
     const { data: juchuKizaiHeadData, error: juchuKizaiHeadDataError } = await selectPdfJuchuKizaiHead(
       juchuHeadId,
@@ -192,7 +224,7 @@ export const getPdfData = async (
       item1: juchuHeadData.juchu_head_id,
       item2: toJapanYMDString(),
       item3: juchuHeadData.koen_nam ?? '',
-      item4: juchuHeadData.kokyaku_nam ?? '',
+      item4: juchuHeadData.kokyaku_nam ? `${juchuHeadData.kokyaku_nam} ${keisho}` : '',
       item5: shukoDat ? toJapanYMDString(shukoDat) : '',
       item6: toJapanYMDString(nyushukoDat),
       item7: juchuHeadData.koenbasho_nam ?? '',

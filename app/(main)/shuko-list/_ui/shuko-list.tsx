@@ -120,7 +120,6 @@ export const ShukoList = (/*props: { shukoData: ShukoTableValues[] }*/) => {
           data.nyushukoBashoId,
           data.nyushukoDat
         );
-        console.log('pdfData', pdfData);
         if (pdfData !== null) {
           pdfData.item13 = headNamv;
           pdfModels.push(pdfData);

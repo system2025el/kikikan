@@ -63,7 +63,7 @@ export const selectPdfJuchuHead = async (juchuHeadId: number) => {
     return await supabase
       .schema(SCHEMA)
       .from('v_juchu_lst')
-      .select('juchu_head_id, koen_nam, koenbasho_nam, kokyaku_nam, nyuryoku_user, kokyaku_tanto_nam')
+      .select('juchu_head_id, koen_nam, koenbasho_nam, kokyaku_id, kokyaku_nam, nyuryoku_user, kokyaku_tanto_nam')
       .eq('juchu_head_id', juchuHeadId)
       .single();
   } catch (e) {

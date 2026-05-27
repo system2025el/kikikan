@@ -146,10 +146,10 @@ export const usePdf = (): [(params: PdfModel[]) => Promise<Blob>] => {
         size: fontSize,
       });
 
-      /* ---------------- 取引先：会社名 + 御中 ---------------- */
+      /* ---------------- 取引先：会社名 ---------------- */
       const textX = 50;
       const textY = tableY - cellHeight * 2 - 20;
-      page.drawText(`${param.item4} 御中`, {
+      page.drawText(`${param.item4}`, {
         x: textX,
         y: textY,
         font: customFont,
