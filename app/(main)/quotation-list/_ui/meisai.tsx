@@ -2,11 +2,12 @@ import AddIcon from '@mui/icons-material/Add';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { Box, Button, Grid2, IconButton, TextField } from '@mui/material';
+import { Autocomplete, Box, Button, Grid2, IconButton, TextField } from '@mui/material';
 import { memo, useEffect, useState } from 'react';
 import { Controller, useFieldArray, useFormContext, useWatch } from 'react-hook-form';
 import { SelectElement, TextFieldElement } from 'react-hook-form-mui';
 
+import { quotationLaborSelectItems } from '../_lib/datas';
 import { QuotHeadValues } from '../_lib/types';
 import { ReadOnlyYenNumberElement } from './yen';
 
@@ -217,23 +218,25 @@ export const MeisaiLines = ({
                   fullWidth
                 />
               ) : (
-                <SelectElement
+                <Controller
                   name={`meisaiHeads.${sectionNam}.${index}.meisai.${i}.nam`}
                   control={control}
-                  options={[
-                    { id: 'チーフ', label: 'チーフ' },
-                    { id: 'サブチーフ', label: 'サブチーフ' },
-                    { id: 'システム', label: 'システム' },
-                    { id: '機材テク', label: '機材テク' },
-                    { id: '卓OP', label: '卓OP' },
-                    { id: '卓ケア', label: '卓ケア' },
-                    { id: 'PINチーフ', label: 'PINチーフ' },
-                    { id: 'PIN', label: 'PIN' },
-                    { id: 'ROBOテク', label: 'ROBOテク' },
-                    { id: '現地', label: '現地' },
-                  ]}
-                  sx={{ width: 242.5 }}
-                  disabled={!editable}
+                  render={({ field }) => (
+                    <Autocomplete
+                      {...field}
+                      getOptionKey={(option) => (typeof option === 'string' ? option : option.id)}
+                      onChange={(_, value) => {
+                        const label = typeof value === 'string' ? value : (value?.label ?? '');
+                        field.onChange(label);
+                      }}
+                      freeSolo
+                      autoSelect
+                      sx={{ width: 300 }}
+                      renderInput={(params) => <TextField {...params} />}
+                      options={quotationLaborSelectItems}
+                      getOptionLabel={(option) => (typeof option === 'string' ? option : option.label)}
+                    />
+                  )}
                 />
               )}
             </Grid2>
