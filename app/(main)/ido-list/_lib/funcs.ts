@@ -24,8 +24,8 @@ export const getIdoList = async (sagyoDenDat: string) => {
         schkSagyoStsNamShort: ykData[0].schk_sagyo_sts_nam_short ?? '無し',
         nchkSagyoStsId: ykData[0].nchk_sagyo_sts_id,
         nchkSagyoStsNamShort: ykData[0].nchk_sagyo_sts_nam_short ?? '無し',
-        shukoFixFlg: !ykData[0].schk_sagyo_sts_id ? null : ykData[0].shuko_fix_flg,
-        nyukoFixFlg: !ykData[0].nchk_sagyo_sts_id ? null : ykData[0].nyuko_fix_flg,
+        shukoFixFlg: ykData[0].schk_sagyo_sts_id == null ? null : ykData[0].shuko_fix_flg,
+        nyukoFixFlg: ykData[0].nchk_sagyo_sts_id == null ? null : ykData[0].nyuko_fix_flg,
       };
       idoData.push(ykIdoData);
     } else {
@@ -54,8 +54,8 @@ export const getIdoList = async (sagyoDenDat: string) => {
         schkSagyoStsNamShort: kyData[0].schk_sagyo_sts_nam_short ?? '無し',
         nchkSagyoStsId: kyData[0].nchk_sagyo_sts_id,
         nchkSagyoStsNamShort: kyData[0].nchk_sagyo_sts_nam_short ?? '無し',
-        shukoFixFlg: !kyData[0].schk_sagyo_sts_id ? null : kyData[0].shuko_fix_flg,
-        nyukoFixFlg: !kyData[0].nchk_sagyo_sts_id ? null : kyData[0].nyuko_fix_flg,
+        shukoFixFlg: kyData[0].schk_sagyo_sts_id == null ? null : kyData[0].shuko_fix_flg,
+        nyukoFixFlg: kyData[0].nchk_sagyo_sts_id == null ? null : kyData[0].nyuko_fix_flg,
       };
       idoData.push(kyIdoData);
     } else {
