@@ -167,10 +167,12 @@ export const LoanSituation = (props: {
           parents.push(data);
         } else {
           // 受注番号と親受注機材番号でキー作成
-          if (!childrenMap[data.oyaJuchuKizaiHeadId]) {
-            childrenMap[`${data.juchuHeadId}-${data.oyaJuchuKizaiHeadId}`] = [];
+          const childKey = `${data.juchuHeadId}-${data.oyaJuchuKizaiHeadId}`;
+
+          if (!childrenMap[childKey]) {
+            childrenMap[childKey] = [];
           }
-          childrenMap[`${data.juchuHeadId}-${data.oyaJuchuKizaiHeadId}`].push(data);
+          childrenMap[childKey].push(data);
         }
       }
 
