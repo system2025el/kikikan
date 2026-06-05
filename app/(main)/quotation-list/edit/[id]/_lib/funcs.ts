@@ -140,23 +140,6 @@ export const updateQuot = async (data: QuotHeadValues, user: string): Promise<nu
         .filter((d) => d.mitu_meisai_head_id !== FAKE_NEW_ID)
         .map(({ add_dat, add_user, ...rest }) => rest);
 
-      // 見積ヘッダ新規挿入
-      if (insertMHeadList.length > 0) {
-        // 新規処理実行
-        await insertQuotMeisaiHead(
-          insertMHeadList.map(({ meisai, ...rest }) => rest),
-          connection
-        );
-      }
-      // 見積ヘッダ更新処理
-      if (updateMHeadList.length > 0) {
-        // 更新処理実行
-        await updateQuoteMeisaiHead(
-          updateMHeadList.map(({ meisai, ...rest }) => rest),
-          connection
-        );
-      }
-
       // 明細 ------------------------------------------------
       // すべての採番済みの明細ヘッドリスト（明細込み）
       const allMeisaiHeads = [...insertMHeadList, ...updateMHeadList];
@@ -239,8 +222,11 @@ export const updateQuot = async (data: QuotHeadValues, user: string): Promise<nu
         await deleteQuotMeisai(meisaiToDelete, connection);
       }
       // meisaiHeads
+      const existingMeisaiHeadIds = await connection.query(
+        `SELECT mitu_head_id, mitu_meisai_head_id FROM ${SCHEMA}.t_mitu_meisai_head WHERE mitu_head_id = ${data.mituHeadId}`
+      );
       const exHeads = Array.from(
-        new Set(existingMeisaiIds.rows.map(({ mitu_meisai_id, ...rest }) => JSON.stringify(rest)))
+        new Set(existingMeisaiHeadIds.rows.map(({ mitu_meisai_id, ...rest }) => JSON.stringify(rest)))
       ).map((str) => JSON.parse(str));
       const formedHeads = Array.from(
         new Set(formedMeisai.map(({ mitu_meisai_id, ...rest }) => JSON.stringify(rest)))
@@ -260,12 +246,30 @@ export const updateQuot = async (data: QuotHeadValues, user: string): Promise<nu
       if (HeadsToDelete.length > 0) {
         await deleteQuotMeisaiHeads(HeadsToDelete, connection);
       }
+      // 明細ヘッド新規挿入
+      if (insertMHeadList.length > 0) {
+        // 新規処理実行
+        await insertQuotMeisaiHead(
+          insertMHeadList.map(({ meisai, ...rest }) => rest),
+          connection
+        );
+      }
+      // 明細ヘッド更新処理
+      if (updateMHeadList.length > 0) {
+        // 更新処理実行
+        await updateQuoteMeisaiHead(
+          updateMHeadList.map(({ meisai, ...rest }) => rest),
+          connection
+        );
+      }
+      // 明細新規挿入
       if (insertMeisaiList.length > 0) {
         await insertQuotMeisai(
           insertMeisaiList.map(({ upd_dat, upd_user, ...rest }) => rest),
           connection
         );
       }
+      // 明細更新処理
       if (updateMeisaiList.length > 0) {
         await updateQuotMeisai(
           updateMeisaiList.map(({ add_dat, add_user, ...rest }) => rest),
