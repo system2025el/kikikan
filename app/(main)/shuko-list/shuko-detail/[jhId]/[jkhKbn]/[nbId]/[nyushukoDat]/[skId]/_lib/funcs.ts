@@ -6,7 +6,7 @@ import { PoolClient } from 'pg';
 import pool, { refreshVRfid } from '@/app/_lib/db/postgres';
 import { selectJuchuContainerMeisaiMaxId, upsertJuchuContainerMeisai } from '@/app/_lib/db/tables/t-juchu-ctn-meisai';
 import { selectChildJuchuKizaiHeadConfirm } from '@/app/_lib/db/tables/t-juchu-kizai-head';
-import { selectJuchuKizaiNyushukoConfirm } from '@/app/_lib/db/tables/t-juchu-kizai-nyushuko';
+import { selectJuchuKizaiNyushukoConfirmList } from '@/app/_lib/db/tables/t-juchu-kizai-nyushuko';
 import { updateNyushukoDen, upsertNyushukoDen } from '@/app/_lib/db/tables/t-nyushuko-den';
 import {
   deleteShukoFix,
@@ -227,17 +227,16 @@ export const updShukoDetail = async (
           continue;
         }
         // 出庫日取得
-        const { data: shukoDat, error: shukoDataError } = await selectJuchuKizaiNyushukoConfirm({
+        const { data: shukoDat, error: shukoDataError } = await selectJuchuKizaiNyushukoConfirmList({
           juchu_head_id: shukoDetailData.juchuHeadId,
           juchu_kizai_head_id: juchuKizaiHeadId,
           nyushuko_shubetu_id: 1,
         });
         // 入庫日取得
-        const { data: nyukoDat, error: nyukoDataError } = await selectJuchuKizaiNyushukoConfirm({
+        const { data: nyukoDat, error: nyukoDataError } = await selectJuchuKizaiNyushukoConfirmList({
           juchu_head_id: shukoDetailData.juchuHeadId,
           juchu_kizai_head_id: juchuKizaiHeadId,
           nyushuko_shubetu_id: 2,
-          //nyushuko_basho_id: shukoDetailData.nyushukoBashoId,
         });
         if (shukoDataError) {
           throw new Error('[selectJuchuKizaiNyushukoConfirm] DBエラー:', { cause: shukoDataError });

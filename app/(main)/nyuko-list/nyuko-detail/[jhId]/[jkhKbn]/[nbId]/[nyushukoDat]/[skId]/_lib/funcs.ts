@@ -7,7 +7,7 @@ import pool, { refreshVRfid } from '@/app/_lib/db/postgres';
 import { selectJuchuContainerMeisaiMaxId, upsertJuchuContainerMeisai } from '@/app/_lib/db/tables/t-juchu-ctn-meisai';
 import { selectJuchuKizaiMeisaiMaxId, upsertJuchuKizaiMeisai } from '@/app/_lib/db/tables/t-juchu-kizai-meisai';
 import {
-  selectJuchuKizaiNyushukoConfirm,
+  selectJuchuKizaiNyushukoConfirmSingle,
   selectOyaJuchuKizaiNyushukoConfirm,
 } from '@/app/_lib/db/tables/t-juchu-kizai-nyushuko';
 import {
@@ -356,15 +356,15 @@ export const updKeepNyukoDetail = async (
     // 出庫日があれば出庫伝票追加更新
     for (const juchuKizaiHeadId of juchuKizaiHeadIds) {
       // 出庫日確認
-      const shukoDat = await selectJuchuKizaiNyushukoConfirm({
+      const shukoDat = await selectJuchuKizaiNyushukoConfirmSingle({
         juchu_head_id: nyukoDetailData.juchuHeadId,
         juchu_kizai_head_id: juchuKizaiHeadId,
         nyushuko_shubetu_id: 1,
         nyushuko_basho_id: nyukoDetailData.nyushukoBashoId,
       });
 
-      if (shukoDat.data && shukoDat.data.length === 1) {
-        await upsShukoDen(nyukoDetailTableData, shukoDat.data[0].nyushuko_dat, userNam, connection);
+      if (shukoDat.data) {
+        await upsShukoDen(nyukoDetailTableData, shukoDat.data.nyushuko_dat, userNam, connection);
       }
     }
 

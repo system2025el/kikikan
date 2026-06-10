@@ -42,7 +42,7 @@ import {
   deleteJuchuKizaiNyushuko,
   insertJuchuKizaiNyushuko,
   selectJuchuKizaiNyushuko,
-  selectJuchuKizaiNyushukoConfirm,
+  selectJuchuKizaiNyushukoConfirmSingle,
   updateJuchuKizaiNyushuko,
 } from '@/app/_lib/db/tables/t-juchu-kizai-nyushuko';
 import {
@@ -307,7 +307,7 @@ export const updJuchuKizaiNyushuko = async (
     };
 
     try {
-      const selectData = await selectJuchuKizaiNyushukoConfirm(confirmData);
+      const selectData = await selectJuchuKizaiNyushukoConfirmSingle(confirmData);
 
       // 更新
       if (selectData.data && data) {

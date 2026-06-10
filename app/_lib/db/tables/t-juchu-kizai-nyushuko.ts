@@ -25,41 +25,51 @@ export const selectJuchuKizaiNyushuko = async (juchuHeadId: number, juchuKizaiHe
 };
 
 /**
- * 受注機材入出庫データ確認
+ * 受注機材入出庫データ確認(入出庫場所指定あり)
  * @param confirmData 受注機材入出庫確認データ
  * @returns
  */
-export const selectJuchuKizaiNyushukoConfirm = async (data: {
+export const selectJuchuKizaiNyushukoConfirmSingle = async (data: {
   juchu_head_id: number;
   juchu_kizai_head_id: number;
   nyushuko_shubetu_id: number;
-  nyushuko_basho_id?: number;
+  nyushuko_basho_id: number;
 }) => {
-  const builder = supabase
-    .schema(SCHEMA)
-    .from('t_juchu_kizai_nyushuko')
-    .select('*')
-    .eq('juchu_head_id', data.juchu_head_id)
-    .eq('juchu_kizai_head_id', data.juchu_kizai_head_id)
-    .eq('nyushuko_shubetu_id', data.nyushuko_shubetu_id);
-
-  if (data.nyushuko_basho_id) {
-    builder.eq('nyushuko_basho_id', data.nyushuko_basho_id);
-    builder.single();
-  }
   try {
-    return await builder;
-    // return await supabase
-    //   .schema(SCHEMA)
-    //   .from('t_juchu_kizai_nyushuko')
-    //   .select('*')
-    //   .eq('juchu_head_id', data.juchu_head_id)
-    //   .eq('juchu_kizai_head_id', data.juchu_kizai_head_id)
-    //   .eq('nyushuko_shubetu_id', data.nyushuko_shubetu_id)
-    //   .eq('nyushuko_basho_id', data.nyushuko_basho_id)
-    //   .single();
+    return await supabase
+      .schema(SCHEMA)
+      .from('t_juchu_kizai_nyushuko')
+      .select('*')
+      .eq('juchu_head_id', data.juchu_head_id)
+      .eq('juchu_kizai_head_id', data.juchu_kizai_head_id)
+      .eq('nyushuko_shubetu_id', data.nyushuko_shubetu_id)
+      .eq('nyushuko_basho_id', data.nyushuko_basho_id)
+      .single();
   } catch (e) {
-    throw new Error('[selectJuchuKizaiNyushukoConfirm] DBエラー:', { cause: e });
+    throw new Error('[selectJuchuKizaiNyushukoConfirmSingle] DBエラー:', { cause: e });
+  }
+};
+
+/**
+ * 受注機材入出庫データ確認(入出庫場所指定なし)
+ * @param confirmData 受注機材入出庫確認データ
+ * @returns
+ */
+export const selectJuchuKizaiNyushukoConfirmList = async (data: {
+  juchu_head_id: number;
+  juchu_kizai_head_id: number;
+  nyushuko_shubetu_id: number;
+}) => {
+  try {
+    return await supabase
+      .schema(SCHEMA)
+      .from('t_juchu_kizai_nyushuko')
+      .select('*')
+      .eq('juchu_head_id', data.juchu_head_id)
+      .eq('juchu_kizai_head_id', data.juchu_kizai_head_id)
+      .eq('nyushuko_shubetu_id', data.nyushuko_shubetu_id);
+  } catch (e) {
+    throw new Error('[selectJuchuKizaiNyushukoConfirmList] DBエラー:', { cause: e });
   }
 };
 
