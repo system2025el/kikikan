@@ -632,42 +632,6 @@ const EquipmentOrderDetail = (props: {
         return;
       }
 
-      // if (
-      //   ((kicsMeisai.length > 0 || kicsContainer.length > 0) && (!data.kicsShukoDat || !data.kicsNyukoDat)) ||
-      //   ((yardMeisai.length > 0 || yardContainer.length > 0) && (!data.yardShukoDat || !data.yardNyukoDat))
-      // ) {
-      //   if ((kicsMeisai.length > 0 || kicsContainer.length > 0) && !data.kicsShukoDat) {
-      //     setError('kicsShukoDat', {
-      //       type: 'manual',
-      //       message: '',
-      //     });
-      //   }
-      //   if ((kicsMeisai.length > 0 || kicsContainer.length > 0) && !data.kicsNyukoDat) {
-      //     setError('kicsNyukoDat', {
-      //       type: 'manual',
-      //       message: '',
-      //     });
-      //   }
-      //   if ((yardMeisai.length > 0 || yardContainer.length > 0) && !data.yardShukoDat) {
-      //     setError('yardShukoDat', {
-      //       type: 'manual',
-      //       message: '',
-      //     });
-      //   }
-      //   if ((yardMeisai.length > 0 || yardContainer.length > 0) && !data.yardNyukoDat) {
-      //     setError('yardNyukoDat', {
-      //       type: 'manual',
-      //       message: '',
-      //     });
-      //   }
-      //   setAlertTitle('入出庫日時が入力されていません');
-      //   setAlertMessage('入出庫日時を入力してください');
-      //   setAlertOpen(true);
-      //   setIsLoading(false);
-      //   setIsProcessing(false);
-      //   return;
-      // }
-
       // 更新判定
       const checkJuchuKizaiHead = isDirty;
       const checkKicsShukoDat = dirtyFields.kicsShukoDat ? true : false;
@@ -840,25 +804,6 @@ const EquipmentOrderDetail = (props: {
     const ids = juchuKizaiMeisaiData.filter((d) => !d.delFlag).map((data) => data.kizaiId);
     // 機材在庫データ
     let updatedEqStockData: StockTableValues[][] = [];
-    // id確認用セット
-    //const checkIds = new Set<number>();
-    // if (ids && shukoDate) {
-    //   for (const id of ids) {
-    //     if (checkIds.has(id)) {
-    //       const stock = updatedEqStockData.find((d) => d[0].kizaiId === id);
-    //       updatedEqStockData.push(stock!);
-    //     } else {
-    //       checkIds.add(id);
-    //       const stock: StockTableValues[] = await getStockList(
-    //         juchuHeadId,
-    //         juchuKizaiHeadId,
-    //         id,
-    //         subDays(shukoDate, 1)
-    //       );
-    //       updatedEqStockData.push(stock);
-    //     }
-    //   }
-    // }
 
     const uniqueIds = Array.from(new Set(juchuKizaiMeisaiData.filter((d) => !d.delFlag).map((data) => data.kizaiId)));
     try {
@@ -1341,9 +1286,19 @@ const EquipmentOrderDetail = (props: {
 
         const yardShukoDat = getValues('yardShukoDat');
 
+        const hours = newDate.hour();
+        const minutes = newDate.minute();
+
+        const totalMinutes = hours * 60 + minutes;
+
         if (idoJuchuKizaiMeisaiList.length > 0 && yardShukoDat === null) {
-          setIdoDat(subDays(newDate.toDate(), 1));
-          setMoveOpen(true);
+          if (totalMinutes === 0) {
+            setIdoDat(newDate.toDate());
+            setMoveOpen(true);
+          } else {
+            setIdoDat(subDays(newDate.toDate(), 1));
+            setMoveOpen(true);
+          }
         } else if (idoJuchuKizaiMeisaiList.length > 0 && yardShukoDat !== null) {
           setIdoDat(null);
           setMoveOpen(true);
@@ -1382,10 +1337,15 @@ const EquipmentOrderDetail = (props: {
 
         const kicsShukoDat = getValues('kicsShukoDat');
 
-        if (idoJuchuKizaiMeisaiList.length > 0 && kicsShukoDat === null && newDate.hour() < 12) {
+        const hours = newDate.hour();
+        const minutes = newDate.minute();
+
+        const totalMinutes = hours * 60 + minutes;
+
+        if (idoJuchuKizaiMeisaiList.length > 0 && kicsShukoDat === null && hours < 12 && totalMinutes !== 0) {
           setIdoDat(subDays(newDate.toDate(), 1));
           setMoveOpen(true);
-        } else if (idoJuchuKizaiMeisaiList.length > 0 && kicsShukoDat === null && newDate.hour() >= 12) {
+        } else if (idoJuchuKizaiMeisaiList.length > 0 && kicsShukoDat === null && (hours >= 12 || totalMinutes === 0)) {
           setIdoDat(newDate.toDate());
           setMoveOpen(true);
         } else if (idoJuchuKizaiMeisaiList.length > 0 && kicsShukoDat !== null) {
@@ -1480,12 +1440,25 @@ const EquipmentOrderDetail = (props: {
   const handleKicsClear = () => {
     setValue('kicsShukoDat', null, { shouldDirty: true });
     trigger(['kicsShukoDat', 'yardShukoDat']);
+
+    if (juchuKizaiMeisaiList.length === 0) return;
+
     const yardDat = getValues('yardShukoDat');
 
-    if (juchuKizaiMeisaiList.length > 0 && yardDat !== null) {
-      setIdoDat(subDays(yardDat, 1));
-      setMoveOpen(true);
-    } else if (juchuKizaiMeisaiList.length > 0 && yardDat === null) {
+    if (yardDat !== null) {
+      const hours = yardDat.getHours();
+      const minutes = yardDat.getMinutes();
+
+      const totalMinutes = hours * 60 + minutes;
+
+      if (hours < 12 && totalMinutes !== 0) {
+        setIdoDat(subDays(yardDat, 1));
+        setMoveOpen(true);
+      } else if (hours >= 12 || totalMinutes === 0) {
+        setIdoDat(yardDat);
+        setMoveOpen(true);
+      }
+    } else {
       setIdoDat(null);
       setMoveOpen(true);
     }
@@ -1497,12 +1470,25 @@ const EquipmentOrderDetail = (props: {
   const handleYardClear = () => {
     setValue('yardShukoDat', null, { shouldDirty: true });
     trigger(['kicsShukoDat', 'yardShukoDat']);
+
+    if (juchuKizaiMeisaiList.length === 0) return;
+
     const kicsDat = getValues('kicsShukoDat');
 
-    if (juchuKizaiMeisaiList.length > 0 && kicsDat !== null) {
-      setIdoDat(subDays(kicsDat, 1));
-      setMoveOpen(true);
-    } else if (juchuKizaiMeisaiList.length > 0 && kicsDat === null) {
+    if (kicsDat !== null) {
+      const hours = kicsDat.getHours();
+      const minutes = kicsDat.getMinutes();
+
+      const totalMinutes = hours * 60 + minutes;
+
+      if (totalMinutes !== 0) {
+        setIdoDat(subDays(kicsDat, 1));
+        setMoveOpen(true);
+      } else {
+        setIdoDat(kicsDat);
+        setMoveOpen(true);
+      }
+    } else {
       setIdoDat(null);
       setMoveOpen(true);
     }
@@ -1638,14 +1624,29 @@ const EquipmentOrderDetail = (props: {
         const indentChara = await getDic(1);
 
         const kicsDat = getValues('kicsShukoDat');
+        const kicsHours = kicsDat ? kicsDat.getHours() : 0;
+        const kicsminutes = kicsDat ? kicsDat.getMinutes() : 0;
+        const kicsTotalMinutes = kicsHours * 60 + kicsminutes;
+
         const yardDat = getValues('yardShukoDat');
+        const yardHours = yardDat ? yardDat.getHours() : 0;
+        const yardminutes = yardDat ? yardDat.getMinutes() : 0;
+        const yardTotalMinutes = yardHours * 60 + yardminutes;
+
+        // KICS→YARD
         const kicsIdoDat =
-          kicsDat === null && yardDat !== null && yardDat.getHours() < 12
+          kicsDat === null && yardDat !== null && yardDat.getHours() < 12 && yardTotalMinutes !== 0
             ? subDays(yardDat, 1)
-            : kicsDat === null && yardDat !== null && yardDat.getHours() >= 12
+            : kicsDat === null && yardDat !== null && (yardDat.getHours() >= 12 || yardTotalMinutes === 0)
               ? yardDat
               : null;
-        const yardIdoDat = yardDat === null && kicsDat !== null ? subDays(kicsDat, 1) : null;
+        // YARD→KICS
+        const yardIdoDat =
+          yardDat === null && kicsDat !== null && kicsTotalMinutes !== 0
+            ? subDays(kicsDat, 1)
+            : yardDat === null && kicsDat !== null && kicsTotalMinutes === 0
+              ? kicsDat
+              : null;
 
         const kizaiData = data.filter((d) => !d.ctnFlg);
         const uniqueIds = new Set();
@@ -1680,31 +1681,6 @@ const EquipmentOrderDetail = (props: {
         }));
 
         const newIds = selectEq.map((data) => data.kizaiId);
-        // 機材在庫データ
-        // const selectEqStockData: StockTableValues[][] = [];
-        // for (const id of newIds) {
-        //   if (kizaiIds.has(id)) {
-        //     const stock = eqStockListRef.current.find((d) => d[0].kizaiId === id);
-        //     selectEqStockData.push(stock!);
-        //   } else {
-        //     const stock: StockTableValues[] = await getStockList(
-        //       getValues('juchuHeadId'),
-        //       getValues('juchuKizaiHeadId'),
-        //       id,
-        //       subDays(selectDate, 1)
-        //     );
-        //     if (originPlanQty.get(id)) {
-        //       const updateStock = stock.map((d) =>
-        //         dateRange.includes(toJapanYMDString(d.calDat))
-        //           ? { ...d, zaikoQty: d.zaikoQty + originPlanQty.get(id)! }
-        //           : d
-        //       );
-        //       selectEqStockData.push(updateStock);
-        //     } else {
-        //       selectEqStockData.push(stock);
-        //     }
-        //   }
-        // }
 
         const fetchTargetIds = Array.from(new Set(newIds.filter((id) => !kizaiIds.has(id))));
 
@@ -1825,11 +1801,6 @@ const EquipmentOrderDetail = (props: {
     if (isProcessing) return;
     setIsProcessing(true);
 
-    // const lockResult = await lock();
-
-    // if (lockResult) {
-    //   setEqSelectionDialogOpen(false);
-    // }
     setEqSelectionDialogOpen(false);
     setIsProcessing(false);
   };
@@ -1866,21 +1837,7 @@ const EquipmentOrderDetail = (props: {
   const handleCloseCopyDialog = async () => {
     if (!user || isProcessing) return;
     setIsProcessing(true);
-
-    // if (edit) {
-    //   try {
-    //     await lockCheck(1, getValues('juchuHeadId'), user.name, user.email);
-    //   } catch (e) {
-    //     // 閉じるべきか確認
-    //     setIsProcessing(false);
-    //     setSnackBarMessage('サーバー接続エラー');
-    //     setSnackBarOpen(true);
-    //     return;
-    //   }
-    // }
-
     setCopyDialogOpen(false);
-
     setIsProcessing(false);
   };
 
@@ -2000,11 +1957,6 @@ const EquipmentOrderDetail = (props: {
     if (isProcessing) return;
     setIsProcessing(true);
 
-    // const lockResult = await lock();
-
-    // if (lockResult) {
-    //   setSeparationDialogOpen(false);
-    // }
     setSeparationDialogOpen(false);
     setIsProcessing(false);
   };
@@ -2167,11 +2119,6 @@ const EquipmentOrderDetail = (props: {
     if (isProcessing) return;
     setIsProcessing(true);
 
-    // const lockResult = await lock();
-
-    // if (lockResult) {
-    //   setSortDialogOpen(false);
-    // }
     setSortDialogOpen(false);
     setIsProcessing(false);
   };
@@ -2224,11 +2171,6 @@ const EquipmentOrderDetail = (props: {
     if (isProcessing) return;
     setIsProcessing(true);
 
-    // const lockResult = await lock();
-
-    // if (lockResult) {
-    //   setDateSelectionDialogOpne(false);
-    // }
     setDateSelectionDialogOpne(false);
     setIsProcessing(false);
   };
