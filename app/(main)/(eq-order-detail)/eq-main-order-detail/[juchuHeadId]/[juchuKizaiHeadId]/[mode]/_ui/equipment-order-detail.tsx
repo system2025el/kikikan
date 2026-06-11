@@ -1284,6 +1284,8 @@ const EquipmentOrderDetail = (props: {
         if (newDate === null) return;
         trigger(['kicsShukoDat', 'yardShukoDat']);
 
+        if (juchuKizaiMeisaiList.length === 0) return;
+
         const yardShukoDat = getValues('yardShukoDat');
 
         const hours = newDate.hour();
@@ -1291,7 +1293,7 @@ const EquipmentOrderDetail = (props: {
 
         const totalMinutes = hours * 60 + minutes;
 
-        if (idoJuchuKizaiMeisaiList.length > 0 && yardShukoDat === null) {
+        if (yardShukoDat === null) {
           if (totalMinutes === 0) {
             setIdoDat(newDate.toDate());
             setMoveOpen(true);
@@ -1299,7 +1301,7 @@ const EquipmentOrderDetail = (props: {
             setIdoDat(subDays(newDate.toDate(), 1));
             setMoveOpen(true);
           }
-        } else if (idoJuchuKizaiMeisaiList.length > 0 && yardShukoDat !== null) {
+        } else {
           setIdoDat(null);
           setMoveOpen(true);
         }
@@ -1335,6 +1337,8 @@ const EquipmentOrderDetail = (props: {
         if (newDate === null) return;
         trigger(['kicsShukoDat', 'yardShukoDat']);
 
+        if (juchuKizaiMeisaiList.length === 0) return;
+
         const kicsShukoDat = getValues('kicsShukoDat');
 
         const hours = newDate.hour();
@@ -1342,13 +1346,13 @@ const EquipmentOrderDetail = (props: {
 
         const totalMinutes = hours * 60 + minutes;
 
-        if (idoJuchuKizaiMeisaiList.length > 0 && kicsShukoDat === null && hours < 12 && totalMinutes !== 0) {
+        if (kicsShukoDat === null && hours < 12 && totalMinutes !== 0) {
           setIdoDat(subDays(newDate.toDate(), 1));
           setMoveOpen(true);
-        } else if (idoJuchuKizaiMeisaiList.length > 0 && kicsShukoDat === null && (hours >= 12 || totalMinutes === 0)) {
+        } else if (kicsShukoDat === null && (hours >= 12 || totalMinutes === 0)) {
           setIdoDat(newDate.toDate());
           setMoveOpen(true);
-        } else if (idoJuchuKizaiMeisaiList.length > 0 && kicsShukoDat !== null) {
+        } else if (kicsShukoDat !== null) {
           setIdoDat(null);
           setMoveOpen(true);
         }
