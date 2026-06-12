@@ -14,9 +14,9 @@ export const ReturnJuchuKizaiHeadSchema = z
     //   .nullable(),
     mem: z.string().nullable(),
     headNam: z
-      .string({ message: validationMessages.required() })
-      .min(1, { message: validationMessages.required() })
-      .max(20, { message: validationMessages.maxStringLength(20) }),
+      .string()
+      .max(50, { message: validationMessages.maxStringLength(50) })
+      .nullable(),
     oyaJuchuKizaiHeadId: z.number(),
     kicsNyukoDat: z.date().nullable(),
     yardNyukoDat: z.date().nullable(),
