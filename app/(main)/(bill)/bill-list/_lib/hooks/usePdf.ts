@@ -517,7 +517,12 @@ export const usePdf = (): [(param: BillHeadValues, keisho: string) => Promise<Bl
                 customFont.widthOfTextAtSize(textToDrawFinal, fontSize) > availableWidth &&
                 textToDrawFinal.length > 0
               ) {
-                textToDrawFinal = textToDrawFinal.slice(0, -2) + '様';
+                // 御担当だけ「様」を残す
+                if (rowIndex === 2 && colIndex === 5) {
+                  textToDrawFinal = textToDrawFinal.slice(0, -2) + '様';
+                } else {
+                  textToDrawFinal = textToDrawFinal.slice(0, -1);
+                }
               }
             }
           }
