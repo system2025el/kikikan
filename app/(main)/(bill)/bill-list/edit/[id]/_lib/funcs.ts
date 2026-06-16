@@ -145,23 +145,6 @@ export const updateBill = async (data: BillHeadValues, user: string): Promise<nu
         .filter((d) => d.seikyu_meisai_head_id !== FAKE_NEW_ID)
         .map(({ add_dat, add_user, ...rest }) => rest);
 
-      // 請求ヘッダ新規挿入
-      if (insertMHeadList.length > 0) {
-        // 新規処理実行
-        await insertBillMeisaiHead(
-          insertMHeadList.map(({ meisai, ...rest }) => rest),
-          connection
-        );
-      }
-      // 請求ヘッダ更新処理
-      if (updateMHeadList.length > 0) {
-        // 更新処理実行
-        await updateBillMeisaiHead(
-          updateMHeadList.map(({ meisai, ...rest }) => rest),
-          connection
-        );
-      }
-
       // 明細 ------------------------------------------------
       // すべての採番済みの明細ヘッドリスト（明細込み）
       const allMeisaiHeads = [...insertMHeadList, ...updateMHeadList];
@@ -244,8 +227,11 @@ export const updateBill = async (data: BillHeadValues, user: string): Promise<nu
         await deleteBillMeisai(meisaiToDelete, connection);
       }
       // meisaiHeads
+      const existingMeisaiHeadIds = await connection.query(
+        `SELECT seikyu_head_id, seikyu_meisai_head_id FROM ${SCHEMA}.t_seikyu_meisai_head WHERE seikyu_head_id = ${data.seikyuHeadId}`
+      );
       const exHeads = Array.from(
-        new Set(existingMeisaiIds.rows.map(({ seikyu_meisai_id, ...rest }) => JSON.stringify(rest)))
+        new Set(existingMeisaiHeadIds.rows.map(({ seikyu_meisai_id, ...rest }) => JSON.stringify(rest)))
       ).map((str) => JSON.parse(str));
       const formedHeads = Array.from(
         new Set(formedMeisai.map(({ seikyu_meisai_id, ...rest }) => JSON.stringify(rest)))
@@ -265,12 +251,30 @@ export const updateBill = async (data: BillHeadValues, user: string): Promise<nu
       if (HeadsToDelete.length > 0) {
         await deleteBillMeisaiHeads(HeadsToDelete, connection);
       }
+      // 請求明細ヘッダ新規挿入
+      if (insertMHeadList.length > 0) {
+        // 新規処理実行
+        await insertBillMeisaiHead(
+          insertMHeadList.map(({ meisai, ...rest }) => rest),
+          connection
+        );
+      }
+      // 請求明細ヘッダ更新処理
+      if (updateMHeadList.length > 0) {
+        // 更新処理実行
+        await updateBillMeisaiHead(
+          updateMHeadList.map(({ meisai, ...rest }) => rest),
+          connection
+        );
+      }
+      // 明細新規挿入
       if (insertMeisaiList.length > 0) {
         await insertBillMeisai(
           insertMeisaiList.map(({ upd_dat, upd_user, ...rest }) => rest),
           connection
         );
       }
+      // 明細更新処理
       if (updateMeisaiList.length > 0) {
         await updateBillMeisai(
           updateMeisaiList.map(({ add_dat, add_user, ...rest }) => rest),
