@@ -614,8 +614,9 @@ export const EquipmentKeepOrderDetail = (props: {
     } catch (e) {
       setSnackBarMessage('サーバー接続エラー');
       setSnackBarOpen(true);
+    } finally {
+      setIsProcessing(false);
     }
-    setIsProcessing(false);
   };
 
   /**
@@ -651,8 +652,9 @@ export const EquipmentKeepOrderDetail = (props: {
     } catch (e) {
       setSnackBarMessage('サーバー接続エラー');
       setSnackBarOpen(true);
+    } finally {
+      setIsProcessing(false);
     }
-    setIsProcessing(false);
   };
 
   // 機材明細削除ダイアログの押下ボタンによる処理
@@ -691,8 +693,9 @@ export const EquipmentKeepOrderDetail = (props: {
     } catch (e) {
       setSnackBarMessage('サーバー接続エラー');
       setSnackBarOpen(true);
+    } finally {
+      setIsProcessing(false);
     }
-    setIsProcessing(false);
   };
 
   /**
@@ -722,8 +725,9 @@ export const EquipmentKeepOrderDetail = (props: {
     } catch (e) {
       setSnackBarMessage('サーバー接続エラー');
       setSnackBarOpen(true);
+    } finally {
+      setIsProcessing(false);
     }
-    setIsProcessing(false);
   };
 
   /**
@@ -762,8 +766,9 @@ export const EquipmentKeepOrderDetail = (props: {
     } catch (e) {
       setSnackBarMessage('サーバー接続エラー');
       setSnackBarOpen(true);
+    } finally {
+      setIsProcessing(false);
     }
-    setIsProcessing(false);
   };
 
   // コンテナ明細削除ダイアログの押下ボタンによる処理
@@ -802,8 +807,9 @@ export const EquipmentKeepOrderDetail = (props: {
     } catch (e) {
       setSnackBarMessage('サーバー接続エラー');
       setSnackBarOpen(true);
+    } finally {
+      setIsProcessing(false);
     }
-    setIsProcessing(false);
   };
 
   /**
@@ -828,9 +834,9 @@ export const EquipmentKeepOrderDetail = (props: {
     } catch (e) {
       setSnackBarMessage('サーバー接続エラー');
       setSnackBarOpen(true);
+    } finally {
+      setIsProcessing(false);
     }
-
-    setIsProcessing(false);
     // if (newDate === null) return;
     // trigger(['kicsShukoDat', 'yardShukoDat']);
 
@@ -863,9 +869,10 @@ export const EquipmentKeepOrderDetail = (props: {
     } catch (e) {
       setSnackBarMessage('サーバー接続エラー');
       setSnackBarOpen(true);
+    } finally {
+      setIsProcessing(false);
     }
 
-    setIsProcessing(false);
     // if (newDate === null) return;
     // trigger(['kicsShukoDat', 'yardShukoDat']);
 
@@ -919,8 +926,9 @@ export const EquipmentKeepOrderDetail = (props: {
     } catch (e) {
       setSnackBarMessage('サーバー接続エラー');
       setSnackBarOpen(true);
+    } finally {
+      setIsProcessing(false);
     }
-    setIsProcessing(false);
   };
 
   /**
@@ -966,8 +974,9 @@ export const EquipmentKeepOrderDetail = (props: {
     } catch (e) {
       setSnackBarMessage('サーバー接続エラー');
       setSnackBarOpen(true);
+    } finally {
+      setIsProcessing(false);
     }
-    setIsProcessing(false);
   };
 
   /**
@@ -1035,8 +1044,9 @@ export const EquipmentKeepOrderDetail = (props: {
     } catch (e) {
       setSnackBarMessage('サーバー接続エラー');
       setSnackBarOpen(true);
+    } finally {
+      setIsProcessing(false);
     }
-    setIsProcessing(false);
   };
 
   // 機材入力ダイアログ開
@@ -1053,8 +1063,9 @@ export const EquipmentKeepOrderDetail = (props: {
     } catch (e) {
       setSnackBarMessage('サーバー接続エラー');
       setSnackBarOpen(true);
+    } finally {
+      setIsProcessing(false);
     }
-    setIsProcessing(false);
   };
 
   // 機材入力ダイアログ閉
@@ -1071,8 +1082,9 @@ export const EquipmentKeepOrderDetail = (props: {
     } catch (e) {
       setSnackBarMessage('サーバー接続エラー');
       setSnackBarOpen(true);
+    } finally {
+      setIsProcessing(false);
     }
-    setIsProcessing(false);
   };
 
   /**

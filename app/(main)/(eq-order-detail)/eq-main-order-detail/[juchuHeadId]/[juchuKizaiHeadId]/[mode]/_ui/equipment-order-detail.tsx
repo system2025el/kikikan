@@ -940,8 +940,9 @@ const EquipmentOrderDetail = (props: {
     } catch (e) {
       setSnackBarMessage('サーバー接続エラー');
       setSnackBarOpen(true);
+    } finally {
+      setIsProcessing(false);
     }
-    setIsProcessing(false);
   };
 
   /**
@@ -971,8 +972,9 @@ const EquipmentOrderDetail = (props: {
     } catch (e) {
       setSnackBarMessage('サーバー接続エラー');
       setSnackBarOpen(true);
+    } finally {
+      setIsProcessing(false);
     }
-    setIsProcessing(false);
   };
 
   /**
@@ -1037,8 +1039,9 @@ const EquipmentOrderDetail = (props: {
     } catch (e) {
       setSnackBarMessage('サーバー接続エラー');
       setSnackBarOpen(true);
+    } finally {
+      setIsProcessing(false);
     }
-    setIsProcessing(false);
   };
 
   // 機材明細削除ダイアログの押下ボタンによる処理
@@ -1093,8 +1096,9 @@ const EquipmentOrderDetail = (props: {
     } catch (e) {
       setSnackBarMessage('サーバー接続エラー');
       setSnackBarOpen(true);
+    } finally {
+      setIsProcessing(false);
     }
-    setIsProcessing(false);
   };
 
   /**
@@ -1173,8 +1177,9 @@ const EquipmentOrderDetail = (props: {
     } catch (e) {
       setSnackBarMessage('サーバー接続エラー');
       setSnackBarOpen(true);
+    } finally {
+      setIsProcessing(false);
     }
-    setIsProcessing(false);
   };
 
   /**
@@ -1220,8 +1225,9 @@ const EquipmentOrderDetail = (props: {
     } catch (e) {
       setSnackBarMessage('サーバー接続エラー');
       setSnackBarOpen(true);
+    } finally {
+      setIsProcessing(false);
     }
-    setIsProcessing(false);
   };
 
   // コンテナ明細削除ダイアログの押下ボタンによる処理
@@ -1255,8 +1261,9 @@ const EquipmentOrderDetail = (props: {
     } catch (e) {
       setSnackBarMessage('サーバー接続エラー');
       setSnackBarOpen(true);
+    } finally {
+      setIsProcessing(false);
     }
-    setIsProcessing(false);
   };
 
   /**
@@ -1309,8 +1316,9 @@ const EquipmentOrderDetail = (props: {
     } catch (e) {
       setSnackBarMessage('サーバー接続エラー');
       setSnackBarOpen(true);
+    } finally {
+      setIsProcessing(false);
     }
-    setIsProcessing(false);
   };
 
   /**
@@ -1360,8 +1368,9 @@ const EquipmentOrderDetail = (props: {
     } catch (e) {
       setSnackBarMessage('サーバー接続エラー');
       setSnackBarOpen(true);
+    } finally {
+      setIsProcessing(false);
     }
-    setIsProcessing(false);
   };
 
   /**
@@ -1397,8 +1406,9 @@ const EquipmentOrderDetail = (props: {
     } catch (e) {
       setSnackBarMessage('サーバー接続エラー');
       setSnackBarOpen(true);
+    } finally {
+      setIsProcessing(false);
     }
-    setIsProcessing(false);
   };
 
   /**
@@ -1434,8 +1444,9 @@ const EquipmentOrderDetail = (props: {
     } catch (e) {
       setSnackBarMessage('サーバー接続エラー');
       setSnackBarOpen(true);
+    } finally {
+      setIsProcessing(false);
     }
-    setIsProcessing(false);
   };
 
   /**
@@ -1777,9 +1788,10 @@ const EquipmentOrderDetail = (props: {
     } catch (e) {
       setSnackBarMessage('サーバー接続エラー');
       setSnackBarOpen(true);
+    } finally {
+      setIsDetailLoading(false);
+      setIsProcessing(false);
     }
-    setIsDetailLoading(false);
-    setIsProcessing(false);
   };
 
   // 機材入力ダイアログ開
@@ -1796,8 +1808,9 @@ const EquipmentOrderDetail = (props: {
     } catch (e) {
       setSnackBarMessage('サーバー接続エラー');
       setSnackBarOpen(true);
+    } finally {
+      setIsProcessing(false);
     }
-    setIsProcessing(false);
   };
 
   // 機材入力ダイアログ閉
@@ -1952,8 +1965,9 @@ const EquipmentOrderDetail = (props: {
       setIsProcessing(false);
       setSnackBarMessage('サーバー接続エラー');
       setSnackBarOpen(true);
+    } finally {
+      setIsProcessing(false);
     }
-    setIsProcessing(false);
   };
 
   // 分離ダイアログ閉
@@ -2114,8 +2128,9 @@ const EquipmentOrderDetail = (props: {
     } catch (e) {
       setSnackBarMessage('サーバー接続エラー');
       setSnackBarOpen(true);
+    } finally {
+      setIsProcessing(false);
     }
-    setIsProcessing(false);
   };
 
   // 並び替えダイアログ閉
@@ -2148,8 +2163,9 @@ const EquipmentOrderDetail = (props: {
     } catch (e) {
       setSnackBarMessage('サーバー接続エラー');
       setSnackBarOpen(true);
+    } finally {
+      setIsProcessing(false);
     }
-    setIsProcessing(false);
   };
 
   // 本番日入力ダイアログ開
@@ -2166,8 +2182,9 @@ const EquipmentOrderDetail = (props: {
     } catch (e) {
       setSnackBarMessage('サーバー接続エラー');
       setSnackBarOpen(true);
+    } finally {
+      setIsProcessing(false);
     }
-    setIsProcessing(false);
   };
 
   // 本番日入力ダイアログ閉
@@ -2208,8 +2225,9 @@ const EquipmentOrderDetail = (props: {
     } catch (e) {
       setSnackBarMessage('サーバー接続エラー');
       setSnackBarOpen(true);
+    } finally {
+      setIsProcessing(false);
     }
-    setIsProcessing(false);
   };
 
   /**

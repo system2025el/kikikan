@@ -831,9 +831,10 @@ export const EquipmentReturnOrderDetail = (props: {
       } catch (e) {
         setSnackBarMessage('データの取得に失敗しました');
         setSnackBarOpen(true);
+      } finally {
+        setIsDetailLoading(false);
+        setAnchorEl(null);
       }
-      setIsDetailLoading(false);
-      setAnchorEl(null);
     }
   };
   // 3か月前
@@ -885,8 +886,9 @@ export const EquipmentReturnOrderDetail = (props: {
     } catch (e) {
       setSnackBarMessage('サーバー接続エラー');
       setSnackBarOpen(true);
+    } finally {
+      setIsProcessing(false);
     }
-    setIsProcessing(false);
   };
 
   /**
@@ -939,8 +941,9 @@ export const EquipmentReturnOrderDetail = (props: {
     } catch (e) {
       setSnackBarMessage('サーバー接続エラー');
       setSnackBarOpen(true);
+    } finally {
+      setIsProcessing(false);
     }
-    setIsProcessing(false);
   };
 
   // 明細削除ダイアログの押下ボタンによる処理
@@ -995,8 +998,9 @@ export const EquipmentReturnOrderDetail = (props: {
     } catch (e) {
       setSnackBarMessage('サーバー接続エラー');
       setSnackBarOpen(true);
+    } finally {
+      setIsProcessing(false);
     }
-    setIsProcessing(false);
   };
 
   /**
@@ -1026,8 +1030,9 @@ export const EquipmentReturnOrderDetail = (props: {
     } catch (e) {
       setSnackBarMessage('サーバー接続エラー');
       setSnackBarOpen(true);
+    } finally {
+      setIsProcessing(false);
     }
-    setIsProcessing(false);
   };
 
   /**
@@ -1074,8 +1079,9 @@ export const EquipmentReturnOrderDetail = (props: {
     } catch (e) {
       setSnackBarMessage('サーバー接続エラー');
       setSnackBarOpen(true);
+    } finally {
+      setIsProcessing(false);
     }
-    setIsProcessing(false);
   };
 
   // コンテナ明細削除ダイアログの押下ボタンによる処理
@@ -1109,8 +1115,9 @@ export const EquipmentReturnOrderDetail = (props: {
     } catch (e) {
       setSnackBarMessage('サーバー接続エラー');
       setSnackBarOpen(true);
+    } finally {
+      setIsProcessing(false);
     }
-    setIsProcessing(false);
   };
 
   /**
@@ -1156,8 +1163,9 @@ export const EquipmentReturnOrderDetail = (props: {
     } catch (e) {
       setSnackBarMessage('サーバー接続エラー');
       setSnackBarOpen(true);
+    } finally {
+      setIsProcessing(false);
     }
-    setIsProcessing(false);
   };
 
   /**
@@ -1203,8 +1211,9 @@ export const EquipmentReturnOrderDetail = (props: {
     } catch (e) {
       setSnackBarMessage('サーバー接続エラー');
       setSnackBarOpen(true);
+    } finally {
+      setIsProcessing(false);
     }
-    setIsProcessing(false);
   };
 
   /**
@@ -1384,9 +1393,10 @@ export const EquipmentReturnOrderDetail = (props: {
     } catch (e) {
       setSnackBarMessage('サーバー接続エラー');
       setSnackBarOpen(true);
+    } finally {
+      setIsDetailLoading(false);
+      setIsProcessing(false);
     }
-    setIsDetailLoading(false);
-    setIsProcessing(false);
   };
 
   // 機材入力ダイアログ開
@@ -1403,8 +1413,9 @@ export const EquipmentReturnOrderDetail = (props: {
     } catch (e) {
       setSnackBarMessage('サーバー接続エラー');
       setSnackBarOpen(true);
+    } finally {
+      setIsProcessing(false);
     }
-    setIsProcessing(false);
   };
 
   // 機材入力ダイアログ閉
