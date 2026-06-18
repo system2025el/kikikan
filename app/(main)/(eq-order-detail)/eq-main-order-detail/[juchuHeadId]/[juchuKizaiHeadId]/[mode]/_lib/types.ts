@@ -173,3 +173,11 @@ export type SeparationCtn = JuchuContainerMeisaiValues & {
   separatePlanKicsKizaiQty: number;
   separatePlanYardKizaiQty: number;
 };
+
+/**
+ * 機材選択用セット機材グループ
+ */
+export type EqptGroup = {
+  parent: SelectedEqptsValues;
+  children: SelectedEqptsValues[];
+};

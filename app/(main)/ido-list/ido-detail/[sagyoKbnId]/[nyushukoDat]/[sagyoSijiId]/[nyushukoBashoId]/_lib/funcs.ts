@@ -10,7 +10,8 @@ import { deleteIdoDen, insertIdoDen, selectIdoDenMaxId, updateIdoDen } from '@/a
 import { deleteIdoFix, insertIdoFix, selectIdoFix, selectIdoFixMaxId } from '@/app/_lib/db/tables/t-ido-fix';
 import { selectActiveBumons } from '@/app/_lib/db/tables/v_bumon_lst';
 import { selectConfirmIdoDen, selectIdoDen } from '@/app/_lib/db/tables/v-ido-den3-lst';
-import { selectActiveEqpts, selectChosenIdoEqptsDetails } from '@/app/_lib/db/tables/v-kizai-list';
+import { selectChosenIdoEqptsDetails } from '@/app/_lib/db/tables/v-kizai-list';
+import { selectActiveEqpts } from '@/app/_lib/db/tables/v-kizai-lst-sel';
 import { IdoDen } from '@/app/_lib/db/types/t-ido-den-type';
 import { IdoFix } from '@/app/_lib/db/types/t-ido-fix-type';
 

@@ -63,7 +63,8 @@ import {
 import { selectActiveBumons } from '@/app/_lib/db/tables/v_bumon_lst';
 import { selectJuchuKizaiMeisai } from '@/app/_lib/db/tables/v-juchu-kizai-meisai';
 import { selectIdoJuchuKizaiMeisai } from '@/app/_lib/db/tables/v-juchu-kizai-meisai-sum';
-import { selectActiveEqpts, selectChosenEqptsDetails } from '@/app/_lib/db/tables/v-kizai-list';
+import { selectChosenEqptsDetails } from '@/app/_lib/db/tables/v-kizai-list';
+import { selectActiveEqpts } from '@/app/_lib/db/tables/v-kizai-lst-sel';
 import { selectFinishedReturn } from '@/app/_lib/db/tables/v-nyushuko-den2-lst-oyako';
 import { JuchuCtnMeisai } from '@/app/_lib/db/types/t_juchu_ctn_meisai-type';
 import { IdoDenJuchu } from '@/app/_lib/db/types/t-ido-den-juchu-type';

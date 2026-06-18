@@ -11,7 +11,7 @@ import {
   selectOneEqptSet,
   updateEqptSetDB,
 } from '@/app/_lib/db/tables/m-kizai-set';
-import { selectActiveEqpts } from '@/app/_lib/db/tables/v-kizai-list';
+import { selectActiveEqpts } from '@/app/_lib/db/tables/v-kizai-lst-sel';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { EqptSelection } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';
 

@@ -3317,6 +3317,40 @@ export type Database = {
         };
         Relationships: [];
       };
+      v_kizai_lst_sel: {
+        Row: {
+          bld_cod: string | null;
+          bumon_id: number | null;
+          bumon_nam: string | null;
+          ctn_flg: number | null;
+          dai_bumon_id: number | null;
+          dai_bumon_nam: string | null;
+          def_dat_qty: number | null;
+          del_flg: number | null;
+          dsp_flg: number | null;
+          dsp_ord_num: number | null;
+          eda_cod: string | null;
+          kizai_grp_cod: number | null;
+          kizai_id: number | null;
+          kizai_nam: string | null;
+          mem: string | null;
+          rank_amt_1: number | null;
+          rank_amt_2: number | null;
+          rank_amt_3: number | null;
+          rank_amt_4: number | null;
+          rank_amt_5: number | null;
+          reg_amt: number | null;
+          section_nam: string | null;
+          section_num: number | null;
+          shozoku_id: number | null;
+          shozoku_nam: string | null;
+          shozoku_nam_short: string | null;
+          shukei_bumon_id: number | null;
+          shukei_bumon_nam: string | null;
+          tana_cod: string | null;
+        };
+        Relationships: [];
+      };
       v_kizai_qty: {
         Row: {
           del_flg: number | null;
