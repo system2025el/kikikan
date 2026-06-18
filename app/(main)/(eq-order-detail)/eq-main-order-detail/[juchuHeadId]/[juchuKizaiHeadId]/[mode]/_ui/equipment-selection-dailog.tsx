@@ -30,7 +30,7 @@ import { Loading } from '@/app/(main)/_ui/loading';
 
 import { bundleData } from '../_lib/eqdata';
 import { checkSetoptions, getEqptsForEqptSelection, getSelectedEqpts, getSetOptions } from '../_lib/funcs';
-import { EqptSelection, JuchuKizaiMeisaiValues, SelectedEqptsValues } from '../_lib/types';
+import { EqptGroup, EqptSelection, JuchuKizaiMeisaiValues, SelectedEqptsValues } from '../_lib/types';
 import { EqptBumonsTable } from './equipment-bumons-table';
 import { EqptTable } from './equipments-table';
 
@@ -387,6 +387,38 @@ const BundleDialog = ({
       // // 選択された機材配列に親機材をpush
       // selectedEqptListRef.current.push(...oya);
     } else {
+      const currentList = [...selectedEqptListRef.current];
+
+      const groups: EqptGroup[] = [];
+      let currentGroup: EqptGroup | null = null;
+
+      for (const item of currentList) {
+        if (item.indentNum === 0) {
+          // 親機材の場合：新しいグループを作成
+          currentGroup = { parent: item, children: [] };
+          groups.push(currentGroup);
+        } else {
+          // オプション機材の場合：直近の親グループに追加
+          if (currentGroup) {
+            currentGroup.children.push(item);
+          } else {
+            // 万が一、最初の要素がオプションだった場合のセーフティ
+            groups.push({ parent: item, children: [] });
+          }
+        }
+      }
+
+      groups.sort((a, b) => {
+        if (a.parent.kizaiGrpCod < b.parent.kizaiGrpCod) return -1;
+        if (a.parent.kizaiGrpCod > b.parent.kizaiGrpCod) return 1;
+
+        return a.parent.dspOrdNum - b.parent.dspOrdNum;
+      });
+
+      // グループをバラして一つの平坦な配列に戻す
+      const sortedList = groups.flatMap((group) => [group.parent, ...group.children]);
+
+      selectedEqptListRef.current = sortedList;
       handleConfirmAll(selectedEqptListRef.current);
     }
   };
