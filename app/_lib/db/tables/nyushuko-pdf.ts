@@ -165,6 +165,8 @@ export const selectNyukoPdfJuchuKizaiMeisai = async (
           ,v_nyushuko_den2_lst.kizai_nam
           ,v_nyushuko_den2_lst.plan_qty::integer
           ,v_nyushuko_den2_lst.mem2
+          ,v_kizai_lst_sel.kizai_grp_cod
+          ,v_kizai_lst_sel.dsp_ord_num
           --ソート用カラム
           ,v_juchu_kizai_head_lst.juchu_kizai_head_id
           ,v_nyushuko_den2_lst.ctn_flg
@@ -175,6 +177,8 @@ export const selectNyukoPdfJuchuKizaiMeisai = async (
           INNER JOIN ${SCHEMA}.v_nyushuko_den2_lst ON
           v_juchu_kizai_head_lst.juchu_head_id = v_nyushuko_den2_lst.juchu_head_id
           AND v_juchu_kizai_head_lst.juchu_kizai_head_id = v_nyushuko_den2_lst.juchu_kizai_head_id
+          INNER JOIN ${SCHEMA}.v_kizai_lst_sel ON
+          v_nyushuko_den2_lst.kizai_id = v_kizai_lst_sel.kizai_id
       
       WHERE
           v_juchu_kizai_head_lst.juchu_head_id = $1
