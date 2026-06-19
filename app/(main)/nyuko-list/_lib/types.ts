@@ -29,4 +29,14 @@ export type NyukoKizai = {
   kizai_nam: string;
   plan_qty: number;
   mem2: string;
+  kizai_grp_cod: number;
+  dsp_ord_num: number;
+};
+
+/**
+ * 入庫セット機材グループ
+ */
+export type EqptGroup = {
+  parent: NyukoKizai;
+  children: NyukoKizai[];
 };

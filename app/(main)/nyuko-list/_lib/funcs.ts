@@ -10,7 +10,7 @@ import { selectFilteredNyukoList, selectFilteredShukoList } from '@/app/_lib/db/
 import { toJapanYMDString } from '../../_lib/date-conversion';
 import { getDic } from '../../_lib/funcs';
 import { PdfModel } from '../nyuko/_lib/hooks/usePdf';
-import { NyukoKizai, NyukoListSearchValues, NyukoTableValues } from './types';
+import { EqptGroup, NyukoKizai, NyukoListSearchValues, NyukoTableValues } from './types';
 
 /**
  * 入庫一覧取得
@@ -141,62 +141,71 @@ export const getPdfData = async (
     // オプション機材のインデント文字
     const indentChara = await getDic(1);
 
-    // セット機材のインデックスを特定
-    const setKizaiIndices = new Set<number>();
-    updatedKizaiData.forEach((item, index) => {
-      if (item.kizai_nam.startsWith(indentChara)) {
-        setKizaiIndices.add(index);
-        if (index > 0) setKizaiIndices.add(index - 1);
-      }
-    });
+    // セット機材のグループ化
+    const groups: EqptGroup[] = [];
+    let currentGroup: EqptGroup | null = null;
 
-    // 合計対象のデータMap
-    const summaryMap = new Map<number, NyukoKizai>();
-
-    // 合計対象のうち最初に現れた位置を記録するMap
-    const firstMap = new Map<number, number>();
-
-    updatedKizaiData.forEach((item, index) => {
-      // セット機材は合計しない
-      if (!setKizaiIndices.has(index)) {
-        const existing = summaryMap.get(item.kizai_id);
-        // 既にあるものは合計
-        if (existing) {
-          existing.plan_qty += item.plan_qty;
-          existing.mem2 =
-            existing.mem2 && item.mem2
-              ? `${existing.mem2},${item.mem2}`
-              : !existing.mem2 && item.mem2
-                ? item.mem2
-                : existing.mem2 && !item.mem2
-                  ? existing.mem2
-                  : '';
-          // 最初のものはMapに追加して位置を記録
+    for (const item of updatedKizaiData) {
+      if (!item.kizai_nam.startsWith(indentChara)) {
+        // 親機材の場合：新しいグループを作成
+        currentGroup = { parent: item, children: [] };
+        groups.push(currentGroup);
+      } else {
+        // オプション機材の場合：直近の親グループに追加
+        if (currentGroup) {
+          currentGroup.children.push(item);
         } else {
-          summaryMap.set(item.kizai_id, { ...item });
-          firstMap.set(item.kizai_id, index);
+          // 万が一、最初の要素がオプションだった場合のセーフティ
+          groups.push({ parent: item, children: [] });
         }
       }
-    });
+    }
 
-    // セット機材データと合計データ
-    const mergeKizaiData: { index: number; data: NyukoKizai }[] = [];
+    // セット機材以外を機材IDごとに合算
+    const finalGroups: EqptGroup[] = [];
+    const summaryMap = new Map<number, EqptGroup>();
 
-    // セット機材データを追加
-    setKizaiIndices.forEach((i) => {
-      if (updatedKizaiData[i]) {
-        mergeKizaiData.push({ index: i, data: { ...updatedKizaiData[i] } });
+    for (const group of groups) {
+      // childrenがある場合はセット機材なので合算しない
+      if (group.children.length > 0) {
+        finalGroups.push(group);
+      } else {
+        // childrenがない場合は単独機材なのでkizai_idごとに合算
+        const kizaiId = group.parent.kizai_id;
+        const existing = summaryMap.get(kizaiId);
+
+        if (existing) {
+          // すでにMapにある場合は、数量を足し算してメモを結合
+          existing.parent.plan_qty += group.parent.plan_qty;
+          existing.parent.mem2 =
+            existing.parent.mem2 && group.parent.mem2
+              ? `${existing.parent.mem2},${group.parent.mem2}`
+              : !existing.parent.mem2 && group.parent.mem2
+                ? group.parent.mem2
+                : existing.parent.mem2 && !group.parent.mem2
+                  ? existing.parent.mem2
+                  : '';
+        } else {
+          // 新しく現れた機材は、元のデータを汚さないようコピーしてMapと配列に追加
+          const clonedGroup = {
+            parent: { ...group.parent },
+            children: [],
+          };
+          summaryMap.set(kizaiId, clonedGroup);
+          finalGroups.push(clonedGroup); // finalGroupsに参照を入れておく
+        }
       }
+    }
+
+    finalGroups.sort((a, b) => {
+      if (a.parent.kizai_grp_cod < b.parent.kizai_grp_cod) return -1;
+      if (a.parent.kizai_grp_cod > b.parent.kizai_grp_cod) return 1;
+
+      return a.parent.dsp_ord_num - b.parent.dsp_ord_num;
     });
 
-    // 合体データを追加（最初に現れたインデックスを使用）
-    summaryMap.forEach((item, kizaiId) => {
-      const originalIndex = firstMap.get(kizaiId)!;
-      mergeKizaiData.push({ index: originalIndex, data: item });
-    });
-
-    // 元のインデックス順に並べる
-    const sortKizaiData = mergeKizaiData.sort((a, b) => a.index - b.index).map((item) => item.data);
+    // グループをバラして一つの平坦な配列に戻す
+    const sortKizaiData = finalGroups.flatMap((group) => [group.parent, ...group.children]);
 
     const sqlHeader = nyukoResult.header;
 

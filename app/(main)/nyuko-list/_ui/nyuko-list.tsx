@@ -256,11 +256,7 @@ export const NyukoList = (/*props: { shukoData: NyukoTableValues[]}*/) => {
               <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} width={'100%'} p={0.5}>
                 <Typography>全{nyukoList ? nyukoList.length : 0}件</Typography>
                 <Box>
-                  <Button
-                    onClick={handleOutput}
-                    disabled={selected.length === 0 || user?.permission.nyushuko === permission.nyushuko_ref}
-                    loading={isProcessing}
-                  >
+                  <Button onClick={handleOutput} disabled={selected.length === 0} loading={isProcessing}>
                     員数票出力
                   </Button>
                 </Box>
