@@ -2661,7 +2661,7 @@ const EquipmentOrderDetail = (props: {
                                 },
                               }}
                               helperText={fieldState.error?.message}
-                              disabled={!edit || shukoFixFlag}
+                              disabled={!edit}
                             />
                           )}
                         />
@@ -2755,9 +2755,6 @@ const EquipmentOrderDetail = (props: {
                                 }}
                                 helperText={fieldState.error?.message}
                                 disabled={!edit}
-                                slotProps={{
-                                  input: { readOnly: shukoFixFlag },
-                                }}
                               />
                             )}
                           />
