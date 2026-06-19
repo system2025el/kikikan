@@ -1,5 +1,6 @@
 'use client';
 import Delete from '@mui/icons-material/Delete';
+import EventNoteIcon from '@mui/icons-material/EventNote';
 import {
   Button,
   IconButton,
@@ -60,6 +61,9 @@ export const ShukoIdoDenTable = (props: {
             <TableCell align="center" style={styles.header} />
             <TableCell align="left" style={styles.header}>
               機材名
+            </TableCell>
+            <TableCell align="center" style={styles.header}>
+              貸出状況
             </TableCell>
             <TableCell align="left" style={styles.header}>
               在庫場所
@@ -130,6 +134,15 @@ export const ShukoIdoDenTable = (props: {
                   }}
                 >
                   {row.kizaiNam}
+                </TableCell>
+                <TableCell padding="checkbox" align="center">
+                  <IconButton
+                    onClick={() =>
+                      window.open(`/loan-situation/${row.kizaiId}?date=${row.nyushukoDat ? row.nyushukoDat : ''}`)
+                    }
+                  >
+                    <EventNoteIcon />
+                  </IconButton>
                 </TableCell>
                 <TableCell align="left">{row.shozokuId === 1 ? 'K' : 'Y'}</TableCell>
                 <TableCell align="right">{row.rfidYardQty}</TableCell>
