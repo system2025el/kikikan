@@ -490,6 +490,7 @@ export const getJuchuContainerMeisai = async (juchuHeadId: number, juchuKizaiHea
       indentNum: 0,
       delFlag: false,
       saveFlag: true,
+      selected: false,
     }));
 
     return juchuContainerMeisaiData;

@@ -287,6 +287,7 @@ export const getJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId:
       indentNum: d.indent_num ?? 0,
       delFlag: false,
       saveFlag: true,
+      selected: false,
     }));
     return juchuKizaiMeisaiData;
   } catch (e) {
