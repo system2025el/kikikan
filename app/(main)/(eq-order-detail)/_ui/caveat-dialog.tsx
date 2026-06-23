@@ -112,8 +112,8 @@ export const WorkingConfirmDialog = ({ open, onClose }: { open: boolean; onClose
         </DialogContentText>
       </DialogContent>
       <DialogActions>
-        <Button onClick={() => onClose(true)} color="primary" variant="contained" autoFocus>
-          保存
+        <Button onClick={() => onClose(true)} color="error" variant="contained" autoFocus>
+          実績を削除して保存
         </Button>
         <Button onClick={() => onClose(false)}>戻る</Button>
       </DialogActions>
