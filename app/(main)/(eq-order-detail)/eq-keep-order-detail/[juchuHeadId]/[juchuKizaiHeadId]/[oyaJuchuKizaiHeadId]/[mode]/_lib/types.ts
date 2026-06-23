@@ -70,6 +70,7 @@ export type KeepJuchuKizaiMeisaiValues = {
   indentNum: number;
   delFlag: boolean;
   saveFlag: boolean;
+  selected: boolean;
 };
 
 export type KeepJuchuContainerMeisaiValues = {
@@ -87,6 +88,7 @@ export type KeepJuchuContainerMeisaiValues = {
   indentNum: number;
   delFlag: boolean;
   saveFlag: boolean;
+  selected: boolean;
 };
 
 export type HonbanbiColorValues = {

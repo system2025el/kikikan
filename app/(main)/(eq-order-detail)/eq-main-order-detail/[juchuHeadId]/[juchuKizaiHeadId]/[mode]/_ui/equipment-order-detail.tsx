@@ -168,10 +168,6 @@ const EquipmentOrderDetail = (props: {
   const [juchuHonbanbiList, setJuchuHonbanbiList] = useState<JuchuKizaiHonbanbiValues[]>(props.juchuHonbanbiData ?? []);
   // 受注本番日削除リスト
   const [juchuHonbanbiDeleteList, setJuchuHonbanbiDeleteList] = useState<JuchuKizaiHonbanbiValues[]>([]);
-  // 削除機材
-  const [deleteEq, setDeleteEq] = useState<{ rowIndex: number; row: JuchuKizaiMeisaiValues } | null>(null);
-  // 削除コンテナ
-  const [deleteCtn, setDeleteCtn] = useState<JuchuContainerMeisaiValues | null>(null);
 
   // 出庫日
   const [shukoDate, setShukoDate] = useState<Date | null>(/*props.shukoDate*/ null);
@@ -204,10 +200,6 @@ const EquipmentOrderDetail = (props: {
   const [sortDialogOpen, setSortDialogOpen] = useState(false);
   // 日付選択カレンダーダイアログ制御
   const [dateSelectionDialogOpne, setDateSelectionDialogOpne] = useState(false);
-  // 機材削除ダイアログ制御
-  const [deleteEqOpen, setDeleteEqOpen] = useState(false);
-  // コンテナ削除ダイアログ制御
-  const [deleteCtnOpen, setDeleteCtnOpen] = useState(false);
   // 削除ダイアログ制御
   const [deleteOpen, setDeleteOpen] = useState(false);
 
@@ -353,8 +345,7 @@ const EquipmentOrderDetail = (props: {
       setSeparationDialogOpen(false);
       setSortDialogOpen(false);
       setDateSelectionDialogOpne(false);
-      setDeleteEqOpen(false);
-      setDeleteCtnOpen(false);
+      setDeleteOpen(false);
 
       setAlertTitle('編集中');
       setAlertMessage(`${lockData.addUser}が編集中です`);
@@ -1027,12 +1018,20 @@ const EquipmentOrderDetail = (props: {
     });
   };
 
+  /**
+   * 機材テーブルのチェックボックス押下時
+   * @param row
+   */
   const handleEqSelect = (row: JuchuKizaiMeisaiValues) => {
     setJuchuKizaiMeisaiList((prev) =>
       prev.map((data) => (data === row ? { ...data, selected: !data.selected } : data))
     );
   };
 
+  /**
+   * 機材テーブルの全選択チェックボックス押下時
+   * @returns
+   */
   const handleEqAllSelect = () => {
     const selectEq = juchuKizaiMeisaiList.filter((data) => !data.delFlag && data.selected);
 
@@ -1045,6 +1044,10 @@ const EquipmentOrderDetail = (props: {
     }
   };
 
+  /**
+   * 削除ボタン押下時
+   * @returns
+   */
   const handleDelete = async () => {
     if (isProcessing) return;
     setIsProcessing(true);
@@ -1063,6 +1066,11 @@ const EquipmentOrderDetail = (props: {
     }
   };
 
+  /**
+   * 明細削除処理
+   * @param result
+   * @returns
+   */
   const handleDeleteExecute = async (result: boolean) => {
     if (isProcessing) return;
     setIsProcessing(true);
@@ -1235,12 +1243,20 @@ const EquipmentOrderDetail = (props: {
     });
   };
 
+  /**
+   * コンテナテーブルのチェックボックス押下時
+   * @param row
+   */
   const handleCtnSelect = (row: JuchuContainerMeisaiValues) => {
     setJuchuContainerMeisaiList((prev) =>
       prev.map((data) => (data === row ? { ...data, selected: !data.selected } : data))
     );
   };
 
+  /**
+   * コンテナテーブルの全選択チェックボックス押下時
+   * @returns
+   */
   const handleCtnAllSelect = () => {
     const selectCtn = juchuContainerMeisaiList.filter((data) => !data.delFlag && data.selected);
 
@@ -3076,7 +3092,7 @@ const EquipmentOrderDetail = (props: {
                   <Loading />
                 ) : (
                   <>
-                    <Box display={'flex'} flexDirection="row" width="100%" py={2}>
+                    <Box display={'flex'} flexDirection="row" width="100%">
                       <Box
                         sx={{
                           width: {
