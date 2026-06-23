@@ -62,8 +62,14 @@ import {
 import { DetailOerValues } from '@/app/(main)/(eq-order-detail)/_lib/types';
 import { HonbanbiColorValues } from '@/app/(main)/(eq-order-detail)/eq-keep-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[oyaJuchuKizaiHeadId]/[mode]/_lib/types';
 
-import { AlertDialog, DeleteAlertDialog, MoveAlertDialog } from '../../../../../_ui/caveat-dialog';
 import {
+  AlertDialog,
+  DeleteAlertDialog,
+  MoveAlertDialog,
+  WorkingConfirmDialog,
+} from '../../../../../_ui/caveat-dialog';
+import {
+  checkShukoStatus,
   getHonbanbi,
   getIdoJuchuKizaiMeisai,
   getJuchuKizaiHead,
@@ -207,6 +213,11 @@ const EquipmentOrderDetail = (props: {
   const [deleteEqOpen, setDeleteEqOpen] = useState(false);
   // コンテナ削除ダイアログ制御
   const [deleteCtnOpen, setDeleteCtnOpen] = useState(false);
+  // 出庫作業中警告ダイアログ制御
+  const [workingConfirmState, setWorkingConfirmState] = useState<{
+    isOpen: boolean;
+    resolve: (value: boolean) => void;
+  } | null>(null);
 
   // スナックバー制御
   const [snackBarOpen, setSnackBarOpen] = useState(false);
@@ -536,6 +547,28 @@ const EquipmentOrderDetail = (props: {
   };
 
   /**
+   * 出庫作業中警告ダイアログ開
+   * @returns
+   */
+  const handleWorkingConfirmOpen = () => {
+    return new Promise<boolean>((resolve) => {
+      setWorkingConfirmState({ isOpen: true, resolve });
+    });
+  };
+
+  /**
+   * 出庫作業中警告ダイアログ閉
+   * @param isConfirmed
+   */
+  const handleWorkingConfirmClose = (isConfirmed: boolean) => {
+    if (workingConfirmState) {
+      // awaitの待機を解除し、結果を返す
+      workingConfirmState.resolve(isConfirmed);
+    }
+    setWorkingConfirmState(null);
+  };
+
+  /**
    * 保存ボタン押下時
    * @param data 受注機材ヘッダーデータ
    * @returns
@@ -648,6 +681,30 @@ const EquipmentOrderDetail = (props: {
       const checkJuchuContainerMeisai =
         JSON.stringify(originJuchuContainerMeisaiList) !==
         JSON.stringify(juchuContainerMeisaiList.filter((data) => !data.delFlag));
+
+      // 出発前の場合出庫作業チェック
+      if (!shukoFixFlag) {
+        try {
+          const isWorking = await checkShukoStatus(data.juchuHeadId, data.juchuKizaiHeadId);
+
+          if (isWorking) {
+            // ダイアログを表示し、ユーザーが「保存」か「キャンセル」を押すまでここで待機する
+            const isConfirmed = await handleWorkingConfirmOpen();
+
+            if (!isConfirmed) {
+              setIsLoading(false);
+              setIsProcessing(false);
+              return;
+            }
+          }
+        } catch (e) {
+          setIsLoading(false);
+          setIsProcessing(false);
+          setSnackBarMessage('作業確認に失敗しました');
+          setSnackBarOpen(true);
+          return;
+        }
+      }
 
       const updateResult = await saveJuchuKizai(
         checkJuchuKizaiHead,
@@ -3481,6 +3538,7 @@ const EquipmentOrderDetail = (props: {
       <MoveAlertDialog open={moveOpen} onClick={handleMoveDialog} />
       <DeleteAlertDialog open={deleteEqOpen} onClick={handleEqMeisaiDeleteResult} />
       <DeleteAlertDialog open={deleteCtnOpen} onClick={handleCtnMeisaiDeleteResult} />
+      <WorkingConfirmDialog open={!!workingConfirmState?.isOpen} onClose={handleWorkingConfirmClose} />
       <Snackbar
         open={snackBarOpen}
         autoHideDuration={6000}
