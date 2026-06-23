@@ -105,7 +105,11 @@ export const WorkingConfirmDialog = ({ open, onClose }: { open: boolean; onClose
         <Box>作業中</Box>
       </DialogTitle>
       <DialogContent>
-        <DialogContentText>出庫作業が開始されていますが保存してもよろしいでしょうか？</DialogContentText>
+        <DialogContentText>
+          出庫作業が開始されています。
+          <br />
+          出庫日時を変更すると実績がクリアされますがよろしいですか？
+        </DialogContentText>
       </DialogContent>
       <DialogActions>
         <Button onClick={() => onClose(true)} color="primary" variant="contained" autoFocus>
