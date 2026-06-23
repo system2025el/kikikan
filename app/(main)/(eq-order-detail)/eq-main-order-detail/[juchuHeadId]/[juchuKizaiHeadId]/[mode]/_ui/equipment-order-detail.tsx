@@ -682,8 +682,8 @@ const EquipmentOrderDetail = (props: {
         JSON.stringify(originJuchuContainerMeisaiList) !==
         JSON.stringify(juchuContainerMeisaiList.filter((data) => !data.delFlag));
 
-      // 出発前の場合出庫作業チェック
-      if (!shukoFixFlag) {
+      // 出庫時間に変更があった場合出庫作業チェック
+      if (checkKicsShukoDat || checkYardShukoDat) {
         try {
           const isWorking = await checkShukoStatus(data.juchuHeadId, data.juchuKizaiHeadId);
 
