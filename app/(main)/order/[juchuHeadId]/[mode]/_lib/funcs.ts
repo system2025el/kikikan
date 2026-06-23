@@ -215,7 +215,7 @@ export const addJuchuHead = async (juchuHeadData: OrderValues, userNam: string) 
  * @param data 受注ヘッダーデータ
  * @returns 正誤
  */
-export const updJuchuHead = async (data: OrderValues) => {
+export const updJuchuHead = async (data: OrderValues, userNam: string) => {
   const updateData: JuchuHead = {
     juchu_head_id: data.juchuHeadId,
     del_flg: data.delFlg,
@@ -232,7 +232,7 @@ export const updJuchuHead = async (data: OrderValues) => {
     // nebiki_amt: data.nebikiAmt,
     zei_kbn: data.zeiKbn,
     upd_dat: new Date().toISOString(),
-    upd_user: 'test_user',
+    upd_user: userNam,
   };
 
   try {

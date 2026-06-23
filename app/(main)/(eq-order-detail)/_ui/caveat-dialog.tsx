@@ -1,7 +1,7 @@
 'use client';
 
 import WarningIcon from '@mui/icons-material/Warning';
-import { Box, Button, Dialog, DialogActions, DialogContentText, DialogTitle } from '@mui/material';
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { set } from 'zod';
 
@@ -92,6 +92,26 @@ export const DeleteAlertDialog = ({ open, onClick }: { open: boolean; onClick: (
           削除
         </Button>
         <Button onClick={() => onClick(false)}>戻る</Button>
+      </DialogActions>
+    </Dialog>
+  );
+};
+
+export const WorkingConfirmDialog = ({ open, onClose }: { open: boolean; onClose: (isConfirmed: boolean) => void }) => {
+  return (
+    <Dialog open={open} onClose={() => onClose(false)}>
+      <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
+        <WarningIcon color="error" />
+        <Box>作業中</Box>
+      </DialogTitle>
+      <DialogContent>
+        <DialogContentText>出庫作業が開始されていますが保存してもよろしいでしょうか？</DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => onClose(true)} color="primary" variant="contained" autoFocus>
+          保存
+        </Button>
+        <Button onClick={() => onClose(false)}>戻る</Button>
       </DialogActions>
     </Dialog>
   );

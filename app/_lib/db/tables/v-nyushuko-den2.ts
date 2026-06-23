@@ -138,6 +138,34 @@ export const selectFilteredNyukoList = async (queries: NyukoListSearchValues) =>
   }
 };
 
+/**
+ * 出庫作業ステータス確認
+ * @param juchuHeadId
+ * @param juchuKizaiHeadId
+ * @returns
+ */
+export const selectShukoStateConfirm = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
+  const query = `
+    select
+      juchu_kizai_head_idv
+    from 
+      v_nyushuko_den2 
+    where 
+      juchu_head_id = $1
+      and ('[' || replace(v_nyushuko_den2.juchu_kizai_head_idv ,',' , '][')  || ']') like '%[' || $2 || ']%' --1で検索したときに10などが引っ掛からないよう[]をつけて検索
+      and nyushuko_shubetu_id = $3
+      and (sstb_sagyo_sts_id > 0 or schk_sagyo_sts_id > 0 or shuko_fix_flg = $4)
+  `;
+
+  const values = [juchuHeadId, juchuKizaiHeadId, 1, 1];
+
+  try {
+    return (await pool.query(query, values)).rows;
+  } catch (e) {
+    throw new Error('[selectShukoStateConfirm] DBエラー:', { cause: e });
+  }
+};
+
 // export const selectNyushukoOne = async (
 //   juchuHeadId: number,
 //   juchuKizaiHeadKbn: number,

@@ -65,6 +65,7 @@ import { selectJuchuKizaiMeisai } from '@/app/_lib/db/tables/v-juchu-kizai-meisa
 import { selectIdoJuchuKizaiMeisai } from '@/app/_lib/db/tables/v-juchu-kizai-meisai-sum';
 import { selectChosenEqptsDetails } from '@/app/_lib/db/tables/v-kizai-list';
 import { selectActiveEqpts } from '@/app/_lib/db/tables/v-kizai-lst-sel';
+import { selectShukoStateConfirm } from '@/app/_lib/db/tables/v-nyushuko-den2';
 import { selectFinishedReturn } from '@/app/_lib/db/tables/v-nyushuko-den2-lst-oyako';
 import { JuchuCtnMeisai } from '@/app/_lib/db/types/t_juchu_ctn_meisai-type';
 import { IdoDenJuchu } from '@/app/_lib/db/types/t-ido-den-juchu-type';
@@ -2978,6 +2979,29 @@ export const juchuMeisaiSeparation = async (
     return null;
   } finally {
     connection.release();
+  }
+};
+
+/**
+ * 出庫作業ステータス確認
+ * @param juchuHeadId
+ * @param juchuKizaiHeadId
+ * @returns
+ */
+export const checkShukoStatus = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
+  try {
+    const confirmData = await selectShukoStateConfirm(juchuHeadId, juchuKizaiHeadId);
+    return confirmData.length === 0 ? false : true;
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
+    throw e;
   }
 };
 
