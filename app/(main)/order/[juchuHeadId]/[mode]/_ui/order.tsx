@@ -273,7 +273,7 @@ export const Order = (props: {
       }
       // 更新
     } else {
-      const updateResult = await updJuchuHead(data);
+      const updateResult = await updJuchuHead(data, user.name);
       if (updateResult) {
         reset(data);
         setIsLoading(false);
