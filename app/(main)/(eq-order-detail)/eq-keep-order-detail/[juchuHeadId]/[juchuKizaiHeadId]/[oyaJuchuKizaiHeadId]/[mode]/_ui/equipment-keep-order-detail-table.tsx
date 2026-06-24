@@ -122,6 +122,7 @@ export const KeepEqTable: React.FC<KeepEqTableProps> = ({
                     transition: 'background-color 0.3s',
                   },
                 }}
+                disabled={!edit || nyukoFixFlag}
               />
             </TableCell>
             <TableCell size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }} />
@@ -193,7 +194,13 @@ const KeepEqTableRow = React.memo(
     return (
       <TableRow hover>
         <TableCell sx={{ padding: 0, border: '1px solid black' }}>
-          <Checkbox color="primary" checked={row.selected} onChange={() => handleEqSelect(row)} sx={{ padding: 0 }} />
+          <Checkbox
+            color="primary"
+            checked={row.selected}
+            onChange={() => handleEqSelect(row)}
+            sx={{ padding: 0 }}
+            disabled={!edit || nyukoFixFlag}
+          />
         </TableCell>
         <TableCell align="right" size="small" sx={{ bgcolor: grey[200], py: 0, px: 1, border: '1px solid black' }}>
           {rowIndex + 1}

@@ -50,6 +50,7 @@ export type ReturnJuchuKizaiMeisaiValues = {
   indentNum: number;
   delFlag: boolean;
   saveFlag: boolean;
+  selected: boolean;
 };
 
 export type ReturnJuchuContainerMeisaiValues = {
@@ -68,4 +69,5 @@ export type ReturnJuchuContainerMeisaiValues = {
   indentNum: number;
   delFlag: boolean;
   saveFlag: boolean;
+  selected: boolean;
 };

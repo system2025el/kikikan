@@ -241,6 +241,7 @@ export const EqTable: React.FC<EqTableProps> = ({
                     transition: 'background-color 0.3s',
                   },
                 }}
+                disabled={!edit || shukoFixFlag}
               />
             </TableCell>
             <TableCell align="left" size="small" style={styles.header}>
@@ -329,7 +330,13 @@ const EqTableRow = React.memo(
     return (
       <TableRow hover>
         <TableCell sx={{ padding: 0, border: '1px solid black' }}>
-          <Checkbox color="primary" checked={row.selected} onChange={() => handleEqSelect(row)} sx={{ padding: 0 }} />
+          <Checkbox
+            color="primary"
+            checked={row.selected}
+            onChange={() => handleEqSelect(row)}
+            sx={{ padding: 0 }}
+            disabled={!edit || shukoFixFlag}
+          />
         </TableCell>
         <TableCell style={styles.row} align="center" size="small">
           <MemoTooltip
@@ -672,6 +679,7 @@ export const ContainerTable = (props: {
                     transition: 'background-color 0.3s',
                   },
                 }}
+                disabled={!edit || shukoFixFlag}
               />
             </TableCell>
             <TableCell size="small" style={styles.header} />
@@ -701,6 +709,7 @@ export const ContainerTable = (props: {
                   checked={row.selected}
                   onChange={() => handleCtnSelect(row)}
                   sx={{ padding: 0 }}
+                  disabled={!edit || shukoFixFlag}
                 />
               </TableCell>
               <TableCell

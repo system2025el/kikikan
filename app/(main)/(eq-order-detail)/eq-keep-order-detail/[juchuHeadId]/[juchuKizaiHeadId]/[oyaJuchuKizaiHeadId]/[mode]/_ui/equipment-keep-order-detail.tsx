@@ -139,10 +139,6 @@ export const EquipmentKeepOrderDetail = (props: {
   const [keepJuchuContainerMeisaiList, setKeepJuchuContainerMeisaiList] = useState<KeepJuchuContainerMeisaiValues[]>(
     /*props.keepJuchuContainerMeisaiData ??*/ []
   );
-  // 削除機材
-  const [deleteEqIndex, setDeleteEqIndex] = useState<number | null>(null);
-  // 削除コンテナ
-  const [deleteCtnIndex, setDeleteCtnIndex] = useState<number | null>(null);
 
   // 親出庫日
   const [oyaShukoDate, setOyaShukoDate] = useState<Date | null>(props.oyaShukoDate);
@@ -451,8 +447,6 @@ export const EquipmentKeepOrderDetail = (props: {
 
       // 更新
     } else {
-      // const kicsMeisai = keepJuchuKizaiMeisaiList.filter((d) => d.shozokuId === 1 && !d.delFlag);
-      // const yardMeisai = keepJuchuKizaiMeisaiList.filter((d) => d.shozokuId === 2 && !d.delFlag);
       const kicsContainer = keepJuchuContainerMeisaiList.filter((d) => d.kicsKeepQty && !d.delFlag);
       const yardContainer = keepJuchuContainerMeisaiList.filter((d) => d.yardKeepQty && !d.delFlag);
 
@@ -476,30 +470,6 @@ export const EquipmentKeepOrderDetail = (props: {
         setIsProcessing(false);
         return;
       }
-
-      // if (
-      //   ((kicsMeisai.length > 0 || kicsContainer.length > 0) && !data.kicsNyukoDat) ||
-      //   ((yardMeisai.length > 0 || yardContainer.length > 0) && !data.yardNyukoDat)
-      // ) {
-      //   if ((kicsMeisai.length > 0 || kicsContainer.length > 0) && !data.kicsNyukoDat) {
-      //     setError('kicsNyukoDat', {
-      //       type: 'manual',
-      //       message: '',
-      //     });
-      //   }
-      //   if ((yardMeisai.length > 0 || yardContainer.length > 0) && !data.yardNyukoDat) {
-      //     setError('yardNyukoDat', {
-      //       type: 'manual',
-      //       message: '',
-      //     });
-      //   }
-      //   setAlertTitle('入出庫日時が入力されていません');
-      //   setAlertMessage('入出庫日時を入力してください');
-      //   setAlertOpen(true);
-      //   setIsLoading(false);
-      //   setIsProcessing(false);
-      //   return;
-      // }
 
       // 更新判定
       const checkJuchuKizaiHead = isDirty;
@@ -586,6 +556,59 @@ export const EquipmentKeepOrderDetail = (props: {
   };
 
   /**
+   * 削除ボタン押下時
+   * @returns
+   */
+  const handleDelete = async () => {
+    if (isProcessing) return;
+    setIsProcessing(true);
+
+    try {
+      const lockResult = await lock();
+
+      if (lockResult) {
+        setDeleteOpen(true);
+      }
+    } catch (e) {
+      setSnackBarMessage('サーバー接続エラー');
+      setSnackBarOpen(true);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  /**
+   * 明細削除処理
+   * @param result
+   * @returns
+   */
+  const handleDeleteExecute = async (result: boolean) => {
+    if (isProcessing) return;
+    setIsProcessing(true);
+
+    try {
+      const lockResult = await lock();
+
+      if (lockResult) {
+        // 選択された明細のdelFlagをtrueに変更
+        setKeepJuchuKizaiMeisaiList((prev) =>
+          prev.map((data) => (data.selected ? { ...data, selected: false, delFlag: true } : data))
+        );
+
+        setKeepJuchuContainerMeisaiList((prev) =>
+          prev.map((data) => (data.selected ? { ...data, selected: false, delFlag: true } : data))
+        );
+      }
+    } catch (e) {
+      setSnackBarMessage('サーバー接続エラー');
+      setSnackBarOpen(true);
+    } finally {
+      setIsProcessing(false);
+      setDeleteOpen(false);
+    }
+  };
+
+  /**
    * 機材キープメモ入力時
    * @param rowIndex 入力された行番号
    * @param memo キープメモ内容
@@ -658,61 +681,6 @@ export const EquipmentKeepOrderDetail = (props: {
     } else {
       setKeepJuchuKizaiMeisaiList((prev) => prev.map((data) => ({ ...data, selected: true })));
       return;
-    }
-  };
-
-  /**
-   * 削除ボタン押下時
-   * @returns
-   */
-  const handleDelete = async () => {
-    if (isProcessing) return;
-    setIsProcessing(true);
-
-    try {
-      const lockResult = await lock();
-
-      if (lockResult) {
-        setDeleteOpen(true);
-      }
-    } catch (e) {
-      setSnackBarMessage('サーバー接続エラー');
-      setSnackBarOpen(true);
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  /**
-   * 明細削除処理
-   * @param result
-   * @returns
-   */
-  const handleDeleteExecute = async (result: boolean) => {
-    if (isProcessing) return;
-    setIsProcessing(true);
-
-    try {
-      const lockResult = await lock();
-
-      if (lockResult) {
-        setKeepJuchuKizaiMeisaiList((prev) =>
-          prev.map((data) => (data.selected ? { ...data, selected: false, delFlag: true } : data))
-        );
-
-        setKeepJuchuContainerMeisaiList((prev) =>
-          prev.map((data) => (data.selected ? { ...data, selected: false, delFlag: true } : data))
-        );
-
-        setDeleteOpen(false);
-      } else {
-        setDeleteOpen(false);
-      }
-    } catch (e) {
-      setSnackBarMessage('サーバー接続エラー');
-      setSnackBarOpen(true);
-    } finally {
-      setIsProcessing(false);
     }
   };
 
@@ -820,14 +788,6 @@ export const EquipmentKeepOrderDetail = (props: {
     } finally {
       setIsProcessing(false);
     }
-    // if (newDate === null) return;
-    // trigger(['kicsShukoDat', 'yardShukoDat']);
-
-    // const yardShukoDat = getValues('yardShukoDat');
-
-    // if (yardShukoDat === null) {
-    //   clearErrors('yardShukoDat');
-    // }
   };
 
   /**
@@ -855,15 +815,6 @@ export const EquipmentKeepOrderDetail = (props: {
     } finally {
       setIsProcessing(false);
     }
-
-    // if (newDate === null) return;
-    // trigger(['kicsShukoDat', 'yardShukoDat']);
-
-    // const kicsShukoDat = getValues('kicsShukoDat');
-
-    // if (kicsShukoDat === null) {
-    //   clearErrors('kicsShukoDat');
-    // }
   };
 
   /**
@@ -1618,7 +1569,7 @@ export const EquipmentKeepOrderDetail = (props: {
                             color="error"
                             disabled={
                               !edit ||
-                              shukoFixFlag ||
+                              nyukoFixFlag ||
                               (keepJuchuKizaiMeisaiList.filter((d) => !d.delFlag && d.selected).length === 0 &&
                                 keepJuchuContainerMeisaiList.filter((d) => !d.delFlag && d.selected).length === 0)
                             }

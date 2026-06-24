@@ -908,6 +908,98 @@ const EquipmentOrderDetail = (props: {
   };
 
   /**
+   * 削除ボタン押下時
+   * @returns
+   */
+  const handleDelete = async () => {
+    if (isProcessing) return;
+    setIsProcessing(true);
+
+    try {
+      const lockResult = await lock();
+
+      if (lockResult) {
+        setDeleteOpen(true);
+      }
+    } catch (e) {
+      setSnackBarMessage('サーバー接続エラー');
+      setSnackBarOpen(true);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  /**
+   * 明細削除処理
+   * @param result
+   * @returns
+   */
+  const handleDeleteExecute = async (result: boolean) => {
+    if (isProcessing) return;
+    setIsProcessing(true);
+
+    try {
+      const lockResult = await lock();
+
+      if (lockResult) {
+        if (result) {
+          const map = new Map<number, number>();
+
+          // 機材明細から選択されているindex取得
+          const indexes = juchuKizaiMeisaiList
+            .filter((data) => !data.delFlag)
+            .map((data, index) => (data.selected ? index : null))
+            .filter((index) => index !== null) as number[];
+
+          // 機材idをキーとして削除機材の合計数をmap化
+          const selectEqList = juchuKizaiMeisaiList.filter((data) => data.selected && !data.delFlag);
+          for (const eq of selectEqList) {
+            if (!map.has(eq.kizaiId)) {
+              map.set(eq.kizaiId, eq.planQty);
+            } else {
+              const currentQty = map.get(eq.kizaiId) ?? 0;
+              map.set(eq.kizaiId, currentQty + eq.planQty);
+            }
+          }
+
+          // 選択されたindexと一致するデータを削除し、同じ機材idがあれば在庫数を削除された合計数分増やす
+          const updatedEqStockData = eqStockListRef.current[0];
+          const targetIndex =
+            updatedEqStockData
+              ?.map((d, index) => (dateRange.includes(toJapanYMDString(d.calDat)) ? index : -1))
+              .filter((index) => index !== -1) ?? [];
+          setEqStockList((prev) =>
+            prev
+              .filter((_, index) => !indexes.includes(index))
+              .map((data) =>
+                map.get(data[0].kizaiId)
+                  ? data.map((d, i) =>
+                      targetIndex.includes(i) ? { ...d, zaikoQty: d.zaikoQty + (map.get(data[0].kizaiId) || 0) } : d
+                    )
+                  : data
+              )
+          );
+
+          // 選択された明細のdelFlagをtrueに変更
+          setJuchuKizaiMeisaiList((prev) =>
+            prev.map((data) => (data.selected ? { ...data, selected: false, delFlag: true } : data))
+          );
+
+          setJuchuContainerMeisaiList((prev) =>
+            prev.map((data) => (data.selected ? { ...data, selected: false, delFlag: true } : data))
+          );
+        }
+      }
+    } catch (e) {
+      setSnackBarMessage('サーバー接続エラー');
+      setSnackBarOpen(true);
+    } finally {
+      setIsProcessing(false);
+      setDeleteOpen(false);
+    }
+  };
+
+  /**
    * 機材メモ入力時
    * @param kizaiId 機材id
    * @param memo メモ内容
@@ -1041,96 +1133,6 @@ const EquipmentOrderDetail = (props: {
     } else {
       setJuchuKizaiMeisaiList((prev) => prev.map((data) => ({ ...data, selected: true })));
       return;
-    }
-  };
-
-  /**
-   * 削除ボタン押下時
-   * @returns
-   */
-  const handleDelete = async () => {
-    if (isProcessing) return;
-    setIsProcessing(true);
-
-    try {
-      const lockResult = await lock();
-
-      if (lockResult) {
-        setDeleteOpen(true);
-      }
-    } catch (e) {
-      setSnackBarMessage('サーバー接続エラー');
-      setSnackBarOpen(true);
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  /**
-   * 明細削除処理
-   * @param result
-   * @returns
-   */
-  const handleDeleteExecute = async (result: boolean) => {
-    if (isProcessing) return;
-    setIsProcessing(true);
-
-    try {
-      const lockResult = await lock();
-
-      if (lockResult) {
-        if (result) {
-          const map = new Map<number, number>();
-
-          const indexes = juchuKizaiMeisaiList
-            .filter((data, index) => !data.delFlag)
-            .map((data, index) => (data.selected ? index : null))
-            .filter((index) => index !== null) as number[];
-          const selectEqList = juchuKizaiMeisaiList.filter((data) => data.selected && !data.delFlag);
-          for (const eq of selectEqList) {
-            if (!map.has(eq.kizaiId)) {
-              map.set(eq.kizaiId, eq.planQty);
-            } else {
-              const currentQty = map.get(eq.kizaiId) ?? 0;
-              map.set(eq.kizaiId, currentQty + eq.planQty);
-            }
-          }
-
-          const updatedEqStockData = eqStockListRef.current[0];
-
-          const targetIndex = updatedEqStockData
-            .map((d, index) => (dateRange.includes(toJapanYMDString(d.calDat)) ? index : -1))
-            .filter((index) => index !== -1);
-          setEqStockList((prev) =>
-            prev
-              .filter((_, index) => !indexes.includes(index))
-              .map((data) =>
-                map.get(data[0].kizaiId)
-                  ? data.map((d, i) =>
-                      targetIndex.includes(i) ? { ...d, zaikoQty: d.zaikoQty + (map.get(data[0].kizaiId) || 0) } : d
-                    )
-                  : data
-              )
-          );
-
-          setJuchuKizaiMeisaiList((prev) =>
-            prev.map((data) => (data.selected ? { ...data, selected: false, delFlag: true } : data))
-          );
-
-          setJuchuContainerMeisaiList((prev) =>
-            prev.map((data) => (data.selected ? { ...data, selected: false, delFlag: true } : data))
-          );
-
-          setDeleteOpen(false);
-        } else {
-          setDeleteOpen(false);
-        }
-      }
-    } catch (e) {
-      setSnackBarMessage('サーバー接続エラー');
-      setSnackBarOpen(true);
-    } finally {
-      setIsProcessing(false);
     }
   };
 
@@ -3197,7 +3199,6 @@ const EquipmentOrderDetail = (props: {
                         <StockTable
                           eqStockList={eqStockList}
                           dateRange={dateRange}
-                          //juchuHonbanbiList={juchuHonbanbiList}
                           shubetuColorMap={shubetuColorMap}
                           juchuColorMap={juchuColorMap}
                           ref={rightRef}
