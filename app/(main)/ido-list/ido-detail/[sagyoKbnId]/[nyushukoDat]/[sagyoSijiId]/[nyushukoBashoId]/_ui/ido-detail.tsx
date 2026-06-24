@@ -462,7 +462,9 @@ export const IdoDetail = (props: {
             削除してもよろしいでしょうか？
           </DialogContentText>
           <DialogActions>
-            <Button onClick={() => handleDeleteResult(true)}>削除</Button>
+            <Button onClick={() => handleDeleteResult(true)} color="error">
+              削除
+            </Button>
             <Button onClick={() => handleDeleteResult(false)}>戻る</Button>
           </DialogActions>
         </Dialog>
