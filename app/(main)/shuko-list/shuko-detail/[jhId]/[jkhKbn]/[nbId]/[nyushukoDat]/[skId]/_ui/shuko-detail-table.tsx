@@ -33,6 +33,12 @@ export const ShukoDetailTable = (props: { datas: ShukoDetailTableValues[] }) => 
             <TableCell align="center" />
             <TableCell align="left">機材名</TableCell>
             <TableCell align="right">出庫予定数</TableCell>
+            {datas[0].juchuKizaiHeadKbn !== 3 && (
+              <>
+                <TableCell align="right">受注数</TableCell>
+                <TableCell align="right">予備数</TableCell>
+              </>
+            )}
             <TableCell align="right">読取数</TableCell>
             <TableCell align="right">補正数</TableCell>
             <TableCell align="right" sx={{ pr: 3 }}>
@@ -64,6 +70,12 @@ export const ShukoDetailTable = (props: { datas: ShukoDetailTableValues[] }) => 
                 {row.kizaiNam}
               </TableCell>
               <TableCell align="right">{row.planQty}</TableCell>
+              {datas[0].juchuKizaiHeadKbn !== 3 && (
+                <>
+                  <TableCell align="right">{row.planKizaiQty}</TableCell>
+                  <TableCell align="right">{row.planYobiQty}</TableCell>
+                </>
+              )}
               <TableCell align="right">{row.resultQty}</TableCell>
               <TableCell align="right">{row.resultAdjQty}</TableCell>
               <TableCell

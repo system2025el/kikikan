@@ -94,17 +94,7 @@ export const getShukoDetailTable = async (
   sagyoKbnId: number
 ) => {
   try {
-    const { data, error } = await selectNyushukoDetail(
-      juchuHeadId,
-      juchuKizaiHeadKbn,
-      nyushukoBashoId,
-      nyushukoDat,
-      sagyoKbnId
-    );
-
-    if (error) {
-      throw new Error('[selectNyushukoDetail] DBエラー:', { cause: error });
-    }
+    const data = await selectNyushukoDetail(juchuHeadId, juchuKizaiHeadKbn, nyushukoBashoId, nyushukoDat, sagyoKbnId);
 
     const shukoDetailTableData: ShukoDetailTableValues[] = data.map((d) => ({
       juchuHeadId: d.juchu_head_id ?? 0,
@@ -121,6 +111,8 @@ export const getShukoDetailTable = async (
       nyushukoDat: d.nyushuko_dat ?? '',
       nyushukoShubetuId: d.nyushuko_shubetu_id,
       planQty: d.plan_qty,
+      planKizaiQty: d.plan_kizai_qty,
+      planYobiQty: d.plan_yobi_qty,
       resultAdjQty: d.result_adj_qty,
       resultQty: d.result_qty,
       sagyoKbnId: d.sagyo_kbn_id,
