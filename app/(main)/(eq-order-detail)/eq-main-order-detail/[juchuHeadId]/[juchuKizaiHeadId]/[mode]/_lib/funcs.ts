@@ -2983,28 +2983,28 @@ export const juchuMeisaiSeparation = async (
   }
 };
 
-/**
- * 出庫作業ステータス確認
- * @param juchuHeadId
- * @param juchuKizaiHeadId
- * @returns
- */
-export const checkShukoStatus = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
-  try {
-    const confirmData = await selectShukoStateConfirm(juchuHeadId, juchuKizaiHeadId);
-    return confirmData.length === 0 ? false : true;
-  } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
-    throw e;
-  }
-};
+// /**
+//  * 出庫作業ステータス確認
+//  * @param juchuHeadId
+//  * @param juchuKizaiHeadId
+//  * @returns
+//  */
+// export const checkShukoStatus = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
+//   try {
+//     const confirmData = await selectShukoStateConfirm(juchuHeadId, juchuKizaiHeadId);
+//     return confirmData.length === 0 ? false : true;
+//   } catch (e) {
+//     if (e instanceof Error) {
+//       console.error(`[ERROR] ${e.message}`);
+//       if (e.cause) {
+//         console.error(`[CAUSE]`, e.cause);
+//       }
+//     } else {
+//       console.error(e);
+//     }
+//     throw e;
+//   }
+// };
 
 /**
  * 新規受注機材ヘッダー保存

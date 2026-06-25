@@ -3,40 +3,17 @@
 import dayjs from 'dayjs';
 import { PoolClient, QueryResult } from 'pg';
 
-import { selectDic } from '@/app/_lib/db/tables/m-dic';
 import { selectColor } from '@/app/_lib/db/tables/m-honbanbi-color';
 import { selectMeisaiEqts } from '@/app/_lib/db/tables/m-kizai';
 import { selectKokyaku } from '@/app/_lib/db/tables/m-kokyaku';
 import { selectDetailStockListBulk } from '@/app/_lib/db/tables/stock-table';
-import {
-  deleteJuchuContainerMeisai,
-  insertJuchuContainerMeisai,
-  selectJuchuContainerMeisaiMaxId,
-  updateJuchuContainerMeisai,
-} from '@/app/_lib/db/tables/t-juchu-ctn-meisai';
+import { selectJuchuContainerMeisaiMaxId } from '@/app/_lib/db/tables/t-juchu-ctn-meisai';
 import { selectJuchuHead } from '@/app/_lib/db/tables/t-juchu-head';
+import { selectJuchuKizaiHeadMaxId } from '@/app/_lib/db/tables/t-juchu-kizai-head';
+import { deleteSiyouHonbanbi, insertAllHonbanbi } from '@/app/_lib/db/tables/t-juchu-kizai-honbanbi';
 import {
-  insertJuchuKizaiHead,
-  selectJuchuKizaiHead,
-  selectJuchuKizaiHeadMaxId,
-  updateJuchuKizaiHead,
-} from '@/app/_lib/db/tables/t-juchu-kizai-head';
-import {
-  deleteHonbanbi,
-  deleteSiyouHonbanbi,
-  insertAllHonbanbi,
-  insertHonbanbi,
-  selectHonbanbi,
-  selectHonbanbiConfirm,
-  updateHonbanbi,
-  updateNyushukoHonbanbi,
-} from '@/app/_lib/db/tables/t-juchu-kizai-honbanbi';
-import {
-  deleteJuchuKizaiMeisai,
-  insertJuchuKizaiMeisai,
   selectJuchuKizaiMeisaiKizaiTanka,
   selectJuchuKizaiMeisaiMaxId,
-  updateJuchuKizaiMeisai,
 } from '@/app/_lib/db/tables/t-juchu-kizai-meisai';
 import {
   deleteJuchuKizaiNyushuko,
@@ -62,15 +39,11 @@ import {
   deleteAllNyukoResult,
   deleteAllNyushukoResult,
   deleteAllShukoResult,
-  deleteKizaiIdNyushukoResult,
 } from '@/app/_lib/db/tables/t-nyushuko-result';
 import { selectJuchuContainerMeisai, selectOyaJuchuContainerMeisai } from '@/app/_lib/db/tables/v-juchu-ctn-meisai';
-import { selectJuchuKizaiMeisai, selectOyaJuchuKizaiMeisai } from '@/app/_lib/db/tables/v-juchu-kizai-meisai';
-import { JuchuCtnMeisai } from '@/app/_lib/db/types/t_juchu_ctn_meisai-type';
-import { IdoDen } from '@/app/_lib/db/types/t-ido-den-type';
-import { JuchuKizaiHead } from '@/app/_lib/db/types/t-juchu-kizai-head-type';
+import { selectOyaJuchuKizaiMeisai } from '@/app/_lib/db/tables/v-juchu-kizai-meisai';
+import { selectShukoStateConfirm } from '@/app/_lib/db/tables/v-nyushuko-den2';
 import { JuchuKizaiHonbanbi } from '@/app/_lib/db/types/t-juchu-kizai-honbanbi-type';
-import { JuchuKizaiMeisai } from '@/app/_lib/db/types/t-juchu-kizai-meisai-type';
 import { JuchuKizaiNyushuko } from '@/app/_lib/db/types/t-juchu-kizai-nyushuko-type';
 import { NyushukoDen } from '@/app/_lib/db/types/t-nyushuko-den-type';
 
@@ -78,9 +51,7 @@ import { toJapanYMDString } from '../../_lib/date-conversion';
 import { HonbanbiColorValues } from '../eq-keep-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[oyaJuchuKizaiHeadId]/[mode]/_lib/types';
 import {
   JuchuContainerMeisaiValues,
-  JuchuKizaiHeadValues,
   JuchuKizaiHonbanbiValues,
-  JuchuKizaiMeisaiValues,
   StockTableValues,
 } from '../eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';
 import { DetailOerValues, OyaJuchuContainerMeisaiValues, OyaJuchuKizaiMeisaiValues } from './types';
@@ -913,6 +884,29 @@ export const getColor = async () => {
     }));
     return honbanbiColor;
   } catch (e) {
+    throw e;
+  }
+};
+
+/**
+ * 出庫作業ステータス確認
+ * @param juchuHeadId
+ * @param juchuKizaiHeadId
+ * @returns
+ */
+export const checkShukoStatus = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
+  try {
+    const confirmData = await selectShukoStateConfirm(juchuHeadId, juchuKizaiHeadId);
+    return confirmData.length === 0 ? false : true;
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };

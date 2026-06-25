@@ -51,6 +51,7 @@ import { IsDirtyAlertDialog, useDirty } from '@/app/(main)/_ui/dirty-context';
 import { Loading, LoadingOverlay } from '@/app/(main)/_ui/loading';
 import { PermissionGuard } from '@/app/(main)/_ui/permission-guard';
 import {
+  checkShukoStatus,
   getDetailJuchuHead,
   getJuchuKizaiNyushuko,
   getNyushukoFixFlag,
@@ -61,7 +62,7 @@ import {
   OyaJuchuKizaiMeisaiValues,
   OyaJuchuKizaiNyushukoValues,
 } from '@/app/(main)/(eq-order-detail)/_lib/types';
-import { AlertDialog, DeleteAlertDialog } from '@/app/(main)/(eq-order-detail)/_ui/caveat-dialog';
+import { AlertDialog, DeleteAlertDialog, WorkingConfirmDialog } from '@/app/(main)/(eq-order-detail)/_ui/caveat-dialog';
 import { OyaEqSelectionDialog } from '@/app/(main)/(eq-order-detail)/_ui/equipment-selection-dialog';
 import { JuchuContainerMeisaiValues } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';
 
@@ -161,6 +162,11 @@ export const EquipmentKeepOrderDetail = (props: {
   const [EqSelectionDialogOpen, setEqSelectionDialogOpen] = useState(false);
   // 削除ダイアログ制御
   const [deleteOpen, setDeleteOpen] = useState(false);
+  // 出庫作業中警告ダイアログ制御
+  const [workingConfirmState, setWorkingConfirmState] = useState<{
+    isOpen: boolean;
+    resolve: (value: boolean) => void;
+  } | null>(null);
 
   // スナックバー制御
   const [snackBarOpen, setSnackBarOpen] = useState(false);
@@ -386,6 +392,28 @@ export const EquipmentKeepOrderDetail = (props: {
   };
 
   /**
+   * 出庫作業中警告ダイアログ開
+   * @returns
+   */
+  const handleWorkingConfirmOpen = () => {
+    return new Promise<boolean>((resolve) => {
+      setWorkingConfirmState({ isOpen: true, resolve });
+    });
+  };
+
+  /**
+   * 出庫作業中警告ダイアログ閉
+   * @param isConfirmed
+   */
+  const handleWorkingConfirmClose = (isConfirmed: boolean) => {
+    if (workingConfirmState) {
+      // awaitの待機を解除し、結果を返す
+      workingConfirmState.resolve(isConfirmed);
+    }
+    setWorkingConfirmState(null);
+  };
+
+  /**
    * 保存ボタン押下時
    * @param data 受注機材ヘッダーデータ
    * @returns
@@ -483,6 +511,29 @@ export const EquipmentKeepOrderDetail = (props: {
       const checkJuchuContainerMeisai =
         JSON.stringify(originKeepJuchuContainerMeisaiList) !==
         JSON.stringify(keepJuchuContainerMeisaiList.filter((data) => !data.delFlag));
+
+      if (checkKicsShukoDat || checkYardShukoDat) {
+        try {
+          const isWorking = await checkShukoStatus(data.juchuHeadId, data.juchuKizaiHeadId);
+
+          if (isWorking) {
+            // ダイアログを表示し、ユーザーが「保存」か「キャンセル」を押すまでここで待機する
+            const isConfirmed = await handleWorkingConfirmOpen();
+
+            if (!isConfirmed) {
+              setIsLoading(false);
+              setIsProcessing(false);
+              return;
+            }
+          }
+        } catch (e) {
+          setIsLoading(false);
+          setIsProcessing(false);
+          setSnackBarMessage('作業確認に失敗しました');
+          setSnackBarOpen(true);
+          return;
+        }
+      }
 
       const updateResult = await saveKeepJuchuKizai(
         checkJuchuKizaiHead,
@@ -1623,6 +1674,7 @@ export const EquipmentKeepOrderDetail = (props: {
       )}
       <AlertDialog open={alertOpen} title={alertTitle} message={alertMessage} onClick={() => setAlertOpen(false)} />
       <IsDirtyAlertDialog open={dirtyOpen} onClick={handleResultDialog} />
+      <WorkingConfirmDialog open={!!workingConfirmState?.isOpen} onClose={handleWorkingConfirmClose} />
       <DeleteAlertDialog
         selectedLength={
           keepJuchuKizaiMeisaiList.filter((data) => !data.delFlag && data.selected).length +
