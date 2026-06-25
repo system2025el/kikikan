@@ -27,6 +27,8 @@ export type ShukoDetailTableValues = {
   nyushukoDat: string;
   nyushukoShubetuId: number | null;
   planQty: number | null;
+  planKizaiQty: number | null;
+  planYobiQty: number | null;
   resultAdjQty: number | null;
   resultQty: number | null;
   sagyoKbnId: number | null;
