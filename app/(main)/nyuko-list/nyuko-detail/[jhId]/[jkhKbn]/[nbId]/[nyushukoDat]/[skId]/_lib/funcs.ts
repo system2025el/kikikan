@@ -103,17 +103,7 @@ export const getNyukoDetailTable = async (
   sagyoKbnId: number
 ) => {
   try {
-    const { data, error } = await selectNyushukoDetail(
-      juchuHeadId,
-      juchuKizaiHeadKbn,
-      nyushukoBashoId,
-      nyushukoDat,
-      sagyoKbnId
-    );
-
-    if (error) {
-      throw new Error('[selectNyushukoDetail] DBエラー:', { cause: error });
-    }
+    const data = await selectNyushukoDetail(juchuHeadId, juchuKizaiHeadKbn, nyushukoBashoId, nyushukoDat, sagyoKbnId);
 
     const nyukoDetailTableData: NyukoDetailTableValues[] = data.map((d) => ({
       juchuHeadId: d.juchu_head_id ?? 0,
