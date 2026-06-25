@@ -304,7 +304,7 @@ export const IdoEqptDetail = (props: {
             実績をクリアしてよろしいでしょうか？
           </DialogContentText>
           <DialogActions>
-            <Button onClick={() => handleResult(true)} loading={isLoading}>
+            <Button onClick={() => handleResult(true)} loading={isLoading} color="error">
               クリア
             </Button>
             <Button onClick={() => handleResult(false)}>戻る</Button>

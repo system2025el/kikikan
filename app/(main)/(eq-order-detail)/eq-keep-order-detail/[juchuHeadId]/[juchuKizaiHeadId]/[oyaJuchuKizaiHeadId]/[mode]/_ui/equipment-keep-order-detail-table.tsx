@@ -4,6 +4,7 @@ import Delete from '@mui/icons-material/Delete';
 import {
   Box,
   Button,
+  Checkbox,
   Dialog,
   DialogActions,
   DialogContent,
@@ -33,9 +34,10 @@ type KeepEqTableProps = {
   edit: boolean;
   nyukoFixFlag: boolean;
   oyaShukoDate: Date | null;
-  handleMeisaiDelete: (rowIndex: number) => void;
   handleMemoChange: (rowIndex: number, memo: string) => void;
   handleCellChange: (rowIndex: number, keepValue: number) => void;
+  handleEqSelect: (row: KeepJuchuKizaiMeisaiValues) => void;
+  handleEqAllSelect: () => void;
 };
 
 export const KeepEqTable: React.FC<KeepEqTableProps> = ({
@@ -43,9 +45,10 @@ export const KeepEqTable: React.FC<KeepEqTableProps> = ({
   edit,
   nyukoFixFlag,
   oyaShukoDate,
-  handleMeisaiDelete,
   handleMemoChange,
   handleCellChange,
+  handleEqSelect,
+  handleEqAllSelect,
 }) => {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -98,7 +101,30 @@ export const KeepEqTable: React.FC<KeepEqTableProps> = ({
             </TableCell>
           </TableRow>
           <TableRow>
-            <TableCell size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }} />
+            <TableCell sx={{ padding: 0, border: '1px solid black' }}>
+              <Checkbox
+                indeterminate={
+                  visibleRows &&
+                  visibleRows.filter((d) => d.selected).length > 0 &&
+                  visibleRows.filter((d) => d.selected).length < visibleRows.length
+                }
+                checked={
+                  visibleRows &&
+                  visibleRows.length > 0 &&
+                  visibleRows.filter((d) => d.selected).length === visibleRows.length
+                }
+                onChange={handleEqAllSelect}
+                sx={{
+                  padding: 0,
+                  '& .MuiSvgIcon-root': {
+                    backgroundColor: '#fff',
+                    borderRadius: '4px',
+                    transition: 'background-color 0.3s',
+                  },
+                }}
+                disabled={!edit || nyukoFixFlag}
+              />
+            </TableCell>
             <TableCell size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }} />
             <TableCell align="left" size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }}>
               YK
@@ -126,9 +152,9 @@ export const KeepEqTable: React.FC<KeepEqTableProps> = ({
               edit={edit}
               nyukoFixFlag={nyukoFixFlag}
               oyaShukoDate={oyaShukoDate}
-              handleMeisaiDelete={handleMeisaiDelete}
               handleKeepRef={handleKeepRef(rowIndex)}
               handleMemoChange={handleMemoChange}
+              handleEqSelect={handleEqSelect}
               handleKeyDown={handleKeyDown}
               handleCellChange={handleCellChange}
             />
@@ -145,10 +171,10 @@ type KeepEqTableRowProps = {
   edit: boolean;
   nyukoFixFlag: boolean;
   oyaShukoDate: Date | null;
-  handleMeisaiDelete: (rowIndex: number) => void;
   handleKeepRef: (el: HTMLInputElement | null) => void;
   handleMemoChange: (rowIndex: number, memo: string) => void;
   handleCellChange: (rowIndex: number, keepValue: number) => void;
+  handleEqSelect: (row: KeepJuchuKizaiMeisaiValues) => void;
   handleKeyDown: (e: React.KeyboardEvent, rowIndex: number) => void;
 };
 
@@ -159,22 +185,22 @@ const KeepEqTableRow = React.memo(
     edit,
     nyukoFixFlag,
     oyaShukoDate,
-    handleMeisaiDelete,
     handleMemoChange,
     handleCellChange,
+    handleEqSelect,
     handleKeepRef,
     handleKeyDown,
   }: KeepEqTableRowProps) => {
     return (
       <TableRow hover>
         <TableCell sx={{ padding: 0, border: '1px solid black' }}>
-          <IconButton
-            onClick={() => handleMeisaiDelete(rowIndex)}
-            sx={{ padding: 0, color: 'red' }}
+          <Checkbox
+            color="primary"
+            checked={row.selected}
+            onChange={() => handleEqSelect(row)}
+            sx={{ padding: 0 }}
             disabled={!edit || nyukoFixFlag}
-          >
-            <Delete fontSize="small" />
-          </IconButton>
+          />
         </TableCell>
         <TableCell align="right" size="small" sx={{ bgcolor: grey[200], py: 0, px: 1, border: '1px solid black' }}>
           {rowIndex + 1}
@@ -271,7 +297,8 @@ export const KeepContainerTable = (props: {
   oyaShukoDate: Date | null;
   handleContainerMemoChange: (rowIndex: number, memo: string) => void;
   handleContainerCellChange: (rowIndex: number, kicsValue: number, yardValue: number) => void;
-  handleMeisaiDelete: (rowIndex: number) => void;
+  handleCtnSelect: (row: KeepJuchuContainerMeisaiValues) => void;
+  handleCtnAllSelect: () => void;
 }) => {
   const {
     rows,
@@ -280,7 +307,8 @@ export const KeepContainerTable = (props: {
     oyaShukoDate,
     handleContainerMemoChange,
     handleContainerCellChange,
-    handleMeisaiDelete,
+    handleCtnSelect,
+    handleCtnAllSelect,
   } = props;
 
   const inputKicsRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -357,7 +385,29 @@ export const KeepContainerTable = (props: {
             </TableCell>
           </TableRow>
           <TableRow>
-            <TableCell size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }} />
+            <TableCell sx={{ padding: 0, border: '1px solid black' }}>
+              <Checkbox
+                indeterminate={
+                  visibleRows &&
+                  visibleRows.filter((d) => d.selected).length > 0 &&
+                  visibleRows.filter((d) => d.selected).length < visibleRows.length
+                }
+                checked={
+                  visibleRows &&
+                  visibleRows.length > 0 &&
+                  visibleRows.filter((d) => d.selected).length === visibleRows.length
+                }
+                onChange={handleCtnAllSelect}
+                sx={{
+                  padding: 0,
+                  '& .MuiSvgIcon-root': {
+                    backgroundColor: '#fff',
+                    borderRadius: '4px',
+                    transition: 'background-color 0.3s',
+                  },
+                }}
+              />
+            </TableCell>
             <TableCell size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }} />
             <TableCell align="left" size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }}>
               メモ
@@ -381,15 +431,14 @@ export const KeepContainerTable = (props: {
         </TableHead>
         <TableBody>
           {visibleRows.map((row, rowIndex) => (
-            <TableRow key={rowIndex}>
-              <TableCell align="center" width={'min-content'} sx={{ padding: 0, border: '1px solid black' }}>
-                <IconButton
-                  onClick={() => handleMeisaiDelete(rowIndex)}
-                  sx={{ padding: 0, color: 'red' }}
-                  disabled={!edit}
-                >
-                  <Delete fontSize="small" />
-                </IconButton>
+            <TableRow key={rowIndex} hover>
+              <TableCell sx={{ padding: 0, border: '1px solid black' }}>
+                <Checkbox
+                  color="primary"
+                  checked={row.selected}
+                  onChange={() => handleCtnSelect(row)}
+                  sx={{ padding: 0 }}
+                />
               </TableCell>
               <TableCell
                 align="right"

@@ -4,6 +4,7 @@ import Delete from '@mui/icons-material/Delete';
 import {
   Box,
   Button,
+  Checkbox,
   Dialog,
   DialogActions,
   DialogContent,
@@ -150,7 +151,8 @@ type EqTableProps = {
     spareValue: number,
     totalValue: number
   ) => void;
-  handleMeisaiDelete: (rowIndex: number, row: JuchuKizaiMeisaiValues) => void;
+  handleEqSelect: (row: JuchuKizaiMeisaiValues) => void;
+  handleEqAllSelect: () => void;
   handleMemoChange: (rowIndex: number, memo: string) => void;
   handleMemo2Change: (rowIndex: number, memo: string) => void;
   ref: React.RefObject<HTMLDivElement | null>;
@@ -162,7 +164,8 @@ export const EqTable: React.FC<EqTableProps> = ({
   shukoFixFlag,
   shukoDate,
   handleCellChange,
-  handleMeisaiDelete,
+  handleEqSelect,
+  handleEqAllSelect,
   handleMemoChange,
   handleMemo2Change,
   ref,
@@ -217,7 +220,30 @@ export const EqTable: React.FC<EqTableProps> = ({
       <Table stickyHeader>
         <TableHead>
           <TableRow>
-            <TableCell size="small" style={styles.header} />
+            <TableCell sx={{ padding: 0, border: '1px solid black' }}>
+              <Checkbox
+                indeterminate={
+                  visibleRows &&
+                  visibleRows.filter((d) => d.selected).length > 0 &&
+                  visibleRows.filter((d) => d.selected).length < visibleRows.length
+                }
+                checked={
+                  visibleRows &&
+                  visibleRows.length > 0 &&
+                  visibleRows.filter((d) => d.selected).length === visibleRows.length
+                }
+                onChange={handleEqAllSelect}
+                sx={{
+                  padding: 0,
+                  '& .MuiSvgIcon-root': {
+                    backgroundColor: '#fff',
+                    borderRadius: '4px',
+                    transition: 'background-color 0.3s',
+                  },
+                }}
+                disabled={!edit || shukoFixFlag}
+              />
+            </TableCell>
             <TableCell align="left" size="small" style={styles.header}>
               メモ
             </TableCell>
@@ -249,12 +275,12 @@ export const EqTable: React.FC<EqTableProps> = ({
               shukoDate={shukoDate}
               handleOrderRef={handleOrderRef(rowIndex)}
               handleYobiRef={handleYobiRef(rowIndex)}
-              handleMeisaiDelete={handleMeisaiDelete}
               handleMemoChange={handleMemoChange}
               handleMemo2Change={handleMemo2Change}
               handleOrderKeyDown={handleOrderKeyDown}
               handleYobiKeyDown={handleYobiKeyDown}
               handleCellChange={handleCellChange}
+              handleEqSelect={handleEqSelect}
             />
           ))}
         </TableBody>
@@ -271,7 +297,6 @@ type EqTableRowProps = {
   shukoDate: Date | null;
   handleOrderRef: (el: HTMLInputElement | null) => void;
   handleYobiRef: (el: HTMLInputElement | null) => void;
-  handleMeisaiDelete: (rowIndex: number, row: JuchuKizaiMeisaiValues) => void;
   handleMemoChange: (rowIndex: number, memo: string) => void;
   handleMemo2Change: (rowIndex: number, memo: string) => void;
   handleCellChange: (
@@ -283,6 +308,7 @@ type EqTableRowProps = {
   ) => void;
   handleOrderKeyDown: (e: React.KeyboardEvent, rowIndex: number) => void;
   handleYobiKeyDown: (e: React.KeyboardEvent, rowIndex: number) => void;
+  handleEqSelect: (row: JuchuKizaiMeisaiValues) => void;
 };
 
 const EqTableRow = React.memo(
@@ -294,23 +320,23 @@ const EqTableRow = React.memo(
     shukoDate,
     handleOrderRef,
     handleYobiRef,
-    handleMeisaiDelete,
     handleMemoChange,
     handleMemo2Change,
     handleCellChange,
     handleOrderKeyDown,
     handleYobiKeyDown,
+    handleEqSelect,
   }: EqTableRowProps) => {
     return (
       <TableRow hover>
         <TableCell sx={{ padding: 0, border: '1px solid black' }}>
-          <IconButton
-            onClick={() => handleMeisaiDelete(rowIndex, row)}
-            sx={{ padding: 0, color: 'red' }}
+          <Checkbox
+            color="primary"
+            checked={row.selected}
+            onChange={() => handleEqSelect(row)}
+            sx={{ padding: 0 }}
             disabled={!edit || shukoFixFlag}
-          >
-            <Delete fontSize="small" />
-          </IconButton>
+          />
         </TableCell>
         <TableCell style={styles.row} align="center" size="small">
           <MemoTooltip
@@ -568,7 +594,8 @@ export const ContainerTable = (props: {
   shukoDate: Date | null;
   handleContainerMemoChange: (rowIndex: number, memo: string) => void;
   handleContainerCellChange: (rowIndex: number, kicsValue: number, yardValue: number) => void;
-  handleMeisaiDelete: (row: JuchuContainerMeisaiValues) => void;
+  handleCtnSelect: (row: JuchuContainerMeisaiValues) => void;
+  handleCtnAllSelect: () => void;
 }) => {
   const {
     rows,
@@ -577,7 +604,8 @@ export const ContainerTable = (props: {
     shukoDate,
     handleContainerMemoChange,
     handleContainerCellChange,
-    handleMeisaiDelete,
+    handleCtnSelect,
+    handleCtnAllSelect,
   } = props;
 
   const inputKicsRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -630,7 +658,30 @@ export const ContainerTable = (props: {
       <Table stickyHeader>
         <TableHead>
           <TableRow>
-            <TableCell size="small" style={styles.header} />
+            <TableCell sx={{ padding: 0, border: '1px solid black' }}>
+              <Checkbox
+                indeterminate={
+                  visibleRows &&
+                  visibleRows.filter((d) => d.selected).length > 0 &&
+                  visibleRows.filter((d) => d.selected).length < visibleRows.length
+                }
+                checked={
+                  visibleRows &&
+                  visibleRows.length > 0 &&
+                  visibleRows.filter((d) => d.selected).length === visibleRows.length
+                }
+                onChange={handleCtnAllSelect}
+                sx={{
+                  padding: 0,
+                  '& .MuiSvgIcon-root': {
+                    backgroundColor: '#fff',
+                    borderRadius: '4px',
+                    transition: 'background-color 0.3s',
+                  },
+                }}
+                disabled={!edit || shukoFixFlag}
+              />
+            </TableCell>
             <TableCell size="small" style={styles.header} />
             <TableCell align="left" size="small" style={styles.header}>
               メモ
@@ -652,14 +703,14 @@ export const ContainerTable = (props: {
         <TableBody>
           {visibleRows.map((row, rowIndex) => (
             <TableRow key={rowIndex} hover>
-              <TableCell align="center" width={'min-content'} sx={{ padding: 0, border: '1px solid black' }}>
-                <IconButton
-                  onClick={() => handleMeisaiDelete(row)}
-                  sx={{ padding: 0, color: 'red' }}
+              <TableCell sx={{ padding: 0, border: '1px solid black' }}>
+                <Checkbox
+                  color="primary"
+                  checked={row.selected}
+                  onChange={() => handleCtnSelect(row)}
+                  sx={{ padding: 0 }}
                   disabled={!edit || shukoFixFlag}
-                >
-                  <Delete fontSize="small" />
-                </IconButton>
+                />
               </TableCell>
               <TableCell
                 align="right"

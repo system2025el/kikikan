@@ -65,7 +65,15 @@ export const MoveAlertDialog = ({ open, onClick }: { open: boolean; onClick: (re
   );
 };
 
-export const DeleteAlertDialog = ({ open, onClick }: { open: boolean; onClick: (result: boolean) => void }) => {
+export const DeleteAlertDialog = ({
+  selectedLength,
+  open,
+  onClick,
+}: {
+  selectedLength: number;
+  open: boolean;
+  onClick: (result: boolean) => void;
+}) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleClick = (result: boolean) => {
@@ -85,10 +93,10 @@ export const DeleteAlertDialog = ({ open, onClick }: { open: boolean; onClick: (
         <Box>削除</Box>
       </DialogTitle>
       <DialogContentText m={2} p={2}>
-        削除してもよろしいでしょうか？
+        {selectedLength}件の機材を削除してもよろしいでしょうか？
       </DialogContentText>
       <DialogActions>
-        <Button onClick={() => handleClick(true)} loading={isLoading}>
+        <Button onClick={() => handleClick(true)} loading={isLoading} color="error">
           削除
         </Button>
         <Button onClick={() => onClick(false)}>戻る</Button>

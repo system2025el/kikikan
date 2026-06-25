@@ -64,6 +64,7 @@ export type JuchuKizaiMeisaiValues = {
   indentNum: number;
   delFlag: boolean;
   saveFlag: boolean;
+  selected: boolean;
 };
 
 export type IdoJuchuKizaiMeisaiValues = {
@@ -99,6 +100,7 @@ export type JuchuContainerMeisaiValues = {
   indentNum: number;
   delFlag: boolean;
   saveFlag: boolean;
+  selected: boolean;
 };
 
 export type StockTableValues = {

@@ -693,6 +693,7 @@ export const getKeepJuchuKizaiMeisai = async (
       indentNum: d.indent_num ?? 0,
       delFlag: false,
       saveFlag: true,
+      selected: false,
     }));
     return keepJuchuKizaiMeisaiData;
   } catch (e) {
@@ -859,6 +860,7 @@ export const getKeepJuchuContainerMeisai = async (
       indentNum: 0,
       delFlag: false,
       saveFlag: true,
+      selected: false,
     }));
     return keepJuchuContainerMeisaiData;
   } catch (e) {

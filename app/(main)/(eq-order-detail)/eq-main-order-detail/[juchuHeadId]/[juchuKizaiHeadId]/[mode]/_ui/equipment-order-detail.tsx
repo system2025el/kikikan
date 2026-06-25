@@ -8,6 +8,7 @@ import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import Delete from '@mui/icons-material/Delete';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import SaveAsIcon from '@mui/icons-material/SaveAs';
 import {
@@ -173,10 +174,6 @@ const EquipmentOrderDetail = (props: {
   const [juchuHonbanbiList, setJuchuHonbanbiList] = useState<JuchuKizaiHonbanbiValues[]>(props.juchuHonbanbiData ?? []);
   // 受注本番日削除リスト
   const [juchuHonbanbiDeleteList, setJuchuHonbanbiDeleteList] = useState<JuchuKizaiHonbanbiValues[]>([]);
-  // 削除機材
-  const [deleteEq, setDeleteEq] = useState<{ rowIndex: number; row: JuchuKizaiMeisaiValues } | null>(null);
-  // 削除コンテナ
-  const [deleteCtn, setDeleteCtn] = useState<JuchuContainerMeisaiValues | null>(null);
 
   // 出庫日
   const [shukoDate, setShukoDate] = useState<Date | null>(/*props.shukoDate*/ null);
@@ -209,10 +206,8 @@ const EquipmentOrderDetail = (props: {
   const [sortDialogOpen, setSortDialogOpen] = useState(false);
   // 日付選択カレンダーダイアログ制御
   const [dateSelectionDialogOpne, setDateSelectionDialogOpne] = useState(false);
-  // 機材削除ダイアログ制御
-  const [deleteEqOpen, setDeleteEqOpen] = useState(false);
-  // コンテナ削除ダイアログ制御
-  const [deleteCtnOpen, setDeleteCtnOpen] = useState(false);
+  // 削除ダイアログ制御
+  const [deleteOpen, setDeleteOpen] = useState(false);
   // 出庫作業中警告ダイアログ制御
   const [workingConfirmState, setWorkingConfirmState] = useState<{
     isOpen: boolean;
@@ -361,8 +356,7 @@ const EquipmentOrderDetail = (props: {
       setSeparationDialogOpen(false);
       setSortDialogOpen(false);
       setDateSelectionDialogOpne(false);
-      setDeleteEqOpen(false);
-      setDeleteCtnOpen(false);
+      setDeleteOpen(false);
 
       setAlertTitle('編集中');
       setAlertMessage(`${lockData.addUser}が編集中です`);
@@ -971,6 +965,98 @@ const EquipmentOrderDetail = (props: {
   };
 
   /**
+   * 削除ボタン押下時
+   * @returns
+   */
+  const handleDelete = async () => {
+    if (isProcessing) return;
+    setIsProcessing(true);
+
+    try {
+      const lockResult = await lock();
+
+      if (lockResult) {
+        setDeleteOpen(true);
+      }
+    } catch (e) {
+      setSnackBarMessage('サーバー接続エラー');
+      setSnackBarOpen(true);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  /**
+   * 明細削除処理
+   * @param result
+   * @returns
+   */
+  const handleDeleteExecute = async (result: boolean) => {
+    if (isProcessing) return;
+    setIsProcessing(true);
+
+    try {
+      const lockResult = await lock();
+
+      if (lockResult) {
+        if (result) {
+          const map = new Map<number, number>();
+
+          // 機材明細から選択されているindex取得
+          const indexes = juchuKizaiMeisaiList
+            .filter((data) => !data.delFlag)
+            .map((data, index) => (data.selected ? index : null))
+            .filter((index) => index !== null) as number[];
+
+          // 機材idをキーとして削除機材の合計数をmap化
+          const selectEqList = juchuKizaiMeisaiList.filter((data) => data.selected && !data.delFlag);
+          for (const eq of selectEqList) {
+            if (!map.has(eq.kizaiId)) {
+              map.set(eq.kizaiId, eq.planQty);
+            } else {
+              const currentQty = map.get(eq.kizaiId) ?? 0;
+              map.set(eq.kizaiId, currentQty + eq.planQty);
+            }
+          }
+
+          // 選択されたindexと一致するデータを削除し、同じ機材idがあれば在庫数を削除された合計数分増やす
+          const updatedEqStockData = eqStockListRef.current[0];
+          const targetIndex =
+            updatedEqStockData
+              ?.map((d, index) => (dateRange.includes(toJapanYMDString(d.calDat)) ? index : -1))
+              .filter((index) => index !== -1) ?? [];
+          setEqStockList((prev) =>
+            prev
+              .filter((_, index) => !indexes.includes(index))
+              .map((data) =>
+                map.get(data[0].kizaiId)
+                  ? data.map((d, i) =>
+                      targetIndex.includes(i) ? { ...d, zaikoQty: d.zaikoQty + (map.get(data[0].kizaiId) || 0) } : d
+                    )
+                  : data
+              )
+          );
+
+          // 選択された明細のdelFlagをtrueに変更
+          setJuchuKizaiMeisaiList((prev) =>
+            prev.map((data) => (data.selected ? { ...data, selected: false, delFlag: true } : data))
+          );
+
+          setJuchuContainerMeisaiList((prev) =>
+            prev.map((data) => (data.selected ? { ...data, selected: false, delFlag: true } : data))
+          );
+        }
+      }
+    } catch (e) {
+      setSnackBarMessage('サーバー接続エラー');
+      setSnackBarOpen(true);
+    } finally {
+      setIsProcessing(false);
+      setDeleteOpen(false);
+    }
+  };
+
+  /**
    * 機材メモ入力時
    * @param kizaiId 機材id
    * @param memo メモ内容
@@ -1081,80 +1167,29 @@ const EquipmentOrderDetail = (props: {
     });
   };
 
-  // 機材明細削除ボタン押下時
-  const handleEqMeisaiDelete = async (rowIndex: number, row: JuchuKizaiMeisaiValues) => {
-    if (isProcessing) return;
-    setIsProcessing(true);
-
-    try {
-      const lockResult = await lock();
-
-      if (lockResult) {
-        setDeleteEqOpen(true);
-        setDeleteEq({ rowIndex: rowIndex, row: row });
-      }
-    } catch (e) {
-      setSnackBarMessage('サーバー接続エラー');
-      setSnackBarOpen(true);
-    } finally {
-      setIsProcessing(false);
-    }
+  /**
+   * 機材テーブルのチェックボックス押下時
+   * @param row
+   */
+  const handleEqSelect = (row: JuchuKizaiMeisaiValues) => {
+    setJuchuKizaiMeisaiList((prev) =>
+      prev.map((data) => (data === row ? { ...data, selected: !data.selected } : data))
+    );
   };
 
-  // 機材明細削除ダイアログの押下ボタンによる処理
-  const handleEqMeisaiDeleteResult = async (result: boolean) => {
-    if (isProcessing) return;
-    setIsProcessing(true);
+  /**
+   * 機材テーブルの全選択チェックボックス押下時
+   * @returns
+   */
+  const handleEqAllSelect = () => {
+    const selectEq = juchuKizaiMeisaiList.filter((data) => !data.delFlag && data.selected);
 
-    if (!deleteEq) {
-      setDeleteEqOpen(false);
-      setIsProcessing(false);
+    if (selectEq.length === juchuKizaiMeisaiList.filter((data) => !data.delFlag).length) {
+      setJuchuKizaiMeisaiList((prev) => prev.map((data) => ({ ...data, selected: false })));
       return;
-    }
-
-    try {
-      const lockResult = await lock();
-
-      if (lockResult) {
-        if (result) {
-          setJuchuKizaiMeisaiList((prev) => {
-            const visibleIndex = prev
-              .map((data, index) => (!data.delFlag ? index : null))
-              .filter((index) => index !== null) as number[];
-
-            const index = visibleIndex[deleteEq.rowIndex];
-            if (index === undefined) return prev;
-
-            return prev.map((data, i) => (i === index ? { ...data, delFlag: true } : data));
-          });
-
-          const updatedEqStockData = eqStockListRef.current[deleteEq.rowIndex];
-          const targetIndex = updatedEqStockData
-            .map((d, index) => (dateRange.includes(toJapanYMDString(d.calDat)) ? index : -1))
-            .filter((index) => index !== -1);
-          setEqStockList((prev) =>
-            prev
-              .filter((_, index) => index !== deleteEq.rowIndex)
-              .map((data) =>
-                data[0].kizaiId === deleteEq.row.kizaiId
-                  ? data.map((d, i) =>
-                      targetIndex.includes(i) ? { ...d, zaikoQty: d.zaikoQty + deleteEq.row.planQty } : d
-                    )
-                  : data
-              )
-          );
-          setDeleteEqOpen(false);
-          setDeleteEq(null);
-        } else {
-          setDeleteEqOpen(false);
-          setDeleteEq(null);
-        }
-      }
-    } catch (e) {
-      setSnackBarMessage('サーバー接続エラー');
-      setSnackBarOpen(true);
-    } finally {
-      setIsProcessing(false);
+    } else {
+      setJuchuKizaiMeisaiList((prev) => prev.map((data) => ({ ...data, selected: true })));
+      return;
     }
   };
 
@@ -1267,59 +1302,29 @@ const EquipmentOrderDetail = (props: {
     });
   };
 
-  // コンテナ明細削除ボタン押下時
-  const handleCtnMeisaiDelete = async (row: JuchuContainerMeisaiValues) => {
-    if (isProcessing) return;
-    setIsProcessing(true);
-
-    try {
-      const lockResult = await lock();
-
-      if (lockResult) {
-        setDeleteCtnOpen(true);
-        setDeleteCtn(row);
-      }
-    } catch (e) {
-      setSnackBarMessage('サーバー接続エラー');
-      setSnackBarOpen(true);
-    } finally {
-      setIsProcessing(false);
-    }
+  /**
+   * コンテナテーブルのチェックボックス押下時
+   * @param row
+   */
+  const handleCtnSelect = (row: JuchuContainerMeisaiValues) => {
+    setJuchuContainerMeisaiList((prev) =>
+      prev.map((data) => (data === row ? { ...data, selected: !data.selected } : data))
+    );
   };
 
-  // コンテナ明細削除ダイアログの押下ボタンによる処理
-  const handleCtnMeisaiDeleteResult = async (result: boolean) => {
-    if (isProcessing) return;
-    setIsProcessing(true);
+  /**
+   * コンテナテーブルの全選択チェックボックス押下時
+   * @returns
+   */
+  const handleCtnAllSelect = () => {
+    const selectCtn = juchuContainerMeisaiList.filter((data) => !data.delFlag && data.selected);
 
-    if (!deleteCtn) {
-      setDeleteCtnOpen(false);
-      setIsProcessing(false);
+    if (selectCtn.length === juchuContainerMeisaiList.filter((data) => !data.delFlag).length) {
+      setJuchuContainerMeisaiList((prev) => prev.map((data) => ({ ...data, selected: false })));
       return;
-    }
-
-    try {
-      const lockResult = await lock();
-
-      if (lockResult) {
-        if (result) {
-          setJuchuContainerMeisaiList((prev) =>
-            prev.map((data) =>
-              data.kizaiId === deleteCtn.kizaiId && !data.delFlag ? { ...data, delFlag: true } : data
-            )
-          );
-          setDeleteCtnOpen(false);
-          setDeleteCtn(null);
-        } else {
-          setDeleteCtnOpen(false);
-          setDeleteCtn(null);
-        }
-      }
-    } catch (e) {
-      setSnackBarMessage('サーバー接続エラー');
-      setSnackBarOpen(true);
-    } finally {
-      setIsProcessing(false);
+    } else {
+      setJuchuContainerMeisaiList((prev) => prev.map((data) => ({ ...data, selected: true })));
+      return;
     }
   };
 
@@ -1750,6 +1755,7 @@ const EquipmentOrderDetail = (props: {
           indentNum: d.indentNum,
           delFlag: false,
           saveFlag: false,
+          selected: false,
         }));
 
         const newIds = selectEq.map((data) => data.kizaiId);
@@ -1835,6 +1841,7 @@ const EquipmentOrderDetail = (props: {
           indentNum: 0,
           delFlag: false,
           saveFlag: false,
+          selected: false,
         }));
 
         setJuchuKizaiMeisaiList((prev) => [...prev, ...selectEq]);
@@ -2718,7 +2725,7 @@ const EquipmentOrderDetail = (props: {
                                 },
                               }}
                               helperText={fieldState.error?.message}
-                              disabled={!edit || shukoFixFlag}
+                              disabled={!edit}
                             />
                           )}
                         />
@@ -2812,9 +2819,6 @@ const EquipmentOrderDetail = (props: {
                                 }}
                                 helperText={fieldState.error?.message}
                                 disabled={!edit}
-                                slotProps={{
-                                  input: { readOnly: shukoFixFlag },
-                                }}
                               />
                             )}
                           />
@@ -3147,7 +3151,7 @@ const EquipmentOrderDetail = (props: {
                   <Loading />
                 ) : (
                   <>
-                    <Box display={'flex'} flexDirection="row" width="100%" py={2}>
+                    <Box display={'flex'} flexDirection="row" width="100%">
                       <Box
                         sx={{
                           width: {
@@ -3156,23 +3160,35 @@ const EquipmentOrderDetail = (props: {
                             md: '40%',
                             lg: 'min-content',
                           },
+                          minWidth: juchuKizaiMeisaiList.filter((d) => !d.delFlag).length === 0 ? '40%' : 'none',
                         }}
                       >
-                        <Grid2 container my={1} mx={2} spacing={2}>
+                        <Grid2 container my={1} mx={1} spacing={2}>
                           <Button disabled={!edit || shukoFixFlag} onClick={handleOpenEqDialog}>
                             <AddIcon fontSize="small" />
                             機材追加
                           </Button>
-                          <Button
-                            disabled={!edit || shukoFixFlag}
-                            onClick={handleOpenSortDialog}
-                            sx={{
-                              display:
-                                juchuKizaiMeisaiList.filter((d) => !d.delFlag).length === 0 ? 'none' : 'inline-flex',
-                            }}
-                          >
-                            並び替え
-                          </Button>
+                          {juchuKizaiMeisaiList.filter((d) => !d.delFlag).length !== 0 && (
+                            <Button disabled={!edit || shukoFixFlag} onClick={handleOpenSortDialog}>
+                              並び替え
+                            </Button>
+                          )}
+                          {(juchuKizaiMeisaiList.filter((d) => !d.delFlag).length !== 0 ||
+                            juchuContainerMeisaiList.filter((d) => !d.delFlag).length !== 0) && (
+                            <Button
+                              color="error"
+                              disabled={
+                                !edit ||
+                                shukoFixFlag ||
+                                (juchuKizaiMeisaiList.filter((d) => !d.delFlag && d.selected).length === 0 &&
+                                  juchuContainerMeisaiList.filter((d) => !d.delFlag && d.selected).length === 0)
+                              }
+                              onClick={handleDelete}
+                            >
+                              <Delete fontSize="small" />
+                              削除
+                            </Button>
+                          )}
 
                           <Dialog
                             open={sortDialogOpen}
@@ -3203,7 +3219,8 @@ const EquipmentOrderDetail = (props: {
                             shukoFixFlag={shukoFixFlag}
                             shukoDate={shukoDate}
                             handleCellChange={handleCellChange}
-                            handleMeisaiDelete={handleEqMeisaiDelete}
+                            handleEqSelect={handleEqSelect}
+                            handleEqAllSelect={handleEqAllSelect}
                             handleMemoChange={handleMemoChange}
                             handleMemo2Change={handleMemo2Change}
                             ref={leftRef}
@@ -3239,7 +3256,6 @@ const EquipmentOrderDetail = (props: {
                         <StockTable
                           eqStockList={eqStockList}
                           dateRange={dateRange}
-                          //juchuHonbanbiList={juchuHonbanbiList}
                           shubetuColorMap={shubetuColorMap}
                           juchuColorMap={juchuColorMap}
                           ref={rightRef}
@@ -3273,7 +3289,8 @@ const EquipmentOrderDetail = (props: {
                         shukoDate={shukoDate}
                         handleContainerMemoChange={handleContainerMemoChange}
                         handleContainerCellChange={handleContainerCellChange}
-                        handleMeisaiDelete={handleCtnMeisaiDelete}
+                        handleCtnSelect={handleCtnSelect}
+                        handleCtnAllSelect={handleCtnAllSelect}
                       />
                     </Box>
                   </>
@@ -3536,9 +3553,15 @@ const EquipmentOrderDetail = (props: {
       <AlertDialog open={alertOpen} title={alertTitle} message={alertMessage} onClick={() => setAlertOpen(false)} />
       <IsDirtyAlertDialog open={dirtyOpen} onClick={handleResultDialog} />
       <MoveAlertDialog open={moveOpen} onClick={handleMoveDialog} />
-      <DeleteAlertDialog open={deleteEqOpen} onClick={handleEqMeisaiDeleteResult} />
-      <DeleteAlertDialog open={deleteCtnOpen} onClick={handleCtnMeisaiDeleteResult} />
       <WorkingConfirmDialog open={!!workingConfirmState?.isOpen} onClose={handleWorkingConfirmClose} />
+      <DeleteAlertDialog
+        selectedLength={
+          juchuKizaiMeisaiList.filter((data) => !data.delFlag && data.selected).length +
+          juchuContainerMeisaiList.filter((data) => !data.delFlag && data.selected).length
+        }
+        open={deleteOpen}
+        onClick={handleDeleteExecute}
+      />
       <Snackbar
         open={snackBarOpen}
         autoHideDuration={6000}

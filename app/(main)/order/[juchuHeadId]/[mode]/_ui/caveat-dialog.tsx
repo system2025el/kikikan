@@ -55,7 +55,7 @@ export const HeadDeleteConfirmDialog = ({ open, onClick }: { open: boolean; onCl
         伝票を削除してもよろしいでしょうか？
       </DialogContentText>
       <DialogActions>
-        <Button onClick={() => handleClick(true)} loading={isLoading}>
+        <Button onClick={() => handleClick(true)} loading={isLoading} color="error">
           削除
         </Button>
         <Button onClick={() => onClick(false)}>戻る</Button>
@@ -94,7 +94,7 @@ export const KizaiHeadDeleteConfirmDialog = ({
         受注明細を削除してもよろしいでしょうか？
       </DialogContentText>
       <DialogActions>
-        <Button onClick={() => handleClick(true)} loading={isLoading}>
+        <Button onClick={() => handleClick(true)} loading={isLoading} color="error">
           削除
         </Button>
         <Button onClick={() => onClick(false)}>戻る</Button>
