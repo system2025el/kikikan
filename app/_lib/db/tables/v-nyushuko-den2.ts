@@ -3,6 +3,7 @@ import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
 
 import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
+import { escapeLikeString } from '@/app/(main)/_lib/escape-string';
 import { NyukoListSearchValues } from '@/app/(main)/nyuko-list/_lib/types';
 import { ShukoListSearchValues } from '@/app/(main)/shuko-list/_lib/types';
 
@@ -38,31 +39,75 @@ export const selectFilteredShukoList = async (queries: ShukoListSearchValues) =>
       d2.nyushuko_shubetu_id = 1
   `;
 
+  // 入出庫日
+  switch (queries.selectedDate.value) {
+    case '1': {
+      // '昨日'
+      const startOfYesterday = dayjs().tz('Asia/Tokyo').subtract(1, 'day').startOf('day').toISOString();
+      const startOfToday = dayjs().tz('Asia/Tokyo').startOf('day').toISOString();
+      query += ` AND d2.nyushuko_dat >= '${startOfYesterday}' AND d2.nyushuko_dat < '${startOfToday}'`;
+      break;
+    }
+    case '2': {
+      // '今日'
+      const startOfToday = dayjs().tz('Asia/Tokyo').startOf('day').toISOString();
+      const startOfTomorrow = dayjs().tz('Asia/Tokyo').add(1, 'day').startOf('day').toISOString();
+      query += ` AND d2.nyushuko_dat >= '${startOfToday}' AND d2.nyushuko_dat < '${startOfTomorrow}'`;
+      break;
+    }
+    case '3': {
+      // '明日'
+      const startOfTomorrow = dayjs().tz('Asia/Tokyo').add(1, 'day').startOf('day').toISOString();
+      const startOfDayAfterTomorrow = dayjs().tz('Asia/Tokyo').add(2, 'day').startOf('day').toISOString();
+      query += ` AND d2.nyushuko_dat >= '${startOfTomorrow}' AND d2.nyushuko_dat < '${startOfDayAfterTomorrow}'`;
+      break;
+    }
+    case '4': {
+      // '指定期間'
+      if (queries.selectedDate.range.from && queries.selectedDate.range.to) {
+        // 指定日がどちらも入ってる場合
+        const startOfDay = dayjs(queries.selectedDate.range.from).tz('Asia/Tokyo').startOf('day').toISOString();
+        const startOfnextDay = dayjs(queries.selectedDate.range.to)
+          .tz('Asia/Tokyo')
+          .add(1, 'day')
+          .startOf('day')
+          .toISOString();
+        query += ` AND d2.nyushuko_dat >= '${startOfDay}' AND d2.nyushuko_dat < '${startOfnextDay}'`;
+      } else if (queries.selectedDate.range.from) {
+        // fromだけの場合
+        const startOfDay = dayjs(queries.selectedDate.range.from).tz('Asia/Tokyo').startOf('day').toISOString();
+
+        query += ` AND d2.nyushuko_dat >= '${startOfDay}'`;
+      } else if (queries.selectedDate.range.to) {
+        // toだけの場合
+        const startOfnextDay = dayjs(queries.selectedDate.range.to)
+          .tz('Asia/Tokyo')
+          .add(1, 'day')
+          .startOf('day')
+          .toISOString();
+
+        query += ` AND d2.nyushuko_dat < '${startOfnextDay}'`;
+      }
+      break;
+    }
+    default:
+      break;
+  }
+
+  // 受注番号
   if (queries.juchuHeadId !== null) {
     query += ` AND d2.juchu_head_id = ${queries.juchuHeadId}`;
   }
+  // 出庫場所
   if (queries.shukoBasho !== 0) {
     query += ` AND d2.nyushuko_basho_id = ${queries.shukoBasho}`;
   }
-
-  // '指定期間'
-  if (queries.shukoDat.from && queries.shukoDat.to) {
-    // 指定日がどちらも入ってる場合
-    const startOfDay = dayjs(queries.shukoDat.from).tz('Asia/Tokyo').startOf('day').toISOString();
-    const startOfnextDay = dayjs(queries.shukoDat.to).tz('Asia/Tokyo').add(1, 'day').startOf('day').toISOString();
-    query += ` AND d2.nyushuko_dat >= '${startOfDay}' AND d2.nyushuko_dat < '${startOfnextDay}'`;
-  } else if (queries.shukoDat.from) {
-    // fromだけの場合
-    const startOfDay = dayjs(queries.shukoDat.from).tz('Asia/Tokyo').startOf('day').toISOString();
-
-    query += ` AND d2.nyushuko_dat >= '${startOfDay}'`;
-  } else if (queries.shukoDat.to) {
-    // toだけの場合
-    const startOfnextDay = dayjs(queries.shukoDat.to).tz('Asia/Tokyo').add(1, 'day').startOf('day').toISOString();
-
-    query += ` AND d2.nyushuko_dat < '${startOfnextDay}'`;
+  // 顧客名称
+  if (queries.kokyaku && queries.kokyaku.trim() !== '') {
+    const escapedKokyaku = escapeLikeString(queries.kokyaku);
+    query += ` AND d2.kokyaku_nam ILIKE '%${escapedKokyaku}%'`;
   }
-
+  // 課
   if (queries.section && queries.section.length !== 0) {
     const likeClouds = queries.section.map((d) => ` d2.section_namv::TEXT LIKE '%${d}%'`).join(' OR');
     query += ` AND (${likeClouds})`;
@@ -100,30 +145,75 @@ export const selectFilteredNyukoList = async (queries: NyukoListSearchValues) =>
       d2.nyushuko_shubetu_id = 2
   `;
 
+  // 入出庫日
+  switch (queries.selectedDate.value) {
+    case '1': {
+      // '昨日'
+      const startOfYesterday = dayjs().tz('Asia/Tokyo').subtract(1, 'day').startOf('day').toISOString();
+      const startOfToday = dayjs().tz('Asia/Tokyo').startOf('day').toISOString();
+      query += ` AND d2.nyushuko_dat >= '${startOfYesterday}' AND d2.nyushuko_dat < '${startOfToday}'`;
+      break;
+    }
+    case '2': {
+      // '今日'
+      const startOfToday = dayjs().tz('Asia/Tokyo').startOf('day').toISOString();
+      const startOfTomorrow = dayjs().tz('Asia/Tokyo').add(1, 'day').startOf('day').toISOString();
+      query += ` AND d2.nyushuko_dat >= '${startOfToday}' AND d2.nyushuko_dat < '${startOfTomorrow}'`;
+      break;
+    }
+    case '3': {
+      // '明日'
+      const startOfTomorrow = dayjs().tz('Asia/Tokyo').add(1, 'day').startOf('day').toISOString();
+      const startOfDayAfterTomorrow = dayjs().tz('Asia/Tokyo').add(2, 'day').startOf('day').toISOString();
+      query += ` AND d2.nyushuko_dat >= '${startOfTomorrow}' AND d2.nyushuko_dat < '${startOfDayAfterTomorrow}'`;
+      break;
+    }
+    case '4': {
+      // '指定期間'
+      if (queries.selectedDate.range.from && queries.selectedDate.range.to) {
+        // 指定日がどちらも入ってる場合
+        const startOfDay = dayjs(queries.selectedDate.range.from).tz('Asia/Tokyo').startOf('day').toISOString();
+        const startOfnextDay = dayjs(queries.selectedDate.range.to)
+          .tz('Asia/Tokyo')
+          .add(1, 'day')
+          .startOf('day')
+          .toISOString();
+        query += ` AND d2.nyushuko_dat >= '${startOfDay}' AND d2.nyushuko_dat < '${startOfnextDay}'`;
+      } else if (queries.selectedDate.range.from) {
+        // fromだけの場合
+        const startOfDay = dayjs(queries.selectedDate.range.from).tz('Asia/Tokyo').startOf('day').toISOString();
+
+        query += ` AND d2.nyushuko_dat >= '${startOfDay}'`;
+      } else if (queries.selectedDate.range.to) {
+        // toだけの場合
+        const startOfnextDay = dayjs(queries.selectedDate.range.to)
+          .tz('Asia/Tokyo')
+          .add(1, 'day')
+          .startOf('day')
+          .toISOString();
+
+        query += ` AND d2.nyushuko_dat < '${startOfnextDay}'`;
+      }
+      break;
+    }
+    default:
+      break;
+  }
+
+  // 受注番号
   if (queries.juchuHeadId !== null) {
     query += ` AND d2.juchu_head_id = ${queries.juchuHeadId}`;
   }
+  // 入庫場所
   if (queries.nyukoBasho !== 0) {
     query += ` AND d2.nyushuko_basho_id = ${queries.nyukoBasho}`;
   }
-
-  // '指定期間'
-  if (queries.nyukoDat.from && queries.nyukoDat.to) {
-    // 指定日がどちらも入ってる場合
-    const startOfDay = dayjs(queries.nyukoDat.from).tz('Asia/Tokyo').startOf('day').toISOString();
-    const startOfnextDay = dayjs(queries.nyukoDat.to).tz('Asia/Tokyo').add(1, 'day').startOf('day').toISOString();
-    query += ` AND d2.nyushuko_dat >= '${startOfDay}' AND d2.nyushuko_dat < '${startOfnextDay}'`;
-  } else if (queries.nyukoDat.from) {
-    // fromだけの場合
-    const startOfDay = dayjs(queries.nyukoDat.from).tz('Asia/Tokyo').startOf('day').toISOString();
-
-    query += ` AND d2.nyushuko_dat >= '${startOfDay}'`;
-  } else if (queries.nyukoDat.to) {
-    // toだけの場合
-    const startOfnextDay = dayjs(queries.nyukoDat.to).tz('Asia/Tokyo').add(1, 'day').startOf('day').toISOString();
-
-    query += ` AND d2.nyushuko_dat < '${startOfnextDay}'`;
+  // 顧客名称
+  if (queries.kokyaku && queries.kokyaku.trim() !== '') {
+    const escapedKokyaku = escapeLikeString(queries.kokyaku);
+    query += ` AND d2.kokyaku_nam ILIKE '%${escapedKokyaku}%'`;
   }
+  // 課
   if (queries.section && queries.section.length !== 0) {
     const likeClouds = queries.section.map((d) => ` d2.section_namv::TEXT LIKE '%${d}%'`).join(' OR');
     query += ` AND (${likeClouds})`;

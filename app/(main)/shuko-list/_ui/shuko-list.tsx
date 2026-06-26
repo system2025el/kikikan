@@ -2,6 +2,7 @@
 
 import SearchIcon from '@mui/icons-material/Search';
 import {
+  Autocomplete,
   Box,
   Button,
   Divider,
@@ -15,7 +16,7 @@ import {
   Typography,
 } from '@mui/material';
 import { useEffect, useState } from 'react';
-import { CheckboxButtonGroup, Controller, TextFieldElement, useForm } from 'react-hook-form-mui';
+import { CheckboxButtonGroup, Controller, RadioButtonGroup, TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
 
@@ -25,7 +26,9 @@ import { TestDate } from '../../_ui/date';
 import { SelectTypes } from '../../_ui/form-box';
 import { Loading } from '../../_ui/loading';
 import { PermissionGuard } from '../../_ui/permission-guard';
+import { getCustomerSelection } from '../../(masters)/_lib/funcs';
 import { getSectionShortSelections } from '../../(masters)/sections-master/_lib/funcs';
+import { radioData } from '../_lib/datas';
 import { getPdfData, getShukoList } from '../_lib/funcs';
 import { ShukoKizai, ShukoListSearchValues, ShukoTableValues } from '../_lib/types';
 import { PdfModel, usePdf } from '../shuko/_lib/hooks/usePdf';
@@ -46,23 +49,30 @@ export const ShukoList = (/*props: { shukoData: ShukoTableValues[] }*/) => {
   const [selected, setSelected] = useState<number[]>([]);
   // 出庫一覧データ
   const [shukoList, setShukoList] = useState<ShukoTableValues[]>(/*props.shukoData*/ []);
-  // 課選択肢
-  const [options, setOptions] = useState<SelectTypes[]>([]);
+  // 選択肢(顧客、課)
+  const [options, setOptions] = useState<{ custs: SelectTypes[]; sect: SelectTypes[] }>({
+    custs: [],
+    sect: [],
+  });
   // スナックバー制御
   const [snackBarOpen, setSnackBarOpen] = useState(false);
   // スナックバーメッセージ
   const [snackBarMessage, setSnackBarMessage] = useState('');
 
   /* useForm ------------------- */
-  const { control, handleSubmit, getValues, reset } = useForm<ShukoListSearchValues>({
+  const { control, handleSubmit, getValues, reset, watch } = useForm<ShukoListSearchValues>({
     mode: 'onSubmit',
     defaultValues: {
+      selectedDate: { value: '2', range: { from: null, to: null } },
       juchuHeadId: null,
-      shukoDat: { from: new Date(), to: new Date() },
       shukoBasho: 0,
+      kokyaku: '',
       section: [],
     },
   });
+
+  /** 検索条件の種別の監視 */
+  const selectedDateValue = watch('selectedDate.value');
 
   /**
    * 検索ボタン押下
@@ -83,8 +93,8 @@ export const ShukoList = (/*props: { shukoData: ShukoTableValues[] }*/) => {
   /** 選択肢の取得 */
   const getOptions = async () => {
     try {
-      const radio = await getSectionShortSelections();
-      setOptions(radio);
+      const [custs, sect] = await Promise.all([getCustomerSelection(), getSectionShortSelections()]);
+      setOptions({ custs: custs, sect: sect });
     } catch (e) {
       setError(e instanceof Error ? e : new Error(String(e)));
     }
@@ -177,7 +187,41 @@ export const ShukoList = (/*props: { shukoData: ShukoTableValues[] }*/) => {
           </Box>
           <Divider />
           <form onSubmit={handleSubmit(onSubmit)}>
-            <Grid2 container alignItems={'center'} p={0.5} px={2} spacing={1}>
+            <Grid2 container alignItems={'center'} ml={3} my={selectedDateValue === '4' ? 1 : 2} spacing={1}>
+              <RadioButtonGroup control={control} name="selectedDate.value" options={radioData} row />
+              {selectedDateValue === '4' && (
+                <Grid2 display={'flex'} alignItems={'center'} width={'fit-content'}>
+                  <Controller
+                    name="selectedDate.range.from"
+                    control={control}
+                    render={({ field, fieldState }) => (
+                      <TestDate
+                        onBlur={field.onBlur}
+                        date={field.value}
+                        onChange={(newDate) => field.onChange(newDate?.toDate())}
+                        fieldstate={fieldState}
+                        onClear={() => field.onChange(null)}
+                      />
+                    )}
+                  />
+                  ～
+                  <Controller
+                    name="selectedDate.range.to"
+                    control={control}
+                    render={({ field, fieldState }) => (
+                      <TestDate
+                        onBlur={field.onBlur}
+                        date={field.value}
+                        onChange={(newDate) => field.onChange(newDate?.toDate())}
+                        fieldstate={fieldState}
+                        onClear={() => field.onChange(null)}
+                      />
+                    )}
+                  />
+                </Grid2>
+              )}
+            </Grid2>
+            <Grid2 container alignItems={'center'} ml={2} my={1} spacing={2}>
               <Grid2 display={'flex'} alignItems={'center'}>
                 <Typography mr={1}>受注番号</Typography>
                 <TextFieldElement
@@ -197,36 +241,6 @@ export const ShukoList = (/*props: { shukoData: ShukoTableValues[] }*/) => {
                   }}
                 />
               </Grid2>
-              <Grid2 display={'flex'} alignItems={'center'} width={'fit-content'}>
-                <Typography mr={1}>出庫日</Typography>
-                <Controller
-                  name="shukoDat.from"
-                  control={control}
-                  render={({ field, fieldState }) => (
-                    <TestDate
-                      onBlur={field.onBlur}
-                      date={field.value}
-                      onChange={(newDate) => field.onChange(newDate?.toDate())}
-                      fieldstate={fieldState}
-                      onClear={() => field.onChange(null)}
-                    />
-                  )}
-                />
-                ～
-                <Controller
-                  name="shukoDat.to"
-                  control={control}
-                  render={({ field, fieldState }) => (
-                    <TestDate
-                      onBlur={field.onBlur}
-                      date={field.value}
-                      onChange={(newDate) => field.onChange(newDate?.toDate())}
-                      fieldstate={fieldState}
-                      onClear={() => field.onChange(null)}
-                    />
-                  )}
-                />
-              </Grid2>
               <Grid2 display={'flex'} alignItems={'center'}>
                 <Typography mr={1}>出庫場所</Typography>
                 <FormControl size="small" sx={{ width: 120 }}>
@@ -244,14 +258,37 @@ export const ShukoList = (/*props: { shukoData: ShukoTableValues[] }*/) => {
                 </FormControl>
               </Grid2>
               <Grid2 display={'flex'} alignItems={'center'}>
+                <Typography mr={1}>顧客</Typography>
+                <Controller
+                  name="kokyaku"
+                  control={control}
+                  render={({ field }) => (
+                    <Autocomplete
+                      {...field}
+                      getOptionKey={(option) => (typeof option === 'string' ? option : option.id)}
+                      onChange={(_, value) => {
+                        const label = typeof value === 'string' ? value : (value?.label ?? '');
+                        field.onChange(label);
+                      }}
+                      freeSolo
+                      autoSelect
+                      sx={{ width: 300 }}
+                      renderInput={(params) => <TextField {...params} />}
+                      options={options.custs ?? []}
+                      getOptionLabel={(option) => (typeof option === 'string' ? option : option.label)}
+                    />
+                  )}
+                />
+              </Grid2>
+              <Grid2 display={'flex'} alignItems={'center'}>
                 <Typography noWrap mr={1}>
                   課
                 </Typography>
                 <Box border={1} borderColor={'divider'} borderRadius={1} pl={1}>
-                  <CheckboxButtonGroup name="section" control={control} options={options} row />
+                  <CheckboxButtonGroup name="section" control={control} options={options.sect} row />
                 </Box>
               </Grid2>
-              <Grid2 size={'grow'} alignItems={'end'} justifyContent={'end'}>
+              <Grid2 size={'auto'} ml={'auto'} mr={1}>
                 <Box alignSelf={'end'} justifySelf={'end'}>
                   <Button type="submit" loading={isLoading}>
                     <SearchIcon fontSize="small" />
