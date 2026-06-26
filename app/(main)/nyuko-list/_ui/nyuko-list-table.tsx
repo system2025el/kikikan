@@ -123,7 +123,7 @@ export const NyukoListTable = (props: {
                       'shukoListSearchParams',
                       JSON.stringify({
                         selectedDate: {
-                          value: 4,
+                          value: '4',
                           range: {
                             from: null,
                             to: null,
