@@ -67,6 +67,7 @@ export const NyukoDetailTable = (props: { datas: NyukoDetailTableValues[] }) => 
             <TableCell align="right" sx={{ pr: 1 }}>
               差異
             </TableCell>
+            <TableCell align="left">連絡メモ</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -111,6 +112,9 @@ export const NyukoDetailTable = (props: { datas: NyukoDetailTableValues[] }) => 
                 }}
               >
                 {row.diff}
+              </TableCell>
+              <TableCell align="left" sx={{ whiteSpace: 'pre-wrap' }}>
+                {row.mem2}
               </TableCell>
             </TableRow>
           ))}

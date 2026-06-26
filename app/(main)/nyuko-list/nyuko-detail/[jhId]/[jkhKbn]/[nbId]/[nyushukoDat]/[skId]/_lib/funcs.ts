@@ -127,6 +127,7 @@ export const getNyukoDetailTable = async (
       ctnFlg: d.ctn_flg,
       dspOrdNumMeisai: d.dsp_ord_num_meisai,
       indentNum: d.indent_num ?? 0,
+      mem2: d.mem2 ?? '',
     }));
 
     return nyukoDetailTableData;
