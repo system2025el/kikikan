@@ -177,26 +177,7 @@ export const NyukoDetail = (props: {
             </Grid2>
           </Grid2>
           <Divider />
-          <Box width={'100%'}>
-            <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} width={'60vw'} pl={1} py={0.5}>
-              <Typography>全{nyukoDetailTableData ? nyukoDetailTableData.length : 0}件</Typography>
-              <Box display={'flex'} alignItems={'center'}>
-                <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.completed }}>
-                  済
-                </Typography>
-                <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.lack }}>
-                  不足
-                </Typography>
-                <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.excess }}>
-                  過剰
-                </Typography>
-                <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.ctn }}>
-                  コンテナ
-                </Typography>
-              </Box>
-            </Box>
-            {nyukoDetailTableData.length > 0 && <NyukoDetailTable datas={nyukoDetailTableData} />}
-          </Box>
+          {nyukoDetailTableData.length > 0 && <NyukoDetailTable datas={nyukoDetailTableData} />}
         </Paper>
         <Dialog open={arrivalOpen}>
           <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>

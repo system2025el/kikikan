@@ -288,37 +288,9 @@ export const ShukoDetail = (props: {
             </Grid2>
           </Grid2>
           <Divider />
-          <Box width={'100%'}>
-            <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} width={'60vw'} pl={1} py={0.5}>
-              <Typography>全{shukoDetailList ? shukoDetailList.length : 0}件</Typography>
-              <Box display={'flex'} alignItems={'center'}>
-                <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.completed }}>
-                  済
-                </Typography>
-                <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.lack }}>
-                  不足
-                </Typography>
-                <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.excess }}>
-                  過剰
-                </Typography>
-                <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.ctn }}>
-                  コンテナ
-                </Typography>
-                <Button
-                  onClick={handleAdjust}
-                  disabled={
-                    !shukoDetailList.find((data) => data.diff !== 0) ||
-                    fixFlag ||
-                    user?.permission.nyushuko === permission.nyushuko_ref
-                  }
-                  sx={{ ml: 2 }}
-                >
-                  一括補正
-                </Button>
-              </Box>
-            </Box>
-            {shukoDetailList.length > 0 && <ShukoDetailTable datas={shukoDetailList} />}
-          </Box>
+          {shukoDetailList.length > 0 && (
+            <ShukoDetailTable datas={shukoDetailList} fixFlag={fixFlag} user={user} handleAdjust={handleAdjust} />
+          )}
         </Paper>
         <Dialog open={departureOpen}>
           <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
