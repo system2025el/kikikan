@@ -49,13 +49,15 @@ export const NyukoDetail = (props: {
 
   // 到着確認ダイアログ制御
   const [arrivalOpen, setArrivalOpen] = useState(false);
+  // 到着解除確認ダイアログ制御
+  const [releaseOpen, setReleaseOpen] = useState(false);
   // スナックバー制御
   const [snackBarOpen, setSnackBarOpen] = useState(false);
   // スナックバーメッセージ
   const [snackBarMessage, setSnackBarMessage] = useState('');
 
   /**
-   * 到着ボタン押下
+   * 到着処理
    * @returns
    */
   const executeArrival = async () => {
@@ -86,10 +88,10 @@ export const NyukoDetail = (props: {
   };
 
   /**
-   * 到着解除ボタン押下
+   * 到着解除処理
    * @returns
    */
-  const handleRelease = async () => {
+  const executeRelease = async () => {
     if (!user || isProcessing) return;
 
     setIsProcessing(true);
@@ -103,11 +105,13 @@ export const NyukoDetail = (props: {
       await delNyukoFix(nyukoDetailData, nyukoDetailTableData, user.name);
 
       setFixFlag(false);
+      setReleaseOpen(false);
       setSnackBarMessage('到着解除しました');
       setSnackBarOpen(true);
       setIsProcessing(false);
       router.push('/nyuko-list');
     } catch (e) {
+      setReleaseOpen(false);
       setSnackBarMessage('到着解除に失敗しました');
       setSnackBarOpen(true);
       setIsProcessing(false);
@@ -151,7 +155,7 @@ export const NyukoDetail = (props: {
               </Button>
               <Button
                 color="error"
-                onClick={handleRelease}
+                onClick={() => setReleaseOpen(true)}
                 disabled={!fixFlag || user?.permission.nyushuko === permission.nyushuko_ref}
               >
                 到着解除
@@ -226,6 +230,23 @@ export const NyukoDetail = (props: {
           <DialogActions>
             <Button onClick={executeArrival} loading={isProcessing} sx={{ backgroundColor: 'yellow', color: 'black' }}>
               到着
+            </Button>
+            <Button onClick={() => setArrivalOpen(false)} loading={isProcessing}>
+              戻る
+            </Button>
+          </DialogActions>
+        </Dialog>
+        <Dialog open={releaseOpen}>
+          <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
+            <WarningIcon color="warning" />
+            <Box>到着解除確認</Box>
+          </DialogTitle>
+          <DialogContentText m={2} p={2}>
+            到着解除してよろしいですか？
+          </DialogContentText>
+          <DialogActions>
+            <Button onClick={executeRelease} loading={isProcessing} color="error">
+              到着解除
             </Button>
             <Button onClick={() => setArrivalOpen(false)} loading={isProcessing}>
               戻る
