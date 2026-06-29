@@ -49,8 +49,6 @@ export const NyukoDetail = (props: {
 
   // 到着確認ダイアログ制御
   const [arrivalOpen, setArrivalOpen] = useState(false);
-  // 到着解除ダイアログ制御
-  const [releaseOpen, setReleaseOpen] = useState(false);
   // スナックバー制御
   const [snackBarOpen, setSnackBarOpen] = useState(false);
   // スナックバーメッセージ

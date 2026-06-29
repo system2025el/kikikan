@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 import { grey, lightBlue } from '@mui/material/colors';
 import { usePathname, useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { Dispatch, SetStateAction, useState } from 'react';
 
 import { User } from '@/app/_lib/stores/usestore';
 import { dispColors, statusColors } from '@/app/(main)/_lib/colors';
@@ -27,9 +27,9 @@ export const ShukoDetailTable = (props: {
   datas: ShukoDetailTableValues[];
   fixFlag: boolean;
   user: User | null;
-  handleAdjust: () => void;
+  setAdjustOpen: Dispatch<SetStateAction<boolean>>;
 }) => {
-  const { datas, fixFlag, user, handleAdjust } = props;
+  const { datas, fixFlag, user, setAdjustOpen } = props;
 
   const router = useRouter();
   const path = usePathname();
@@ -62,7 +62,7 @@ export const ShukoDetailTable = (props: {
             コンテナ
           </Typography>
           <Button
-            onClick={handleAdjust}
+            onClick={() => setAdjustOpen(true)}
             disabled={
               !datas.find((data) => data.diff !== 0) || fixFlag || user?.permission.nyushuko === permission.nyushuko_ref
             }
