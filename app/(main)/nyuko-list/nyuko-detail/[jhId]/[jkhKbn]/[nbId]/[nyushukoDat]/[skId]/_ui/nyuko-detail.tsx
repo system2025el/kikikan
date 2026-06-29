@@ -27,7 +27,7 @@ import { BackButton } from '@/app/(main)/_ui/buttons';
 import { DateTime, TestDate } from '@/app/(main)/_ui/date';
 import { PermissionGuard } from '@/app/(main)/_ui/permission-guard';
 
-import { updNyukoDetail } from '../_lib/funcs';
+import { delNyukoFix, updNyukoDetail } from '../_lib/funcs';
 import { NyukoDetailTableValues, NyukoDetailValues } from '../_lib/types';
 import { NyukoDetailTable } from './nyuko-detail-table';
 
@@ -49,6 +49,8 @@ export const NyukoDetail = (props: {
 
   // 到着確認ダイアログ制御
   const [arrivalOpen, setArrivalOpen] = useState(false);
+  // 到着解除ダイアログ制御
+  const [releaseOpen, setReleaseOpen] = useState(false);
   // スナックバー制御
   const [snackBarOpen, setSnackBarOpen] = useState(false);
   // スナックバーメッセージ
@@ -80,6 +82,35 @@ export const NyukoDetail = (props: {
     } else {
       setArrivalOpen(false);
       setSnackBarMessage('到着に失敗しました');
+      setSnackBarOpen(true);
+      setIsProcessing(false);
+    }
+  };
+
+  /**
+   * 到着解除ボタン押下
+   * @returns
+   */
+  const handleRelease = async () => {
+    if (!user || isProcessing) return;
+
+    setIsProcessing(true);
+
+    if (nyukoDetailTableData.length === 0) {
+      setIsProcessing(false);
+      return;
+    }
+
+    try {
+      await delNyukoFix(nyukoDetailData, nyukoDetailTableData, user.name);
+
+      setFixFlag(false);
+      setSnackBarMessage('到着解除しました');
+      setSnackBarOpen(true);
+      setIsProcessing(false);
+      router.push('/nyuko-list');
+    } catch (e) {
+      setSnackBarMessage('到着解除に失敗しました');
       setSnackBarOpen(true);
       setIsProcessing(false);
     }
@@ -119,6 +150,13 @@ export const NyukoDetail = (props: {
                 sx={{ backgroundColor: 'yellow', color: 'black' }}
               >
                 到着
+              </Button>
+              <Button
+                color="error"
+                onClick={handleRelease}
+                disabled={!fixFlag || user?.permission.nyushuko === permission.nyushuko_ref}
+              >
+                到着解除
               </Button>
             </Grid2>
           </Box>
@@ -185,8 +223,6 @@ export const NyukoDetail = (props: {
             <Box>到着確認</Box>
           </DialogTitle>
           <DialogContentText m={2} p={2}>
-            到着は戻せません。
-            <br />
             到着済みにしてよろしいですか？
           </DialogContentText>
           <DialogActions>

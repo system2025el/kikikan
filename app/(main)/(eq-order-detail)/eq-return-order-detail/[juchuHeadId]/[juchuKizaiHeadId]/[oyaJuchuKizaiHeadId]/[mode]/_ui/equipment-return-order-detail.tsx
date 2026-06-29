@@ -1982,7 +1982,7 @@ export const EquipmentReturnOrderDetail = (props: {
                         }}
                       >
                         <Grid2 container my={1} mx={1} spacing={2}>
-                          <Button disabled={!edit} onClick={handleOpenEqDialog}>
+                          <Button disabled={!edit || nyukoFixFlag} onClick={handleOpenEqDialog}>
                             <AddIcon fontSize="small" />
                             機材追加
                           </Button>
@@ -2013,6 +2013,7 @@ export const EquipmentReturnOrderDetail = (props: {
                           <ReturnEqTable
                             rows={returnJuchuKizaiMeisaiList}
                             edit={edit}
+                            nyukoFixFlag={nyukoFixFlag}
                             returnNyukoDate={returnNyukoDate}
                             handleCellChange={handleCellChange}
                             handleEqSelect={handleEqSelect}
@@ -2064,6 +2065,7 @@ export const EquipmentReturnOrderDetail = (props: {
                       <ReturnContainerTable
                         rows={returnJuchuContainerMeisaiList}
                         edit={edit}
+                        nyukoFixFlag={nyukoFixFlag}
                         returnNyukoDate={returnNyukoDate}
                         handleContainerMemoChange={handleReturnContainerMemoChange}
                         handleContainerCellChange={handleReturnContainerCellChange}

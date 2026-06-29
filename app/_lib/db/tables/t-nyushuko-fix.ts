@@ -162,47 +162,10 @@ export const updateNyushukoFix = async (data: NyushukoFix, connection: PoolClien
 
 /**
  * 入出庫確定削除
- * @param data 入出庫確定削除データ
- * @returns
- */
-export const deleteNyushukoFix = async (
-  data: {
-    juchu_head_id: number;
-    juchu_kizai_head_id: number;
-    sagyo_id: number;
-  },
-  connection: PoolClient
-) => {
-  const whereKeys = Object.keys(data) as (keyof typeof data)[];
-
-  if (whereKeys.length === 0) {
-    throw new Error('DELETE conditions cannot be empty.');
-  }
-
-  const whereClause = whereKeys.map((key, index) => `${key} = $${index + 1}`).join(' AND ');
-
-  const values = whereKeys.map((key) => data[key]);
-
-  const query = `
-    DELETE FROM
-      ${SCHEMA}.t_nyushuko_fix
-    WHERE
-      ${whereClause}
-  `;
-
-  try {
-    await connection.query(query, values);
-  } catch (e) {
-    throw new Error('[deleteNyushukoFix] DBエラー:', { cause: e });
-  }
-};
-
-/**
- * 出庫確定削除
  * @param data 出庫確定削除データ
  * @param connection
  */
-export const deleteShukoFix = async (
+export const deleteNyushukoFix = async (
   data: {
     juchu_head_id: number;
     juchu_kizai_head_id: number;
@@ -231,7 +194,7 @@ export const deleteShukoFix = async (
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw new Error('[deleteShukoFix] DBエラー:', { cause: e });
+    throw new Error('[deleteNyushukoFix] DBエラー:', { cause: e });
   }
 };
 

@@ -406,6 +406,7 @@ export const KeepContainerTable = (props: {
                     transition: 'background-color 0.3s',
                   },
                 }}
+                disabled={!edit || nyukoFixFlag}
               />
             </TableCell>
             <TableCell size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }} />
@@ -438,6 +439,7 @@ export const KeepContainerTable = (props: {
                   checked={row.selected}
                   onChange={() => handleCtnSelect(row)}
                   sx={{ padding: 0 }}
+                  disabled={!edit || nyukoFixFlag}
                 />
               </TableCell>
               <TableCell

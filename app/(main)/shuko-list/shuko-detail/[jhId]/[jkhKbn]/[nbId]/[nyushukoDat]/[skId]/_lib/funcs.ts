@@ -9,7 +9,7 @@ import { selectChildJuchuKizaiHeadConfirm } from '@/app/_lib/db/tables/t-juchu-k
 import { selectJuchuKizaiNyushukoConfirmList } from '@/app/_lib/db/tables/t-juchu-kizai-nyushuko';
 import { updateNyushukoDen, upsertNyushukoDen } from '@/app/_lib/db/tables/t-nyushuko-den';
 import {
-  deleteShukoFix,
+  deleteNyushukoFix,
   insertNyushukoFix,
   selectSagyoIdFilterNyushukoFixFlag,
 } from '@/app/_lib/db/tables/t-nyushuko-fix';
@@ -572,7 +572,7 @@ export const delShukoFix = async (
     await connection.query('BEGIN');
 
     for (const data of deleteFixData) {
-      await deleteShukoFix(data, connection);
+      await deleteNyushukoFix(data, connection);
     }
 
     await connection.query('COMMIT');

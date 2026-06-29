@@ -84,7 +84,13 @@ export const ShukoDetailTable = (props: {
                 <TableCell align="right">予備数</TableCell>
               </>
             )}
-            <TableCell align="right" sx={{ borderLeft: '2px solid', borderLeftColor: 'blue' }}>
+            <TableCell
+              align="right"
+              sx={{
+                borderLeft: datas[0].juchuKizaiHeadKbn !== 3 ? '2px solid' : 'inherit',
+                borderLeftColor: datas[0].juchuKizaiHeadKbn !== 3 ? 'blue' : 'inherit',
+              }}
+            >
               読取数
             </TableCell>
             <TableCell align="right">補正数</TableCell>
