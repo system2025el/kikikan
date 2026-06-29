@@ -149,6 +149,7 @@ ReturnStockTableRow.displayName = 'ReturnStockTableRow';
 type ReturnEqTableProps = {
   rows: ReturnJuchuKizaiMeisaiValues[];
   edit: boolean;
+  nyukoFixFlag: boolean;
   returnNyukoDate: Date | null;
   handleCellChange: (rowIndex: number, kizaiId: number, planQty: number) => void;
   handleEqSelect: (row: ReturnJuchuKizaiMeisaiValues) => void;
@@ -160,6 +161,7 @@ type ReturnEqTableProps = {
 export const ReturnEqTable: React.FC<ReturnEqTableProps> = ({
   rows,
   edit,
+  nyukoFixFlag,
   returnNyukoDate,
   handleCellChange,
   handleEqSelect,
@@ -263,7 +265,7 @@ export const ReturnEqTable: React.FC<ReturnEqTableProps> = ({
                     transition: 'background-color 0.3s',
                   },
                 }}
-                disabled={!edit}
+                disabled={!edit || nyukoFixFlag}
               />
             </TableCell>
             <TableCell size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }} />
@@ -300,6 +302,7 @@ export const ReturnEqTable: React.FC<ReturnEqTableProps> = ({
               row={row}
               rowIndex={rowIndex}
               edit={edit}
+              nyukoFixFlag={nyukoFixFlag}
               returnNyukoDate={returnNyukoDate}
               handleOrderRef={handleOrderRef(rowIndex)}
               handleYobiRef={handleYobiRef(rowIndex)}
@@ -320,6 +323,7 @@ type ReturnEqTableRowProps = {
   row: ReturnJuchuKizaiMeisaiValues;
   rowIndex: number;
   edit: boolean;
+  nyukoFixFlag: boolean;
   returnNyukoDate: Date | null;
   handleOrderRef: (el: HTMLInputElement | null) => void;
   handleYobiRef: (el: HTMLInputElement | null) => void;
@@ -335,6 +339,7 @@ const ReturnEqTableRow = React.memo(
     row,
     rowIndex,
     edit,
+    nyukoFixFlag,
     returnNyukoDate,
     handleOrderRef,
     handleYobiRef,
@@ -352,7 +357,7 @@ const ReturnEqTableRow = React.memo(
             checked={row.selected}
             onChange={() => handleEqSelect(row)}
             sx={{ padding: 0 }}
-            disabled={!edit}
+            disabled={!edit || nyukoFixFlag}
           />
         </TableCell>
         <TableCell align="right" size="small" sx={{ bgcolor: grey[200], py: 0, px: 1, border: '1px solid black' }}>
@@ -367,7 +372,7 @@ const ReturnEqTableRow = React.memo(
             memo={row.mem ? row.mem : ''}
             handleMemoChange={handleMemoChange}
             rowIndex={rowIndex}
-            disabled={!edit}
+            disabled={!edit || nyukoFixFlag}
           />
         </TableCell>
         <TableCell style={styles.row} align="left" size="small">
@@ -431,7 +436,7 @@ const ReturnEqTableRow = React.memo(
               handleOrderKeyDown(e, rowIndex);
             }}
             onFocus={(e) => e.target.select()}
-            disabled={!edit}
+            disabled={!edit || nyukoFixFlag}
           />
         </TableCell>
         {/* <TableCell style={styles.row} align="right" size="small">
@@ -497,6 +502,7 @@ ReturnEqTableRow.displayName = 'ReturnEqTableRow';
 export const ReturnContainerTable = (props: {
   rows: ReturnJuchuContainerMeisaiValues[];
   edit: boolean;
+  nyukoFixFlag: boolean;
   returnNyukoDate: Date | null;
   handleContainerMemoChange: (rowIndex: number, memo: string) => void;
   handleContainerCellChange: (rowIndex: number, kicsValue: number, yardValue: number) => void;
@@ -506,6 +512,7 @@ export const ReturnContainerTable = (props: {
   const {
     rows,
     edit,
+    nyukoFixFlag,
     returnNyukoDate,
     handleContainerMemoChange,
     handleContainerCellChange,
@@ -608,6 +615,7 @@ export const ReturnContainerTable = (props: {
                     transition: 'background-color 0.3s',
                   },
                 }}
+                disabled={!edit || nyukoFixFlag}
               />
             </TableCell>
             <TableCell size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }} />
@@ -643,6 +651,7 @@ export const ReturnContainerTable = (props: {
                   checked={row.selected}
                   onChange={() => handleCtnSelect(row)}
                   sx={{ padding: 0 }}
+                  disabled={!edit || nyukoFixFlag}
                 />
               </TableCell>
               <TableCell
@@ -658,7 +667,7 @@ export const ReturnContainerTable = (props: {
                   memo={row.mem ? row.mem : ''}
                   handleMemoChange={handleContainerMemoChange}
                   rowIndex={rowIndex}
-                  disabled={!edit}
+                  disabled={!edit || nyukoFixFlag}
                 />
               </TableCell>
               <TableCell style={styles.row} align="left" size="small">
@@ -729,7 +738,7 @@ export const ReturnContainerTable = (props: {
                     handleKicsKeyDown(e, rowIndex);
                   }}
                   onFocus={(e) => e.target.select()}
-                  disabled={!edit}
+                  disabled={!edit || nyukoFixFlag}
                 />
               </TableCell>
               <TableCell style={styles.row} align="right" size="small">
@@ -781,7 +790,7 @@ export const ReturnContainerTable = (props: {
                     handleYardKeyDown(e, rowIndex);
                   }}
                   onFocus={(e) => e.target.select()}
-                  disabled={!edit}
+                  disabled={!edit || nyukoFixFlag}
                 />
               </TableCell>
               <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: lightBlue[100], color: 'red' }}>

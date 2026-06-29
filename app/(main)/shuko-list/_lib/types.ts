@@ -1,7 +1,14 @@
 export type ShukoListSearchValues = {
+  selectedDate: {
+    value: string;
+    range: {
+      from: Date | null;
+      to: Date | null;
+    };
+  };
   juchuHeadId: number | null;
-  shukoDat: { from: Date | null; to: Date | null };
   shukoBasho: number;
+  kokyaku: string | null;
   section: string[];
 };
 

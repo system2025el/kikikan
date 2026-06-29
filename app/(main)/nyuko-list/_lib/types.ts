@@ -1,8 +1,14 @@
 export type NyukoListSearchValues = {
+  selectedDate: {
+    value: string;
+    range: {
+      from: Date | null;
+      to: Date | null;
+    };
+  };
   juchuHeadId: number | null;
-  nyukoDat: { from: Date | null; to: Date | null };
-
   nyukoBasho: number;
+  kokyaku: string | null;
   section: string[];
 };
 

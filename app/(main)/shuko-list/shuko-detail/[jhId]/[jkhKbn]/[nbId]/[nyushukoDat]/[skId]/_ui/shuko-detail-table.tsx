@@ -1,16 +1,35 @@
 'use client';
 
-import { Button, Link, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
-import { grey } from '@mui/material/colors';
+import {
+  Box,
+  Button,
+  Link,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography,
+} from '@mui/material';
+import { grey, lightBlue } from '@mui/material/colors';
 import { usePathname, useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { Dispatch, SetStateAction, useState } from 'react';
 
+import { User } from '@/app/_lib/stores/usestore';
 import { dispColors, statusColors } from '@/app/(main)/_lib/colors';
+import { permission } from '@/app/(main)/_lib/permission';
 
 import { ShukoDetailTableValues } from '../_lib/types';
 
-export const ShukoDetailTable = (props: { datas: ShukoDetailTableValues[] }) => {
-  const { datas } = props;
+export const ShukoDetailTable = (props: {
+  datas: ShukoDetailTableValues[];
+  fixFlag: boolean;
+  user: User | null;
+  setAdjustOpen: Dispatch<SetStateAction<boolean>>;
+}) => {
+  const { datas, fixFlag, user, setAdjustOpen } = props;
 
   const router = useRouter();
   const path = usePathname();
@@ -26,7 +45,33 @@ export const ShukoDetailTable = (props: { datas: ShukoDetailTableValues[] }) => 
   };
 
   return (
-    <TableContainer sx={{ overflow: 'auto', maxHeight: '80vh', maxWidth: '60vw' }}>
+    <TableContainer sx={{ overflow: 'auto', maxHeight: '80vh', maxWidth: 'min-content' }}>
+      <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} pl={1} py={0.5}>
+        <Typography>全{datas ? datas.length : 0}件</Typography>
+        <Box display={'flex'} alignItems={'center'}>
+          <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.completed }}>
+            済
+          </Typography>
+          <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.lack }}>
+            不足
+          </Typography>
+          <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.excess }}>
+            過剰
+          </Typography>
+          <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.ctn }}>
+            コンテナ
+          </Typography>
+          <Button
+            onClick={() => setAdjustOpen(true)}
+            disabled={
+              !datas.find((data) => data.diff !== 0) || fixFlag || user?.permission.nyushuko === permission.nyushuko_ref
+            }
+            sx={{ ml: 2 }}
+          >
+            一括補正
+          </Button>
+        </Box>
+      </Box>
       <Table stickyHeader size="small">
         <TableHead sx={{ bgcolor: 'primary.light' }}>
           <TableRow sx={{ whiteSpace: 'nowrap' }}>
@@ -39,9 +84,17 @@ export const ShukoDetailTable = (props: { datas: ShukoDetailTableValues[] }) => 
                 <TableCell align="right">予備数</TableCell>
               </>
             )}
-            <TableCell align="right">読取数</TableCell>
+            <TableCell
+              align="right"
+              sx={{
+                borderLeft: '1px solid',
+                borderLeftColor: grey[500],
+              }}
+            >
+              読取数
+            </TableCell>
             <TableCell align="right">補正数</TableCell>
-            <TableCell align="right" sx={{ pr: 3 }}>
+            <TableCell align="right" sx={{ pr: 1 }}>
               差異
             </TableCell>
             <TableCell align="left">連絡メモ</TableCell>
@@ -69,19 +122,34 @@ export const ShukoDetailTable = (props: { datas: ShukoDetailTableValues[] }) => 
               >
                 {row.kizaiNam}
               </TableCell>
-              <TableCell align="right">{row.planQty}</TableCell>
+              <TableCell
+                align="right"
+                sx={{
+                  backgroundColor: lightBlue[100],
+                }}
+              >
+                {row.planQty}
+              </TableCell>
               {datas[0].juchuKizaiHeadKbn !== 3 && (
                 <>
                   <TableCell align="right">{row.planKizaiQty}</TableCell>
                   <TableCell align="right">{row.planYobiQty}</TableCell>
                 </>
               )}
-              <TableCell align="right">{row.resultQty}</TableCell>
+              <TableCell
+                align="right"
+                sx={{
+                  borderLeft: '1px solid',
+                  borderLeftColor: grey[500],
+                }}
+              >
+                {row.resultQty}
+              </TableCell>
               <TableCell align="right">{row.resultAdjQty}</TableCell>
               <TableCell
                 align="right"
                 sx={{
-                  pr: 3,
+                  pr: 1,
                   backgroundColor:
                     row.diff === 0 /*&& row.planQty !== 0*/
                       ? statusColors.completed

@@ -122,9 +122,16 @@ export const NyukoListTable = (props: {
                     sessionStorage.setItem(
                       'shukoListSearchParams',
                       JSON.stringify({
+                        selectedDate: {
+                          value: '4',
+                          range: {
+                            from: null,
+                            to: null,
+                          },
+                        },
                         juchuHeadId: row.juchuHeadId,
-                        shukoDat: { from: null, to: null },
                         shukoBasho: 0,
+                        kokyaku: '',
                         section: [],
                       })
                     );

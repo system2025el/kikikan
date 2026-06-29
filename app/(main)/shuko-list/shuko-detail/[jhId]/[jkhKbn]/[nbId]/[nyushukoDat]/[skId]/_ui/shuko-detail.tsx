@@ -66,6 +66,8 @@ export const ShukoDetail = (props: {
   const [departureOpen, setDepartureOpen] = useState(false);
   // 出発解除ボタンダイアログ制御
   const [releaseOpen, setReleaseOpen] = useState(false);
+  // 一括補正確認ダイアログ制御
+  const [adjustOpen, setAdjustOpen] = useState(false);
   // スナックバー制御
   const [snackBarOpen, setSnackBarOpen] = useState(false);
   // スナックバーメッセージ
@@ -160,7 +162,7 @@ export const ShukoDetail = (props: {
    * 一括補正ボタン押下
    * @returns
    */
-  const handleAdjust = async () => {
+  const executeAdjust = async () => {
     if (!user || isProcessing) return;
 
     setIsProcessing(true);
@@ -183,6 +185,7 @@ export const ShukoDetail = (props: {
         shukoDetailData.sagyoKbnId
       );
       setShukoDetailList(updatedShukoDetailTableData);
+      setAdjustOpen(false);
       setSnackBarMessage('一括補正しました');
       setSnackBarOpen(true);
     } catch (e) {
@@ -288,37 +291,9 @@ export const ShukoDetail = (props: {
             </Grid2>
           </Grid2>
           <Divider />
-          <Box width={'100%'}>
-            <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} width={'60vw'} pl={1} py={0.5}>
-              <Typography>全{shukoDetailList ? shukoDetailList.length : 0}件</Typography>
-              <Box display={'flex'} alignItems={'center'}>
-                <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.completed }}>
-                  済
-                </Typography>
-                <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.lack }}>
-                  不足
-                </Typography>
-                <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.excess }}>
-                  過剰
-                </Typography>
-                <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.ctn }}>
-                  コンテナ
-                </Typography>
-                <Button
-                  onClick={handleAdjust}
-                  disabled={
-                    !shukoDetailList.find((data) => data.diff !== 0) ||
-                    fixFlag ||
-                    user?.permission.nyushuko === permission.nyushuko_ref
-                  }
-                  sx={{ ml: 2 }}
-                >
-                  一括補正
-                </Button>
-              </Box>
-            </Box>
-            {shukoDetailList.length > 0 && <ShukoDetailTable datas={shukoDetailList} />}
-          </Box>
+          {shukoDetailList.length > 0 && (
+            <ShukoDetailTable datas={shukoDetailList} fixFlag={fixFlag} user={user} setAdjustOpen={setAdjustOpen} />
+          )}
         </Paper>
         <Dialog open={departureOpen}>
           <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
@@ -342,6 +317,23 @@ export const ShukoDetail = (props: {
           </DialogContentText>
           <DialogActions>
             <Button onClick={() => setReleaseOpen(false)}>確認</Button>
+          </DialogActions>
+        </Dialog>
+        <Dialog open={adjustOpen}>
+          <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
+            <WarningIcon color="error" />
+            <Box>一括補正</Box>
+          </DialogTitle>
+          <DialogContentText m={2} p={2}>
+            一括補正してよろしいでしょうか？
+          </DialogContentText>
+          <DialogActions>
+            <Button onClick={executeAdjust} loading={isProcessing}>
+              一括補正
+            </Button>
+            <Button onClick={() => setAdjustOpen(false)} loading={isProcessing}>
+              戻る
+            </Button>
           </DialogActions>
         </Dialog>
         <Snackbar

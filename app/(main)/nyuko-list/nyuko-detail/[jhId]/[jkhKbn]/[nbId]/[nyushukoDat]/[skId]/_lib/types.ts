@@ -34,4 +34,5 @@ export type NyukoDetailTableValues = {
   ctnFlg: number | null;
   dspOrdNumMeisai: number | null;
   indentNum: number;
+  mem2: string | null;
 };

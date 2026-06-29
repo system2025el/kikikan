@@ -53,7 +53,6 @@ export const ShukoListTable = (props: {
     setIsProcessing(true);
     setIsLoading(true);
     router.push(
-      // `shuko-list/shuko-detail/${row.juchuHeadId}/${row.juchuKizaiHeadKbn}/${row.nyushukoBashoId}/${new Date(row.nyushukoDat).toISOString()}/${sagyoKbnId}`
       `shuko-list/shuko-detail/${row.juchuHeadId}/${row.juchuKizaiHeadKbn}/${row.nyushukoBashoId}/${new Date(row.nyushukoDat).toISOString()}/${sagyoKbnId}`
     );
   };
@@ -143,9 +142,16 @@ export const ShukoListTable = (props: {
                     sessionStorage.setItem(
                       'nyukoListSearchParams',
                       JSON.stringify({
+                        selectedDate: {
+                          value: '4',
+                          range: {
+                            from: null,
+                            to: null,
+                          },
+                        },
                         juchuHeadId: row.juchuHeadId,
-                        nyukoDat: { from: null, to: null },
                         nyukoBasho: 0,
+                        kokyaku: '',
                         section: [],
                       })
                     );

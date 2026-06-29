@@ -27,7 +27,7 @@ import { BackButton } from '@/app/(main)/_ui/buttons';
 import { DateTime, TestDate } from '@/app/(main)/_ui/date';
 import { PermissionGuard } from '@/app/(main)/_ui/permission-guard';
 
-import { updNyukoDetail } from '../_lib/funcs';
+import { delNyukoFix, updNyukoDetail } from '../_lib/funcs';
 import { NyukoDetailTableValues, NyukoDetailValues } from '../_lib/types';
 import { NyukoDetailTable } from './nyuko-detail-table';
 
@@ -85,6 +85,35 @@ export const NyukoDetail = (props: {
     }
   };
 
+  /**
+   * 到着解除ボタン押下
+   * @returns
+   */
+  const handleRelease = async () => {
+    if (!user || isProcessing) return;
+
+    setIsProcessing(true);
+
+    if (nyukoDetailTableData.length === 0) {
+      setIsProcessing(false);
+      return;
+    }
+
+    try {
+      await delNyukoFix(nyukoDetailData, nyukoDetailTableData, user.name);
+
+      setFixFlag(false);
+      setSnackBarMessage('到着解除しました');
+      setSnackBarOpen(true);
+      setIsProcessing(false);
+      router.push('/nyuko-list');
+    } catch (e) {
+      setSnackBarMessage('到着解除に失敗しました');
+      setSnackBarOpen(true);
+      setIsProcessing(false);
+    }
+  };
+
   return (
     <PermissionGuard category={'nyushuko'} required={permission.nyushuko_ref}>
       <Box>
@@ -119,6 +148,13 @@ export const NyukoDetail = (props: {
                 sx={{ backgroundColor: 'yellow', color: 'black' }}
               >
                 到着
+              </Button>
+              <Button
+                color="error"
+                onClick={handleRelease}
+                disabled={!fixFlag || user?.permission.nyushuko === permission.nyushuko_ref}
+              >
+                到着解除
               </Button>
             </Grid2>
           </Box>
@@ -177,26 +213,7 @@ export const NyukoDetail = (props: {
             </Grid2>
           </Grid2>
           <Divider />
-          <Box width={'100%'}>
-            <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} width={'60vw'} pl={1} py={0.5}>
-              <Typography>全{nyukoDetailTableData ? nyukoDetailTableData.length : 0}件</Typography>
-              <Box display={'flex'} alignItems={'center'}>
-                <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.completed }}>
-                  済
-                </Typography>
-                <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.lack }}>
-                  不足
-                </Typography>
-                <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.excess }}>
-                  過剰
-                </Typography>
-                <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.ctn }}>
-                  コンテナ
-                </Typography>
-              </Box>
-            </Box>
-            {nyukoDetailTableData.length > 0 && <NyukoDetailTable datas={nyukoDetailTableData} />}
-          </Box>
+          {nyukoDetailTableData.length > 0 && <NyukoDetailTable datas={nyukoDetailTableData} />}
         </Paper>
         <Dialog open={arrivalOpen}>
           <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
@@ -204,8 +221,6 @@ export const NyukoDetail = (props: {
             <Box>到着確認</Box>
           </DialogTitle>
           <DialogContentText m={2} p={2}>
-            到着は戻せません。
-            <br />
             到着済みにしてよろしいですか？
           </DialogContentText>
           <DialogActions>
