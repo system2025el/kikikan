@@ -248,7 +248,7 @@ export const NyukoDetail = (props: {
             <Button onClick={executeRelease} loading={isProcessing} color="error">
               到着解除
             </Button>
-            <Button onClick={() => setArrivalOpen(false)} loading={isProcessing}>
+            <Button onClick={() => setReleaseOpen(false)} loading={isProcessing}>
               戻る
             </Button>
           </DialogActions>
