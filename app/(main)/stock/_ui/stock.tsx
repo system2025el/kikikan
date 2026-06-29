@@ -20,6 +20,7 @@ import { addDays, addMonths, set, subDays, subMonths } from 'date-fns';
 import dayjs, { Dayjs } from 'dayjs';
 import { useEffect, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
+import { TextFieldElement } from 'react-hook-form-mui';
 
 import { permission } from '../../_lib/permission';
 import { Calendar } from '../../_ui/date';
@@ -57,9 +58,9 @@ export const Stock = () => {
   const isSyncing = useRef(false);
 
   /* 検索useForm-------------------------- */
-  const { control, handleSubmit, reset } = useForm<{ bumonId: number }>({
+  const { control, handleSubmit, reset } = useForm<{ bumonId: number; keyword: string }>({
     mode: 'onSubmit',
-    defaultValues: { bumonId: FAKE_NEW_ID },
+    defaultValues: { bumonId: FAKE_NEW_ID, keyword: '' },
   });
 
   /**
@@ -93,17 +94,12 @@ export const Stock = () => {
    * 検索ボタン押下時
    * @param data フォームデータ(部門id)
    */
-  const onSubmit = async (data: { bumonId: number }) => {
+  const onSubmit = async (data: { bumonId: number; keyword: string }) => {
     if (!data.bumonId) return;
     setIsLoading(true);
     try {
-      const newEqList = await getEqData(data.bumonId);
+      const newEqList = await getEqData(data.bumonId, data.keyword);
       const kizaiIds = newEqList.map((data) => data.kizaiId);
-      // const newEqStockList: StockTableValues[][] = [];
-      // for (const kizaiId of kizaiIds) {
-      //   const stock: StockTableValues[] = await getEqStockData(kizaiId, subDays(selectDate, 1));
-      //   newEqStockList.push(stock);
-      // }
 
       const uniqueKizaiIds = Array.from(new Set(kizaiIds));
 
@@ -140,11 +136,6 @@ export const Stock = () => {
     if (view === 'day') {
       setIsLoading(true);
       const kizaiIds = eqList.map((data) => data.kizaiId);
-      // const newEqStockList: StockTableValues[][] = [];
-      // for (const kizaiId of kizaiIds) {
-      //   const stock: StockTableValues[] = await getEqStockData(kizaiId, subDays(date.toDate(), 1));
-      //   newEqStockList.push(stock);
-      // }
 
       const uniqueKizaiIds = Array.from(new Set(kizaiIds));
 
@@ -199,7 +190,7 @@ export const Stock = () => {
       try {
         const bumonList = await getBumonsData();
         setBumons(bumonList);
-        reset({ bumonId: bumonList[0].bumonId });
+        //reset({ bumonId: bumonList[0].bumonId });
       } catch (e) {
         setError(e instanceof Error ? e : new Error(String(e)));
       }
@@ -235,25 +226,34 @@ export const Stock = () => {
       <Box>
         <form onSubmit={handleSubmit(onSubmit)}>
           <Grid2 container alignItems="center" p={2} spacing={2}>
-            <Typography>部門</Typography>
-            <Controller
-              name="bumonId"
-              control={control}
-              render={({ field }) => (
-                <Select {...field} sx={{ minWidth: 250 }}>
-                  {bumons.length > 0 &&
-                    bumons.map((d: Bumon) => (
-                      <MenuItem key={d.bumonId} value={d.bumonId}>
-                        {d.bumonNam}
-                      </MenuItem>
-                    ))}
-                </Select>
-              )}
-            />
-            <Button type="submit" loading={isLoading}>
-              <SearchIcon fontSize="small" />
-              検索
-            </Button>
+            <Grid2 container alignItems="center">
+              <Typography>部門</Typography>
+              <Controller
+                name="bumonId"
+                control={control}
+                render={({ field }) => (
+                  <Select {...field} sx={{ minWidth: 250 }}>
+                    <MenuItem value={FAKE_NEW_ID}>未選択</MenuItem>
+                    {bumons.length > 0 &&
+                      bumons.map((d: Bumon) => (
+                        <MenuItem key={d.bumonId} value={d.bumonId}>
+                          {d.bumonNam}
+                        </MenuItem>
+                      ))}
+                  </Select>
+                )}
+              />
+            </Grid2>
+            <Grid2 container alignItems="center">
+              <Typography>機材名キーワード</Typography>
+              <TextFieldElement name="keyword" control={control} sx={{ width: 400 }} />
+            </Grid2>
+            <Grid2 size={'auto'} ml={'auto'}>
+              <Button type="submit" loading={isLoading}>
+                <SearchIcon fontSize="small" />
+                検索
+              </Button>
+            </Grid2>
           </Grid2>
         </form>
       </Box>
