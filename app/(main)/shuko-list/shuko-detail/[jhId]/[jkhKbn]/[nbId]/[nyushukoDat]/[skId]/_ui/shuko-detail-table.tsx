@@ -141,7 +141,7 @@ export const ShukoDetailTable = (props: {
               <TableCell
                 align="right"
                 sx={{
-                  backgroundColor: lightBlue[100],
+                  backgroundColor: row.diff !== 0 ? lightBlue[100] : 'inherit',
                   borderLeft: '1px solid',
                   borderLeftColor: grey[500],
                 }}
