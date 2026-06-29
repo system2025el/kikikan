@@ -62,9 +62,15 @@ export const ShukoDetail = (props: {
   // 出庫データ
   const [shukoDetailList, setShukoDetailList] = useState<ShukoDetailTableValues[]>(props.shukoDetailTableData);
 
-  // 出発ボタンダイアログ制御
+  // 警告ダイアログ制御
+  const [alertOpen, setAlertOpen] = useState(false);
+  // 警告ダイアログタイトル
+  const [alertTitle, setAlertTitle] = useState('');
+  // 警告ダイアログ用メッセージ
+  const [alertMessage, setAlertMessage] = useState('');
+  // 出発確認ダイアログ制御
   const [departureOpen, setDepartureOpen] = useState(false);
-  // 出発解除ボタンダイアログ制御
+  // 出発解除確認ダイアログ制御
   const [releaseOpen, setReleaseOpen] = useState(false);
   // 一括補正確認ダイアログ制御
   const [adjustOpen, setAdjustOpen] = useState(false);
@@ -74,10 +80,10 @@ export const ShukoDetail = (props: {
   const [snackBarMessage, setSnackBarMessage] = useState('');
 
   /**
-   * 出発ボタン押下
+   * 出発処理
    * @returns
    */
-  const handleDeparture = async () => {
+  const executeDeparture = async () => {
     if (!user || isProcessing) return;
 
     setIsProcessing(true);
@@ -94,7 +100,10 @@ export const ShukoDetail = (props: {
     );
 
     if (diffCheck) {
-      setDepartureOpen(true);
+      setAlertTitle('不足・過剰があります');
+      setAlertMessage('不足・過剰があるため、出発できません');
+      setDepartureOpen(false);
+      setAlertOpen(true);
       setIsProcessing(false);
       return;
     }
@@ -103,11 +112,13 @@ export const ShukoDetail = (props: {
 
     if (updateResult) {
       setFixFlag(true);
+      setDepartureOpen(false);
       setSnackBarMessage('出発しました');
       setSnackBarOpen(true);
       setIsProcessing(false);
       router.push('/shuko-list');
     } else {
+      setDepartureOpen(false);
       setSnackBarMessage('出発に失敗しました');
       setSnackBarOpen(true);
       setIsProcessing(false);
@@ -115,10 +126,10 @@ export const ShukoDetail = (props: {
   };
 
   /**
-   * 出発解除ボタン押下
+   * 出発解除処理
    * @returns
    */
-  const handleRelease = async () => {
+  const executeRelease = async () => {
     if (!user || isProcessing) return;
 
     setIsProcessing(true);
@@ -133,7 +144,10 @@ export const ShukoDetail = (props: {
       const childJuchuKizaiHeadCount = await confirmChildJuchuKizaiHead(shukoDetailData.juchuHeadId, juchuKizaiHeadIds);
 
       if (childJuchuKizaiHeadCount && childJuchuKizaiHeadCount > 0) {
-        setReleaseOpen(true);
+        setAlertTitle('子伝票が存在します');
+        setAlertMessage('子伝票があるため、出発解除できません');
+        setReleaseOpen(false);
+        setAlertOpen(true);
         setIsProcessing(false);
         return;
       }
@@ -147,11 +161,13 @@ export const ShukoDetail = (props: {
 
     if (updateResult) {
       setFixFlag(false);
+      setReleaseOpen(false);
       setSnackBarMessage('出発解除しました');
       setSnackBarOpen(true);
       setIsProcessing(false);
       router.push('/shuko-list');
     } else {
+      setReleaseOpen(false);
       setSnackBarMessage('出発解除に失敗しました');
       setSnackBarOpen(true);
       setIsProcessing(false);
@@ -159,7 +175,7 @@ export const ShukoDetail = (props: {
   };
 
   /**
-   * 一括補正ボタン押下
+   * 一括補正処理
    * @returns
    */
   const executeAdjust = async () => {
@@ -223,7 +239,7 @@ export const ShukoDetail = (props: {
             <Grid2 container alignItems={'center'} spacing={2}>
               {fixFlag && <Typography>出発済</Typography>}
               <Button
-                onClick={handleDeparture}
+                onClick={() => setDepartureOpen(true)}
                 disabled={
                   fixFlag || user?.permission.nyushuko === permission.nyushuko_ref || shukoDetailList.length === 0
                 }
@@ -233,7 +249,7 @@ export const ShukoDetail = (props: {
               </Button>
               <Button
                 color="error"
-                onClick={handleRelease}
+                onClick={() => setReleaseOpen(true)}
                 disabled={!fixFlag || user?.permission.nyushuko === permission.nyushuko_ref}
                 sx={{ display: shukoDetailData.sagyoKbnId === 20 ? 'block' : 'none' }}
               >
@@ -295,28 +311,50 @@ export const ShukoDetail = (props: {
             <ShukoDetailTable datas={shukoDetailList} fixFlag={fixFlag} user={user} setAdjustOpen={setAdjustOpen} />
           )}
         </Paper>
-        <Dialog open={departureOpen}>
+        <Dialog open={alertOpen}>
           <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
             <WarningIcon color="error" />
-            <Box>不足・過剰があります</Box>
+            <Box>{alertTitle}</Box>
           </DialogTitle>
           <DialogContentText m={2} p={2}>
-            不足・過剰があるため、出発できません
+            {alertMessage}
           </DialogContentText>
           <DialogActions>
-            <Button onClick={() => setDepartureOpen(false)}>確認</Button>
+            <Button onClick={() => setAlertOpen(false)}>確認</Button>
+          </DialogActions>
+        </Dialog>
+        <Dialog open={departureOpen}>
+          <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
+            <WarningIcon color="warning" />
+            <Box>出発確認</Box>
+          </DialogTitle>
+          <DialogContentText m={2} p={2}>
+            出発済みにしてよろしいですか？
+          </DialogContentText>
+          <DialogActions>
+            <Button onClick={executeDeparture} loading={isProcessing}>
+              出発
+            </Button>
+            <Button onClick={() => setDepartureOpen(false)} loading={isProcessing}>
+              戻る
+            </Button>
           </DialogActions>
         </Dialog>
         <Dialog open={releaseOpen}>
           <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
-            <WarningIcon color="error" />
-            <Box>子伝票が存在します</Box>
+            <WarningIcon color="warning" />
+            <Box>出発解除確認</Box>
           </DialogTitle>
           <DialogContentText m={2} p={2}>
-            子伝票があるため、出発解除できません
+            出発解除してよろしいですか？
           </DialogContentText>
           <DialogActions>
-            <Button onClick={() => setReleaseOpen(false)}>確認</Button>
+            <Button onClick={executeRelease} loading={isProcessing} color="error">
+              出発解除
+            </Button>
+            <Button onClick={() => setReleaseOpen(false)} loading={isProcessing}>
+              戻る
+            </Button>
           </DialogActions>
         </Dialog>
         <Dialog open={adjustOpen}>
