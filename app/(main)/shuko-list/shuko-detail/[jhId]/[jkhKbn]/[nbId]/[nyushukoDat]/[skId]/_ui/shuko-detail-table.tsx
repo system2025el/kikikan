@@ -87,8 +87,8 @@ export const ShukoDetailTable = (props: {
             <TableCell
               align="right"
               sx={{
-                borderLeft: datas[0].juchuKizaiHeadKbn !== 3 ? '2px solid' : 'inherit',
-                borderLeftColor: datas[0].juchuKizaiHeadKbn !== 3 ? 'blue' : 'inherit',
+                borderLeft: '1px solid',
+                borderLeftColor: grey[500],
               }}
             >
               読取数
@@ -125,8 +125,7 @@ export const ShukoDetailTable = (props: {
               <TableCell
                 align="right"
                 sx={{
-                  backgroundColor:
-                    row.diff !== 0 && datas[0].juchuKizaiHeadKbn !== 3 && !row.ctnFlg ? lightBlue[100] : 'inherit',
+                  backgroundColor: lightBlue[100],
                 }}
               >
                 {row.planQty}
@@ -140,8 +139,8 @@ export const ShukoDetailTable = (props: {
               <TableCell
                 align="right"
                 sx={{
-                  borderLeft: datas[0].juchuKizaiHeadKbn !== 3 ? '2px solid' : 'inherit',
-                  borderLeftColor: datas[0].juchuKizaiHeadKbn !== 3 ? 'blue' : 'inherit',
+                  borderLeft: '1px solid',
+                  borderLeftColor: grey[500],
                 }}
               >
                 {row.resultQty}
