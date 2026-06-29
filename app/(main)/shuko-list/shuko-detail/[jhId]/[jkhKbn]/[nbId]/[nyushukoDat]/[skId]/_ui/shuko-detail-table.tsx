@@ -45,7 +45,7 @@ export const ShukoDetailTable = (props: {
   };
 
   return (
-    <TableContainer sx={{ overflow: 'auto', maxHeight: '80vh', maxWidth: 'min-content' }}>
+    <TableContainer sx={{ overflow: 'auto', maxHeight: '80vh', maxWidth: '60%' }}>
       <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} pl={1} py={0.5}>
         <Typography>全{datas ? datas.length : 0}件</Typography>
         <Box display={'flex'} alignItems={'center'}>
@@ -77,7 +77,15 @@ export const ShukoDetailTable = (props: {
           <TableRow sx={{ whiteSpace: 'nowrap' }}>
             <TableCell align="center" />
             <TableCell align="left">機材名</TableCell>
-            <TableCell align="right">出庫予定数</TableCell>
+            <TableCell
+              align="right"
+              sx={{
+                borderLeft: '1px solid',
+                borderLeftColor: grey[500],
+              }}
+            >
+              出庫予定数
+            </TableCell>
             {datas[0].juchuKizaiHeadKbn !== 3 && (
               <>
                 <TableCell align="right">受注数</TableCell>
@@ -94,10 +102,18 @@ export const ShukoDetailTable = (props: {
               読取数
             </TableCell>
             <TableCell align="right">補正数</TableCell>
-            <TableCell align="right" sx={{ pr: 1 }}>
+            <TableCell align="right" sx={{ pr: 1, borderLeft: '1px solid', borderLeftColor: grey[500] }}>
               差異
             </TableCell>
-            <TableCell align="left">連絡メモ</TableCell>
+            <TableCell
+              align="left"
+              sx={{
+                borderLeft: '1px solid',
+                borderLeftColor: grey[500],
+              }}
+            >
+              連絡メモ
+            </TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -126,6 +142,8 @@ export const ShukoDetailTable = (props: {
                 align="right"
                 sx={{
                   backgroundColor: lightBlue[100],
+                  borderLeft: '1px solid',
+                  borderLeftColor: grey[500],
                 }}
               >
                 {row.planQty}
@@ -160,11 +178,16 @@ export const ShukoDetailTable = (props: {
                           : row.ctnFlg === 1
                             ? statusColors.ctn
                             : undefined,
+                  borderLeft: '1px solid',
+                  borderLeftColor: grey[500],
                 }}
               >
                 {row.diff}
               </TableCell>
-              <TableCell align="left" sx={{ whiteSpace: 'pre-wrap' }}>
+              <TableCell
+                align="left"
+                sx={{ whiteSpace: 'pre-wrap', borderLeft: '1px solid', borderLeftColor: grey[500] }}
+              >
                 {row.mem2}
               </TableCell>
             </TableRow>
