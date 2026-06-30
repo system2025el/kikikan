@@ -202,17 +202,27 @@ export const selectLoanKizai = async (kizaiId: number) => {
  * @param bumonId 部門id
  * @returns 機材id,機材名,保有数,部門id,部門名
  */
-export const selectStockKizai = async (bumonId: number) => {
+export const selectStockKizai = async (bumonId: number, keyword: string) => {
   try {
-    return await supabase
+    const builder = supabase
       .schema(SCHEMA)
       .from('v_kizai_lst')
       .select(`kizai_id, kizai_nam, kizai_qty, bumon_id, bumon_nam, kizai_ng_qty`)
-      .eq('bumon_id', bumonId)
       .eq('del_flg', 0)
       .eq('dsp_flg', 1)
       .order('kizai_grp_cod')
       .order('dsp_ord_num');
+
+    if (bumonId !== FAKE_NEW_ID) {
+      builder.eq('bumon_id', bumonId);
+    }
+
+    if (keyword && keyword.trim() !== '') {
+      const escapedKizaiNam = escapeLikeString(keyword);
+      builder.ilike('kizai_nam', `%${escapedKizaiNam}%`);
+    }
+
+    return await builder;
   } catch (e) {
     throw new Error('[selectStockKizai] DBエラー:', { cause: e });
   }

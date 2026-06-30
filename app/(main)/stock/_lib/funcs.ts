@@ -48,9 +48,9 @@ export const getBumonsData = async () => {
  * @param bumonId 部門id
  * @returns 機材データ
  */
-export const getEqData = async (bumonId: number) => {
+export const getEqData = async (bumonId: number, keyword: string) => {
   try {
-    const { data, error } = await selectStockKizai(bumonId);
+    const { data, error } = await selectStockKizai(bumonId, keyword);
 
     if (error) {
       throw new Error('[selectStockKizai] DBエラー:', { cause: error });
