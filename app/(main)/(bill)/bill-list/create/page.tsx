@@ -55,6 +55,7 @@ const Page = async ({ searchParams }: { searchParams: Promise<{ [key: string]: s
     meisaiHeads: juchus
       ? juchus.map((j) => ({
           ...j!,
+          shokeiAmt: (j?.meisai ?? []).reduce((acc, item) => acc + (item.shokeiAmt ?? 0), 0),
           nebikiAftAmt: (j?.meisai ?? []).reduce((acc, item) => acc + (item.shokeiAmt ?? 0), 0),
         }))
       : [],

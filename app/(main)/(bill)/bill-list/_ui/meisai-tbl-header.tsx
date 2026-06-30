@@ -50,6 +50,7 @@ export const MeisaiTblHeader = ({
     name: `meisaiHeads.${index}.meisai`,
   });
 
+  const currentShokeiAmt = useWatch({ control, name: `meisaiHeads.${index}.shokeiAmt` });
   const nebikiAmt = useWatch({ control, name: `meisaiHeads.${index}.nebikiAmt` });
   const currentNebikiAftAmt = useWatch({ control, name: `meisaiHeads.${index}.nebikiAftAmt` });
 
@@ -74,12 +75,15 @@ export const MeisaiTblHeader = ({
 
   useEffect(() => {
     const sum = (meisaiList ?? []).reduce((acc, item) => acc + (item.shokeiAmt ?? 0), 0);
+    if (sum !== (Number(currentShokeiAmt) || 0)) {
+      setValue(`meisaiHeads.${index}.shokeiAmt`, sum, { shouldDirty: false });
+    }
 
     const nebikiAft = sum - (nebikiAmt ?? 0);
-    if (nebikiAft !== Number(currentNebikiAftAmt) || 0) {
+    if (nebikiAft !== (Number(currentNebikiAftAmt) || 0)) {
       setValue(`meisaiHeads.${index}.nebikiAftAmt`, nebikiAft, { shouldDirty: false });
     }
-  }, [meisaiList, nebikiAmt, currentNebikiAftAmt, index, setValue]);
+  }, [meisaiList, currentShokeiAmt, nebikiAmt, currentNebikiAftAmt, index, setValue]);
 
   return (
     <Box border={1} borderColor={'divider'} p={1}>
@@ -291,6 +295,16 @@ export const MeisaiTblHeader = ({
       {children}
 
       {/* 明細ヘッダ下部 */}
+      <Grid2 container px={2} my={0.5} alignItems={'center'} spacing={1}>
+        <Grid2 size={'grow'} />
+        <Grid2 size={1}>
+          <Typography textAlign="end">小計</Typography>
+        </Grid2>
+        <Grid2 size={2}>
+          <ReadOnlyYenNumberElement name={`meisaiHeads.${index}.shokeiAmt`} />
+        </Grid2>
+        <Grid2 size={1} />
+      </Grid2>
       <Grid2 container px={2} my={0.5} alignItems={'center'} spacing={1}>
         <Grid2 size={'grow'} />
         <Grid2 size={1}>
