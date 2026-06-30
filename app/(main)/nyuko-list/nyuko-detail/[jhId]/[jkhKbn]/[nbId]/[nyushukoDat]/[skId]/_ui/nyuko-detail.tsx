@@ -51,6 +51,8 @@ export const NyukoDetail = (props: {
   const [arrivalOpen, setArrivalOpen] = useState(false);
   // 到着解除確認ダイアログ制御
   const [releaseOpen, setReleaseOpen] = useState(false);
+  // 到着メッセージ
+  const [arrivalMessage, setArrivalMessage] = useState('');
   // スナックバー制御
   const [snackBarOpen, setSnackBarOpen] = useState(false);
   // スナックバーメッセージ
@@ -118,6 +120,19 @@ export const NyukoDetail = (props: {
     }
   };
 
+  const handleArrivalOpen = () => {
+    if (
+      nyukoDetailData.juchuKizaiHeadKbn !== 1 &&
+      nyukoDetailTableData.filter((d) => d.resultQty === 0 && d.resultAdjQty === 0).length > 0
+    ) {
+      setArrivalMessage(`読み取りも補正もない状態で到着すると\n入庫予定から削除されますがよろしいですか？`);
+      setArrivalOpen(true);
+    } else {
+      setArrivalMessage('到着済みにしてよろしいですか？');
+      setArrivalOpen(true);
+    }
+  };
+
   return (
     <PermissionGuard category={'nyushuko'} required={permission.nyushuko_ref}>
       <Box>
@@ -145,7 +160,7 @@ export const NyukoDetail = (props: {
               )}
               {fixFlag && <Typography>到着済</Typography>}
               <Button
-                onClick={() => setArrivalOpen(true)}
+                onClick={handleArrivalOpen}
                 disabled={
                   fixFlag || user?.permission.nyushuko === permission.nyushuko_ref || nyukoDetailTableData.length === 0
                 }
@@ -224,11 +239,26 @@ export const NyukoDetail = (props: {
             <WarningIcon color="warning" />
             <Box>到着確認</Box>
           </DialogTitle>
-          <DialogContentText m={2} p={2}>
-            到着済みにしてよろしいですか？
+          <DialogContentText m={2} p={2} sx={{ whiteSpace: 'pre-line' }}>
+            {arrivalMessage}
           </DialogContentText>
           <DialogActions>
-            <Button onClick={executeArrival} loading={isProcessing} sx={{ backgroundColor: 'yellow', color: 'black' }}>
+            <Button
+              onClick={executeArrival}
+              loading={isProcessing}
+              sx={{
+                backgroundColor:
+                  nyukoDetailData.juchuKizaiHeadKbn !== 1 &&
+                  nyukoDetailTableData.filter((d) => d.resultQty === 0 && d.resultAdjQty === 0).length > 0
+                    ? 'red'
+                    : 'yellow',
+                color:
+                  nyukoDetailData.juchuKizaiHeadKbn !== 1 &&
+                  nyukoDetailTableData.filter((d) => d.resultQty === 0 && d.resultAdjQty === 0).length > 0
+                    ? 'white'
+                    : 'black',
+              }}
+            >
               到着
             </Button>
             <Button onClick={() => setArrivalOpen(false)} loading={isProcessing}>
