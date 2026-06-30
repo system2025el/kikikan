@@ -248,7 +248,7 @@ export const Stock = () => {
               <Typography>機材名キーワード</Typography>
               <TextFieldElement name="keyword" control={control} sx={{ width: 400 }} />
             </Grid2>
-            <Grid2 size={'auto'} ml={'auto'}>
+            <Grid2 /*size={'auto'} ml={'auto'}*/>
               <Button type="submit" loading={isLoading}>
                 <SearchIcon fontSize="small" />
                 検索
