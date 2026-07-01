@@ -583,7 +583,6 @@ export const usePdf = (): [(param: BillHeadValues, keisho: string) => Promise<Bl
                 '         値引き',
                 {
                   text: `￥-${Number(meisai.nebikiAmt).toLocaleString()}`,
-                  color: 'red', // ここで赤字のフラグを持たせる
                 },
               ],
             ]
@@ -653,14 +652,11 @@ export const usePdf = (): [(param: BillHeadValues, keisho: string) => Promise<Bl
           if (!cellWidth) return;
 
           let textToDraw = '';
-          let textColor = rgb(0, 0, 0); // 基本は黒
+          const textColor = rgb(0, 0, 0); // 基本は黒
 
           if (typeof cellText === 'object' && cellText !== null) {
             // オブジェクト（値引き）の場合
             textToDraw = cellText.text;
-            if (cellText.color === 'red') {
-              textColor = rgb(1, 0, 0); // 赤色を設定
-            }
           } else if (typeof cellText === 'number') {
             // 数値の場合
             textToDraw = cellText.toLocaleString();

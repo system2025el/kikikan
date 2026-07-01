@@ -86,13 +86,6 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
   const [snackBarOpen, setSnackBarOpen] = useState(false);
   /* スナックバーのメッセージ */
   const [snackBarMessage, setSnackBarMessage] = useState('');
-  // /** 編集内容が未保存ダイアログ制御 */
-  // const [dirtyOpen, setDirtyOpen] = useState(false);
-
-  // /** ロックデータ */
-  // const [lockData, setLockData] = useState<LockValues | null>(null);
-  // /** 全体の編集状態 */
-  // const [editable, setEditable] = useState(isNew ? true : false);
 
   /* useForm -------------------------------------------------------------- */
   const billForm = useForm<BillHeadValues>({
@@ -148,51 +141,6 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
     setIsLoading(false);
   };
 
-  // /** 編集モード変更 */
-  // const handleEdit = async () => {
-  //   // 編集→閲覧
-  //   if (editable) {
-  //     if (isDirty) {
-  //       setDirtyOpen(true);
-  //       return;
-  //     }
-  //     await delLock(3, bill.seikyuHeadId ?? 0);
-  //     setLockData(null);
-  //     setEditable(false);
-  //     // 閲覧→編集
-  //   } else {
-  //     if (!user) return;
-  //     const lockData = await getLock(3, bill.seikyuHeadId ?? 0);
-  //     setLockData(lockData);
-  //     if (lockData === null) {
-  //       await addLock(3, bill.seikyuHeadId ?? 0, new Date().toISOString(), user.name, user.email);
-  //       const newLockData = await getLock(3, bill.seikyuHeadId ?? 0);
-  //       setLockData(newLockData);
-  //       setEditable(true);
-  //     } else if (lockData !== null && lockData.addUser === user.name) {
-  //       setEditable(true);
-  //     }
-  //   }
-  // };
-
-  // /**
-  //  * 警告ダイアログの押下ボタンによる処理
-  //  * @param result 結果
-  //  */
-  // const handleResultDialog = async (result: boolean) => {
-  //   if (result) {
-  //     if (!isNew) {
-  //       await delLock(3, bill.seikyuHeadId ?? 0);
-  //       setLockData(null);
-  //     }
-  //     setEditable(false);
-  //     reset();
-  //     setDirtyOpen(false);
-  //   } else {
-  //     setDirtyOpen(false);
-  //   }
-  // };
-
   /* useEffect ------------------------------------------------------------ */
   // 初期表示とログインユーザを取得とセット
   useEffect(() => {
@@ -204,19 +152,6 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
         setIsError(e instanceof Error ? e : new Error(String(e)));
       }
     };
-
-    // /** ロック確認 */
-    // const asyncProcess = async () => {
-    //   const lockData = await getLock(3, bill.seikyuHeadId ?? 0);
-    //   setLockData(lockData);
-    //   if (lockData === null) {
-    //     await addLock(3, bill.seikyuHeadId ?? 0, new Date().toISOString(), user?.name ?? '', user?.email ?? '');
-    //     const newLockData = await getLock(3, bill.seikyuHeadId ?? 0);
-    //     setLockData(newLockData);
-    //   } else if (lockData !== null && lockData.addUser !== user?.name) {
-    //     setEditable(false);
-    //   }
-    // };
 
     getOptions();
 
@@ -262,11 +197,6 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
     }
   }, [meisaiHeads, currentChukei, currentPreTaxGokei, zeiRat, currentZeiAmt, currentGokeiAmt, setValue]);
 
-  // // ロック
-  // useEffect(() => {
-  //   setLock(lockData);
-  // }, [lockData, setLock]);
-
   // 変更あるかどうか
   useEffect(() => {
     const dirty = isDirty;
@@ -274,18 +204,8 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
   }, [isDirty, setIsDirty]);
 
   /* print pdf ------------------------------------------------------------ */
-
-  // PDF出力用のモデル
-  const [pdfModel, setPdfModel] = useState(getValues());
-  // フォーム全体を監視
-  const watchedValues = useWatch({ control });
   // PDFデータ生成フック
   const [printBill] = usePdf();
-
-  useEffect(() => {
-    // getValues() を使うことで setValue() の直後の値も確実に拾える
-    setPdfModel(getValues());
-  }, [watchedValues, getValues, setValue]);
 
   // ボタン押下
   const hundlePrintPdf = async () => {
@@ -297,9 +217,10 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
     await new Promise((resolve) => setTimeout(resolve, 100));
 
     try {
+      const currentData = getValues();
       const keisho = await getKeisho(getValues('aite.id'));
       // PDFデータ生成
-      const blob = await printBill(pdfModel, keisho);
+      const blob = await printBill(currentData, keisho);
       // ダウンロードもしくはブラウザ表示するためのURL
       const url = URL.createObjectURL(blob);
 
@@ -321,10 +242,6 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
     }
   };
 
-  // useEffect(() => {
-  //   setPdfModel(bill);
-  // }, [bill]); // <- 変更の契機
-
   if (isError) throw isError;
 
   /* ---------------------------------------------------------------------- */
@@ -333,34 +250,6 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
       <PermissionGuard category={'juchu'} required={isNew ? permission.juchu_upd : permission.juchu_ref}>
         <Container disableGutters sx={{ minWidth: '100%', pb: 10 }} maxWidth={'xl'}>
           <Grid2 container spacing={4} display={'flex'} justifyContent={'end'} mb={1}>
-            {/* {lockData !== null && lockData.addUser !== user?.name && (
-              <Grid2 container alignItems={'center'} spacing={2}>
-                <Typography>{lockData.addDat && toJapanTimeString(new Date(lockData.addDat))}</Typography>
-                <Typography>{lockData.addUser}</Typography>
-                <Typography>編集中</Typography>
-              </Grid2>
-            )} */}
-            {/* {fixFlag && (
-                 <Box display={'flex'} alignItems={'center'}>
-                   <Typography>出庫済</Typography>
-                 </Box>
-               )} */}
-            {/* <Grid2 container alignItems={'center'} spacing={1}>
-              {!editable || (lockData !== null && lockData?.addUser !== user?.name) ? (
-                <Typography>閲覧モード</Typography>
-              ) : (
-                <Typography>編集モード</Typography>
-              )}
-              <Button
-                disabled={
-                  ((lockData && lockData?.addUser !== user?.name ? true : false) && isNew) ||
-                  user?.permission.juchu === permission.juchu_ref
-                }
-                onClick={handleEdit}
-              >
-                変更
-              </Button>
-            </Grid2> */}
             <Button onClick={() => window.close()}>閉じる</Button>
           </Grid2>
           <FormProvider {...billForm}>

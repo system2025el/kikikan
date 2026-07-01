@@ -57,6 +57,11 @@ const billMeisaiHeadSchema = z
       .string()
       .max(50, { message: validationMessages.maxStringLength(50) })
       .nullish(),
+    shokeiAmt: z
+      .number({ message: validationMessages.number() })
+      .int({ message: validationMessages.int() })
+      .max(9999999999, { message: validationMessages.maxNumberLength(10) })
+      .nullish(),
     nebikiAmt: z
       .number({ message: validationMessages.number() })
       .int({ message: validationMessages.int() })
