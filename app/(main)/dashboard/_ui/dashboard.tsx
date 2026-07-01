@@ -12,10 +12,10 @@ import { ShukoTable } from './shuko-table';
 import { VehiclesTable } from './vehicles-table ';
 
 export const Dashboard = () => {
-  const today = dayjs().format('YYYY/MM/DD');
-  const nextWeek = dayjs()
-    .add(7 - 1, 'day')
-    .format('YYYY/MM/DD');
+  const [dateRange, setDateRange] = useState({
+    today: dayjs().format('YYYY/MM/DD'),
+    nextWeek: dayjs().add(6, 'day').format('YYYY/MM/DD'),
+  });
 
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
@@ -25,12 +25,20 @@ export const Dashboard = () => {
 
   const fetchDashboardData = async () => {
     setLoading(true);
+
+    const currentToday = dayjs().format('YYYY/MM/DD');
+    const currentNextWeek = dayjs().add(6, 'day').format('YYYY/MM/DD');
+
+    // 最新の日付で state を更新
+    setDateRange({ today: currentToday, nextWeek: currentNextWeek });
+
     try {
       const [shukoData, ordersData, shortageData] = await Promise.all([
-        getShukoList(today, 7),
-        getVehiclesList(today, 7),
-        getMinusZaikoList(today, 7),
+        getShukoList(currentToday, 7),
+        getVehiclesList(currentToday, 7),
+        getMinusZaikoList(currentToday, 7),
       ]);
+
       if (shukoData) {
         setUnsetShukoTimeOrders(shukoData);
       }
@@ -48,14 +56,12 @@ export const Dashboard = () => {
       setLoading(false);
     }
   };
-
   const handleReload = () => {
     fetchDashboardData();
   };
 
   useEffect(() => {
     fetchDashboardData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (error) throw error;
@@ -67,7 +73,7 @@ export const Dashboard = () => {
           <Box display="flex" alignItems="baseline" gap={2}>
             <Typography sx={{ fontSize: '24px', fontWeight: 'bold' }}>ダッシュボード</Typography>
             <Typography sx={{ fontSize: '16px', color: 'text.secondary' }}>
-              {today}～{nextWeek}
+              {dateRange.today}～{dateRange.nextWeek}
             </Typography>
           </Box>
           <Button startIcon={<UpdateIcon />} onClick={handleReload} disabled={loading}>

@@ -50,6 +50,7 @@ export const EqptTable = ({ eqpts }: { eqpts: MinusZaikoValues[] }) => {
                     textAlign: 'left',
                     justifyContent: 'flex-start',
                     fontWeight: 'normal',
+                    textTransform: 'none',
                     '&:hover': {
                       textDecoration: 'underline',
                       backgroundColor: 'transparent', // ホバー時の背景色を無効化
