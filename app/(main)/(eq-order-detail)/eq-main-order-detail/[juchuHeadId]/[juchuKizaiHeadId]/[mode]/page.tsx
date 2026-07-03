@@ -15,9 +15,16 @@ import {
 } from './_lib/types';
 import EquipmentOrderDetail from './_ui/equipment-order-detail';
 
-export const metadata: Metadata = {
-  title: '受注明細',
-  description: '受注明細(メイン)ページです',
+export const generateMetadata = async (props: {
+  params: Promise<{ juchuHeadId: string; juchuKizaiHeadId: string; mode: string }>;
+}): Promise<Metadata> => {
+  const params = await props.params;
+  const product = await getDetailJuchuHead(Number(params.juchuHeadId));
+
+  return {
+    title: `受注明細 ${product?.koenNam}`,
+    description: '受注明細(メイン)ページです',
+  };
 };
 
 const Page = async (props: { params: Promise<{ juchuHeadId: string; juchuKizaiHeadId: string; mode: string }> }) => {

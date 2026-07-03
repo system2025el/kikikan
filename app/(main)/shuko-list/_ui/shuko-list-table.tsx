@@ -48,11 +48,7 @@ export const ShukoListTable = (props: {
   };
 
   const handleClickRow = (row: ShukoTableValues, sagyoKbnId: number) => {
-    if (isProcessing) return;
-
-    setIsProcessing(true);
-    setIsLoading(true);
-    router.push(
+    window.open(
       `shuko-list/shuko-detail/${row.juchuHeadId}/${row.juchuKizaiHeadKbn}/${row.nyushukoBashoId}/${new Date(row.nyushukoDat).toISOString()}/${sagyoKbnId}`
     );
   };

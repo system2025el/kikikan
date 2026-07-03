@@ -219,16 +219,10 @@ export const ShukoDetail = (props: {
         <Box display={'flex'} justifyContent={'end'} mb={1}>
           <Button
             onClick={() => {
-              if (isProcessing) return;
-              setIsProcessing(true);
-              router.push('/shuko-list');
+              window.close();
             }}
-            disabled={isProcessing}
           >
-            <Box display={'flex'} alignItems={'center'}>
-              <ArrowLeftIcon fontSize="small" />
-              出庫一覧
-            </Box>
+            閉じる
           </Button>
         </Box>
         <Paper variant="outlined">
@@ -307,6 +301,36 @@ export const ShukoDetail = (props: {
             </Grid2>
           </Grid2>
           <Divider />
+          <Box width={'100%'}>
+            <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} width={'70vw'} p={1}>
+              <Typography>全{shukoDetailList ? shukoDetailList.length : 0}件</Typography>
+              <Box display={'flex'} alignItems={'center'}>
+                <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.completed }}>
+                  済
+                </Typography>
+                <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.lack }}>
+                  不足
+                </Typography>
+                <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.excess }}>
+                  過剰
+                </Typography>
+                <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.ctn }}>
+                  コンテナ
+                </Typography>
+                <Button
+                  onClick={() => setAdjustOpen(true)}
+                  disabled={
+                    !shukoDetailList.find((data) => data.diff !== 0) ||
+                    fixFlag ||
+                    user?.permission.nyushuko === permission.nyushuko_ref
+                  }
+                  sx={{ ml: 2 }}
+                >
+                  一括補正
+                </Button>
+              </Box>
+            </Box>
+          </Box>
           {shukoDetailList.length > 0 && (
             <ShukoDetailTable datas={shukoDetailList} fixFlag={fixFlag} user={user} setAdjustOpen={setAdjustOpen} />
           )}
