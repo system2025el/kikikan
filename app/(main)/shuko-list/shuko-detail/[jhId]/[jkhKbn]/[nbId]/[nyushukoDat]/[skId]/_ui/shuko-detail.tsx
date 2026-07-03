@@ -116,7 +116,7 @@ export const ShukoDetail = (props: {
       setSnackBarMessage('出発しました');
       setSnackBarOpen(true);
       setIsProcessing(false);
-      router.push('/shuko-list');
+      window.close();
     } else {
       setDepartureOpen(false);
       setSnackBarMessage('出発に失敗しました');
@@ -165,7 +165,7 @@ export const ShukoDetail = (props: {
       setSnackBarMessage('出発解除しました');
       setSnackBarOpen(true);
       setIsProcessing(false);
-      router.push('/shuko-list');
+      window.close();
     } else {
       setReleaseOpen(false);
       setSnackBarMessage('出発解除に失敗しました');

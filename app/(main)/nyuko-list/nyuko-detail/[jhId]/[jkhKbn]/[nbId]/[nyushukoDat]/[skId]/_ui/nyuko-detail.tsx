@@ -80,7 +80,7 @@ export const NyukoDetail = (props: {
       setSnackBarMessage('到着しました');
       setSnackBarOpen(true);
       setIsProcessing(false);
-      router.push('/nyuko-list');
+      window.close();
     } else {
       setArrivalOpen(false);
       setSnackBarMessage('到着に失敗しました');
@@ -111,7 +111,7 @@ export const NyukoDetail = (props: {
       setSnackBarMessage('到着解除しました');
       setSnackBarOpen(true);
       setIsProcessing(false);
-      router.push('/nyuko-list');
+      window.close();
     } catch (e) {
       setReleaseOpen(false);
       setSnackBarMessage('到着解除に失敗しました');

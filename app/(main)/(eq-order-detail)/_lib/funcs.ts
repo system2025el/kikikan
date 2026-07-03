@@ -41,6 +41,7 @@ import {
   deleteAllShukoResult,
 } from '@/app/_lib/db/tables/t-nyushuko-result';
 import { selectJuchuContainerMeisai, selectOyaJuchuContainerMeisai } from '@/app/_lib/db/tables/v-juchu-ctn-meisai';
+import { selectChildJuchuKizaiHead } from '@/app/_lib/db/tables/v-juchu-kizai-head-lst';
 import { selectOyaJuchuKizaiMeisai } from '@/app/_lib/db/tables/v-juchu-kizai-meisai';
 import { selectShukoStateConfirm } from '@/app/_lib/db/tables/v-nyushuko-den2';
 import { JuchuKizaiHonbanbi } from '@/app/_lib/db/types/t-juchu-kizai-honbanbi-type';
@@ -116,6 +117,32 @@ export const getDetailJuchuHead = async (juchuHeadId: number) => {
     return order;
   } catch (e) {
     console.error('getDetailJuchuHead error:', e);
+    throw e;
+  }
+};
+
+/**
+ * 子受注機材ヘッダー取得(返却)
+ * @param juchuHeadId
+ * @param juchuKizaiHeadId
+ * @returns
+ */
+export const getChildJuchuKizaiHead = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
+  try {
+    const { data, error } = await selectChildJuchuKizaiHead(juchuHeadId, juchuKizaiHeadId);
+    if (error) {
+      throw new Error('[selectChildJuchuKizaiHead] DBエラー:', { cause: error });
+    }
+    return data;
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };

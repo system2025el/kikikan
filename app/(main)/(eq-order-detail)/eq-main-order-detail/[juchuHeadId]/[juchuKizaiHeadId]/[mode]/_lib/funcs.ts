@@ -77,6 +77,7 @@ import { JuchuKizaiMeisai } from '@/app/_lib/db/types/t-juchu-kizai-meisai-type'
 import { NyushukoDen } from '@/app/_lib/db/types/t-nyushuko-den-type';
 import { NyushukoFix } from '@/app/_lib/db/types/t-nyushuko-fix-type';
 import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
+import { getNyukoDate, getRange } from '@/app/(main)/_lib/date-funcs';
 import {
   addAllHonbanbi,
   addJuchuKizaiNyushuko,
@@ -88,6 +89,7 @@ import {
   delAllShukoResult,
   delNyushukoCtnResult,
   delSiyouHonbanbi,
+  getChildJuchuKizaiHead,
   getJuchuContainerMeisaiMaxId,
   getJuchuKizaiHeadMaxId,
   getJuchuKizaiMeisaiMaxId,
@@ -3176,6 +3178,35 @@ export const saveJuchuKizai = async (
         userNam,
         connection
       );
+
+      if (checkKicsNyukoDat || checkYardNyukoDat) {
+        // 返却伝票チェック
+        const returnJuchuKizaiHeads = await getChildJuchuKizaiHead(data.juchuHeadId, data.juchuKizaiHeadId);
+        if (returnJuchuKizaiHeads.length > 0) {
+          for (const returnHead of returnJuchuKizaiHeads) {
+            const returnDateRange = getRange(
+              returnHead.nyuko_dat ? new Date(returnHead.nyuko_dat) : null,
+              updateNyukoDate
+            );
+            const returnJuchuSiyouHonbanbiData: JuchuKizaiHonbanbiValues[] = returnDateRange.map((d) => ({
+              juchuHeadId: returnHead.juchu_head_id,
+              juchuKizaiHeadId: returnHead.juchu_kizai_head_id,
+              juchuHonbanbiShubetuId: 1,
+              juchuHonbanbiDat: new Date(d),
+              mem: '',
+              juchuHonbanbiAddQty: 0,
+            }));
+            await delSiyouHonbanbi(returnHead.juchu_head_id, returnHead.juchu_kizai_head_id, connection);
+            await addAllHonbanbi(
+              returnHead.juchu_head_id,
+              returnHead.juchu_kizai_head_id,
+              returnJuchuSiyouHonbanbiData,
+              userNam,
+              connection
+            );
+          }
+        }
+      }
 
       // 受注機材本番日(出庫、入庫)更新
       const updateNyushukoHonbanbiData: JuchuKizaiHonbanbiValues[] = [
