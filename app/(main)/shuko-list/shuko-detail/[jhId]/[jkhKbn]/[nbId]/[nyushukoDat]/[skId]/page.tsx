@@ -4,9 +4,28 @@ import { getShukoDetail, getShukoDetailTable, getShukoFixFlag } from './_lib/fun
 import { ShukoDetailValues } from './_lib/types';
 import { ShukoDetail } from './_ui/shuko-detail';
 
-export const metadata: Metadata = {
-  title: '出庫明細',
-  description: '出庫明細ページです',
+export const generateMetadata = async (props: {
+  params: Promise<{
+    jhId: string;
+    jkhKbn: string;
+    nbId: string;
+    nyushukoDat: string;
+    skId: string;
+  }>;
+}): Promise<Metadata> => {
+  const params = await props.params;
+  const product = await getShukoDetail(
+    Number(params.jhId),
+    Number(params.jkhKbn),
+    Number(params.nbId),
+    decodeURIComponent(params.nyushukoDat),
+    Number(params.skId)
+  );
+
+  return {
+    title: `出庫明細 ${product?.koenNam}`,
+    description: '出庫明細ページです',
+  };
 };
 
 const Page = async (props: {

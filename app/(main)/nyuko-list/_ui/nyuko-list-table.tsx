@@ -47,11 +47,7 @@ export const NyukoListTable = (props: {
   };
 
   const handleClickRow = (row: NyukoTableValues) => {
-    if (isProcessing) return;
-
-    setIsProcessing(true);
-    setIsLoading(true);
-    router.push(
+    window.open(
       `nyuko-list/nyuko-detail/${row.juchuHeadId}/${row.juchuKizaiHeadKbn}/${row.nyushukoBashoId}/${new Date(row.nyushukoDat).toISOString()}/30`
     );
   };

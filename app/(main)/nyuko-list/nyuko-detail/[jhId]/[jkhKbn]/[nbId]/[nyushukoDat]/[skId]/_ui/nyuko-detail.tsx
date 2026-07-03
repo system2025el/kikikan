@@ -137,19 +137,7 @@ export const NyukoDetail = (props: {
     <PermissionGuard category={'nyushuko'} required={permission.nyushuko_ref}>
       <Box>
         <Box display={'flex'} justifyContent={'end'} mb={1}>
-          <Button
-            onClick={() => {
-              if (isProcessing) return;
-              setIsProcessing(true);
-              router.push('/nyuko-list');
-            }}
-            disabled={isProcessing}
-          >
-            <Box display={'flex'} alignItems={'center'}>
-              <ArrowLeftIcon fontSize="small" />
-              入庫一覧
-            </Box>
-          </Button>
+          <Button onClick={() => window.close()}>閉じる</Button>
         </Box>
         <Paper variant="outlined">
           <Box display={'flex'} justifyContent={'space-between'} alignItems="center" px={2}>
@@ -232,6 +220,25 @@ export const NyukoDetail = (props: {
             </Grid2>
           </Grid2>
           <Divider />
+          <Box width={'100%'}>
+            <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} width={'65vw'} p={1}>
+              <Typography>全{nyukoDetailTableData ? nyukoDetailTableData.length : 0}件</Typography>
+              <Box display={'flex'} alignItems={'center'}>
+                <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.completed }}>
+                  済
+                </Typography>
+                <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.lack }}>
+                  不足
+                </Typography>
+                <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.excess }}>
+                  過剰
+                </Typography>
+                <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.ctn }}>
+                  コンテナ
+                </Typography>
+              </Box>
+            </Box>
+          </Box>
           {nyukoDetailTableData.length > 0 && <NyukoDetailTable datas={nyukoDetailTableData} />}
         </Paper>
         <Dialog open={arrivalOpen}>

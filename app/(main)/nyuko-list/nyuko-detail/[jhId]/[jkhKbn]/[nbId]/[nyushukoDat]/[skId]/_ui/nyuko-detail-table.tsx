@@ -38,24 +38,7 @@ export const NyukoDetailTable = (props: { datas: NyukoDetailTableValues[] }) => 
   };
 
   return (
-    <TableContainer sx={{ overflow: 'auto', maxHeight: '80vh', maxWidth: '60%' }}>
-      <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} pl={1} py={0.5}>
-        <Typography>全{datas ? datas.length : 0}件</Typography>
-        <Box display={'flex'} alignItems={'center'}>
-          <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.completed }}>
-            済
-          </Typography>
-          <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.lack }}>
-            不足
-          </Typography>
-          <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.excess }}>
-            過剰
-          </Typography>
-          <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.ctn }}>
-            コンテナ
-          </Typography>
-        </Box>
-      </Box>
+    <TableContainer sx={{ overflow: 'auto', maxHeight: '80vh', maxWidth: '65vw' }}>
       <Table stickyHeader size="small">
         <TableHead sx={{ bgcolor: 'primary.light' }}>
           <TableRow sx={{ whiteSpace: 'nowrap' }}>
