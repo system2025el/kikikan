@@ -296,3 +296,23 @@ export const selectFilteredKizaiHead = async ({
     throw new Error('[selectFilteredKizaiHead] DBエラー:', { cause: e });
   }
 };
+
+/**
+ * 子受注機材ヘッダーリスト取得(返却)
+ * @param juchuHeadId
+ * @param oyaJuchuKizaiHeadId
+ * @returns
+ */
+export const selectChildJuchuKizaiHead = async (juchuHeadId: number, oyaJuchuKizaiHeadId: number) => {
+  try {
+    return await supabase
+      .schema(SCHEMA)
+      .from('v_juchu_kizai_head_lst')
+      .select('juchu_head_id, juchu_kizai_head_id, nyuko_dat')
+      .eq('juchu_head_id', juchuHeadId)
+      .eq('oya_juchu_kizai_head_id', oyaJuchuKizaiHeadId)
+      .eq('juchu_kizai_head_kbn', 2);
+  } catch (e) {
+    throw new Error('[selectChildJuchuKizaiHead] DBエラー:', { cause: e });
+  }
+};
