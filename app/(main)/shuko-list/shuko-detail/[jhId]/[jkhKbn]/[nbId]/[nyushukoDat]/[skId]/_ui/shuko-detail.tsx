@@ -275,7 +275,11 @@ export const ShukoDetail = (props: {
               </Box>
               <Box display={'flex'} alignItems={'center'}>
                 <Typography mr={4}>出庫場所</Typography>
-                <TextField value={shukoDetailData.nyushukoBashoId === 1 ? 'KICS' : 'YARD'} disabled />
+                <TextField
+                  value={shukoDetailData.nyushukoBashoId === 1 ? 'KICS' : 'YARD'}
+                  disabled
+                  sx={{ width: 100 }}
+                />
               </Box>
             </Grid2>
             <Grid2 container size={{ xs: 12, sm: 12, md: 6 }} direction={'column'} p={{ sx: 1, sm: 1, md: 1 }}>
