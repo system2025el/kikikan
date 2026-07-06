@@ -1,5 +1,6 @@
 'use client';
 
+import AutorenewIcon from '@mui/icons-material/Autorenew';
 import SearchIcon from '@mui/icons-material/Search';
 import {
   Autocomplete,
@@ -309,6 +310,7 @@ export const ShukoList = (/*props: { shukoData: ShukoTableValues[] }*/) => {
               <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} width={'100%'} p={0.5}>
                 <Typography>全{shukoList ? shukoList.length : 0}件</Typography>
                 <Box display={'flex'} alignItems={'center'}>
+                  <AutorenewIcon color="primary" />
                   <Typography>員数票</Typography>
                   <Checkbox
                     checked={conversionFlag}
@@ -321,7 +323,7 @@ export const ShukoList = (/*props: { shukoData: ShukoTableValues[] }*/) => {
                     disabled={selected.length === 0 || user?.permission.nyushuko === permission.nyushuko_ref}
                     loading={isProcessing}
                   >
-                    納品書出力
+                    {conversionFlag ? '員数票' : '納品書'}出力
                   </Button>
                 </Box>
               </Box>
