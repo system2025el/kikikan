@@ -29,6 +29,8 @@ export type ShukoTableValues = {
   schkSagyoStsNamShort: string;
   shukoFixFlg: boolean;
   nyuryokuUser: string;
+  sstbPlanQty: number;
+  schkPlanQty: number;
 };
 
 export type ShukoKizai = {

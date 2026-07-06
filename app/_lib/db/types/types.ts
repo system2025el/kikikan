@@ -3498,6 +3498,7 @@ export type Database = {
       v_nyushuko_den2: {
         Row: {
           head_namv: string | null;
+          juchu_dat: string | null;
           juchu_head_id: number | null;
           juchu_kizai_head_idv: string | null;
           juchu_kizai_head_kbnv: string | null;
@@ -3506,6 +3507,7 @@ export type Database = {
           koen_nam: string | null;
           koenbasho_nam: string | null;
           kokyaku_nam: string | null;
+          nchk_plan_qty: number | null;
           nchk_sagyo_sts_id: number | null;
           nchk_sagyo_sts_nam: string | null;
           nchk_sagyo_sts_nam_short: string | null;
@@ -3514,6 +3516,7 @@ export type Database = {
           nyushuko_basho_id: number | null;
           nyushuko_dat: string | null;
           nyushuko_shubetu_id: number | null;
+          schk_plan_qty: number | null;
           schk_sagyo_sts_id: number | null;
           schk_sagyo_sts_nam: string | null;
           schk_sagyo_sts_nam_short: string | null;
@@ -3521,6 +3524,7 @@ export type Database = {
           shozoku_nam: string | null;
           shozoku_nam_short: string | null;
           shuko_fix_flg: number | null;
+          sstb_plan_qty: number | null;
           sstb_sagyo_sts_id: number | null;
           sstb_sagyo_sts_nam: string | null;
           sstb_sagyo_sts_nam_short: string | null;
@@ -3532,20 +3536,25 @@ export type Database = {
       v_nyushuko_den2_head: {
         Row: {
           head_namv: string | null;
+          juchu_dat: string | null;
           juchu_head_id: number | null;
           juchu_kizai_head_idv: string | null;
           juchu_kizai_head_kbnv: string | null;
           koen_nam: string | null;
           koenbasho_nam: string | null;
           kokyaku_nam: string | null;
+          memv: string | null;
+          nchk_plan_qty: number | null;
           nyuko_fix_flg: number | null;
           nyushuko_basho_id: number | null;
           nyushuko_dat: string | null;
           nyushuko_shubetu_id: number | null;
+          schk_plan_qty: number | null;
           section_namv: string | null;
           shozoku_nam: string | null;
           shozoku_nam_short: string | null;
           shuko_fix_flg: number | null;
+          sstb_plan_qty: number | null;
         };
         Relationships: [];
       };

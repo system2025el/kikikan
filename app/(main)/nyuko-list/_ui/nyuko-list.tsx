@@ -31,7 +31,7 @@ import { getSectionShortSelections } from '../../(masters)/sections-master/_lib/
 import { radioData } from '../_lib/datas';
 import { getNyukoList, getPdfData } from '../_lib/funcs';
 import { NyukoListSearchValues, NyukoTableValues } from '../_lib/types';
-import { PdfModel, usePdf } from '../nyuko/_lib/hooks/usePdf';
+import { NyukoPdfModel, usePdf } from '../nyuko/_lib/hooks/usePdf';
 import { NyukoListTable } from './nyuko-list-table';
 
 export const NyukoList = (/*props: { shukoData: NyukoTableValues[]}*/) => {
@@ -117,14 +117,14 @@ export const NyukoList = (/*props: { shukoData: NyukoTableValues[]}*/) => {
 
     if (selectList.length === 0) return;
 
-    // PdfModelの配列
-    const pdfModels: PdfModel[] = [];
+    // NyukoPdfModelの配列
+    const pdfModels: NyukoPdfModel[] = [];
 
     try {
       // チェックされた行分データ取得
       for (const data of selectList) {
         const headNamv = data.headNamv;
-        const pdfData: PdfModel | null = await getPdfData(
+        const pdfData: NyukoPdfModel | null = await getPdfData(
           data.juchuHeadId,
           data.juchuKizaiHeadIdv,
           data.nyushukoBashoId,

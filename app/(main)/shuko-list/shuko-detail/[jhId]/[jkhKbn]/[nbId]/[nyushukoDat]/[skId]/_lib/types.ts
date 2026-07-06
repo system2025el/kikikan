@@ -10,6 +10,8 @@ export type ShukoDetailValues = {
   koenNam: string | null;
   koenbashoNam: string | null;
   kokyakuNam: string | null;
+  juchuDat: string | null;
+  memv: string | null;
 };
 
 export type ShukoDetailTableValues = {

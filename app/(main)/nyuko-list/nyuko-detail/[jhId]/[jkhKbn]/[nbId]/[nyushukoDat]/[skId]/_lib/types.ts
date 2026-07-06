@@ -10,6 +10,8 @@ export type NyukoDetailValues = {
   koenNam: string | null;
   koenbashoNam: string | null;
   kokyakuNam: string | null;
+  juchuDat: string | null;
+  memv: string | null;
 };
 
 export type NyukoDetailTableValues = {

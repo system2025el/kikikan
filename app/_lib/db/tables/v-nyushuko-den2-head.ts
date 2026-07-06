@@ -11,24 +11,15 @@ export const selectNyushukoOne = async (
   nyushukoShubetuId: number
 ) => {
   try {
-    // return await supabase
-    //   .schema(SCHEMA)
-    //   .from('v_nyushuko_den2_head')
-    //   .select('koen_nam, juchu_kizai_head_idv, head_namv, koenbasho_nam, kokyaku_nam')
-    //   .eq('juchu_head_id', juchuHeadId)
-    //   .eq('juchu_kizai_head_kbnv', juchuKizaiHeadKbn.toString())
-    //   .eq('nyushuko_basho_id', nyushukoBashoId)
-    //   .eq('nyushuko_dat', nyushukoDat)
-    //   .eq('nyushuko_shubetu_id', nyushukoShubetuId)
-    //   .single();
-
     const queey = `
       SELECT
         koen_nam,
         juchu_kizai_head_idv,
         head_namv,
         koenbasho_nam,
-        kokyaku_nam
+        kokyaku_nam,
+        juchu_dat,
+        memv
       FROM ${SCHEMA}.v_nyushuko_den2_head
       WHERE juchu_head_id = $1
         AND juchu_kizai_head_kbnv = $2

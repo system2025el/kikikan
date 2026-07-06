@@ -90,6 +90,7 @@ export const ShukoListTable = (props: {
             <TableCell align="left">受注明細</TableCell>
             <TableCell align="left">公演場所</TableCell>
             <TableCell align="left">顧客名</TableCell>
+            <TableCell align="right">機材総数</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -188,6 +189,7 @@ export const ShukoListTable = (props: {
               </TableCell>
               <TableCell align="left">{row.koenbashoNam}</TableCell>
               <TableCell align="left">{row.kokyakuNam}</TableCell>
+              <TableCell align="right">{row.schkPlanQty}</TableCell>
             </TableRow>
           ))}
         </TableBody>

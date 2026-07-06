@@ -1,10 +1,12 @@
 'use client';
 
+import AutorenewIcon from '@mui/icons-material/Autorenew';
 import SearchIcon from '@mui/icons-material/Search';
 import {
   Autocomplete,
   Box,
   Button,
+  Checkbox,
   Divider,
   FormControl,
   Grid2,
@@ -31,7 +33,7 @@ import { getSectionShortSelections } from '../../(masters)/sections-master/_lib/
 import { radioData } from '../_lib/datas';
 import { getPdfData, getShukoList } from '../_lib/funcs';
 import { ShukoKizai, ShukoListSearchValues, ShukoTableValues } from '../_lib/types';
-import { PdfModel, usePdf } from '../shuko/_lib/hooks/usePdf';
+import { ShukoPdfModel, usePdf } from '../shuko/_lib/hooks/usePdf';
 import { ShukoListTable } from './shuko-list-table';
 
 export const ShukoList = (/*props: { shukoData: ShukoTableValues[] }*/) => {
@@ -54,6 +56,8 @@ export const ShukoList = (/*props: { shukoData: ShukoTableValues[] }*/) => {
     custs: [],
     sect: [],
   });
+  // 員数票変換フラグ
+  const [conversionFlag, setConversionFlag] = useState(false);
   // スナックバー制御
   const [snackBarOpen, setSnackBarOpen] = useState(false);
   // スナックバーメッセージ
@@ -117,14 +121,14 @@ export const ShukoList = (/*props: { shukoData: ShukoTableValues[] }*/) => {
 
     if (selectList.length === 0) return;
 
-    // PdfModelの配列
-    const pdfModels: PdfModel[] = [];
+    // ShukoPdfModelの配列
+    const pdfModels: ShukoPdfModel[] = [];
 
     try {
       // チェックされた行分データ取得
       for (const data of selectList) {
         const headNamv = data.headNamv;
-        const pdfData: PdfModel | null = await getPdfData(
+        const pdfData: ShukoPdfModel | null = await getPdfData(
           data.juchuHeadId,
           data.juchuKizaiHeadIdv,
           data.nyushukoBashoId,
@@ -137,7 +141,7 @@ export const ShukoList = (/*props: { shukoData: ShukoTableValues[] }*/) => {
       }
 
       // PDF生成
-      const blob = await printShuko(pdfModels);
+      const blob = await printShuko(pdfModels, conversionFlag);
 
       // ブラウザ表示
       const url = URL.createObjectURL(blob);
@@ -305,13 +309,21 @@ export const ShukoList = (/*props: { shukoData: ShukoTableValues[] }*/) => {
             <Box width={'100%'}>
               <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} width={'100%'} p={0.5}>
                 <Typography>全{shukoList ? shukoList.length : 0}件</Typography>
-                <Box>
+                <Box display={'flex'} alignItems={'center'}>
+                  <AutorenewIcon color="primary" />
+                  <Typography>員数票</Typography>
+                  <Checkbox
+                    checked={conversionFlag}
+                    onChange={() => setConversionFlag(!conversionFlag)}
+                    disabled={user?.permission.nyushuko === permission.nyushuko_ref}
+                    sx={{ mr: 2 }}
+                  />
                   <Button
                     onClick={handleOutput}
                     disabled={selected.length === 0 || user?.permission.nyushuko === permission.nyushuko_ref}
                     loading={isProcessing}
                   >
-                    納品書出力
+                    {conversionFlag ? '員数票' : '納品書'}出力
                   </Button>
                 </Box>
               </Box>
