@@ -40,7 +40,7 @@ export const LoanSituationTable = (props: LoanSituationTableProps) => {
       variant="outlined"
       sx={{ maxHeight: '80vh' }}
     >
-      <Table stickyHeader padding="none">
+      <Table stickyHeader padding="none" sx={{ borderCollapse: 'collapse' }}>
         <TableHead>
           <TableRow>
             <TableCell
@@ -209,7 +209,7 @@ export const UseTable = (props: UseTableProps) => {
       variant="outlined"
       sx={{ maxHeight: '80vh' }}
     >
-      <Table stickyHeader padding="none">
+      <Table stickyHeader padding="none" sx={{ borderCollapse: 'collapse' }}>
         <TableHead>
           <TableRow>
             {eqStockList.length > 0 &&
@@ -245,7 +245,7 @@ export const UseTable = (props: UseTableProps) => {
                     color: 'white',
                     bgcolor: 'black',
                     paddingY: 0,
-                    paddingX: 0.1,
+                    paddingX: 0.5,
                     height: 15,
                     lineHeight: '1rem',
                     minWidth: 0,
