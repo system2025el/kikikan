@@ -2,7 +2,7 @@
 
 import { QueryResult } from 'pg';
 
-import { selectStockList, selectUseListBulk } from '@/app/_lib/db/tables/stock-table';
+import { selectMergeUseListBulk, selectStockList, selectUseListBulk } from '@/app/_lib/db/tables/stock-table';
 import { selectLoanJuchuData, selectLoanJuchuReturnData } from '@/app/_lib/db/tables/v-juchu-kizai-den';
 import { selectJuchuHeadIds } from '@/app/_lib/db/tables/v-juchu-lst';
 import { selectLoanKizai } from '@/app/_lib/db/tables/v-kizai-list';
@@ -199,6 +199,36 @@ export const getAllLoanUseData = async (
   const stringDate = toJapanYMDString(date, '-');
   try {
     const result: QueryResult<LoanUseTableValues> = await selectUseListBulk(targetIds, kizaiId, stringDate);
+    const data: LoanUseTableValues[] = result.rows;
+    return data;
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
+    throw e;
+  }
+};
+
+/**
+ * 複数貸出状況用親子合体使用データ一括取得
+ * @param juchuHeadId 受注ヘッダーid
+ * @param kizaiId 機材id
+ * @param date 日付
+ * @returns 貸出状況用使用データ
+ */
+export const getAllMergeLoanUseData = async (
+  targetIds: { juchuHeadId: number; juchuKizaiHeadId: number }[],
+  kizaiId: number,
+  date: Date
+) => {
+  const stringDate = toJapanYMDString(date, '-');
+  try {
+    const result: QueryResult<LoanUseTableValues> = await selectMergeUseListBulk(targetIds, kizaiId, stringDate);
     const data: LoanUseTableValues[] = result.rows;
     return data;
   } catch (e) {

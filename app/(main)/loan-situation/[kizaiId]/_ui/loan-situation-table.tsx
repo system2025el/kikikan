@@ -267,7 +267,11 @@ export const UseTable = (props: UseTableProps) => {
                     sx={{
                       bgcolor: cell.juchuHonbanbiColor,
                       border: '1px solid black',
-                      color: cell.planQty < 0 ? 'red' : 'black',
+                      color:
+                        cell.planQty <= 0 ||
+                        (row[colIndex - 1]?.planQty && row[colIndex].planQty !== row[colIndex - 1].planQty)
+                          ? 'red'
+                          : 'black',
                       height: 25,
                       py: 0,
                       px: '4px',
