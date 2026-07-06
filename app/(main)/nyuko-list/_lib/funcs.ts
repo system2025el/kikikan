@@ -9,7 +9,7 @@ import { selectFilteredNyukoList, selectFilteredShukoList } from '@/app/_lib/db/
 
 import { toJapanYMDString } from '../../_lib/date-conversion';
 import { getDic } from '../../_lib/funcs';
-import { PdfModel } from '../nyuko/_lib/hooks/usePdf';
+import { NyukoPdfModel } from '../nyuko/_lib/hooks/usePdf';
 import { EqptGroup, NyukoKizai, NyukoListSearchValues, NyukoTableValues } from './types';
 
 /**
@@ -229,7 +229,7 @@ export const getPdfData = async (
     // ---------------------------------------------------------
     // PDFデータの生成
     // ---------------------------------------------------------
-    const pdjData: PdfModel = {
+    const pdjData: NyukoPdfModel = {
       item1: juchuHeadData.juchu_head_id,
       item2: toJapanYMDString(),
       item3: juchuHeadData.koen_nam ?? '',

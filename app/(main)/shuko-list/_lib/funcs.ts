@@ -7,7 +7,7 @@ import { selectPdfJuchuHead } from '@/app/_lib/db/tables/v-juchu-lst';
 import { selectFilteredShukoList } from '@/app/_lib/db/tables/v-nyushuko-den2';
 
 import { toJapanYMDString } from '../../_lib/date-conversion';
-import { PdfModel } from '../shuko/_lib/hooks/usePdf';
+import { ShukoPdfModel } from '../shuko/_lib/hooks/usePdf';
 import { ShukoKizai, ShukoListSearchValues, ShukoTableValues } from './types';
 
 /**
@@ -135,7 +135,7 @@ export const getPdfData = async (
       await selectPdfJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadIds, nyushukoDat, nyushukoBashoId)
     ).rows;
 
-    const pdjData: PdfModel = {
+    const pdjData: ShukoPdfModel = {
       item1: juchuHeadData.juchu_head_id,
       item2: toJapanYMDString(),
       item3: juchuHeadData.koen_nam ?? '',

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 
 import { ShukoKizai } from '../../../_lib/types';
 
-export type PdfModel = {
+export type ShukoPdfModel = {
   item1: number; //受注番号
   item2: string; //年月日
   item3: string; //公演名
@@ -21,7 +21,7 @@ export type PdfModel = {
 };
 
 // PDFデータ生成フック
-export const usePdf = (): [(params: PdfModel[]) => Promise<Blob>] => {
+export const usePdf = (): [(params: ShukoPdfModel[], conversionFlag: boolean) => Promise<Blob>] => {
   // フォント
   const [font, setFont] = useState<ArrayBuffer>(new ArrayBuffer(0));
   // イメージ
@@ -47,10 +47,10 @@ export const usePdf = (): [(params: PdfModel[]) => Promise<Blob>] => {
   }, []);
 
   // PDF生成関数
-  const printShuko = async (params: PdfModel[]): Promise<Blob> => {
+  const printShuko = async (params: ShukoPdfModel[], conversionFlag: boolean): Promise<Blob> => {
     const pdfDoc = await PDFDocument.create();
 
-    const tabTitle = '納品書 - 機材管理';
+    const tabTitle = conversionFlag ? '員数票 - 機材管理' : '納品書 - 機材管理';
     pdfDoc.setTitle(tabTitle);
 
     pdfDoc.registerFontkit(fontkit);
@@ -61,7 +61,8 @@ export const usePdf = (): [(params: PdfModel[]) => Promise<Blob>] => {
       let page = pdfDoc.addPage();
 
       /* ---------------- ヘッダー：納品書 ---------------- */
-      page.drawText('納　品　書', {
+      const headerText = conversionFlag ? '員　数　票' : '納　品　書';
+      page.drawText(headerText, {
         x: 257,
         y: 790,
         font: customFont,

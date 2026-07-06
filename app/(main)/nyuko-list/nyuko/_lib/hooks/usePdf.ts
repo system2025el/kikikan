@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { NyukoKizai } from '../../../_lib/types';
 
 // PDF出力用のモデル
-export type PdfModel = {
+export type NyukoPdfModel = {
   item1: number; //受注番号
   item2: string; //年月日
   item3: string; //公演名
@@ -22,7 +22,7 @@ export type PdfModel = {
 };
 
 // PDFデータ生成フック
-export const usePdf = (): [(params: PdfModel[]) => Promise<Blob>] => {
+export const usePdf = (): [(params: NyukoPdfModel[]) => Promise<Blob>] => {
   // フォント
   const [font, setFont] = useState<ArrayBuffer>(new ArrayBuffer(0));
   // イメージ
@@ -48,7 +48,7 @@ export const usePdf = (): [(params: PdfModel[]) => Promise<Blob>] => {
   }, []);
 
   // PDF生成関数
-  const printShuko = async (params: PdfModel[]): Promise<Blob> => {
+  const printShuko = async (params: NyukoPdfModel[]): Promise<Blob> => {
     const pdfDoc = await PDFDocument.create();
 
     const tabTitle = '員数票 - 機材管理';
