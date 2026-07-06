@@ -219,6 +219,10 @@ export const NyukoDetail = (props: {
               </Box>
             </Grid2>
           </Grid2>
+          <Box display={'flex'} alignItems="center" px={2} pb={1}>
+            <Typography mr={2}>メモ</Typography>
+            <TextField multiline rows={3} fullWidth disabled value={nyukoDetailData.memv ?? ''} />
+          </Box>
           <Divider />
           <Box width={'100%'}>
             <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} width={'65vw'} p={1}>

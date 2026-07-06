@@ -49,16 +49,6 @@ export const getNyukoDetail = async (
   sagyoKbnId: number
 ) => {
   try {
-    // const { data, error } = await selectNyushukoOne(juchuHeadId, juchuKizaiHeadKbn, nyushukoBashoId, nyushukoDat, 2);
-
-    // if (error) {
-    //   if (error.code === 'PGRST116') {
-    //     return null;
-    //   }
-    //   console.error('getNyukoDetail error : ', error);
-    //   throw error;
-    // }
-
     const data = await selectNyushukoOne(juchuHeadId, juchuKizaiHeadKbn, nyushukoBashoId, nyushukoDat, 2);
 
     const nyukoDetailData: NyukoDetailValues = {
@@ -73,6 +63,8 @@ export const getNyukoDetail = async (
       koenNam: data[0].koen_nam,
       koenbashoNam: data[0].koenbasho_nam,
       kokyakuNam: data[0].kokyaku_nam,
+      juchuDat: data[0].juchu_dat,
+      memv: data[0].memv,
     };
 
     return nyukoDetailData;
