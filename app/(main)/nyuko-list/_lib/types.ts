@@ -27,6 +27,7 @@ export type NyukoTableValues = {
   nchkSagyoStsNamShort: string;
   nyukoFixFlg: boolean;
   nyuryokuUser: string;
+  nchkPlanQty: number;
 };
 
 export type NyukoKizai = {

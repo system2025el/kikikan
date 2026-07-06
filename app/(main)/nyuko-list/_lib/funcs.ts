@@ -40,6 +40,7 @@ export const getNyukoList = async (queries: NyukoListSearchValues) => {
       nchkSagyoStsNamShort: d.nchk_sagyo_sts_nam_short,
       nyukoFixFlg: d.nyuko_fix_flg === 1 ? true : false,
       nyuryokuUser: d.nyuryoku_user,
+      nchkPlanQty: d.nchk_plan_qty ?? 0,
     }));
 
     return nyukoList;

@@ -170,7 +170,7 @@ export const NyukoDetail = (props: {
             <Grid2 container size={{ xs: 12, sm: 12, md: 6 }} direction={'column'} p={{ sx: 1, sm: 1, md: 1 }}>
               <Box display={'flex'} alignItems={'center'}>
                 <Typography mr={4}>受注番号</Typography>
-                <TextField value={nyukoDetailData.juchuHeadId} sx={{ width: 120 }} disabled />
+                <TextField value={nyukoDetailData.juchuHeadId} sx={{ width: 100 }} disabled />
               </Box>
               <Box display={'flex'} alignItems={'center'}>
                 <Typography mr={4}>入庫日時</Typography>
@@ -184,24 +184,6 @@ export const NyukoDetail = (props: {
               <Box display={'flex'} alignItems={'center'}>
                 <Typography mr={4}>入庫場所</Typography>
                 <TextField value={nyukoDetailData.nyushukoBashoId === 1 ? 'KICS' : 'YARD'} disabled />
-              </Box>
-              <Box display={'flex'} alignItems={'center'}>
-                <Typography mr={2}>受注明細名</Typography>
-                <TextField
-                  value={nyukoDetailData.headNamv ?? ''}
-                  fullWidth
-                  disabled
-                  sx={{
-                    '.MuiOutlinedInput-input.Mui-disabled': {
-                      WebkitTextFillColor:
-                        nyukoDetailData.juchuKizaiHeadKbn === 2
-                          ? dispColors.return
-                          : nyukoDetailData.juchuKizaiHeadKbn === 3
-                            ? dispColors.keep
-                            : 'inherit',
-                    },
-                  }}
-                />
               </Box>
             </Grid2>
             <Grid2 container size={{ xs: 12, sm: 12, md: 6 }} direction={'column'} p={{ sx: 1, sm: 1, md: 1 }}>
@@ -219,8 +201,26 @@ export const NyukoDetail = (props: {
               </Box>
             </Grid2>
           </Grid2>
+          <Box display={'flex'} alignItems={'center'} px={2} pb={2}>
+            <Typography mr={2}>受注明細名</Typography>
+            <TextField
+              value={nyukoDetailData.headNamv ?? ''}
+              fullWidth
+              disabled
+              sx={{
+                '.MuiOutlinedInput-input.Mui-disabled': {
+                  WebkitTextFillColor:
+                    nyukoDetailData.juchuKizaiHeadKbn === 2
+                      ? dispColors.return
+                      : nyukoDetailData.juchuKizaiHeadKbn === 3
+                        ? dispColors.keep
+                        : 'inherit',
+                },
+              }}
+            />
+          </Box>
           <Box display={'flex'} alignItems="center" px={2} pb={1}>
-            <Typography mr={2}>メモ</Typography>
+            <Typography mr={4}>明細メモ</Typography>
             <TextField multiline rows={3} fullWidth disabled value={nyukoDetailData.memv ?? ''} />
           </Box>
           <Divider />

@@ -256,10 +256,8 @@ export const ShukoDetail = (props: {
             <Grid2 container size={{ xs: 12, sm: 12, md: 6 }} direction={'column'} p={{ sx: 1, sm: 1, md: 1 }}>
               <Box display={'flex'} alignItems={'center'}>
                 <Typography mr={4}>受注番号</Typography>
-                <TextField value={shukoDetailData.juchuHeadId} sx={{ width: 120 }} disabled />
-              </Box>
-              <Box display={'flex'} alignItems={'center'}>
-                <Typography mr={6}>受注日</Typography>
+                <TextField value={shukoDetailData.juchuHeadId} sx={{ width: 100 }} disabled />
+                <Typography mx={2}>受注日</Typography>
                 <TestDate
                   date={shukoDetailData.juchuDat ? new Date(shukoDetailData.juchuDat) : null}
                   onChange={() => {}}
@@ -293,23 +291,23 @@ export const ShukoDetail = (props: {
                 <Typography mr={6}>顧客名</Typography>
                 <TextField value={shukoDetailData.kokyakuNam ?? ''} fullWidth disabled />
               </Box>
-              <Box display={'flex'} alignItems={'center'}>
-                <Typography mr={2}>受注明細名</Typography>
-                <TextField
-                  value={shukoDetailData.headNamv ?? ''}
-                  fullWidth
-                  disabled
-                  sx={{
-                    '.MuiOutlinedInput-input.Mui-disabled': {
-                      WebkitTextFillColor: shukoDetailData.juchuKizaiHeadKbn === 3 ? dispColors.keep : 'inherit',
-                    },
-                  }}
-                />
-              </Box>
             </Grid2>
           </Grid2>
+          <Box display={'flex'} alignItems={'center'} px={2} pb={2}>
+            <Typography mr={2}>受注明細名</Typography>
+            <TextField
+              value={shukoDetailData.headNamv ?? ''}
+              fullWidth
+              disabled
+              sx={{
+                '.MuiOutlinedInput-input.Mui-disabled': {
+                  WebkitTextFillColor: shukoDetailData.juchuKizaiHeadKbn === 3 ? dispColors.keep : 'inherit',
+                },
+              }}
+            />
+          </Box>
           <Box display={'flex'} alignItems="center" px={2} pb={1}>
-            <Typography mr={2}>メモ</Typography>
+            <Typography mr={4}>明細メモ</Typography>
             <TextField multiline rows={3} fullWidth disabled value={shukoDetailData.memv ?? ''} />
           </Box>
           <Divider />

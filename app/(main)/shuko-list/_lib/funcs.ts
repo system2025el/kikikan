@@ -40,6 +40,8 @@ export const getShukoList = async (queries: ShukoListSearchValues) => {
       schkSagyoStsNamShort: d.schk_sagyo_sts_nam_short,
       shukoFixFlg: d.shuko_fix_flg === 1 ? true : false,
       nyuryokuUser: d.nyuryoku_user,
+      sstbPlanQty: d.sstb_plan_qty ?? 0,
+      schkPlanQty: d.schk_plan_qty ?? 0,
     }));
 
     return shukoList;

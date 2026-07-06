@@ -32,7 +32,9 @@ export const selectFilteredShukoList = async (queries: ShukoListSearchValues) =>
       d2.schk_sagyo_sts_id,
       d2.schk_sagyo_sts_nam_short,
       d2.shuko_fix_flg,
-      d2.nyuryoku_user
+      d2.nyuryoku_user,
+      d2.sstb_plan_qty,
+      d2.schk_plan_qty
     FROM
       ${SCHEMA}.v_nyushuko_den2 as d2
     WHERE
@@ -138,7 +140,8 @@ export const selectFilteredNyukoList = async (queries: NyukoListSearchValues) =>
       d2.nchk_sagyo_sts_id,
       d2.nchk_sagyo_sts_nam_short,
       d2.nyuko_fix_flg,
-      d2.nyuryoku_user
+      d2.nyuryoku_user,
+      d2.nchk_plan_qty
     FROM
       ${SCHEMA}.v_nyushuko_den2 as d2
     WHERE
