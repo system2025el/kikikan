@@ -46,10 +46,9 @@ export const LoanSituationTable = (props: LoanSituationTableProps) => {
             <TableCell
               align="right"
               sx={{
-                height: 15,
+                height: 25,
                 lineHeight: '1rem',
-                py: 0,
-                px: 1,
+                padding: '4px',
                 color: 'black',
                 bgcolor: 'white',
                 fontWeight: 400,
@@ -98,8 +97,8 @@ export const LoanSituationTable = (props: LoanSituationTableProps) => {
                   height: 25,
                   paddingTop: 0,
                   paddingBottom: 0,
-                  paddingLeft: 1,
-                  paddingRight: 1,
+                  paddingLeft: 4,
+                  paddingRight: 4,
                   minWidth: 0,
                 }}
                 sx={{ minWidth: 0 }}
@@ -108,20 +107,6 @@ export const LoanSituationTable = (props: LoanSituationTableProps) => {
                   {row.koenNam}
                 </LightTooltipWithText>
               </TableCell>
-              {/* <TableCell
-                style={{
-                  border: '1px solid black',
-                  whiteSpace: 'nowrap',
-                  width: 1,
-                  height: 25,
-                  paddingTop: 0,
-                  paddingBottom: 0,
-                  paddingLeft: 1,
-                  paddingRight: 1,
-                  minWidth: 0,
-                }}
-                sx={{ minWidth: 0, color: row.juchuKizaiHeadKbn === 2 ? 'red' : 'primary' }}
-              > */}
               <TableCell style={styles.row}>
                 <Button
                   variant="text"
@@ -148,9 +133,6 @@ export const LoanSituationTable = (props: LoanSituationTableProps) => {
                     {row.headNam}
                   </LightTooltipWithText>
                 </Button>
-                {/* <LightTooltipWithText variant="body2" maxWidth={130}>
-                  {row.headNam}
-                </LightTooltipWithText> */}
               </TableCell>
               <TableCell style={styles.row} sx={{ textAlign: 'center' }}>
                 {row.shukoDat ? toJapanMDString(row.shukoDat) : ''}
@@ -172,9 +154,8 @@ export const LoanSituationTable = (props: LoanSituationTableProps) => {
                 whiteSpace: 'nowrap',
                 color: 'black',
                 bgcolor: 'white',
-                padding: 0,
-                px: 1,
-                height: 15,
+                padding: '4px',
+                height: 25,
                 lineHeight: '1rem',
                 minWidth: 0,
                 fontSize: '0.875rem',
@@ -219,10 +200,9 @@ export const UseTable = (props: UseTableProps) => {
                   sx={{
                     border: '1px solid',
                     borderColor: 'divider',
-                    height: 15,
+                    height: 25,
                     lineHeight: '1rem',
-                    py: 0,
-                    px: '4px',
+                    padding: '4px',
                     color: cell.zaikoQty < 0 ? 'red' : 'black',
                     bgcolor: 'white',
                     fontWeight: 400,
@@ -245,9 +225,8 @@ export const UseTable = (props: UseTableProps) => {
                     whiteSpace: 'nowrap',
                     color: 'white',
                     bgcolor: 'black',
-                    paddingY: 0,
-                    paddingX: 0.5,
-                    height: 15,
+                    padding: '4px',
+                    height: 25,
                     lineHeight: '1rem',
                     minWidth: 0,
                   }}
@@ -296,11 +275,10 @@ export const UseTable = (props: UseTableProps) => {
                   sx={{
                     border: '1px solid',
                     borderColor: 'divider',
-                    height: 15,
+                    height: 25,
                     lineHeight: '1rem',
                     fontSize: '0.875rem',
-                    py: 0,
-                    px: '4px',
+                    padding: '4px',
                     color: cell.zaikoQty < 0 ? 'red' : 'black',
                     bgcolor: 'white',
                     minWidth: 0,
@@ -323,13 +301,10 @@ const styles: { [key: string]: React.CSSProperties } = {
   // ヘッダー
   header: {
     border: '1px solid lightGray',
-    height: 15,
+    height: 25,
     lineHeight: '1rem',
     whiteSpace: 'nowrap',
-    paddingTop: 0,
-    paddingBottom: 0,
-    paddingLeft: 1,
-    paddingRight: 1,
+    padding: 4,
     width: 1,
     minWidth: 0,
   },
@@ -338,11 +313,11 @@ const styles: { [key: string]: React.CSSProperties } = {
     border: '1px solid lightGray',
     whiteSpace: 'nowrap',
     width: 1,
-    height: 15,
+    height: 25,
     paddingTop: 0,
     paddingBottom: 0,
-    paddingLeft: 1,
-    paddingRight: 1,
+    paddingLeft: 4,
+    paddingRight: 4,
     minWidth: 0,
   },
 };

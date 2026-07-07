@@ -56,7 +56,7 @@ export const StockTable: React.FC<StockTableProps> = ({
 }) => {
   return (
     <TableContainer ref={ref} style={{ overflow: 'scroll', maxHeight: '80vh' }}>
-      <Table stickyHeader>
+      <Table stickyHeader sx={{ borderCollapse: 'collapse' }}>
         <TableHead>
           <TableRow>
             {eqStockList.length > 0 &&
@@ -66,14 +66,12 @@ export const StockTable: React.FC<StockTableProps> = ({
                   align={'right'}
                   size="small"
                   sx={{
-                    border:
-                      getDateHeaderBackgroundColor(toJapanYMDString(data.calDat), dateRange) === 'black'
-                        ? '1px solid grey'
-                        : '1px solid black',
+                    border: '1px solid lightGray',
                     whiteSpace: 'nowrap',
                     color: 'white',
                     bgcolor: getDateHeaderBackgroundColor(toJapanYMDString(data.calDat), dateRange),
-                    padding: 0,
+                    paddingY: 0,
+                    paddingX: 0.5,
                     height: '26px',
                   }}
                 >
@@ -217,10 +215,10 @@ export const EqTable: React.FC<EqTableProps> = ({
 
   return (
     <TableContainer ref={ref} style={{ overflow: 'scroll', maxHeight: '80vh' }}>
-      <Table stickyHeader>
+      <Table stickyHeader sx={{ borderCollapse: 'collapse' }}>
         <TableHead>
           <TableRow>
-            <TableCell sx={{ padding: 0, border: '1px solid black' }}>
+            <TableCell sx={{ padding: 0, border: '1px solid lightGray' }}>
               <Checkbox
                 indeterminate={
                   visibleRows &&
@@ -329,7 +327,7 @@ const EqTableRow = React.memo(
   }: EqTableRowProps) => {
     return (
       <TableRow hover>
-        <TableCell sx={{ padding: 0, border: '1px solid black' }}>
+        <TableCell sx={{ padding: 0, border: '1px solid lightGray' }}>
           <Checkbox
             color="primary"
             checked={row.selected}
@@ -484,7 +482,7 @@ export const IdoEqTable: React.FC<IdoEqTableProps> = React.memo(
     const visibleRows = rows.filter((row) => !row.delFlag);
     return (
       <TableContainer style={{ overflow: 'scroll', maxHeight: '80vh' }}>
-        <Table stickyHeader>
+        <Table stickyHeader sx={{ borderCollapse: 'collapse' }}>
           <TableHead>
             <TableRow>
               <TableCell size="small" style={styles.header} />
@@ -517,7 +515,7 @@ export const IdoEqTable: React.FC<IdoEqTableProps> = React.memo(
                 <TableCell
                   align="right"
                   size="small"
-                  sx={{ bgcolor: grey[200], py: 0, px: 1, border: '1px solid black' }}
+                  sx={{ bgcolor: grey[200], py: 0, px: 1, border: '1px solid lightGray' }}
                 >
                   {rowIndex + 1}
                 </TableCell>
@@ -655,10 +653,10 @@ export const ContainerTable = (props: {
 
   return (
     <TableContainer style={{ overflow: 'auto', maxHeight: '80vh' }}>
-      <Table stickyHeader>
+      <Table stickyHeader sx={{ borderCollapse: 'collapse' }}>
         <TableHead>
           <TableRow>
-            <TableCell sx={{ padding: 0, border: '1px solid black' }}>
+            <TableCell sx={{ padding: 0, border: '1px solid lightGray' }}>
               <Checkbox
                 indeterminate={
                   visibleRows &&
@@ -703,7 +701,7 @@ export const ContainerTable = (props: {
         <TableBody>
           {visibleRows.map((row, rowIndex) => (
             <TableRow key={rowIndex} hover>
-              <TableCell sx={{ padding: 0, border: '1px solid black' }}>
+              <TableCell sx={{ padding: 0, border: '1px solid lightGray' }}>
                 <Checkbox
                   color="primary"
                   checked={row.selected}
@@ -715,7 +713,7 @@ export const ContainerTable = (props: {
               <TableCell
                 align="right"
                 size="small"
-                sx={{ bgcolor: grey[200], py: 0, px: 1, border: '1px solid black' }}
+                sx={{ bgcolor: grey[200], py: 0, px: 1, border: '1px solid lightGray' }}
               >
                 {rowIndex + 1}
               </TableCell>
@@ -844,7 +842,7 @@ export const ContainerTable = (props: {
 const styles: { [key: string]: React.CSSProperties } = {
   // ヘッダー
   header: {
-    border: '1px solid grey',
+    border: '1px solid lightGray',
     whiteSpace: 'nowrap',
     paddingTop: 0,
     paddingBottom: 0,
@@ -853,7 +851,7 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
   // 行
   row: {
-    border: '1px solid black',
+    border: '1px solid lightGray',
     whiteSpace: 'nowrap',
     height: '26px',
     paddingTop: 0,
