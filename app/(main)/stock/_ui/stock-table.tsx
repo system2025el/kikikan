@@ -107,7 +107,7 @@ export const EqStockTable = (props: EqStockTableProps) => {
                     color: 'white',
                     bgcolor: 'black',
                     padding: 0.5,
-                    height: 15,
+                    height: 25,
                     lineHeight: '1rem',
                   }}
                 >
@@ -156,7 +156,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     borderRight: '1px solid rgba(0, 0, 0, 0.12)',
     whiteSpace: 'nowrap',
     padding: 4,
-    height: 15,
+    height: 25,
     lineHeight: '1rem',
   },
   // 行

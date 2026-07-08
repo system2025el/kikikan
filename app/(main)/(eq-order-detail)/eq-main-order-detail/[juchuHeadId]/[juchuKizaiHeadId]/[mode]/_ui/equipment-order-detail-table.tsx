@@ -79,7 +79,7 @@ export const StockTable: React.FC<StockTableProps> = ({
                     bgcolor: getDateHeaderBackgroundColor(toJapanYMDString(data.calDat), dateRange),
                     paddingY: 0,
                     paddingX: 0.5,
-                    height: '26px',
+                    height: '25px',
                   }}
                 >
                   {toJapanMDString(data.calDat)}
@@ -900,6 +900,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
     borderRight: '1px solid rgba(0, 0, 0, 0.12)',
     whiteSpace: 'nowrap',
+    height: '25px',
     paddingTop: 0,
     paddingBottom: 0,
     paddingLeft: 4,
