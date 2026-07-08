@@ -28,7 +28,7 @@ export const EqTable = (props: EqTableProps) => {
 
   return (
     <TableContainer ref={ref} component={Paper} style={{ overflow: 'scroll', maxHeight: '80vh' }} square>
-      <Table stickyHeader>
+      <Table stickyHeader sx={{ borderCollapse: 'collapse' }}>
         <TableHead>
           <TableRow>
             <TableCell size="small" style={styles.header} />
@@ -46,7 +46,8 @@ export const EqTable = (props: EqTableProps) => {
               <TableCell
                 align="right"
                 sx={{
-                  border: '1px solid black',
+                  border: '1px solid',
+                  borderColor: 'divider',
                   whiteSpace: 'nowrap',
                   height: 25,
                   paddingTop: 0,
@@ -90,7 +91,7 @@ export const EqStockTable = (props: EqStockTableProps) => {
 
   return (
     <TableContainer ref={ref} component={Paper} style={{ overflowX: 'auto', maxHeight: '80vh' }} square>
-      <Table stickyHeader>
+      <Table stickyHeader sx={{ borderCollapse: 'collapse' }}>
         <TableHead>
           <TableRow>
             {eqStockList.length > 0 &&
@@ -100,11 +101,12 @@ export const EqStockTable = (props: EqStockTableProps) => {
                   align="right"
                   size="small"
                   sx={{
-                    border: '1px solid grey',
+                    border: '1px solid',
+                    borderColor: 'divider',
                     whiteSpace: 'nowrap',
                     color: 'white',
                     bgcolor: 'black',
-                    padding: 0,
+                    padding: 0.5,
                     height: 15,
                     lineHeight: '1rem',
                   }}
@@ -123,7 +125,8 @@ export const EqStockTable = (props: EqStockTableProps) => {
                     key={colIndex}
                     align="right"
                     sx={{
-                      border: '1px solid black',
+                      border: '1px solid',
+                      borderColor: 'divider',
                       height: 25,
                       py: 0,
                       px: '4px',
@@ -148,15 +151,15 @@ export const EqStockTable = (props: EqStockTableProps) => {
 const styles: { [key: string]: React.CSSProperties } = {
   // ヘッダー
   header: {
-    border: '1px solid grey',
+    border: '1px solid lightGray',
     whiteSpace: 'nowrap',
-    padding: 0,
+    padding: 4,
     height: 15,
     lineHeight: '1rem',
   },
   // 行
   row: {
-    border: '1px solid black',
+    border: '1px solid lightGray',
     whiteSpace: 'nowrap',
     height: 25,
     paddingTop: 0,

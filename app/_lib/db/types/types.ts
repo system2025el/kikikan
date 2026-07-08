@@ -3896,6 +3896,7 @@ export type Database = {
           juchu_qty: number | null;
           kizai_id: number | null;
           kizai_qty: number | null;
+          oya_juchu_kizai_head_id: number | null;
           plan_dat: string | null;
           plan_qty: number | null;
           yobi_qty: number | null;

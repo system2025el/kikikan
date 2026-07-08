@@ -311,8 +311,7 @@ export const selectUseListBulk = async (
         tj.juchu_kizai_head_id AS "juchuKizaiHeadId",
         km.kizai_id AS "kizaiId",
         km.kizai_qty AS "kizaiQty",
-        COALESCE(v.plan_qty, 0)::integer AS "planQty",
-        COALESCE(v.zaiko_qty, km.kizai_qty)::integer AS "zaikoQty",
+        v.plan_qty AS "planQty",
         COALESCE(h.juchu_honbanbi_shubetu_color, 'white') AS "juchuHonbanbiColor"
       FROM 
         target_days cal
@@ -324,6 +323,92 @@ export const selectUseListBulk = async (
         ${SCHEMA}.v_zaiko_qty_kasi v ON v.plan_dat = cal.cal_dat 
         AND v.kizai_id = km.kizai_id
         -- ペアの両方で結合
+        AND v.juchu_head_id = tj.juchu_head_id
+        AND v.juchu_kizai_head_id = tj.juchu_kizai_head_id
+      LEFT JOIN 
+        ${SCHEMA}.v_honbanbi_kasi_jokyo h ON h.plan_dat = cal.cal_dat 
+        AND h.kizai_id = km.kizai_id
+        -- ペアの両方で結合
+        AND h.juchu_head_id = tj.juchu_head_id
+        AND h.juchu_kizai_head_id = tj.juchu_kizai_head_id
+      ORDER BY 
+        tj.juchu_head_id, tj.juchu_kizai_head_id, cal.cal_dat;
+    `;
+
+    const values = [kizaiId, juchuHeadIds, juchuKizaiHeadIds, date];
+
+    return await pool.query(query, values);
+  } catch (e) {
+    throw new Error('[selectUseListBulk] DBエラー:', { cause: e });
+  }
+};
+
+/**
+ * 複数貸出状況用親子合体使用データ一括取得
+ * @param juchuHeadIds
+ * @param kizaiId
+ * @param date
+ * @returns
+ */
+export const selectMergeUseListBulk = async (
+  targetIds: { juchuHeadId: number; juchuKizaiHeadId: number }[],
+  kizaiId: number,
+  date: string
+) => {
+  try {
+    const juchuHeadIds = targetIds.map((d) => d.juchuHeadId);
+    const juchuKizaiHeadIds = targetIds.map((d) => d.juchuKizaiHeadId);
+
+    const query = `
+      WITH target_days AS (
+        SELECT $4::date + g.i AS cal_dat 
+        FROM generate_series(0, 90) AS g(i)
+      ),
+      target_juchu AS (
+        -- 2つの配列を同時に unnest してペア（行）を作成
+        SELECT 
+          unnest($2::integer[]) AS juchu_head_id,
+          unnest($3::integer[]) AS juchu_kizai_head_id
+      ),
+      kizai_master AS (
+        SELECT kizai_id, kizai_qty 
+        FROM ${SCHEMA}.v_kizai_qty 
+        WHERE kizai_id = $1
+      )
+      SELECT 
+        cal.cal_dat AS "calDat",
+        tj.juchu_head_id AS "juchuHeadId",
+        tj.juchu_kizai_head_id AS "juchuKizaiHeadId",
+        km.kizai_id AS "kizaiId",
+        km.kizai_qty AS "kizaiQty",
+        v.plan_qty AS "planQty",
+        COALESCE(h.juchu_honbanbi_shubetu_color, 'white') AS "juchuHonbanbiColor"
+      FROM 
+        target_days cal
+      CROSS JOIN 
+        target_juchu tj -- 日付 × (受注ID + 受注機材ID) の組み合わせ
+      CROSS JOIN 
+        kizai_master km
+      LEFT JOIN (
+        SELECT 
+          plan_dat,
+          kizai_id,
+          juchu_head_id,
+          juchu_kizai_head_id,
+          SUM(plan_qty) AS plan_qty
+        FROM (
+          -- 通常の一致用データ
+          SELECT plan_dat, kizai_id, juchu_head_id, juchu_kizai_head_id, plan_qty
+          FROM ${SCHEMA}.v_zaiko_qty_kasi
+          UNION ALL
+          -- 親一致（oya_juchu_kizai_head_id）を通常のキーに見立てたデータ
+          SELECT plan_dat, kizai_id, juchu_head_id, oya_juchu_kizai_head_id AS juchu_kizai_head_id, plan_qty
+          FROM ${SCHEMA}.v_zaiko_qty_kasi
+          WHERE oya_juchu_kizai_head_id IS NOT NULL
+        ) sub
+        GROUP BY plan_dat, kizai_id, juchu_head_id, juchu_kizai_head_id
+      ) v ON v.plan_dat = cal.cal_dat 
+        AND v.kizai_id = km.kizai_id
         AND v.juchu_head_id = tj.juchu_head_id
         AND v.juchu_kizai_head_id = tj.juchu_kizai_head_id
       LEFT JOIN 

@@ -87,7 +87,7 @@ export const SortDialog = ({
           onDragEnd={handleDragEnd}
         >
           <TableContainer sx={{ maxHeight: '65vh' }}>
-            <Table stickyHeader>
+            <Table stickyHeader sx={{ borderCollapse: 'collapse' }}>
               <TableHead>
                 <TableRow>
                   <TableCell align="center" size="small" style={styles.header} />
@@ -149,9 +149,15 @@ const SortableItem = ({ id, data }: { id: string; data: JuchuKizaiMeisaiValues }
         <DragHandleIcon sx={{ cursor: 'move' }} />
       </TableCell>
       <TableCell style={styles.row}>{data.kizaiNam}</TableCell>
-      <TableCell style={styles.row}>{data.planQty}</TableCell>
-      <TableCell style={styles.row}>{data.planKizaiQty}</TableCell>
-      <TableCell style={styles.row}>{data.planYobiQty}</TableCell>
+      <TableCell style={styles.row} sx={{ textAlign: 'right' }}>
+        {data.planQty}
+      </TableCell>
+      <TableCell style={styles.row} sx={{ textAlign: 'right' }}>
+        {data.planKizaiQty}
+      </TableCell>
+      <TableCell style={styles.row} sx={{ textAlign: 'right' }}>
+        {data.planYobiQty}
+      </TableCell>
     </TableRow>
   );
 };
@@ -162,18 +168,21 @@ const SortableItem = ({ id, data }: { id: string; data: JuchuKizaiMeisaiValues }
 const styles: { [key: string]: React.CSSProperties } = {
   // ヘッダー
   header: {
-    border: '1px solid black',
+    border: '1px solid lightGray',
     whiteSpace: 'nowrap',
-    padding: 0,
+    paddingTop: 0,
+    paddingBottom: 0,
+    paddingLeft: 4,
+    paddingRight: 4,
   },
   // 行
   row: {
-    border: '1px solid black',
+    border: '1px solid lightGray',
     whiteSpace: 'nowrap',
     height: '26px',
     paddingTop: 0,
     paddingBottom: 0,
-    paddingLeft: 1,
-    paddingRight: 1,
+    paddingLeft: 4,
+    paddingRight: 4,
   },
 };
