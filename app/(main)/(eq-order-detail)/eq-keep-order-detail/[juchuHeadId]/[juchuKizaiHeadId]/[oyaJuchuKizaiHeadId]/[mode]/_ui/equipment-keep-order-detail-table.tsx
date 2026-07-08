@@ -73,7 +73,7 @@ export const KeepEqTable: React.FC<KeepEqTableProps> = ({
 
   return (
     <TableContainer style={{ overflow: 'scroll', maxHeight: '80vh' }}>
-      <Table>
+      <Table sx={{ borderCollapse: 'collapse' }}>
         <TableHead>
           <TableRow>
             <TableCell size="small" sx={{ bgcolor: 'white', position: 'sticky', top: 0, zIndex: 2 }}></TableCell>
@@ -101,7 +101,7 @@ export const KeepEqTable: React.FC<KeepEqTableProps> = ({
             </TableCell>
           </TableRow>
           <TableRow>
-            <TableCell sx={{ padding: 0, border: '1px solid black' }}>
+            <TableCell sx={{ padding: 0, border: '1px solid lightGray' }}>
               <Checkbox
                 indeterminate={
                   visibleRows &&
@@ -193,7 +193,7 @@ const KeepEqTableRow = React.memo(
   }: KeepEqTableRowProps) => {
     return (
       <TableRow hover>
-        <TableCell sx={{ padding: 0, border: '1px solid black' }}>
+        <TableCell sx={{ padding: 0, border: '1px solid lightGray' }}>
           <Checkbox
             color="primary"
             checked={row.selected}
@@ -202,7 +202,7 @@ const KeepEqTableRow = React.memo(
             disabled={!edit || nyukoFixFlag}
           />
         </TableCell>
-        <TableCell align="right" size="small" sx={{ bgcolor: grey[200], py: 0, px: 1, border: '1px solid black' }}>
+        <TableCell align="right" size="small" sx={{ bgcolor: grey[200], py: 0, px: 1, border: '1px solid lightGray' }}>
           {rowIndex + 1}
         </TableCell>
         <TableCell style={styles.row} align="left" size="small" sx={{ bgcolor: grey[200] }}>
@@ -358,7 +358,7 @@ export const KeepContainerTable = (props: {
 
   return (
     <TableContainer style={{ overflow: 'auto', maxHeight: '80vh' }}>
-      <Table stickyHeader>
+      <Table stickyHeader sx={{ borderCollapse: 'collapse' }}>
         <TableHead>
           <TableRow>
             <TableCell size="small" sx={{ bgcolor: 'white', position: 'sticky', top: 0, zIndex: 2 }}></TableCell>
@@ -385,7 +385,7 @@ export const KeepContainerTable = (props: {
             </TableCell>
           </TableRow>
           <TableRow>
-            <TableCell sx={{ padding: 0, border: '1px solid black' }}>
+            <TableCell sx={{ padding: 0, border: '1px solid lightGray' }}>
               <Checkbox
                 indeterminate={
                   visibleRows &&
@@ -433,7 +433,7 @@ export const KeepContainerTable = (props: {
         <TableBody>
           {visibleRows.map((row, rowIndex) => (
             <TableRow key={rowIndex} hover>
-              <TableCell sx={{ padding: 0, border: '1px solid black' }}>
+              <TableCell sx={{ padding: 0, border: '1px solid lightGray' }}>
                 <Checkbox
                   color="primary"
                   checked={row.selected}
@@ -445,7 +445,7 @@ export const KeepContainerTable = (props: {
               <TableCell
                 align="right"
                 size="small"
-                sx={{ bgcolor: grey[200], py: 0, px: 1, border: '1px solid black' }}
+                sx={{ bgcolor: grey[200], py: 0, px: 1, border: '1px solid lightGray' }}
               >
                 {rowIndex + 1}
               </TableCell>
@@ -585,7 +585,7 @@ export const KeepContainerTable = (props: {
 const styles: { [key: string]: React.CSSProperties } = {
   // ヘッダー
   header: {
-    border: '1px solid grey',
+    border: '1px solid lightGray',
     whiteSpace: 'nowrap',
     paddingTop: 0,
     paddingBottom: 0,
@@ -594,7 +594,7 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
   // 行
   row: {
-    border: '1px solid black',
+    border: '1px solid lightGray',
     whiteSpace: 'nowrap',
     height: '26px',
     paddingTop: 0,

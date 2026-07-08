@@ -52,7 +52,7 @@ export const ReturnStockTable: React.FC<ReturnStockTableProps> = ({
 }) => {
   return (
     <TableContainer ref={ref} style={{ overflow: 'scroll', maxHeight: '80vh' }}>
-      <Table>
+      <Table sx={{ borderCollapse: 'collapse' }}>
         <TableHead>
           <TableRow>
             {eqStockList.length > 0 &&
@@ -80,14 +80,12 @@ export const ReturnStockTable: React.FC<ReturnStockTableProps> = ({
                   align={'right'}
                   size="small"
                   sx={{
-                    border:
-                      getDateHeaderBackgroundColor(toJapanYMDString(data.calDat), stockTableHeaderDateRange) === 'black'
-                        ? '1px solid grey'
-                        : '1px solid black',
+                    border: '1px solid lightGray',
                     whiteSpace: 'nowrap',
                     color: 'white',
                     bgcolor: getDateHeaderBackgroundColor(toJapanYMDString(data.calDat), stockTableHeaderDateRange),
-                    padding: 0,
+                    paddingY: 0,
+                    paddingX: 0.5,
                     height: '26px',
                     position: 'sticky',
                     top: 24,
@@ -216,7 +214,7 @@ export const ReturnEqTable: React.FC<ReturnEqTableProps> = ({
 
   return (
     <TableContainer ref={ref} style={{ overflow: 'scroll', maxHeight: '80vh' }}>
-      <Table stickyHeader>
+      <Table stickyHeader sx={{ borderCollapse: 'collapse' }}>
         <TableHead>
           <TableRow>
             <TableCell size="small" sx={{ bgcolor: 'white', position: 'sticky', top: 0, zIndex: 2 }}></TableCell>
@@ -244,7 +242,7 @@ export const ReturnEqTable: React.FC<ReturnEqTableProps> = ({
             </TableCell>
           </TableRow>
           <TableRow>
-            <TableCell sx={{ padding: 0, border: '1px solid black' }}>
+            <TableCell sx={{ padding: 0, border: '1px solid lightGray' }}>
               <Checkbox
                 indeterminate={
                   visibleRows &&
@@ -284,15 +282,6 @@ export const ReturnEqTable: React.FC<ReturnEqTableProps> = ({
             <TableCell align="right" size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }}>
               予備
             </TableCell>
-            {/* <TableCell align="right" size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }}>
-              受注
-            </TableCell>
-            <TableCell align="right" size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }}>
-              予備
-            </TableCell>
-            <TableCell align="right" size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }}>
-              合計
-            </TableCell> */}
           </TableRow>
         </TableHead>
         <TableBody>
@@ -351,7 +340,7 @@ const ReturnEqTableRow = React.memo(
   }: ReturnEqTableRowProps) => {
     return (
       <TableRow hover>
-        <TableCell sx={{ padding: 0, border: '1px solid black' }}>
+        <TableCell sx={{ padding: 0, border: '1px solid lightGray' }}>
           <Checkbox
             color="primary"
             checked={row.selected}
@@ -360,7 +349,7 @@ const ReturnEqTableRow = React.memo(
             disabled={!edit || nyukoFixFlag}
           />
         </TableCell>
-        <TableCell align="right" size="small" sx={{ bgcolor: grey[200], py: 0, px: 1, border: '1px solid black' }}>
+        <TableCell align="right" size="small" sx={{ bgcolor: grey[200], py: 0, px: 1, border: '1px solid lightGray' }}>
           {rowIndex + 1}
         </TableCell>
         <TableCell style={styles.row} align="left" size="small" sx={{ bgcolor: grey[200] }}>
@@ -439,56 +428,6 @@ const ReturnEqTableRow = React.memo(
             disabled={!edit || nyukoFixFlag}
           />
         </TableCell>
-        {/* <TableCell style={styles.row} align="right" size="small">
-          <TextField
-            variant="standard"
-            value={row.planYobiQty}
-            type="text"
-            onChange={(e) => {
-              if (/^\d*$/.test(e.target.value) && Number(e.target.value) <= (row.oyaPlanYobiQty ?? 0)) {
-                handleCellChange(rowIndex, row.kizaiId, row.planKizaiQty, Number(e.target.value), row.planQty);
-              }
-            }}
-            sx={{
-              '& .MuiInputBase-input': {
-                textAlign: 'right',
-                padding: 0,
-                fontSize: 'small',
-                color: 'red',
-              },
-              '& input[type=number]': {
-                MozAppearance: 'textfield',
-              },
-              '& input[type=number]::-webkit-outer-spin-button': {
-                WebkitAppearance: 'none',
-                margin: 0,
-              },
-              '& input[type=number]::-webkit-inner-spin-button': {
-                WebkitAppearance: 'none',
-                margin: 0,
-              },
-              '.MuiInput-input.Mui-disabled': {
-                WebkitTextFillColor: 'red',
-              },
-            }}
-            slotProps={{
-              input: {
-                style: { textAlign: 'right' },
-                disableUnderline: true,
-                inputMode: 'numeric',
-              },
-            }}
-            inputRef={handleYobiRef}
-            onKeyDown={(e) => {
-              handleYobiKeyDown(e, rowIndex);
-            }}
-            onFocus={(e) => e.target.select()}
-            disabled={!edit}
-          />
-        </TableCell>
-        <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200], color: 'red' }}>
-          {row.planQty}
-        </TableCell> */}
       </TableRow>
     );
   },
@@ -567,7 +506,7 @@ export const ReturnContainerTable = (props: {
 
   return (
     <TableContainer style={{ overflow: 'auto', maxHeight: '80vh' }}>
-      <Table stickyHeader>
+      <Table stickyHeader sx={{ borderCollapse: 'collapse' }}>
         <TableHead>
           <TableRow>
             <TableCell size="small" sx={{ bgcolor: 'white', position: 'sticky', top: 0, zIndex: 2 }}></TableCell>
@@ -594,7 +533,7 @@ export const ReturnContainerTable = (props: {
             </TableCell>
           </TableRow>
           <TableRow>
-            <TableCell sx={{ padding: 0, border: '1px solid black' }}>
+            <TableCell sx={{ padding: 0, border: '1px solid lightGray' }}>
               <Checkbox
                 indeterminate={
                   visibleRows &&
@@ -645,7 +584,7 @@ export const ReturnContainerTable = (props: {
         <TableBody>
           {visibleRows.map((row, rowIndex) => (
             <TableRow key={rowIndex} hover>
-              <TableCell sx={{ padding: 0, border: '1px solid black' }}>
+              <TableCell sx={{ padding: 0, border: '1px solid lightGray' }}>
                 <Checkbox
                   color="primary"
                   checked={row.selected}
@@ -657,7 +596,7 @@ export const ReturnContainerTable = (props: {
               <TableCell
                 align="right"
                 size="small"
-                sx={{ bgcolor: grey[200], py: 0, px: 1, border: '1px solid black' }}
+                sx={{ bgcolor: grey[200], py: 0, px: 1, border: '1px solid lightGray' }}
               >
                 {rowIndex + 1}
               </TableCell>
@@ -810,7 +749,7 @@ export const ReturnContainerTable = (props: {
 const styles: { [key: string]: React.CSSProperties } = {
   // ヘッダー
   header: {
-    border: '1px solid grey',
+    border: '1px solid lightGray',
     whiteSpace: 'nowrap',
     paddingTop: 0,
     paddingBottom: 0,
@@ -819,7 +758,7 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
   // 行
   row: {
-    border: '1px solid black',
+    border: '1px solid lightGray',
     whiteSpace: 'nowrap',
     height: '26px',
     paddingTop: 0,
