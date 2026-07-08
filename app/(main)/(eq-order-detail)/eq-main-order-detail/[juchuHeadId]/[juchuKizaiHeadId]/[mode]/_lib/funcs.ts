@@ -3239,6 +3239,7 @@ export const saveJuchuKizai = async (
   updateDateRange: string[],
   juchuHonbanbiList: JuchuKizaiHonbanbiValues[],
   juchuHonbanbiDeleteList: JuchuKizaiHonbanbiValues[],
+  originJuchuKizaiMeisaiList: JuchuKizaiMeisaiValues[],
   juchuKizaiMeisaiList: JuchuKizaiMeisaiValues[],
   idoJuchuKizaiMeisaiList: IdoJuchuKizaiMeisaiValues[],
   juchuContainerMeisaiList: JuchuContainerMeisaiValues[],
@@ -3424,6 +3425,13 @@ export const saveJuchuKizai = async (
           }
         }
       }
+
+      const originMap = new Map(originJuchuKizaiMeisaiList.map((item) => [item.juchuKizaiMeisaiId, item]));
+      const changedData = updateJuchuKizaiMeisaiData.filter((updItem) => {
+        const key = updItem.juchuKizaiMeisaiId;
+        const originItem = originMap.get(key);
+        return originItem && originItem.shozokuId !== updItem.shozokuId;
+      });
 
       // 受注コンテナ明細id最大値
       const juchuContainerMeisaiMaxId = await getJuchuContainerMeisaiMaxId(data.juchuHeadId, data.juchuKizaiHeadId);
