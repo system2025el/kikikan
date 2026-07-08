@@ -217,11 +217,7 @@ export const ReturnEqTable: React.FC<ReturnEqTableProps> = ({
       <Table stickyHeader sx={{ borderCollapse: 'collapse' }}>
         <TableHead>
           <TableRow>
-            <TableCell size="small" sx={{ bgcolor: 'white', position: 'sticky', top: 0, zIndex: 2 }}></TableCell>
-            <TableCell size="small" sx={{ bgcolor: 'white', position: 'sticky', top: 0, zIndex: 2 }}></TableCell>
-            <TableCell size="small" sx={{ bgcolor: 'white', position: 'sticky', top: 0, zIndex: 2 }}></TableCell>
-            <TableCell size="small" sx={{ bgcolor: 'white', position: 'sticky', top: 0, zIndex: 2 }}></TableCell>
-            <TableCell size="small" sx={{ bgcolor: 'white', position: 'sticky', top: 0, zIndex: 2 }}></TableCell>
+            <TableCell size="small" sx={{ bgcolor: 'white', position: 'sticky', top: 0, zIndex: 2 }} colSpan={5} />
             <TableCell
               align="center"
               size="small"
@@ -242,7 +238,7 @@ export const ReturnEqTable: React.FC<ReturnEqTableProps> = ({
             </TableCell>
           </TableRow>
           <TableRow>
-            <TableCell sx={{ padding: 0, border: '1px solid lightGray' }}>
+            <TableCell sx={{ position: 'sticky', top: 24, zIndex: 2, padding: 0, border: '1px solid lightGray' }}>
               <Checkbox
                 indeterminate={
                   visibleRows &&
@@ -509,10 +505,7 @@ export const ReturnContainerTable = (props: {
       <Table stickyHeader sx={{ borderCollapse: 'collapse' }}>
         <TableHead>
           <TableRow>
-            <TableCell size="small" sx={{ bgcolor: 'white', position: 'sticky', top: 0, zIndex: 2 }}></TableCell>
-            <TableCell size="small" sx={{ bgcolor: 'white', position: 'sticky', top: 0, zIndex: 2 }}></TableCell>
-            <TableCell size="small" sx={{ bgcolor: 'white', position: 'sticky', top: 0, zIndex: 2 }}></TableCell>
-            <TableCell size="small" sx={{ bgcolor: 'white', position: 'sticky', top: 0, zIndex: 2 }}></TableCell>
+            <TableCell size="small" sx={{ bgcolor: 'white', position: 'sticky', top: 0, zIndex: 2 }} colSpan={4} />
             <TableCell
               align="center"
               size="small"
@@ -533,7 +526,7 @@ export const ReturnContainerTable = (props: {
             </TableCell>
           </TableRow>
           <TableRow>
-            <TableCell sx={{ padding: 0, border: '1px solid lightGray' }}>
+            <TableCell sx={{ position: 'sticky', top: 24, zIndex: 2, padding: 0, border: '1px solid lightGray' }}>
               <Checkbox
                 indeterminate={
                   visibleRows &&
