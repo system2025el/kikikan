@@ -40,7 +40,7 @@ export const LoanSituationTable = (props: LoanSituationTableProps) => {
       variant="outlined"
       sx={{ maxHeight: '80vh' }}
     >
-      <Table stickyHeader padding="none" sx={{ borderCollapse: 'collapse' }}>
+      <Table stickyHeader padding="none" sx={{ borderCollapse: 'separate', borderSpacing: 0 }}>
         <TableHead>
           <TableRow>
             <TableCell
@@ -59,7 +59,7 @@ export const LoanSituationTable = (props: LoanSituationTableProps) => {
               在庫数
             </TableCell>
           </TableRow>
-          <TableRow sx={{ position: 'sticky', top: 24, zIndex: 2 }}>
+          <TableRow sx={{ position: 'sticky', top: 25, zIndex: 2 }}>
             <TableCell align="center" style={styles.header}>
               受注番号
             </TableCell>
@@ -92,6 +92,7 @@ export const LoanSituationTable = (props: LoanSituationTableProps) => {
               </TableCell>
               <TableCell
                 style={{
+                  borderRight: '1px solid rgba(0, 0, 0, 0.12)',
                   whiteSpace: 'nowrap',
                   width: 1,
                   height: 25,
@@ -144,13 +145,13 @@ export const LoanSituationTable = (props: LoanSituationTableProps) => {
           ))}
         </TableBody>
         <TableFooter>
-          <TableRow sx={{ position: 'sticky', bottom: -1 }}>
+          <TableRow sx={{ position: 'sticky', bottom: 0 }}>
             <TableCell
               align="right"
               size="small"
               sx={{
-                border: '1px solid',
-                borderColor: 'divider',
+                borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
+                borderRight: '1px solid rgba(0, 0, 0, 0.12)',
                 whiteSpace: 'nowrap',
                 color: 'black',
                 bgcolor: 'white',
@@ -189,7 +190,7 @@ export const UseTable = (props: UseTableProps) => {
       variant="outlined"
       sx={{ maxHeight: '80vh' }}
     >
-      <Table stickyHeader padding="none" sx={{ borderCollapse: 'collapse' }}>
+      <Table stickyHeader padding="none" sx={{ borderCollapse: 'separate', borderSpacing: 0 }}>
         <TableHead>
           <TableRow>
             {eqStockList.length > 0 &&
@@ -198,8 +199,8 @@ export const UseTable = (props: UseTableProps) => {
                   key={colIndex}
                   align="right"
                   sx={{
-                    border: '1px solid',
-                    borderColor: 'divider',
+                    borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
+                    borderRight: '1px solid rgba(0, 0, 0, 0.12)',
                     height: 25,
                     lineHeight: '1rem',
                     padding: '4px',
@@ -213,15 +214,15 @@ export const UseTable = (props: UseTableProps) => {
                 </TableCell>
               ))}
           </TableRow>
-          <TableRow sx={{ position: 'sticky', top: 24, zIndex: 2 }}>
+          <TableRow sx={{ position: 'sticky', top: 25, zIndex: 2 }}>
             {eqStockList.length > 0 &&
               eqStockList.map((cell, index) => (
                 <TableCell
                   key={index}
                   align="center"
                   sx={{
-                    border: '1px solid',
-                    borderColor: 'divider',
+                    borderBottom: '1px solid lightGray',
+                    borderRight: '1px solid lightGray',
                     whiteSpace: 'nowrap',
                     color: 'white',
                     bgcolor: 'black',
@@ -246,8 +247,8 @@ export const UseTable = (props: UseTableProps) => {
                     align="right"
                     sx={{
                       bgcolor: cell.juchuHonbanbiColor,
-                      border: '1px solid',
-                      borderColor: 'divider',
+                      borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
+                      borderRight: '1px solid rgba(0, 0, 0, 0.12)',
                       color:
                         cell.planQty <= 0 ||
                         (row[colIndex - 1]?.planQty && row[colIndex].planQty !== row[colIndex - 1].planQty)
@@ -266,15 +267,15 @@ export const UseTable = (props: UseTableProps) => {
             ))}
         </TableBody>
         <TableFooter>
-          <TableRow sx={{ position: 'sticky', bottom: -1 }}>
+          <TableRow sx={{ position: 'sticky', bottom: 0 }}>
             {eqStockList.length > 0 &&
               eqStockList.map((cell, colIndex) => (
                 <TableCell
                   key={colIndex}
                   align="right"
                   sx={{
-                    border: '1px solid',
-                    borderColor: 'divider',
+                    borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
+                    borderRight: '1px solid rgba(0, 0, 0, 0.12)',
                     height: 25,
                     lineHeight: '1rem',
                     fontSize: '0.875rem',
@@ -300,7 +301,8 @@ export const UseTable = (props: UseTableProps) => {
 const styles: { [key: string]: React.CSSProperties } = {
   // ヘッダー
   header: {
-    border: '1px solid lightGray',
+    borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
+    borderRight: '1px solid rgba(0, 0, 0, 0.12)',
     height: 25,
     lineHeight: '1rem',
     whiteSpace: 'nowrap',
@@ -310,7 +312,8 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
   // 行
   row: {
-    border: '1px solid lightGray',
+    borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
+    borderRight: '1px solid rgba(0, 0, 0, 0.12)',
     whiteSpace: 'nowrap',
     width: 1,
     height: 25,

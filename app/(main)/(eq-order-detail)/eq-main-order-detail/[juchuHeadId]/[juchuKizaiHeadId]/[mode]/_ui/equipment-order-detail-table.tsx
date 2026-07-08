@@ -55,8 +55,14 @@ export const StockTable: React.FC<StockTableProps> = ({
   ref,
 }) => {
   return (
-    <TableContainer ref={ref} style={{ overflow: 'scroll', maxHeight: '80vh' }}>
-      <Table stickyHeader sx={{ borderCollapse: 'collapse' }}>
+    <TableContainer
+      ref={ref}
+      style={{
+        overflow: 'scroll',
+        maxHeight: '80vh',
+      }}
+    >
+      <Table stickyHeader sx={{ borderCollapse: 'separate', borderSpacing: 0 }}>
         <TableHead>
           <TableRow>
             {eqStockList.length > 0 &&
@@ -66,7 +72,8 @@ export const StockTable: React.FC<StockTableProps> = ({
                   align={'right'}
                   size="small"
                   sx={{
-                    border: '1px solid lightGray',
+                    borderBottom: '1px solid lightGray',
+                    borderRight: '1px solid lightGray',
                     whiteSpace: 'nowrap',
                     color: 'white',
                     bgcolor: getDateHeaderBackgroundColor(toJapanYMDString(data.calDat), dateRange),
@@ -118,6 +125,7 @@ const StockTableRow = React.memo(
               align={'right'}
               style={styles.row}
               sx={{
+                borderLeft: colIndex === 0 ? '1px solid rgba(0, 0, 0, 0.12)' : 'none',
                 bgcolor: getStockRowBackgroundColor(cell.calDat, dateRange, shubetuColorMap, juchuColorMap),
                 color: cell.zaikoQty < 0 ? 'red' : 'black',
               }}
@@ -214,11 +222,23 @@ export const EqTable: React.FC<EqTableProps> = ({
   };
 
   return (
-    <TableContainer ref={ref} style={{ overflow: 'scroll', maxHeight: '80vh' }}>
-      <Table stickyHeader sx={{ borderCollapse: 'collapse' }}>
+    <TableContainer
+      ref={ref}
+      style={{
+        overflow: 'scroll',
+        maxHeight: '80vh',
+      }}
+    >
+      <Table stickyHeader sx={{ borderCollapse: 'separate', borderSpacing: 0 }}>
         <TableHead>
           <TableRow>
-            <TableCell sx={{ padding: 0, border: '1px solid lightGray' }}>
+            <TableCell
+              sx={{
+                padding: 0,
+                borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
+                borderRight: '1px solid rgba(0, 0, 0, 0.12)',
+              }}
+            >
               <Checkbox
                 indeterminate={
                   visibleRows &&
@@ -327,7 +347,13 @@ const EqTableRow = React.memo(
   }: EqTableRowProps) => {
     return (
       <TableRow hover>
-        <TableCell sx={{ padding: 0, border: '1px solid lightGray' }}>
+        <TableCell
+          sx={{
+            padding: 0,
+            borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
+            borderRight: '1px solid rgba(0, 0, 0, 0.12)',
+          }}
+        >
           <Checkbox
             color="primary"
             checked={row.selected}
@@ -482,7 +508,7 @@ export const IdoEqTable: React.FC<IdoEqTableProps> = React.memo(
     const visibleRows = rows.filter((row) => !row.delFlag);
     return (
       <TableContainer style={{ overflow: 'scroll', maxHeight: '80vh' }}>
-        <Table stickyHeader sx={{ borderCollapse: 'collapse' }}>
+        <Table stickyHeader sx={{ borderCollapse: 'separate', borderSpacing: 0 }}>
           <TableHead>
             <TableRow>
               <TableCell size="small" style={styles.header} />
@@ -515,7 +541,13 @@ export const IdoEqTable: React.FC<IdoEqTableProps> = React.memo(
                 <TableCell
                   align="right"
                   size="small"
-                  sx={{ bgcolor: grey[200], py: 0, px: 1, border: '1px solid lightGray' }}
+                  sx={{
+                    bgcolor: grey[200],
+                    py: 0,
+                    px: 1,
+                    borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
+                    borderRight: '1px solid rgba(0, 0, 0, 0.12)',
+                  }}
                 >
                   {rowIndex + 1}
                 </TableCell>
@@ -652,11 +684,22 @@ export const ContainerTable = (props: {
   };
 
   return (
-    <TableContainer style={{ overflow: 'auto', maxHeight: '80vh' }}>
-      <Table stickyHeader sx={{ borderCollapse: 'collapse' }}>
+    <TableContainer
+      style={{
+        overflow: 'auto',
+        maxHeight: '80vh',
+      }}
+    >
+      <Table stickyHeader sx={{ borderCollapse: 'separate', borderSpacing: 0 }}>
         <TableHead>
           <TableRow>
-            <TableCell sx={{ padding: 0, border: '1px solid lightGray' }}>
+            <TableCell
+              sx={{
+                padding: 0,
+                borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
+                borderRight: '1px solid rgba(0, 0, 0, 0.12)',
+              }}
+            >
               <Checkbox
                 indeterminate={
                   visibleRows &&
@@ -701,7 +744,13 @@ export const ContainerTable = (props: {
         <TableBody>
           {visibleRows.map((row, rowIndex) => (
             <TableRow key={rowIndex} hover>
-              <TableCell sx={{ padding: 0, border: '1px solid lightGray' }}>
+              <TableCell
+                sx={{
+                  padding: 0,
+                  borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
+                  borderRight: '1px solid rgba(0, 0, 0, 0.12)',
+                }}
+              >
                 <Checkbox
                   color="primary"
                   checked={row.selected}
@@ -713,7 +762,13 @@ export const ContainerTable = (props: {
               <TableCell
                 align="right"
                 size="small"
-                sx={{ bgcolor: grey[200], py: 0, px: 1, border: '1px solid lightGray' }}
+                sx={{
+                  bgcolor: grey[200],
+                  py: 0,
+                  px: 1,
+                  borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
+                  borderRight: '1px solid rgba(0, 0, 0, 0.12)',
+                }}
               >
                 {rowIndex + 1}
               </TableCell>
@@ -842,7 +897,8 @@ export const ContainerTable = (props: {
 const styles: { [key: string]: React.CSSProperties } = {
   // ヘッダー
   header: {
-    border: '1px solid lightGray',
+    borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
+    borderRight: '1px solid rgba(0, 0, 0, 0.12)',
     whiteSpace: 'nowrap',
     paddingTop: 0,
     paddingBottom: 0,
@@ -851,7 +907,8 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
   // 行
   row: {
-    border: '1px solid lightGray',
+    borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
+    borderRight: '1px solid rgba(0, 0, 0, 0.12)',
     whiteSpace: 'nowrap',
     height: '26px',
     paddingTop: 0,

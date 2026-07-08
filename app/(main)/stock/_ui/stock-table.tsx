@@ -28,7 +28,7 @@ export const EqTable = (props: EqTableProps) => {
 
   return (
     <TableContainer ref={ref} component={Paper} style={{ overflow: 'scroll', maxHeight: '80vh' }} square>
-      <Table stickyHeader sx={{ borderCollapse: 'collapse' }}>
+      <Table stickyHeader sx={{ borderCollapse: 'separate', borderSpacing: 0 }}>
         <TableHead>
           <TableRow>
             <TableCell size="small" style={styles.header} />
@@ -46,8 +46,8 @@ export const EqTable = (props: EqTableProps) => {
               <TableCell
                 align="right"
                 sx={{
-                  border: '1px solid',
-                  borderColor: 'divider',
+                  borderBottom: '1px solid lightGray',
+                  borderRight: '1px solid lightGray',
                   whiteSpace: 'nowrap',
                   height: 25,
                   paddingTop: 0,
@@ -91,7 +91,7 @@ export const EqStockTable = (props: EqStockTableProps) => {
 
   return (
     <TableContainer ref={ref} component={Paper} style={{ overflowX: 'auto', maxHeight: '80vh' }} square>
-      <Table stickyHeader sx={{ borderCollapse: 'collapse' }}>
+      <Table stickyHeader sx={{ borderCollapse: 'separate', borderSpacing: 0 }}>
         <TableHead>
           <TableRow>
             {eqStockList.length > 0 &&
@@ -101,8 +101,8 @@ export const EqStockTable = (props: EqStockTableProps) => {
                   align="right"
                   size="small"
                   sx={{
-                    border: '1px solid',
-                    borderColor: 'divider',
+                    borderBottom: '1px solid lightGray',
+                    borderRight: '1px solid lightGray',
                     whiteSpace: 'nowrap',
                     color: 'white',
                     bgcolor: 'black',
@@ -125,8 +125,9 @@ export const EqStockTable = (props: EqStockTableProps) => {
                     key={colIndex}
                     align="right"
                     sx={{
-                      border: '1px solid',
-                      borderColor: 'divider',
+                      borderLeft: colIndex === 0 ? '1px solid rgba(0, 0, 0, 0.12)' : 'none',
+                      borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
+                      borderRight: '1px solid rgba(0, 0, 0, 0.12)',
                       height: 25,
                       py: 0,
                       px: '4px',
@@ -151,7 +152,8 @@ export const EqStockTable = (props: EqStockTableProps) => {
 const styles: { [key: string]: React.CSSProperties } = {
   // ヘッダー
   header: {
-    border: '1px solid lightGray',
+    borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
+    borderRight: '1px solid rgba(0, 0, 0, 0.12)',
     whiteSpace: 'nowrap',
     padding: 4,
     height: 15,
@@ -159,7 +161,8 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
   // 行
   row: {
-    border: '1px solid lightGray',
+    borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
+    borderRight: '1px solid rgba(0, 0, 0, 0.12)',
     whiteSpace: 'nowrap',
     height: 25,
     paddingTop: 0,
