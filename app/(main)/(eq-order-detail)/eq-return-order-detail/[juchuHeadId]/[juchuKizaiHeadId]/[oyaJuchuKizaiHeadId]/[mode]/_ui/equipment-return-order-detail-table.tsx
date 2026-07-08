@@ -87,7 +87,7 @@ export const ReturnStockTable: React.FC<ReturnStockTableProps> = ({
                     bgcolor: getDateHeaderBackgroundColor(toJapanYMDString(data.calDat), stockTableHeaderDateRange),
                     paddingY: 0,
                     paddingX: 0.5,
-                    height: '26px',
+                    height: '25px',
                     position: 'sticky',
                     top: 25,
                     zIndex: 2,
