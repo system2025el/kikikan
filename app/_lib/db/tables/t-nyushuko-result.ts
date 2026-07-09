@@ -4,6 +4,34 @@ import { PoolClient } from 'pg';
 
 import { SCHEMA } from '../supabase';
 
+export const updateShukoResult = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  juchuKizaiMeisaiId: number,
+  shukoDat: string,
+  connection: PoolClient
+) => {
+  const query = `
+      UPDATE
+        ${SCHEMA}.t_nyushuko_result
+      SET
+        sagyo_den_dat = $1
+      WHERE
+        juchu_head_id = $2
+        AND juchu_kizai_head_id = $3
+        AND juchu_kizai_meisai_id = $4
+        AND sagyo_kbn_id = ANY($5)
+    `;
+
+  const values = [shukoDat, juchuHeadId, juchuKizaiHeadId, juchuKizaiMeisaiId, [10, 20]];
+
+  try {
+    await connection.query(query, values);
+  } catch (e) {
+    throw new Error('[updateShukoResult] DBエラー:', { cause: e });
+  }
+};
+
 export const deleteNyushukoResult = async (
   juchuHeadId: number,
   juchuKizaiHeadId: number,
@@ -206,7 +234,6 @@ export const deleteShukoResult = async (
   juchuKizaiHeadId: number,
   juchuKizaiMeisaiId: number,
   kizaiId: number,
-  sagyoId: number,
   connection: PoolClient
 ) => {
   const query = `
@@ -217,11 +244,10 @@ export const deleteShukoResult = async (
       AND juchu_kizai_head_id = $2
       AND juchu_kizai_meisai_id = $3
       AND kizai_id = $4
-      AND sagyo_id = $5
-      AND sagyo_kbn_id = ANY($6)
+      AND sagyo_kbn_id = ANY($5)
   `;
 
-  const values = [juchuHeadId, juchuKizaiHeadId, juchuKizaiMeisaiId, kizaiId, sagyoId, [10, 20]];
+  const values = [juchuHeadId, juchuKizaiHeadId, juchuKizaiMeisaiId, kizaiId, [10, 20]];
 
   try {
     await connection.query(query, values);
