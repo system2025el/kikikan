@@ -30,6 +30,7 @@ import {
 } from '@/app/_lib/db/tables/t-nyushuko-ctn-result';
 import {
   deleteAllKicsOrYardNyukoDen,
+  deleteAllKicsOrYardShukoCtnDen,
   deleteAllKicsOrYardShukoDen,
   deleteAllNyushukoDen,
   insertNyushukoDen,
@@ -783,6 +784,20 @@ export const delAllKicsOrYardShukoDen = async (
   }
 };
 
+export const delAllKicsOrYardShukoCtnDen = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  kizaiIds: number[],
+  sagyoId: number,
+  connection: PoolClient
+) => {
+  try {
+    await deleteAllKicsOrYardShukoCtnDen(juchuHeadId, juchuKizaiHeadId, kizaiIds, sagyoId, connection);
+  } catch (e) {
+    throw e;
+  }
+};
+
 /**
  * KICS/YARD入庫伝票全削除
  * @param juchuHeadId 受注ヘッダーid
@@ -864,6 +879,20 @@ export const delAllShukoResult = async (
 ) => {
   try {
     await deleteAllShukoResult(juchuHeadId, juchuKizaiHeadId, sagyoId, connection);
+    await deleteAllShukoCtnResult(juchuHeadId, juchuKizaiHeadId, sagyoId, connection);
+    return true;
+  } catch (e) {
+    throw e;
+  }
+};
+
+export const delAllKicsOrYardShukoCtnResult = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  sagyoId: number,
+  connection: PoolClient
+) => {
+  try {
     await deleteAllShukoCtnResult(juchuHeadId, juchuKizaiHeadId, sagyoId, connection);
     return true;
   } catch (e) {

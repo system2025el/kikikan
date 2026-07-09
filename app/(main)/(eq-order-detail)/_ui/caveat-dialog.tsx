@@ -116,7 +116,7 @@ export const WorkingConfirmDialog = ({ open, onClose }: { open: boolean; onClose
         <DialogContentText>
           出庫作業が開始されています。
           <br />
-          出庫日時を変更すると実績がクリアされますがよろしいですか？
+          出庫日時を変更するとコンテナ実績がクリアされますがよろしいですか？
         </DialogContentText>
       </DialogContent>
       <DialogActions>

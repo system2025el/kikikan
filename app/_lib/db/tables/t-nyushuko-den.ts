@@ -466,6 +466,33 @@ export const deleteAllKicsOrYardNyukoDen = async (
   }
 };
 
+export const deleteAllKicsOrYardShukoCtnDen = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  kizaiIds: number[],
+  sagyoId: number,
+  connection: PoolClient
+) => {
+  const query = `
+      DELETE FROM
+        ${SCHEMA}.t_nyushuko_den
+      WHERE
+        juchu_head_id = $1
+        AND juchu_kizai_head_id = $2
+        AND kizai_id = ANY($3)
+        AND sagyo_id = $4
+        AND sagyo_kbn_id = ANY($5)
+    `;
+
+  const values = [juchuHeadId, juchuKizaiHeadId, kizaiIds, sagyoId, [10, 20]];
+
+  try {
+    await connection.query(query, values);
+  } catch (e) {
+    throw new Error('[deleteAllKicsOrYardCtnShukoDen] DBエラー:', { cause: e });
+  }
+};
+
 /**
  * 入出庫伝票削除
  * @param juchuHeadId 受注ヘッダーid

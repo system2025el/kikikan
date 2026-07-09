@@ -716,6 +716,7 @@ const EquipmentOrderDetail = (props: {
         updateDateRange,
         juchuHonbanbiList,
         juchuHonbanbiDeleteList,
+        originJuchuKizaiMeisaiList,
         juchuKizaiMeisaiList,
         idoJuchuKizaiMeisaiList,
         juchuContainerMeisaiList,
