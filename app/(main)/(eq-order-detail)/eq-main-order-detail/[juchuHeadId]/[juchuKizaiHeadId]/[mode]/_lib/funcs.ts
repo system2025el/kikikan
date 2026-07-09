@@ -3427,11 +3427,35 @@ export const saveJuchuKizai = async (
       }
 
       const originMap = new Map(originJuchuKizaiMeisaiList.map((item) => [item.juchuKizaiMeisaiId, item]));
-      const changedData = updateJuchuKizaiMeisaiData.filter((updItem) => {
+      const shozokuChangedData = [];
+      const shozokuUnChangedData = [];
+
+      for (const updItem of updateJuchuKizaiMeisaiData) {
         const key = updItem.juchuKizaiMeisaiId;
         const originItem = originMap.get(key);
-        return originItem && originItem.shozokuId !== updItem.shozokuId;
-      });
+
+        if (originItem && originItem.shozokuId !== updItem.shozokuId) {
+          shozokuChangedData.push(updItem);
+        } else {
+          shozokuUnChangedData.push(updItem);
+        }
+      }
+
+      // 追加入出庫機材
+      const addNyushukoKizaiData = [...addJuchuKizaiMeisaiData, ...shozokuChangedData];
+      // 更新入出庫機材
+      const updateNyushukoKizaiData = [...shozokuUnChangedData];
+      // 削除入出庫機材
+      const deleteNyushukoKizaiData = [...shozokuChangedData];
+
+      if (deleteNyushukoKizaiData.length > 0) {
+      }
+
+      if (addNyushukoKizaiData.length > 0) {
+      }
+
+      if (updateNyushukoKizaiData.length > 0) {
+      }
 
       // 受注コンテナ明細id最大値
       const juchuContainerMeisaiMaxId = await getJuchuContainerMeisaiMaxId(data.juchuHeadId, data.juchuKizaiHeadId);
