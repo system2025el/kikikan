@@ -550,6 +550,7 @@ export const EquipmentKeepOrderDetail = (props: {
         data,
         updateShukoDate,
         updateNyukoDate,
+        originKeepJuchuKizaiMeisaiList,
         keepJuchuKizaiMeisaiList,
         keepJuchuContainerMeisaiList,
         userNam
