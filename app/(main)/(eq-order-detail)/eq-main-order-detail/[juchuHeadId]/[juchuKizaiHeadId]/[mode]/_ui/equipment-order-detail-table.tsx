@@ -389,7 +389,7 @@ const EqTableRow = React.memo(
           <TextField
             variant="standard"
             value={row.planKizaiQty}
-            type="text"
+            type="tel"
             onChange={(e) => {
               if (/^\d*$/.test(e.target.value)) {
                 handleCellChange(rowIndex, row.kizaiId, Number(e.target.value), row.planYobiQty, row.planQty);
@@ -432,7 +432,7 @@ const EqTableRow = React.memo(
           <TextField
             variant="standard"
             value={row.planYobiQty}
-            type="text"
+            type="tel"
             onChange={(e) => {
               if (/^\d*$/.test(e.target.value)) {
                 handleCellChange(rowIndex, row.kizaiId, row.planKizaiQty, Number(e.target.value), row.planQty);
