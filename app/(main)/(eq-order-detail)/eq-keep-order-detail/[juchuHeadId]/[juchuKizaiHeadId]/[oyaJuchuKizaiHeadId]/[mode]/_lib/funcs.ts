@@ -674,9 +674,15 @@ export const getKeepJuchuKizaiMeisai = async (
   oyaJuchuKizaiHeadId: number
 ) => {
   try {
-    const { data: keepData, error: keepError } = await selectKeepJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId);
+    const [{ data: keepData, error: keepError }, { data: oyaData, error: oyaError }] = await Promise.all([
+      selectKeepJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId),
+      selectOyaJuchuKizaiMeisai(juchuHeadId, oyaJuchuKizaiHeadId),
+    ]);
     if (keepError) {
       throw new Error('[selectKeepJuchuKizaiMeisai] DBエラー:', { cause: keepError });
+    }
+    if (oyaError) {
+      throw new Error('[selectOyaJuchuKizaiMeisai] DBエラー:', { cause: oyaError });
     }
 
     const eqIds = [...new Set(keepData.map((data) => data.kizai_id))];
@@ -685,11 +691,6 @@ export const getKeepJuchuKizaiMeisai = async (
 
     if (mKizaiError) {
       throw new Error('[selectMeisaiEqts] DBエラー:', { cause: mKizaiError });
-    }
-
-    const { data: oyaData, error: oyaError } = await selectOyaJuchuKizaiMeisai(juchuHeadId, oyaJuchuKizaiHeadId);
-    if (oyaError) {
-      throw new Error('[selectOyaJuchuKizaiMeisai] DBエラー:', { cause: oyaError });
     }
 
     const keepJuchuKizaiMeisaiData: KeepJuchuKizaiMeisaiValues[] = keepData.map((d) => ({
@@ -853,15 +854,13 @@ export const getKeepJuchuContainerMeisai = async (
   oyaJuchuKizaiHeadId: number
 ) => {
   try {
-    const { data: containerData, error: containerError } = await selectJuchuContainerMeisai(
-      juchuHeadId,
-      juchuKizaiHeadId
-    );
+    const [{ data: containerData, error: containerError }, { data: oyaData, error: oyaError }] = await Promise.all([
+      selectJuchuContainerMeisai(juchuHeadId, juchuKizaiHeadId),
+      selectJuchuContainerMeisai(juchuHeadId, oyaJuchuKizaiHeadId),
+    ]);
     if (containerError) {
       throw new Error('[selectJuchuContainerMeisai] DBエラー:', { cause: containerError });
     }
-
-    const { data: oyaData, error: oyaError } = await selectJuchuContainerMeisai(juchuHeadId, oyaJuchuKizaiHeadId);
     if (oyaError) {
       throw new Error('[selectJuchuContainerMeisai] DBエラー:', { cause: oyaError });
     }

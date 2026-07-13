@@ -596,9 +596,23 @@ export const getReturnJuchuKizaiMeisai = async (
   oyaJuchuKizaiHeadId: number
 ) => {
   try {
-    const { data: returnData, error: returnError } = await selectReturnJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId);
+    const [
+      { data: returnData, error: returnError },
+      { data: eqTanka, error: eqTankaError },
+      { data: oyaData, error: oyaError },
+    ] = await Promise.all([
+      selectReturnJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId),
+      selectJuchuKizaiMeisaiKizaiTanka(juchuHeadId, juchuKizaiHeadId),
+      selectOyaJuchuKizaiMeisai(juchuHeadId, oyaJuchuKizaiHeadId),
+    ]);
     if (returnError) {
       throw new Error('[selectReturnJuchuKizaiMeisai] DBエラー:', { cause: returnError });
+    }
+    if (eqTankaError) {
+      throw new Error('[selectJuchuKizaiMeisaiKizaiTanka] DBエラー:', { cause: eqTankaError });
+    }
+    if (oyaError) {
+      throw new Error('[selectOyaJuchuKizaiMeisai] DBエラー:', { cause: oyaError });
     }
 
     const eqIds = [...new Set(returnData.map((data) => data.kizai_id))];
@@ -607,19 +621,6 @@ export const getReturnJuchuKizaiMeisai = async (
 
     if (mKizaiError) {
       throw new Error('[selectMeisaiEqts] DBエラー:', { cause: mKizaiError });
-    }
-
-    const { data: eqTanka, error: eqTankaError } = await selectJuchuKizaiMeisaiKizaiTanka(
-      juchuHeadId,
-      juchuKizaiHeadId
-    );
-    if (eqTankaError) {
-      throw new Error('[selectJuchuKizaiMeisaiKizaiTanka] DBエラー:', { cause: eqTankaError });
-    }
-
-    const { data: oyaData, error: oyaError } = await selectOyaJuchuKizaiMeisai(juchuHeadId, oyaJuchuKizaiHeadId);
-    if (oyaError) {
-      throw new Error('[selectOyaJuchuKizaiMeisai] DBエラー:', { cause: oyaError });
     }
 
     const returnJuchuKizaiMeisaiData: ReturnJuchuKizaiMeisaiValues[] = returnData.map((d) => ({
@@ -785,15 +786,13 @@ export const getReturnJuchuContainerMeisai = async (
   oyaJuchuKizaiHeadId: number
 ) => {
   try {
-    const { data: containerData, error: containerError } = await selectJuchuContainerMeisai(
-      juchuHeadId,
-      juchuKizaiHeadId
-    );
+    const [{ data: containerData, error: containerError }, { data: oyaData, error: oyaError }] = await Promise.all([
+      selectJuchuContainerMeisai(juchuHeadId, juchuKizaiHeadId),
+      selectJuchuContainerMeisai(juchuHeadId, oyaJuchuKizaiHeadId),
+    ]);
     if (containerError) {
       throw new Error('[selectJuchuContainerMeisai] DBエラー:', { cause: containerError });
     }
-
-    const { data: oyaData, error: oyaError } = await selectJuchuContainerMeisai(juchuHeadId, oyaJuchuKizaiHeadId);
     if (oyaError) {
       throw new Error('[selectJuchuContainerMeisai] DBエラー:', { cause: oyaError });
     }

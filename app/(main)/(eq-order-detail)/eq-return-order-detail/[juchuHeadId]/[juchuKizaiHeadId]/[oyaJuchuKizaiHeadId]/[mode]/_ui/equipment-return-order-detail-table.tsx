@@ -461,6 +461,214 @@ const ReturnEqTableRow = React.memo(
 
 ReturnEqTableRow.displayName = 'ReturnEqTableRow';
 
+type ReturnContainerTableRowProps = {
+  row: ReturnJuchuContainerMeisaiValues;
+  rowIndex: number;
+  edit: boolean;
+  nyukoFixFlag: boolean;
+  returnNyukoDate: Date | null;
+  handleContainerMemoChange: (rowIndex: number, memo: string) => void;
+  handleContainerCellChange: (rowIndex: number, kicsValue: number, yardValue: number) => void;
+  handleCtnSelect: (row: ReturnJuchuContainerMeisaiValues) => void;
+  handleContainerKicsRef: (el: HTMLInputElement | null, rowIndex: number) => void;
+  handleContainerYardRef: (el: HTMLInputElement | null, rowIndex: number) => void;
+  handleKicsKeyDown: (e: React.KeyboardEvent, rowIndex: number) => void;
+  handleYardKeyDown: (e: React.KeyboardEvent, rowIndex: number) => void;
+};
+
+const ReturnContainerTableRow = React.memo(
+  ({
+    row,
+    rowIndex,
+    edit,
+    nyukoFixFlag,
+    returnNyukoDate,
+    handleContainerMemoChange,
+    handleContainerCellChange,
+    handleCtnSelect,
+    handleContainerKicsRef,
+    handleContainerYardRef,
+    handleKicsKeyDown,
+    handleYardKeyDown,
+  }: ReturnContainerTableRowProps) => {
+    return (
+      <TableRow hover>
+        <TableCell
+          sx={{
+            padding: 0,
+            borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
+            borderRight: '1px solid rgba(0, 0, 0, 0.12)',
+          }}
+        >
+          <Checkbox
+            color="primary"
+            checked={row.selected}
+            onChange={() => handleCtnSelect(row)}
+            sx={{ padding: 0 }}
+            disabled={!edit || nyukoFixFlag}
+          />
+        </TableCell>
+        <TableCell
+          align="right"
+          size="small"
+          sx={{
+            bgcolor: grey[200],
+            py: 0,
+            px: 1,
+            borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
+            borderRight: '1px solid rgba(0, 0, 0, 0.12)',
+          }}
+        >
+          {rowIndex + 1}
+        </TableCell>
+        <TableCell style={styles.row} align="center" size="small">
+          <MemoTooltip
+            name={row.kizaiNam}
+            memo={row.mem ? row.mem : ''}
+            handleMemoChange={handleContainerMemoChange}
+            rowIndex={rowIndex}
+            disabled={!edit || nyukoFixFlag}
+          />
+        </TableCell>
+        <TableCell style={styles.row} align="left" size="small">
+          <Button
+            variant="text"
+            sx={{ p: 0, justifyContent: 'start', textTransform: 'none', color: 'text.primary' }}
+            onClick={() =>
+              window.open(`/loan-situation/${row.kizaiId}?date=${returnNyukoDate ? returnNyukoDate.toISOString() : ''}`)
+            }
+          >
+            {row.kizaiNam}
+          </Button>
+        </TableCell>
+        <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200] }}>
+          {row.oyaPlanKicsKizaiQty}
+        </TableCell>
+        <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200] }}>
+          {row.oyaPlanYardKizaiQty}
+        </TableCell>
+        <TableCell style={styles.row} align="right" size="small">
+          <TextField
+            variant="standard"
+            value={row.planKicsKizaiQty}
+            type="text"
+            onChange={(e) => {
+              if (
+                /^\d*$/.test(e.target.value) &&
+                Number(e.target.value) + (row.planYardKizaiQty ?? 0) <=
+                  (row.oyaPlanKicsKizaiQty ?? 0) + (row.oyaPlanYardKizaiQty ?? 0)
+              ) {
+                handleContainerCellChange(rowIndex, Number(e.target.value), row.planYardKizaiQty);
+              }
+            }}
+            sx={{
+              '& .MuiInputBase-input': {
+                textAlign: 'right',
+                padding: 0,
+                fontSize: 'small',
+                width: 60,
+                color: 'red',
+              },
+              '& input[type=number]': {
+                MozAppearance: 'textfield',
+              },
+              '& input[type=number]::-webkit-outer-spin-button': {
+                WebkitAppearance: 'none',
+                margin: 0,
+              },
+              '& input[type=number]::-webkit-inner-spin-button': {
+                WebkitAppearance: 'none',
+                margin: 0,
+              },
+              '.MuiInput-input.Mui-disabled': {
+                WebkitTextFillColor: 'red',
+              },
+            }}
+            slotProps={{
+              input: {
+                style: { textAlign: 'right' },
+                disableUnderline: true,
+                inputMode: 'numeric',
+              },
+            }}
+            inputRef={(el) => handleContainerKicsRef(el, rowIndex)}
+            onKeyDown={(e) => {
+              handleKicsKeyDown(e, rowIndex);
+            }}
+            onFocus={(e) => e.target.select()}
+            disabled={!edit || nyukoFixFlag}
+          />
+        </TableCell>
+        <TableCell style={styles.row} align="right" size="small">
+          <TextField
+            variant="standard"
+            value={row.planYardKizaiQty}
+            type="text"
+            onChange={(e) => {
+              if (
+                /^\d*$/.test(e.target.value) &&
+                Number(e.target.value) + (row.planKicsKizaiQty ?? 0) <=
+                  (row.oyaPlanKicsKizaiQty ?? 0) + (row.oyaPlanYardKizaiQty ?? 0)
+              ) {
+                handleContainerCellChange(rowIndex, row.planKicsKizaiQty, Number(e.target.value));
+              }
+            }}
+            sx={{
+              '& .MuiInputBase-input': {
+                textAlign: 'right',
+                padding: 0,
+                fontSize: 'small',
+                width: 60,
+                color: 'red',
+              },
+              '& input[type=number]': {
+                MozAppearance: 'textfield',
+              },
+              '& input[type=number]::-webkit-outer-spin-button': {
+                WebkitAppearance: 'none',
+                margin: 0,
+              },
+              '& input[type=number]::-webkit-inner-spin-button': {
+                WebkitAppearance: 'none',
+                margin: 0,
+              },
+              '.MuiInput-input.Mui-disabled': {
+                WebkitTextFillColor: 'red',
+              },
+            }}
+            slotProps={{
+              input: {
+                style: { textAlign: 'right' },
+                disableUnderline: true,
+                inputMode: 'numeric',
+              },
+            }}
+            inputRef={(el) => handleContainerYardRef(el, rowIndex)}
+            onKeyDown={(e) => {
+              handleYardKeyDown(e, rowIndex);
+            }}
+            onFocus={(e) => e.target.select()}
+            disabled={!edit || nyukoFixFlag}
+          />
+        </TableCell>
+        <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: lightBlue[100], color: 'red' }}>
+          {row.planQty}
+        </TableCell>
+      </TableRow>
+    );
+  },
+  (prevProps, nextProps) => {
+    return (
+      prevProps.row === nextProps.row &&
+      prevProps.rowIndex === nextProps.rowIndex &&
+      prevProps.edit === nextProps.edit &&
+      prevProps.nyukoFixFlag === nextProps.nyukoFixFlag
+    );
+  }
+);
+
+ReturnContainerTableRow.displayName = 'ReturnContainerTableRow';
+
 export const ReturnContainerTable = (props: {
   rows: ReturnJuchuContainerMeisaiValues[];
   edit: boolean;
@@ -612,171 +820,21 @@ export const ReturnContainerTable = (props: {
         </TableHead>
         <TableBody>
           {visibleRows.map((row, rowIndex) => (
-            <TableRow key={rowIndex} hover>
-              <TableCell
-                sx={{
-                  padding: 0,
-                  borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
-                  borderRight: '1px solid rgba(0, 0, 0, 0.12)',
-                }}
-              >
-                <Checkbox
-                  color="primary"
-                  checked={row.selected}
-                  onChange={() => handleCtnSelect(row)}
-                  sx={{ padding: 0 }}
-                  disabled={!edit || nyukoFixFlag}
-                />
-              </TableCell>
-              <TableCell
-                align="right"
-                size="small"
-                sx={{
-                  bgcolor: grey[200],
-                  py: 0,
-                  px: 1,
-                  borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
-                  borderRight: '1px solid rgba(0, 0, 0, 0.12)',
-                }}
-              >
-                {rowIndex + 1}
-              </TableCell>
-              <TableCell style={styles.row} align="center" size="small">
-                <MemoTooltip
-                  name={row.kizaiNam}
-                  memo={row.mem ? row.mem : ''}
-                  handleMemoChange={handleContainerMemoChange}
-                  rowIndex={rowIndex}
-                  disabled={!edit || nyukoFixFlag}
-                />
-              </TableCell>
-              <TableCell style={styles.row} align="left" size="small">
-                <Button
-                  variant="text"
-                  sx={{ p: 0, justifyContent: 'start', textTransform: 'none', color: 'text.primary' }}
-                  onClick={() =>
-                    window.open(
-                      `/loan-situation/${row.kizaiId}?date=${returnNyukoDate ? returnNyukoDate.toISOString() : ''}`
-                    )
-                  }
-                >
-                  {row.kizaiNam}
-                </Button>
-              </TableCell>
-              <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200] }}>
-                {row.oyaPlanKicsKizaiQty}
-              </TableCell>
-              <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200] }}>
-                {row.oyaPlanYardKizaiQty}
-              </TableCell>
-              <TableCell style={styles.row} align="right" size="small">
-                <TextField
-                  variant="standard"
-                  value={row.planKicsKizaiQty}
-                  type="text"
-                  onChange={(e) => {
-                    if (
-                      /^\d*$/.test(e.target.value) &&
-                      Number(e.target.value) + (row.planYardKizaiQty ?? 0) <=
-                        (row.oyaPlanKicsKizaiQty ?? 0) + (row.oyaPlanYardKizaiQty ?? 0)
-                    ) {
-                      handleContainerCellChange(rowIndex, Number(e.target.value), row.planYardKizaiQty);
-                    }
-                  }}
-                  sx={{
-                    '& .MuiInputBase-input': {
-                      textAlign: 'right',
-                      padding: 0,
-                      fontSize: 'small',
-                      width: 60,
-                      color: 'red',
-                    },
-                    '& input[type=number]': {
-                      MozAppearance: 'textfield',
-                    },
-                    '& input[type=number]::-webkit-outer-spin-button': {
-                      WebkitAppearance: 'none',
-                      margin: 0,
-                    },
-                    '& input[type=number]::-webkit-inner-spin-button': {
-                      WebkitAppearance: 'none',
-                      margin: 0,
-                    },
-                    '.MuiInput-input.Mui-disabled': {
-                      WebkitTextFillColor: 'red',
-                    },
-                  }}
-                  slotProps={{
-                    input: {
-                      style: { textAlign: 'right' },
-                      disableUnderline: true,
-                      inputMode: 'numeric',
-                    },
-                  }}
-                  inputRef={(el) => handleContainerKicsRef(el, rowIndex)}
-                  onKeyDown={(e) => {
-                    handleKicsKeyDown(e, rowIndex);
-                  }}
-                  onFocus={(e) => e.target.select()}
-                  disabled={!edit || nyukoFixFlag}
-                />
-              </TableCell>
-              <TableCell style={styles.row} align="right" size="small">
-                <TextField
-                  variant="standard"
-                  value={row.planYardKizaiQty}
-                  type="text"
-                  onChange={(e) => {
-                    if (
-                      /^\d*$/.test(e.target.value) &&
-                      Number(e.target.value) + (row.planKicsKizaiQty ?? 0) <=
-                        (row.oyaPlanKicsKizaiQty ?? 0) + (row.oyaPlanYardKizaiQty ?? 0)
-                    ) {
-                      handleContainerCellChange(rowIndex, row.planKicsKizaiQty, Number(e.target.value));
-                    }
-                  }}
-                  sx={{
-                    '& .MuiInputBase-input': {
-                      textAlign: 'right',
-                      padding: 0,
-                      fontSize: 'small',
-                      width: 60,
-                      color: 'red',
-                    },
-                    '& input[type=number]': {
-                      MozAppearance: 'textfield',
-                    },
-                    '& input[type=number]::-webkit-outer-spin-button': {
-                      WebkitAppearance: 'none',
-                      margin: 0,
-                    },
-                    '& input[type=number]::-webkit-inner-spin-button': {
-                      WebkitAppearance: 'none',
-                      margin: 0,
-                    },
-                    '.MuiInput-input.Mui-disabled': {
-                      WebkitTextFillColor: 'red',
-                    },
-                  }}
-                  slotProps={{
-                    input: {
-                      style: { textAlign: 'right' },
-                      disableUnderline: true,
-                      inputMode: 'numeric',
-                    },
-                  }}
-                  inputRef={(el) => handleContainerYardRef(el, rowIndex)}
-                  onKeyDown={(e) => {
-                    handleYardKeyDown(e, rowIndex);
-                  }}
-                  onFocus={(e) => e.target.select()}
-                  disabled={!edit || nyukoFixFlag}
-                />
-              </TableCell>
-              <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: lightBlue[100], color: 'red' }}>
-                {row.planQty}
-              </TableCell>
-            </TableRow>
+            <ReturnContainerTableRow
+              key={rowIndex}
+              row={row}
+              rowIndex={rowIndex}
+              edit={edit}
+              nyukoFixFlag={nyukoFixFlag}
+              returnNyukoDate={returnNyukoDate}
+              handleContainerMemoChange={handleContainerMemoChange}
+              handleContainerCellChange={handleContainerCellChange}
+              handleCtnSelect={handleCtnSelect}
+              handleContainerKicsRef={handleContainerKicsRef}
+              handleContainerYardRef={handleContainerYardRef}
+              handleKicsKeyDown={handleKicsKeyDown}
+              handleYardKeyDown={handleYardKeyDown}
+            />
           ))}
         </TableBody>
       </Table>

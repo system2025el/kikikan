@@ -33,7 +33,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { addMonths, set, setDate, subDays, subMonths } from 'date-fns';
+import { addDays, set, setDate, subDays } from 'date-fns';
 import dayjs, { Dayjs } from 'dayjs';
 import { redirect, useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -942,14 +942,14 @@ const EquipmentOrderDetail = (props: {
       setAnchorEl(null);
     }
   };
-  // 3か月前
+  // 61日前
   const handleBackDateChange = () => {
-    const date = subMonths(new Date(selectDate), 3);
+    const date = subDays(new Date(selectDate), 61);
     handleDateChange(dayjs(date), 'day');
   };
-  // 3か月後
+  // 61日後
   const handleForwardDateChange = () => {
-    const date = addMonths(new Date(selectDate), 3);
+    const date = addDays(new Date(selectDate), 61);
     handleDateChange(dayjs(date), 'day');
   };
 
@@ -2446,6 +2446,9 @@ const EquipmentOrderDetail = (props: {
       prev.map((d) => {
         const s = sum.get(d.kizaiId);
         if (s && !d.delFlag) {
+          if (d.planKizaiQty === s.planKizaiQty && d.planYobiQty === s.planYobiQty && d.planQty === s.planQty) {
+            return d;
+          }
           return {
             ...d,
             planKizaiQty: s.planKizaiQty,

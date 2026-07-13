@@ -251,11 +251,20 @@ export const updJuchuKizaiHead = async (
  */
 export const getJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
   try {
-    const /*{ data: eqList, error: eqListError }*/ eqList = await selectJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId);
+    const [/*{ data: eqList, error: eqListError }*/ eqList, { data: eqTanka, error: eqTankaError }] = await Promise.all(
+      [
+        selectJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId),
+        selectJuchuKizaiMeisaiKizaiTanka(juchuHeadId, juchuKizaiHeadId),
+      ]
+    );
     // if (eqListError) {
     //   console.error('getJuchuKizaiMeisai eqList error : ', eqListError);
     //   throw eqListError;
     // }
+    if (eqTankaError) {
+      throw new Error('[selectJuchuKizaiMeisaiKizaiTanka] DBエラー:', { cause: eqTankaError });
+    }
+
     const uniqueIds = new Set();
     const uniqueEqList = eqList.filter((item) => {
       if (uniqueIds.has(item.juchu_kizai_meisai_id)) {
@@ -271,14 +280,6 @@ export const getJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId:
 
     if (mKizaiError) {
       throw new Error('[selectMeisaiEqts] DBエラー:', { cause: mKizaiError });
-    }
-
-    const { data: eqTanka, error: eqTankaError } = await selectJuchuKizaiMeisaiKizaiTanka(
-      juchuHeadId,
-      juchuKizaiHeadId
-    );
-    if (eqTankaError) {
-      throw new Error('[selectJuchuKizaiMeisaiKizaiTanka] DBエラー:', { cause: eqTankaError });
     }
 
     const juchuKizaiMeisaiData: JuchuKizaiMeisaiValues[] = uniqueEqList.map((d, i) => ({
@@ -360,10 +361,10 @@ export const getIdoJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHead
       shozokuNam: d.shozoku_nam ?? '',
       kizaiId: d.kizai_id ?? 0,
       kizaiNam: d.kizai_nam ?? '',
-      kizaiQty: d.kizai_qty ?? 0,
-      planKizaiQty: d.plan_kizai_qty ?? 0,
-      planYobiQty: d.plan_yobi_qty ?? 0,
-      planQty: d.plan_qty ?? 0,
+      kizaiQty: Number(d.kizai_qty ?? 0),
+      planKizaiQty: Number(d.plan_kizai_qty ?? 0),
+      planYobiQty: Number(d.plan_yobi_qty ?? 0),
+      planQty: Number(d.plan_qty ?? 0),
       delFlag: false,
       saveFlag: true,
     }));
