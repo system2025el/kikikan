@@ -280,7 +280,7 @@ export const EquipmentReturnOrderDetail = (props: {
       ]);
 
       if (!juchuHeadData || !oyaJuchuKizaiHeadData) {
-        return <div>受注情報が見つかりません。</div>;
+        return false;
       }
       // 親出庫日
       const oyaShukoDate = getShukoDate(oyaJuchuKizaiHeadData.kicsShukoDat, oyaJuchuKizaiHeadData.yardShukoDat);
@@ -288,7 +288,7 @@ export const EquipmentReturnOrderDetail = (props: {
       const oyaNyukoDate = getNyukoDate(oyaJuchuKizaiHeadData.kicsNyukoDat, oyaJuchuKizaiHeadData.yardNyukoDat);
 
       if (!oyaShukoDate || !oyaNyukoDate) {
-        return <div>受注情報が見つかりません。</div>;
+        return false;
       }
 
       // 在庫テーブルヘッダー用日付範囲
@@ -331,7 +331,7 @@ export const EquipmentReturnOrderDetail = (props: {
         );
 
         if (!returnJuchuKizaiHeadData) {
-          return <div>受注機材情報が見つかりません。</div>;
+          return false;
         }
 
         // 返却受注機材明細データ、返却受注コンテナ明細データ
@@ -505,13 +505,12 @@ export const EquipmentReturnOrderDetail = (props: {
     // 新規
     if (data.juchuKizaiHeadId === 0) {
       // 新規受注機材ヘッダー追加
-      const newJuchuKizaiHeadId = await saveNewReturnJuchuKizaiHead(data, updateDateRange, userNam);
-
-      if (newJuchuKizaiHeadId) {
+      try {
+        const newJuchuKizaiHeadId = await saveNewReturnJuchuKizaiHead(data, updateDateRange, userNam);
         router.replace(
           `/eq-return-order-detail/${data.juchuHeadId}/${newJuchuKizaiHeadId}/${data.oyaJuchuKizaiHeadId}/edit`
         );
-      } else {
+      } catch (e) {
         setIsLoading(false);
         setSnackBarMessage('保存に失敗しました');
         setSnackBarOpen(true);
@@ -554,24 +553,24 @@ export const EquipmentReturnOrderDetail = (props: {
       const checkKicsDat = dirtyFields.kicsNyukoDat ? true : false;
       const checkYardDat = dirtyFields.yardNyukoDat ? true : false;
 
-      const updateResult = await saveReturnJuchuKizai(
-        checkJuchuKizaiHead,
-        checkJuchuKizaiMeisai,
-        checkJuchuContainerMeisai,
-        checkKicsDat,
-        checkYardDat,
-        defaultValues?.kicsNyukoDat,
-        defaultValues?.yardNyukoDat,
-        data,
-        updateNyukoDate,
-        updateDateRange,
-        returnJuchuKizaiMeisaiList,
-        returnJuchuContainerMeisaiList,
-        userNam
-      );
+      try {
+        await saveReturnJuchuKizai(
+          checkJuchuKizaiHead,
+          checkJuchuKizaiMeisai,
+          checkJuchuContainerMeisai,
+          checkKicsDat,
+          checkYardDat,
+          defaultValues?.kicsNyukoDat,
+          defaultValues?.yardNyukoDat,
+          data,
+          updateNyukoDate,
+          updateDateRange,
+          returnJuchuKizaiMeisaiList,
+          returnJuchuContainerMeisaiList,
+          userNam
+        );
 
-      // 画面情報更新
-      if (updateResult) {
+        // 画面情報更新
         try {
           if (checkJuchuKizaiHead && checkJuchuKizaiMeisai) {
             // 受注機材ヘッダー状態管理更新
@@ -660,7 +659,7 @@ export const EquipmentReturnOrderDetail = (props: {
           setSnackBarMessage('データの再取得に失敗しました');
           setSnackBarOpen(true);
         }
-      } else {
+      } catch (e) {
         setIsLoading(false);
         setSnackBarMessage('保存に失敗しました');
         setSnackBarOpen(true);

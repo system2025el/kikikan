@@ -26,7 +26,6 @@ import React, { useRef, useState } from 'react';
 
 import { MemoTooltip } from '@/app/(main)/(eq-order-detail)/_ui/memo-tooltip';
 
-import { getDateHeaderBackgroundColor, getDateRowBackgroundColor } from '../_lib/colorselect';
 import { KeepJuchuContainerMeisaiValues, KeepJuchuKizaiMeisaiValues } from '../_lib/types';
 
 type KeepEqTableProps = {

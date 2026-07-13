@@ -641,7 +641,6 @@ export const addAllHonbanbi = async (
   }));
   try {
     await insertAllHonbanbi(newData, connection);
-    return true;
   } catch (e) {
     if (e instanceof Error) {
       console.error(`[ERROR] ${e.message}`);
@@ -665,6 +664,14 @@ export const delSiyouHonbanbi = async (juchuHeadId: number, juchuKizaiHeadId: nu
   try {
     await deleteSiyouHonbanbi(juchuHeadId, juchuKizaiHeadId, connection);
   } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -735,8 +742,6 @@ export const addDummyNyushukoDen = async (
 
   try {
     await insertNyushukoDen(dummyData, connection);
-
-    return true;
   } catch (e) {
     if (e instanceof Error) {
       console.error(`[ERROR] ${e.message}`);
@@ -760,6 +765,14 @@ export const delAllNyushukoDen = async (juchuHeadId: number, juchuKizaiHeadId: n
   try {
     await deleteAllNyushukoDen(juchuHeadId, juchuKizaiHeadId, connection);
   } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -780,6 +793,14 @@ export const delAllKicsOrYardShukoDen = async (
   try {
     await deleteAllKicsOrYardShukoDen(juchuHeadId, juchuKizaiHeadId, sagyoId, connection);
   } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -794,6 +815,14 @@ export const delAllKicsOrYardShukoCtnDen = async (
   try {
     await deleteAllKicsOrYardShukoCtnDen(juchuHeadId, juchuKizaiHeadId, kizaiIds, sagyoId, connection);
   } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -814,6 +843,14 @@ export const delAllKicsOrYardNyukoDen = async (
   try {
     await deleteAllKicsOrYardNyukoDen(juchuHeadId, juchuKizaiHeadId, sagyoId, connection);
   } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -834,8 +871,15 @@ export const delAllNyushukoResult = async (
   try {
     await deleteAllNyushukoResult(juchuHeadId, juchuKizaiHeadId, sagyoId, connection);
     await deleteAllNyushukoCtnResult(juchuHeadId, juchuKizaiHeadId, sagyoId, connection);
-    return true;
   } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -857,8 +901,15 @@ export const delNyushukoCtnResult = async (
 ) => {
   try {
     await deleteKizaiIdNyushukoCtnResult(juchuHeadId, juchuKizaiHeadId, kizaiIds, connection);
-    return true;
   } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -880,8 +931,15 @@ export const delAllShukoResult = async (
   try {
     await deleteAllShukoResult(juchuHeadId, juchuKizaiHeadId, sagyoId, connection);
     await deleteAllShukoCtnResult(juchuHeadId, juchuKizaiHeadId, sagyoId, connection);
-    return true;
   } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -894,8 +952,15 @@ export const delAllKicsOrYardShukoCtnResult = async (
 ) => {
   try {
     await deleteAllShukoCtnResult(juchuHeadId, juchuKizaiHeadId, sagyoId, connection);
-    return true;
   } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -917,8 +982,15 @@ export const delAllNyukoResult = async (
   try {
     await deleteAllNyukoResult(juchuHeadId, juchuKizaiHeadId, sagyoId, connection);
     await deleteAllNyukoCtnResult(juchuHeadId, juchuKizaiHeadId, sagyoId, connection);
-    return true;
   } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -931,7 +1003,7 @@ export const getColor = async () => {
   try {
     const { data, error } = await selectColor();
     if (error) {
-      throw Error;
+      throw new Error('[selectColor] DBエラー:', { cause: error });
     }
 
     const honbanbiColor: HonbanbiColorValues[] = data.map((d) => ({
@@ -940,6 +1012,14 @@ export const getColor = async () => {
     }));
     return honbanbiColor;
   } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
