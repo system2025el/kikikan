@@ -25,7 +25,7 @@ import {
 } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
-import { Controller, FormProvider, useFieldArray, useForm, useWatch } from 'react-hook-form';
+import { Controller, FormProvider, useFieldArray, useForm, useFormContext, useWatch } from 'react-hook-form';
 import { SelectElement, TextFieldElement } from 'react-hook-form-mui';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
@@ -51,6 +51,85 @@ import { FirstDialogPage, SecondDialogPage } from './create-tbl-dialogs';
 import { MeisaiLines } from './meisai';
 import { MeisaiTblHeader } from './meisai-tbl-header';
 import { ReadOnlyYenNumberElement } from './yen';
+
+/**
+ * 見積の中計・合計金額を計算してフォームへ反映する非表示コンポーネント。
+ * 明細行数分の useWatch/計算ロジックを Quotation 本体から切り離すことで、
+ * 明細の数量等を入力するたびに画面全体（全テーブル・全行）が再レンダリングされるのを防ぐ。
+ * @returns {null} 何も描画しない
+ */
+const QuotTotalsCalculator = () => {
+  const { control, setValue } = useFormContext<QuotHeadValues>();
+
+  /** 機材の明細ヘッダ */
+  const kizaiHeads = useWatch({ control, name: 'meisaiHeads.kizai' });
+  /** 人件費の明細ヘッダ */
+  const laborHeads = useWatch({ control, name: 'meisaiHeads.labor' });
+  /** その他の明細ヘッダ */
+  const otherHeads = useWatch({ control, name: 'meisaiHeads.other' });
+  /** 現在の機材中計金額の値 */
+  const currentKizaiChukei = useWatch({ control, name: 'kizaiChukeiAmt' });
+  /** 現在の中計金額の値 */
+  const currentChukei = useWatch({ control, name: 'chukeiAmt' });
+  /** 値引き金額の値 */
+  const tokuNebikiAmt = useWatch({ control, name: 'tokuNebikiAmt' });
+  /** 現在の税抜き合計金額の値 */
+  const currentPreTaxGokei = useWatch({ control, name: 'preTaxGokeiAmt' });
+  /** 現在の税金額の値 */
+  const currentZeiAmt = useWatch({ control, name: 'zeiAmt' });
+  /** 現在の税率の値 */
+  const zeiRat = useWatch({ control, name: 'zeiRat' });
+  /** 現在の合計金額の値 */
+  const currentGokeiAmt = useWatch({ control, name: 'gokeiAmt' });
+
+  const kChukei = useMemo(
+    () => (kizaiHeads ?? []).reduce((acc, item) => acc + (item.nebikiAftAmt ?? 0), 0),
+    [kizaiHeads]
+  );
+
+  const chukeiSum = useMemo(() => {
+    const lChukei = (laborHeads ?? []).reduce((acc, item) => acc + (item.nebikiAftAmt ?? 0), 0);
+    const oChukei = (otherHeads ?? []).reduce((acc, item) => acc + (item.nebikiAftAmt ?? 0), 0);
+
+    return kChukei + lChukei + oChukei;
+  }, [kChukei, laborHeads, otherHeads]);
+
+  const sum = useMemo(() => chukeiSum - (tokuNebikiAmt ?? 0), [chukeiSum, tokuNebikiAmt]);
+
+  const zei = useMemo(() => Math.round((sum * (zeiRat ?? 0)) / 100), [sum, zeiRat]);
+
+  // 機材中計計算
+  useEffect(() => {
+    if (currentKizaiChukei !== kChukei) {
+      // shouldDirty: true にして、値が元に戻った際に isDirty が正しく再評価されるようにする
+      setValue('kizaiChukeiAmt', kChukei, { shouldDirty: true });
+    }
+  }, [kChukei, currentKizaiChukei, setValue]);
+
+  // 見積全体計算
+  useEffect(() => {
+    if (chukeiSum !== currentChukei) {
+      setValue('chukeiAmt', chukeiSum, { shouldDirty: true });
+    }
+
+    if (sum !== currentPreTaxGokei) {
+      setValue('preTaxGokeiAmt', sum, { shouldDirty: true });
+    }
+
+    const currentZei = Math.round(currentZeiAmt ?? 0);
+    if (zei !== currentZei) {
+      setValue('zeiAmt', zei === 0 ? null : zei, { shouldDirty: true });
+    }
+
+    const gokei = sum + zei;
+
+    if (gokei !== currentGokeiAmt) {
+      setValue('gokeiAmt', gokei, { shouldDirty: true });
+    }
+  }, [chukeiSum, sum, zei, currentChukei, currentPreTaxGokei, currentZeiAmt, currentGokeiAmt, setValue]);
+
+  return null;
+};
 
 /**
  * 見積書作成画面
@@ -114,7 +193,7 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
     handleSubmit,
     reset,
     setValue,
-    formState: { errors, isDirty },
+    formState: { isDirty },
   } = quotForm;
 
   // formfield
@@ -124,28 +203,6 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
   const laborFields = useFieldArray({ control, name: 'meisaiHeads.labor' });
   /** その他の明細 */
   const otherFields = useFieldArray({ control, name: 'meisaiHeads.other' });
-
-  // 監視
-  /** 機材の明細ヘッダ */
-  const kizaiHeads = useWatch({ control, name: 'meisaiHeads.kizai' });
-  /** 人件費の明細ヘッダ */
-  const laborHeads = useWatch({ control, name: 'meisaiHeads.labor' });
-  /** その他の明細ヘッダ */
-  const otherHeads = useWatch({ control, name: 'meisaiHeads.other' });
-  /** 現在の機材中計金額の値 */
-  const currentKizaiChukei = useWatch({ control, name: 'kizaiChukeiAmt' });
-  /** 現在の中計金額の値 */
-  const currentChukei = useWatch({ control, name: 'chukeiAmt' });
-  /** 値引き金額の値 */
-  const tokuNebikiAmt = useWatch({ control, name: 'tokuNebikiAmt' });
-  /** 現在の税抜き合計金額の値 */
-  const currentPreTaxGokei = useWatch({ control, name: 'preTaxGokeiAmt' });
-  /** 現在の税金額の値 */
-  const currentZeiAmt = useWatch({ control, name: 'zeiAmt' });
-  /** 現在の税率の値 */
-  const zeiRat = useWatch({ control, name: 'zeiRat' });
-  /** 現在の合計金額の値 */
-  const currentGokeiAmt = useWatch({ control, name: 'gokeiAmt' });
 
   // context
   const { setIsDirty /*setLock*/ } = useDirty();
@@ -220,27 +277,11 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
   //   }
   // };
 
-  /* useMemo ---------------------------------------------------------- */
-  const kChukei = useMemo(
-    () => (kizaiHeads ?? []).reduce((acc, item) => acc + (item.nebikiAftAmt ?? 0), 0),
-    [kizaiHeads]
-  );
-
-  const chukeiSum = useMemo(() => {
-    const kChukei = (kizaiHeads ?? []).reduce((acc, item) => acc + (item.nebikiAftAmt ?? 0), 0);
-    const lChukei = (laborHeads ?? []).reduce((acc, item) => acc + (item.nebikiAftAmt ?? 0), 0);
-    const oChukei = (otherHeads ?? []).reduce((acc, item) => acc + (item.nebikiAftAmt ?? 0), 0);
-
-    return kChukei + lChukei + oChukei;
-  }, [kizaiHeads, laborHeads, otherHeads]);
-
-  const sum = useMemo(() => chukeiSum - (tokuNebikiAmt ?? 0), [chukeiSum, tokuNebikiAmt]);
-
-  const zei = useMemo(() => Math.round((sum * (zeiRat ?? 0)) / 100), [sum, zeiRat]);
-
   /* useEffect ------------------------------------------------------------ */
   /** 初期表示とログインユーザを取得とセット */
   useEffect(() => {
+    let cancelled = false;
+
     const getOptions = async () => {
       try {
         // 選択肢取得
@@ -249,9 +290,15 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
           getMituStsSelection(),
           getCustomerSelection(),
         ]);
+        if (cancelled) return;
         setOptions({ users: users, mituSts: mituSts, custs: custs });
       } catch (e) {
+        if (cancelled) return;
         setIsError(e instanceof Error ? e : new Error(String(e)));
+      } finally {
+        if (!cancelled) {
+          setIsLoading(false);
+        }
       }
     };
 
@@ -268,8 +315,6 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
     //   }
     // };
 
-    getOptions();
-
     if (isNew) {
       // 新規なら入力者をログインアカウントから取得する
       if (user?.name) {
@@ -279,39 +324,13 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
       // 編集でログインユーザがあるときロックデータを確認する
       //if (user && quot.mituHeadId) asyncProcess();
     }
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 5000); // setValue待ち
+
+    getOptions();
+
+    return () => {
+      cancelled = true;
+    };
   }, [user, isNew, quot, setValue]);
-
-  // 機材中計計算
-  useEffect(() => {
-    if (currentKizaiChukei !== kChukei) {
-      setValue('kizaiChukeiAmt', kChukei, { shouldDirty: false });
-    }
-  }, [kChukei, currentKizaiChukei, setValue]);
-
-  // 見積全体計算
-  useEffect(() => {
-    if (chukeiSum !== currentChukei) {
-      setValue('chukeiAmt', chukeiSum, { shouldDirty: false });
-    }
-
-    if (sum !== currentPreTaxGokei) {
-      setValue('preTaxGokeiAmt', sum, { shouldDirty: false });
-    }
-
-    const currentZei = Math.round(currentZeiAmt ?? 0);
-    if (zei !== currentZei) {
-      setValue('zeiAmt', zei === 0 ? null : zei, { shouldDirty: false });
-    }
-
-    const gokei = sum + zei;
-
-    if (gokei !== currentGokeiAmt) {
-      setValue('gokeiAmt', gokei, { shouldDirty: false });
-    }
-  }, [chukeiSum, sum, zei, currentChukei, currentPreTaxGokei, currentZeiAmt, currentGokeiAmt, setValue]);
 
   // // ロック
   // useEffect(() => {
@@ -412,6 +431,7 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
           <Button onClick={() => window.close()}>閉じる</Button>
         </Grid2>
         <FormProvider {...quotForm}>
+          <QuotTotalsCalculator />
           <form onSubmit={handleSubmit(onSubmit)}>
             <Paper variant="outlined">
               <Grid2
