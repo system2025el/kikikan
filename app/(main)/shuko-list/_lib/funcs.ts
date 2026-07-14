@@ -124,14 +124,14 @@ export const getPdfData = async (
             return (current.juchu_honbanbi_calc_qty ?? 0) > (max.juchu_honbanbi_calc_qty ?? 0) ? current : max;
           }).juchu_honbanbi_calc_qty;
 
+    const nyukoDatCandidates = juchuKizaiHeadData
+      .flatMap((d) => [d.kics_nyuko_dat, d.yard_nyuko_dat])
+      .filter((d): d is string => d !== null);
+
     const nyukoDat =
-      nyushukoBashoId === 1
-        ? juchuKizaiHeadData.reduce((min, current) => {
-            return new Date(current.kics_nyuko_dat ?? '') < new Date(min.kics_nyuko_dat ?? '') ? current : min;
-          }).kics_nyuko_dat
-        : juchuKizaiHeadData.reduce((min, current) => {
-            return new Date(current.yard_nyuko_dat ?? '') < new Date(min.yard_nyuko_dat ?? '') ? current : min;
-          }).yard_nyuko_dat;
+      nyukoDatCandidates.length > 0
+        ? nyukoDatCandidates.reduce((max, current) => (new Date(current) > new Date(max) ? current : max))
+        : null;
 
     const kizaiData: ShukoKizai[] = (
       await selectPdfJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadIds, nyushukoDat, nyushukoBashoId)
