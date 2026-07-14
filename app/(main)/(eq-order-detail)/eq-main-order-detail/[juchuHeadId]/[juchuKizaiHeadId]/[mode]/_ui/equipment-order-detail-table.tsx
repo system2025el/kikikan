@@ -796,7 +796,7 @@ export const ContainerTable = (props: {
                 <TextField
                   variant="standard"
                   value={row.planKicsKizaiQty}
-                  type="text"
+                  type="tel"
                   onChange={(e) => {
                     if (/^\d*$/.test(e.target.value)) {
                       handleContainerCellChange(rowIndex, Number(e.target.value), row.planYardKizaiQty);
@@ -840,7 +840,7 @@ export const ContainerTable = (props: {
                 <TextField
                   variant="standard"
                   value={row.planYardKizaiQty}
-                  type="text"
+                  type="tel"
                   onChange={(e) => {
                     if (/^\d*$/.test(e.target.value)) {
                       handleContainerCellChange(rowIndex, row.planKicsKizaiQty, Number(e.target.value));
