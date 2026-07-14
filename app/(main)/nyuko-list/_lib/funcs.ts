@@ -218,14 +218,14 @@ export const getPdfData = async (
             return (current.juchu_honbanbi_calc_qty ?? 0) > (max.juchu_honbanbi_calc_qty ?? 0) ? current : max;
           }, juchuKizaiHeadData[0] || {}).juchu_honbanbi_calc_qty; /*)*/
 
+    const shukoDatCandidates = juchuKizaiHeadData
+      .flatMap((d) => [d.kics_shuko_dat, d.yard_shuko_dat])
+      .filter((d): d is string => d !== null);
+
     const shukoDat =
-      nyushukoBashoId === 1
-        ? juchuKizaiHeadData.reduce((min, current) => {
-            return new Date(current.kics_shuko_dat ?? '') < new Date(min.kics_shuko_dat ?? '') ? current : min;
-          }, juchuKizaiHeadData[0] || {}).kics_shuko_dat
-        : juchuKizaiHeadData.reduce((min, current) => {
-            return new Date(current.yard_shuko_dat ?? '') < new Date(min.yard_shuko_dat ?? '') ? current : min;
-          }, juchuKizaiHeadData[0] || {}).yard_shuko_dat;
+      shukoDatCandidates.length > 0
+        ? shukoDatCandidates.reduce((min, current) => (new Date(current) < new Date(min) ? current : min))
+        : null;
 
     // ---------------------------------------------------------
     // PDFデータの生成
