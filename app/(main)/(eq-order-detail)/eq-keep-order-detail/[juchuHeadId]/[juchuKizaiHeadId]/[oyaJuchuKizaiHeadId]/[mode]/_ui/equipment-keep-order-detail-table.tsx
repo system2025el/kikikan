@@ -259,7 +259,7 @@ const KeepEqTableRow = React.memo(
           <TextField
             variant="standard"
             value={row.keepQty}
-            type="text"
+            type="tel"
             onChange={(e) => {
               if (
                 /^\d*$/.test(e.target.value) &&
@@ -518,7 +518,7 @@ export const KeepContainerTable = (props: {
                 <TextField
                   variant="standard"
                   value={row.kicsKeepQty}
-                  type="text"
+                  type="tel"
                   onChange={(e) => {
                     if (
                       /^\d*$/.test(e.target.value) &&
@@ -566,7 +566,7 @@ export const KeepContainerTable = (props: {
                 <TextField
                   variant="standard"
                   value={row.yardKeepQty}
-                  type="text"
+                  type="tel"
                   onChange={(e) => {
                     if (
                       /^\d*$/.test(e.target.value) &&

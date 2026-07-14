@@ -408,7 +408,7 @@ const ReturnEqTableRow = React.memo(
           <TextField
             variant="standard"
             value={row.planQty}
-            type="text"
+            type="tel"
             onChange={(e) => {
               if (/^\d*$/.test(e.target.value) && Number(e.target.value) <= row.oyaPlanKizaiQty + row.oyaPlanYobiQty) {
                 handleCellChange(rowIndex, row.kizaiId, Number(e.target.value));
@@ -673,7 +673,7 @@ export const ReturnContainerTable = (props: {
                 <TextField
                   variant="standard"
                   value={row.planKicsKizaiQty}
-                  type="text"
+                  type="tel"
                   onChange={(e) => {
                     if (
                       /^\d*$/.test(e.target.value) &&
@@ -725,7 +725,7 @@ export const ReturnContainerTable = (props: {
                 <TextField
                   variant="standard"
                   value={row.planYardKizaiQty}
-                  type="text"
+                  type="tel"
                   onChange={(e) => {
                     if (
                       /^\d*$/.test(e.target.value) &&

@@ -48,11 +48,7 @@
   ```json
   {
     "permissions": {
-      "allow": [
-        "Bash(git status)",
-        "Bash(npm run dev)",
-        "Bash(npm run lint*)"
-      ]
+      "allow": ["Bash(git status)", "Bash(npm run dev)", "Bash(npm run lint*)"]
     }
   }
   ```
