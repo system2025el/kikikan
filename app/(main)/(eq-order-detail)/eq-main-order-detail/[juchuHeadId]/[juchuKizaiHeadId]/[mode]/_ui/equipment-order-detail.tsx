@@ -2299,7 +2299,6 @@ const EquipmentOrderDetail = (props: {
    */
   useEffect(() => {
     const getData = async () => {
-      performance.mark('detail-fetch-start');
       setIsDetailLoading(true);
       // 受注機材ヘッダーデータ
       const juchuKizaiHeadData = getValues();
@@ -2311,12 +2310,6 @@ const EquipmentOrderDetail = (props: {
           getIdoJuchuKizaiMeisai(juchuKizaiHeadData.juchuHeadId, juchuKizaiHeadData.juchuKizaiHeadId),
           getJuchuContainerMeisai(juchuKizaiHeadData.juchuHeadId, juchuKizaiHeadData.juchuKizaiHeadId),
         ]);
-        performance.mark('detail-queries-done');
-        console.log(
-          '  内訳: 明細/移動/コンテナ取得',
-          performance.measure('detail-queries', 'detail-fetch-start', 'detail-queries-done').duration,
-          'ms'
-        );
 
         // 出庫日
         const shukoDate = getShukoDate(
@@ -2342,12 +2335,6 @@ const EquipmentOrderDetail = (props: {
                 juchuKizaiMeisaiData
               )
             : [];
-        performance.mark('detail-stock-done');
-        console.log(
-          '  内訳: 在庫取得',
-          performance.measure('detail-stock', 'detail-queries-done', 'detail-stock-done').duration,
-          'ms'
-        );
 
         setOriginJuchuKizaiMeisaiList(juchuKizaiMeisaiData ?? []);
         setJuchuKizaiMeisaiList(juchuKizaiMeisaiData ?? []);
@@ -2365,19 +2352,6 @@ const EquipmentOrderDetail = (props: {
         setIsError(e instanceof Error ? e : new Error(String(e)));
       }
       setIsDetailLoading(false);
-
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          performance.mark('detail-paint-end');
-          const m = performance.measure('detail-render', 'detail-fetch-start', 'detail-paint-end');
-          console.log('初期表示 取得開始→描画完了', m.duration, 'ms');
-          console.log(
-            '  内訳: 描画+ペイント',
-            performance.measure('detail-paint', 'detail-stock-done', 'detail-paint-end').duration,
-            'ms'
-          );
-        });
-      });
     };
     if (saveKizaiHead && user && user.permission.juchu !== permission.none) {
       getData();
