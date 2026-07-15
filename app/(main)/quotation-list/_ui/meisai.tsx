@@ -420,7 +420,7 @@ const MeisaiLinesComponent = ({
         <Button
           size="small"
           onClick={() =>
-            meisaiFields.append({ nam: null, qty: null, honbanbiQty: null, tankaAmt: null, shokeiAmt: null })
+            meisaiFields.append({ nam: '', qty: null, honbanbiQty: null, tankaAmt: null, shokeiAmt: null })
           }
           disabled={!editable}
         >

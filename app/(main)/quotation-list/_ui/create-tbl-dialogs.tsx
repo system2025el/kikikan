@@ -113,6 +113,9 @@ export const SecondDialogPage = ({
         nebikiNam: '値引き',
         nebikiAmt: nebikiAmt,
         nebikiAftNam: '機材費',
+        biko1: '',
+        biko2: '',
+        biko3: '',
         meisai: data,
       });
     } else {
@@ -126,6 +129,9 @@ export const SecondDialogPage = ({
         nebikiNam: '値引き',
         nebikiAmt: nebikiAmt,
         nebikiAftNam: '機材費',
+        biko1: '',
+        biko2: '',
+        biko3: '',
         meisai: data,
       });
     }

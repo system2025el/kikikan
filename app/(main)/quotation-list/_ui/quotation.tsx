@@ -765,11 +765,14 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
                         handleClose={() => setKizaimeisaiaddDialogOpen(false)}
                         addKizaiTbl={() =>
                           kizaiFields.append({
-                            mituMeisaiHeadNam: null,
+                            mituMeisaiHeadNam: '',
                             headNamDspFlg: false,
                             mituMeisaiKbn: 0,
                             nebikiNam: '値引き',
                             nebikiAftNam: '機材費',
+                            biko1: '',
+                            biko2: '',
+                            biko3: '',
                           })
                         }
                         toSecondPage={setShowSecond}
@@ -825,10 +828,13 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
                       onClick={() =>
                         laborFields.append({
                           headNamDspFlg: false,
-                          mituMeisaiHeadNam: null,
+                          mituMeisaiHeadNam: '',
                           mituMeisaiKbn: 1,
                           nebikiNam: '値引き',
                           nebikiAftNam: '人件費',
+                          biko1: '',
+                          biko2: '',
+                          biko3: '',
                         })
                       }
                       disabled={!editable}
@@ -856,10 +862,13 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
                       onClick={() =>
                         otherFields.append({
                           headNamDspFlg: false,
-                          mituMeisaiHeadNam: null,
+                          mituMeisaiHeadNam: '',
                           mituMeisaiKbn: 2,
                           nebikiNam: '値引き',
                           nebikiAftNam: 'その他',
+                          biko1: '',
+                          biko2: '',
+                          biko3: '',
                         })
                       }
                       disabled={!editable}
