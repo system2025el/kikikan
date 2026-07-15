@@ -3,7 +3,7 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Box, Button, Grid2, IconButton, TextField } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { Controller, useFieldArray, useFormContext, useWatch } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 
@@ -11,24 +11,130 @@ import { BillHeadValues } from '../_lib/types';
 import { ReadOnlyYenNumberElement } from './yen';
 
 /**
+ * 明細1行分の小計金額を計算してフォームへ反映する非表示コンポーネント。
+ * 行単位でしか監視しないことで、1行の数量・本番日数・単価を入力した際に
+ * 同じテーブル内の他の行まで再レンダリングされるのを防ぐ。
+ * @returns {null} 何も描画しない
+ */
+const MeisaiRowShokeiCalculator = ({ index, rowIndex }: { index: number; rowIndex: number }) => {
+  const { control, setValue } = useFormContext<BillHeadValues>();
+
+  const qty = useWatch({ control, name: `meisaiHeads.${index}.meisai.${rowIndex}.qty` });
+  const honbanbiQty = useWatch({ control, name: `meisaiHeads.${index}.meisai.${rowIndex}.honbanbiQty` });
+  const tankaAmt = useWatch({ control, name: `meisaiHeads.${index}.meisai.${rowIndex}.tankaAmt` });
+  const currentShokeiAmt = useWatch({ control, name: `meisaiHeads.${index}.meisai.${rowIndex}.shokeiAmt` });
+
+  useEffect(() => {
+    const q = Number(qty) || 0;
+    const h = Number(honbanbiQty) || 0;
+    const t = Number(tankaAmt) || 0;
+    // 小計を計算
+    const newShokei = Math.round((q * (h * 1000) * t) / 1000);
+    const currentShokei = Math.round(Number(currentShokeiAmt) || 0);
+    // 現在の小計の値と比較し、異なっていればフォームの値を更新する
+    // (無限ループを防ぐため、値が違う場合のみsetValueを実行)
+    if (newShokei !== currentShokei) {
+      // shouldDirty: true にして、値が元に戻った際に isDirty が正しく再評価されるようにする
+      setValue(`meisaiHeads.${index}.meisai.${rowIndex}.shokeiAmt`, newShokei, { shouldDirty: true });
+    }
+  }, [qty, honbanbiQty, tankaAmt, currentShokeiAmt, index, rowIndex, setValue]);
+
+  return null;
+};
+
+/**
+ * 明細1行分の単価セル。
+ * フォーカス中かどうかの状態を行単位で持つことで、1つのセルにフォーカス／
+ * フォーカスアウトした際に同じテーブル内の他の行まで再レンダリングされるのを防ぐ。
+ */
+const MeisaiRowTankaAmtField = ({
+  index,
+  rowIndex,
+  editable,
+}: {
+  index: number;
+  rowIndex: number;
+  editable: boolean;
+}) => {
+  const { control } = useFormContext<BillHeadValues>();
+  const [isEditing, setIsEditing] = useState(false);
+
+  return (
+    <Controller
+      name={`meisaiHeads.${index}.meisai.${rowIndex}.tankaAmt`}
+      control={control}
+      render={({ field, fieldState }) => (
+        <TextField
+          {...field}
+          value={
+            isEditing
+              ? (field.value ?? '')
+              : typeof field.value === 'number' && !isNaN(field.value)
+                ? `¥${Math.abs(field.value).toLocaleString()}`
+                : `¥0`
+          }
+          type="text"
+          onFocus={(e) => {
+            setIsEditing(true);
+            const rawValue = String(field.value ?? '');
+            e.target.value = rawValue;
+          }}
+          onBlur={(e) => {
+            const rawValue = e.target.value.replace(/[¥,]/g, '');
+            // 空欄のまま何も入力されなかった場合は 0 ではなく null に戻し、
+            // 未編集の値が誤って dirty 扱いになるのを防ぐ
+            const numericValue = rawValue === '' ? null : Math.abs(Number(rawValue));
+            field.onChange(numericValue);
+            setIsEditing(false);
+          }}
+          onChange={(e) => {
+            const raw = e.target.value.replace(/[^\d]/g, '');
+            if (/^\d*$/.test(raw)) {
+              // 空欄になった場合は 0 ではなく null にし、値が0の状態から
+              // バックスペースで消しても表示が0に戻ってしまわないようにする
+              field.onChange(raw === '' ? null : Number(raw));
+              e.target.value = raw;
+            }
+          }}
+          sx={(theme) => ({
+            '.MuiOutlinedInput-notchedOutline': {
+              borderColor: fieldState.error?.message && theme.palette.error.main,
+            },
+            '.Mui-focused .MuiOutlinedInput-notchedOutline': {
+              borderColor: fieldState.error?.message && theme.palette.error.main,
+            },
+            '&:hover .MuiOutlinedInput-notchedOutline': {
+              borderColor: fieldState.error?.message && theme.palette.error.main,
+            },
+            '& .MuiInputBase-input': {
+              textAlign: 'right',
+            },
+            '.MuiFormHelperText-root': {
+              color: theme.palette.error.main,
+            },
+            '& input[type=number]::-webkit-inner-spin-button': {
+              WebkitAppearance: 'none',
+              margin: 0,
+            },
+          })}
+          helperText={fieldState.error?.message}
+          disabled={!editable}
+        />
+      )}
+    />
+  );
+};
+
+/**
  * 動的フォーム（請求の明細項目部分）
  * @param param0
  * @returns 請求の明細項目のUIコンポーネント
  */
-export const MeisaiLines = ({ index, editable }: { index: number; editable: boolean }) => {
-  /* useState --------------------------------------------------------- */
-  /** フォーカスしている行 */
-  const [editingIndex, setEditingIndex] = useState<number | null>(null);
-
+const MeisaiLinesComponent = ({ index, editable }: { index: number; editable: boolean }) => {
   /* useForm ---------------------------------------------------------- */
-  const { control, setValue } = useFormContext<BillHeadValues>();
+  const { control } = useFormContext<BillHeadValues>();
   // フォームのフィールド（明細）
   const meisaiFields = useFieldArray({ control, name: `meisaiHeads.${index}.meisai` });
-  // 明細行の監視
-  const watchedMeisai = useWatch({
-    control,
-    name: `meisaiHeads.${index}.meisai`,
-  });
 
   /* methods ---------------------------------------------------------- */
   /* 明細項目の順番を帰るボタン押下時 */
@@ -36,28 +142,11 @@ export const MeisaiLines = ({ index, editable }: { index: number; editable: bool
     meisaiFields.move(i, i + direction);
   };
 
-  /* useEffect -------------------------------------------------------- */
-  useEffect(() => {
-    watchedMeisai?.forEach((m, i) => {
-      const qty = Number(m.qty) || 0;
-      const honbanbiQty = Number(m.honbanbiQty) || 0;
-      const tankaAmt = Number(m.tankaAmt) || 0;
-      // 小計を計算
-      const theShokei = (qty * (honbanbiQty * 1000) * tankaAmt) / 1000;
-      // 現在の小計の値と比較し、異なっていればフォームの値を更新する
-      // (無限ループを防ぐため、値が違う場合のみsetValueを実行)
-      const currentShokei = Math.round(Number(m.shokeiAmt) || 0);
-      const newShokei = Math.round(theShokei);
-      if (newShokei !== currentShokei) {
-        setValue(`meisaiHeads.${index}.meisai.${i}.shokeiAmt`, newShokei, { shouldDirty: false });
-      }
-    });
-  }, [watchedMeisai, index, setValue]); // 依存配列に監視対象などを設定
-
   return (
     <Box>
       {meisaiFields.fields.map((f, i) => (
         <Box key={f.id}>
+          <MeisaiRowShokeiCalculator index={index} rowIndex={i} />
           <Grid2 container px={2} my={0.5} alignItems={'center'} spacing={0.5}>
             <Grid2 size={0.5} justifyItems={'end'}>
               <Box>
@@ -109,64 +198,7 @@ export const MeisaiLines = ({ index, editable }: { index: number; editable: bool
               />
             </Grid2>
             <Grid2 size={1.5}>
-              <Controller
-                name={`meisaiHeads.${index}.meisai.${i}.tankaAmt`}
-                control={control}
-                render={({ field, fieldState }) => (
-                  <TextField
-                    {...field}
-                    value={
-                      editingIndex === i
-                        ? (field.value ?? '')
-                        : typeof field.value === 'number' && !isNaN(field.value)
-                          ? `¥${Math.abs(field.value).toLocaleString()}`
-                          : `¥0`
-                    }
-                    type="text"
-                    onFocus={(e) => {
-                      setEditingIndex(i);
-                      const rawValue = String(field.value ?? '');
-                      e.target.value = rawValue;
-                    }}
-                    onBlur={(e) => {
-                      const rawValue = e.target.value.replace(/[¥,]/g, '');
-                      const numericValue = Math.abs(Number(rawValue));
-                      field.onChange(numericValue);
-                      setEditingIndex(null);
-                    }}
-                    onChange={(e) => {
-                      const raw = e.target.value.replace(/[^\d]/g, '');
-                      if (/^\d*$/.test(raw)) {
-                        field.onChange(Number(raw));
-                        e.target.value = raw;
-                      }
-                    }}
-                    sx={(theme) => ({
-                      '.MuiOutlinedInput-notchedOutline': {
-                        borderColor: fieldState.error?.message && theme.palette.error.main,
-                      },
-                      '.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                        borderColor: fieldState.error?.message && theme.palette.error.main,
-                      },
-                      '&:hover .MuiOutlinedInput-notchedOutline': {
-                        borderColor: fieldState.error?.message && theme.palette.error.main,
-                      },
-                      '& .MuiInputBase-input': {
-                        textAlign: 'right',
-                      },
-                      '.MuiFormHelperText-root': {
-                        color: theme.palette.error.main,
-                      },
-                      '& input[type=number]::-webkit-inner-spin-button': {
-                        WebkitAppearance: 'none',
-                        margin: 0,
-                      },
-                    })}
-                    helperText={fieldState.error?.message}
-                    disabled={!editable}
-                  />
-                )}
-              />
+              <MeisaiRowTankaAmtField index={index} rowIndex={i} editable={editable} />
             </Grid2>
             <Grid2 size={2}>
               <ReadOnlyYenNumberElement name={`meisaiHeads.${index}.meisai.${i}.shokeiAmt`} />
@@ -209,7 +241,7 @@ export const MeisaiLines = ({ index, editable }: { index: number; editable: bool
         <Button
           size="small"
           onClick={() =>
-            meisaiFields.append({ nam: null, qty: null, honbanbiQty: null, tankaAmt: null, shokeiAmt: null })
+            meisaiFields.append({ nam: '', qty: null, honbanbiQty: null, tankaAmt: null, shokeiAmt: null })
           }
           disabled={!editable}
         >
@@ -220,3 +252,7 @@ export const MeisaiLines = ({ index, editable }: { index: number; editable: bool
     </Box>
   );
 };
+
+// props（index, editable）が変わらない限り再レンダリングされないようにし、
+// 親（Bill・MeisaiTblHeader）が別の理由で再レンダリングされてもテーブル全体が巻き込まれないようにする
+export const MeisaiLines = memo(MeisaiLinesComponent);

@@ -61,14 +61,14 @@ export const getJuchusForBill = async (queries: {
           acc[groupKey] = {
             juchuHeadId: currentRow.juchu_head_id,
             juchuKizaiHeadId: currentRow.juchu_kizai_head_id,
-            seikyuMeisaiHeadNam: currentRow.head_nam,
-            koenNam: currentRow.koen_nam,
+            seikyuMeisaiHeadNam: currentRow.head_nam ?? '',
+            koenNam: currentRow.koen_nam ?? '',
             seikyuRange: {
               strt: currentRow.seikyu_dat ? new Date(currentRow.seikyu_dat) : new Date(currentRow.shuko_dat),
               end: new Date(currentRow.nyuko_dat) > new Date(date) ? new Date(date) : new Date(currentRow.nyuko_dat),
             },
-            koenbashoNam: currentRow.koenbasho_nam,
-            kokyakuTantoNam: currentRow.kokyaku_tanto_nam,
+            koenbashoNam: currentRow.koenbasho_nam ?? '',
+            kokyakuTantoNam: currentRow.kokyaku_tanto_nam ?? '',
             zeiFlg: true,
             meisai: [], // 明細を入れるための空配列
           };
@@ -80,7 +80,7 @@ export const getJuchusForBill = async (queries: {
         const planQty = Number(currentRow.plan_qty) || 0;
 
         acc[groupKey].meisai.push({
-          nam: currentRow.kizai_nam ? `${' * '.repeat(currentRow.indent_num ?? 0)}${currentRow.kizai_nam}` : null,
+          nam: currentRow.kizai_nam ? `${' * '.repeat(currentRow.indent_num ?? 0)}${currentRow.kizai_nam}` : '',
           qty: planQty,
           honbanbiQty: honbanbiQty,
           tankaAmt: tankaAmt,
@@ -104,8 +104,8 @@ export const getJuchusForBill = async (queries: {
       return juchus.rows.map((j) => ({
         juchuHeadId: j.juchu_head_id,
         juchuKizaiHeadId: j.juchu_kizai_head_id,
-        seikyuMeisaiHeadNam: j.head_nam,
-        koenNam: j.koen_nam,
+        seikyuMeisaiHeadNam: j.head_nam ?? '',
+        koenNam: j.koen_nam ?? '',
         seikyuRange: {
           strt:
             j.seikyu_dat && toJapanYMDString(j.seikyu_dat) !== toJapanYMDString(j.shuko_dat)
@@ -113,8 +113,8 @@ export const getJuchusForBill = async (queries: {
               : new Date(j.shuko_dat),
           end: new Date(j.nyuko_dat) > new Date(date) ? new Date(date) : new Date(j.nyuko_dat),
         },
-        koenbashoNam: j.koenbasho_nam,
-        kokyakuTantoNam: j.kokyaku_tanto_nam,
+        koenbashoNam: j.koenbasho_nam ?? '',
+        kokyakuTantoNam: j.kokyaku_tanto_nam ?? '',
         zeiFlg: true,
         meisai: Array.isArray(juchus.rows)
           ? juchus.rows.filter(

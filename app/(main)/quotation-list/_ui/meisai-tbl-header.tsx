@@ -4,7 +4,7 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Box, Button, Grid2, Stack, TextField, Typography } from '@mui/material';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import {
   CheckboxElement,
   Control,
@@ -19,7 +19,53 @@ import { FAKE_NEW_ID } from '../../(masters)/_lib/constants';
 import { QuotHeadValues } from '../_lib/types';
 import { ReadOnlyYenNumberElement } from './yen';
 
-export const MeisaiTblHeader = ({
+/**
+ * テーブル1つ分の小計・値引後金額を計算してフォームへ反映する非表示コンポーネント。
+ * テーブル単位でしか監視しないことで、明細行の入力のたびにテーブルヘッダー本体
+ * （＝配下の全行）まで再レンダリングされるのを防ぐ。
+ * @returns {null} 何も描画しない
+ */
+const MeisaiTblShokeiCalculator = ({
+  sectionNam,
+  index,
+}: {
+  sectionNam: 'kizai' | 'labor' | 'other';
+  index: number;
+}) => {
+  const { control, setValue } = useFormContext<QuotHeadValues>();
+
+  const meisaiList = useWatch({
+    control,
+    name: `meisaiHeads.${sectionNam}.${index}.meisai`,
+  });
+  const currentShokeiAmt = useWatch({
+    control,
+    name: `meisaiHeads.${sectionNam}.${index}.shokeiAmt`,
+  });
+  const nebikiAmt = useWatch({ control, name: `meisaiHeads.${sectionNam}.${index}.nebikiAmt` });
+  const currentNebikiAftAmt = useWatch({ control, name: `meisaiHeads.${sectionNam}.${index}.nebikiAftAmt` });
+
+  const shokeiSum = useMemo(
+    () => Math.round((meisaiList ?? []).reduce((acc, item) => acc + (item.shokeiAmt ?? 0), 0)),
+    [meisaiList]
+  );
+  const nebikiAft = useMemo(() => Math.round(shokeiSum - (nebikiAmt ?? 0)), [shokeiSum, nebikiAmt]);
+
+  useEffect(() => {
+    // 計算結果が現在の値と異なる場合のみ更新
+    // shouldDirty: true にして、値が元に戻った際に isDirty が正しく再評価されるようにする
+    if (shokeiSum !== (Number(currentShokeiAmt) || 0)) {
+      setValue(`meisaiHeads.${sectionNam}.${index}.shokeiAmt`, shokeiSum, { shouldDirty: true });
+    }
+    if (nebikiAft !== Number(currentNebikiAftAmt) || 0) {
+      setValue(`meisaiHeads.${sectionNam}.${index}.nebikiAftAmt`, nebikiAft, { shouldDirty: true });
+    }
+  }, [currentShokeiAmt, currentNebikiAftAmt, shokeiSum, nebikiAft, sectionNam, index, setValue]);
+
+  return null;
+};
+
+const MeisaiTblHeaderComponent = ({
   index,
   sectionNam,
   sectionFields,
@@ -45,32 +91,13 @@ export const MeisaiTblHeader = ({
   /* useForm ------------------------------------------------------- */
   const { control, setValue, getValues } = useFormContext<QuotHeadValues>();
 
-  // 明細の監視
-  const meisaiList = useWatch({
-    control,
-    name: `meisaiHeads.${sectionNam}.${index}.meisai`,
-  });
-  const currentShokeiAmt = useWatch({
-    control,
-    name: `meisaiHeads.${sectionNam}.${index}.shokeiAmt`,
-  });
-
-  const nebikiAmt = useWatch({ control, name: `meisaiHeads.${sectionNam}.${index}.nebikiAmt` });
-  const currentNebikiAftAmt = useWatch({ control, name: `meisaiHeads.${sectionNam}.${index}.nebikiAftAmt` });
-
-  /* 自動計算 ----------------------------------------------------- */
-  const shokeiSum = useMemo(
-    () => Math.round((meisaiList ?? []).reduce((acc, item) => acc + (item.shokeiAmt ?? 0), 0)),
-    [meisaiList]
-  );
-  const nebikiAft = useMemo(() => Math.round(shokeiSum - (nebikiAmt ?? 0)), [shokeiSum, nebikiAmt]);
-
   /* ref */
   const inputRef = useRef<HTMLInputElement>(null);
 
   /* 一括変更ボタン押下 */
   const handleBulkChange = () => {
     const newValue = Number(inputRef.current?.value);
+    const meisaiList = getValues(`meisaiHeads.${sectionNam}.${index}.meisai`);
     if (!inputRef.current?.value || isNaN(newValue) || !meisaiList) return;
 
     const updatedMeisai = meisaiList.map((item) => ({
@@ -88,6 +115,7 @@ export const MeisaiTblHeader = ({
   const handleMerge = () => {
     const targetPath = `meisaiHeads.${sectionNam}.${index - 1}.meisai` as const;
     const target = getValues(targetPath);
+    const meisaiList = getValues(`meisaiHeads.${sectionNam}.${index}.meisai`);
 
     if (!target || !meisaiList) return;
 
@@ -207,19 +235,9 @@ export const MeisaiTblHeader = ({
     sectionFields.remove(index);
   };
 
-  /* useEffect ---------------------------------------------------- */
-  useEffect(() => {
-    // 計算結果が現在の値と異なる場合のみ更新
-    if (shokeiSum !== (Number(currentShokeiAmt) || 0)) {
-      setValue(`meisaiHeads.${sectionNam}.${index}.shokeiAmt`, shokeiSum, { shouldDirty: false });
-    }
-    if (nebikiAft !== Number(currentNebikiAftAmt) || 0) {
-      setValue(`meisaiHeads.${sectionNam}.${index}.nebikiAftAmt`, nebikiAft, { shouldDirty: false });
-    }
-  }, [currentShokeiAmt, currentNebikiAftAmt, shokeiSum, nebikiAft, sectionNam, index, setValue]);
-
   return (
     <>
+      <MeisaiTblShokeiCalculator sectionNam={sectionNam} index={index} />
       <Grid2 container alignItems={'end'} my={0.5}>
         <Grid2 size={1} />
         <Grid2 size={5} display={'flex'} alignItems={'base-line'}>
@@ -387,14 +405,18 @@ export const MeisaiTblHeader = ({
                 }}
                 onBlur={(e) => {
                   const rawValue = e.target.value.replace(/[¥,]/g, '');
-                  const numericValue = Math.abs(Number(rawValue));
+                  // 空欄のまま何も入力されなかった場合は 0 ではなく null に戻し、
+                  // 未編集の値が誤って dirty 扱いになるのを防ぐ
+                  const numericValue = rawValue === '' ? null : Math.abs(Number(rawValue));
                   field.onChange(numericValue);
                   setEditingIndex(null);
                 }}
                 onChange={(e) => {
                   const raw = e.target.value.replace(/[^\d]/g, '');
                   if (/^\d*$/.test(raw)) {
-                    field.onChange(Number(raw));
+                    // 空欄になった場合は 0 ではなく null にし、値が0の状態から
+                    // バックスペースで消しても表示が0に戻ってしまわないようにする
+                    field.onChange(raw === '' ? null : Number(raw));
                     e.target.value = raw;
                   }
                 }}
@@ -453,3 +475,19 @@ export const MeisaiTblHeader = ({
     </>
   );
 };
+
+/**
+ * sectionFields（useFieldArrayの戻り値）は親が再レンダリングされるたびに
+ * 新しいオブジェクト参照になるため、既定の shallow compare では memo が効かない。
+ * 実際にこのコンポーネントの表示に影響する値（行数・並び順に relevant な index）だけを
+ * 比較することで、親（Quotation）が isDirty 等の変化で再レンダリングされても、
+ * 内容が変わっていないテーブルは再レンダリングされないようにする。
+ */
+export const MeisaiTblHeader = memo(
+  MeisaiTblHeaderComponent,
+  (prev, next) =>
+    prev.index === next.index &&
+    prev.sectionNam === next.sectionNam &&
+    prev.editable === next.editable &&
+    prev.sectionFields.fields.length === next.sectionFields.fields.length
+);

@@ -25,7 +25,7 @@ import {
 } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Controller, FormProvider, useFieldArray, useForm, useWatch } from 'react-hook-form';
+import { Controller, FormProvider, useFieldArray, useForm, useFormContext, useWatch } from 'react-hook-form';
 import { SelectElement, TextFieldElement } from 'react-hook-form-mui';
 
 import { serverErrorLog } from '@/app/_lib/funcs';
@@ -54,6 +54,53 @@ import { FirstDialogPage, SecondDialogPage } from './create-tbl-dialogs';
 import { MeisaiLines } from './meisai';
 import { MeisaiTblHeader } from './meisai-tbl-header';
 import { ReadOnlyYenNumberElement } from './yen';
+
+/**
+ * 請求の中計・合計金額を計算してフォームへ反映する非表示コンポーネント。
+ * 明細行数分の useWatch/計算ロジックを Bill 本体から切り離すことで、
+ * 明細の数量等を入力するたびに画面全体（全テーブル・全行）が再レンダリングされるのを防ぐ。
+ * @returns {null} 何も描画しない
+ */
+const BillTotalsCalculator = () => {
+  const { control, setValue } = useFormContext<BillHeadValues>();
+
+  const meisaiHeads = useWatch({ control, name: 'meisaiHeads' });
+  const currentChukei = useWatch({ control, name: 'chukeiAmt' });
+  const currentPreTaxGokei = useWatch({ control, name: 'preTaxGokeiAmt' });
+  const currentZeiAmt = useWatch({ control, name: 'zeiAmt' });
+  const zeiRat = useWatch({ control, name: 'zeiRat' });
+  const currentGokeiAmt = useWatch({ control, name: 'gokeiAmt' });
+
+  useEffect(() => {
+    const chukei = (meisaiHeads ?? []).reduce((acc, item) => acc + (item?.nebikiAftAmt ?? 0), 0);
+
+    if (chukei !== currentChukei) {
+      // shouldDirty: true にして、値が元に戻った際に isDirty が正しく再評価されるようにする
+      setValue('chukeiAmt', chukei, { shouldDirty: true });
+    }
+
+    const preTax = (meisaiHeads ?? [])
+      .filter((d) => d?.zeiFlg)
+      .reduce((acc, item) => acc + (item?.nebikiAftAmt ?? 0), 0);
+    if (preTax !== currentPreTaxGokei) {
+      setValue('preTaxGokeiAmt', preTax, { shouldDirty: true });
+    }
+
+    const zei = Math.round((preTax * (zeiRat ?? 0)) / 100);
+    const currentZei = Math.round(currentZeiAmt ?? 0);
+    if (zei !== currentZei) {
+      setValue('zeiAmt', zei === 0 ? null : zei, { shouldDirty: true });
+    }
+
+    const gokei = chukei + zei;
+
+    if (gokei !== currentGokeiAmt) {
+      setValue('gokeiAmt', gokei, { shouldDirty: true });
+    }
+  }, [meisaiHeads, currentChukei, currentPreTaxGokei, zeiRat, currentZeiAmt, currentGokeiAmt, setValue]);
+
+  return null;
+};
 
 /**
  * 請求書作成画面
@@ -100,19 +147,11 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
     reset,
     getValues,
     setValue,
-    formState: { isDirty, dirtyFields },
+    formState: { isDirty },
   } = billForm;
 
   const meisaiHeadFields = useFieldArray({ control, name: 'meisaiHeads' });
   const kokyaku = useWatch({ control, name: 'aite' });
-
-  // 監視
-  const meisaiHeads = useWatch({ control, name: 'meisaiHeads' });
-  const currentChukei = useWatch({ control, name: 'chukeiAmt' });
-  const currentPreTaxGokei = useWatch({ control, name: 'preTaxGokeiAmt' });
-  const currentZeiAmt = useWatch({ control, name: 'zeiAmt' });
-  const zeiRat = useWatch({ control, name: 'zeiRat' });
-  const currentGokeiAmt = useWatch({ control, name: 'gokeiAmt' });
 
   // context
   const { setIsDirty /*setLock*/ } = useDirty();
@@ -144,16 +183,22 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
   /* useEffect ------------------------------------------------------------ */
   // 初期表示とログインユーザを取得とセット
   useEffect(() => {
+    let cancelled = false;
+
     const getOptions = async () => {
       try {
         const [users, sts] = await Promise.all([getUsersSelection(), getBillingStsSelection()]);
+        if (cancelled) return;
         setOptions({ users: users, sts: sts });
       } catch (e) {
+        if (cancelled) return;
         setIsError(e instanceof Error ? e : new Error(String(e)));
+      } finally {
+        if (!cancelled) {
+          setIsLoading(false);
+        }
       }
     };
-
-    getOptions();
 
     if (isNew) {
       // 新規なら入力者をログインアカウントから取得する
@@ -164,38 +209,13 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
       // 編集でログインユーザがあるときロックデータを確認する
       // if (user && bill.seikyuHeadId) asyncProcess();
     }
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 5000); // setValue待ち
+
+    getOptions();
+
+    return () => {
+      cancelled = true;
+    };
   }, [user, isNew, bill, setValue]);
-
-  // 見積全体計算
-  useEffect(() => {
-    const chukei = (meisaiHeads ?? []).reduce((acc, item) => acc + (item?.nebikiAftAmt ?? 0), 0);
-
-    if (chukei !== currentChukei) {
-      setValue('chukeiAmt', chukei, { shouldDirty: false });
-    }
-
-    const preTax = (meisaiHeads ?? [])
-      .filter((d) => d?.zeiFlg)
-      .reduce((acc, item) => acc + (item?.nebikiAftAmt ?? 0), 0);
-    if (preTax !== currentPreTaxGokei) {
-      setValue('preTaxGokeiAmt', preTax, { shouldDirty: false });
-    }
-
-    const zei = Math.round((preTax * (zeiRat ?? 0)) / 100);
-    const currentZei = Math.round(currentZeiAmt ?? 0);
-    if (zei !== currentZei) {
-      setValue('zeiAmt', zei === 0 ? null : zei, { shouldDirty: false });
-    }
-
-    const gokei = chukei + zei;
-
-    if (gokei !== currentGokeiAmt) {
-      setValue('gokeiAmt', gokei, { shouldDirty: false });
-    }
-  }, [meisaiHeads, currentChukei, currentPreTaxGokei, zeiRat, currentZeiAmt, currentGokeiAmt, setValue]);
 
   // 変更あるかどうか
   useEffect(() => {
@@ -253,6 +273,7 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
             <Button onClick={() => window.close()}>閉じる</Button>
           </Grid2>
           <FormProvider {...billForm}>
+            <BillTotalsCalculator />
             <form onSubmit={handleSubmit(onSubmit)}>
               <Paper variant="outlined">
                 <Grid2
@@ -486,13 +507,13 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
                             meisaiHeadFields.append({
                               juchuHeadId: null,
                               juchuKizaiHeadId: null,
-                              koenNam: null,
-                              koenbashoNam: null,
-                              kokyakuTantoNam: null,
+                              koenNam: '',
+                              koenbashoNam: '',
+                              kokyakuTantoNam: '',
                               nebikiAmt: null,
                               nebikiAftAmt: null,
                               seikyuRange: { strt: null, end: null },
-                              seikyuMeisaiHeadNam: null,
+                              seikyuMeisaiHeadNam: '',
                               zeiFlg: true,
                               meisai: [],
                             })
