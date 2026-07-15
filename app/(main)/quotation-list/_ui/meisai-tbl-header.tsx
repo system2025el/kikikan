@@ -405,14 +405,18 @@ const MeisaiTblHeaderComponent = ({
                 }}
                 onBlur={(e) => {
                   const rawValue = e.target.value.replace(/[¥,]/g, '');
-                  const numericValue = Math.abs(Number(rawValue));
+                  // 空欄のまま何も入力されなかった場合は 0 ではなく null に戻し、
+                  // 未編集の値が誤って dirty 扱いになるのを防ぐ
+                  const numericValue = rawValue === '' ? null : Math.abs(Number(rawValue));
                   field.onChange(numericValue);
                   setEditingIndex(null);
                 }}
                 onChange={(e) => {
                   const raw = e.target.value.replace(/[^\d]/g, '');
                   if (/^\d*$/.test(raw)) {
-                    field.onChange(Number(raw));
+                    // 空欄になった場合は 0 ではなく null にし、値が0の状態から
+                    // バックスペースで消しても表示が0に戻ってしまわないようにする
+                    field.onChange(raw === '' ? null : Number(raw));
                     e.target.value = raw;
                   }
                 }}

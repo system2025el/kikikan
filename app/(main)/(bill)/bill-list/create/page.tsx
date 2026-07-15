@@ -43,10 +43,15 @@ const Page = async ({ searchParams }: { searchParams: Promise<{ [key: string]: s
           }, 0)
       : 0;
 
+  const zeiRat = 10;
+  // BillTotalsCalculatorと同じ式で計算し、開いた直後からisDirtyが誤ってtrueにならないようにする
+  const zeiAmt = Math.round((preTax * zeiRat) / 100);
+
   const bill: BillHeadValues = {
     aite: { id: custs.kokyakuId, nam: custs.kokyakuNam },
     // seikyuDat: new Date(toJapanTimeStampString()),
     seikyuDat: new Date(),
+    seikyuHeadNam: '',
     adrPost: custs.adrPost.trim(),
     adrShozai: custs.adrShozai,
     adrTatemono: custs.adrTatemono,
@@ -61,8 +66,9 @@ const Page = async ({ searchParams }: { searchParams: Promise<{ [key: string]: s
       : [],
     chukeiAmt: chukei,
     preTaxGokeiAmt: preTax,
-    zeiRat: 10,
-    gokeiAmt: chukei,
+    zeiRat,
+    zeiAmt: zeiAmt === 0 ? null : zeiAmt,
+    gokeiAmt: chukei + zeiAmt,
   };
   return <Bill isNew={true} bill={bill} />;
 };

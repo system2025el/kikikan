@@ -103,28 +103,46 @@ export const getFilteredBills = async (
  */
 export const getChosenBill = async (seikyuId: number) => {
   // 明細のデータ変換をする
-  const transformMeisaiHead = (head: SeikyuMeisaiHead, meisais: SeikyuMeisai[]) => ({
-    juchuHeadId: head.juchu_head_id,
-    juchuKizaiHeadId: head.juchu_kizai_head_id,
-    seikyuMeisaiHeadId: head.seikyu_meisai_head_id,
-    seikyuMeisaiHeadNam: head.seikyu_meisai_head_nam,
-    seikyuRange: {
-      strt: head.seikyu_str_dat ? new Date(head.seikyu_str_dat) : null,
-      end: head.seikyu_end_dat ? new Date(head.seikyu_end_dat) : null,
-    },
-    koenNam: head.koen_nam,
-    koenbashoNam: head.koenbasho_nam,
-    kokyakuTantoNam: head.kokyaku_tanto_nam,
-    nebikiAmt: head.nebiki_amt,
-    zeiFlg: Boolean(head.zei_flg),
-    meisai: meisais.map((m) => ({
-      id: m.seikyu_meisai_id,
-      nam: m.seikyu_meisai_nam,
-      qty: m.meisai_qty,
-      honbanbiQty: m.meisai_honbanbi_qty,
-      tankaAmt: m.meisai_tanka_amt,
-    })),
-  });
+  // shokeiAmt（明細行・明細ヘッド）とnebikiAftAmt（明細ヘッド）はDBに保存されておらず、
+  // 常に数量・本番日数・単価から算出される値のため、画面側の計算コンポーネント
+  // （MeisaiRowShokeiCalculator・MeisaiTblShokeiCalculator）と同じ式でここでも計算し、
+  // 読み込み直後から値が一致する（＝isDirtyが誤ってtrueにならない）ようにする
+  const transformMeisaiHead = (head: SeikyuMeisaiHead, meisais: SeikyuMeisai[]) => {
+    const meisaiValues = meisais.map((m) => {
+      const qty = Number(m.meisai_qty) || 0;
+      const honbanbiQty = Number(m.meisai_honbanbi_qty) || 0;
+      const tankaAmt = Number(m.meisai_tanka_amt) || 0;
+      return {
+        id: m.seikyu_meisai_id,
+        nam: m.seikyu_meisai_nam ?? '',
+        qty: m.meisai_qty,
+        honbanbiQty: m.meisai_honbanbi_qty,
+        tankaAmt: m.meisai_tanka_amt,
+        shokeiAmt: Math.round((qty * (honbanbiQty * 1000) * tankaAmt) / 1000),
+      };
+    });
+    const shokeiAmt = meisaiValues.reduce((acc, item) => acc + item.shokeiAmt, 0);
+    const nebikiAftAmt = shokeiAmt - (head.nebiki_amt ?? 0);
+
+    return {
+      juchuHeadId: head.juchu_head_id,
+      juchuKizaiHeadId: head.juchu_kizai_head_id,
+      seikyuMeisaiHeadId: head.seikyu_meisai_head_id,
+      seikyuMeisaiHeadNam: head.seikyu_meisai_head_nam ?? '',
+      seikyuRange: {
+        strt: head.seikyu_str_dat ? new Date(head.seikyu_str_dat) : null,
+        end: head.seikyu_end_dat ? new Date(head.seikyu_end_dat) : null,
+      },
+      koenNam: head.koen_nam ?? '',
+      koenbashoNam: head.koenbasho_nam ?? '',
+      kokyakuTantoNam: head.kokyaku_tanto_nam ?? '',
+      nebikiAmt: head.nebiki_amt,
+      shokeiAmt,
+      nebikiAftAmt,
+      zeiFlg: Boolean(head.zei_flg),
+      meisai: meisaiValues,
+    };
+  };
   try {
     // 見積ヘッドの取得
     const { data: seikyuData, error: seikyuError } = await selectChosenSeikyu(seikyuId);
@@ -179,19 +197,28 @@ export const getChosenBill = async (seikyuId: number) => {
     //   return acc;
     // }, initialKbnMeisais);
 
+    // 中計・消費税対象合計・消費税・請求金額も同様にDBへ保存されておらず、
+    // BillTotalsCalculatorと同じ式で算出する
+    const chukeiAmt = meisaisList.reduce((acc, item) => acc + (item?.nebikiAftAmt ?? 0), 0);
+    const preTaxGokeiAmt = meisaisList
+      .filter((d) => d?.zeiFlg)
+      .reduce((acc, item) => acc + (item?.nebikiAftAmt ?? 0), 0);
+    const zeiAmt = Math.round((preTaxGokeiAmt * (seikyuData.zei_rat ?? 0)) / 100);
+    const gokeiAmt = chukeiAmt + zeiAmt;
+
     // 見積の全情報
     const allData: BillHeadValues = {
       seikyuHeadId: seikyuData.seikyu_head_id,
       seikyuSts: seikyuData.seikyu_sts,
       seikyuDat: seikyuData.seikyu_dat ? new Date(seikyuData.seikyu_dat) : null,
-      seikyuHeadNam: seikyuData.seikyu_head_nam,
-      kokyaku: seikyuData.kokyaku_nam,
+      seikyuHeadNam: seikyuData.seikyu_head_nam ?? '',
+      kokyaku: seikyuData.kokyaku_nam ?? '',
       nyuryokuUser: seikyuData.nyuryoku_user,
       aite: { id: seikyuData.kokyaku_id ?? FAKE_NEW_ID, nam: seikyuData.kokyaku_nam ?? '' },
-      adrPost: seikyuData.adr_post,
-      adrShozai: seikyuData.adr_shozai,
-      adrTatemono: seikyuData.adr_tatemono,
-      adrSonota: seikyuData.adr_sonota,
+      adrPost: seikyuData.adr_post ?? '',
+      adrShozai: seikyuData.adr_shozai ?? '',
+      adrTatemono: seikyuData.adr_tatemono ?? '',
+      adrSonota: seikyuData.adr_sonota ?? '',
       // seikyuRange:
       //   seikyuData.seikyu_str_dat && seikyuData.seikyu_end_dat
       //     ? { strt: new Date(seikyuData.seikyu_str_dat), end: new Date(seikyuData.seikyu_end_dat) }
@@ -201,6 +228,10 @@ export const getChosenBill = async (seikyuId: number) => {
       // koenbashoNam: seikyuData.koenbasho_nam,
       // seikyuHonbanbiQty: seikyuData.seikyu_honbanbi_qty,
       zeiRat: seikyuData.zei_rat,
+      chukeiAmt,
+      preTaxGokeiAmt,
+      zeiAmt: zeiAmt === 0 ? null : zeiAmt,
+      gokeiAmt,
       meisaiHeads: meisaisList, // 整形済みのデータを代入
     };
     return allData;

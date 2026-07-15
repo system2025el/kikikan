@@ -4,7 +4,7 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Box, Button, Grid2, Stack, TextField, Typography } from '@mui/material';
-import { useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import {
   CheckboxElement,
   Controller,
@@ -21,11 +21,41 @@ import { BillHeadValues } from '../_lib/types';
 import { ReadOnlyYenNumberElement } from './yen';
 
 /**
+ * テーブル1つ分の小計・値引後金額を計算してフォームへ反映する非表示コンポーネント。
+ * テーブル単位でしか監視しないことで、明細行の入力のたびにテーブルヘッダー本体
+ * （＝配下の全行）まで再レンダリングされるのを防ぐ。
+ * @returns {null} 何も描画しない
+ */
+const MeisaiTblShokeiCalculator = ({ index }: { index: number }) => {
+  const { control, setValue } = useFormContext<BillHeadValues>();
+
+  const meisaiList = useWatch({ control, name: `meisaiHeads.${index}.meisai` });
+  const currentShokeiAmt = useWatch({ control, name: `meisaiHeads.${index}.shokeiAmt` });
+  const nebikiAmt = useWatch({ control, name: `meisaiHeads.${index}.nebikiAmt` });
+  const currentNebikiAftAmt = useWatch({ control, name: `meisaiHeads.${index}.nebikiAftAmt` });
+
+  useEffect(() => {
+    const sum = (meisaiList ?? []).reduce((acc, item) => acc + (item.shokeiAmt ?? 0), 0);
+    // shouldDirty: true にして、値が元に戻った際に isDirty が正しく再評価されるようにする
+    if (sum !== (Number(currentShokeiAmt) || 0)) {
+      setValue(`meisaiHeads.${index}.shokeiAmt`, sum, { shouldDirty: true });
+    }
+
+    const nebikiAft = sum - (nebikiAmt ?? 0);
+    if (nebikiAft !== (Number(currentNebikiAftAmt) || 0)) {
+      setValue(`meisaiHeads.${index}.nebikiAftAmt`, nebikiAft, { shouldDirty: true });
+    }
+  }, [meisaiList, currentShokeiAmt, nebikiAmt, currentNebikiAftAmt, index, setValue]);
+
+  return null;
+};
+
+/**
  * 請求の明細ヘッダUIコンポーネント
  * @param param0
  * @returns 請求の明細ヘッダUIコンポーネント
  */
-export const MeisaiTblHeader = ({
+const MeisaiTblHeaderComponent = ({
   index,
   fields,
   editable,
@@ -42,17 +72,7 @@ export const MeisaiTblHeader = ({
     fields.move(index, index + direction);
   };
 
-  const { control, setValue } = useFormContext<BillHeadValues>();
-
-  // 明細の監視
-  const meisaiList = useWatch({
-    control,
-    name: `meisaiHeads.${index}.meisai`,
-  });
-
-  const currentShokeiAmt = useWatch({ control, name: `meisaiHeads.${index}.shokeiAmt` });
-  const nebikiAmt = useWatch({ control, name: `meisaiHeads.${index}.nebikiAmt` });
-  const currentNebikiAftAmt = useWatch({ control, name: `meisaiHeads.${index}.nebikiAftAmt` });
+  const { control, setValue, getValues } = useFormContext<BillHeadValues>();
 
   /* ref */
   const inputRef = useRef<HTMLInputElement>(null);
@@ -60,6 +80,7 @@ export const MeisaiTblHeader = ({
   /* 一括変更ボタン押下 */
   const handleBulkChange = () => {
     const newValue = Number(inputRef.current?.value);
+    const meisaiList = getValues(`meisaiHeads.${index}.meisai`);
     if (!inputRef.current?.value || isNaN(newValue) || !meisaiList) return;
 
     const updatedMeisai = meisaiList.map((item) => ({
@@ -73,20 +94,9 @@ export const MeisaiTblHeader = ({
     });
   };
 
-  useEffect(() => {
-    const sum = (meisaiList ?? []).reduce((acc, item) => acc + (item.shokeiAmt ?? 0), 0);
-    if (sum !== (Number(currentShokeiAmt) || 0)) {
-      setValue(`meisaiHeads.${index}.shokeiAmt`, sum, { shouldDirty: false });
-    }
-
-    const nebikiAft = sum - (nebikiAmt ?? 0);
-    if (nebikiAft !== (Number(currentNebikiAftAmt) || 0)) {
-      setValue(`meisaiHeads.${index}.nebikiAftAmt`, nebikiAft, { shouldDirty: false });
-    }
-  }, [meisaiList, currentShokeiAmt, nebikiAmt, currentNebikiAftAmt, index, setValue]);
-
   return (
     <Box border={1} borderColor={'divider'} p={1}>
+      <MeisaiTblShokeiCalculator index={index} />
       <Grid2 container alignItems={'end'} my={0.5}>
         <Grid2 size={4} sx={styles.container}>
           <TextFieldElement
@@ -334,14 +344,18 @@ export const MeisaiTblHeader = ({
                 }}
                 onBlur={(e) => {
                   const rawValue = e.target.value.replace(/[¥,]/g, '');
-                  const numericValue = Math.abs(Number(rawValue));
+                  // 空欄のまま何も入力されなかった場合は 0 ではなく null に戻し、
+                  // 未編集の値が誤って dirty 扱いになるのを防ぐ
+                  const numericValue = rawValue === '' ? null : Math.abs(Number(rawValue));
                   field.onChange(numericValue);
                   setIsEditing(false);
                 }}
                 onChange={(e) => {
                   const raw = e.target.value.replace(/[^\d]/g, '');
                   if (/^\d*$/.test(raw)) {
-                    field.onChange(Number(raw));
+                    // 空欄になった場合は 0 ではなく null にし、値が0の状態から
+                    // バックスペースで消しても表示が0に戻ってしまわないようにする
+                    field.onChange(raw === '' ? null : Number(raw));
                     e.target.value = raw;
                   }
                 }}
@@ -397,6 +411,21 @@ export const MeisaiTblHeader = ({
     </Box>
   );
 };
+
+/**
+ * fields（useFieldArrayの戻り値）は親が再レンダリングされるたびに
+ * 新しいオブジェクト参照になるため、既定の shallow compare では memo が効かない。
+ * 実際にこのコンポーネントの表示に影響する値（行数・並び順に relevant な index）だけを
+ * 比較することで、親（Bill）が isDirty 等の変化で再レンダリングされても、
+ * 内容が変わっていないテーブルは再レンダリングされないようにする。
+ */
+export const MeisaiTblHeader = memo(
+  MeisaiTblHeaderComponent,
+  (prev, next) =>
+    prev.index === next.index &&
+    prev.editable === next.editable &&
+    prev.fields.fields.length === next.fields.fields.length
+);
 
 /* style
 ---------------------------------------------------------------------------------------------------- */
