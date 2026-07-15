@@ -168,13 +168,6 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
   const [snackBarOpen, setSnackBarOpen] = useState(false);
   /** スナックバーのメッセージ */
   const [snackBarMessage, setSnackBarMessage] = useState('');
-  /** 編集内容が未保存ダイアログ制御 */
-  // const [dirtyOpen, setDirtyOpen] = useState(false);
-
-  /** ロックデータ */
-  //const [lockData, setLockData] = useState<LockValues | null>(null);
-  /** 全体の編集状態 */
-  //const [editable, setEditable] = useState(isNew ? true : false);
 
   /** 値引きの編集状態 */
   const [nebikiEditing, setNebikiEditing] = useState(false);
@@ -232,51 +225,6 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
     setIsLoading(false);
   };
 
-  /** 編集モード変更 */
-  // const handleEdit = async () => {
-  //   // 編集→閲覧
-  //   if (editable) {
-  //     if (isDirty) {
-  //       setDirtyOpen(true);
-  //       return;
-  //     }
-  //     await delLock(2, quot.mituHeadId ?? 0);
-  //     setLockData(null);
-  //     setEditable(false);
-  //     // 閲覧→編集
-  //   } else {
-  //     if (!user) return;
-  //     const lockData = await getLock(2, quot.mituHeadId ?? 0);
-  //     setLockData(lockData);
-  //     if (lockData === null) {
-  //       await addLock(2, quot.mituHeadId ?? 0, new Date().toISOString(), user.name, user.email);
-  //       const newLockData = await getLock(2, quot.mituHeadId ?? 0);
-  //       setLockData(newLockData);
-  //       setEditable(true);
-  //     } else if (lockData !== null && lockData.addUser === user.name) {
-  //       setEditable(true);
-  //     }
-  //   }
-  // };
-
-  /**
-   * 警告ダイアログの押下ボタンによる処理
-   * @param result 結果
-   */
-  // const handleResultDialog = async (result: boolean) => {
-  //   if (result) {
-  //     if (!isNew) {
-  //       //await delLock(2, quot.mituHeadId ?? 0);
-  //       //setLockData(null);
-  //     }
-  //     //setEditable(false);
-  //     reset();
-  //     setDirtyOpen(false);
-  //   } else {
-  //     setDirtyOpen(false);
-  //   }
-  // };
-
   /* useEffect ------------------------------------------------------------ */
   /** 初期表示とログインユーザを取得とセット */
   useEffect(() => {
@@ -302,27 +250,11 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
       }
     };
 
-    /** ロック確認 */
-    // const asyncProcess = async () => {
-    //   const lockData = await getLock(2, quot.mituHeadId ?? 0);
-    //   setLockData(lockData);
-    //   if (lockData === null) {
-    //     await addLock(2, quot.mituHeadId ?? 0, new Date().toISOString(), user?.name ?? '', user?.email ?? '');
-    //     const newLockData = await getLock(2, quot.mituHeadId ?? 0);
-    //     setLockData(newLockData);
-    //   } else if (lockData !== null && lockData.addUser !== user?.name) {
-    //     setEditable(false);
-    //   }
-    // };
-
     if (isNew) {
       // 新規なら入力者をログインアカウントから取得する
       if (user?.name) {
         setValue('nyuryokuUser', user.name);
       }
-    } else {
-      // 編集でログインユーザがあるときロックデータを確認する
-      //if (user && quot.mituHeadId) asyncProcess();
     }
 
     getOptions();
@@ -331,11 +263,6 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
       cancelled = true;
     };
   }, [user, isNew, quot, setValue]);
-
-  // // ロック
-  // useEffect(() => {
-  //   setLock(lockData);
-  // }, [lockData, setLock]);
 
   // 変更あるかどうか
   useEffect(() => {
@@ -400,34 +327,6 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
     <PermissionGuard category={'juchu'} required={isNew ? permission.juchu_upd : permission.juchu_ref}>
       <Container disableGutters sx={{ minWidth: '100%', pb: 10 }} maxWidth={'xl'}>
         <Grid2 container spacing={4} display={'flex'} justifyContent={'end'} mb={1}>
-          {/* {lockData !== null && lockData.addUser !== user?.name && (
-            <Grid2 container alignItems={'center'} spacing={2}>
-              <Typography>{lockData.addDat && toJapanTimeString(new Date(lockData.addDat))}</Typography>
-              <Typography>{lockData.addUser}</Typography>
-              <Typography>編集中</Typography>
-            </Grid2>
-          )} */}
-          {/* {fixFlag && (
-          <Box display={'flex'} alignItems={'center'}>
-            <Typography>出庫済</Typography>
-          </Box>
-        )} */}
-          {/* <Grid2 container alignItems={'center'} spacing={1}>
-            {!editable || (lockData !== null && lockData?.addUser !== user?.name) ? (
-              <Typography>閲覧モード</Typography>
-            ) : (
-              <Typography>編集モード</Typography>
-            )}
-            <Button
-              disabled={
-                ((lockData && lockData?.addUser !== user?.name ? true : false) && isNew) ||
-                user?.permission.juchu === permission.juchu_ref
-              }
-              onClick={handleEdit}
-            >
-              変更
-            </Button>
-          </Grid2> */}
           <Button onClick={() => window.close()}>閉じる</Button>
         </Grid2>
         <FormProvider {...quotForm}>
