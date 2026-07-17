@@ -83,7 +83,7 @@ export const getKeisho = async (kokyakuId: number) => {
 };
 
 /**
- * 員数票PDF用データ取得
+ * 員数表PDF用データ取得
  * @param juchuHeadId 受注ヘッダーid
  * @param juchuKizaiHeadIds 受注機材ヘッダーid
  * @param nyushukoBashoId 入出庫場所id
