@@ -810,10 +810,10 @@ export const copyJuchuKizaiHeadMeisai = async (
     };
 
     // 受注機材ヘッダー追加
-    const headResult = await addJuchuKizaiHead(newJuchuKizaiHeadId, newJuchuKizaiHeadData, 1, userNam, connection);
+    await addJuchuKizaiHead(newJuchuKizaiHeadId, newJuchuKizaiHeadData, 1, userNam, connection);
 
     // 受注機材入出庫追加
-    const nyushukoResult = await addJuchuKizaiNyushuko(
+    await addJuchuKizaiNyushuko(
       juchuHeadId,
       newJuchuKizaiHeadId,
       data.kicsShukoDat,
@@ -852,7 +852,7 @@ export const copyJuchuKizaiHeadMeisai = async (
       },
     ];
     const mergeHonbanbiData: CopyJuchuKizaiHonbanbiValues[] = [...addJuchuSiyouHonbanbiData, ...addJuchuHonbanbiData];
-    const addHonbanbiResult = await addAllHonbanbi(
+    await addAllHonbanbi(
       juchuHeadId,
       newJuchuKizaiHeadId,
       mergeHonbanbiData,
@@ -877,10 +877,10 @@ export const copyJuchuKizaiHeadMeisai = async (
       }));
 
       // 受注機材明細追加
-      const addMeisaiResult = await addJuchuKizaiMeisai(newJuchuKizaiMeisai, userNam, connection);
+      await addJuchuKizaiMeisai(newJuchuKizaiMeisai, userNam, connection);
 
       // 機材入出庫伝票追加
-      const addNyushukoDenResult = await addNyushukoDen(
+      await addNyushukoDen(
         newJuchuKizaiHeadData,
         newJuchuKizaiMeisai,
         userNam,
@@ -905,136 +905,54 @@ export const copyJuchuKizaiHeadMeisai = async (
       }));
 
       // 受注コンテナ明細追加
-      const addCtnMeisaiResult = await addJuchuContainerMeisai(newJuchuCtnMeisai, userNam, connection);
+      await addJuchuContainerMeisai(newJuchuCtnMeisai, userNam, connection);
 
       // コンテナ入出庫伝票追加
       if (data.kicsShukoDat) {
         // コンテナ出庫伝票追加(KICS)
-        const addKicsCtnShukoDenResult = await addCtnShukoDen(
-          newJuchuCtnMeisai,
-          data.kicsShukoDat,
-          1,
-          userNam,
-          connection
-        );
+        await addCtnShukoDen(newJuchuCtnMeisai, data.kicsShukoDat, 1, userNam, connection);
       }
 
       if (data.yardShukoDat) {
         // コンテナ出庫伝票追加(YARD)
-        const addYardCtnShukoDenResult = await addCtnShukoDen(
-          newJuchuCtnMeisai,
-          data.yardShukoDat,
-          2,
-          userNam,
-          connection
-        );
+        await addCtnShukoDen(newJuchuCtnMeisai, data.yardShukoDat, 2, userNam, connection);
       }
 
       if (data.kicsNyukoDat && data.yardNyukoDat) {
         if (data.kicsShukoDat && data.yardShukoDat) {
           // コンテナ入庫伝票追加(KICS)
-          const addKicsCtnNyukoDenResult = await addCtnNyukoDen(
-            newJuchuCtnMeisai,
-            data.kicsNyukoDat,
-            1,
-            1,
-            userNam,
-            connection
-          );
+          await addCtnNyukoDen(newJuchuCtnMeisai, data.kicsNyukoDat, 1, 1, userNam, connection);
 
           // コンテナ入庫伝票追加(YARD)
-          const addYardCtnNyukoDenResult = await addCtnNyukoDen(
-            newJuchuCtnMeisai,
-            data.yardNyukoDat,
-            2,
-            2,
-            userNam,
-            connection
-          );
+          await addCtnNyukoDen(newJuchuCtnMeisai, data.yardNyukoDat, 2, 2, userNam, connection);
         } else if (data.kicsShukoDat && !data.yardShukoDat) {
           // コンテナ入庫伝票追加(KICS)
-          const addKicsCtnNyukoDenResult = await addCtnNyukoDen(
-            newJuchuCtnMeisai,
-            data.kicsNyukoDat,
-            1,
-            1,
-            userNam,
-            connection
-          );
+          await addCtnNyukoDen(newJuchuCtnMeisai, data.kicsNyukoDat, 1, 1, userNam, connection);
         } else if (!data.kicsShukoDat && data.yardShukoDat) {
           // コンテナ入庫伝票追加(YARD)
-          const addYardCtnNyukoDenResult = await addCtnNyukoDen(
-            newJuchuCtnMeisai,
-            data.yardNyukoDat,
-            2,
-            2,
-            userNam,
-            connection
-          );
+          await addCtnNyukoDen(newJuchuCtnMeisai, data.yardNyukoDat, 2, 2, userNam, connection);
         }
       } else if (data.kicsNyukoDat && !data.yardNyukoDat) {
         if (data.kicsShukoDat && data.yardShukoDat) {
           // コンテナ入庫伝票追加(KICS)
-          const addKicsCtnNyukoDenResult = await addCtnNyukoDen(
-            newJuchuCtnMeisai,
-            data.kicsNyukoDat,
-            1,
-            3,
-            userNam,
-            connection
-          );
+          await addCtnNyukoDen(newJuchuCtnMeisai, data.kicsNyukoDat, 1, 3, userNam, connection);
         } else if (data.kicsShukoDat && !data.yardShukoDat) {
           // コンテナ入庫伝票追加(KICS)
-          const addKicsCtnNyukoDenResult = await addCtnNyukoDen(
-            newJuchuCtnMeisai,
-            data.kicsNyukoDat,
-            1,
-            1,
-            userNam,
-            connection
-          );
+          await addCtnNyukoDen(newJuchuCtnMeisai, data.kicsNyukoDat, 1, 1, userNam, connection);
         } else if (!data.kicsShukoDat && data.yardShukoDat) {
           // コンテナ入庫伝票追加(KICS)
-          const addKicsCtnNyukoDenResult = await addCtnNyukoDen(
-            newJuchuCtnMeisai,
-            data.kicsNyukoDat,
-            1,
-            2,
-            userNam,
-            connection
-          );
+          await addCtnNyukoDen(newJuchuCtnMeisai, data.kicsNyukoDat, 1, 2, userNam, connection);
         }
       } else if (!data.kicsNyukoDat && data.yardNyukoDat) {
         if (data.kicsShukoDat && data.yardShukoDat) {
           // コンテナ入庫伝票追加(YARD)
-          const addYardCtnNyukoDenResult = await addCtnNyukoDen(
-            newJuchuCtnMeisai,
-            data.yardNyukoDat,
-            2,
-            3,
-            userNam,
-            connection
-          );
+          await addCtnNyukoDen(newJuchuCtnMeisai, data.yardNyukoDat, 2, 3, userNam, connection);
         } else if (data.kicsShukoDat && !data.yardShukoDat) {
           // コンテナ入庫伝票追加(YARD)
-          const addYardCtnNyukoDenResult = await addCtnNyukoDen(
-            newJuchuCtnMeisai,
-            data.yardNyukoDat,
-            2,
-            1,
-            userNam,
-            connection
-          );
+          await addCtnNyukoDen(newJuchuCtnMeisai, data.yardNyukoDat, 2, 1, userNam, connection);
         } else if (!data.kicsShukoDat && data.yardShukoDat) {
           // コンテナ入庫伝票追加(YARD)
-          const addYardCtnNyukoDenResult = await addCtnNyukoDen(
-            newJuchuCtnMeisai,
-            data.yardNyukoDat,
-            2,
-            2,
-            userNam,
-            connection
-          );
+          await addCtnNyukoDen(newJuchuCtnMeisai, data.yardNyukoDat, 2, 2, userNam, connection);
         }
       }
     }
@@ -1065,7 +983,7 @@ export const copyJuchuKizaiHeadMeisai = async (
       }));
 
       // 移動受注機材明細追加
-      const addIdoDenResult = await addIdoDenJuchu(newIdoDenId, newIdoList, userNam, connection);
+      await addIdoDenJuchu(newIdoDenId, newIdoList, userNam, connection);
     }
 
     await connection.query('COMMIT');
