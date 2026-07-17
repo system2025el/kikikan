@@ -100,12 +100,12 @@ export const NyukoList = (/*props: { shukoData: NyukoTableValues[]}*/) => {
     }
   };
 
-  /* 員数票出力(PDF) ------------------- */
+  /* 員数表出力(PDF) ------------------- */
   // PDFデータ生成フック
   const [printShuko] = usePdf();
 
   /**
-   * 納品書出力ボタン押下
+   * 員数表出力ボタン押下
    */
   const handleOutput = async () => {
     if (isProcessing) return;
@@ -306,7 +306,7 @@ export const NyukoList = (/*props: { shukoData: NyukoTableValues[]}*/) => {
                 <Typography>全{nyukoList ? nyukoList.length : 0}件</Typography>
                 <Box>
                   <Button onClick={handleOutput} disabled={selected.length === 0} loading={isProcessing}>
-                    員数票出力
+                    員数表出力
                   </Button>
                 </Box>
               </Box>

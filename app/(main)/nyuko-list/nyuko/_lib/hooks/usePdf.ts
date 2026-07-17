@@ -51,7 +51,7 @@ export const usePdf = (): [(params: NyukoPdfModel[]) => Promise<Blob>] => {
   const printShuko = async (params: NyukoPdfModel[]): Promise<Blob> => {
     const pdfDoc = await PDFDocument.create();
 
-    const tabTitle = '員数票 - 機材管理';
+    const tabTitle = '員数表 - 機材管理';
     pdfDoc.setTitle(tabTitle);
 
     pdfDoc.registerFontkit(fontkit);
@@ -62,7 +62,7 @@ export const usePdf = (): [(params: NyukoPdfModel[]) => Promise<Blob>] => {
       let page = pdfDoc.addPage();
 
       /* ---------------- ヘッダー：納品書 ---------------- */
-      page.drawText('員　数　票', {
+      page.drawText('員　数　表', {
         x: 257,
         y: 790,
         font: customFont,

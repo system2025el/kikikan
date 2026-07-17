@@ -56,7 +56,7 @@ export const ShukoList = (/*props: { shukoData: ShukoTableValues[] }*/) => {
     custs: [],
     sect: [],
   });
-  // 員数票変換フラグ
+  // 員数表変換フラグ
   const [conversionFlag, setConversionFlag] = useState(false);
   // スナックバー制御
   const [snackBarOpen, setSnackBarOpen] = useState(false);
@@ -316,7 +316,7 @@ export const ShukoList = (/*props: { shukoData: ShukoTableValues[] }*/) => {
                     disabled={user?.permission.nyushuko === permission.nyushuko_ref}
                     sx={{ p: 0.5 }}
                   />
-                  <Typography sx={{ mr: 3 }}>タイトルを「員数票」にする</Typography>
+                  <Typography sx={{ mr: 3 }}>タイトルを「員数表」にする</Typography>
                   <Button
                     onClick={handleOutput}
                     disabled={selected.length === 0 || user?.permission.nyushuko === permission.nyushuko_ref}

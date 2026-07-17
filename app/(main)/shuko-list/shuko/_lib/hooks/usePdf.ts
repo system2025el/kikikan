@@ -50,7 +50,7 @@ export const usePdf = (): [(params: ShukoPdfModel[], conversionFlag: boolean) =>
   const printShuko = async (params: ShukoPdfModel[], conversionFlag: boolean): Promise<Blob> => {
     const pdfDoc = await PDFDocument.create();
 
-    const tabTitle = conversionFlag ? '員数票 - 機材管理' : '納品書 - 機材管理';
+    const tabTitle = conversionFlag ? '員数表 - 機材管理' : '納品書 - 機材管理';
     pdfDoc.setTitle(tabTitle);
 
     pdfDoc.registerFontkit(fontkit);
@@ -61,7 +61,7 @@ export const usePdf = (): [(params: ShukoPdfModel[], conversionFlag: boolean) =>
       let page = pdfDoc.addPage();
 
       /* ---------------- ヘッダー：納品書 ---------------- */
-      const headerText = conversionFlag ? '員　数　票' : '納　品　書';
+      const headerText = conversionFlag ? '員　数　表' : '納　品　書';
       page.drawText(headerText, {
         x: 257,
         y: 790,

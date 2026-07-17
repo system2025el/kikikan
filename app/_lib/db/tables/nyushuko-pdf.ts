@@ -112,7 +112,7 @@ order by
 };
 
 /**
- * 員数票PDF用受注機材データ取得
+ * 員数表PDF用受注機材データ取得
  * @param juchuHeadId 受注ヘッダーid
  * @param juchuKizaiHeadIds 受注機材ヘッダーid
  * @param nyushukoBashoId 入出庫場所id
