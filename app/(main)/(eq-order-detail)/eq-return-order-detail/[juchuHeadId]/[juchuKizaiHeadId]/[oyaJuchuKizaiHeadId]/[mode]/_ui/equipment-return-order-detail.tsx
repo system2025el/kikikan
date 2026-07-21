@@ -39,7 +39,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { addDays, endOfMonth, set, subDays } from 'date-fns';
+import { addDays, addMonths, endOfMonth, set, subDays, subMonths } from 'date-fns';
 import dayjs, { Dayjs } from 'dayjs';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
@@ -785,14 +785,14 @@ export const EquipmentReturnOrderDetail = (props: {
       }
     }
   };
-  // 61日前
+  // 3か月前
   const handleBackDateChange = () => {
-    const date = subDays(new Date(selectDate), 61);
+    const date = subDays(new Date(selectDate), 91);
     handleDateChange(dayjs(date), 'day');
   };
-  // 61日後
+  // 3か月後
   const handleForwardDateChange = () => {
-    const date = addDays(new Date(selectDate), 61);
+    const date = addDays(new Date(selectDate), 91);
     handleDateChange(dayjs(date), 'day');
   };
 
