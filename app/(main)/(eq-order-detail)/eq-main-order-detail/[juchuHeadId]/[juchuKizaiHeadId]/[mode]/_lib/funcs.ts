@@ -189,8 +189,6 @@ export const addJuchuKizaiHead = async (
   };
   try {
     await insertJuchuKizaiHead(newData, connection);
-
-    return true;
   } catch (e) {
     if (e instanceof Error) {
       console.error(`[ERROR] ${e.message}`);
@@ -232,8 +230,15 @@ export const updJuchuKizaiHead = async (
 
   try {
     await updateJuchuKizaiHead(updateData, connection);
-    return true;
   } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -246,11 +251,20 @@ export const updJuchuKizaiHead = async (
  */
 export const getJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
   try {
-    const /*{ data: eqList, error: eqListError }*/ eqList = await selectJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId);
+    const [/*{ data: eqList, error: eqListError }*/ eqList, { data: eqTanka, error: eqTankaError }] = await Promise.all(
+      [
+        selectJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId),
+        selectJuchuKizaiMeisaiKizaiTanka(juchuHeadId, juchuKizaiHeadId),
+      ]
+    );
     // if (eqListError) {
     //   console.error('getJuchuKizaiMeisai eqList error : ', eqListError);
     //   throw eqListError;
     // }
+    if (eqTankaError) {
+      throw new Error('[selectJuchuKizaiMeisaiKizaiTanka] DBエラー:', { cause: eqTankaError });
+    }
+
     const uniqueIds = new Set();
     const uniqueEqList = eqList.filter((item) => {
       if (uniqueIds.has(item.juchu_kizai_meisai_id)) {
@@ -266,14 +280,6 @@ export const getJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId:
 
     if (mKizaiError) {
       throw new Error('[selectMeisaiEqts] DBエラー:', { cause: mKizaiError });
-    }
-
-    const { data: eqTanka, error: eqTankaError } = await selectJuchuKizaiMeisaiKizaiTanka(
-      juchuHeadId,
-      juchuKizaiHeadId
-    );
-    if (eqTankaError) {
-      throw new Error('[selectJuchuKizaiMeisaiKizaiTanka] DBエラー:', { cause: eqTankaError });
     }
 
     const juchuKizaiMeisaiData: JuchuKizaiMeisaiValues[] = uniqueEqList.map((d, i) => ({
@@ -355,10 +361,10 @@ export const getIdoJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHead
       shozokuNam: d.shozoku_nam ?? '',
       kizaiId: d.kizai_id ?? 0,
       kizaiNam: d.kizai_nam ?? '',
-      kizaiQty: d.kizai_qty ?? 0,
-      planKizaiQty: d.plan_kizai_qty ?? 0,
-      planYobiQty: d.plan_yobi_qty ?? 0,
-      planQty: d.plan_qty ?? 0,
+      kizaiQty: Number(d.kizai_qty ?? 0),
+      planKizaiQty: Number(d.plan_kizai_qty ?? 0),
+      planYobiQty: Number(d.plan_yobi_qty ?? 0),
+      planQty: Number(d.plan_qty ?? 0),
       delFlag: false,
       saveFlag: true,
     }));
@@ -485,6 +491,14 @@ export const delJuchuKizaiMeisai = async (juchuKizaiMeisaiData: JuchuKizaiMeisai
       await deleteJuchuKizaiMeisai(data, connection);
     }
   } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -532,7 +546,6 @@ export const addJuchuContainerMeisai = async (
 
   try {
     await insertJuchuContainerMeisai(mergeData, connection);
-    return true;
   } catch (e) {
     if (e instanceof Error) {
       console.error(`[ERROR] ${e.message}`);
@@ -591,7 +604,6 @@ export const updJuchuContainerMeisai = async (
     for (const data of mergeData) {
       await updateJuchuContainerMeisai(data, connection);
     }
-    return true;
   } catch (e) {
     if (e instanceof Error) {
       console.error(`[ERROR] ${e.message}`);
@@ -620,6 +632,14 @@ export const delJuchuContainerMeisai = async (
   try {
     await deleteJuchuContainerMeisai(juchuHeadId, juchuKizaiHeadId, kizaiId, connection);
   } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -715,8 +735,6 @@ export const addNyushukoDen = async (
 
   try {
     await insertNyushukoDen(mergeData, connection);
-
-    return true;
   } catch (e) {
     if (e instanceof Error) {
       console.error(`[ERROR] ${e.message}`);
@@ -929,7 +947,6 @@ export const updNyushukoDen = async (
     for (const data of mergeData) {
       await updateNyushukoDenFromKizaiMeisai(data, connection);
     }
-    return true;
   } catch (e) {
     if (e instanceof Error) {
       console.error(`[ERROR] ${e.message}`);
@@ -1187,6 +1204,14 @@ export const delNyushukoDen = async (juchuKizaiMeisaiData: JuchuKizaiMeisaiValue
       await deleteNyushukoDen(data, connection);
     }
   } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -1202,8 +1227,15 @@ export const delShukoDen = async (juchuKizaiMeisaiData: JuchuKizaiMeisaiValues[]
     for (const data of deleteData) {
       await deleteShukoDen(data, connection);
     }
-    return true;
   } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -1226,6 +1258,14 @@ export const delKicsOrYardShukoDen = async (
       await deleteKicsOrYardShukoDen(data, connection);
     }
   } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -1248,6 +1288,14 @@ export const delKicsOrYardNyukoDen = async (
       await deleteKicsOrYardNyukoDen(data, connection);
     }
   } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -1319,8 +1367,6 @@ export const addCtnNyushukoDen = async (
 
   try {
     await insertNyushukoDen(mergeData, connection);
-
-    return true;
   } catch (e) {
     if (e instanceof Error) {
       console.error(`[ERROR] ${e.message}`);
@@ -1384,8 +1430,6 @@ export const addCtnShukoDen = async (
 
   try {
     await insertNyushukoDen(mergeData, connection);
-
-    return true;
   } catch (e) {
     if (e instanceof Error) {
       console.error(`[ERROR] ${e.message}`);
@@ -1433,8 +1477,6 @@ export const addCtnNyukoDen = async (
 
   try {
     await insertNyushukoDen(newCtnNyukoData, connection);
-
-    return true;
   } catch (e) {
     if (e instanceof Error) {
       console.error(`[ERROR] ${e.message}`);
@@ -1516,7 +1558,6 @@ export const updCtnNyushukoDen = async (
     for (const data of mergeData) {
       await updateNyushukoDen(data, connection);
     }
-    return true;
   } catch (e) {
     if (e instanceof Error) {
       console.error(`[ERROR] ${e.message}`);
@@ -1582,8 +1623,6 @@ export const updCtnShukoDen = async (
     for (const data of mergeData) {
       await updateNyushukoDen(data, connection);
     }
-
-    return true;
   } catch (e) {
     if (e instanceof Error) {
       console.error(`[ERROR] ${e.message}`);
@@ -1624,8 +1663,6 @@ export const updCtnNyukoDen = async (
     for (const data of updCtnNyukoData) {
       await updateNyushukoDen(data, connection);
     }
-
-    return true;
   } catch (e) {
     if (e instanceof Error) {
       console.error(`[ERROR] ${e.message}`);
@@ -1786,8 +1823,15 @@ export const delCtnNyushukoDen = async (
     for (const data of deleteData) {
       await deleteNyushukoDen(data, connection);
     }
-    return true;
   } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -1814,8 +1858,15 @@ export const delKicsOrYardCtnNyukoDen = async (
     for (const data of deleteData) {
       await deleteKicsOrYardNyukoDen(data, connection);
     }
-    return true;
   } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -1842,6 +1893,14 @@ export const updShukoResult = async (
       );
     }
   } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -1870,6 +1929,14 @@ export const delNyushukoResult = async (juchuKizaiMeisaiData: JuchuKizaiMeisaiVa
       );
     }
   } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -1897,8 +1964,15 @@ export const delShukoResult = async (juchuKizaiMeisaiData: JuchuKizaiMeisaiValue
         connection
       );
     }
-    return true;
   } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -1932,8 +2006,15 @@ export const delNyukoResult = async (
         connection
       );
     }
-    return true;
   } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -2010,7 +2091,6 @@ export const addIdoDenJuchu = async (
 
   try {
     await insertIdoDenJuchu(mergeData, connection);
-    return true;
   } catch (e) {
     if (e instanceof Error) {
       console.error(`[ERROR] ${e.message}`);
@@ -2078,7 +2158,6 @@ export const updIdoDenJuchu = async (
     for (const data of updateData) {
       await updateIdoDenJuchu(data, connection);
     }
-    return true;
   } catch (e) {
     if (e instanceof Error) {
       console.error(`[ERROR] ${e.message}`);
@@ -2100,6 +2179,14 @@ export const delIdoDenJuchu = async (idoDenIds: number[], connection: PoolClient
   try {
     await deleteIdoDenJuchu(idoDenIds, connection);
   } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -2166,8 +2253,15 @@ export const confirmHonbanbi = async (
       }
       throw error;
     }
-    return true;
   } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -2199,8 +2293,15 @@ export const addHonbanbi = async (
   };
   try {
     await insertHonbanbi(newData, connection);
-    return true;
   } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -2233,8 +2334,15 @@ export const updNyushukoHonbanbi = async (
 
   try {
     await updateNyushukoHonbanbi(updateData, connection);
-    return true;
   } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -2267,8 +2375,15 @@ export const updHonbanbi = async (
 
   try {
     await updateHonbanbi(updateData, connection);
-    return true;
   } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -2295,6 +2410,14 @@ export const delHonbanbi = async (
       connection
     );
   } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -2511,10 +2634,10 @@ export const juchuMeisaiCopy = async (
     const newJuchuKizaiHeadId = JuchuKizaiHeadMaxId ? JuchuKizaiHeadMaxId.juchu_kizai_head_id + 1 : 1;
 
     // 受注機材ヘッダー追加
-    const headResult = await addJuchuKizaiHead(newJuchuKizaiHeadId, juchuKizaiHeadData, 1, userNam, connection);
+    await addJuchuKizaiHead(newJuchuKizaiHeadId, juchuKizaiHeadData, 1, userNam, connection);
 
     // 受注機材入出庫追加
-    const nyushukoResult = await addJuchuKizaiNyushuko(
+    await addJuchuKizaiNyushuko(
       juchuKizaiHeadData.juchuHeadId,
       newJuchuKizaiHeadId,
       juchuKizaiHeadData.kicsShukoDat,
@@ -2553,13 +2676,7 @@ export const juchuMeisaiCopy = async (
       },
     ];
     const mergeHonbanbiData: JuchuKizaiHonbanbiValues[] = [...addJuchuSiyouHonbanbiData, ...addJuchuHonbanbiData];
-    const addHonbanbiResult = await addAllHonbanbi(
-      juchuKizaiHeadData.juchuHeadId,
-      newJuchuKizaiHeadId,
-      mergeHonbanbiData,
-      userNam,
-      connection
-    );
+    await addAllHonbanbi(juchuKizaiHeadData.juchuHeadId, newJuchuKizaiHeadId, mergeHonbanbiData, userNam, connection);
 
     // 並び順
     let dspOrdNum = 1;
@@ -2577,10 +2694,10 @@ export const juchuMeisaiCopy = async (
       }));
 
       // 受注機材明細追加
-      const addMeisaiResult = await addJuchuKizaiMeisai(newJuchuKizaiMeisai, userNam, connection);
+      await addJuchuKizaiMeisai(newJuchuKizaiMeisai, userNam, connection);
 
       // 機材入出庫伝票追加
-      const addNyushukoDenResult = await addNyushukoDen(juchuKizaiHeadData, newJuchuKizaiMeisai, userNam, connection);
+      await addNyushukoDen(juchuKizaiHeadData, newJuchuKizaiMeisai, userNam, connection);
     }
 
     // 受注コンテナ明細
@@ -2596,136 +2713,54 @@ export const juchuMeisaiCopy = async (
       }));
 
       // 受注コンテナ明細追加
-      const addCtnMeisaiResult = await addJuchuContainerMeisai(newJuchuCtnMeisai, userNam, connection);
+      await addJuchuContainerMeisai(newJuchuCtnMeisai, userNam, connection);
 
       // コンテナ入出庫伝票追加
       if (juchuKizaiHeadData.kicsShukoDat) {
         // コンテナ出庫伝票追加(KICS)
-        const addKicsCtnShukoDenResult = await addCtnShukoDen(
-          newJuchuCtnMeisai,
-          juchuKizaiHeadData.kicsShukoDat,
-          1,
-          userNam,
-          connection
-        );
+        await addCtnShukoDen(newJuchuCtnMeisai, juchuKizaiHeadData.kicsShukoDat, 1, userNam, connection);
       }
 
       if (juchuKizaiHeadData.yardShukoDat) {
         // コンテナ出庫伝票追加(YARD)
-        const addYardCtnShukoDenResult = await addCtnShukoDen(
-          newJuchuCtnMeisai,
-          juchuKizaiHeadData.yardShukoDat,
-          2,
-          userNam,
-          connection
-        );
+        await addCtnShukoDen(newJuchuCtnMeisai, juchuKizaiHeadData.yardShukoDat, 2, userNam, connection);
       }
 
       if (juchuKizaiHeadData.kicsNyukoDat && juchuKizaiHeadData.yardNyukoDat) {
         if (juchuKizaiHeadData.kicsShukoDat && juchuKizaiHeadData.yardShukoDat) {
           // コンテナ入庫伝票追加(KICS)
-          const addKicsCtnNyukoDenResult = await addCtnNyukoDen(
-            newJuchuCtnMeisai,
-            juchuKizaiHeadData.kicsNyukoDat,
-            1,
-            1,
-            userNam,
-            connection
-          );
+          await addCtnNyukoDen(newJuchuCtnMeisai, juchuKizaiHeadData.kicsNyukoDat, 1, 1, userNam, connection);
 
           // コンテナ入庫伝票追加(YARD)
-          const addYardCtnNyukoDenResult = await addCtnNyukoDen(
-            newJuchuCtnMeisai,
-            juchuKizaiHeadData.yardNyukoDat,
-            2,
-            2,
-            userNam,
-            connection
-          );
+          await addCtnNyukoDen(newJuchuCtnMeisai, juchuKizaiHeadData.yardNyukoDat, 2, 2, userNam, connection);
         } else if (juchuKizaiHeadData.kicsShukoDat && !juchuKizaiHeadData.yardShukoDat) {
           // コンテナ入庫伝票追加(KICS)
-          const addKicsCtnNyukoDenResult = await addCtnNyukoDen(
-            newJuchuCtnMeisai,
-            juchuKizaiHeadData.kicsNyukoDat,
-            1,
-            1,
-            userNam,
-            connection
-          );
+          await addCtnNyukoDen(newJuchuCtnMeisai, juchuKizaiHeadData.kicsNyukoDat, 1, 1, userNam, connection);
         } else if (!juchuKizaiHeadData.kicsShukoDat && juchuKizaiHeadData.yardShukoDat) {
           // コンテナ入庫伝票追加(YARD)
-          const addYardCtnNyukoDenResult = await addCtnNyukoDen(
-            newJuchuCtnMeisai,
-            juchuKizaiHeadData.yardNyukoDat,
-            2,
-            2,
-            userNam,
-            connection
-          );
+          await addCtnNyukoDen(newJuchuCtnMeisai, juchuKizaiHeadData.yardNyukoDat, 2, 2, userNam, connection);
         }
       } else if (juchuKizaiHeadData.kicsNyukoDat && !juchuKizaiHeadData.yardNyukoDat) {
         if (juchuKizaiHeadData.kicsShukoDat && juchuKizaiHeadData.yardShukoDat) {
           // コンテナ入庫伝票追加(KICS)
-          const addKicsCtnNyukoDenResult = await addCtnNyukoDen(
-            newJuchuCtnMeisai,
-            juchuKizaiHeadData.kicsNyukoDat,
-            1,
-            3,
-            userNam,
-            connection
-          );
+          await addCtnNyukoDen(newJuchuCtnMeisai, juchuKizaiHeadData.kicsNyukoDat, 1, 3, userNam, connection);
         } else if (juchuKizaiHeadData.kicsShukoDat && !juchuKizaiHeadData.yardShukoDat) {
           // コンテナ入庫伝票追加(KICS)
-          const addKicsCtnNyukoDenResult = await addCtnNyukoDen(
-            newJuchuCtnMeisai,
-            juchuKizaiHeadData.kicsNyukoDat,
-            1,
-            1,
-            userNam,
-            connection
-          );
+          await addCtnNyukoDen(newJuchuCtnMeisai, juchuKizaiHeadData.kicsNyukoDat, 1, 1, userNam, connection);
         } else if (!juchuKizaiHeadData.kicsShukoDat && juchuKizaiHeadData.yardShukoDat) {
           // コンテナ入庫伝票追加(KICS)
-          const addKicsCtnNyukoDenResult = await addCtnNyukoDen(
-            newJuchuCtnMeisai,
-            juchuKizaiHeadData.kicsNyukoDat,
-            1,
-            2,
-            userNam,
-            connection
-          );
+          await addCtnNyukoDen(newJuchuCtnMeisai, juchuKizaiHeadData.kicsNyukoDat, 1, 2, userNam, connection);
         }
       } else if (!juchuKizaiHeadData.kicsNyukoDat && juchuKizaiHeadData.yardNyukoDat) {
         if (juchuKizaiHeadData.kicsShukoDat && juchuKizaiHeadData.yardShukoDat) {
           // コンテナ入庫伝票追加(YARD)
-          const addYardCtnNyukoDenResult = await addCtnNyukoDen(
-            newJuchuCtnMeisai,
-            juchuKizaiHeadData.yardNyukoDat,
-            2,
-            3,
-            userNam,
-            connection
-          );
+          await addCtnNyukoDen(newJuchuCtnMeisai, juchuKizaiHeadData.yardNyukoDat, 2, 3, userNam, connection);
         } else if (juchuKizaiHeadData.kicsShukoDat && !juchuKizaiHeadData.yardShukoDat) {
           // コンテナ入庫伝票追加(YARD)
-          const addYardCtnNyukoDenResult = await addCtnNyukoDen(
-            newJuchuCtnMeisai,
-            juchuKizaiHeadData.yardNyukoDat,
-            2,
-            1,
-            userNam,
-            connection
-          );
+          await addCtnNyukoDen(newJuchuCtnMeisai, juchuKizaiHeadData.yardNyukoDat, 2, 1, userNam, connection);
         } else if (!juchuKizaiHeadData.kicsShukoDat && juchuKizaiHeadData.yardShukoDat) {
           // コンテナ入庫伝票追加(YARD)
-          const addYardCtnNyukoDenResult = await addCtnNyukoDen(
-            newJuchuCtnMeisai,
-            juchuKizaiHeadData.yardNyukoDat,
-            2,
-            2,
-            userNam,
-            connection
-          );
+          await addCtnNyukoDen(newJuchuCtnMeisai, juchuKizaiHeadData.yardNyukoDat, 2, 2, userNam, connection);
         }
       }
     }
@@ -2738,19 +2773,13 @@ export const juchuMeisaiCopy = async (
       const newIdoList = idoList.map((d) => ({ ...d, juchuKizaiHeadId: newJuchuKizaiHeadId }));
 
       // 移動受注機材明細追加
-      const addIdoDenResult = await addIdoDenJuchu(newIdoDenId, newIdoList, userNam, connection);
+      await addIdoDenJuchu(newIdoDenId, newIdoList, userNam, connection);
     }
 
     // 受注本番日追加
     if (juchuHonbanbiList.length > 0) {
       for (const data of juchuHonbanbiList) {
-        const addHonbanbiResult = await addHonbanbi(
-          juchuKizaiHeadData.juchuHeadId,
-          newJuchuKizaiHeadId,
-          data,
-          userNam,
-          connection
-        );
+        await addHonbanbi(juchuKizaiHeadData.juchuHeadId, newJuchuKizaiHeadId, data, userNam, connection);
       }
     }
 
@@ -2819,10 +2848,10 @@ export const juchuMeisaiSeparation = async (
     const newJuchuKizaiHeadId = JuchuKizaiHeadMaxId ? JuchuKizaiHeadMaxId.juchu_kizai_head_id + 1 : 1;
 
     // 受注機材ヘッダー追加
-    const headResult = await addJuchuKizaiHead(newJuchuKizaiHeadId, juchuKizaiHeadData, 1, userNam, connection);
+    await addJuchuKizaiHead(newJuchuKizaiHeadId, juchuKizaiHeadData, 1, userNam, connection);
 
     // 受注機材入出庫追加
-    const nyushukoResult = await addJuchuKizaiNyushuko(
+    await addJuchuKizaiNyushuko(
       juchuKizaiHeadData.juchuHeadId,
       newJuchuKizaiHeadId,
       juchuKizaiHeadData.kicsShukoDat,
@@ -2861,13 +2890,7 @@ export const juchuMeisaiSeparation = async (
       },
     ];
     const mergeHonbanbiData: JuchuKizaiHonbanbiValues[] = [...addJuchuSiyouHonbanbiData, ...addJuchuHonbanbiData];
-    const addHonbanbiResult = await addAllHonbanbi(
-      juchuKizaiHeadData.juchuHeadId,
-      newJuchuKizaiHeadId,
-      mergeHonbanbiData,
-      userNam,
-      connection
-    );
+    await addAllHonbanbi(juchuKizaiHeadData.juchuHeadId, newJuchuKizaiHeadId, mergeHonbanbiData, userNam, connection);
 
     // 並び順
     let dspOrdNum = 1;
@@ -2885,10 +2908,10 @@ export const juchuMeisaiSeparation = async (
       }));
 
       // 受注機材明細追加
-      const addMeisaiResult = await addJuchuKizaiMeisai(newJuchuKizaiMeisai, userNam, connection);
+      await addJuchuKizaiMeisai(newJuchuKizaiMeisai, userNam, connection);
 
       // 機材入出庫伝票追加
-      const addNyushukoDenResult = await addNyushukoDen(juchuKizaiHeadData, newJuchuKizaiMeisai, userNam, connection);
+      await addNyushukoDen(juchuKizaiHeadData, newJuchuKizaiMeisai, userNam, connection);
 
       // 元受注機材明細更新
       await updJuchuKizaiMeisai(updateEq, userNam, connection);
@@ -2910,20 +2933,14 @@ export const juchuMeisaiSeparation = async (
       }));
 
       // 受注コンテナ明細追加
-      const addCtnMeisaiResult = await addJuchuContainerMeisai(newJuchuCtnMeisai, userNam, connection);
+      await addJuchuContainerMeisai(newJuchuCtnMeisai, userNam, connection);
 
       // 元受注コンテナ明細更新
       await updJuchuContainerMeisai(updateCtn, userNam, connection);
 
       if (juchuKizaiHeadData.kicsShukoDat) {
         // コンテナ出庫伝票追加(KICS)
-        const addKicsCtnShukoDenResult = await addCtnShukoDen(
-          newJuchuCtnMeisai,
-          juchuKizaiHeadData.kicsShukoDat,
-          1,
-          userNam,
-          connection
-        );
+        await addCtnShukoDen(newJuchuCtnMeisai, juchuKizaiHeadData.kicsShukoDat, 1, userNam, connection);
 
         // 元コンテナ出庫伝票更新(KICS)
         await updCtnShukoDen(updateCtn, juchuKizaiHeadData.kicsShukoDat, 1, userNam, connection);
@@ -2931,13 +2948,7 @@ export const juchuMeisaiSeparation = async (
 
       if (juchuKizaiHeadData.yardShukoDat) {
         // コンテナ出庫伝票追加(YARD)
-        const addYardCtnShukoDenResult = await addCtnShukoDen(
-          newJuchuCtnMeisai,
-          juchuKizaiHeadData.yardShukoDat,
-          2,
-          userNam,
-          connection
-        );
+        await addCtnShukoDen(newJuchuCtnMeisai, juchuKizaiHeadData.yardShukoDat, 2, userNam, connection);
 
         // 元コンテナ出庫伝票更新(YARD)
         await updCtnShukoDen(updateCtn, juchuKizaiHeadData.yardShukoDat, 2, userNam, connection);
@@ -2946,24 +2957,10 @@ export const juchuMeisaiSeparation = async (
       if (juchuKizaiHeadData.kicsNyukoDat && juchuKizaiHeadData.yardNyukoDat) {
         if (juchuKizaiHeadData.kicsShukoDat && juchuKizaiHeadData.yardShukoDat) {
           // コンテナ入庫伝票追加(KICS)
-          const addKicsCtnNyukoDenResult = await addCtnNyukoDen(
-            newJuchuCtnMeisai,
-            juchuKizaiHeadData.kicsNyukoDat,
-            1,
-            1,
-            userNam,
-            connection
-          );
+          await addCtnNyukoDen(newJuchuCtnMeisai, juchuKizaiHeadData.kicsNyukoDat, 1, 1, userNam, connection);
 
           // コンテナ入庫伝票追加(YARD)
-          const addYardCtnNyukoDenResult = await addCtnNyukoDen(
-            newJuchuCtnMeisai,
-            juchuKizaiHeadData.yardNyukoDat,
-            2,
-            2,
-            userNam,
-            connection
-          );
+          await addCtnNyukoDen(newJuchuCtnMeisai, juchuKizaiHeadData.yardNyukoDat, 2, 2, userNam, connection);
 
           // 元コンテナ入庫伝票更新(KICS)
           await updCtnNyukoDen(updateCtn, juchuKizaiHeadData.kicsNyukoDat, 1, 1, userNam, connection);
@@ -2972,27 +2969,13 @@ export const juchuMeisaiSeparation = async (
           await updCtnNyukoDen(updateCtn, juchuKizaiHeadData.yardNyukoDat, 2, 2, userNam, connection);
         } else if (juchuKizaiHeadData.kicsShukoDat && !juchuKizaiHeadData.yardShukoDat) {
           // コンテナ入庫伝票追加(KICS)
-          const addKicsCtnNyukoDenResult = await addCtnNyukoDen(
-            newJuchuCtnMeisai,
-            juchuKizaiHeadData.kicsNyukoDat,
-            1,
-            1,
-            userNam,
-            connection
-          );
+          await addCtnNyukoDen(newJuchuCtnMeisai, juchuKizaiHeadData.kicsNyukoDat, 1, 1, userNam, connection);
 
           // 元コンテナ入庫伝票更新(KICS)
           await updCtnNyukoDen(updateCtn, juchuKizaiHeadData.kicsNyukoDat, 1, 1, userNam, connection);
         } else if (!juchuKizaiHeadData.kicsShukoDat && juchuKizaiHeadData.yardShukoDat) {
           // コンテナ入庫伝票追加(YARD)
-          const addYardCtnNyukoDenResult = await addCtnNyukoDen(
-            newJuchuCtnMeisai,
-            juchuKizaiHeadData.yardNyukoDat,
-            2,
-            2,
-            userNam,
-            connection
-          );
+          await addCtnNyukoDen(newJuchuCtnMeisai, juchuKizaiHeadData.yardNyukoDat, 2, 2, userNam, connection);
 
           // 元コンテナ入庫伝票更新(YARD)
           await updCtnNyukoDen(updateCtn, juchuKizaiHeadData.yardNyukoDat, 2, 2, userNam, connection);
@@ -3000,40 +2983,19 @@ export const juchuMeisaiSeparation = async (
       } else if (juchuKizaiHeadData.kicsNyukoDat && !juchuKizaiHeadData.yardNyukoDat) {
         if (juchuKizaiHeadData.kicsShukoDat && juchuKizaiHeadData.yardShukoDat) {
           // コンテナ入庫伝票追加(KICS)
-          const addKicsCtnNyukoDenResult = await addCtnNyukoDen(
-            newJuchuCtnMeisai,
-            juchuKizaiHeadData.kicsNyukoDat,
-            1,
-            3,
-            userNam,
-            connection
-          );
+          await addCtnNyukoDen(newJuchuCtnMeisai, juchuKizaiHeadData.kicsNyukoDat, 1, 3, userNam, connection);
 
           // 元コンテナ入庫伝票更新(KICS)
           await updCtnNyukoDen(updateCtn, juchuKizaiHeadData.kicsNyukoDat, 1, 3, userNam, connection);
         } else if (juchuKizaiHeadData.kicsShukoDat && !juchuKizaiHeadData.yardShukoDat) {
           // コンテナ入庫伝票追加(KICS)
-          const addKicsCtnNyukoDenResult = await addCtnNyukoDen(
-            newJuchuCtnMeisai,
-            juchuKizaiHeadData.kicsNyukoDat,
-            1,
-            1,
-            userNam,
-            connection
-          );
+          await addCtnNyukoDen(newJuchuCtnMeisai, juchuKizaiHeadData.kicsNyukoDat, 1, 1, userNam, connection);
 
           // 元コンテナ入庫伝票更新(KICS)
           await updCtnNyukoDen(updateCtn, juchuKizaiHeadData.kicsNyukoDat, 1, 1, userNam, connection);
         } else if (!juchuKizaiHeadData.kicsShukoDat && juchuKizaiHeadData.yardShukoDat) {
           // コンテナ入庫伝票追加(KICS)
-          const addKicsCtnNyukoDenResult = await addCtnNyukoDen(
-            newJuchuCtnMeisai,
-            juchuKizaiHeadData.kicsNyukoDat,
-            1,
-            2,
-            userNam,
-            connection
-          );
+          await addCtnNyukoDen(newJuchuCtnMeisai, juchuKizaiHeadData.kicsNyukoDat, 1, 2, userNam, connection);
 
           // 元コンテナ入庫伝票更新(KICS)
           await updCtnNyukoDen(updateCtn, juchuKizaiHeadData.kicsNyukoDat, 1, 2, userNam, connection);
@@ -3041,40 +3003,19 @@ export const juchuMeisaiSeparation = async (
       } else if (!juchuKizaiHeadData.kicsNyukoDat && juchuKizaiHeadData.yardNyukoDat) {
         if (juchuKizaiHeadData.kicsShukoDat && juchuKizaiHeadData.yardShukoDat) {
           // コンテナ入庫伝票追加(YARD)
-          const addYardCtnNyukoDenResult = await addCtnNyukoDen(
-            newJuchuCtnMeisai,
-            juchuKizaiHeadData.yardNyukoDat,
-            2,
-            3,
-            userNam,
-            connection
-          );
+          await addCtnNyukoDen(newJuchuCtnMeisai, juchuKizaiHeadData.yardNyukoDat, 2, 3, userNam, connection);
 
           // 元コンテナ入庫伝票更新(YARD)
           await updCtnNyukoDen(updateCtn, juchuKizaiHeadData.yardNyukoDat, 2, 3, userNam, connection);
         } else if (juchuKizaiHeadData.kicsShukoDat && !juchuKizaiHeadData.yardShukoDat) {
           // コンテナ入庫伝票追加(YARD)
-          const addYardCtnNyukoDenResult = await addCtnNyukoDen(
-            newJuchuCtnMeisai,
-            juchuKizaiHeadData.yardNyukoDat,
-            2,
-            1,
-            userNam,
-            connection
-          );
+          await addCtnNyukoDen(newJuchuCtnMeisai, juchuKizaiHeadData.yardNyukoDat, 2, 1, userNam, connection);
 
           // 元コンテナ入庫伝票更新(YARD)
           await updCtnNyukoDen(updateCtn, juchuKizaiHeadData.yardNyukoDat, 2, 1, userNam, connection);
         } else if (!juchuKizaiHeadData.kicsShukoDat && juchuKizaiHeadData.yardShukoDat) {
           // コンテナ入庫伝票追加(YARD)
-          const addYardCtnNyukoDenResult = await addCtnNyukoDen(
-            newJuchuCtnMeisai,
-            juchuKizaiHeadData.yardNyukoDat,
-            2,
-            2,
-            userNam,
-            connection
-          );
+          await addCtnNyukoDen(newJuchuCtnMeisai, juchuKizaiHeadData.yardNyukoDat, 2, 2, userNam, connection);
 
           // 元コンテナ入庫伝票更新(YARD)
           await updCtnNyukoDen(updateCtn, juchuKizaiHeadData.yardNyukoDat, 2, 2, userNam, connection);
@@ -3090,7 +3031,7 @@ export const juchuMeisaiSeparation = async (
       const newIdoList = idoList.map((d) => ({ ...d, juchuKizaiHeadId: newJuchuKizaiHeadId }));
 
       // 移動受注機材明細追加
-      const addIdoDenResult = await addIdoDenJuchu(newIdoDenId, newIdoList, userNam, connection);
+      await addIdoDenJuchu(newIdoDenId, newIdoList, userNam, connection);
 
       // 元移動受注機材明細更新
       await updIdoDenJuchu(updateIdoList, userNam, connection);
@@ -3099,13 +3040,7 @@ export const juchuMeisaiSeparation = async (
     // 受注本番日追加
     if (juchuHonbanbiList.length > 0) {
       for (const data of juchuHonbanbiList) {
-        const addHonbanbiResult = await addHonbanbi(
-          juchuKizaiHeadData.juchuHeadId,
-          newJuchuKizaiHeadId,
-          data,
-          userNam,
-          connection
-        );
+        await addHonbanbi(juchuKizaiHeadData.juchuHeadId, newJuchuKizaiHeadId, data, userNam, connection);
       }
     }
 
@@ -3180,9 +3115,9 @@ export const saveNewJuchuKizaiHead = async (
     await connection.query('BEGIN');
 
     // 受注機材ヘッダー追加
-    const headResult = await addJuchuKizaiHead(newJuchuKizaiHeadId, data, 1, userNam, connection);
+    await addJuchuKizaiHead(newJuchuKizaiHeadId, data, 1, userNam, connection);
     // 受注機材入出庫追加
-    const nyushukoResult = await addJuchuKizaiNyushuko(
+    await addJuchuKizaiNyushuko(
       data.juchuHeadId,
       newJuchuKizaiHeadId,
       data.kicsShukoDat,
@@ -3220,13 +3155,7 @@ export const saveNewJuchuKizaiHead = async (
       },
     ];
     const mergeHonbanbiData: JuchuKizaiHonbanbiValues[] = [...addJuchuSiyouHonbanbiData, ...addJuchuHonbanbiData];
-    const addHonbanbiResult = await addAllHonbanbi(
-      data.juchuHeadId,
-      newJuchuKizaiHeadId,
-      mergeHonbanbiData,
-      userNam,
-      connection
-    );
+    await addAllHonbanbi(data.juchuHeadId, newJuchuKizaiHeadId, mergeHonbanbiData, userNam, connection);
 
     await connection.query('COMMIT');
 
@@ -3243,7 +3172,7 @@ export const saveNewJuchuKizaiHead = async (
       console.error(e);
     }
     await connection.query('ROLLBACK');
-    return null;
+    throw e;
   } finally {
     connection.release();
   }
@@ -3296,10 +3225,10 @@ export const saveJuchuKizai = async (
     // 受注機材ヘッダー関係更新
     if (checkJuchuKizaiHead) {
       // 受注機材ヘッダー更新
-      const headResult = await updJuchuKizaiHead(data, userNam, connection);
+      await updJuchuKizaiHead(data, userNam, connection);
 
       // 受注機材入出庫更新
-      const nyushukoResult = await updJuchuKizaiNyushuko(
+      await updJuchuKizaiNyushuko(
         data.juchuHeadId,
         data.juchuKizaiHeadId,
         data.kicsShukoDat,
@@ -3319,14 +3248,8 @@ export const saveJuchuKizai = async (
         mem: '',
         juchuHonbanbiAddQty: 0,
       }));
-      const deleteSiyouHonbanbiResult = await delSiyouHonbanbi(data.juchuHeadId, data.juchuKizaiHeadId, connection);
-      const addSiyouHonbanbiResult = await addAllHonbanbi(
-        data.juchuHeadId,
-        data.juchuKizaiHeadId,
-        addJuchuSiyouHonbanbiData,
-        userNam,
-        connection
-      );
+      await delSiyouHonbanbi(data.juchuHeadId, data.juchuKizaiHeadId, connection);
+      await addAllHonbanbi(data.juchuHeadId, data.juchuKizaiHeadId, addJuchuSiyouHonbanbiData, userNam, connection);
 
       if (checkKicsNyukoDat || checkYardNyukoDat) {
         // 返却伝票チェック
@@ -3377,20 +3300,14 @@ export const saveJuchuKizai = async (
         },
       ];
       for (const item of updateNyushukoHonbanbiData) {
-        const nyushukoHonbanbiResult = await updNyushukoHonbanbi(
-          data.juchuHeadId,
-          data.juchuKizaiHeadId,
-          item,
-          userNam,
-          connection
-        );
+        await updNyushukoHonbanbi(data.juchuHeadId, data.juchuKizaiHeadId, item, userNam, connection);
       }
     }
 
     // 受注機材本番日更新
     if (checkJuchuHonbanbi) {
       for (const item of juchuHonbanbiDeleteList) {
-        const deleteHonbanbiResult = await delHonbanbi(
+        await delHonbanbi(
           data.juchuHeadId,
           data.juchuKizaiHeadId,
           item.juchuHonbanbiShubetuId,
@@ -3407,21 +3324,9 @@ export const saveJuchuKizai = async (
           item.juchuHonbanbiDat
         );
         if (confirm) {
-          const updateHonbanbiResult = await updHonbanbi(
-            data.juchuHeadId,
-            data.juchuKizaiHeadId,
-            item,
-            userNam,
-            connection
-          );
+          await updHonbanbi(data.juchuHeadId, data.juchuKizaiHeadId, item, userNam, connection);
         } else {
-          const addHonbanbiResult = await addHonbanbi(
-            data.juchuHeadId,
-            data.juchuKizaiHeadId,
-            item,
-            userNam,
-            connection
-          );
+          await addHonbanbi(data.juchuHeadId, data.juchuKizaiHeadId, item, userNam, connection);
         }
       }
     }
@@ -3498,24 +3403,15 @@ export const saveJuchuKizai = async (
       // 削除
       if (deleteJuchuContainerMeisaiData.length > 0) {
         const deleteKizaiiIds = deleteJuchuContainerMeisaiData.map((data) => data.kizaiId);
-        const deleteCtnMeisaiResult = await delJuchuContainerMeisai(
-          data.juchuHeadId,
-          data.juchuKizaiHeadId,
-          deleteKizaiiIds,
-          connection
-        );
+        await delJuchuContainerMeisai(data.juchuHeadId, data.juchuKizaiHeadId, deleteKizaiiIds, connection);
       }
       // 追加
       if (addJuchuContainerMeisaiData.length > 0) {
-        const addCtnMeisaiResult = await addJuchuContainerMeisai(addJuchuContainerMeisaiData, userNam, connection);
+        await addJuchuContainerMeisai(addJuchuContainerMeisaiData, userNam, connection);
       }
       // 更新
       if (updateJuchuContainerMeisaiData.length > 0) {
-        const updateContainerMeisaiResult = await updJuchuContainerMeisai(
-          updateJuchuContainerMeisaiData,
-          userNam,
-          connection
-        );
+        await updJuchuContainerMeisai(updateJuchuContainerMeisaiData, userNam, connection);
       }
 
       // 削除処理された機材の入出庫伝票、入出庫実績削除
@@ -3525,16 +3421,11 @@ export const saveJuchuKizai = async (
       }
       // 削除処理されたコンテナの入出庫伝票、入出庫実績削除
       if (deleteJuchuContainerMeisaiData.length > 0) {
-        const deleteCtnNyushukoDenResult = await delCtnNyushukoDen(deleteJuchuContainerMeisaiData, connection);
+        await delCtnNyushukoDen(deleteJuchuContainerMeisaiData, connection);
 
         const deleteIds = deleteJuchuContainerMeisaiData.map((d) => d.kizaiId);
         if (deleteIds.length > 0) {
-          const deleteKicsContainerNyushukoResultResult = await delNyushukoCtnResult(
-            data.juchuHeadId,
-            data.juchuKizaiHeadId,
-            deleteIds,
-            connection
-          );
+          await delNyushukoCtnResult(data.juchuHeadId, data.juchuKizaiHeadId, deleteIds, connection);
         }
       }
 
@@ -3669,19 +3560,9 @@ export const saveJuchuKizai = async (
         await delAllKicsOrYardShukoCtnResult(data.juchuHeadId, data.juchuKizaiHeadId, 2, connection);
       }
       if (checkKicsNyukoDat) {
-        const deleteAllKicsNyukoDenResult = await delAllKicsOrYardNyukoDen(
-          data.juchuHeadId,
-          data.juchuKizaiHeadId,
-          1,
-          connection
-        );
+        await delAllKicsOrYardNyukoDen(data.juchuHeadId, data.juchuKizaiHeadId, 1, connection);
 
-        const deleteAllKicsNyukoResultResult = await delAllNyukoResult(
-          data.juchuHeadId,
-          data.juchuKizaiHeadId,
-          1,
-          connection
-        );
+        await delAllNyukoResult(data.juchuHeadId, data.juchuKizaiHeadId, 1, connection);
 
         if (data.kicsNyukoDat && data.yardNyukoDat && !checkYardNyukoDat) {
           const kicsNyukoData = newJuchuKizaiMeisaiData.filter((d) => !d.delFlag && d.mShozokuId === 1);
@@ -3694,19 +3575,9 @@ export const saveJuchuKizai = async (
         }
       }
       if (checkYardNyukoDat) {
-        const deleteAllYardNyukoDenResult = await delAllKicsOrYardNyukoDen(
-          data.juchuHeadId,
-          data.juchuKizaiHeadId,
-          2,
-          connection
-        );
+        await delAllKicsOrYardNyukoDen(data.juchuHeadId, data.juchuKizaiHeadId, 2, connection);
 
-        const deleteAllYardNyukoResultResult = await delAllNyukoResult(
-          data.juchuHeadId,
-          data.juchuKizaiHeadId,
-          2,
-          connection
-        );
+        await delAllNyukoResult(data.juchuHeadId, data.juchuKizaiHeadId, 2, connection);
 
         if (data.kicsNyukoDat && data.yardNyukoDat && !checkKicsNyukoDat) {
           const yardNyukoData = newJuchuKizaiMeisaiData.filter((d) => !d.delFlag && d.mShozokuId === 2);
@@ -3722,14 +3593,14 @@ export const saveJuchuKizai = async (
       if (!data.kicsShukoDat && checkKicsShukoDat && data.kicsNyukoDat && !checkKicsNyukoDat) {
         const deleteJuchuCtnMeisai = newJuchuContainerMeisaiData.filter((d) => !d.delFlag);
         if (deleteJuchuCtnMeisai.length > 0) {
-          const deleteCtnNyukoDenResult = await delKicsOrYardCtnNyukoDen(deleteJuchuCtnMeisai, 1, connection);
+          await delKicsOrYardCtnNyukoDen(deleteJuchuCtnMeisai, 1, connection);
         }
       }
 
       if (!data.yardShukoDat && checkYardShukoDat && data.yardNyukoDat && !checkYardNyukoDat) {
         const deleteJuchuCtnMeisai = newJuchuContainerMeisaiData.filter((d) => !d.delFlag);
         if (deleteJuchuCtnMeisai.length > 0) {
-          const deleteCtnNyukoDenResult = await delKicsOrYardCtnNyukoDen(deleteJuchuCtnMeisai, 2, connection);
+          await delKicsOrYardCtnNyukoDen(deleteJuchuCtnMeisai, 2, connection);
         }
       }
 
@@ -3743,13 +3614,7 @@ export const saveJuchuKizai = async (
 
         const KicsCtnShukoData = newJuchuContainerMeisaiData.filter((d) => !d.delFlag);
         if (KicsCtnShukoData.length > 0) {
-          const upsertKicsCtnShukoDenResult = await upsCtnShukoDen(
-            KicsCtnShukoData,
-            data.kicsShukoDat,
-            1,
-            userNam,
-            connection
-          );
+          await upsCtnShukoDen(KicsCtnShukoData, data.kicsShukoDat, 1, userNam, connection);
         }
       }
 
@@ -3769,13 +3634,7 @@ export const saveJuchuKizai = async (
 
         const upsertYardJuchuCtnMeisaiData = newJuchuContainerMeisaiData.filter((d) => !d.delFlag);
         if (upsertYardJuchuCtnMeisaiData.length > 0) {
-          const upsertCtnShukoDenResult = await upsCtnShukoDen(
-            upsertYardJuchuCtnMeisaiData,
-            data.yardShukoDat,
-            2,
-            userNam,
-            connection
-          );
+          await upsCtnShukoDen(upsertYardJuchuCtnMeisaiData, data.yardShukoDat, 2, userNam, connection);
         }
       }
 
@@ -3790,70 +3649,24 @@ export const saveJuchuKizai = async (
         const yardNyukoData = newJuchuKizaiMeisaiData.filter((d) => !d.delFlag && d.mShozokuId === 2);
 
         if (kicsNyukoData.length > 0) {
-          const upsertKicsNyukoDenResult = await upsNyukoDen(
-            kicsNyukoData,
-            returnData,
-            data.kicsNyukoDat,
-            1,
-            userNam,
-            connection
-          );
+          await upsNyukoDen(kicsNyukoData, returnData, data.kicsNyukoDat, 1, userNam, connection);
         }
 
         if (yardNyukoData.length > 0) {
-          const upsertYardNyukoDenResult = await upsNyukoDen(
-            yardNyukoData,
-            returnData,
-            data.yardNyukoDat,
-            2,
-            userNam,
-            connection
-          );
+          await upsNyukoDen(yardNyukoData, returnData, data.yardNyukoDat, 2, userNam, connection);
         }
 
         // コンテナ入庫明細
         const ctnNyukoData = newJuchuContainerMeisaiData.filter((d) => !d.delFlag);
         if (ctnNyukoData.length > 0) {
           if (data.kicsShukoDat && data.yardShukoDat) {
-            const upsertKicsCtnNyukoDenResult = await upsCtnNyukoDen(
-              ctnNyukoData,
-              returnData,
-              data.kicsNyukoDat,
-              1,
-              1,
-              userNam,
-              connection
-            );
+            await upsCtnNyukoDen(ctnNyukoData, returnData, data.kicsNyukoDat, 1, 1, userNam, connection);
 
-            const upsertYardCtnNyukoDenResult = await upsCtnNyukoDen(
-              ctnNyukoData,
-              returnData,
-              data.yardNyukoDat,
-              2,
-              2,
-              userNam,
-              connection
-            );
+            await upsCtnNyukoDen(ctnNyukoData, returnData, data.yardNyukoDat, 2, 2, userNam, connection);
           } else if (data.kicsShukoDat && !data.yardShukoDat) {
-            const upsertKicsCtnNyukoDenResult = await upsCtnNyukoDen(
-              ctnNyukoData,
-              returnData,
-              data.kicsNyukoDat,
-              1,
-              1,
-              userNam,
-              connection
-            );
+            await upsCtnNyukoDen(ctnNyukoData, returnData, data.kicsNyukoDat, 1, 1, userNam, connection);
           } else if (!data.kicsShukoDat && data.yardShukoDat) {
-            const upsertYardCtnNyukoDenResult = await upsCtnNyukoDen(
-              ctnNyukoData,
-              returnData,
-              data.yardNyukoDat,
-              2,
-              2,
-              userNam,
-              connection
-            );
+            await upsCtnNyukoDen(ctnNyukoData, returnData, data.yardNyukoDat, 2, 2, userNam, connection);
           }
         }
       } else if (data.kicsNyukoDat && !data.yardNyukoDat) {
@@ -3861,49 +3674,18 @@ export const saveJuchuKizai = async (
         const kicsNyukoData = newJuchuKizaiMeisaiData.filter((d) => !d.delFlag);
 
         if (kicsNyukoData.length > 0) {
-          const upsertKicsNyukoDenResult = await upsNyukoDen(
-            kicsNyukoData,
-            returnData,
-            data.kicsNyukoDat,
-            1,
-            userNam,
-            connection
-          );
+          await upsNyukoDen(kicsNyukoData, returnData, data.kicsNyukoDat, 1, userNam, connection);
         }
 
         // KICSコンテナ入庫明細
         const ctnNyukoData = newJuchuContainerMeisaiData.filter((d) => !d.delFlag);
         if (ctnNyukoData.length > 0) {
           if (data.kicsShukoDat && data.yardShukoDat) {
-            const upsertCtnNyukoDenResult = await upsCtnNyukoDen(
-              ctnNyukoData,
-              returnData,
-              data.kicsNyukoDat,
-              1,
-              3,
-              userNam,
-              connection
-            );
+            await upsCtnNyukoDen(ctnNyukoData, returnData, data.kicsNyukoDat, 1, 3, userNam, connection);
           } else if (data.kicsShukoDat && !data.yardShukoDat) {
-            const upsertCtnNyukoDenResult = await upsCtnNyukoDen(
-              ctnNyukoData,
-              returnData,
-              data.kicsNyukoDat,
-              1,
-              1,
-              userNam,
-              connection
-            );
+            await upsCtnNyukoDen(ctnNyukoData, returnData, data.kicsNyukoDat, 1, 1, userNam, connection);
           } else if (!data.kicsShukoDat && data.yardShukoDat) {
-            const upsertCtnNyukoDenResult = await upsCtnNyukoDen(
-              ctnNyukoData,
-              returnData,
-              data.kicsNyukoDat,
-              1,
-              2,
-              userNam,
-              connection
-            );
+            await upsCtnNyukoDen(ctnNyukoData, returnData, data.kicsNyukoDat, 1, 2, userNam, connection);
           }
         }
       } else if (!data.kicsNyukoDat && data.yardNyukoDat) {
@@ -3911,49 +3693,18 @@ export const saveJuchuKizai = async (
         const yardNyukoData = newJuchuKizaiMeisaiData.filter((d) => !d.delFlag);
 
         if (yardNyukoData.length > 0) {
-          const upsertNyukoDenResult = await upsNyukoDen(
-            yardNyukoData,
-            returnData,
-            data.yardNyukoDat,
-            2,
-            userNam,
-            connection
-          );
+          await upsNyukoDen(yardNyukoData, returnData, data.yardNyukoDat, 2, userNam, connection);
         }
 
         // YARDコンテナ入庫明細
         const ctnNyukoData = newJuchuContainerMeisaiData.filter((d) => !d.delFlag);
         if (ctnNyukoData.length > 0) {
           if (data.kicsShukoDat && data.yardShukoDat) {
-            const upsertCtnNyukoDenResult = await upsCtnNyukoDen(
-              ctnNyukoData,
-              returnData,
-              data.yardNyukoDat,
-              2,
-              3,
-              userNam,
-              connection
-            );
+            await upsCtnNyukoDen(ctnNyukoData, returnData, data.yardNyukoDat, 2, 3, userNam, connection);
           } else if (data.kicsShukoDat && !data.yardShukoDat) {
-            const upsertCtnNyukoDenResult = await upsCtnNyukoDen(
-              ctnNyukoData,
-              returnData,
-              data.yardNyukoDat,
-              2,
-              1,
-              userNam,
-              connection
-            );
+            await upsCtnNyukoDen(ctnNyukoData, returnData, data.yardNyukoDat, 2, 1, userNam, connection);
           } else if (!data.kicsShukoDat && data.yardShukoDat) {
-            const upsertCtnNyukoDenResult = await upsCtnNyukoDen(
-              ctnNyukoData,
-              returnData,
-              data.yardNyukoDat,
-              2,
-              2,
-              userNam,
-              connection
-            );
+            await upsCtnNyukoDen(ctnNyukoData, returnData, data.yardNyukoDat, 2, 2, userNam, connection);
           }
         }
       }
@@ -3973,17 +3724,17 @@ export const saveJuchuKizai = async (
       // 削除
       if (deleteIdoKizaiData.length > 0) {
         const deleteIdoDenIds = deleteIdoKizaiData.map((data) => data.idoDenId);
-        const deleteIdoDenResult = await delIdoDenJuchu(deleteIdoDenIds as number[], connection);
+        await delIdoDenJuchu(deleteIdoDenIds as number[], connection);
       }
       // 追加
       if (addIdoKizaiData.length > 0) {
         const idoDenMaxId = await getIdoDenJuchuMaxId();
         const newIdoDenId = idoDenMaxId ? idoDenMaxId + 1 : 1;
-        const addIdoDenResult = await addIdoDenJuchu(newIdoDenId, addIdoKizaiData, userNam, connection);
+        await addIdoDenJuchu(newIdoDenId, addIdoKizaiData, userNam, connection);
       }
       // 更新
       if (updateIdoKizaiData.length > 0) {
-        const updateIdoDenResult = await updIdoDenJuchu(updateIdoKizaiData, userNam, connection);
+        await updIdoDenJuchu(updateIdoKizaiData, userNam, connection);
       }
     }
 
@@ -4005,7 +3756,7 @@ export const saveJuchuKizai = async (
       console.error(e);
     }
     await connection.query('ROLLBACK');
-    return false;
+    throw e;
   } finally {
     connection.release();
   }

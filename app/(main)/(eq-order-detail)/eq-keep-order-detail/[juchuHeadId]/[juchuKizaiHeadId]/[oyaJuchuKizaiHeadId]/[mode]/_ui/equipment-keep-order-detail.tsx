@@ -4,7 +4,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import AddIcon from '@mui/icons-material/Add';
 import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
-import CheckIcon from '@mui/icons-material/Check';
 import Delete from '@mui/icons-material/Delete';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import SaveAsIcon from '@mui/icons-material/SaveAs';
@@ -14,24 +13,19 @@ import {
   AccordionSummary,
   Box,
   Button,
-  Checkbox,
-  ClickAwayListener,
   Container,
   Dialog,
   Divider,
   Fab,
-  FormControl,
   Grid2,
   MenuItem,
   Paper,
-  Popper,
   Select,
   Snackbar,
   TextField,
   Typography,
 } from '@mui/material';
-import { addMonths, endOfMonth, subDays, subMonths } from 'date-fns';
-import dayjs, { Dayjs } from 'dayjs';
+import { Dayjs } from 'dayjs';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -40,13 +34,12 @@ import { TextFieldElement } from 'react-hook-form-mui';
 import { useUserStore } from '@/app/_lib/stores/usestore';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { getNyukoDate, getShukoDate } from '@/app/(main)/_lib/date-funcs';
-import { addLock, getLock } from '@/app/(main)/_lib/funcs';
 import { useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
 import { lockCheck, lockRelease } from '@/app/(main)/_lib/lock';
 import { permission } from '@/app/(main)/_lib/permission';
 import { LockValues } from '@/app/(main)/_lib/types';
 import { BackButton } from '@/app/(main)/_ui/buttons';
-import { Calendar, DateTime, TestDate } from '@/app/(main)/_ui/date';
+import { DateTime, TestDate } from '@/app/(main)/_ui/date';
 import { IsDirtyAlertDialog, useDirty } from '@/app/(main)/_ui/dirty-context';
 import { Loading, LoadingOverlay } from '@/app/(main)/_ui/loading';
 import { PermissionGuard } from '@/app/(main)/_ui/permission-guard';
@@ -64,7 +57,6 @@ import {
 } from '@/app/(main)/(eq-order-detail)/_lib/types';
 import { AlertDialog, DeleteAlertDialog, WorkingConfirmDialog } from '@/app/(main)/(eq-order-detail)/_ui/caveat-dialog';
 import { OyaEqSelectionDialog } from '@/app/(main)/(eq-order-detail)/_ui/equipment-selection-dialog';
-import { JuchuContainerMeisaiValues } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';
 
 import {
   getKeepJuchuContainerMeisai,
@@ -248,7 +240,7 @@ export const EquipmentKeepOrderDetail = (props: {
         getNyushukoFixFlag(getValues('juchuHeadId'), getValues('juchuKizaiHeadId'), 70),
       ]);
       if (!juchuHeadData || !oyaJuchuKizaiHeadData) {
-        return <div>受注情報が見つかりません。</div>;
+        return false;
       }
       // 親出庫日
       const oyaShukoDate = getShukoDate(
@@ -261,7 +253,7 @@ export const EquipmentKeepOrderDetail = (props: {
         oyaJuchuKizaiHeadData.yardNyukoDat ? new Date(oyaJuchuKizaiHeadData.yardNyukoDat) : null
       );
       if (!oyaShukoDate || !oyaNyukoDate) {
-        return <div>受注情報が見つかりません。</div>;
+        return false;
       }
       setJuchuHeadData(juchuHeadData);
       setOyaJuchuKizaiHeadData(oyaJuchuKizaiHeadData);
@@ -293,7 +285,7 @@ export const EquipmentKeepOrderDetail = (props: {
         );
 
         if (!keepJuchuKizaiHeadData) {
-          return <div>受注機材情報が見つかりません。</div>;
+          return false;
         }
 
         // キープ受注機材明細データ、キープ受注コンテナ明細データ
@@ -461,13 +453,12 @@ export const EquipmentKeepOrderDetail = (props: {
     // 新規
     if (data.juchuKizaiHeadId === 0) {
       // 新規受注機材ヘッダー追加
-      const newJuchuKizaiHeadId = await saveNewKeepJuchuKizaiHead(data, userNam);
-
-      if (newJuchuKizaiHeadId) {
+      try {
+        const newJuchuKizaiHeadId = await saveNewKeepJuchuKizaiHead(data, userNam);
         router.replace(
           `/eq-keep-order-detail/${data.juchuHeadId}/${newJuchuKizaiHeadId}/${data.oyaJuchuKizaiHeadId}/edit`
         );
-      } else {
+      } catch (e) {
         setIsLoading(false);
         setSnackBarMessage('保存に失敗しました');
         setSnackBarOpen(true);
@@ -535,29 +526,29 @@ export const EquipmentKeepOrderDetail = (props: {
         }
       }
 
-      const updateResult = await saveKeepJuchuKizai(
-        checkJuchuKizaiHead,
-        checkKicsShukoDat,
-        checkKicsNyukoDat,
-        checkYardShukoDat,
-        checkYardNyukoDat,
-        checkJuchuKizaiMeisai,
-        checkJuchuContainerMeisai,
-        defaultValues?.kicsShukoDat,
-        defaultValues?.kicsNyukoDat,
-        defaultValues?.yardShukoDat,
-        defaultValues?.yardNyukoDat,
-        data,
-        updateShukoDate,
-        updateNyukoDate,
-        originKeepJuchuKizaiMeisaiList,
-        keepJuchuKizaiMeisaiList,
-        keepJuchuContainerMeisaiList,
-        userNam
-      );
+      try {
+        await saveKeepJuchuKizai(
+          checkJuchuKizaiHead,
+          checkKicsShukoDat,
+          checkKicsNyukoDat,
+          checkYardShukoDat,
+          checkYardNyukoDat,
+          checkJuchuKizaiMeisai,
+          checkJuchuContainerMeisai,
+          defaultValues?.kicsShukoDat,
+          defaultValues?.kicsNyukoDat,
+          defaultValues?.yardShukoDat,
+          defaultValues?.yardNyukoDat,
+          data,
+          updateShukoDate,
+          updateNyukoDate,
+          originKeepJuchuKizaiMeisaiList,
+          keepJuchuKizaiMeisaiList,
+          keepJuchuContainerMeisaiList,
+          userNam
+        );
 
-      // 画面情報更新
-      if (updateResult) {
+        // 画面情報更新
         if (checkJuchuKizaiHead) {
           reset(data);
           // 出庫日更新
@@ -598,7 +589,7 @@ export const EquipmentKeepOrderDetail = (props: {
           setSnackBarMessage('データの再取得に失敗しました');
           setSnackBarOpen(true);
         }
-      } else {
+      } catch (e) {
         setIsLoading(false);
         setSnackBarMessage('保存に失敗しました');
         setSnackBarOpen(true);

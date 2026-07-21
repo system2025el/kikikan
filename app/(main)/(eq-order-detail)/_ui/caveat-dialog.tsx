@@ -3,7 +3,6 @@
 import WarningIcon from '@mui/icons-material/Warning';
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 import { useEffect, useState } from 'react';
-import { set } from 'zod';
 
 export const AlertDialog = ({
   open,

@@ -33,7 +33,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { addMonths, set, setDate, subDays, subMonths } from 'date-fns';
+import { addDays, addMonths, set, setDate, subDays, subMonths } from 'date-fns';
 import dayjs, { Dayjs } from 'dayjs';
 import { redirect, useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -369,7 +369,7 @@ const EquipmentOrderDetail = (props: {
         getNyushukoFixFlag(getValues('juchuHeadId'), getValues('juchuKizaiHeadId'), 70),
       ]);
       if (!juchuHeadData) {
-        return <div>受注情報が見つかりません。</div>;
+        return false;
       }
       setJuchuHeadData(juchuHeadData);
       setShukoFixFlag(shukoFixFlag);
@@ -400,7 +400,7 @@ const EquipmentOrderDetail = (props: {
         ]);
 
         if (!juchuKizaiHeadData) {
-          return <div>受注機材情報が見つかりません。</div>;
+          return false;
         }
 
         // 受注機材明細データ、移動受注機材明細データ、受注コンテナ明細データ
@@ -612,17 +612,16 @@ const EquipmentOrderDetail = (props: {
     // 新規
     if (data.juchuKizaiHeadId === 0) {
       // 新規受注機材ヘッダー追加
-      const newJuchuKizaiHeadId = await saveNewJuchuKizaiHead(
-        data,
-        updateShukoDate,
-        updateNyukoDate,
-        updateDateRange,
-        userNam
-      );
-
-      if (newJuchuKizaiHeadId) {
+      try {
+        const newJuchuKizaiHeadId = await saveNewJuchuKizaiHead(
+          data,
+          updateShukoDate,
+          updateNyukoDate,
+          updateDateRange,
+          userNam
+        );
         router.replace(`/eq-main-order-detail/${data.juchuHeadId}/${newJuchuKizaiHeadId}/edit`);
-      } else {
+      } catch (e) {
         setIsLoading(false);
         setSnackBarMessage('保存に失敗しました');
         setSnackBarOpen(true);
@@ -700,31 +699,31 @@ const EquipmentOrderDetail = (props: {
         }
       }
 
-      const updateResult = await saveJuchuKizai(
-        checkJuchuKizaiHead,
-        checkKicsShukoDat,
-        checkKicsNyukoDat,
-        checkYardShukoDat,
-        checkYardNyukoDat,
-        checkJuchuHonbanbi,
-        checkJuchuKizaiMeisai,
-        checkIdoJuchuKizaiMeisai,
-        checkJuchuContainerMeisai,
-        data,
-        updateShukoDate,
-        updateNyukoDate,
-        updateDateRange,
-        juchuHonbanbiList,
-        juchuHonbanbiDeleteList,
-        originJuchuKizaiMeisaiList,
-        juchuKizaiMeisaiList,
-        idoJuchuKizaiMeisaiList,
-        juchuContainerMeisaiList,
-        userNam
-      );
+      try {
+        await saveJuchuKizai(
+          checkJuchuKizaiHead,
+          checkKicsShukoDat,
+          checkKicsNyukoDat,
+          checkYardShukoDat,
+          checkYardNyukoDat,
+          checkJuchuHonbanbi,
+          checkJuchuKizaiMeisai,
+          checkIdoJuchuKizaiMeisai,
+          checkJuchuContainerMeisai,
+          data,
+          updateShukoDate,
+          updateNyukoDate,
+          updateDateRange,
+          juchuHonbanbiList,
+          juchuHonbanbiDeleteList,
+          originJuchuKizaiMeisaiList,
+          juchuKizaiMeisaiList,
+          idoJuchuKizaiMeisaiList,
+          juchuContainerMeisaiList,
+          userNam
+        );
 
-      // 画面情報更新
-      if (updateResult) {
+        // 画面情報更新
         try {
           if (checkJuchuHonbanbi) {
             // 受注機材本番日データ更新
@@ -830,7 +829,7 @@ const EquipmentOrderDetail = (props: {
           setSnackBarMessage('データの再取得に失敗しました');
           setSnackBarOpen(true);
         }
-      } else {
+      } catch (e) {
         setIsLoading(false);
         setSnackBarMessage('保存に失敗しました');
         setSnackBarOpen(true);
@@ -945,12 +944,12 @@ const EquipmentOrderDetail = (props: {
   };
   // 3か月前
   const handleBackDateChange = () => {
-    const date = subMonths(new Date(selectDate), 3);
+    const date = subDays(new Date(selectDate), 91);
     handleDateChange(dayjs(date), 'day');
   };
   // 3か月後
   const handleForwardDateChange = () => {
-    const date = addMonths(new Date(selectDate), 3);
+    const date = addDays(new Date(selectDate), 91);
     handleDateChange(dayjs(date), 'day');
   };
 
@@ -2447,6 +2446,9 @@ const EquipmentOrderDetail = (props: {
       prev.map((d) => {
         const s = sum.get(d.kizaiId);
         if (s && !d.delFlag) {
+          if (d.planKizaiQty === s.planKizaiQty && d.planYobiQty === s.planYobiQty && d.planQty === s.planQty) {
+            return d;
+          }
           return {
             ...d,
             planKizaiQty: s.planKizaiQty,

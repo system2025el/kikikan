@@ -89,9 +89,9 @@ export const saveNewKeepJuchuKizaiHead = async (data: KeepJuchuKizaiHeadValues, 
     const maxId = await getJuchuKizaiHeadMaxId(data.juchuHeadId);
     const newJuchuKizaiHeadId = maxId ? maxId.juchu_kizai_head_id + 1 : 1;
     // 受注機材ヘッダー追加
-    const headResult = await addKeepJuchuKizaiHead(newJuchuKizaiHeadId, data, userNam, connection);
+    await addKeepJuchuKizaiHead(newJuchuKizaiHeadId, data, userNam, connection);
     // 受注機材入出庫追加
-    const nyushukoResult = await addJuchuKizaiNyushuko(
+    await addJuchuKizaiNyushuko(
       data.juchuHeadId,
       newJuchuKizaiHeadId,
       data.kicsShukoDat,
@@ -125,7 +125,7 @@ export const saveNewKeepJuchuKizaiHead = async (data: KeepJuchuKizaiHeadValues, 
       console.error(e);
     }
     await connection.query('ROLLBACK');
-    return null;
+    throw e;
   } finally {
     connection.release();
   }
@@ -171,10 +171,10 @@ export const saveKeepJuchuKizai = async (
     // 受注機材ヘッダー関係更新
     if (checkJuchuKizaiHead) {
       // 受注機材ヘッド更新
-      const headResult = await updKeepJuchuKizaiHead(data, userNam, connection);
+      await updKeepJuchuKizaiHead(data, userNam, connection);
 
       // 受注機材入出庫更新
-      const nyushukoResult = await updJuchuKizaiNyushuko(
+      await updJuchuKizaiNyushuko(
         data.juchuHeadId,
         data.juchuKizaiHeadId,
         data.kicsShukoDat,
@@ -218,15 +218,15 @@ export const saveKeepJuchuKizai = async (
 
       // 削除
       if (deleteKeepJuchuKizaiMeisaiData.length > 0) {
-        const deleteMeisaiResult = await delKeepJuchuKizaiMeisai(deleteKeepJuchuKizaiMeisaiData, connection);
+        await delKeepJuchuKizaiMeisai(deleteKeepJuchuKizaiMeisaiData, connection);
       }
       // 追加
       if (addKeepJuchuKizaiMeisaiData.length > 0) {
-        const addMeisaiResult = await addKeepJuchuKizaiMeisai(addKeepJuchuKizaiMeisaiData, userNam, connection);
+        await addKeepJuchuKizaiMeisai(addKeepJuchuKizaiMeisaiData, userNam, connection);
       }
       // 更新
       if (updateKeepJuchuKizaiMeisaiData.length > 0) {
-        const updateMeisaiResult = await updKeepJuchuKizaiMeisai(updateKeepJuchuKizaiMeisaiData, userNam, connection);
+        await updKeepJuchuKizaiMeisai(updateKeepJuchuKizaiMeisaiData, userNam, connection);
       }
 
       // 受注コンテナ明細id最大値
@@ -257,28 +257,15 @@ export const saveKeepJuchuKizai = async (
       // 削除
       if (deleteKeepJuchuContainerMeisaiData.length > 0) {
         const deleteKizaiIds = deleteKeepJuchuContainerMeisaiData.map((data) => data.kizaiId);
-        const deleteContainerMeisaiResult = await delKeepJuchuContainerMeisai(
-          data.juchuHeadId,
-          data.juchuKizaiHeadId,
-          deleteKizaiIds,
-          connection
-        );
+        await delKeepJuchuContainerMeisai(data.juchuHeadId, data.juchuKizaiHeadId, deleteKizaiIds, connection);
       }
       // 追加
       if (addKeepJuchuContainerMeisaiData.length > 0) {
-        const addContainerMeisaiResult = await addKeepJuchuContainerMeisai(
-          addKeepJuchuContainerMeisaiData,
-          userNam,
-          connection
-        );
+        await addKeepJuchuContainerMeisai(addKeepJuchuContainerMeisaiData, userNam, connection);
       }
       // 更新
       if (updateKeepJuchuContainerMeisaiData.length > 0) {
-        const updateContainerMeisaiResult = await updKeepJuchuContainerMeisai(
-          updateKeepJuchuContainerMeisaiData,
-          userNam,
-          connection
-        );
+        await updKeepJuchuContainerMeisai(updateKeepJuchuContainerMeisaiData, userNam, connection);
       }
 
       // 削除処理された機材の入出庫伝票、入出庫実績削除
@@ -289,16 +276,11 @@ export const saveKeepJuchuKizai = async (
 
       // コンテナ入出庫伝票、入出庫実績削除
       if (deleteKeepJuchuContainerMeisaiData.length > 0) {
-        const deleteCtnNyushukoDenResult = await delCtnNyushukoDen(deleteKeepJuchuContainerMeisaiData, connection);
+        await delCtnNyushukoDen(deleteKeepJuchuContainerMeisaiData, connection);
 
         const deleteIds = deleteKeepJuchuContainerMeisaiData.map((d) => d.kizaiId);
         if (deleteIds.length > 0) {
-          const deleteKicsContainerNyushukoResultResult = await delNyushukoCtnResult(
-            data.juchuHeadId,
-            data.juchuKizaiHeadId,
-            deleteIds,
-            connection
-          );
+          await delNyushukoCtnResult(data.juchuHeadId, data.juchuKizaiHeadId, deleteIds, connection);
         }
       }
 
@@ -378,19 +360,9 @@ export const saveKeepJuchuKizai = async (
       const ctnKizaiIds = keepJuchuContainerMeisaiList.map((d) => d.kizaiId);
 
       if (checkKicsNyukoDat) {
-        const deleteAllKicsNyukoDenResult = await delAllKicsOrYardNyukoDen(
-          data.juchuHeadId,
-          data.juchuKizaiHeadId,
-          1,
-          connection
-        );
+        await delAllKicsOrYardNyukoDen(data.juchuHeadId, data.juchuKizaiHeadId, 1, connection);
 
-        const deleteAllKicsNyukoResultResult = await delAllNyukoResult(
-          data.juchuHeadId,
-          data.juchuKizaiHeadId,
-          1,
-          connection
-        );
+        await delAllNyukoResult(data.juchuHeadId, data.juchuKizaiHeadId, 1, connection);
 
         if (data.kicsNyukoDat && data.yardNyukoDat && !checkYardNyukoDat) {
           const kicsNyukoData = newKeepJuchuKizaiMeisaiData.filter((d) => !d.delFlag && d.shozokuId === 1);
@@ -409,19 +381,9 @@ export const saveKeepJuchuKizai = async (
       }
 
       if (checkYardNyukoDat) {
-        const deleteAllYardNyukoDenResult = await delAllKicsOrYardNyukoDen(
-          data.juchuHeadId,
-          data.juchuKizaiHeadId,
-          2,
-          connection
-        );
+        await delAllKicsOrYardNyukoDen(data.juchuHeadId, data.juchuKizaiHeadId, 2, connection);
 
-        const deleteAllYardNyukoResultResult = await delAllNyukoResult(
-          data.juchuHeadId,
-          data.juchuKizaiHeadId,
-          2,
-          connection
-        );
+        await delAllNyukoResult(data.juchuHeadId, data.juchuKizaiHeadId, 2, connection);
 
         if (data.kicsNyukoDat && data.yardNyukoDat && !checkKicsNyukoDat) {
           const yardNyukoData = newKeepJuchuKizaiMeisaiData.filter((d) => !d.delFlag && d.shozokuId === 2);
@@ -483,19 +445,13 @@ export const saveKeepJuchuKizai = async (
         const kicsNyukoData = newKeepJuchuKizaiMeisaiData.filter((d) => !d.delFlag && d.shozokuId === 1);
 
         if (kicsNyukoData.length > 0) {
-          const upsertKicsNyukoDenResult = await upsNyukoDen(kicsNyukoData, data.kicsNyukoDat, 1, userNam, connection);
+          await upsNyukoDen(kicsNyukoData, data.kicsNyukoDat, 1, userNam, connection);
         }
 
         // KICSコンテナ入庫明細
         const ctnNyukoData = newKeepJuchuContainerMeisaiData.filter((d) => !d.delFlag);
         if (ctnNyukoData.length > 0) {
-          const upsertKicsCtnNyukoDenResult = await upsCtnNyukoDen(
-            ctnNyukoData,
-            data.kicsNyukoDat,
-            1,
-            userNam,
-            connection
-          );
+          await upsCtnNyukoDen(ctnNyukoData, data.kicsNyukoDat, 1, userNam, connection);
         }
       }
 
@@ -505,19 +461,13 @@ export const saveKeepJuchuKizai = async (
         const yardNyukoData = newKeepJuchuKizaiMeisaiData.filter((d) => !d.delFlag && d.shozokuId === 2);
 
         if (yardNyukoData.length > 0) {
-          const upsertYardNyukoDenResult = await upsNyukoDen(yardNyukoData, data.yardNyukoDat, 2, userNam, connection);
+          await upsNyukoDen(yardNyukoData, data.yardNyukoDat, 2, userNam, connection);
         }
 
         // YARDコンテナ入庫明細
         const ctnNyukoData = newKeepJuchuContainerMeisaiData.filter((d) => !d.delFlag);
         if (ctnNyukoData.length > 0) {
-          const upsertYardCtnNyukoDenResult = await upsCtnNyukoDen(
-            ctnNyukoData,
-            data.yardNyukoDat,
-            2,
-            userNam,
-            connection
-          );
+          await upsCtnNyukoDen(ctnNyukoData, data.yardNyukoDat, 2, userNam, connection);
         }
       }
 
@@ -531,13 +481,7 @@ export const saveKeepJuchuKizai = async (
 
         const KicsCtnShukoData = newKeepJuchuContainerMeisaiData.filter((d) => !d.delFlag);
         if (KicsCtnShukoData.length > 0) {
-          const upsertKicsCtnShukoDenResult = await upsCtnShukoDen(
-            KicsCtnShukoData,
-            data.kicsShukoDat,
-            1,
-            userNam,
-            connection
-          );
+          await upsCtnShukoDen(KicsCtnShukoData, data.kicsShukoDat, 1, userNam, connection);
         }
       }
 
@@ -559,13 +503,7 @@ export const saveKeepJuchuKizai = async (
 
         const upsertYardJuchuCtnMeisaiData = newKeepJuchuContainerMeisaiData.filter((d) => !d.delFlag);
         if (upsertYardJuchuCtnMeisaiData.length > 0) {
-          const upsertCtnShukoDenResult = await upsCtnShukoDen(
-            upsertYardJuchuCtnMeisaiData,
-            data.yardShukoDat,
-            2,
-            userNam,
-            connection
-          );
+          await upsCtnShukoDen(upsertYardJuchuCtnMeisaiData, data.yardShukoDat, 2, userNam, connection);
         }
       }
     }
@@ -587,7 +525,7 @@ export const saveKeepJuchuKizai = async (
       console.error(e);
     }
     await connection.query('ROLLBACK');
-    return false;
+    throw e;
   } finally {
     connection.release();
   }
@@ -673,7 +611,6 @@ export const addKeepJuchuKizaiHead = async (
   };
   try {
     await insertKeepJuchuKizaiHead(newData, connection);
-    return true;
   } catch (e) {
     if (e instanceof Error) {
       console.error(`[ERROR] ${e.message}`);
@@ -712,7 +649,6 @@ export const updKeepJuchuKizaiHead = async (
 
   try {
     await updateKeepJuchuKizaiHead(updateData, connection);
-    return true;
   } catch (e) {
     if (e instanceof Error) {
       console.error(`[ERROR] ${e.message}`);
@@ -738,9 +674,15 @@ export const getKeepJuchuKizaiMeisai = async (
   oyaJuchuKizaiHeadId: number
 ) => {
   try {
-    const { data: keepData, error: keepError } = await selectKeepJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId);
+    const [{ data: keepData, error: keepError }, { data: oyaData, error: oyaError }] = await Promise.all([
+      selectKeepJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId),
+      selectOyaJuchuKizaiMeisai(juchuHeadId, oyaJuchuKizaiHeadId),
+    ]);
     if (keepError) {
       throw new Error('[selectKeepJuchuKizaiMeisai] DBエラー:', { cause: keepError });
+    }
+    if (oyaError) {
+      throw new Error('[selectOyaJuchuKizaiMeisai] DBエラー:', { cause: oyaError });
     }
 
     const eqIds = [...new Set(keepData.map((data) => data.kizai_id))];
@@ -749,11 +691,6 @@ export const getKeepJuchuKizaiMeisai = async (
 
     if (mKizaiError) {
       throw new Error('[selectMeisaiEqts] DBエラー:', { cause: mKizaiError });
-    }
-
-    const { data: oyaData, error: oyaError } = await selectOyaJuchuKizaiMeisai(juchuHeadId, oyaJuchuKizaiHeadId);
-    if (oyaError) {
-      throw new Error('[selectOyaJuchuKizaiMeisai] DBエラー:', { cause: oyaError });
     }
 
     const keepJuchuKizaiMeisaiData: KeepJuchuKizaiMeisaiValues[] = keepData.map((d) => ({
@@ -816,7 +753,6 @@ export const addKeepJuchuKizaiMeisai = async (
 
   try {
     await insertJuchuKizaiMeisai(newData, connection);
-    return true;
   } catch (e) {
     if (e instanceof Error) {
       console.error(`[ERROR] ${e.message}`);
@@ -859,7 +795,6 @@ export const updKeepJuchuKizaiMeisai = async (
     for (const data of updateData) {
       await updateJuchuKizaiMeisai(data, connection);
     }
-    return true;
   } catch (e) {
     if (e instanceof Error) {
       console.error(`[ERROR] ${e.message}`);
@@ -893,8 +828,15 @@ export const delKeepJuchuKizaiMeisai = async (
     for (const data of deleteData) {
       await deleteJuchuKizaiMeisai(data, connection);
     }
-    return true;
   } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -912,15 +854,13 @@ export const getKeepJuchuContainerMeisai = async (
   oyaJuchuKizaiHeadId: number
 ) => {
   try {
-    const { data: containerData, error: containerError } = await selectJuchuContainerMeisai(
-      juchuHeadId,
-      juchuKizaiHeadId
-    );
+    const [{ data: containerData, error: containerError }, { data: oyaData, error: oyaError }] = await Promise.all([
+      selectJuchuContainerMeisai(juchuHeadId, juchuKizaiHeadId),
+      selectJuchuContainerMeisai(juchuHeadId, oyaJuchuKizaiHeadId),
+    ]);
     if (containerError) {
       throw new Error('[selectJuchuContainerMeisai] DBエラー:', { cause: containerError });
     }
-
-    const { data: oyaData, error: oyaError } = await selectJuchuContainerMeisai(juchuHeadId, oyaJuchuKizaiHeadId);
     if (oyaError) {
       throw new Error('[selectJuchuContainerMeisai] DBエラー:', { cause: oyaError });
     }
@@ -999,7 +939,6 @@ export const addKeepJuchuContainerMeisai = async (
 
   try {
     await insertJuchuContainerMeisai(mergeData, connection);
-    return true;
   } catch (e) {
     if (e instanceof Error) {
       console.error(`[ERROR] ${e.message}`);
@@ -1058,7 +997,6 @@ export const updKeepJuchuContainerMeisai = async (
     for (const data of mergeData) {
       await updateJuchuContainerMeisai(data, connection);
     }
-    return true;
   } catch (e) {
     if (e instanceof Error) {
       console.error(`[ERROR] ${e.message}`);
@@ -1087,6 +1025,14 @@ export const delKeepJuchuContainerMeisai = async (
   try {
     await deleteJuchuContainerMeisai(juchuHeadId, juchuKizaiHeadId, deleteJuchuContainerMeisaiIds, connection);
   } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -1139,7 +1085,6 @@ export const addShukoDen = async (
 
   try {
     await insertNyushukoDen(mergeData, connection);
-    return true;
   } catch (e) {
     if (e instanceof Error) {
       console.error(`[ERROR] ${e.message}`);
@@ -1203,7 +1148,6 @@ export const updShukoDen = async (
     for (const data of mergeData) {
       await updateNyushukoDen(data, connection);
     }
-    return true;
   } catch (e) {
     if (e instanceof Error) {
       console.error(`[ERROR] ${e.message}`);
@@ -1251,7 +1195,6 @@ export const addNyukoDen = async (
 
   try {
     await insertNyushukoDen(newData, connection);
-    return true;
   } catch (e) {
     if (e instanceof Error) {
       console.error(`[ERROR] ${e.message}`);
@@ -1301,7 +1244,6 @@ export const updNyukoDen = async (
     for (const data of updateNyukoCheckData) {
       await updateNyushukoDen(data, connection);
     }
-    return true;
   } catch (e) {
     if (e instanceof Error) {
       console.error(`[ERROR] ${e.message}`);
@@ -1471,8 +1413,6 @@ export const addCtnShukoDen = async (
 
   try {
     await insertNyushukoDen(mergeData, connection);
-
-    return true;
   } catch (e) {
     if (e instanceof Error) {
       console.error(`[ERROR] ${e.message}`);
@@ -1538,8 +1478,6 @@ export const updCtnShukoDen = async (
     for (const data of mergeData) {
       await updateNyushukoDen(data, connection);
     }
-
-    return true;
   } catch (e) {
     if (e instanceof Error) {
       console.error(`[ERROR] ${e.message}`);
@@ -1636,7 +1574,6 @@ export const updCtnNyukoDen = async (
     for (const data of updCtnNyukoCheckData) {
       await updateNyushukoDen(data, connection);
     }
-    return true;
   } catch (e) {
     if (e instanceof Error) {
       console.error(`[ERROR] ${e.message}`);
@@ -1766,6 +1703,14 @@ export const delAllShukoDen = async (juchuHeadId: number, juchuKizaiHeadId: numb
   try {
     await deleteAllShukoDen(juchuHeadId, juchuKizaiHeadId, connection);
   } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -1780,6 +1725,14 @@ export const delAllNyukoDen = async (juchuHeadId: number, juchuKizaiHeadId: numb
   try {
     await deleteAllNyukoDen(juchuHeadId, juchuKizaiHeadId, connection);
   } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -1804,8 +1757,15 @@ export const delKeepNyushukoDen = async (
     for (const data of deleteData) {
       await deleteNyushukoDen(data, connection);
     }
-    return true;
   } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -1834,6 +1794,14 @@ export const delKeepKicsOrYardShukoDen = async (
       await deleteKicsOrYardShukoDen(data, connection);
     }
   } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -1862,6 +1830,14 @@ export const delKeepKicsOrYardNyukoDen = async (
       await deleteKicsOrYardNyukoDen(data, connection);
     }
   } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -1883,8 +1859,15 @@ export const delShukoDen = async (keepJuchuKizaiMeisaiData: KeepJuchuKizaiMeisai
     for (const data of deleteData) {
       await deleteShukoDen(data, connection);
     }
-    return true;
   } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -1906,8 +1889,15 @@ export const delNyukoDen = async (keepJuchuKizaiMeisaiData: KeepJuchuKizaiMeisai
     for (const data of deleteData) {
       await deleteNyukoDen(data, connection);
     }
-    return true;
   } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -1933,8 +1923,15 @@ export const delCtnNyushukoDen = async (
     for (const data of deleteData) {
       await deleteNyushukoDen(data, connection);
     }
-    return true;
   } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -1959,8 +1956,15 @@ export const delCtnShukoDen = async (
     for (const data of deleteData) {
       await deleteShukoDen(data, connection);
     }
-    return true;
   } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -1985,8 +1989,15 @@ export const delCtnNyukoDen = async (
     for (const data of deleteData) {
       await deleteNyukoDen(data, connection);
     }
-    return true;
   } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -2013,6 +2024,14 @@ export const updShukoResult = async (
       );
     }
   } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -2040,8 +2059,15 @@ export const delNyushukoResult = async (juchuKizaiMeisaiData: KeepJuchuKizaiMeis
         connection
       );
     }
-    return true;
   } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -2069,8 +2095,15 @@ export const delShukoResult = async (juchuKizaiMeisaiData: KeepJuchuKizaiMeisaiV
         connection
       );
     }
-    return true;
   } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -2104,8 +2137,15 @@ export const delNyukoResult = async (
         connection
       );
     }
-    return true;
   } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };

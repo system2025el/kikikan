@@ -104,8 +104,8 @@ export const selectDetailStockListBulk = async (
   try {
     const query = `
       WITH target_days AS (
-        -- 指定日から90日分のカレンダーを作成
-        SELECT $4::date + g.i AS cal_dat 
+        -- 指定日から91日分のカレンダーを作成
+        SELECT $4::date + g.i AS cal_dat
         FROM generate_series(0, 90) AS g(i)
       ),
         target_kizai AS (
