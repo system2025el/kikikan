@@ -23,6 +23,7 @@ import {
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+import { BASHO_ID, SAGYO_KBN_ID, SAGYO_SIJI_ID } from '@/app/_lib/constants';
 import { useUserStore } from '@/app/_lib/stores/usestore';
 import { statusColors } from '@/app/(main)/_lib/colors';
 import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
@@ -103,7 +104,7 @@ export const IdoDetail = (props: {
     }
 
     // 到着確認ダイアログ表示
-    if (idoDetailData.sagyoKbnId === 50) {
+    if (idoDetailData.sagyoKbnId === SAGYO_KBN_ID.idoNyuko) {
       setIsProcessing(false);
       setArrivalOpen(true);
       return;
@@ -118,7 +119,7 @@ export const IdoDetail = (props: {
     }
 
     const result = await addIdoFix(
-      60,
+      SAGYO_KBN_ID.shukoConfirmed,
       idoDetailData.sagyoSijiId,
       idoDetailData.nyushukoDat,
       idoDetailData.nyushukoBashoId,
@@ -144,7 +145,7 @@ export const IdoDetail = (props: {
     setIsProcessing(true);
 
     const result = await addIdoFix(
-      70,
+      SAGYO_KBN_ID.nyukoConfirmed,
       idoDetailData.sagyoSijiId,
       idoDetailData.nyushukoDat,
       idoDetailData.nyushukoBashoId,
@@ -175,7 +176,7 @@ export const IdoDetail = (props: {
     setIsProcessing(true);
 
     const result = await delIdoFix(
-      60,
+      SAGYO_KBN_ID.shukoConfirmed,
       idoDetailData.sagyoSijiId,
       idoDetailData.nyushukoDat,
       idoDetailData.nyushukoBashoId
@@ -330,27 +331,29 @@ export const IdoDetail = (props: {
         <Paper variant="outlined">
           <Box display={'flex'} justifyContent={'space-between'} alignItems="center" px={2}>
             <Typography fontSize={'large'}>
-              移動明細({idoDetailData.sagyoKbnId === 40 ? '移動出庫' : '移動入庫'})
+              移動明細({idoDetailData.sagyoKbnId === SAGYO_KBN_ID.idoShuko ? '移動出庫' : '移動入庫'})
             </Typography>
             <Grid2 container alignItems={'center'} spacing={2}>
-              {fixFlag && <Typography>{idoDetailData.sagyoKbnId === 40 ? '出発済' : '到着済'}</Typography>}
+              {fixFlag && (
+                <Typography>{idoDetailData.sagyoKbnId === SAGYO_KBN_ID.idoShuko ? '出発済' : '到着済'}</Typography>
+              )}
               <Button
                 onClick={handleFix}
                 disabled={
                   fixFlag || idoDetailList.length === 0 || user?.permission.nyushuko === permission.nyushuko_ref
                 }
                 sx={{
-                  backgroundColor: idoDetailData.sagyoKbnId === 40 ? 'primary' : 'yellow',
-                  color: idoDetailData.sagyoKbnId === 40 ? 'white' : 'black',
+                  backgroundColor: idoDetailData.sagyoKbnId === SAGYO_KBN_ID.idoShuko ? 'primary' : 'yellow',
+                  color: idoDetailData.sagyoKbnId === SAGYO_KBN_ID.idoShuko ? 'white' : 'black',
                 }}
               >
-                {idoDetailData.sagyoKbnId === 40 ? '出発' : '到着'}
+                {idoDetailData.sagyoKbnId === SAGYO_KBN_ID.idoShuko ? '出発' : '到着'}
               </Button>
               <Button
                 color="error"
                 onClick={handleRelease}
                 disabled={!fixFlag || user?.permission.nyushuko === permission.nyushuko_ref}
-                sx={{ display: idoDetailData.sagyoKbnId === 40 ? 'inline-flex' : 'none' }}
+                sx={{ display: idoDetailData.sagyoKbnId === SAGYO_KBN_ID.idoShuko ? 'inline-flex' : 'none' }}
               >
                 出発解除
               </Button>
@@ -370,15 +373,15 @@ export const IdoDetail = (props: {
             </Box>
             <Box display={'flex'} alignItems={'center'}>
               <Typography mr={5}>移動指示</Typography>
-              <TextField value={idoDetailData.sagyoSijiId === 1 ? 'KICS→YARD' : 'YARD→KICS'} disabled />
+              <TextField value={idoDetailData.sagyoSijiId === SAGYO_SIJI_ID.ky ? 'KICS→YARD' : 'YARD→KICS'} disabled />
             </Box>
             <Box display={'flex'} alignItems={'center'}>
               <Typography mr={5}>作業場所</Typography>
-              <TextField value={idoDetailData.nyushukoBashoId === 1 ? 'KICS' : 'YARD'} disabled />
+              <TextField value={idoDetailData.nyushukoBashoId === BASHO_ID.kics ? 'KICS' : 'YARD'} disabled />
             </Box>
           </Grid2>
           <Divider />
-          {idoDetailData.sagyoKbnId === 40 ? (
+          {idoDetailData.sagyoKbnId === SAGYO_KBN_ID.idoShuko ? (
             <Box width={'100%'}>
               <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} px={2}>
                 <Box alignItems={'center'}>
@@ -441,7 +444,7 @@ export const IdoDetail = (props: {
             color="primary"
             onClick={handleSave}
             disabled={fixFlag || isProcessing || user?.permission.nyushuko === permission.nyushuko_ref}
-            sx={{ display: idoDetailData.sagyoKbnId === 40 ? 'inline-flex' : 'none', mr: 2 }}
+            sx={{ display: idoDetailData.sagyoKbnId === SAGYO_KBN_ID.idoShuko ? 'inline-flex' : 'none', mr: 2 }}
           >
             <SaveAsIcon sx={{ mr: 1 }} />
             保存

@@ -20,6 +20,7 @@ import { grey } from '@mui/material/colors';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
+import { BASHO_ID, JUCHU_KIZAI_HEAD_KBN } from '@/app/_lib/constants';
 import { useUserStore } from '@/app/_lib/stores/usestore';
 import { dispColors, statusColors } from '@/app/(main)/_lib/colors';
 import { permission } from '@/app/(main)/_lib/permission';
@@ -122,7 +123,7 @@ export const NyukoDetail = (props: {
 
   const handleArrivalOpen = () => {
     if (
-      nyukoDetailData.juchuKizaiHeadKbn !== 1 &&
+      nyukoDetailData.juchuKizaiHeadKbn !== JUCHU_KIZAI_HEAD_KBN.normal &&
       nyukoDetailTableData.filter((d) => d.resultQty === 0 && d.resultAdjQty === 0).length > 0
     ) {
       setArrivalMessage(`読み取りも補正もない状態で到着すると\n入庫予定から削除されますがよろしいですか？`);
@@ -143,7 +144,7 @@ export const NyukoDetail = (props: {
           <Box display={'flex'} justifyContent={'space-between'} alignItems="center" px={2}>
             <Typography fontSize={'large'}>入庫明細(カウント)</Typography>
             <Grid2 container alignItems={'center'} spacing={2}>
-              {nyukoDetailData.juchuKizaiHeadKbn === 2 && (
+              {nyukoDetailData.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.return && (
                 <Typography color="red">※返却時は到着ボタンで親の入庫明細の数量に反映されます。</Typography>
               )}
               {fixFlag && <Typography>到着済</Typography>}
@@ -184,7 +185,7 @@ export const NyukoDetail = (props: {
               <Box display={'flex'} alignItems={'center'}>
                 <Typography mr={4}>入庫場所</Typography>
                 <TextField
-                  value={nyukoDetailData.nyushukoBashoId === 1 ? 'KICS' : 'YARD'}
+                  value={nyukoDetailData.nyushukoBashoId === BASHO_ID.kics ? 'KICS' : 'YARD'}
                   disabled
                   sx={{ width: 100 }}
                 />
@@ -214,9 +215,9 @@ export const NyukoDetail = (props: {
               sx={{
                 '.MuiOutlinedInput-input.Mui-disabled': {
                   WebkitTextFillColor:
-                    nyukoDetailData.juchuKizaiHeadKbn === 2
+                    nyukoDetailData.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.return
                       ? dispColors.return
-                      : nyukoDetailData.juchuKizaiHeadKbn === 3
+                      : nyukoDetailData.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.keep
                         ? dispColors.keep
                         : 'inherit',
                 },
@@ -263,12 +264,12 @@ export const NyukoDetail = (props: {
               loading={isProcessing}
               sx={{
                 backgroundColor:
-                  nyukoDetailData.juchuKizaiHeadKbn !== 1 &&
+                  nyukoDetailData.juchuKizaiHeadKbn !== JUCHU_KIZAI_HEAD_KBN.normal &&
                   nyukoDetailTableData.filter((d) => d.resultQty === 0 && d.resultAdjQty === 0).length > 0
                     ? 'red'
                     : 'yellow',
                 color:
-                  nyukoDetailData.juchuKizaiHeadKbn !== 1 &&
+                  nyukoDetailData.juchuKizaiHeadKbn !== JUCHU_KIZAI_HEAD_KBN.normal &&
                   nyukoDetailTableData.filter((d) => d.resultQty === 0 && d.resultAdjQty === 0).length > 0
                     ? 'white'
                     : 'black',

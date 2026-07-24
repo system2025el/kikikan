@@ -18,6 +18,7 @@ import { useRouter } from 'next/navigation';
 import * as React from 'react';
 import { useState } from 'react';
 
+import { JUCHU_KIZAI_HEAD_KBN } from '@/app/_lib/constants';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
 import { EqTableValues, VehicleTableValues } from '../_lib/types';
@@ -110,17 +111,17 @@ export const OrderEqTable: React.FC<OrderEqTableProps> = ({
                     variant="text"
                     sx={{
                       color:
-                        row.juchuKizaiHeadKbn === 1
+                        row.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.normal
                           ? 'primary'
-                          : row.juchuKizaiHeadKbn === 2
+                          : row.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.return
                             ? 'red'
-                            : row.juchuKizaiHeadKbn === 3
+                            : row.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.keep
                               ? 'green'
                               : 'primary',
                       whiteSpace: 'nowrap',
                       justifyContent: 'start',
                       textTransform: 'none',
-                      ...(row.juchuKizaiHeadKbn !== 1 && { pl: 2 }),
+                      ...(row.juchuKizaiHeadKbn !== JUCHU_KIZAI_HEAD_KBN.normal && { pl: 2 }),
                     }}
                   >
                     {row.headNam}

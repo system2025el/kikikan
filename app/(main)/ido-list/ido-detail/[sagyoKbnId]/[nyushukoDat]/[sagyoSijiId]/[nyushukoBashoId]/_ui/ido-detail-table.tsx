@@ -16,6 +16,7 @@ import { purple } from '@mui/material/colors';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
 
+import { BASHO_ID } from '@/app/_lib/constants';
 import { User } from '@/app/_lib/stores/usestore';
 import { dispColors, statusColors } from '@/app/(main)/_lib/colors';
 import { permission } from '@/app/(main)/_lib/permission';
@@ -144,7 +145,7 @@ export const ShukoIdoDenTable = (props: {
                     <EventNoteIcon />
                   </IconButton>
                 </TableCell>
-                <TableCell align="left">{row.shozokuId === 1 ? 'K' : 'Y'}</TableCell>
+                <TableCell align="left">{row.shozokuId === BASHO_ID.kics ? 'K' : 'Y'}</TableCell>
                 <TableCell align="right">{row.rfidYardQty}</TableCell>
                 <TableCell align="right">{row.rfidKicsQty}</TableCell>
                 <TableCell align="right">{row.planJuchuQty}</TableCell>

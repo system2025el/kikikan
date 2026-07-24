@@ -18,6 +18,7 @@ import {
 import { useEffect, useRef, useState } from 'react';
 import { UseFieldArrayReturn } from 'react-hook-form-mui';
 
+import { JUCHU_KIZAI_HEAD_KBN } from '@/app/_lib/constants';
 import { CloseMasterDialogButton } from '@/app/(main)/_ui/buttons';
 import { Loading } from '@/app/(main)/_ui/loading';
 
@@ -192,7 +193,7 @@ export const SecondDialogPage = ({
                         handleClickHeadNam(l.juchuHeadId, l.juchuKizaiHeadId, l.headNam, l.nebikiAmt, checked);
                       }}
                       dense
-                      sx={{ color: l.juchuKizaiHeadKbn === 2 ? 'red' : 'primary.main' }}
+                      sx={{ color: l.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.return ? 'red' : 'primary.main' }}
                     >
                       <ListItemText primary={l.headNam} />
                     </ListItemButton>

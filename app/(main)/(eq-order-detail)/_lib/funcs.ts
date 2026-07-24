@@ -3,6 +3,7 @@
 import dayjs from 'dayjs';
 import { PoolClient, QueryResult } from 'pg';
 
+import { BASHO_ID, NYUSHUKO_SHUBETU_ID, SAGYO_KBN_ID } from '@/app/_lib/constants';
 import { selectColor } from '@/app/_lib/db/tables/m-honbanbi-color';
 import { selectMeisaiEqts } from '@/app/_lib/db/tables/m-kizai';
 import { selectKokyaku } from '@/app/_lib/db/tables/m-kokyaku';
@@ -189,13 +190,17 @@ export const getJuchuKizaiNyushuko = async (juchuHeadId: number, juchuKizaiHeadI
     }
 
     const kicsShukoDat =
-      data.find((d) => d.nyushuko_shubetu_id === 1 && d.nyushuko_basho_id === 1)?.nyushuko_dat ?? null;
+      data.find((d) => d.nyushuko_shubetu_id === NYUSHUKO_SHUBETU_ID.shuko && d.nyushuko_basho_id === BASHO_ID.kics)
+        ?.nyushuko_dat ?? null;
     const kicsNyukoDat =
-      data.find((d) => d.nyushuko_shubetu_id === 2 && d.nyushuko_basho_id === 1)?.nyushuko_dat ?? null;
+      data.find((d) => d.nyushuko_shubetu_id === NYUSHUKO_SHUBETU_ID.nyuko && d.nyushuko_basho_id === BASHO_ID.kics)
+        ?.nyushuko_dat ?? null;
     const yardShukoDat =
-      data.find((d) => d.nyushuko_shubetu_id === 1 && d.nyushuko_basho_id === 2)?.nyushuko_dat ?? null;
+      data.find((d) => d.nyushuko_shubetu_id === NYUSHUKO_SHUBETU_ID.shuko && d.nyushuko_basho_id === BASHO_ID.yard)
+        ?.nyushuko_dat ?? null;
     const yardNyukoDat =
-      data.find((d) => d.nyushuko_shubetu_id === 2 && d.nyushuko_basho_id === 2)?.nyushuko_dat ?? null;
+      data.find((d) => d.nyushuko_shubetu_id === NYUSHUKO_SHUBETU_ID.nyuko && d.nyushuko_basho_id === BASHO_ID.yard)
+        ?.nyushuko_dat ?? null;
 
     const juchuKizaiNyushukoData = {
       juchuHeadId: juchuHeadId,
@@ -244,8 +249,8 @@ export const addJuchuKizaiNyushuko = async (
     const newData: JuchuKizaiNyushuko = {
       juchu_head_id: juchuHeadId,
       juchu_kizai_head_id: juchuKizaiHeadId,
-      nyushuko_shubetu_id: i === 0 || i === 1 ? 1 : 2,
-      nyushuko_basho_id: i === 0 || i === 2 ? 1 : 2,
+      nyushuko_shubetu_id: i === 0 || i === 1 ? NYUSHUKO_SHUBETU_ID.shuko : NYUSHUKO_SHUBETU_ID.nyuko,
+      nyushuko_basho_id: i === 0 || i === 2 ? BASHO_ID.kics : BASHO_ID.yard,
       nyushuko_dat: currentDate.toISOString(),
       add_dat: new Date().toISOString(),
       add_user: userNam,
@@ -292,8 +297,8 @@ export const updJuchuKizaiNyushuko = async (
         ? {
             juchu_head_id: juchuHeadId,
             juchu_kizai_head_id: juchuKizaiHeadId,
-            nyushuko_shubetu_id: i === 0 || i === 1 ? 1 : 2,
-            nyushuko_basho_id: i === 0 || i === 2 ? 1 : 2,
+            nyushuko_shubetu_id: i === 0 || i === 1 ? NYUSHUKO_SHUBETU_ID.shuko : NYUSHUKO_SHUBETU_ID.nyuko,
+            nyushuko_basho_id: i === 0 || i === 2 ? BASHO_ID.kics : BASHO_ID.yard,
             nyushuko_dat: currentDate.toISOString(),
           }
         : null;
@@ -301,8 +306,8 @@ export const updJuchuKizaiNyushuko = async (
     const confirmData = {
       juchu_head_id: juchuHeadId,
       juchu_kizai_head_id: juchuKizaiHeadId,
-      nyushuko_shubetu_id: i === 0 || i === 1 ? 1 : 2,
-      nyushuko_basho_id: i === 0 || i === 2 ? 1 : 2,
+      nyushuko_shubetu_id: i === 0 || i === 1 ? NYUSHUKO_SHUBETU_ID.shuko : NYUSHUKO_SHUBETU_ID.nyuko,
+      nyushuko_basho_id: i === 0 || i === 2 ? BASHO_ID.kics : BASHO_ID.yard,
     };
 
     try {
@@ -728,7 +733,7 @@ export const addDummyNyushukoDen = async (
       juchu_head_id: juchuHeadId,
       juchu_kizai_head_id: juchuKizaiHeadId,
       juchu_kizai_meisai_id: 0,
-      sagyo_kbn_id: 30,
+      sagyo_kbn_id: SAGYO_KBN_ID.nyukoCount,
       sagyo_den_dat: date.toISOString(),
       sagyo_id: sagyoId,
       kizai_id: 0,

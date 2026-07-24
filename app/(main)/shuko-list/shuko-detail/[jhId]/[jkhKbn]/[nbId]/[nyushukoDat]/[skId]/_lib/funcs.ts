@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { PoolClient } from 'pg';
 
+import { JUCHU_KIZAI_HEAD_KBN, NYUSHUKO_SHUBETU_ID, SAGYO_KBN_ID } from '@/app/_lib/constants';
 import pool, { refreshVRfid } from '@/app/_lib/db/postgres';
 import { selectJuchuContainerMeisaiMaxId, upsertJuchuContainerMeisai } from '@/app/_lib/db/tables/t-juchu-ctn-meisai';
 import { selectChildJuchuKizaiHeadConfirm } from '@/app/_lib/db/tables/t-juchu-kizai-head';
@@ -38,7 +39,13 @@ export const getShukoDetail = async (
   sagyoKbnId: number
 ) => {
   try {
-    const data = await selectNyushukoOne(juchuHeadId, juchuKizaiHeadKbn, nyushukoBashoId, nyushukoDat, 1);
+    const data = await selectNyushukoOne(
+      juchuHeadId,
+      juchuKizaiHeadKbn,
+      nyushukoBashoId,
+      nyushukoDat,
+      NYUSHUKO_SHUBETU_ID.shuko
+    );
 
     const nyukoDetailData: ShukoDetailValues = {
       juchuHeadId: juchuHeadId,
@@ -47,7 +54,7 @@ export const getShukoDetail = async (
       nyushukoDat: nyushukoDat,
       sagyoKbnId: sagyoKbnId,
       juchuKizaiHeadIds: data[0].juchu_kizai_head_idv?.split(',').map((id: string) => parseInt(id)) || [],
-      nyushukoShubetuId: 1,
+      nyushukoShubetuId: NYUSHUKO_SHUBETU_ID.shuko,
       headNamv: data[0].head_namv,
       koenNam: data[0].koen_nam,
       koenbashoNam: data[0].koenbasho_nam,
@@ -192,7 +199,7 @@ export const updShukoDetail = async (
     await connection.query('BEGIN');
 
     // キープ以外は明細、伝票を更新
-    if (shukoDetailTableData[0].juchuKizaiHeadKbn !== 3 && ctnData && ctnData.length > 0) {
+    if (shukoDetailTableData[0].juchuKizaiHeadKbn !== JUCHU_KIZAI_HEAD_KBN.keep && ctnData && ctnData.length > 0) {
       // コンテナ明細追加更新
       const upsertJuchuMeisaiResult = await upsJuchuCtnMeisai(ctnData, userNam, connection);
 
@@ -214,13 +221,13 @@ export const updShukoDetail = async (
         const { data: shukoDat, error: shukoDataError } = await selectJuchuKizaiNyushukoConfirmList({
           juchu_head_id: shukoDetailData.juchuHeadId,
           juchu_kizai_head_id: juchuKizaiHeadId,
-          nyushuko_shubetu_id: 1,
+          nyushuko_shubetu_id: NYUSHUKO_SHUBETU_ID.shuko,
         });
         // 入庫日取得
         const { data: nyukoDat, error: nyukoDataError } = await selectJuchuKizaiNyushukoConfirmList({
           juchu_head_id: shukoDetailData.juchuHeadId,
           juchu_kizai_head_id: juchuKizaiHeadId,
-          nyushuko_shubetu_id: 2,
+          nyushuko_shubetu_id: NYUSHUKO_SHUBETU_ID.nyuko,
         });
         if (shukoDataError) {
           throw new Error('[selectJuchuKizaiNyushukoConfirm] DBエラー:', { cause: shukoDataError });
@@ -358,7 +365,7 @@ export const upsNyushukoDen = async (
     plan_qty: (d.resultQty ?? 0) + (d.resultAdjQty ?? 0),
     sagyo_den_dat: d.nyushukoDat,
     sagyo_id: d.nyushukoBashoId,
-    sagyo_kbn_id: 20,
+    sagyo_kbn_id: SAGYO_KBN_ID.shukoConfirmation,
     dsp_ord_num: d.dspOrdNumMeisai,
     indent_num: d.indentNum,
     add_dat: new Date().toISOString(),
@@ -375,7 +382,7 @@ export const upsNyushukoDen = async (
     plan_qty: (d.resultQty ?? 0) + (d.resultAdjQty ?? 0),
     sagyo_den_dat: nyukoDatas.find((data) => data.juchuKizaiHeadId === d.juchuKizaiHeadId)!.nyushukoDat,
     sagyo_id: d.nyushukoBashoId,
-    sagyo_kbn_id: 30,
+    sagyo_kbn_id: SAGYO_KBN_ID.nyukoCount,
     dsp_ord_num: d.dspOrdNumMeisai,
     indent_num: d.indentNum,
     add_dat: new Date().toISOString(),
@@ -423,7 +430,7 @@ export const upsShukoDen = async (
     plan_qty: (d.resultQty ?? 0) + (d.resultAdjQty ?? 0),
     sagyo_den_dat: d.nyushukoDat,
     sagyo_id: d.nyushukoBashoId,
-    sagyo_kbn_id: 20,
+    sagyo_kbn_id: SAGYO_KBN_ID.shukoConfirmation,
     dsp_ord_num: d.dspOrdNumMeisai,
     indent_num: d.indentNum,
     add_dat: new Date().toISOString(),
@@ -470,7 +477,7 @@ export const upsNyukoDen = async (
       : (d.resultQty ?? 0) + (d.resultAdjQty ?? 0),
     sagyo_den_dat: nyukoDat,
     sagyo_id: nyushukoBashoId,
-    sagyo_kbn_id: 30,
+    sagyo_kbn_id: SAGYO_KBN_ID.nyukoCount,
     dsp_ord_num: d.dspOrdNumMeisai,
     indent_num: d.indentNum,
     add_dat: new Date().toISOString(),
@@ -516,7 +523,7 @@ export const addShukoFix = async (
   const newFixData: NyushukoFix[] = juchuKizaiHeadIds.map((id) => ({
     juchu_head_id: shukoDetailData.juchuHeadId,
     juchu_kizai_head_id: id,
-    sagyo_kbn_id: 60,
+    sagyo_kbn_id: SAGYO_KBN_ID.shukoConfirmed,
     sagyo_den_dat: shukoDetailData.nyushukoDat,
     sagyo_id: shukoDetailData.nyushukoBashoId,
     sagyo_fix_flg: 1,
@@ -556,7 +563,7 @@ export const delShukoFix = async (
   const deleteFixData = juchuKizaiHeadIds.map((d) => ({
     juchu_head_id: shukoDetailData.juchuHeadId,
     juchu_kizai_head_id: d,
-    sagyo_kbn_id: 60,
+    sagyo_kbn_id: SAGYO_KBN_ID.shukoConfirmed,
     sagyo_id: shukoDetailData.nyushukoBashoId,
   }));
 

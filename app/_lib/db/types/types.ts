@@ -3123,6 +3123,7 @@ export type Database = {
           juchu_kizai_head_kbn: number;
           keikoku: string | null;
           kics_nyuko_dat: string | null;
+          kics_nyuko_fix_flg: number | null;
           kics_shuko_dat: string | null;
           kics_shuko_fix_flg: number | null;
           koen_nam: string | null;
@@ -3140,6 +3141,7 @@ export type Database = {
           shuko_dat: string | null;
           sikomibi: number | null;
           yard_nyuko_dat: string | null;
+          yard_nyuko_fix_flg: number | null;
           yard_shuko_dat: string | null;
           yard_shuko_fix_flg: number | null;
         };

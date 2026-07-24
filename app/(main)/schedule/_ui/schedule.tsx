@@ -23,6 +23,8 @@ import { useEffect, useState } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 
+import { BASHO_ID, NYUSHUKO_SHUBETU_ID } from '@/app/_lib/constants';
+
 import { weeklyColors } from '../../_lib/colors';
 import { toJapanDayString, toJapanHHmmString, toJapanYMDAndDayString } from '../../_lib/date-conversion';
 import { permission } from '../../_lib/permission';
@@ -403,19 +405,23 @@ export const Schedule = () => {
                             <Box
                               width={43}
                               sx={styles.boxStyle}
-                              bgcolor={time.nyushukoShubetuId === 1 ? weeklyColors.shuko : weeklyColors.nyuko}
+                              bgcolor={
+                                time.nyushukoShubetuId === NYUSHUKO_SHUBETU_ID.shuko
+                                  ? weeklyColors.shuko
+                                  : weeklyColors.nyuko
+                              }
                               //fontSize={'0.75rem'}
                             >
-                              {time.nyushukoShubetuId === 1 ? '積み' : '降ろし'}
+                              {time.nyushukoShubetuId === NYUSHUKO_SHUBETU_ID.shuko ? '積み' : '降ろし'}
                             </Box>
                             <Divider orientation="vertical" />
                             <Box
                               width={150}
                               sx={styles.boxStyle}
                               bgcolor={
-                                time.nyushukoBashoId === 1
+                                time.nyushukoBashoId === BASHO_ID.kics
                                   ? weeklyColors.kics
-                                  : time.nyushukoBashoId === 3
+                                  : time.nyushukoBashoId === BASHO_ID.others
                                     ? weeklyColors.atsugi
                                     : weeklyColors.yard
                               }
@@ -432,7 +438,11 @@ export const Schedule = () => {
                             <Box
                               width={43}
                               sx={styles.boxStyle}
-                              bgcolor={time.nyushukoShubetuId === 1 ? weeklyColors.shuko : weeklyColors.nyuko}
+                              bgcolor={
+                                time.nyushukoShubetuId === NYUSHUKO_SHUBETU_ID.shuko
+                                  ? weeklyColors.shuko
+                                  : weeklyColors.nyuko
+                              }
                               //fontSize={'0.75rem'}
                             >
                               {time.sharyos[0]?.nam ?? ''}
@@ -443,9 +453,9 @@ export const Schedule = () => {
                               width={150}
                               sx={styles.boxStyle}
                               bgcolor={
-                                time.nyushukoBashoId === 1
+                                time.nyushukoBashoId === BASHO_ID.kics
                                   ? weeklyColors.kics
-                                  : time.nyushukoBashoId === 3
+                                  : time.nyushukoBashoId === BASHO_ID.others
                                     ? weeklyColors.atsugi
                                     : weeklyColors.yard
                               }
@@ -462,7 +472,11 @@ export const Schedule = () => {
                             <Box
                               width={43}
                               sx={styles.boxStyle}
-                              bgcolor={time.nyushukoShubetuId === 1 ? weeklyColors.shuko : weeklyColors.nyuko}
+                              bgcolor={
+                                time.nyushukoShubetuId === NYUSHUKO_SHUBETU_ID.shuko
+                                  ? weeklyColors.shuko
+                                  : weeklyColors.nyuko
+                              }
                               //fontSize={'0.75rem'}
                             >
                               {time.sharyos[1]?.nam ?? ''}
@@ -473,9 +487,9 @@ export const Schedule = () => {
                               width={150}
                               sx={styles.boxStyle}
                               bgcolor={
-                                time.nyushukoBashoId === 1
+                                time.nyushukoBashoId === BASHO_ID.kics
                                   ? weeklyColors.kics
-                                  : time.nyushukoBashoId === 3
+                                  : time.nyushukoBashoId === BASHO_ID.others
                                     ? weeklyColors.atsugi
                                     : weeklyColors.yard
                               }

@@ -4,6 +4,7 @@ import { Checkbox, Table, TableBody, TableCell, TableContainer, TableHead, Table
 import { grey } from '@mui/material/colors';
 import { Dispatch, SetStateAction } from 'react';
 
+import { BASHO_ID } from '@/app/_lib/constants';
 import { toJapanTimeString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 
 import { NyukoEqptDetailTableValues } from '../_lib/types';
@@ -58,7 +59,7 @@ export const NyukoEqptDetailTable = (props: {
               <TableCell align="left">{row.rfidTagId}</TableCell>
               <TableCell align="left">{row.rfidStsNam}</TableCell>
               <TableCell align="left">{row.rfidMem}</TableCell>
-              <TableCell align="left">{row.nyushukoBashoId === 1 ? 'K' : 'Y'}</TableCell>
+              <TableCell align="left">{row.nyushukoBashoId === BASHO_ID.kics ? 'K' : 'Y'}</TableCell>
               <TableCell align="left">{row.rfidDat && toJapanTimeString(row.rfidDat)}</TableCell>
               <TableCell align="left">{row.rfidUser}</TableCell>
               <TableCell align="left">{row.rfidDelFlg === 1 && '無効'}</TableCell>

@@ -1,5 +1,6 @@
 'use server';
 
+import { DIC_ID, JUCHU_KIZAI_HEAD_KBN } from '@/app/_lib/constants';
 import { selectOneCustomer } from '@/app/_lib/db/tables/m-kokyaku';
 import { selectNyukoPdfJuchuKizaiMeisai } from '@/app/_lib/db/tables/nyushuko-pdf';
 import { selectSagyoIdFilterNyushukoFixFlag } from '@/app/_lib/db/tables/t-nyushuko-fix';
@@ -140,7 +141,7 @@ export const getPdfData = async (
     const updatedKizaiData = kizaiData;
 
     // オプション機材のインデント文字
-    const indentChara = await getDic(1);
+    const indentChara = await getDic(DIC_ID.indentChara);
 
     // セット機材のグループ化
     const groups: EqptGroup[] = [];
@@ -211,7 +212,7 @@ export const getPdfData = async (
     const sqlHeader = nyukoResult.header;
 
     const honbanbiCalcQty =
-      sqlHeader.juchu_kizai_head_kbn !== 1
+      sqlHeader.juchu_kizai_head_kbn !== JUCHU_KIZAI_HEAD_KBN.normal
         ? null
         : /*(sqlHeader?.juchu_honbanbi_calc_qty ??*/
           juchuKizaiHeadData.reduce((max, current) => {

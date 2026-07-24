@@ -46,6 +46,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 
+import { BASHO_ID, JUCHU_KIZAI_HEAD_KBN, LOCK_SHUBETU, SAGYO_KBN_ID } from '@/app/_lib/constants';
 import { useUserStore } from '@/app/_lib/stores/usestore';
 import { toJapanTimeString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { getNyukoDate, getRange, getShukoDate } from '@/app/(main)/_lib/date-funcs';
@@ -256,7 +257,7 @@ export const EquipmentReturnOrderDetail = (props: {
     if (!user) return;
 
     try {
-      const lockData = await lockCheck(1, getValues('juchuHeadId'), user.name, user.email);
+      const lockData = await lockCheck(LOCK_SHUBETU.juchuHead, getValues('juchuHeadId'), user.name, user.email);
       setLockData(lockData);
 
       if (!lockData) return true;
@@ -276,7 +277,7 @@ export const EquipmentReturnOrderDetail = (props: {
       const [juchuHeadData, oyaJuchuKizaiHeadData, nyukoFixFlag] = await Promise.all([
         getDetailJuchuHead(getValues('juchuHeadId')),
         getJuchuKizaiNyushuko(getValues('juchuHeadId'), getValues('oyaJuchuKizaiHeadId')),
-        getNyushukoFixFlag(getValues('juchuHeadId'), getValues('juchuKizaiHeadId'), 70),
+        getNyushukoFixFlag(getValues('juchuHeadId'), getValues('juchuKizaiHeadId'), SAGYO_KBN_ID.nyukoConfirmed),
       ]);
 
       if (!juchuHeadData || !oyaJuchuKizaiHeadData) {
@@ -311,7 +312,7 @@ export const EquipmentReturnOrderDetail = (props: {
         const newReturnJuchuKizaiHeadData: ReturnJuchuKizaiHeadValues = {
           juchuHeadId: juchuHeadData.juchuHeadId,
           juchuKizaiHeadId: 0,
-          juchuKizaiHeadKbn: 2,
+          juchuKizaiHeadKbn: JUCHU_KIZAI_HEAD_KBN.return,
           juchuHonbanbiQty: oyaJuchuHonbanbiQty ?? 0,
           //nebikiAmt: null,
           mem: null,
@@ -404,7 +405,7 @@ export const EquipmentReturnOrderDetail = (props: {
       }
 
       try {
-        await lockRelease(1, juchuHeadData.juchuHeadId, user.name, user.email);
+        await lockRelease(LOCK_SHUBETU.juchuHead, juchuHeadData.juchuHeadId, user.name, user.email);
       } catch (e) {
         setSnackBarMessage('ロック解除に失敗しました');
         setSnackBarOpen(true);
@@ -1112,9 +1113,9 @@ export const EquipmentReturnOrderDetail = (props: {
         setReturnJuchuKizaiMeisaiList((prev) =>
           prev.map((d) =>
             newDate && !yardNyukoDat
-              ? { ...d, shozokuId: 1 }
+              ? { ...d, shozokuId: BASHO_ID.kics }
               : !newDate && yardNyukoDat
-                ? { ...d, shozokuId: 2 }
+                ? { ...d, shozokuId: BASHO_ID.yard }
                 : { ...d, shozokuId: d.mShozokuId }
           )
         );
@@ -1160,9 +1161,9 @@ export const EquipmentReturnOrderDetail = (props: {
         setReturnJuchuKizaiMeisaiList((prev) =>
           prev.map((d) =>
             kicsNyukoDat && !newDate
-              ? { ...d, shozokuId: 1 }
+              ? { ...d, shozokuId: BASHO_ID.kics }
               : !kicsNyukoDat && newDate
-                ? { ...d, shozokuId: 2 }
+                ? { ...d, shozokuId: BASHO_ID.yard }
                 : { ...d, shozokuId: d.mShozokuId }
           )
         );
@@ -1189,7 +1190,7 @@ export const EquipmentReturnOrderDetail = (props: {
       setPath(null);
     } else if (result && !path) {
       try {
-        await lockRelease(1, juchuHeadData.juchuHeadId, user.name, user.email);
+        await lockRelease(LOCK_SHUBETU.juchuHead, juchuHeadData.juchuHeadId, user.name, user.email);
       } catch (e) {
         setSnackBarMessage('ロック解除に失敗しました');
         setSnackBarOpen(true);
@@ -1233,7 +1234,7 @@ export const EquipmentReturnOrderDetail = (props: {
           juchuKizaiHeadId: getValues('juchuKizaiHeadId'),
           juchuKizaiMeisaiId: 0,
           mShozokuId: d.mShozokuId,
-          shozokuId: kicsDat && !yardDat ? 1 : !kicsDat && yardDat ? 2 : d.mShozokuId,
+          shozokuId: kicsDat && !yardDat ? BASHO_ID.kics : !kicsDat && yardDat ? BASHO_ID.yard : d.mShozokuId,
           shozokuNam: d.shozokuNam,
           mem: '',
           kizaiId: d.kizaiId,
@@ -1434,7 +1435,7 @@ export const EquipmentReturnOrderDetail = (props: {
     if (!user) return;
     const asyncProcess = async () => {
       try {
-        const lockData = await lockCheck(1, juchuHeadData.juchuHeadId, user.name, user.email);
+        const lockData = await lockCheck(LOCK_SHUBETU.juchuHead, juchuHeadData.juchuHeadId, user.name, user.email);
         setLockData(lockData);
         if (lockData) {
           setEdit(false);
@@ -1829,7 +1830,9 @@ export const EquipmentReturnOrderDetail = (props: {
                                   const yardNyukoDat = getValues('yardNyukoDat');
                                   setReturnJuchuKizaiMeisaiList((prev) =>
                                     prev.map((d) =>
-                                      yardNyukoDat ? { ...d, shozokuId: 2 } : { ...d, shozokuId: d.mShozokuId }
+                                      yardNyukoDat
+                                        ? { ...d, shozokuId: BASHO_ID.yard }
+                                        : { ...d, shozokuId: d.mShozokuId }
                                     )
                                   );
                                 }}
@@ -1869,7 +1872,9 @@ export const EquipmentReturnOrderDetail = (props: {
                                   const kicsNyukoDat = getValues('kicsNyukoDat');
                                   setReturnJuchuKizaiMeisaiList((prev) =>
                                     prev.map((d) =>
-                                      kicsNyukoDat ? { ...d, shozokuId: 1 } : { ...d, shozokuId: d.mShozokuId }
+                                      kicsNyukoDat
+                                        ? { ...d, shozokuId: BASHO_ID.kics }
+                                        : { ...d, shozokuId: d.mShozokuId }
                                     )
                                   );
                                 }}

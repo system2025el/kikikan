@@ -37,6 +37,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 import { set } from 'zod';
 
+import { JUCHU_KIZAI_HEAD_KBN, LOCK_SHUBETU } from '@/app/_lib/constants';
 import { useUserStore } from '@/app/_lib/stores/usestore';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { getNyukoDate, getRange, getShukoDate } from '@/app/(main)/_lib/date-funcs';
@@ -203,7 +204,7 @@ export const Order = (props: {
     if (getValues('juchuHeadId') === 0) return true;
 
     try {
-      const lockData = await lockCheck(1, getValues('juchuHeadId'), user.name, user.email);
+      const lockData = await lockCheck(LOCK_SHUBETU.juchuHead, getValues('juchuHeadId'), user.name, user.email);
       setLockData(lockData);
 
       if (!lockData) return true;
@@ -299,7 +300,7 @@ export const Order = (props: {
         return;
       }
       try {
-        await lockRelease(1, props.juchuHeadData.juchuHeadId, user.name, user.email);
+        await lockRelease(LOCK_SHUBETU.juchuHead, props.juchuHeadData.juchuHeadId, user.name, user.email);
       } catch (e) {
         setSnackBarMessage('ロック解除に失敗しました');
         setSnackBarOpen(true);
@@ -406,7 +407,7 @@ export const Order = (props: {
         if (selectEqHeader) {
           if (
             selectEqHeader &&
-            selectEqHeader.juchuKizaiHeadKbn === 1 &&
+            selectEqHeader.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.normal &&
             (selectEqHeader.kicsShukoDat ? selectEqHeader.kicsShukoFixFlg === 1 : true) &&
             (selectEqHeader.yardShukoDat ? selectEqHeader.yardShukoFixFlg === 1 : true)
           ) {
@@ -450,7 +451,7 @@ export const Order = (props: {
         if (selectEqHeader) {
           if (
             selectEqHeader &&
-            selectEqHeader.juchuKizaiHeadKbn === 1 &&
+            selectEqHeader.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.normal &&
             (selectEqHeader.kicsShukoDat ? selectEqHeader.kicsShukoFixFlg === 1 : true) &&
             (selectEqHeader.yardShukoDat ? selectEqHeader.yardShukoFixFlg === 1 : true)
           ) {
@@ -491,7 +492,7 @@ export const Order = (props: {
       const lockResult = await lock();
 
       if (lockResult) {
-        if (selectEqHeader && selectEqHeader.juchuKizaiHeadKbn === 1) {
+        if (selectEqHeader && selectEqHeader.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.normal) {
           setCopyOpen(true);
         } else {
           setAlertTitle('選択項目を確認してください');
@@ -625,9 +626,14 @@ export const Order = (props: {
           return;
         }
 
-        if (selectEqHeader.kicsShukoFixFlg || selectEqHeader.yardShukoFixFlg) {
+        if (
+          selectEqHeader.kicsShukoFixFlg ||
+          selectEqHeader.yardShukoFixFlg ||
+          selectEqHeader.kicsNyukoFixFlg ||
+          selectEqHeader.yardNyukoFixFlg
+        ) {
           setAlertTitle('選択項目を確認してください');
-          setAlertMessage('出発済の受注明細は削除できません');
+          setAlertMessage('出発済、到着済の受注明細は削除できません');
           setAlertOpen(true);
           setIsProcessing(false);
           return;
@@ -689,11 +695,11 @@ export const Order = (props: {
   const handleClickEqOrderName = async (row: EqTableValues) => {
     const mode = edit ? 'edit' : 'view';
     const path =
-      row.juchuKizaiHeadKbn === 1
+      row.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.normal
         ? `/eq-main-order-detail/${row.juchuHeadId}/${row.juchuKizaiHeadId}/${mode}`
-        : row.juchuKizaiHeadKbn === 2
+        : row.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.return
           ? `/eq-return-order-detail/${row.juchuHeadId}/${row.juchuKizaiHeadId}/${row.oyaJuchuKizaiHeadId}/${mode}`
-          : row.juchuKizaiHeadKbn === 3
+          : row.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.keep
             ? `/eq-keep-order-detail/${row.juchuHeadId}/${row.juchuKizaiHeadId}/${row.oyaJuchuKizaiHeadId}/${mode}`
             : `/eq-main-order-detail/${row.juchuHeadId}/${row.juchuKizaiHeadId}/${mode}`;
     // if (!isDirty) {
@@ -800,7 +806,7 @@ export const Order = (props: {
     //   }
     /*} else*/ if (result /*&& !path*/) {
       try {
-        await lockRelease(1, props.juchuHeadData.juchuHeadId, user.name, user.email);
+        await lockRelease(LOCK_SHUBETU.juchuHead, props.juchuHeadData.juchuHeadId, user.name, user.email);
       } catch (e) {
         setSnackBarMessage('ロック解除に失敗しました');
         setSnackBarOpen(true);
@@ -927,7 +933,12 @@ export const Order = (props: {
     const asyncProcess = async () => {
       if (!user) return;
       try {
-        const lockData = await lockCheck(1, props.juchuHeadData.juchuHeadId, user.name, user.email);
+        const lockData = await lockCheck(
+          LOCK_SHUBETU.juchuHead,
+          props.juchuHeadData.juchuHeadId,
+          user.name,
+          user.email
+        );
         setLockData(lockData);
         if (lockData) {
           setEdit(false);

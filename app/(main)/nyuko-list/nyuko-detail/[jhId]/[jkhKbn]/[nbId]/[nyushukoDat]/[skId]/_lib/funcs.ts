@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { PoolClient } from 'pg';
 
+import { BASHO_ID, JUCHU_KIZAI_HEAD_KBN, NYUSHUKO_SHUBETU_ID, SAGYO_KBN_ID } from '@/app/_lib/constants';
 import pool, { refreshVRfid } from '@/app/_lib/db/postgres';
 import { selectJuchuContainerMeisaiMaxId, upsertJuchuContainerMeisai } from '@/app/_lib/db/tables/t-juchu-ctn-meisai';
 import { selectJuchuKizaiMeisaiMaxId, upsertJuchuKizaiMeisai } from '@/app/_lib/db/tables/t-juchu-kizai-meisai';
@@ -49,7 +50,13 @@ export const getNyukoDetail = async (
   sagyoKbnId: number
 ) => {
   try {
-    const data = await selectNyushukoOne(juchuHeadId, juchuKizaiHeadKbn, nyushukoBashoId, nyushukoDat, 2);
+    const data = await selectNyushukoOne(
+      juchuHeadId,
+      juchuKizaiHeadKbn,
+      nyushukoBashoId,
+      nyushukoDat,
+      NYUSHUKO_SHUBETU_ID.nyuko
+    );
 
     const nyukoDetailData: NyukoDetailValues = {
       juchuHeadId: juchuHeadId,
@@ -58,7 +65,7 @@ export const getNyukoDetail = async (
       nyushukoDat: nyushukoDat,
       sagyoKbnId: sagyoKbnId,
       juchuKizaiHeadIds: data[0].juchu_kizai_head_idv.split(',').map((id: string) => parseInt(id)) || [],
-      nyushukoShubetuId: 2,
+      nyushukoShubetuId: NYUSHUKO_SHUBETU_ID.nyuko,
       headNamv: data[0].head_namv,
       koenNam: data[0].koen_nam,
       koenbashoNam: data[0].koenbasho_nam,
@@ -190,7 +197,7 @@ export const updReturnNyukoDetail = async (
         {
           juchu_head_id: nyukoDetailData.juchuHeadId,
           juchu_kizai_head_id: juchuKizaiHeadId,
-          nyushuko_shubetu_id: 2,
+          nyushuko_shubetu_id: NYUSHUKO_SHUBETU_ID.nyuko,
         },
         connection
       );
@@ -210,7 +217,7 @@ export const updReturnNyukoDetail = async (
           juchuCtnNyukoData,
           oyaJuchuCtnMeisaiData,
           nyukoDetailData.nyushukoBashoId,
-          1,
+          BASHO_ID.kics,
           oyaNyukoDat.length,
           true,
           userNam,
@@ -220,7 +227,7 @@ export const updReturnNyukoDetail = async (
           juchuCtnNyukoData,
           oyaJuchuCtnMeisaiData,
           nyukoDetailData.nyushukoBashoId,
-          2,
+          BASHO_ID.yard,
           oyaNyukoDat.length,
           true,
           userNam,
@@ -288,7 +295,7 @@ export const updKeepNyukoDetail = async (
       const shukoDat = await selectJuchuKizaiNyushukoConfirmSingle({
         juchu_head_id: nyukoDetailData.juchuHeadId,
         juchu_kizai_head_id: juchuKizaiHeadId,
-        nyushuko_shubetu_id: 1,
+        nyushuko_shubetu_id: NYUSHUKO_SHUBETU_ID.shuko,
         nyushuko_basho_id: nyukoDetailData.nyushukoBashoId,
       });
 
@@ -375,9 +382,10 @@ export const upsJuchuKizaiMeisai = async (
     juchu_head_id: d.juchuHeadId,
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
-    keep_qty: d.juchuKizaiHeadKbn === 3 ? (d.resultQty ?? 0) + (d.resultAdjQty ?? 0) : null,
+    keep_qty: d.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.keep ? (d.resultQty ?? 0) + (d.resultAdjQty ?? 0) : null,
     kizai_id: d.kizaiId,
-    plan_kizai_qty: d.juchuKizaiHeadKbn === 2 ? -1 * ((d.resultQty ?? 0) + (d.resultAdjQty ?? 0)) : null,
+    plan_kizai_qty:
+      d.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.return ? -1 * ((d.resultQty ?? 0) + (d.resultAdjQty ?? 0)) : null,
     shozoku_id: d.nyushukoShubetuId ?? 0,
     dsp_ord_num: d.dspOrdNumMeisai,
     indent_num: d.indentNum,
@@ -411,9 +419,10 @@ export const upsJuchuCtnMeisai = async (
     juchu_head_id: d.juchuHeadId,
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
-    keep_qty: d.juchuKizaiHeadKbn === 3 ? (d.resultQty ?? 0) + (d.resultAdjQty ?? 0) : null,
+    keep_qty: d.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.keep ? (d.resultQty ?? 0) + (d.resultAdjQty ?? 0) : null,
     kizai_id: d.kizaiId,
-    plan_kizai_qty: d.juchuKizaiHeadKbn === 2 ? -1 * ((d.resultQty ?? 0) + (d.resultAdjQty ?? 0)) : null,
+    plan_kizai_qty:
+      d.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.return ? -1 * ((d.resultQty ?? 0) + (d.resultAdjQty ?? 0)) : null,
     shozoku_id: d.nyushukoBashoId ?? 0,
     dsp_ord_num: d.dspOrdNumMeisai,
     indent_num: d.indentNum,
@@ -449,7 +458,7 @@ export const updNyukoDen = async (
     plan_qty: (d.resultQty ?? 0) + (d.resultAdjQty ?? 0),
     sagyo_den_dat: d.nyushukoDat,
     sagyo_id: d.nyushukoBashoId,
-    sagyo_kbn_id: 30,
+    sagyo_kbn_id: SAGYO_KBN_ID.nyukoCount,
     dsp_ord_num: d.dspOrdNumMeisai,
     indent_num: d.indentNum,
     add_dat: new Date().toISOString(),
@@ -498,7 +507,7 @@ export const upsShukoDen = async (
     plan_qty: (d.resultQty ?? 0) + (d.resultAdjQty ?? 0),
     sagyo_den_dat: shukoDat,
     sagyo_id: d.nyushukoBashoId,
-    sagyo_kbn_id: 10,
+    sagyo_kbn_id: SAGYO_KBN_ID.shukoPicking,
     dsp_ord_num: d.dspOrdNumMeisai,
     indent_num: d.indentNum,
     add_dat: new Date().toISOString(),
@@ -515,7 +524,7 @@ export const upsShukoDen = async (
     plan_qty: (d.resultQty ?? 0) + (d.resultAdjQty ?? 0),
     sagyo_den_dat: shukoDat,
     sagyo_id: d.nyushukoBashoId,
-    sagyo_kbn_id: 20,
+    sagyo_kbn_id: SAGYO_KBN_ID.shukoConfirmation,
     dsp_ord_num: d.dspOrdNumMeisai,
     indent_num: d.indentNum,
     add_dat: new Date().toISOString(),
@@ -566,7 +575,7 @@ export const updOyaKizaiNyukoDen = async (
       : -1 * ((d.resultQty ?? 0) + (d.resultAdjQty ?? 0)),
     sagyo_den_dat: d.nyushukoDat,
     sagyo_id: d.nyushukoBashoId,
-    sagyo_kbn_id: 30,
+    sagyo_kbn_id: SAGYO_KBN_ID.nyukoCount,
     dsp_ord_num: d.dspOrdNumMeisai,
     indent_num: d.indentNum,
     upd_dat: new Date().toISOString(),
@@ -616,7 +625,7 @@ export const updOyaCtnNyukoDen = async (
 ) => {
   const updateNyukoData: NyushukoDen[] = nyukoDetailTableData.map((d) => {
     const oyaPlanQty =
-      sagyoId === 1
+      sagyoId === BASHO_ID.kics
         ? (oyaJuchuContainerMeisaiData.find((c) => c.kizaiId === d.kizaiId)?.planKicsKizaiQty ?? 0)
         : (oyaJuchuContainerMeisaiData.find((c) => c.kizaiId === d.kizaiId)?.planYardKizaiQty ?? 0);
     const planQty =
@@ -639,7 +648,7 @@ export const updOyaCtnNyukoDen = async (
       plan_qty: arrivalFlag ? planQty : -1 * planQty,
       sagyo_den_dat: d.nyushukoDat,
       sagyo_id: oyaSagyoId,
-      sagyo_kbn_id: 30,
+      sagyo_kbn_id: SAGYO_KBN_ID.nyukoCount,
       dsp_ord_num: d.dspOrdNumMeisai,
       indent_num: d.indentNum,
       upd_dat: new Date().toISOString(),
@@ -677,7 +686,7 @@ export const addNyukoFix = async (nyukoDetailData: NyukoDetailValues, userNam: s
   const newFixData: NyushukoFix[] = juchuKizaiHeadIds.map((id) => ({
     juchu_head_id: nyukoDetailData.juchuHeadId,
     juchu_kizai_head_id: id,
-    sagyo_kbn_id: 70,
+    sagyo_kbn_id: SAGYO_KBN_ID.nyukoConfirmed,
     sagyo_den_dat: nyukoDetailData.nyushukoDat,
     sagyo_id: nyukoDetailData.nyushukoBashoId,
     sagyo_fix_flg: 1,
@@ -814,7 +823,7 @@ export const delNyukoFix = async (
     ];
 
     // 返却の到着解除の場合は親入庫伝票更新
-    if (nyukoDetailData.juchuKizaiHeadKbn === 2) {
+    if (nyukoDetailData.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.return) {
       // 機材データ
       const kizaiData = nyukoDetailTableData.filter((d) => !d.ctnFlg);
       // コンテナデータ
@@ -831,7 +840,7 @@ export const delNyukoFix = async (
           {
             juchu_head_id: nyukoDetailData.juchuHeadId,
             juchu_kizai_head_id: juchuKizaiHeadId,
-            nyushuko_shubetu_id: 2,
+            nyushuko_shubetu_id: NYUSHUKO_SHUBETU_ID.nyuko,
           },
           connection
         );
@@ -851,7 +860,7 @@ export const delNyukoFix = async (
             juchuCtnNyukoData,
             oyaJuchuCtnMeisaiData,
             nyukoDetailData.nyushukoBashoId,
-            1,
+            BASHO_ID.kics,
             oyaNyukoDat.length,
             false,
             userNam,
@@ -861,7 +870,7 @@ export const delNyukoFix = async (
             juchuCtnNyukoData,
             oyaJuchuCtnMeisaiData,
             nyukoDetailData.nyushukoBashoId,
-            2,
+            BASHO_ID.yard,
             oyaNyukoDat.length,
             false,
             userNam,
@@ -885,7 +894,7 @@ export const delNyukoFix = async (
     const deleteFixData = juchuKizaiHeadIds.map((d) => ({
       juchu_head_id: nyukoDetailData.juchuHeadId,
       juchu_kizai_head_id: d,
-      sagyo_kbn_id: 70,
+      sagyo_kbn_id: SAGYO_KBN_ID.nyukoConfirmed,
       sagyo_id: nyukoDetailData.nyushukoBashoId,
     }));
 

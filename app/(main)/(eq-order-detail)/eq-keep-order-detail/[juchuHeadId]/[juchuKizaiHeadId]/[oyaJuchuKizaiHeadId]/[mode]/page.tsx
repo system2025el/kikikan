@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 
+import { JUCHU_KIZAI_HEAD_KBN, SAGYO_KBN_ID } from '@/app/_lib/constants';
 import { getNyukoDate, getShukoDate } from '@/app/(main)/_lib/date-funcs';
 
 import { getDetailJuchuHead, getJuchuKizaiNyushuko, getNyushukoFixFlag } from '../../../../../_lib/funcs';
@@ -39,8 +40,8 @@ const Page = async (props: {
   const [juchuHeadData, oyaJuchuKizaiNyushukoData, shukoFixFlag, nyukoFixFlag] = await Promise.all([
     getDetailJuchuHead(juchuHeadId),
     getJuchuKizaiNyushuko(juchuHeadId, oyaJuchuKizaiHeadId),
-    getNyushukoFixFlag(juchuHeadId, juchuKizaiHeadId, 60),
-    getNyushukoFixFlag(juchuHeadId, juchuKizaiHeadId, 70),
+    getNyushukoFixFlag(juchuHeadId, juchuKizaiHeadId, SAGYO_KBN_ID.shukoConfirmed),
+    getNyushukoFixFlag(juchuHeadId, juchuKizaiHeadId, SAGYO_KBN_ID.nyukoConfirmed),
   ]);
 
   if (!juchuHeadData || !oyaJuchuKizaiNyushukoData) {
@@ -71,7 +72,7 @@ const Page = async (props: {
     const newKeepJuchuKizaiHeadData: KeepJuchuKizaiHeadValues = {
       juchuHeadId: juchuHeadId,
       juchuKizaiHeadId: juchuKizaiHeadId,
-      juchuKizaiHeadKbn: 3,
+      juchuKizaiHeadKbn: JUCHU_KIZAI_HEAD_KBN.keep,
       mem: null,
       headNam: juchuHeadData.koenNam,
       oyaJuchuKizaiHeadId: oyaJuchuKizaiHeadId,

@@ -67,6 +67,8 @@ export type EqTableValues = {
   mem: string | null;
   kicsShukoFixFlg: number | null;
   yardShukoFixFlg: number | null;
+  kicsNyukoFixFlg: number | null;
+  yardNyukoFixFlg: number | null;
 };
 
 export type VehicleTableValues = {

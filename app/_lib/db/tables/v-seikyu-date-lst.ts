@@ -2,6 +2,7 @@
 
 import dayjs from 'dayjs';
 
+import { HONBANBI_SHUBETU_ID } from '@/app/_lib/constants';
 import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { escapeLikeString } from '@/app/(main)/_lib/escape-string';
 import { BillingStsSearchValues, UnbilledCustsSearchValues } from '@/app/(main)/(bill)/billing-sts-list/_lib/types';
@@ -212,7 +213,7 @@ export const selectFilteredJuchusForBill = async (queries: {
         AND
           ch.juchu_kizai_head_id = v.juchu_kizai_head_id
         AND
-          ch.juchu_honbanbi_shubetu_id = 40
+          ch.juchu_honbanbi_shubetu_id = ${HONBANBI_SHUBETU_ID.honban}
         AND
           ch.juchu_honbanbi_dat >= COALESCE(v.seikyu_dat, v.shuko_dat)
         AND
@@ -228,7 +229,7 @@ export const selectFilteredJuchusForBill = async (queries: {
         AND
           sh.juchu_kizai_head_id = v.juchu_kizai_head_id
         AND
-          sh.juchu_honbanbi_shubetu_id = 40
+          sh.juchu_honbanbi_shubetu_id = ${HONBANBI_SHUBETU_ID.honban}
         AND
           sh.juchu_honbanbi_dat >= COALESCE(v.seikyu_dat, v.shuko_dat)
         AND
@@ -311,7 +312,7 @@ export const selectFilteredJuchuDetailsForBill = async (queries: {
           AND
             ch.juchu_kizai_head_id = v.juchu_kizai_head_id
           AND
-            ch.juchu_honbanbi_shubetu_id = 40
+            ch.juchu_honbanbi_shubetu_id = ${HONBANBI_SHUBETU_ID.honban}
           AND
             ch.juchu_honbanbi_dat >= COALESCE(v.seikyu_dat, v.shuko_dat)
           AND
@@ -438,7 +439,7 @@ export const selectJuchuKizaiMeisaiHeadForBill = async (juchuId: number, kizaiHe
         AND
           ch.juchu_kizai_head_id = v.juchu_kizai_head_id
         AND
-          ch.juchu_honbanbi_shubetu_id = 40
+          ch.juchu_honbanbi_shubetu_id = ${HONBANBI_SHUBETU_ID.honban}
         AND
           ch.juchu_honbanbi_dat >= COALESCE(v.seikyu_dat, v.shuko_dat)
         AND
@@ -454,7 +455,7 @@ export const selectJuchuKizaiMeisaiHeadForBill = async (juchuId: number, kizaiHe
         AND
           sh.juchu_kizai_head_id = v.juchu_kizai_head_id
         AND
-          sh.juchu_honbanbi_shubetu_id = 40 
+          sh.juchu_honbanbi_shubetu_id = ${HONBANBI_SHUBETU_ID.honban} 
         AND
           sh.juchu_honbanbi_dat >= COALESCE(v.seikyu_dat, v.shuko_dat)
         AND
@@ -519,7 +520,7 @@ export const selectJuchuKizaiMeisaiDetailsForBill = async (juchuId: number, kiza
         AND
           ch.juchu_kizai_head_id = v.juchu_kizai_head_id
         AND
-          ch.juchu_honbanbi_shubetu_id = 40
+          ch.juchu_honbanbi_shubetu_id = ${HONBANBI_SHUBETU_ID.honban}
         AND
           ch.juchu_honbanbi_dat >= COALESCE(v.seikyu_dat, v.shuko_dat)
         AND
@@ -535,7 +536,7 @@ export const selectJuchuKizaiMeisaiDetailsForBill = async (juchuId: number, kiza
         AND
           sh.juchu_kizai_head_id = v.juchu_kizai_head_id
         AND
-          sh.juchu_honbanbi_shubetu_id = 40
+          sh.juchu_honbanbi_shubetu_id = ${HONBANBI_SHUBETU_ID.honban}
         AND
           sh.juchu_honbanbi_dat >= COALESCE(v.seikyu_dat, v.shuko_dat)
         AND

@@ -17,6 +17,7 @@ import { grey, lightBlue } from '@mui/material/colors';
 import { usePathname, useRouter } from 'next/navigation';
 import { Dispatch, SetStateAction, useState } from 'react';
 
+import { JUCHU_KIZAI_HEAD_KBN } from '@/app/_lib/constants';
 import { User } from '@/app/_lib/stores/usestore';
 import { dispColors, statusColors } from '@/app/(main)/_lib/colors';
 import { permission } from '@/app/(main)/_lib/permission';
@@ -60,7 +61,7 @@ export const ShukoDetailTable = (props: {
             >
               出庫予定数
             </TableCell>
-            {datas[0].juchuKizaiHeadKbn !== 3 && (
+            {datas[0].juchuKizaiHeadKbn !== JUCHU_KIZAI_HEAD_KBN.keep && (
               <>
                 <TableCell align="right">受注数</TableCell>
                 <TableCell align="right">予備数</TableCell>
@@ -122,7 +123,7 @@ export const ShukoDetailTable = (props: {
               >
                 {row.planQty}
               </TableCell>
-              {datas[0].juchuKizaiHeadKbn !== 3 && (
+              {datas[0].juchuKizaiHeadKbn !== JUCHU_KIZAI_HEAD_KBN.keep && (
                 <>
                   <TableCell align="right">{row.planKizaiQty}</TableCell>
                   <TableCell align="right">{row.planYobiQty}</TableCell>

@@ -21,6 +21,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { set } from 'zod';
 
+import { BASHO_ID, JUCHU_KIZAI_HEAD_KBN, SAGYO_KBN_ID } from '@/app/_lib/constants';
 import { useUserStore } from '@/app/_lib/stores/usestore';
 import { dispColors, statusColors } from '@/app/(main)/_lib/colors';
 import { permission } from '@/app/(main)/_lib/permission';
@@ -95,8 +96,8 @@ export const ShukoDetail = (props: {
 
     const diffCheck = shukoDetailList.find(
       (data) =>
-        (data.juchuKizaiHeadKbn !== 3 && !data.ctnFlg && data.diff !== 0) ||
-        (data.juchuKizaiHeadKbn === 3 && data.diff !== 0)
+        (data.juchuKizaiHeadKbn !== JUCHU_KIZAI_HEAD_KBN.keep && !data.ctnFlg && data.diff !== 0) ||
+        (data.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.keep && data.diff !== 0)
     );
 
     if (diffCheck) {
@@ -228,7 +229,7 @@ export const ShukoDetail = (props: {
         <Paper variant="outlined">
           <Box display={'flex'} justifyContent={'space-between'} alignItems="center" px={2}>
             <Typography fontSize={'large'}>
-              出庫明細({shukoDetailData.sagyoKbnId === 20 ? '最終確認' : 'ピッキング'})
+              出庫明細({shukoDetailData.sagyoKbnId === SAGYO_KBN_ID.shukoConfirmation ? '最終確認' : 'ピッキング'})
             </Typography>
             <Grid2 container alignItems={'center'} spacing={2}>
               {fixFlag && <Typography>出発済</Typography>}
@@ -237,7 +238,7 @@ export const ShukoDetail = (props: {
                 disabled={
                   fixFlag || user?.permission.nyushuko === permission.nyushuko_ref || shukoDetailList.length === 0
                 }
-                sx={{ display: shukoDetailData.sagyoKbnId === 20 ? 'block' : 'none' }}
+                sx={{ display: shukoDetailData.sagyoKbnId === SAGYO_KBN_ID.shukoConfirmation ? 'block' : 'none' }}
               >
                 出発
               </Button>
@@ -245,7 +246,7 @@ export const ShukoDetail = (props: {
                 color="error"
                 onClick={() => setReleaseOpen(true)}
                 disabled={!fixFlag || user?.permission.nyushuko === permission.nyushuko_ref}
-                sx={{ display: shukoDetailData.sagyoKbnId === 20 ? 'block' : 'none' }}
+                sx={{ display: shukoDetailData.sagyoKbnId === SAGYO_KBN_ID.shukoConfirmation ? 'block' : 'none' }}
               >
                 出発解除
               </Button>
@@ -276,7 +277,7 @@ export const ShukoDetail = (props: {
               <Box display={'flex'} alignItems={'center'}>
                 <Typography mr={4}>出庫場所</Typography>
                 <TextField
-                  value={shukoDetailData.nyushukoBashoId === 1 ? 'KICS' : 'YARD'}
+                  value={shukoDetailData.nyushukoBashoId === BASHO_ID.kics ? 'KICS' : 'YARD'}
                   disabled
                   sx={{ width: 100 }}
                 />
@@ -305,7 +306,8 @@ export const ShukoDetail = (props: {
               disabled
               sx={{
                 '.MuiOutlinedInput-input.Mui-disabled': {
-                  WebkitTextFillColor: shukoDetailData.juchuKizaiHeadKbn === 3 ? dispColors.keep : 'inherit',
+                  WebkitTextFillColor:
+                    shukoDetailData.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.keep ? dispColors.keep : 'inherit',
                 },
               }}
             />

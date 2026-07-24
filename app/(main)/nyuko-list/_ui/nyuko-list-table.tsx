@@ -15,6 +15,7 @@ import {
 import { useRouter } from 'next/navigation';
 import { Dispatch, SetStateAction, useState } from 'react';
 
+import { BASHO_ID, JUCHU_KIZAI_HEAD_KBN, SAGYO_KBN_ID } from '@/app/_lib/constants';
 import { User } from '@/app/_lib/stores/usestore';
 
 import { dispColors } from '../../_lib/colors';
@@ -48,7 +49,7 @@ export const NyukoListTable = (props: {
 
   const handleClickRow = (row: NyukoTableValues) => {
     window.open(
-      `nyuko-list/nyuko-detail/${row.juchuHeadId}/${row.juchuKizaiHeadKbn}/${row.nyushukoBashoId}/${new Date(row.nyushukoDat).toISOString()}/30`
+      `nyuko-list/nyuko-detail/${row.juchuHeadId}/${row.juchuKizaiHeadKbn}/${row.nyushukoBashoId}/${new Date(row.nyushukoDat).toISOString()}/${SAGYO_KBN_ID.nyukoCount}`
     );
   };
 
@@ -109,7 +110,7 @@ export const NyukoListTable = (props: {
                   {row.juchuHeadId}
                 </Button>
               </TableCell>
-              <TableCell align="left">{row.nyushukoBashoId === 1 ? 'K' : 'Y'}</TableCell>
+              <TableCell align="left">{row.nyushukoBashoId === BASHO_ID.kics ? 'K' : 'Y'}</TableCell>
               <TableCell align="left">{toJapanTimeString(row.nyushukoDat)}</TableCell>
               <TableCell align="center">
                 <Button
@@ -150,11 +151,11 @@ export const NyukoListTable = (props: {
                 <Typography
                   variant="body2"
                   color={
-                    row.juchuKizaiHeadKbn === 1
+                    row.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.normal
                       ? dispColors.main
-                      : row.juchuKizaiHeadKbn === 2
+                      : row.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.return
                         ? dispColors.return
-                        : row.juchuKizaiHeadKbn === 3
+                        : row.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.keep
                           ? dispColors.keep
                           : dispColors.main
                   }

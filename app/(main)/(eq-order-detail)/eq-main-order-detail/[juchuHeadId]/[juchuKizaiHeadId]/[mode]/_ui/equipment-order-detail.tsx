@@ -41,6 +41,15 @@ import React from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 
+import {
+  BASHO_ID,
+  DIC_ID,
+  HONBANBI_SHUBETU_ID,
+  JUCHU_KIZAI_HEAD_KBN,
+  LOCK_SHUBETU,
+  SAGYO_KBN_ID,
+  SAGYO_SIJI_ID,
+} from '@/app/_lib/constants';
 import { useUserStore } from '@/app/_lib/stores/usestore';
 import { toJapanTimeString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { getNyukoDate, getRange, getShukoDate } from '@/app/(main)/_lib/date-funcs';
@@ -342,7 +351,7 @@ const EquipmentOrderDetail = (props: {
     if (!user) return;
 
     try {
-      const lockData = await lockCheck(1, getValues('juchuHeadId'), user.name, user.email);
+      const lockData = await lockCheck(LOCK_SHUBETU.juchuHead, getValues('juchuHeadId'), user.name, user.email);
       setLockData(lockData);
 
       if (!lockData) return true;
@@ -365,8 +374,8 @@ const EquipmentOrderDetail = (props: {
       // 受注ヘッダーデータ、出発フラグ
       const [juchuHeadData, shukoFixFlag, nyukoFixFlag] = await Promise.all([
         getDetailJuchuHead(getValues('juchuHeadId')),
-        getNyushukoFixFlag(getValues('juchuHeadId'), getValues('juchuKizaiHeadId'), 60),
-        getNyushukoFixFlag(getValues('juchuHeadId'), getValues('juchuKizaiHeadId'), 70),
+        getNyushukoFixFlag(getValues('juchuHeadId'), getValues('juchuKizaiHeadId'), SAGYO_KBN_ID.shukoConfirmed),
+        getNyushukoFixFlag(getValues('juchuHeadId'), getValues('juchuKizaiHeadId'), SAGYO_KBN_ID.nyukoConfirmed),
       ]);
       if (!juchuHeadData) {
         return false;
@@ -379,7 +388,7 @@ const EquipmentOrderDetail = (props: {
         const newJuchuKizaiHeadData: JuchuKizaiHeadValues = {
           juchuHeadId: juchuHeadData.juchuHeadId,
           juchuKizaiHeadId: 0,
-          juchuKizaiHeadKbn: 1,
+          juchuKizaiHeadKbn: JUCHU_KIZAI_HEAD_KBN.normal,
           juchuHonbanbiQty: null,
           nebikiAmt: null,
           nebikiRat: null,
@@ -477,7 +486,7 @@ const EquipmentOrderDetail = (props: {
       }
 
       try {
-        await lockRelease(1, juchuHeadData.juchuHeadId, user.name, user.email);
+        await lockRelease(LOCK_SHUBETU.juchuHead, juchuHeadData.juchuHeadId, user.name, user.email);
       } catch (e) {
         setSnackBarMessage('ロック解除に失敗しました');
         setSnackBarOpen(true);
@@ -629,8 +638,8 @@ const EquipmentOrderDetail = (props: {
 
       // 更新
     } else {
-      const kicsMeisai = juchuKizaiMeisaiList.filter((d) => d.shozokuId === 1 && !d.delFlag);
-      const yardMeisai = juchuKizaiMeisaiList.filter((d) => d.shozokuId === 2 && !d.delFlag);
+      const kicsMeisai = juchuKizaiMeisaiList.filter((d) => d.shozokuId === BASHO_ID.kics && !d.delFlag);
+      const yardMeisai = juchuKizaiMeisaiList.filter((d) => d.shozokuId === BASHO_ID.yard && !d.delFlag);
       const kicsContainer = juchuContainerMeisaiList.filter((d) => d.planKicsKizaiQty > 0 && !d.delFlag);
       const yardContainer = juchuContainerMeisaiList.filter((d) => d.planYardKizaiQty > 0 && !d.delFlag);
 
@@ -1226,8 +1235,8 @@ const EquipmentOrderDetail = (props: {
             ? {
                 ...row,
                 sagyoDenDat: newDate,
-                sagyoSijiId: row.mShozokuId === 1 ? 1 : 2,
-                shozokuId: row.mShozokuId === 1 ? 2 : 1,
+                sagyoSijiId: row.mShozokuId === BASHO_ID.kics ? SAGYO_SIJI_ID.ky : SAGYO_SIJI_ID.yk,
+                shozokuId: row.mShozokuId === BASHO_ID.kics ? BASHO_ID.yard : BASHO_ID.kics,
               }
             : row
         )
@@ -1236,7 +1245,9 @@ const EquipmentOrderDetail = (props: {
       // 受注機材明細、所属変更
       setJuchuKizaiMeisaiList((prev) =>
         prev.map((row) =>
-          row.kizaiId === kizaiId && !row.delFlag ? { ...row, shozokuId: row.mShozokuId === 1 ? 2 : 1 } : row
+          row.kizaiId === kizaiId && !row.delFlag
+            ? { ...row, shozokuId: row.mShozokuId === BASHO_ID.kics ? BASHO_ID.yard : BASHO_ID.kics }
+            : row
         )
       );
     }
@@ -1580,19 +1591,21 @@ const EquipmentOrderDetail = (props: {
       if (idoDat !== null && getValues('yardShukoDat') === null) {
         setIdoJuchuKizaiMeisaiList((prev) =>
           prev.map((row) =>
-            row.mShozokuId === 2 && !row.delFlag
+            row.mShozokuId === BASHO_ID.yard && !row.delFlag
               ? {
                   ...row,
                   sagyoDenDat: idoDat,
-                  sagyoSijiId: 2,
-                  shozokuId: 1,
+                  sagyoSijiId: SAGYO_SIJI_ID.yk,
+                  shozokuId: BASHO_ID.kics,
                 }
               : row
           )
         );
 
         setJuchuKizaiMeisaiList((prev) =>
-          prev.map((row) => (row.mShozokuId === 2 && !row.delFlag ? { ...row, shozokuId: 1 } : row))
+          prev.map((row) =>
+            row.mShozokuId === BASHO_ID.yard && !row.delFlag ? { ...row, shozokuId: BASHO_ID.kics } : row
+          )
         );
 
         setIdoDat(null);
@@ -1600,19 +1613,21 @@ const EquipmentOrderDetail = (props: {
       } else if (idoDat !== null && getValues('kicsShukoDat') === null) {
         setIdoJuchuKizaiMeisaiList((prev) =>
           prev.map((row) =>
-            row.mShozokuId === 1 && !row.delFlag
+            row.mShozokuId === BASHO_ID.kics && !row.delFlag
               ? {
                   ...row,
                   sagyoDenDat: idoDat,
-                  sagyoSijiId: 1,
-                  shozokuId: 2,
+                  sagyoSijiId: SAGYO_SIJI_ID.ky,
+                  shozokuId: BASHO_ID.yard,
                 }
               : row
           )
         );
 
         setJuchuKizaiMeisaiList((prev) =>
-          prev.map((row) => (row.mShozokuId === 1 && !row.delFlag ? { ...row, shozokuId: 2 } : row))
+          prev.map((row) =>
+            row.mShozokuId === BASHO_ID.kics && !row.delFlag ? { ...row, shozokuId: BASHO_ID.yard } : row
+          )
         );
 
         setIdoDat(null);
@@ -1651,7 +1666,7 @@ const EquipmentOrderDetail = (props: {
       setPath(null);
     } else if (result && !path) {
       try {
-        await lockRelease(1, juchuHeadData.juchuHeadId, user.name, user.email);
+        await lockRelease(LOCK_SHUBETU.juchuHead, juchuHeadData.juchuHeadId, user.name, user.email);
       } catch (e) {
         setSnackBarMessage('ロック解除に失敗しました');
         setSnackBarOpen(true);
@@ -1698,7 +1713,7 @@ const EquipmentOrderDetail = (props: {
       const lockResult = await lock();
 
       if (lockResult) {
-        const indentChara = await getDic(1);
+        const indentChara = await getDic(DIC_ID.indentChara);
 
         const kicsDat = getValues('kicsShukoDat');
         const kicsHours = kicsDat ? kicsDat.getHours() : 0;
@@ -1742,7 +1757,11 @@ const EquipmentOrderDetail = (props: {
           juchuKizaiMeisaiId: 0,
           mShozokuId: d.shozokuId,
           shozokuId:
-            d.shozokuId === 1 && kicsIdoDat !== null ? 2 : d.shozokuId === 2 && yardIdoDat !== null ? 1 : d.shozokuId,
+            d.shozokuId === BASHO_ID.kics && kicsIdoDat !== null
+              ? BASHO_ID.yard
+              : d.shozokuId === BASHO_ID.yard && yardIdoDat !== null
+                ? BASHO_ID.kics
+                : d.shozokuId,
           mem: '',
           mem2: '',
           kizaiId: d.kizaiId,
@@ -1796,20 +1815,28 @@ const EquipmentOrderDetail = (props: {
           juchuKizaiHeadId: getValues('juchuKizaiHeadId'),
           idoDenId: null,
           sagyoDenDat:
-            d.shozokuId === 1 && kicsIdoDat !== null
+            d.shozokuId === BASHO_ID.kics && kicsIdoDat !== null
               ? kicsIdoDat
-              : d.shozokuId === 2 && yardIdoDat !== null
+              : d.shozokuId === BASHO_ID.yard && yardIdoDat !== null
                 ? yardIdoDat
                 : null,
           sagyoSijiId:
-            d.shozokuId === 1 && kicsIdoDat !== null ? 1 : d.shozokuId === 2 && yardIdoDat !== null ? 2 : null,
+            d.shozokuId === BASHO_ID.kics && kicsIdoDat !== null
+              ? SAGYO_SIJI_ID.ky
+              : d.shozokuId === BASHO_ID.yard && yardIdoDat !== null
+                ? SAGYO_SIJI_ID.yk
+                : null,
           mShozokuId: d.shozokuId,
           shozokuId:
-            d.shozokuId === 1 && kicsIdoDat !== null ? 2 : d.shozokuId === 2 && yardIdoDat !== null ? 1 : d.shozokuId,
+            d.shozokuId === BASHO_ID.kics && kicsIdoDat !== null
+              ? BASHO_ID.yard
+              : d.shozokuId === BASHO_ID.yard && yardIdoDat !== null
+                ? BASHO_ID.kics
+                : d.shozokuId,
           shozokuNam:
-            d.shozokuId === 1 && kicsIdoDat !== null
+            d.shozokuId === BASHO_ID.kics && kicsIdoDat !== null
               ? 'YARD'
-              : d.shozokuId === 2 && yardIdoDat !== null
+              : d.shozokuId === BASHO_ID.yard && yardIdoDat !== null
                 ? 'KICS'
                 : d.shozokuNam,
           kizaiId: d.kizaiId,
@@ -1893,7 +1920,7 @@ const EquipmentOrderDetail = (props: {
 
     if (edit) {
       try {
-        await lockCheck(1, getValues('juchuHeadId'), user.name, user.email);
+        await lockCheck(LOCK_SHUBETU.juchuHead, getValues('juchuHeadId'), user.name, user.email);
       } catch (e) {
         setIsProcessing(false);
         setSnackBarMessage('サーバー接続エラー');
@@ -1933,7 +1960,7 @@ const EquipmentOrderDetail = (props: {
 
     if (edit) {
       try {
-        await lockCheck(1, getValues('juchuHeadId'), user.name, user.email);
+        await lockCheck(LOCK_SHUBETU.juchuHead, getValues('juchuHeadId'), user.name, user.email);
       } catch (e) {
         setIsProcessing(false);
         setSnackBarMessage('サーバー接続エラー');
@@ -2274,7 +2301,9 @@ const EquipmentOrderDetail = (props: {
       const lockResult = await lock();
 
       if (lockResult) {
-        const honbanbiQty = updatedHonbanbiList.filter((data) => data.juchuHonbanbiShubetuId === 40).length;
+        const honbanbiQty = updatedHonbanbiList.filter(
+          (data) => data.juchuHonbanbiShubetuId === HONBANBI_SHUBETU_ID.honban
+        ).length;
         const addHonbanbiQty = updatedHonbanbiList.reduce((sum, data) => sum + (data.juchuHonbanbiAddQty ?? 0), 0);
         const updatedJuchuHonbanbiQty = honbanbiQty + addHonbanbiQty;
 
@@ -2363,7 +2392,7 @@ const EquipmentOrderDetail = (props: {
     if (!user) return;
     const asyncProcess = async () => {
       try {
-        const lockData = await lockCheck(1, juchuHeadData.juchuHeadId, user.name, user.email);
+        const lockData = await lockCheck(LOCK_SHUBETU.juchuHead, juchuHeadData.juchuHeadId, user.name, user.email);
         setLockData(lockData);
         if (lockData) {
           setEdit(false);
@@ -3332,7 +3361,7 @@ const EquipmentOrderDetail = (props: {
                     justifyContent={'center'}
                     ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
                     width={75}
-                    bgcolor={shubetuColorMap.get(10)}
+                    bgcolor={shubetuColorMap.get(HONBANBI_SHUBETU_ID.shikomi)}
                   >
                     <Typography fontSize={'small'} py={1} px={3}>
                       仕込
@@ -3360,7 +3389,7 @@ const EquipmentOrderDetail = (props: {
                     {juchuHonbanbiList &&
                       juchuHonbanbiList.map(
                         (data, index) =>
-                          data.juchuHonbanbiShubetuId === 10 && (
+                          data.juchuHonbanbiShubetuId === HONBANBI_SHUBETU_ID.shikomi && (
                             <Grid2 key={index} container display="flex" flexDirection="row">
                               <Grid2 size={3} maxWidth={200}>
                                 <Typography>{toJapanYMDString(data.juchuHonbanbiDat)}</Typography>
@@ -3381,7 +3410,7 @@ const EquipmentOrderDetail = (props: {
                     ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
                     mt={4}
                     width={75}
-                    bgcolor={shubetuColorMap.get(20)}
+                    bgcolor={shubetuColorMap.get(HONBANBI_SHUBETU_ID.rh)}
                   >
                     <Typography fontSize={'small'} py={1} px={3}>
                       RH
@@ -3417,7 +3446,7 @@ const EquipmentOrderDetail = (props: {
                     {juchuHonbanbiList &&
                       juchuHonbanbiList.map(
                         (data, index) =>
-                          data.juchuHonbanbiShubetuId === 20 && (
+                          data.juchuHonbanbiShubetuId === HONBANBI_SHUBETU_ID.rh && (
                             <Grid2 key={index} container display="flex" flexDirection="row">
                               <Grid2 size={3} maxWidth={200}>
                                 <Typography>{toJapanYMDString(data.juchuHonbanbiDat)}</Typography>
@@ -3438,7 +3467,7 @@ const EquipmentOrderDetail = (props: {
                     ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
                     mt={4}
                     width={75}
-                    bgcolor={shubetuColorMap.get(30)}
+                    bgcolor={shubetuColorMap.get(HONBANBI_SHUBETU_ID.gp)}
                   >
                     <Typography fontSize={'small'} py={1} px={3}>
                       GP
@@ -3474,7 +3503,7 @@ const EquipmentOrderDetail = (props: {
                     {juchuHonbanbiList &&
                       juchuHonbanbiList.map(
                         (data, index) =>
-                          data.juchuHonbanbiShubetuId === 30 && (
+                          data.juchuHonbanbiShubetuId === HONBANBI_SHUBETU_ID.gp && (
                             <Grid2 key={index} container display="flex" flexDirection="row">
                               <Grid2 size={3} maxWidth={200}>
                                 <Typography>{toJapanYMDString(data.juchuHonbanbiDat)}</Typography>
@@ -3495,7 +3524,7 @@ const EquipmentOrderDetail = (props: {
                     ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
                     mt={4}
                     width={75}
-                    bgcolor={shubetuColorMap.get(40)}
+                    bgcolor={shubetuColorMap.get(HONBANBI_SHUBETU_ID.honban)}
                   >
                     <Typography fontSize={'small'} py={1} px={3}>
                       本番
@@ -3532,7 +3561,7 @@ const EquipmentOrderDetail = (props: {
                     {juchuHonbanbiList &&
                       juchuHonbanbiList.map(
                         (data, index) =>
-                          data.juchuHonbanbiShubetuId === 40 && (
+                          data.juchuHonbanbiShubetuId === HONBANBI_SHUBETU_ID.honban && (
                             <Grid2 key={index} container display="flex" flexDirection="row">
                               <Grid2 size={3} maxWidth={200}>
                                 <Typography>{toJapanYMDString(data.juchuHonbanbiDat)}</Typography>

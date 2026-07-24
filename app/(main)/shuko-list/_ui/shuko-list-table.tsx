@@ -16,6 +16,7 @@ import { grey } from '@mui/material/colors';
 import { useRouter } from 'next/navigation';
 import { Dispatch, SetStateAction, use, useState } from 'react';
 
+import { BASHO_ID, JUCHU_KIZAI_HEAD_KBN, SAGYO_KBN_ID } from '@/app/_lib/constants';
 import { User, useUserStore } from '@/app/_lib/stores/usestore';
 
 import { dispColors } from '../../_lib/colors';
@@ -129,7 +130,7 @@ export const ShukoListTable = (props: {
                   {row.juchuHeadId}
                 </Button>
               </TableCell>
-              <TableCell align="left">{row.nyushukoBashoId === 1 ? 'K' : 'Y'}</TableCell>
+              <TableCell align="left">{row.nyushukoBashoId === BASHO_ID.kics ? 'K' : 'Y'}</TableCell>
               <TableCell align="left">{toJapanTimeString(row.nyushukoDat)}</TableCell>
               <TableCell align="center">
                 <Button
@@ -160,12 +161,22 @@ export const ShukoListTable = (props: {
                 </Button>
               </TableCell>
               <TableCell align="center">
-                <Button variant="text" size="small" onClick={() => handleClickRow(row, 10)} sx={{ py: 0, px: 1 }}>
+                <Button
+                  variant="text"
+                  size="small"
+                  onClick={() => handleClickRow(row, SAGYO_KBN_ID.shukoPicking)}
+                  sx={{ py: 0, px: 1 }}
+                >
                   {row.sstbSagyoStsNamShort}
                 </Button>
               </TableCell>
               <TableCell align="center">
-                <Button variant="text" size="small" onClick={() => handleClickRow(row, 20)} sx={{ py: 0, px: 1 }}>
+                <Button
+                  variant="text"
+                  size="small"
+                  onClick={() => handleClickRow(row, SAGYO_KBN_ID.shukoConfirmation)}
+                  sx={{ py: 0, px: 1 }}
+                >
                   {row.schkSagyoStsNamShort}
                 </Button>
               </TableCell>
@@ -175,11 +186,11 @@ export const ShukoListTable = (props: {
                 <Typography
                   variant="body2"
                   color={
-                    row.juchuKizaiHeadKbn === 1
+                    row.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.normal
                       ? dispColors.main
-                      : row.juchuKizaiHeadKbn === 2
+                      : row.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.return
                         ? dispColors.return
-                        : row.juchuKizaiHeadKbn === 3
+                        : row.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.keep
                           ? dispColors.keep
                           : dispColors.main
                   }

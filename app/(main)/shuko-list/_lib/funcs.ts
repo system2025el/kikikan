@@ -1,5 +1,6 @@
 'use server';
 
+import { JUCHU_KIZAI_HEAD_KBN } from '@/app/_lib/constants';
 import { selectOneCustomer } from '@/app/_lib/db/tables/m-kokyaku';
 import { selectPdfJuchuKizaiMeisai } from '@/app/_lib/db/tables/nyushuko-pdf';
 import { selectPdfJuchuKizaiHead } from '@/app/_lib/db/tables/v-juchu-kizai-head-lst';
@@ -118,7 +119,7 @@ export const getPdfData = async (
     }
 
     const honbanbiCalcQty =
-      juchuKizaiHeadData[0].juchu_kizai_head_kbn !== 1
+      juchuKizaiHeadData[0].juchu_kizai_head_kbn !== JUCHU_KIZAI_HEAD_KBN.normal
         ? null
         : juchuKizaiHeadData.reduce((max, current) => {
             return (current.juchu_honbanbi_calc_qty ?? 0) > (max.juchu_honbanbi_calc_qty ?? 0) ? current : max;

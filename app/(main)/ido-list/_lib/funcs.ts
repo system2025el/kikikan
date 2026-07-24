@@ -1,5 +1,6 @@
 'use server';
 
+import { SAGYO_SIJI_ID } from '@/app/_lib/constants';
 import { selectFilteredIdoList } from '@/app/_lib/db/tables/v-ido-den3';
 
 import { IdoTableValues } from './types';
@@ -13,13 +14,13 @@ import { IdoTableValues } from './types';
 export const getIdoList = async (sagyoDenDat: string) => {
   const idoData: IdoTableValues[] = [];
   try {
-    const ykData = await selectFilteredIdoList(sagyoDenDat, 2);
+    const ykData = await selectFilteredIdoList(sagyoDenDat, SAGYO_SIJI_ID.yk);
 
     if (ykData.length > 0) {
       const ykIdoData: IdoTableValues = {
         nyushukoDat: sagyoDenDat,
         juchuFlg: ykData[0].juchu_flg,
-        sagyoSijiId: 2,
+        sagyoSijiId: SAGYO_SIJI_ID.yk,
         schkSagyoStsId: ykData[0].schk_sagyo_sts_id,
         schkSagyoStsNamShort: ykData[0].schk_sagyo_sts_nam_short ?? '無し',
         nchkSagyoStsId: ykData[0].nchk_sagyo_sts_id,
@@ -32,7 +33,7 @@ export const getIdoList = async (sagyoDenDat: string) => {
       const ykIdoData: IdoTableValues = {
         nyushukoDat: sagyoDenDat,
         juchuFlg: null,
-        sagyoSijiId: 2,
+        sagyoSijiId: SAGYO_SIJI_ID.yk,
         schkSagyoStsId: null,
         schkSagyoStsNamShort: '無し',
         nchkSagyoStsId: null,
@@ -43,13 +44,13 @@ export const getIdoList = async (sagyoDenDat: string) => {
       idoData.push(ykIdoData);
     }
 
-    const kyData = await selectFilteredIdoList(sagyoDenDat, 1);
+    const kyData = await selectFilteredIdoList(sagyoDenDat, SAGYO_SIJI_ID.ky);
 
     if (kyData.length > 0) {
       const kyIdoData: IdoTableValues = {
         nyushukoDat: sagyoDenDat,
         juchuFlg: kyData[0].juchu_flg,
-        sagyoSijiId: 1,
+        sagyoSijiId: SAGYO_SIJI_ID.ky,
         schkSagyoStsId: kyData[0].schk_sagyo_sts_id,
         schkSagyoStsNamShort: kyData[0].schk_sagyo_sts_nam_short ?? '無し',
         nchkSagyoStsId: kyData[0].nchk_sagyo_sts_id,
@@ -62,7 +63,7 @@ export const getIdoList = async (sagyoDenDat: string) => {
       const kyIdoData: IdoTableValues = {
         nyushukoDat: sagyoDenDat,
         juchuFlg: null,
-        sagyoSijiId: 1,
+        sagyoSijiId: SAGYO_SIJI_ID.ky,
         schkSagyoStsId: null,
         schkSagyoStsNamShort: '無し',
         nchkSagyoStsId: null,

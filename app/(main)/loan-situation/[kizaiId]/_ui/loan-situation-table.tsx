@@ -13,6 +13,7 @@ import {
   TableRow,
 } from '@mui/material';
 
+import { JUCHU_KIZAI_HEAD_KBN } from '@/app/_lib/constants';
 import { useUserStore } from '@/app/_lib/stores/usestore';
 import { toJapanMDString } from '@/app/(main)/_lib/date-conversion';
 import { permission } from '@/app/(main)/_lib/permission';
@@ -117,12 +118,12 @@ export const LoanSituationTable = (props: LoanSituationTableProps) => {
                     m: 0,
                     minWidth: 0,
                     width: 1,
-                    color: row.juchuKizaiHeadKbn === 2 ? 'red' : 'primary',
+                    color: row.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.return ? 'red' : 'primary',
                     justifyContent: 'start',
                   }}
                   onClick={() => {
                     const path =
-                      row.juchuKizaiHeadKbn === 1
+                      row.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.normal
                         ? `/eq-main-order-detail/${row.juchuHeadId}/${row.juchuKizaiHeadId}/view`
                         : `/eq-return-order-detail/${row.juchuHeadId}/${row.juchuKizaiHeadId}/${row.oyaJuchuKizaiHeadId}/view`;
                     window.open(path);
@@ -130,7 +131,7 @@ export const LoanSituationTable = (props: LoanSituationTableProps) => {
                   disabled={user?.permission.juchu === permission.none}
                 >
                   <LightTooltipWithText variant="body2" maxWidth={130}>
-                    {row.juchuKizaiHeadKbn !== 1 && <Box component="span" sx={{ ml: 1.5 }} />}
+                    {row.juchuKizaiHeadKbn !== JUCHU_KIZAI_HEAD_KBN.normal && <Box component="span" sx={{ ml: 1.5 }} />}
                     {row.headNam}
                   </LightTooltipWithText>
                 </Button>
