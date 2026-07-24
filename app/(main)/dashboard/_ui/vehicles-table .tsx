@@ -80,7 +80,17 @@ export const VehiclesTable = ({ orders }: { orders: DashboardTableValues[] }) =>
                             ? dispColors.keep
                             : dispColors.main,
                   }}
-                  onClick={() => window.open(`/eq-main-order-detail/${order.juchuHeadId}/${order.kizaiHeadId}/view`)}
+                  onClick={() => {
+                    const path =
+                      order.headKbn === JUCHU_KIZAI_HEAD_KBN.normal
+                        ? `/eq-main-order-detail/${order.juchuHeadId}/${order.kizaiHeadId}/view`
+                        : order.headKbn === JUCHU_KIZAI_HEAD_KBN.return
+                          ? `/eq-return-order-detail/${order.juchuHeadId}/${order.kizaiHeadId}/${order.oyaJuchuKizaiHeadId}/view`
+                          : order.headKbn === JUCHU_KIZAI_HEAD_KBN.keep
+                            ? `/eq-keep-order-detail/${order.juchuHeadId}/${order.kizaiHeadId}/${order.oyaJuchuKizaiHeadId}/view`
+                            : `/eq-main-order-detail/${order.juchuHeadId}/${order.kizaiHeadId}/view`;
+                    window.open(path);
+                  }}
                 >
                   <LightTooltipWithText variant={'button'} maxWidth={300}>
                     {order.headNam}

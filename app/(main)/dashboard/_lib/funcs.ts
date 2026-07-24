@@ -30,6 +30,7 @@ export const getShukoList = async (startDate: string, totalDays: number) => {
       yardNyukoDat: d.yard_nyuko_dat ?? null,
       kicsNyukoDat: d.kics_nyuko_dat ?? null,
       headKbn: d.juchu_kizai_head_kbn ?? null,
+      oyaJuchuKizaiHeadId: d.oya_juchu_kizai_head_id ?? null,
     }));
     return EqTableData;
   } catch (e) {
@@ -72,6 +73,7 @@ export const getVehiclesList = async (startDate: string, totalDays: number) => {
       yardNyukoDat: d.yard_nyuko_dat ?? null,
       kicsNyukoDat: d.kics_nyuko_dat ?? null,
       headKbn: d.juchu_kizai_head_kbn ?? null,
+      oyaJuchuKizaiHeadId: d.oya_juchu_kizai_head_id ?? null,
     }));
     return EqTableData;
   } catch (e) {

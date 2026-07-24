@@ -88,7 +88,8 @@ FROM (
       v_juchu_kizai_head_lst.koen_nam, 
       v_juchu_kizai_head_lst.koenbasho_nam,
       v_juchu_kizai_head_lst.kokyaku_nam,
-      v_juchu_kizai_head_lst.juchu_kizai_head_kbn
+      v_juchu_kizai_head_lst.juchu_kizai_head_kbn,
+      v_juchu_kizai_head_lst.oya_juchu_kizai_head_id
     FROM
       ${SCHEMA}.v_juchu_kizai_head_lst
     -- 受注車両の出庫
