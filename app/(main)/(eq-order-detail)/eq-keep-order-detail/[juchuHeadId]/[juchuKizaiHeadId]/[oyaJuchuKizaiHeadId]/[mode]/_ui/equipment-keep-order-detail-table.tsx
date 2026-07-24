@@ -24,6 +24,7 @@ import {
 import { grey } from '@mui/material/colors';
 import React, { useRef, useState } from 'react';
 
+import { BASHO_ID } from '@/app/_lib/constants';
 import { MemoTooltip } from '@/app/(main)/(eq-order-detail)/_ui/memo-tooltip';
 
 import { KeepJuchuContainerMeisaiValues, KeepJuchuKizaiMeisaiValues } from '../_lib/types';
@@ -226,7 +227,7 @@ const KeepEqTableRow = React.memo(
           {rowIndex + 1}
         </TableCell>
         <TableCell style={styles.row} align="left" size="small" sx={{ bgcolor: grey[200] }}>
-          {row.shozokuId === 1 ? 'K' : 'Y'}
+          {row.shozokuId === BASHO_ID.kics ? 'K' : 'Y'}
         </TableCell>
         <TableCell style={styles.row} align="center" size="small">
           <MemoTooltip

@@ -42,6 +42,7 @@ import { useEffect, useState } from 'react';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import { SelectElement, TextFieldElement } from 'react-hook-form-mui';
 
+import { LOCK_SHUBETU } from '@/app/_lib/constants';
 import { useUserStore } from '@/app/_lib/stores/usestore';
 import { toJapanTimeString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { addLock, delLock, getLock } from '@/app/(main)/_lib/funcs';
@@ -181,7 +182,7 @@ const VehicleOrderDetail = ({
   const lock = async () => {
     if (!user) return;
     try {
-      const lockData = await lockCheck(1, getValues('juchuHeadId'), user.name, user.email);
+      const lockData = await lockCheck(LOCK_SHUBETU.juchuHead, getValues('juchuHeadId'), user.name, user.email);
       setLockData(lockData);
 
       if (!lockData) return true;
@@ -337,7 +338,7 @@ const VehicleOrderDetail = ({
         return;
       }
       try {
-        await lockRelease(1, juchuHead.juchuHeadId, user.name, user.email);
+        await lockRelease(LOCK_SHUBETU.juchuHead, juchuHead.juchuHeadId, user.name, user.email);
       } catch (e) {
         setSnackBarMessage('ロック解除に失敗しました');
         setSnackBarOpen(true);
@@ -368,7 +369,7 @@ const VehicleOrderDetail = ({
 
     if (result) {
       try {
-        await lockRelease(1, juchuHead.juchuHeadId, user.name, user.email);
+        await lockRelease(LOCK_SHUBETU.juchuHead, juchuHead.juchuHeadId, user.name, user.email);
       } catch (e) {
         setSnackBarMessage('ロック解除に失敗しました');
         setSnackBarOpen(true);
@@ -455,7 +456,7 @@ const VehicleOrderDetail = ({
 
     const asyncProcess = async () => {
       try {
-        const lockData = await lockCheck(1, juchuHead.juchuHeadId, user.name, user.email);
+        const lockData = await lockCheck(LOCK_SHUBETU.juchuHead, juchuHead.juchuHeadId, user.name, user.email);
         setLockData(lockData);
         if (lockData) {
           setEditable(false);

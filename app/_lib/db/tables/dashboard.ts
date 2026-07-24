@@ -1,4 +1,6 @@
 'use server';
+import { BASHO_ID, NYUSHUKO_SHUBETU_ID } from '@/app/_lib/constants';
+
 import pool from '../postgres';
 import { SCHEMA } from '../supabase';
 
@@ -92,14 +94,14 @@ FROM (
     -- 受注車両の出庫
     LEFT OUTER JOIN ${SCHEMA}.v_juchu_sharyo_head_lst ON
       v_juchu_kizai_head_lst.juchu_head_id = v_juchu_sharyo_head_lst.juchu_head_id
-      AND v_juchu_sharyo_head_lst.nyushuko_shubetu_id = 1 --出庫
+      AND v_juchu_sharyo_head_lst.nyushuko_shubetu_id = ${NYUSHUKO_SHUBETU_ID.shuko} --出庫
       AND (
         (
-          v_juchu_sharyo_head_lst.nyushuko_basho_id = 1 --KICS
+          v_juchu_sharyo_head_lst.nyushuko_basho_id = ${BASHO_ID.kics} --KICS
           AND v_juchu_kizai_head_lst.kics_shuko_dat::date = v_juchu_sharyo_head_lst.nyushuko_dat::date --KICS
         )
         OR (
-          v_juchu_sharyo_head_lst.nyushuko_basho_id = 2 --YARD
+          v_juchu_sharyo_head_lst.nyushuko_basho_id = ${BASHO_ID.yard} --YARD
           AND v_juchu_kizai_head_lst.yard_shuko_dat::date = v_juchu_sharyo_head_lst.nyushuko_dat::date --YARD
         )
       )

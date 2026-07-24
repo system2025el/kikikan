@@ -2,6 +2,7 @@ import dayjs from 'dayjs';
 import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
 
+import { NYUSHUKO_SHUBETU_ID } from '@/app/_lib/constants';
 import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { escapeLikeString } from '@/app/(main)/_lib/escape-string';
 import { NyukoListSearchValues } from '@/app/(main)/nyuko-list/_lib/types';
@@ -38,7 +39,7 @@ export const selectFilteredShukoList = async (queries: ShukoListSearchValues) =>
     FROM
       ${SCHEMA}.v_nyushuko_den2 as d2
     WHERE
-      d2.nyushuko_shubetu_id = 1
+      d2.nyushuko_shubetu_id = ${NYUSHUKO_SHUBETU_ID.shuko}
   `;
 
   // 入出庫日
@@ -145,7 +146,7 @@ export const selectFilteredNyukoList = async (queries: NyukoListSearchValues) =>
     FROM
       ${SCHEMA}.v_nyushuko_den2 as d2
     WHERE
-      d2.nyushuko_shubetu_id = 2
+      d2.nyushuko_shubetu_id = ${NYUSHUKO_SHUBETU_ID.nyuko}
   `;
 
   // 入出庫日

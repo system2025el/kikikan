@@ -23,6 +23,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
+import { SAGYO_KBN_ID } from '@/app/_lib/constants';
 import { useUserStore } from '@/app/_lib/stores/usestore';
 import { useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
 import { permission } from '@/app/(main)/_lib/permission';
@@ -173,7 +174,9 @@ export const IdoEqptDetail = (props: {
     <PermissionGuard category={'nyushuko'} required={permission.nyushuko_ref}>
       <Box>
         <Grid2 container justifyContent={'end'} alignItems={'center'} spacing={2} mb={1}>
-          {fixFlag && <Typography>{idoDenDetailData.sagyoKbnId === 40 ? '出発済' : '到着済'}</Typography>}
+          {fixFlag && (
+            <Typography>{idoDenDetailData.sagyoKbnId === SAGYO_KBN_ID.idoShuko ? '出発済' : '到着済'}</Typography>
+          )}
           <Button onClick={handleBack} disabled={isPending}>
             <Box display={'flex'} alignItems={'center'}>
               <ArrowLeftIcon fontSize="small" />
@@ -215,7 +218,7 @@ export const IdoEqptDetail = (props: {
                 color="error"
                 onClick={handleDelete}
                 disabled={
-                  (idoDenDetailData.sagyoKbnId === 40 ? fixFlag : false) ||
+                  (idoDenDetailData.sagyoKbnId === SAGYO_KBN_ID.idoShuko ? fixFlag : false) ||
                   selected.length === 0 ||
                   user?.permission.nyushuko === permission.nyushuko_ref
                 }
@@ -248,7 +251,7 @@ export const IdoEqptDetail = (props: {
                         },
                       }}
                       disabled={
-                        (idoDenDetailData.sagyoKbnId === 40 ? fixFlag : false) ||
+                        (idoDenDetailData.sagyoKbnId === SAGYO_KBN_ID.idoShuko ? fixFlag : false) ||
                         user?.permission.nyushuko === permission.nyushuko_ref
                       }
                       onFocus={(e) => e.target.select()}
@@ -256,7 +259,7 @@ export const IdoEqptDetail = (props: {
                   )}
                 />
               </Box>
-              {idoDenDetailData.sagyoKbnId === 50 && (
+              {idoDenDetailData.sagyoKbnId === SAGYO_KBN_ID.idoNyuko && (
                 <Box>
                   <Typography color="error" fontSize={'small'} sx={{ whiteSpace: 'pre-line' }}>
                     {
@@ -275,7 +278,7 @@ export const IdoEqptDetail = (props: {
                 type="submit"
                 sx={{ mr: 2 }}
                 disabled={
-                  (idoDenDetailData.sagyoKbnId === 40 ? fixFlag : false) ||
+                  (idoDenDetailData.sagyoKbnId === SAGYO_KBN_ID.idoShuko ? fixFlag : false) ||
                   !isDirty ||
                   isProcessing ||
                   user?.permission.nyushuko === permission.nyushuko_ref

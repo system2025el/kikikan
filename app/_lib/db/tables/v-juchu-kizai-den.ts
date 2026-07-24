@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
 
+import { JUCHU_KIZAI_HEAD_KBN } from '../../constants';
 import { SCHEMA, supabase } from '../supabase';
 
 export const selectLoanJuchuData = async (kizaiId: number, date: Date) => {
@@ -15,7 +16,7 @@ export const selectLoanJuchuData = async (kizaiId: number, date: Date) => {
         'juchu_head_id, juchu_kizai_head_id, juchu_kizai_head_kbn, koen_nam, head_nam, kics_shuko_dat, kics_nyuko_dat, yard_shuko_dat, yard_nyuko_dat, oya_juchu_kizai_head_id'
       )
       .eq('kizai_id', kizaiId)
-      .eq('juchu_kizai_head_kbn', 1)
+      .eq('juchu_kizai_head_kbn', JUCHU_KIZAI_HEAD_KBN.normal)
       // 出庫日がカレンダー最終日以下
       .or(`kics_shuko_dat.lte.${endDat},yard_shuko_dat.lte.${endDat}`)
       // 入庫日がカレンダー開始日以上
@@ -36,7 +37,7 @@ export const selectLoanJuchuReturnData = async (kizaiId: number, date: Date) => 
         'juchu_head_id, juchu_kizai_head_id, juchu_kizai_head_kbn, koen_nam, head_nam, kics_shuko_dat, kics_nyuko_dat, yard_shuko_dat, yard_nyuko_dat, oya_juchu_kizai_head_id'
       )
       .eq('kizai_id', kizaiId)
-      .eq('juchu_kizai_head_kbn', 2)
+      .eq('juchu_kizai_head_kbn', JUCHU_KIZAI_HEAD_KBN.return)
       // 入庫日がカレンダー開始日以上
       .or(`kics_nyuko_dat.lte.${endDat},yard_nyuko_dat.lte.${endDat}`);
   } catch (e) {

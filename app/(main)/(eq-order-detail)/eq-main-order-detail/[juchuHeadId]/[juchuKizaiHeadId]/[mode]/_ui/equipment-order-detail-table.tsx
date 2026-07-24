@@ -25,6 +25,7 @@ import { blue, grey, lightBlue } from '@mui/material/colors';
 import { Dayjs } from 'dayjs';
 import React, { useRef, useState } from 'react';
 
+import { BASHO_ID, SAGYO_SIJI_ID } from '@/app/_lib/constants';
 import { toJapanMDString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { TestDate } from '@/app/(main)/_ui/date';
 import { MemoTooltip } from '@/app/(main)/(eq-order-detail)/_ui/memo-tooltip';
@@ -549,11 +550,11 @@ const IdoEqTableRow = React.memo(
               onClear={() => handleCellDateClear(row.kizaiId)}
               disabled={!edit || shukoFixFlag}
             />
-            {row.sagyoSijiId && <Typography>{row.sagyoSijiId === 1 ? 'K→Y' : 'Y→K'}</Typography>}
+            {row.sagyoSijiId && <Typography>{row.sagyoSijiId === SAGYO_SIJI_ID.ky ? 'K→Y' : 'Y→K'}</Typography>}
           </Box>
         </TableCell>
         <TableCell style={styles.row} align="left" size="small" sx={{ bgcolor: grey[200] }}>
-          {row.shozokuId === 1 ? 'K' : 'Y'}
+          {row.shozokuId === BASHO_ID.kics ? 'K' : 'Y'}
         </TableCell>
         <TableCell style={styles.row} align="left" size="small">
           <Button

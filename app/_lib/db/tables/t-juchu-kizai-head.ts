@@ -2,6 +2,7 @@
 
 import { PoolClient } from 'pg';
 
+import { JUCHU_KIZAI_HEAD_KBN } from '@/app/_lib/constants';
 import { KeepJuchuKizaiHeadValues } from '@/app/(main)/(eq-order-detail)/eq-keep-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[oyaJuchuKizaiHeadId]/[mode]/_lib/types';
 import { JuchuKizaiHeadValues } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';
 
@@ -107,7 +108,7 @@ export const selectChildJuchuKizaiHeadConfirm = async (juchuHeadId: number, juch
       .select('*', { count: 'exact', head: true })
       .eq('juchu_head_id', juchuHeadId)
       .in('oya_juchu_kizai_head_id', juchuKizaiHeadIdv)
-      .neq('juchu_kizai_head_kbn', 1);
+      .neq('juchu_kizai_head_kbn', JUCHU_KIZAI_HEAD_KBN.normal);
   } catch (e) {
     throw new Error('[selectChildJuchuKizaiHeadConfirm] DBエラー:', { cause: e });
   }

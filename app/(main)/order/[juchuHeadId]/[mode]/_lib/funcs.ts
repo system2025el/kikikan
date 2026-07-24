@@ -4,6 +4,14 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { PoolClient } from 'pg';
 
+import {
+  BASHO_ID,
+  HONBANBI_SHUBETU_ID,
+  JUCHU_KIZAI_HEAD_KBN,
+  NYUSHUKO_SHUBETU_ID,
+  SAGYO_KBN_ID,
+  SAGYO_SIJI_ID,
+} from '@/app/_lib/constants';
 import pool from '@/app/_lib/db/postgres';
 import { selectMeisaiEqts } from '@/app/_lib/db/tables/m-kizai';
 import { selectFilteredLocs } from '@/app/_lib/db/tables/m-koenbasho';
@@ -328,6 +336,8 @@ export const getJuchuKizaiHeadList = async (juchuHeadId: number) => {
       mem: d.mem,
       kicsShukoFixFlg: d.kics_shuko_fix_flg,
       yardShukoFixFlg: d.yard_shuko_fix_flg,
+      kicsNyukoFixFlg: d.kics_nyuko_fix_flg,
+      yardNyukoFixFlg: d.yard_nyuko_fix_flg,
     }));
 
     const childrenMap: { [key: number]: EqTableValues[] } = {};
@@ -802,7 +812,7 @@ export const copyJuchuKizaiHeadMeisai = async (
       kicsNyukoDat: data.kicsNyukoDat,
       yardShukoDat: data.yardShukoDat,
       yardNyukoDat: data.yardNyukoDat,
-      juchuKizaiHeadKbn: 1,
+      juchuKizaiHeadKbn: JUCHU_KIZAI_HEAD_KBN.normal,
       juchuKizaiHeadId: newJuchuKizaiHeadId,
       juchuHonbanbiQty: 0,
       nebikiAmt: originJuchuKizaiHead.nebikiAmt,
@@ -810,7 +820,13 @@ export const copyJuchuKizaiHeadMeisai = async (
     };
 
     // 受注機材ヘッダー追加
-    await addJuchuKizaiHead(newJuchuKizaiHeadId, newJuchuKizaiHeadData, 1, userNam, connection);
+    await addJuchuKizaiHead(
+      newJuchuKizaiHeadId,
+      newJuchuKizaiHeadData,
+      JUCHU_KIZAI_HEAD_KBN.normal,
+      userNam,
+      connection
+    );
 
     // 受注機材入出庫追加
     await addJuchuKizaiNyushuko(
@@ -828,7 +844,7 @@ export const copyJuchuKizaiHeadMeisai = async (
     const addJuchuSiyouHonbanbiData: CopyJuchuKizaiHonbanbiValues[] = dateRange.map((d) => ({
       juchuHeadId: juchuHeadId,
       juchuKizaiHeadId: newJuchuKizaiHeadId,
-      juchuHonbanbiShubetuId: 1,
+      juchuHonbanbiShubetuId: HONBANBI_SHUBETU_ID.use,
       juchuHonbanbiDat: new Date(d),
       mem: '',
       juchuHonbanbiAddQty: 0,
@@ -837,7 +853,7 @@ export const copyJuchuKizaiHeadMeisai = async (
       {
         juchuHeadId: juchuHeadId,
         juchuKizaiHeadId: newJuchuKizaiHeadId,
-        juchuHonbanbiShubetuId: 2,
+        juchuHonbanbiShubetuId: HONBANBI_SHUBETU_ID.shuko,
         juchuHonbanbiDat: shukoDate,
         mem: '',
         juchuHonbanbiAddQty: 0,
@@ -845,20 +861,14 @@ export const copyJuchuKizaiHeadMeisai = async (
       {
         juchuHeadId: juchuHeadId,
         juchuKizaiHeadId: newJuchuKizaiHeadId,
-        juchuHonbanbiShubetuId: 3,
+        juchuHonbanbiShubetuId: HONBANBI_SHUBETU_ID.nyuko,
         juchuHonbanbiDat: nyukoDate,
         mem: '',
         juchuHonbanbiAddQty: 0,
       },
     ];
     const mergeHonbanbiData: CopyJuchuKizaiHonbanbiValues[] = [...addJuchuSiyouHonbanbiData, ...addJuchuHonbanbiData];
-    await addAllHonbanbi(
-      juchuHeadId,
-      newJuchuKizaiHeadId,
-      mergeHonbanbiData,
-      userNam,
-      connection
-    );
+    await addAllHonbanbi(juchuHeadId, newJuchuKizaiHeadId, mergeHonbanbiData, userNam, connection);
 
     // 受注機材明細
     const juchuKizaiMeisai: CopyJuchuKizaiMeisaiValues[] = await getJuchuKizaiMeisai(
@@ -880,12 +890,7 @@ export const copyJuchuKizaiHeadMeisai = async (
       await addJuchuKizaiMeisai(newJuchuKizaiMeisai, userNam, connection);
 
       // 機材入出庫伝票追加
-      await addNyushukoDen(
-        newJuchuKizaiHeadData,
-        newJuchuKizaiMeisai,
-        userNam,
-        connection
-      );
+      await addNyushukoDen(newJuchuKizaiHeadData, newJuchuKizaiMeisai, userNam, connection);
     }
 
     // 受注コンテナ明細
@@ -979,7 +984,7 @@ export const copyJuchuKizaiHeadMeisai = async (
         ...d,
         juchuHeadId: juchuHeadId,
         juchuKizaiHeadId: newJuchuKizaiHeadId,
-        sagyoDenDat: d.shozokuId === 1 ? yardIdoDat : kickIdoDat,
+        sagyoDenDat: d.shozokuId === BASHO_ID.kics ? yardIdoDat : kickIdoDat,
       }));
 
       // 移動受注機材明細追加
@@ -1107,8 +1112,8 @@ export const addJuchuKizaiNyushuko = async (
     const newData: JuchuKizaiNyushuko = {
       juchu_head_id: juchuHeadId,
       juchu_kizai_head_id: juchuKizaiHeadId,
-      nyushuko_shubetu_id: i === 0 || i === 1 ? 1 : 2,
-      nyushuko_basho_id: i === 0 || i === 2 ? 1 : 2,
+      nyushuko_shubetu_id: i === 0 || i === 1 ? NYUSHUKO_SHUBETU_ID.shuko : NYUSHUKO_SHUBETU_ID.nyuko,
+      nyushuko_basho_id: i === 0 || i === 2 ? BASHO_ID.kics : BASHO_ID.yard,
       nyushuko_dat: currentDate.toISOString(),
       add_dat: new Date().toISOString(),
       add_user: userNam,
@@ -1306,9 +1311,9 @@ export const addNyushukoDen = async (
     juchu_head_id: d.juchuHeadId,
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
-    sagyo_kbn_id: 10,
+    sagyo_kbn_id: SAGYO_KBN_ID.shukoPicking,
     sagyo_den_dat:
-      d.shozokuId === 1
+      d.shozokuId === BASHO_ID.kics
         ? juchuKizaiHeadData.kicsShukoDat!.toISOString()
         : juchuKizaiHeadData.yardShukoDat!.toISOString(),
     sagyo_id: d.shozokuId,
@@ -1324,9 +1329,9 @@ export const addNyushukoDen = async (
     juchu_head_id: d.juchuHeadId,
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
-    sagyo_kbn_id: 20,
+    sagyo_kbn_id: SAGYO_KBN_ID.shukoConfirmation,
     sagyo_den_dat:
-      d.shozokuId === 1
+      d.shozokuId === BASHO_ID.kics
         ? juchuKizaiHeadData.kicsShukoDat!.toISOString()
         : juchuKizaiHeadData.yardShukoDat!.toISOString(),
     sagyo_id: d.shozokuId,
@@ -1342,15 +1347,15 @@ export const addNyushukoDen = async (
     juchu_head_id: d.juchuHeadId,
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
-    sagyo_kbn_id: 30,
+    sagyo_kbn_id: SAGYO_KBN_ID.nyukoCount,
     // sagyo_den_dat:
-    //   d.shozokuId === 1
+    //   d.shozokuId === BASHO_ID.kics
     //     ? juchuKizaiHeadData.kicsNyukoDat!.toISOString()
     //     : juchuKizaiHeadData.yardNyukoDat!.toISOString(),
     sagyo_den_dat:
-      juchuKizaiHeadData.kicsNyukoDat && juchuKizaiHeadData.yardNyukoDat && d.mShozokuId === 1
+      juchuKizaiHeadData.kicsNyukoDat && juchuKizaiHeadData.yardNyukoDat && d.mShozokuId === BASHO_ID.kics
         ? juchuKizaiHeadData.kicsNyukoDat.toISOString()
-        : juchuKizaiHeadData.kicsNyukoDat && juchuKizaiHeadData.yardNyukoDat && d.mShozokuId === 2
+        : juchuKizaiHeadData.kicsNyukoDat && juchuKizaiHeadData.yardNyukoDat && d.mShozokuId === BASHO_ID.yard
           ? juchuKizaiHeadData.yardNyukoDat.toISOString()
           : juchuKizaiHeadData.kicsNyukoDat && !juchuKizaiHeadData.yardNyukoDat
             ? juchuKizaiHeadData.kicsNyukoDat.toISOString()
@@ -1359,15 +1364,15 @@ export const addNyushukoDen = async (
               : '',
     // sagyo_id: d.shozokuId,
     sagyo_id:
-      juchuKizaiHeadData.kicsNyukoDat && juchuKizaiHeadData.yardNyukoDat && d.mShozokuId === 1
-        ? 1
-        : juchuKizaiHeadData.kicsNyukoDat && juchuKizaiHeadData.yardNyukoDat && d.mShozokuId === 2
-          ? 2
+      juchuKizaiHeadData.kicsNyukoDat && juchuKizaiHeadData.yardNyukoDat && d.mShozokuId === BASHO_ID.kics
+        ? BASHO_ID.kics
+        : juchuKizaiHeadData.kicsNyukoDat && juchuKizaiHeadData.yardNyukoDat && d.mShozokuId === BASHO_ID.yard
+          ? BASHO_ID.yard
           : juchuKizaiHeadData.kicsNyukoDat && !juchuKizaiHeadData.yardNyukoDat
-            ? 1
+            ? BASHO_ID.kics
             : !juchuKizaiHeadData.kicsNyukoDat && juchuKizaiHeadData.yardNyukoDat
-              ? 2
-              : 3,
+              ? BASHO_ID.yard
+              : BASHO_ID.others,
     kizai_id: d.kizaiId,
     plan_qty: d.planQty,
     dsp_ord_num: d.dspOrdNum,
@@ -1459,7 +1464,7 @@ export const addJuchuContainerMeisai = async (
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
     kizai_id: d.kizaiId,
     plan_kizai_qty: d.planKicsKizaiQty,
-    shozoku_id: 1,
+    shozoku_id: BASHO_ID.kics,
     mem: d.mem,
     dsp_ord_num: d.dspOrdNum,
     indent_num: d.indentNum,
@@ -1473,7 +1478,7 @@ export const addJuchuContainerMeisai = async (
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
     kizai_id: d.kizaiId,
     plan_kizai_qty: d.planYardKizaiQty,
-    shozoku_id: 2,
+    shozoku_id: BASHO_ID.yard,
     mem: d.mem,
     dsp_ord_num: d.dspOrdNum,
     indent_num: d.indentNum,
@@ -1519,11 +1524,11 @@ export const addCtnShukoDen = async (
     juchu_head_id: d.juchuHeadId,
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
-    sagyo_kbn_id: 10,
+    sagyo_kbn_id: SAGYO_KBN_ID.shukoPicking,
     sagyo_den_dat: shukoDat.toISOString(),
     sagyo_id: sagyoId,
     kizai_id: d.kizaiId,
-    plan_qty: sagyoId === 1 ? d.planKicsKizaiQty : d.planYardKizaiQty,
+    plan_qty: sagyoId === BASHO_ID.kics ? d.planKicsKizaiQty : d.planYardKizaiQty,
     dsp_ord_num: d.dspOrdNum,
     indent_num: d.indentNum,
     add_dat: new Date().toISOString(),
@@ -1534,11 +1539,11 @@ export const addCtnShukoDen = async (
     juchu_head_id: d.juchuHeadId,
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
-    sagyo_kbn_id: 20,
+    sagyo_kbn_id: SAGYO_KBN_ID.shukoConfirmation,
     sagyo_den_dat: shukoDat.toISOString(),
     sagyo_id: sagyoId,
     kizai_id: d.kizaiId,
-    plan_qty: sagyoId === 1 ? d.planKicsKizaiQty : d.planYardKizaiQty,
+    plan_qty: sagyoId === BASHO_ID.kics ? d.planKicsKizaiQty : d.planYardKizaiQty,
     dsp_ord_num: d.dspOrdNum,
     indent_num: d.indentNum,
     add_dat: new Date().toISOString(),
@@ -1585,11 +1590,12 @@ export const addCtnNyukoDen = async (
     juchu_head_id: d.juchuHeadId,
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
-    sagyo_kbn_id: 30,
+    sagyo_kbn_id: SAGYO_KBN_ID.nyukoCount,
     sagyo_den_dat: nyukoDat.toISOString(),
     sagyo_id: sagyoId,
     kizai_id: d.kizaiId,
-    plan_qty: planQtyId === 1 ? d.planKicsKizaiQty : planQtyId === 2 ? d.planYardKizaiQty : d.planQty,
+    plan_qty:
+      planQtyId === BASHO_ID.kics ? d.planKicsKizaiQty : planQtyId === BASHO_ID.yard ? d.planYardKizaiQty : d.planQty,
     dsp_ord_num: d.dspOrdNum,
     indent_num: d.indentNum,
     add_dat: new Date().toISOString(),
@@ -1635,11 +1641,11 @@ export const addCtnNyushukoDen = async (
     juchu_head_id: d.juchuHeadId,
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
-    sagyo_kbn_id: 10,
+    sagyo_kbn_id: SAGYO_KBN_ID.shukoPicking,
     sagyo_den_dat: shukoDat.toISOString(),
     sagyo_id: sagyoId,
     kizai_id: d.kizaiId,
-    plan_qty: sagyoId === 1 ? d.planKicsKizaiQty : d.planYardKizaiQty,
+    plan_qty: sagyoId === BASHO_ID.kics ? d.planKicsKizaiQty : d.planYardKizaiQty,
     dsp_ord_num: d.dspOrdNum,
     indent_num: d.indentNum,
     add_dat: new Date().toISOString(),
@@ -1650,11 +1656,11 @@ export const addCtnNyushukoDen = async (
     juchu_head_id: d.juchuHeadId,
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
-    sagyo_kbn_id: 20,
+    sagyo_kbn_id: SAGYO_KBN_ID.shukoConfirmation,
     sagyo_den_dat: shukoDat.toISOString(),
     sagyo_id: sagyoId,
     kizai_id: d.kizaiId,
-    plan_qty: sagyoId === 1 ? d.planKicsKizaiQty : d.planYardKizaiQty,
+    plan_qty: sagyoId === BASHO_ID.kics ? d.planKicsKizaiQty : d.planYardKizaiQty,
     dsp_ord_num: d.dspOrdNum,
     indent_num: d.indentNum,
     add_dat: new Date().toISOString(),
@@ -1665,11 +1671,11 @@ export const addCtnNyushukoDen = async (
     juchu_head_id: d.juchuHeadId,
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
-    sagyo_kbn_id: 30,
+    sagyo_kbn_id: SAGYO_KBN_ID.nyukoCount,
     sagyo_den_dat: nyukoDat.toISOString(),
     sagyo_id: sagyoId,
     kizai_id: d.kizaiId,
-    plan_qty: sagyoId === 1 ? d.planKicsKizaiQty : d.planYardKizaiQty,
+    plan_qty: sagyoId === BASHO_ID.kics ? d.planKicsKizaiQty : d.planYardKizaiQty,
     dsp_ord_num: d.dspOrdNum,
     indent_num: d.indentNum,
     add_dat: new Date().toISOString(),
@@ -1734,7 +1740,7 @@ export const getIdoJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHead
       juchuKizaiHeadId: d.juchu_kizai_head_id ?? 0,
       idoDenId: d.ido_den_id,
       sagyoDenDat: d.sagyo_den_dat ? new Date(d.sagyo_den_dat) : null,
-      sagyoSijiId: d.sagyo_siji_id === 'K→Y' ? 1 : d.sagyo_siji_id === 'Y→K' ? 2 : null,
+      sagyoSijiId: d.sagyo_siji_id === 'K→Y' ? SAGYO_SIJI_ID.ky : d.sagyo_siji_id === 'Y→K' ? SAGYO_SIJI_ID.yk : null,
       mShozokuId: mKizai.find((data) => data.kizai_id === d.kizai_id)?.shozoku_id ?? 0,
       shozokuId: d.shozoku_id ?? 0,
       shozokuNam: d.shozoku_nam ?? '',
@@ -1806,7 +1812,7 @@ export const addIdoDenJuchu = async (
     sagyo_den_dat: toJapanYMDString(d.sagyoDenDat as Date, '-'),
     sagyo_siji_id: d.mShozokuId,
     sagyo_id: d.mShozokuId,
-    sagyo_kbn_id: 40,
+    sagyo_kbn_id: SAGYO_KBN_ID.idoShuko,
     kizai_id: d.kizaiId,
     plan_qty: d.planQty,
     juchu_head_id: d.juchuHeadId,
@@ -1819,8 +1825,8 @@ export const addIdoDenJuchu = async (
     ido_den_id: newIdoDenId + index,
     sagyo_den_dat: toJapanYMDString(d.sagyoDenDat as Date, '-'),
     sagyo_siji_id: d.mShozokuId,
-    sagyo_id: d.mShozokuId === 1 ? 2 : 1,
-    sagyo_kbn_id: 50,
+    sagyo_id: d.mShozokuId === BASHO_ID.kics ? BASHO_ID.yard : BASHO_ID.kics,
+    sagyo_kbn_id: SAGYO_KBN_ID.idoNyuko,
     kizai_id: d.kizaiId,
     plan_qty: d.planQty,
     juchu_head_id: d.juchuHeadId,

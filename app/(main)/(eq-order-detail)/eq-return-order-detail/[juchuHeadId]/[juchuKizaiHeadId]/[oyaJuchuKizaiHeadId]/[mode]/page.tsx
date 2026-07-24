@@ -1,6 +1,7 @@
 import { subDays } from 'date-fns';
 import { Metadata } from 'next';
 
+import { JUCHU_KIZAI_HEAD_KBN, SAGYO_KBN_ID } from '@/app/_lib/constants';
 import { getNyukoDate, getRange, getShukoDate } from '@/app/(main)/_lib/date-funcs';
 import { StockTableValues } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';
 
@@ -52,7 +53,7 @@ const Page = async (props: {
   const [juchuHeadData, oyaJuchuKizaiHeadData, nyukoFixFlag] = await Promise.all([
     getDetailJuchuHead(juchuHeadId),
     getJuchuKizaiNyushuko(juchuHeadId, oyaJuchuKizaiHeadId),
-    getNyushukoFixFlag(juchuHeadId, juchuKizaiHeadId, 70),
+    getNyushukoFixFlag(juchuHeadId, juchuKizaiHeadId, SAGYO_KBN_ID.nyukoConfirmed),
   ]);
 
   if (!juchuHeadData || !oyaJuchuKizaiHeadData) {
@@ -79,7 +80,7 @@ const Page = async (props: {
     const newReturnJuchuKizaiHeadData: ReturnJuchuKizaiHeadValues = {
       juchuHeadId: juchuHeadId,
       juchuKizaiHeadId: juchuKizaiHeadId,
-      juchuKizaiHeadKbn: 2,
+      juchuKizaiHeadKbn: JUCHU_KIZAI_HEAD_KBN.return,
       juchuHonbanbiQty: oyaJuchuHonbanbiQty ?? 0,
       //nebikiAmt: null,
       mem: null,

@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { PoolClient } from 'pg';
 
+import { BASHO_ID, SAGYO_KBN_ID, SAGYO_SIJI_ID } from '@/app/_lib/constants';
 import pool, { refreshVRfid } from '@/app/_lib/db/postgres';
 import { selectBundledEqpts } from '@/app/_lib/db/tables/m-kizai';
 import { selectBundledEqptIds } from '@/app/_lib/db/tables/m-kizai-set';
@@ -143,7 +144,7 @@ export const addIdoDen = async (addIdoDenData: IdoDetailTableValues[], userNam: 
     plan_qty: d.planQty,
     sagyo_den_dat: d.nyushukoDat,
     sagyo_id: d.nyushukoBashoId,
-    sagyo_kbn_id: 40,
+    sagyo_kbn_id: SAGYO_KBN_ID.idoShuko,
     sagyo_siji_id: d.sagyosijiId,
     add_dat: new Date().toISOString(),
     add_user: userNam,
@@ -154,8 +155,8 @@ export const addIdoDen = async (addIdoDenData: IdoDetailTableValues[], userNam: 
     kizai_id: d.kizaiId,
     plan_qty: d.planQty,
     sagyo_den_dat: d.nyushukoDat,
-    sagyo_id: d.sagyosijiId === 1 ? 2 : 1,
-    sagyo_kbn_id: 50,
+    sagyo_id: d.sagyosijiId === SAGYO_SIJI_ID.ky ? BASHO_ID.yard : BASHO_ID.kics,
+    sagyo_kbn_id: SAGYO_KBN_ID.idoNyuko,
     sagyo_siji_id: d.sagyosijiId,
     add_dat: new Date().toISOString(),
     add_user: userNam,
@@ -183,7 +184,7 @@ export const updIdoDen = async (updIdoDenData: IdoDetailTableValues[], userNam: 
     plan_qty: d.planQty,
     sagyo_den_dat: d.nyushukoDat,
     sagyo_id: d.nyushukoBashoId,
-    sagyo_kbn_id: 40,
+    sagyo_kbn_id: SAGYO_KBN_ID.idoShuko,
     sagyo_siji_id: d.sagyosijiId,
     upd_dat: new Date().toISOString(),
     upd_user: userNam,
@@ -194,8 +195,8 @@ export const updIdoDen = async (updIdoDenData: IdoDetailTableValues[], userNam: 
     kizai_id: d.kizaiId,
     plan_qty: d.planQty,
     sagyo_den_dat: d.nyushukoDat,
-    sagyo_id: d.sagyosijiId === 1 ? 2 : 1,
-    sagyo_kbn_id: 50,
+    sagyo_id: d.sagyosijiId === SAGYO_SIJI_ID.ky ? BASHO_ID.yard : BASHO_ID.kics,
+    sagyo_kbn_id: SAGYO_KBN_ID.idoNyuko,
     sagyo_siji_id: d.sagyosijiId,
     upd_dat: new Date().toISOString(),
     upd_user: userNam,
@@ -549,7 +550,7 @@ export const getIdoSelectedEqpts = async (idList: number[]) => {
     const selectedEqpts: SelectedIdoEqptsValues[] = data.map((d) => ({
       kizaiId: d.kizai_id,
       kizaiNam: d.kizai_nam ?? '',
-      shozokuId: d.shozoku_id ?? 2,
+      shozokuId: d.shozoku_id ?? BASHO_ID.yard,
       shozokuNam: d.shozoku_nam ?? '',
       kizaiGrpCod: d.kizai_grp_cod ?? '',
       dspOrdNum: d.dsp_ord_num ?? 0,

@@ -1,6 +1,7 @@
 import { subDays } from 'date-fns';
 import { Metadata } from 'next';
 
+import { JUCHU_KIZAI_HEAD_KBN, SAGYO_KBN_ID } from '@/app/_lib/constants';
 import { getNyukoDate, getRange, getShukoDate } from '@/app/(main)/_lib/date-funcs';
 
 import { getColor, getDetailJuchuHead, getJuchuContainerMeisai, getNyushukoFixFlag } from '../../../../_lib/funcs';
@@ -37,8 +38,8 @@ const Page = async (props: { params: Promise<{ juchuHeadId: string; juchuKizaiHe
   // 受注ヘッダーデータ、出発フラグ、本番日背景色
   const [juchuHeadData, shukoFixFlag, nyukoFixFlag, honbanbiColor] = await Promise.all([
     getDetailJuchuHead(juchuHeadId),
-    getNyushukoFixFlag(juchuHeadId, juchuKizaiHeadId, 60),
-    getNyushukoFixFlag(juchuHeadId, juchuKizaiHeadId, 70),
+    getNyushukoFixFlag(juchuHeadId, juchuKizaiHeadId, SAGYO_KBN_ID.shukoConfirmed),
+    getNyushukoFixFlag(juchuHeadId, juchuKizaiHeadId, SAGYO_KBN_ID.nyukoConfirmed),
     getColor(),
   ]);
 
@@ -55,7 +56,7 @@ const Page = async (props: { params: Promise<{ juchuHeadId: string; juchuKizaiHe
     const newJuchuKizaiHeadData: JuchuKizaiHeadValues = {
       juchuHeadId: juchuHeadId,
       juchuKizaiHeadId: juchuKizaiHeadId,
-      juchuKizaiHeadKbn: 1,
+      juchuKizaiHeadKbn: JUCHU_KIZAI_HEAD_KBN.normal,
       juchuHonbanbiQty: null,
       nebikiAmt: null,
       nebikiRat: null,

@@ -1,5 +1,7 @@
 import { Metadata } from 'next';
 
+import { SAGYO_KBN_ID } from '@/app/_lib/constants';
+
 import { getIdoDenDetail, getIdoEqptDetail, getIdoFix } from './_lib/funcs';
 import { IdoEqptDetail } from './_ui/ido-eqpt-detail';
 
@@ -20,7 +22,8 @@ const Page = async (props: {
   const params = await props.params;
 
   // 区分
-  const fixKbn = Number(params.sagyoKbnId) === 40 ? 60 : 70;
+  const fixKbn =
+    Number(params.sagyoKbnId) === SAGYO_KBN_ID.idoShuko ? SAGYO_KBN_ID.shukoConfirmed : SAGYO_KBN_ID.nyukoConfirmed;
 
   // 移動伝票データ、移動機材詳細データ、完了フラグ
   const [idoDenDetailData, idoEqptDetailData, fixFlag] = await Promise.all([

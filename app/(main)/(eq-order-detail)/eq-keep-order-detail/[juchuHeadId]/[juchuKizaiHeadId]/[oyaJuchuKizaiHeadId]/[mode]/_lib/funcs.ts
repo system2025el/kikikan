@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { PoolClient } from 'pg';
 
+import { BASHO_ID, JUCHU_KIZAI_HEAD_KBN, SAGYO_KBN_ID } from '@/app/_lib/constants';
 import pool from '@/app/_lib/db/postgres';
 import { selectMeisaiEqts } from '@/app/_lib/db/tables/m-kizai';
 import {
@@ -104,10 +105,24 @@ export const saveNewKeepJuchuKizaiHead = async (data: KeepJuchuKizaiHeadValues, 
 
     // ダミー入庫伝票追加
     if (data.kicsNyukoDat) {
-      await addDummyNyushukoDen(data.juchuHeadId, newJuchuKizaiHeadId, data.kicsNyukoDat, 1, userNam, connection);
+      await addDummyNyushukoDen(
+        data.juchuHeadId,
+        newJuchuKizaiHeadId,
+        data.kicsNyukoDat,
+        BASHO_ID.kics,
+        userNam,
+        connection
+      );
     }
     if (data.yardNyukoDat) {
-      await addDummyNyushukoDen(data.juchuHeadId, newJuchuKizaiHeadId, data.yardNyukoDat, 2, userNam, connection);
+      await addDummyNyushukoDen(
+        data.juchuHeadId,
+        newJuchuKizaiHeadId,
+        data.yardNyukoDat,
+        BASHO_ID.yard,
+        userNam,
+        connection
+      );
     }
 
     await connection.query('COMMIT');
@@ -309,8 +324,8 @@ export const saveKeepJuchuKizai = async (
 
         if (data.kicsShukoDat) {
           const addKicsJuchuKizaiMeisaiData = [
-            ...addKeepJuchuKizaiMeisaiData.filter((d) => d.shozokuId === 1),
-            ...shozokuChangedData.filter((d) => d.shozokuId === 1),
+            ...addKeepJuchuKizaiMeisaiData.filter((d) => d.shozokuId === BASHO_ID.kics),
+            ...shozokuChangedData.filter((d) => d.shozokuId === BASHO_ID.kics),
           ];
 
           if (addKicsJuchuKizaiMeisaiData.length > 0) {
@@ -320,8 +335,8 @@ export const saveKeepJuchuKizai = async (
 
         if (data.yardShukoDat) {
           const addYardJuchuKizaiMeisaiData = [
-            ...addKeepJuchuKizaiMeisaiData.filter((d) => d.shozokuId === 2),
-            ...shozokuChangedData.filter((d) => d.shozokuId === 2),
+            ...addKeepJuchuKizaiMeisaiData.filter((d) => d.shozokuId === BASHO_ID.yard),
+            ...shozokuChangedData.filter((d) => d.shozokuId === BASHO_ID.yard),
           ];
 
           if (addYardJuchuKizaiMeisaiData.length > 0) {
@@ -333,7 +348,7 @@ export const saveKeepJuchuKizai = async (
       // 出庫機材伝票、実績更新
       if (shozokuUnChangedData.length > 0) {
         if (data.kicsShukoDat) {
-          const updateKicsJuchuKizaiMeisaiData = shozokuUnChangedData.filter((d) => d.shozokuId === 1);
+          const updateKicsJuchuKizaiMeisaiData = shozokuUnChangedData.filter((d) => d.shozokuId === BASHO_ID.kics);
 
           if (updateKicsJuchuKizaiMeisaiData.length > 0) {
             await updShukoDen(updateKicsJuchuKizaiMeisaiData, data.kicsShukoDat, userNam, connection);
@@ -345,7 +360,7 @@ export const saveKeepJuchuKizai = async (
         }
 
         if (data.yardShukoDat) {
-          const updateYardJuchuKizaiMeisaiData = shozokuUnChangedData.filter((d) => d.shozokuId === 2);
+          const updateYardJuchuKizaiMeisaiData = shozokuUnChangedData.filter((d) => d.shozokuId === BASHO_ID.yard);
 
           if (updateYardJuchuKizaiMeisaiData.length > 0) {
             await updShukoDen(updateYardJuchuKizaiMeisaiData, data.yardShukoDat, userNam, connection);
@@ -360,44 +375,58 @@ export const saveKeepJuchuKizai = async (
       const ctnKizaiIds = keepJuchuContainerMeisaiList.map((d) => d.kizaiId);
 
       if (checkKicsNyukoDat) {
-        await delAllKicsOrYardNyukoDen(data.juchuHeadId, data.juchuKizaiHeadId, 1, connection);
+        await delAllKicsOrYardNyukoDen(data.juchuHeadId, data.juchuKizaiHeadId, BASHO_ID.kics, connection);
 
-        await delAllNyukoResult(data.juchuHeadId, data.juchuKizaiHeadId, 1, connection);
+        await delAllNyukoResult(data.juchuHeadId, data.juchuKizaiHeadId, BASHO_ID.kics, connection);
 
         if (data.kicsNyukoDat && data.yardNyukoDat && !checkYardNyukoDat) {
-          const kicsNyukoData = newKeepJuchuKizaiMeisaiData.filter((d) => !d.delFlag && d.shozokuId === 1);
+          const kicsNyukoData = newKeepJuchuKizaiMeisaiData.filter((d) => !d.delFlag && d.shozokuId === BASHO_ID.kics);
 
           if (kicsNyukoData.length) {
-            await delKeepKicsOrYardNyukoDen(kicsNyukoData, 2, connection);
+            await delKeepKicsOrYardNyukoDen(kicsNyukoData, BASHO_ID.yard, connection);
 
-            await delNyukoResult(kicsNyukoData, 2, connection);
+            await delNyukoResult(kicsNyukoData, BASHO_ID.yard, connection);
           }
         }
 
         // ダミーKICS入庫伝票追加
         if (data.kicsNyukoDat) {
-          await addDummyNyushukoDen(data.juchuHeadId, data.juchuKizaiHeadId, data.kicsNyukoDat, 1, userNam, connection);
+          await addDummyNyushukoDen(
+            data.juchuHeadId,
+            data.juchuKizaiHeadId,
+            data.kicsNyukoDat,
+            BASHO_ID.kics,
+            userNam,
+            connection
+          );
         }
       }
 
       if (checkYardNyukoDat) {
-        await delAllKicsOrYardNyukoDen(data.juchuHeadId, data.juchuKizaiHeadId, 2, connection);
+        await delAllKicsOrYardNyukoDen(data.juchuHeadId, data.juchuKizaiHeadId, BASHO_ID.yard, connection);
 
-        await delAllNyukoResult(data.juchuHeadId, data.juchuKizaiHeadId, 2, connection);
+        await delAllNyukoResult(data.juchuHeadId, data.juchuKizaiHeadId, BASHO_ID.yard, connection);
 
         if (data.kicsNyukoDat && data.yardNyukoDat && !checkKicsNyukoDat) {
-          const yardNyukoData = newKeepJuchuKizaiMeisaiData.filter((d) => !d.delFlag && d.shozokuId === 2);
+          const yardNyukoData = newKeepJuchuKizaiMeisaiData.filter((d) => !d.delFlag && d.shozokuId === BASHO_ID.yard);
 
           if (yardNyukoData.length) {
-            await delKeepKicsOrYardNyukoDen(yardNyukoData, 1, connection);
+            await delKeepKicsOrYardNyukoDen(yardNyukoData, BASHO_ID.kics, connection);
 
-            await delNyukoResult(yardNyukoData, 1, connection);
+            await delNyukoResult(yardNyukoData, BASHO_ID.kics, connection);
           }
         }
 
         // ダミーYARD入庫伝票追加
         if (data.yardNyukoDat) {
-          await addDummyNyushukoDen(data.juchuHeadId, data.juchuKizaiHeadId, data.yardNyukoDat, 2, userNam, connection);
+          await addDummyNyushukoDen(
+            data.juchuHeadId,
+            data.juchuKizaiHeadId,
+            data.yardNyukoDat,
+            BASHO_ID.yard,
+            userNam,
+            connection
+          );
         }
       }
 
@@ -416,8 +445,14 @@ export const saveKeepJuchuKizai = async (
         //   connection
         // );
 
-        await delAllKicsOrYardShukoCtnDen(data.juchuHeadId, data.juchuKizaiHeadId, ctnKizaiIds, 1, connection);
-        await delAllKicsOrYardShukoCtnResult(data.juchuHeadId, data.juchuKizaiHeadId, 1, connection);
+        await delAllKicsOrYardShukoCtnDen(
+          data.juchuHeadId,
+          data.juchuKizaiHeadId,
+          ctnKizaiIds,
+          BASHO_ID.kics,
+          connection
+        );
+        await delAllKicsOrYardShukoCtnResult(data.juchuHeadId, data.juchuKizaiHeadId, BASHO_ID.kics, connection);
       }
 
       if (checkYardShukoDat) {
@@ -435,60 +470,66 @@ export const saveKeepJuchuKizai = async (
         //   connection
         // );
 
-        await delAllKicsOrYardShukoCtnDen(data.juchuHeadId, data.juchuKizaiHeadId, ctnKizaiIds, 2, connection);
-        await delAllKicsOrYardShukoCtnResult(data.juchuHeadId, data.juchuKizaiHeadId, 2, connection);
+        await delAllKicsOrYardShukoCtnDen(
+          data.juchuHeadId,
+          data.juchuKizaiHeadId,
+          ctnKizaiIds,
+          BASHO_ID.yard,
+          connection
+        );
+        await delAllKicsOrYardShukoCtnResult(data.juchuHeadId, data.juchuKizaiHeadId, BASHO_ID.yard, connection);
       }
 
       // KICS入庫追加更新
       if (data.kicsNyukoDat) {
         // KICS入庫明細
-        const kicsNyukoData = newKeepJuchuKizaiMeisaiData.filter((d) => !d.delFlag && d.shozokuId === 1);
+        const kicsNyukoData = newKeepJuchuKizaiMeisaiData.filter((d) => !d.delFlag && d.shozokuId === BASHO_ID.kics);
 
         if (kicsNyukoData.length > 0) {
-          await upsNyukoDen(kicsNyukoData, data.kicsNyukoDat, 1, userNam, connection);
+          await upsNyukoDen(kicsNyukoData, data.kicsNyukoDat, BASHO_ID.kics, userNam, connection);
         }
 
         // KICSコンテナ入庫明細
         const ctnNyukoData = newKeepJuchuContainerMeisaiData.filter((d) => !d.delFlag);
         if (ctnNyukoData.length > 0) {
-          await upsCtnNyukoDen(ctnNyukoData, data.kicsNyukoDat, 1, userNam, connection);
+          await upsCtnNyukoDen(ctnNyukoData, data.kicsNyukoDat, BASHO_ID.kics, userNam, connection);
         }
       }
 
       // YARD入庫追加更新
       if (data.yardNyukoDat) {
         // YARD入庫明細
-        const yardNyukoData = newKeepJuchuKizaiMeisaiData.filter((d) => !d.delFlag && d.shozokuId === 2);
+        const yardNyukoData = newKeepJuchuKizaiMeisaiData.filter((d) => !d.delFlag && d.shozokuId === BASHO_ID.yard);
 
         if (yardNyukoData.length > 0) {
-          await upsNyukoDen(yardNyukoData, data.yardNyukoDat, 2, userNam, connection);
+          await upsNyukoDen(yardNyukoData, data.yardNyukoDat, BASHO_ID.yard, userNam, connection);
         }
 
         // YARDコンテナ入庫明細
         const ctnNyukoData = newKeepJuchuContainerMeisaiData.filter((d) => !d.delFlag);
         if (ctnNyukoData.length > 0) {
-          await upsCtnNyukoDen(ctnNyukoData, data.yardNyukoDat, 2, userNam, connection);
+          await upsCtnNyukoDen(ctnNyukoData, data.yardNyukoDat, BASHO_ID.yard, userNam, connection);
         }
       }
 
       // KICS出庫追加更新
       if (data.kicsShukoDat) {
-        // const kicsShukoData = newKeepJuchuKizaiMeisaiData.filter((d) => !d.delFlag && d.shozokuId === 1);
+        // const kicsShukoData = newKeepJuchuKizaiMeisaiData.filter((d) => !d.delFlag && d.shozokuId === BASHO_ID.kics);
 
         // if (kicsShukoData.length > 0) {
-        //   const upsertKicsShukoDenResult = await upsShukoDen(kicsShukoData, data.kicsShukoDat, 1, userNam, connection);
+        //   const upsertKicsShukoDenResult = await upsShukoDen(kicsShukoData, data.kicsShukoDat, BASHO_ID.kics, userNam, connection);
         // }
 
         const KicsCtnShukoData = newKeepJuchuContainerMeisaiData.filter((d) => !d.delFlag);
         if (KicsCtnShukoData.length > 0) {
-          await upsCtnShukoDen(KicsCtnShukoData, data.kicsShukoDat, 1, userNam, connection);
+          await upsCtnShukoDen(KicsCtnShukoData, data.kicsShukoDat, BASHO_ID.kics, userNam, connection);
         }
       }
 
       // YARD出庫追加更新
       if (data.yardShukoDat) {
         // const upsertYardJuchuKizaiMeisaiData = newKeepJuchuKizaiMeisaiData.filter(
-        //   (d) => !d.delFlag && d.shozokuId === 2
+        //   (d) => !d.delFlag && d.shozokuId === BASHO_ID.yard
         // );
 
         // if (upsertYardJuchuKizaiMeisaiData.length > 0) {
@@ -503,7 +544,7 @@ export const saveKeepJuchuKizai = async (
 
         const upsertYardJuchuCtnMeisaiData = newKeepJuchuContainerMeisaiData.filter((d) => !d.delFlag);
         if (upsertYardJuchuCtnMeisaiData.length > 0) {
-          await upsCtnShukoDen(upsertYardJuchuCtnMeisaiData, data.yardShukoDat, 2, userNam, connection);
+          await upsCtnShukoDen(upsertYardJuchuCtnMeisaiData, data.yardShukoDat, BASHO_ID.yard, userNam, connection);
         }
       }
     }
@@ -601,7 +642,7 @@ export const addKeepJuchuKizaiHead = async (
   const newData: JuchuKizaiHead = {
     juchu_head_id: keepJuchuKizaiHeadData.juchuHeadId,
     juchu_kizai_head_id: keepJuchuKizaiHeadId,
-    juchu_kizai_head_kbn: 3,
+    juchu_kizai_head_kbn: JUCHU_KIZAI_HEAD_KBN.keep,
     mem: keepJuchuKizaiHeadData.mem,
     head_nam: keepJuchuKizaiHeadData.headNam,
     oya_juchu_kizai_head_id: keepJuchuKizaiHeadData.oyaJuchuKizaiHeadId,
@@ -1055,7 +1096,7 @@ export const addShukoDen = async (
     juchu_head_id: d.juchuHeadId,
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
-    sagyo_kbn_id: 10,
+    sagyo_kbn_id: SAGYO_KBN_ID.shukoPicking,
     sagyo_den_dat: shukoDat.toISOString(),
     sagyo_id: d.shozokuId,
     kizai_id: d.kizaiId,
@@ -1070,7 +1111,7 @@ export const addShukoDen = async (
     juchu_head_id: d.juchuHeadId,
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
-    sagyo_kbn_id: 20,
+    sagyo_kbn_id: SAGYO_KBN_ID.shukoConfirmation,
     sagyo_den_dat: shukoDat.toISOString(),
     sagyo_id: d.shozokuId,
     kizai_id: d.kizaiId,
@@ -1116,7 +1157,7 @@ export const updShukoDen = async (
     juchu_head_id: d.juchuHeadId,
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
-    sagyo_kbn_id: 10,
+    sagyo_kbn_id: SAGYO_KBN_ID.shukoPicking,
     sagyo_den_dat: shukoDat.toISOString(),
     sagyo_id: d.shozokuId,
     kizai_id: d.kizaiId,
@@ -1131,7 +1172,7 @@ export const updShukoDen = async (
     juchu_head_id: d.juchuHeadId,
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
-    sagyo_kbn_id: 20,
+    sagyo_kbn_id: SAGYO_KBN_ID.shukoConfirmation,
     sagyo_den_dat: shukoDat.toISOString(),
     sagyo_id: d.shozokuId,
     kizai_id: d.kizaiId,
@@ -1179,9 +1220,9 @@ export const addNyukoDen = async (
     juchu_head_id: d.juchuHeadId,
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
-    sagyo_kbn_id: 30,
+    sagyo_kbn_id: SAGYO_KBN_ID.nyukoCount,
     sagyo_den_dat:
-      d.shozokuId === 1
+      d.shozokuId === BASHO_ID.kics
         ? juchuKizaiHeadData.kicsNyukoDat!.toISOString()
         : juchuKizaiHeadData.yardNyukoDat!.toISOString(),
     sagyo_id: d.shozokuId,
@@ -1226,9 +1267,9 @@ export const updNyukoDen = async (
     juchu_head_id: d.juchuHeadId,
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
-    sagyo_kbn_id: 30,
+    sagyo_kbn_id: SAGYO_KBN_ID.nyukoCount,
     sagyo_den_dat:
-      d.shozokuId === 1
+      d.shozokuId === BASHO_ID.kics
         ? juchuKizaiHeadData.kicsNyukoDat!.toISOString()
         : juchuKizaiHeadData.yardNyukoDat!.toISOString(),
     sagyo_id: d.shozokuId,
@@ -1276,7 +1317,7 @@ export const upsShukoDen = async (
     juchu_head_id: d.juchuHeadId,
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
-    sagyo_kbn_id: 10,
+    sagyo_kbn_id: SAGYO_KBN_ID.shukoPicking,
     sagyo_den_dat: shukoDat.toISOString(),
     sagyo_id: sagyoId,
     kizai_id: d.kizaiId,
@@ -1291,7 +1332,7 @@ export const upsShukoDen = async (
     juchu_head_id: d.juchuHeadId,
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
-    sagyo_kbn_id: 20,
+    sagyo_kbn_id: SAGYO_KBN_ID.shukoConfirmation,
     sagyo_den_dat: shukoDat.toISOString(),
     sagyo_id: sagyoId,
     kizai_id: d.kizaiId,
@@ -1337,7 +1378,7 @@ export const upsNyukoDen = async (
     juchu_head_id: d.juchuHeadId,
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
-    sagyo_kbn_id: 30,
+    sagyo_kbn_id: SAGYO_KBN_ID.nyukoCount,
     sagyo_den_dat: nyukoDat.toISOString(),
     sagyo_id: sagyoId,
     kizai_id: d.kizaiId,
@@ -1383,11 +1424,11 @@ export const addCtnShukoDen = async (
     juchu_head_id: d.juchuHeadId,
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
-    sagyo_kbn_id: 10,
+    sagyo_kbn_id: SAGYO_KBN_ID.shukoPicking,
     sagyo_den_dat: shukoDat.toISOString(),
     sagyo_id: sagyoId,
     kizai_id: d.kizaiId,
-    plan_qty: sagyoId === 1 ? d.kicsKeepQty : d.yardKeepQty,
+    plan_qty: sagyoId === BASHO_ID.kics ? d.kicsKeepQty : d.yardKeepQty,
     dsp_ord_num: d.dspOrdNum,
     indent_num: d.indentNum,
     add_dat: new Date().toISOString(),
@@ -1398,11 +1439,11 @@ export const addCtnShukoDen = async (
     juchu_head_id: d.juchuHeadId,
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
-    sagyo_kbn_id: 20,
+    sagyo_kbn_id: SAGYO_KBN_ID.shukoConfirmation,
     sagyo_den_dat: shukoDat.toISOString(),
     sagyo_id: sagyoId,
     kizai_id: d.kizaiId,
-    plan_qty: sagyoId === 1 ? d.kicsKeepQty : d.yardKeepQty,
+    plan_qty: sagyoId === BASHO_ID.kics ? d.kicsKeepQty : d.yardKeepQty,
     dsp_ord_num: d.dspOrdNum,
     indent_num: d.indentNum,
     add_dat: new Date().toISOString(),
@@ -1446,11 +1487,11 @@ export const updCtnShukoDen = async (
     juchu_head_id: d.juchuHeadId,
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
-    sagyo_kbn_id: 10,
+    sagyo_kbn_id: SAGYO_KBN_ID.shukoPicking,
     sagyo_den_dat: shukoDat.toISOString(),
     sagyo_id: sagyoId,
     kizai_id: d.kizaiId,
-    plan_qty: sagyoId === 1 ? d.kicsKeepQty : d.yardKeepQty,
+    plan_qty: sagyoId === BASHO_ID.kics ? d.kicsKeepQty : d.yardKeepQty,
     dsp_ord_num: d.dspOrdNum,
     indent_num: d.indentNum,
     add_dat: new Date().toISOString(),
@@ -1461,11 +1502,11 @@ export const updCtnShukoDen = async (
     juchu_head_id: d.juchuHeadId,
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
-    sagyo_kbn_id: 20,
+    sagyo_kbn_id: SAGYO_KBN_ID.shukoConfirmation,
     sagyo_den_dat: shukoDat.toISOString(),
     sagyo_id: sagyoId,
     kizai_id: d.kizaiId,
-    plan_qty: sagyoId === 1 ? d.kicsKeepQty : d.yardKeepQty,
+    plan_qty: sagyoId === BASHO_ID.kics ? d.kicsKeepQty : d.yardKeepQty,
     dsp_ord_num: d.dspOrdNum,
     indent_num: d.indentNum,
     add_dat: new Date().toISOString(),
@@ -1511,11 +1552,11 @@ export const addCtnNyukoDen = async (
     juchu_head_id: d.juchuHeadId,
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
-    sagyo_kbn_id: 30,
+    sagyo_kbn_id: SAGYO_KBN_ID.nyukoCount,
     sagyo_den_dat: nyukoDat.toISOString(),
     sagyo_id: sagyoId,
     kizai_id: d.kizaiId,
-    plan_qty: sagyoId === 1 ? d.kicsKeepQty : d.yardKeepQty,
+    plan_qty: sagyoId === BASHO_ID.kics ? d.kicsKeepQty : d.yardKeepQty,
     dsp_ord_num: d.dspOrdNum,
     indent_num: d.indentNum,
     add_dat: new Date().toISOString(),
@@ -1559,11 +1600,11 @@ export const updCtnNyukoDen = async (
     juchu_head_id: d.juchuHeadId,
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
-    sagyo_kbn_id: 30,
+    sagyo_kbn_id: SAGYO_KBN_ID.nyukoCount,
     sagyo_den_dat: nyukoDat.toISOString(),
     sagyo_id: sagyoId,
     kizai_id: d.kizaiId,
-    plan_qty: sagyoId === 1 ? d.kicsKeepQty : d.yardKeepQty,
+    plan_qty: sagyoId === BASHO_ID.kics ? d.kicsKeepQty : d.yardKeepQty,
     dsp_ord_num: d.dspOrdNum,
     indent_num: d.indentNum,
     upd_dat: new Date().toISOString(),
@@ -1606,11 +1647,11 @@ export const upsCtnShukoDen = async (
     juchu_head_id: d.juchuHeadId,
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
-    sagyo_kbn_id: 10,
+    sagyo_kbn_id: SAGYO_KBN_ID.shukoPicking,
     sagyo_den_dat: shukoDat.toISOString(),
     sagyo_id: sagyoId,
     kizai_id: d.kizaiId,
-    plan_qty: sagyoId === 1 ? d.kicsKeepQty : d.yardKeepQty,
+    plan_qty: sagyoId === BASHO_ID.kics ? d.kicsKeepQty : d.yardKeepQty,
     dsp_ord_num: d.dspOrdNum,
     indent_num: d.indentNum,
     add_dat: new Date().toISOString(),
@@ -1621,11 +1662,11 @@ export const upsCtnShukoDen = async (
     juchu_head_id: d.juchuHeadId,
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
-    sagyo_kbn_id: 20,
+    sagyo_kbn_id: SAGYO_KBN_ID.shukoConfirmation,
     sagyo_den_dat: shukoDat.toISOString(),
     sagyo_id: sagyoId,
     kizai_id: d.kizaiId,
-    plan_qty: sagyoId === 1 ? d.kicsKeepQty : d.yardKeepQty,
+    plan_qty: sagyoId === BASHO_ID.kics ? d.kicsKeepQty : d.yardKeepQty,
     dsp_ord_num: d.dspOrdNum,
     indent_num: d.indentNum,
     add_dat: new Date().toISOString(),
@@ -1667,11 +1708,11 @@ export const upsCtnNyukoDen = async (
     juchu_head_id: d.juchuHeadId,
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
-    sagyo_kbn_id: 30,
+    sagyo_kbn_id: SAGYO_KBN_ID.nyukoCount,
     sagyo_den_dat: nyukoDat.toISOString(),
     sagyo_id: sagyoId,
     kizai_id: d.kizaiId,
-    plan_qty: sagyoId === 1 ? d.kicsKeepQty : d.yardKeepQty,
+    plan_qty: sagyoId === BASHO_ID.kics ? d.kicsKeepQty : d.yardKeepQty,
     dsp_ord_num: d.dspOrdNum,
     indent_num: d.indentNum,
     add_dat: new Date().toISOString(),

@@ -1,5 +1,7 @@
 'use server';
 
+import { BASHO_ID, JUCHU_KIZAI_HEAD_KBN, SAGYO_KBN_ID } from '@/app/_lib/constants';
+
 import pool from '../postgres';
 import { SCHEMA } from '../supabase';
 
@@ -18,7 +20,7 @@ export const selectPdfJuchuKizaiMeisai = async (
   nyushukoBashoId: number
 ) => {
   try {
-    const shukoBasho = nyushukoBashoId === 1 ? 'kics' : 'yard';
+    const shukoBasho = nyushukoBashoId === BASHO_ID.kics ? 'kics' : 'yard';
     const query = `select 
 
     v_juchu_kizai_head_lst.juchu_head_id
@@ -55,7 +57,7 @@ where
     v_juchu_kizai_head_lst.${shukoBasho}_shuko_dat = $3   --$4
     
     and
-    v_juchu_kizai_head_lst.juchu_kizai_head_kbn in (1,3)    --通常、キープ
+    v_juchu_kizai_head_lst.juchu_kizai_head_kbn in (${JUCHU_KIZAI_HEAD_KBN.normal},${JUCHU_KIZAI_HEAD_KBN.keep})    --通常、キープ
     
 --コンテナも追加(KICS+YARD)
 union all
@@ -95,7 +97,7 @@ where
     v_juchu_kizai_head_lst.${shukoBasho}_shuko_dat = $3    --$4
     
     and
-    v_juchu_kizai_head_lst.juchu_kizai_head_kbn in (1,3)    --通常、キープ
+    v_juchu_kizai_head_lst.juchu_kizai_head_kbn in (${JUCHU_KIZAI_HEAD_KBN.normal},${JUCHU_KIZAI_HEAD_KBN.keep})    --通常、キープ
     
 
 order by
@@ -127,7 +129,7 @@ export const selectNyukoPdfJuchuKizaiMeisai = async (
   const ids = juchuKizaiHeadIds.split(',').map(Number);
   try {
     const values = [juchuHeadId, ids, nyukoDat];
-    const nyukoBasho = nyushukoBashoId === 1 ? 'kics' : 'yard';
+    const nyukoBasho = nyushukoBashoId === BASHO_ID.kics ? 'kics' : 'yard';
     // ---------------------------------------------------
     // 入庫リスト印刷ボタンSQL
     // ---------------------------------------------------
@@ -184,7 +186,7 @@ export const selectNyukoPdfJuchuKizaiMeisai = async (
           v_juchu_kizai_head_lst.juchu_head_id = $1
           AND v_juchu_kizai_head_lst.juchu_kizai_head_id = ANY ($2)    --入庫明細ビューから機材ヘッダーIDセット
           AND v_juchu_kizai_head_lst.${nyukoBasho}_nyuko_dat = $3
-          AND v_nyushuko_den2_lst.sagyo_kbn_id = 30
+          AND v_nyushuko_den2_lst.sagyo_kbn_id = ${SAGYO_KBN_ID.nyukoCount}
       ORDER BY
           juchu_kizai_head_id
           ,ctn_flg

@@ -4,6 +4,7 @@ import dayjs from 'dayjs';
 import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
 
+import { JUCHU_KIZAI_HEAD_KBN } from '@/app/_lib/constants';
 import { escapeLikeString } from '@/app/(main)/_lib/escape-string';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 import { EqptOrderSearchValues } from '@/app/(main)/eqpt-order-list/_lib/types';
@@ -25,7 +26,7 @@ export const selectJuchuKizaiHeadList = async (juchuHeadId: number) => {
       .schema(SCHEMA)
       .from('v_juchu_kizai_head_lst')
       .select(
-        'juchu_head_id, juchu_kizai_head_id, head_nam, kics_shuko_dat, kics_nyuko_dat, yard_shuko_dat, yard_nyuko_dat, sikomibi, rihabi, genebi, honbanbi, juchu_honbanbi_calc_qty, shokei, nebiki_amt, mem, oya_juchu_kizai_head_id, ht_kbn, juchu_kizai_head_kbn, nebiki_rat, kics_shuko_fix_flg, yard_shuko_fix_flg'
+        'juchu_head_id, juchu_kizai_head_id, head_nam, kics_shuko_dat, kics_nyuko_dat, yard_shuko_dat, yard_nyuko_dat, sikomibi, rihabi, genebi, honbanbi, juchu_honbanbi_calc_qty, shokei, nebiki_amt, mem, oya_juchu_kizai_head_id, ht_kbn, juchu_kizai_head_kbn, nebiki_rat, kics_shuko_fix_flg, yard_shuko_fix_flg, kics_nyuko_fix_flg, yard_nyuko_fix_flg'
       )
       .eq('juchu_head_id', juchuHeadId)
       .not('juchu_kizai_head_id', 'is', null);
@@ -46,7 +47,7 @@ export const selectJuchuKizaiHeadNamList = async (juchuHeadId: number) => {
       .from('v_juchu_kizai_head_lst')
       .select('juchu_head_id, juchu_kizai_head_id, head_nam, nebiki_amt, juchu_kizai_head_kbn')
       .eq('juchu_head_id', juchuHeadId)
-      .neq('juchu_kizai_head_kbn', 3)
+      .neq('juchu_kizai_head_kbn', JUCHU_KIZAI_HEAD_KBN.keep)
       .not('juchu_kizai_head_id', 'is', null);
   } catch (e) {
     throw new Error('[selectJuchuKizaiHeadNamList] DBエラー:', { cause: e });
@@ -311,7 +312,7 @@ export const selectChildJuchuKizaiHead = async (juchuHeadId: number, oyaJuchuKiz
       .select('juchu_head_id, juchu_kizai_head_id, nyuko_dat')
       .eq('juchu_head_id', juchuHeadId)
       .eq('oya_juchu_kizai_head_id', oyaJuchuKizaiHeadId)
-      .eq('juchu_kizai_head_kbn', 2);
+      .eq('juchu_kizai_head_kbn', JUCHU_KIZAI_HEAD_KBN.return);
   } catch (e) {
     throw new Error('[selectChildJuchuKizaiHead] DBエラー:', { cause: e });
   }
