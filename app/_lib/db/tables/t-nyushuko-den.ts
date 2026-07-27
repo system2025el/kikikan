@@ -796,7 +796,7 @@ export const updateResultAdjQty = async (data: NyushukoDen) => {
   //   `;
   try {
     const supabase = await createClient();
-    await supabase
+    return await supabase
       .schema(SCHEMA)
       .from('t_nyushuko_den')
       .update(data)
