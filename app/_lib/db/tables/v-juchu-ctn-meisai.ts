@@ -1,6 +1,10 @@
-import { SCHEMA, supabase } from '../supabase';
+'use server';
+
+import { SCHEMA } from '../supabase';
+import { createClient } from '../supabase-server';
 
 export const selectJuchuContainerMeisai = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
+  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)
@@ -18,6 +22,7 @@ export const selectJuchuContainerMeisai = async (juchuHeadId: number, juchuKizai
 };
 
 export const selectOyaJuchuContainerMeisai = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
+  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)

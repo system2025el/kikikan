@@ -1,6 +1,7 @@
 'use server';
 
-import { SCHEMA, supabase } from '../supabase';
+import { SCHEMA } from '../supabase';
+import { createClient } from '../supabase-server';
 
 export const selectNyushukoEqptDetail = async (
   juchuHeadId: number,
@@ -11,6 +12,7 @@ export const selectNyushukoEqptDetail = async (
   sagyoKbnId: number,
   kizaiId: number
 ) => {
+  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)

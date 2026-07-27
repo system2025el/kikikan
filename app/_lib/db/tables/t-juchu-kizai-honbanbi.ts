@@ -2,7 +2,8 @@
 
 import { PoolClient } from 'pg';
 
-import { SCHEMA, supabase } from '../supabase';
+import { SCHEMA } from '../supabase';
+import { createClient } from '../supabase-server';
 import { JuchuKizaiHonbanbi } from '../types/t-juchu-kizai-honbanbi-type';
 
 /**
@@ -12,6 +13,7 @@ import { JuchuKizaiHonbanbi } from '../types/t-juchu-kizai-honbanbi-type';
  * @returns 受注機材本番日
  */
 export const selectHonbanbi = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
+  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)
@@ -41,6 +43,7 @@ export const selectHonbanbiConfirm = async (
   juchuHonbanbiShubetuId: number,
   juchuHonbanbiDat: string
 ) => {
+  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)

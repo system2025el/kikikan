@@ -1,5 +1,4 @@
-import { type CookieOptions, createServerClient } from '@supabase/ssr';
-import { createClient } from '@supabase/supabase-js';
+import { type CookieOptions, createBrowserClient, createServerClient } from '@supabase/ssr';
 
 //import { cookies } from 'next/headers';
 import { Database } from './types/types';
@@ -36,18 +35,9 @@ import { Database } from './types/types';
 //   },
 // });
 
-// ログインあり(クライアントサイド)
-export const supabase = createClient<Database>(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  {
-    auth: {
-      autoRefreshToken: true,
-      persistSession: true,
-      detectSessionInUrl: true,
-    },
-  }
-);
+// クライアントサイド
+export const createClient = () =>
+  createBrowserClient<Database>(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
 
 // ログインあり(サーバーサイド)
 // export const createClient = async () => {

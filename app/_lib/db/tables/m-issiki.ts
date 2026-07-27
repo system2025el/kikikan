@@ -3,7 +3,8 @@
 import { PoolClient } from 'pg';
 
 import pool from '../postgres';
-import { SCHEMA, supabase } from '../supabase';
+import { SCHEMA } from '../supabase';
+import { createClient } from '../supabase-server';
 import { MIsshikiDBValues } from '../types/m-issiki-type';
 
 /**
@@ -11,6 +12,7 @@ import { MIsshikiDBValues } from '../types/m-issiki-type';
  * @returns 有効な一式のidと名前の配列
  */
 export const selectActiveIsshikis = async () => {
+  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)
@@ -29,6 +31,7 @@ export const selectActiveIsshikis = async () => {
  * @returns issiki_nameで検索された一式マスタの配列 検索無しなら全件
  */
 export const selectFilteredIsshikis = async () => {
+  const supabase = await createClient();
   const builder = supabase
     .schema(SCHEMA)
     .from('m_issiki')
@@ -107,6 +110,7 @@ export const insertNewIsshiki = async (data: MIsshikiDBValues, connection: PoolC
  * @param id 更新する一式のissiki_id
  */
 export const updateIsshikiDB = async (data: MIsshikiDBValues) => {
+  const supabase = await createClient();
   try {
     await supabase
       .schema(SCHEMA)
@@ -131,6 +135,7 @@ export const updIsshikiDelFlgDB = async (
     upd_dat: string;
   }
 ) => {
+  const supabase = await createClient();
   try {
     await supabase.schema(SCHEMA).from('m_issiki').update(data).eq('issiki_id', id);
   } catch (e) {

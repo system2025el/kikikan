@@ -3,7 +3,8 @@ import { PoolClient } from 'pg';
 
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 
-import { SCHEMA, supabase } from '../supabase';
+import { SCHEMA } from '../supabase';
+import { createClient } from '../supabase-server';
 import { MituMeisai } from '../types/t-mitu-meisai-type';
 
 export const insertQuotMeisai = async (data: MituMeisai[], connection: PoolClient) => {
@@ -73,6 +74,7 @@ export const updateQuotMeisai = async (data: MituMeisai[], connection: PoolClien
  * @returns 見積明細の配列
  */
 export const selectQuotMeisai = async (id: number) => {
+  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)

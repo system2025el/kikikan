@@ -1,6 +1,7 @@
 'use server';
 
-import { SCHEMA, supabase } from '../supabase';
+import { SCHEMA } from '../supabase';
+import { createClient } from '../supabase-server';
 import { Lock } from '../types/t-lock-type';
 
 /**
@@ -10,6 +11,7 @@ import { Lock } from '../types/t-lock-type';
  * @returns ロックデータ
  */
 export const selectLock = async (lockShubetu: number, headId: number) => {
+  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)
@@ -29,6 +31,7 @@ export const selectLock = async (lockShubetu: number, headId: number) => {
  * @param headId ヘッダーid
  */
 export const insertLock = async (data: Lock) => {
+  const supabase = await createClient();
   try {
     return await supabase.schema(SCHEMA).from('t_lock').insert(data);
   } catch (e) {
@@ -42,6 +45,7 @@ export const insertLock = async (data: Lock) => {
  * @returns
  */
 export const updateLock = async (data: Lock) => {
+  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)
@@ -60,6 +64,7 @@ export const updateLock = async (data: Lock) => {
  * @param headId ヘッダーid
  */
 export const deleteLock = async (lockShubetu: number, headId: number) => {
+  const supabase = await createClient();
   try {
     return await supabase.schema(SCHEMA).from('t_lock').delete().eq('lock_shubetu', lockShubetu).eq('head_id', headId);
   } catch (e) {

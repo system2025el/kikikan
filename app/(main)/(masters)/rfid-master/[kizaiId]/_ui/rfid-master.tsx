@@ -29,12 +29,11 @@ import {
 import { grey } from '@mui/material/colors';
 import { useEffect, useMemo, useState } from 'react';
 
-import { useUserStore } from '@/app/_lib/stores/usestore';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { permission } from '@/app/(main)/_lib/permission';
+import { User } from '@/app/(main)/_lib/types';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
-import { PermissionGuard } from '@/app/(main)/_ui/permission-guard';
 import { MuiTablePagination } from '@/app/(main)/_ui/table-pagination';
 
 import { FAKE_NEW_ID, ROWS_PER_MASTER_TABLE_PAGE } from '../../../_lib/constants';
@@ -44,12 +43,10 @@ import { getEqptNam, getRfidsOfTheKizai, updateRfidTagSts } from '../_lib/funcs'
 import { RfidsMasterTableValues } from '../_lib/types';
 import { RfidMasterDialog } from './rfid-master-dialog';
 
-export const RfidMaster = ({ kizaiId }: { kizaiId: number }) => {
+export const RfidMaster = ({ user, kizaiId }: { user: User; kizaiId: number }) => {
   /** テーブル1ページの行数 */
   const rowsPerPage = ROWS_PER_MASTER_TABLE_PAGE;
 
-  /** ログインユーザ */
-  const user = useUserStore((state) => state.user);
   /** useState ------------------------------------------------- */
   /** 表示されるRFIDリスト */
   const [theRfids, setTheRfids] = useState<RfidsMasterTableValues[] | undefined>([]);

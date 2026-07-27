@@ -17,16 +17,16 @@ import { useRouter } from 'next/navigation';
 import { Dispatch, SetStateAction, use, useState } from 'react';
 
 import { BASHO_ID, JUCHU_KIZAI_HEAD_KBN, SAGYO_KBN_ID } from '@/app/_lib/constants';
-import { User, useUserStore } from '@/app/_lib/stores/usestore';
 
 import { dispColors } from '../../_lib/colors';
 import { toJapanTimeString } from '../../_lib/date-conversion';
 import { permission } from '../../_lib/permission';
+import { User } from '../../_lib/types';
 import { LoadingOverlay } from '../../_ui/loading';
 import { ShukoTableValues } from '../_lib/types';
 
 export const ShukoListTable = (props: {
-  user: User | null;
+  user: User;
   datas: ShukoTableValues[];
   onSelectionChange: Dispatch<SetStateAction<number[]>>;
 }) => {

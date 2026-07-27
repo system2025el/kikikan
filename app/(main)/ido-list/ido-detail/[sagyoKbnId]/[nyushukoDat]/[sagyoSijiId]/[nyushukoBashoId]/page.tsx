@@ -1,6 +1,10 @@
+import { Typography } from '@mui/material';
 import { Metadata } from 'next';
+import { redirect } from 'next/navigation';
 
 import { BASHO_ID, SAGYO_KBN_ID, SAGYO_SIJI_ID } from '@/app/_lib/constants';
+import { getCurrentUser } from '@/app/(main)/_lib/funcs';
+import { permission } from '@/app/(main)/_lib/permission';
 
 import { getIdoDen, getIdoFix } from './_lib/funcs';
 import { IdoDetailTableValues, IdoDetailValues } from './_lib/types';
@@ -20,6 +24,19 @@ const Page = async (props: {
   }>;
 }) => {
   const params = await props.params;
+
+  const user = await getCurrentUser();
+  if (!user) {
+    await redirect('/login');
+    return;
+  }
+
+  const hasPermission = !!(user.permission.nyushuko & permission.nyushuko_ref);
+
+  if (!hasPermission) {
+    return <Typography>このページを閲覧する権限がありません。</Typography>;
+  }
+
   const sagyoKbnId = Number(params.sagyoKbnId);
   const nyushukoDat = decodeURIComponent(params.nyushukoDat);
   const sagyoSijiId = Number(params.sagyoSijiId);
@@ -52,6 +69,6 @@ const Page = async (props: {
     getIdoFix(fixKbn, sagyoSijiId, nyushukoDat, nyushukoBashoId),
   ]);
 
-  return <IdoDetail idoDetailData={idoDetailData} idoDetailTableData={idoDenData} fixFlag={fixFlag} />;
+  return <IdoDetail user={user} idoDetailData={idoDetailData} idoDetailTableData={idoDenData} fixFlag={fixFlag} />;
 };
 export default Page;

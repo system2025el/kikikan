@@ -1,6 +1,7 @@
 'use server';
 
-import { SCHEMA, supabase } from '../supabase';
+import { SCHEMA } from '../supabase';
+import { createClient } from '../supabase-server';
 
 /**
  * 受注ヘッドIDが一致する受注車両ヘッダのリストを取得する関数
@@ -8,6 +9,7 @@ import { SCHEMA, supabase } from '../supabase';
  * @returns {} 受注車両ヘッダのデータ配列
  */
 export const selectJuchuSharyoHeadList = async (juchuHeadId: number) => {
+  const supabase = await createClient();
   try {
     return supabase
       .schema(SCHEMA)

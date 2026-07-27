@@ -8,7 +8,8 @@ import { fakeToNull } from '@/app/(main)/(masters)/_lib/value-converters';
 import { EqptsMasterDialogValues } from '@/app/(main)/(masters)/eqpt-master/_lib/types';
 
 import pool from '../postgres';
-import { SCHEMA, supabase } from '../supabase';
+import { SCHEMA } from '../supabase';
+import { createClient } from '../supabase-server';
 import { MKizaiDBValues } from '../types/m-kizai-type';
 
 /**
@@ -17,6 +18,7 @@ import { MKizaiDBValues } from '../types/m-kizai-type';
  * @returns kizai_idが一致する機材
  */
 export const selectOneEqpt = async (id: number) => {
+  const supabase = await createClient();
   try {
     return await supabase.schema(SCHEMA).from('m_kizai').select('*').eq('kizai_id', id).single();
   } catch (e) {
@@ -178,6 +180,7 @@ export const selectBundledEqpts = async (setIds: number[]) => {
 };
 
 export const selectMeisaiEqts = async (ids: number[]) => {
+  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)
@@ -278,6 +281,7 @@ export const selectActiveEqptsForSet = async () => {
  * @param {number[]} kizaiIds 探す機材IDの配列
  */
 export const checkExIsshiki = async (isshikiId: number, kizaiIds: number[]) => {
+  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)

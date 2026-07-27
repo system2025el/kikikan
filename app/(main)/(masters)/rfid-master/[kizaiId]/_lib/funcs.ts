@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 
 import pool, { refreshVRfid } from '@/app/_lib/db/postgres';
-import { SCHEMA, supabase } from '@/app/_lib/db/supabase';
+import { SCHEMA } from '@/app/_lib/db/supabase';
 import { selectOneEqpt } from '@/app/_lib/db/tables/m-kizai';
 import { updateMasterUpdates } from '@/app/_lib/db/tables/m-master-update';
 import { insertNewRfid, upDateRfidDB, updateRfidTagDelFlgs, updRfidDelFlgDB } from '@/app/_lib/db/tables/m-rfid';

@@ -3,7 +3,8 @@
 import { SectionsMasterDialogValues } from '@/app/(main)/(masters)/sections-master/_lib/types';
 
 import pool from '../postgres';
-import { SCHEMA, supabase } from '../supabase';
+import { SCHEMA } from '../supabase';
+import { createClient } from '../supabase-server';
 import { MSectionDBValues } from '../types/m-section-type';
 
 /**
@@ -11,6 +12,7 @@ import { MSectionDBValues } from '../types/m-section-type';
  * @returns 有効な課のidと名前の配列
  */
 export const selectActiveSections = async () => {
+  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)
@@ -29,6 +31,7 @@ export const selectActiveSections = async () => {
  * @returns section_nameで検索された課マスタの配列 検索無しなら全件
  */
 export const selectFilteredSections = async (query: string) => {
+  const supabase = await createClient();
   const builder = supabase
     .schema(SCHEMA)
     .from('m_section')
@@ -52,6 +55,7 @@ export const selectFilteredSections = async (query: string) => {
  * @returns section_idが一致する課
  */
 export const selectOneSection = async (id: number) => {
+  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)
@@ -97,6 +101,7 @@ export const insertNewSection = async (data: SectionsMasterDialogValues, user: s
  * @param id 更新する課のsection_id
  */
 export const upDateSectionDB = async (data: MSectionDBValues) => {
+  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)

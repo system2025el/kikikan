@@ -5,9 +5,9 @@ import { Box, Button, Dialog, DialogActions, DialogContentText, DialogTitle } fr
 import { usePathname, useRouter } from 'next/navigation';
 import { createContext, useContext, useEffect, useState, useTransition } from 'react';
 
-import { supabase } from '@/app/_lib/db/supabase';
 import { serverErrorLog } from '@/app/_lib/funcs';
-import { useUserStore } from '@/app/_lib/stores/usestore';
+
+import { logout } from '../_lib/funcs';
 
 type DirtyContextType = {
   isDirty: boolean;
@@ -22,7 +22,6 @@ const DirtyContext = createContext<DirtyContextType | undefined>(undefined);
 
 export const DirtyProvider = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
-  const clearUser = useUserStore((state) => state.clearUser);
   //const pathname = usePathname();
   //const user = useUserStore((state) => state.user);
   const [isDirty, setIsDirty] = useState(false);
@@ -68,7 +67,6 @@ export const DirtyProvider = ({ children }: { children: React.ReactNode }) => {
         } else {
           router.push(pendingPath);
         }
-
         setPendingPath(null);
       });
     }
@@ -76,18 +74,13 @@ export const DirtyProvider = ({ children }: { children: React.ReactNode }) => {
 
   const executeLogout = async () => {
     try {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        throw new Error(`[supabase.auth.signOut] エラー: ${error.message}`);
-      }
-      clearUser();
+      await logout();
 
       router.refresh();
       router.replace('/login');
     } catch (e) {
       const errorLog = e as Error;
       await serverErrorLog(errorLog.message);
-      console.error('ログアウトエラー：', e);
     }
   };
 

@@ -4,7 +4,8 @@ import { escapeLikeString, escapeOrLikeString } from '@/app/(main)/_lib/escape-s
 import { CustomersMasterDialogValues } from '@/app/(main)/(masters)/customers-master/_lib/types';
 
 import pool from '../postgres';
-import { SCHEMA, supabase } from '../supabase';
+import { SCHEMA } from '../supabase';
+import { createClient } from '../supabase-server';
 import { MKokyakuDBValues } from '../types/m-kokyaku-type';
 
 /**
@@ -13,6 +14,7 @@ import { MKokyakuDBValues } from '../types/m-kokyaku-type';
  * @returns
  */
 export const selectKokyaku = async (kokyaku_id: number) => {
+  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)
@@ -30,6 +32,7 @@ export const selectKokyaku = async (kokyaku_id: number) => {
  * @returns 有効な顧客のリスト
  */
 export const selectActiveCustomers = async () => {
+  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)
@@ -49,6 +52,7 @@ export const selectActiveCustomers = async () => {
  * @returns {Promise<CustomersDialogValues[]>} 顧客マスタテーブルに表示するデータ（ 検索キーワードが空の場合は全て ）
  */
 export const selectFilteredCustomers = async (query: string) => {
+  const supabase = await createClient();
   const builder = supabase
     .schema(SCHEMA)
     .from('m_kokyaku')
@@ -76,6 +80,7 @@ export const selectFilteredCustomers = async (query: string) => {
  * @returns 顧客IDが一致する顧客情報
  */
 export const selectOneCustomer = async (id: number) => {
+  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)
@@ -142,6 +147,7 @@ export const insertNewCustomer = async (data: CustomersMasterDialogValues, user:
  * @param id 更新する顧客のkokyaku_id
  */
 export const upDateCustomerDB = async (data: MKokyakuDBValues) => {
+  const supabase = await createClient();
   try {
     await supabase
       .schema(SCHEMA)

@@ -4,7 +4,8 @@ import { escapeLikeString } from '@/app/(main)/_lib/escape-string';
 import { DaibumonsMasterDialogValues } from '@/app/(main)/(masters)/daibumons-master/_lib/types';
 
 import pool from '../postgres';
-import { SCHEMA, supabase } from '../supabase';
+import { SCHEMA } from '../supabase';
+import { createClient } from '../supabase-server';
 import { MDaibumonDBValues } from '../types/m-daibumon-type';
 
 /**
@@ -12,6 +13,7 @@ import { MDaibumonDBValues } from '../types/m-daibumon-type';
  * @returns 有効な大部門のidと名前の配列
  */
 export const selectActiveDaibumons = async () => {
+  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)
@@ -30,6 +32,7 @@ export const selectActiveDaibumons = async () => {
  * @returns dai_bumon_nameで検索された大部門マスタの配列 検索無しなら全件
  */
 export const selectFilteredDaibumons = async (query: string) => {
+  const supabase = await createClient();
   const builder = supabase
     .schema(SCHEMA)
     .from('m_dai_bumon')
@@ -54,6 +57,7 @@ export const selectFilteredDaibumons = async (query: string) => {
  * @returns dai_bumon_idが一致する大部門
  */
 export const selectOneDaibumon = async (id: number) => {
+  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)
@@ -99,6 +103,7 @@ export const insertNewDaibumon = async (data: DaibumonsMasterDialogValues, user:
  * @param id 更新する大部門のdai_bumon_id
  */
 export const updateDaibumonDB = async (data: MDaibumonDBValues) => {
+  const supabase = await createClient();
   try {
     await supabase
       .schema(SCHEMA)

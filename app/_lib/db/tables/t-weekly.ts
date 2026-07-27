@@ -1,9 +1,11 @@
 'use server';
 
-import { SCHEMA, supabase } from '../supabase';
+import { SCHEMA } from '../supabase';
+import { createClient } from '../supabase-server';
 import { TWeeklyValues } from '../types/t-weekly-type';
 
 export const upsertTWeekly = async (data: TWeeklyValues) => {
+  const supabase = await createClient();
   try {
     // レコードの存在確認
     const { data: rows, error } = await supabase

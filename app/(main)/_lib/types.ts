@@ -9,3 +9,17 @@ export const LockSchema = z.object({
 });
 
 export type LockValues = z.infer<typeof LockSchema>;
+
+export type User = {
+  id: string;
+  name: string;
+  email: string;
+  permission: {
+    juchu: number;
+    nyushuko: number;
+    masters: number;
+    loginSetting: number;
+    ht: number;
+    schedule: number;
+  };
+};

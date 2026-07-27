@@ -1,7 +1,8 @@
 'use server';
 import { PoolClient } from 'pg';
 
-import { SCHEMA, supabase } from '../supabase';
+import { SCHEMA } from '../supabase';
+import { createClient } from '../supabase-server';
 import { SeikyuMeisai } from '../types/t-seikyu-meisai-type';
 
 export const insertBillMeisai = async (data: SeikyuMeisai[], connection: PoolClient) => {
@@ -71,6 +72,7 @@ export const updateBillMeisai = async (data: SeikyuMeisai[], connection: PoolCli
  * @returns 請求明細の配列
  */
 export const selectBillMeisai = async (id: number) => {
+  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)

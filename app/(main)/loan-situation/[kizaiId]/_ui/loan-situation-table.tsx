@@ -14,23 +14,21 @@ import {
 } from '@mui/material';
 
 import { JUCHU_KIZAI_HEAD_KBN } from '@/app/_lib/constants';
-import { useUserStore } from '@/app/_lib/stores/usestore';
 import { toJapanMDString } from '@/app/(main)/_lib/date-conversion';
 import { permission } from '@/app/(main)/_lib/permission';
+import { User } from '@/app/(main)/_lib/types';
 import { LightTooltipWithText } from '@/app/(main)/(masters)/_ui/tables';
 
 import { LoanJuchu, LoanStockTableValues, LoanUseTableValues } from '../_lib/types';
 
 type LoanSituationTableProps = {
+  user: User;
   rows: LoanJuchu[];
   ref: React.RefObject<HTMLDivElement | null>;
 };
 
 export const LoanSituationTable = (props: LoanSituationTableProps) => {
-  const { rows, ref } = props;
-
-  // user情報
-  const user = useUserStore((state) => state.user);
+  const { rows, ref, user } = props;
 
   return (
     <TableContainer

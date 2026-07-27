@@ -3,7 +3,8 @@
 import { VehsMasterDialogValues } from '@/app/(main)/(masters)/vehicles-master/_lib/types';
 
 import pool from '../postgres';
-import { SCHEMA, supabase } from '../supabase';
+import { SCHEMA } from '../supabase';
+import { createClient } from '../supabase-server';
 import { MSharyoDBValues } from '../types/m-sharyo-type';
 
 /**
@@ -11,6 +12,7 @@ import { MSharyoDBValues } from '../types/m-sharyo-type';
  * @returns 有効な車両の配列
  */
 export const selectActiveVehs = async () => {
+  const supabase = await createClient();
   try {
     return supabase
       .schema(SCHEMA)
@@ -30,6 +32,7 @@ export const selectActiveVehs = async () => {
  * @returns {Promise<VehsDialogValues[]>} 公演場所マスタテーブルに表示するデータ（ 検索キーワードが空の場合は全て ）
  */
 export const SelectFilteredVehs = async (/*query: string*/) => {
+  const supabase = await createClient();
   const builder = supabase
     .schema(SCHEMA)
     .from('m_sharyo')
@@ -48,6 +51,7 @@ export const SelectFilteredVehs = async (/*query: string*/) => {
  * @returns 車両IDが一致する車両情報
  */
 export const selectOneVeh = async (id: number) => {
+  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)
@@ -92,6 +96,7 @@ export const insertNewVeh = async (data: VehsMasterDialogValues, user: string) =
  * @param id 更新する車両のsharyo_id
  */
 export const upDateVehDB = async (data: MSharyoDBValues) => {
+  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)

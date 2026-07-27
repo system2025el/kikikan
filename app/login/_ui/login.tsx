@@ -1,27 +1,46 @@
 'use client';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Box, Button, Stack, TextField, Typography } from '@mui/material';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { Alert, AlertTitle, Box, Button, Stack, TextField, Typography } from '@mui/material';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
 import { TextFieldElement, useForm } from 'react-hook-form-mui';
 
-import { supabase } from '@/app/_lib/db/supabase';
+// import { supabase } from '@/app/_lib/db/supabase';
 import { serverErrorLog } from '@/app/_lib/funcs';
-import { useUserStore } from '@/app/_lib/stores/usestore';
-import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 import { getChosenUser } from '@/app/(main)/(masters)/users-master/_lib/funcs';
 
-import { handleLogout, login, setSession } from '../_lib/funcs';
+import { login } from '../_lib/funcs';
 import { UserSchema, UserValues } from '../_lib/types';
 
 const Login = () => {
   const router = useRouter();
-  const user = useUserStore((state) => state.user);
-  const setUser = useUserStore((state) => state.setUser);
-  const clearUser = useUserStore((state) => state.clearUser);
+  // const user = useUserStore((state) => state.user);
+  const searchParams = useSearchParams();
 
   const [error, setError] = useState<string>('');
-  const [isHydrated, setIsHydrated] = useState(false);
+  // const [isHydrated, setIsHydrated] = useState(false);
+
+  const authErrorMessage = useMemo(() => {
+    const errorType = searchParams.get('error');
+    if (!errorType) return null;
+
+    const messages: Record<string, { title: string; body: string }> = {
+      verify_fail: {
+        title: '認証に失敗しました',
+        body: '招待リンクの期限が切れているか、既に使用されています。\n管理者に再送を依頼してください。',
+      },
+      auth_code_error: {
+        title: 'アクセス権限エラー',
+        body: '認証コードが無効です。\nもう一度最初からやり直してください。',
+      },
+      unexpected: {
+        title: 'システムエラー',
+        body: '一時的な問題が発生しました。\n管理者へお問い合わせください。',
+      },
+    };
+
+    return messages[errorType] || { title: 'エラー', body: '予期せぬエラーが発生しました。' };
+  }, [searchParams]);
 
   const { control, handleSubmit } = useForm({
     mode: 'onSubmit',
@@ -31,24 +50,19 @@ const Login = () => {
   });
 
   const onSubmit = async (data: UserValues) => {
-    //const { error } = await login(data);
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email: data.email, password: data.password });
-      const user = await getChosenUser(data.email);
+      const { error } = await login(data);
+      // const { error } = await supabase.auth.signInWithPassword({ email: data.email, password: data.password });
       if (error) {
         const errorLog = new Error('[supabase.auth.signInWithPassword] DBエラー');
         serverErrorLog(errorLog.message);
         setError('メールアドレスかパスワードがちがいます。');
-      } else if (!user) {
+        return;
+      }
+      const user = await getChosenUser(data.email);
+      if (!user) {
         setError('メールアドレスかパスワードがちがいます。');
       } else {
-        const storeUser = {
-          id: user.shainCod ?? '',
-          name: user.tantouNam,
-          email: user.mailAdr,
-          permission: user.permission,
-        };
-        setUser(storeUser);
         router.refresh();
         router.push('/dashboard');
       } // ログイン後のページへリダイレクト
@@ -81,7 +95,6 @@ const Login = () => {
       },
     };
 
-    setUser(mockUser);
     router.push('/dashboard');
   };
 
@@ -103,25 +116,55 @@ const Login = () => {
   // }, []);
 
   useEffect(() => {
-    setIsHydrated(true);
+    const MIGRATION_KEY = 'auth_migration';
+
+    if (typeof window === 'undefined') return;
+
+    if (!localStorage.getItem(MIGRATION_KEY)) {
+      Object.keys(localStorage).forEach((key) => {
+        if (key.startsWith('sb-')) {
+          localStorage.removeItem(key);
+        }
+      });
+      localStorage.removeItem('user-storage');
+      localStorage.setItem(MIGRATION_KEY, 'true');
+    }
+
+    // const checkAndClear = async () => {
+    //   const session = await sessionCheck();
+
+    //   if (!session) {
+    //     await handleLogout();
+    //     clearUser();
+    //   }
+    // };
+    // checkAndClear();
   }, []);
 
-  useEffect(() => {
-    if (!isHydrated) return;
-    const checkUser = async () => {
-      const {
-        data: { user: authUser },
-      } = await supabase.auth.getUser();
-      if (authUser && user) {
-        router.push('/dashboard');
-      }
-    };
-    checkUser();
-  }, [isHydrated, user, router, clearUser]);
+  // useEffect(() => {
+  //   if (!isHydrated) return;
+  //   const checkUser = async () => {
+  //     const {
+  //       data: { user: authUser },
+  //     } = await supabase.auth.getUser();
+  //     if (authUser && user) {
+  //       router.push('/dashboard');
+  //     }
+  //   };
+  //   checkUser();
+  // }, [isHydrated, user, router, clearUser]);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <Stack direction="column" spacing={4} justifyContent="center" alignItems="center" width="100%" height="100vh">
+        {authErrorMessage && (
+          <Box width="30%">
+            <Alert severity="error" variant="outlined" sx={{ whiteSpace: 'pre-line' }}>
+              <AlertTitle>{authErrorMessage.title}</AlertTitle>
+              {authErrorMessage.body}
+            </Alert>
+          </Box>
+        )}
         <Typography variant="caption" color="error">
           {error}
         </Typography>

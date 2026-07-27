@@ -6,7 +6,6 @@ import { writeFileXLSX } from 'xlsx';
 
 import { permission } from '@/app/(main)/_lib/permission';
 import { BackButton } from '@/app/(main)/_ui/buttons';
-import { PermissionGuard } from '@/app/(main)/_ui/permission-guard';
 
 import { getAllEqptAndRfid } from '../_lib/funcs';
 
@@ -43,32 +42,30 @@ export const ExportMaster = () => {
   };
 
   return (
-    <PermissionGuard category={'masters'} required={permission.mst_upd}>
-      <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
-        <Stack direction={'column'} spacing={5} sx={{ minWidth: '100%' }}>
-          <Paper variant="outlined" sx={{ minWidth: '100%' }}>
-            <Box width={'100%'} display={'flex'} p={2}>
-              <Typography>機材RFIDマスタエクスポート</Typography>
+    <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
+      <Stack direction={'column'} spacing={5} sx={{ minWidth: '100%' }}>
+        <Paper variant="outlined" sx={{ minWidth: '100%' }}>
+          <Box width={'100%'} display={'flex'} p={2}>
+            <Typography>機材RFIDマスタエクスポート</Typography>
+          </Box>
+          <Divider sx={{ mx: 1 }} />
+          <Grid2 container width={'100%'} display={'flex'} p={2} alignItems={'center'}>
+            <Box>
+              <Button size="medium" onClick={() => exportFile()} loading={push}>
+                エクセルエクスポート
+              </Button>
             </Box>
-            <Divider sx={{ mx: 1 }} />
-            <Grid2 container width={'100%'} display={'flex'} p={2} alignItems={'center'}>
-              <Box>
-                <Button size="medium" onClick={() => exportFile()} loading={push}>
-                  エクセルエクスポート
-                </Button>
-              </Box>
-            </Grid2>
-          </Paper>
-        </Stack>
-        <Snackbar
-          open={snackBarOpen}
-          autoHideDuration={6000}
-          onClose={() => setSnackBarOpen(false)}
-          message={snackBarMessage}
-          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-          sx={{ marginTop: '65px' }}
-        />
-      </Container>
-    </PermissionGuard>
+          </Grid2>
+        </Paper>
+      </Stack>
+      <Snackbar
+        open={snackBarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackBarOpen(false)}
+        message={snackBarMessage}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        sx={{ marginTop: '65px' }}
+      />
+    </Container>
   );
 };

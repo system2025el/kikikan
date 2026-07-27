@@ -27,9 +27,9 @@ import {
 } from '@mui/material';
 import { useMemo, useState } from 'react';
 
-import { useUserStore } from '@/app/_lib/stores/usestore';
 import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { permission } from '@/app/(main)/_lib/permission';
+import { User } from '@/app/(main)/_lib/types';
 import { CloseMasterDialogButton } from '@/app/(main)/_ui/buttons';
 import { FormDateX } from '@/app/(main)/_ui/date';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
@@ -48,6 +48,7 @@ import { BillingStsTableValues } from '../_lib/types';
  * @returns {JSX.Element} 受注請求助教一覧テーブルコンポーネント
  */
 export const BillingStsListTable = ({
+  user,
   isLoading,
   page,
   //kokyakuId,
@@ -58,6 +59,7 @@ export const BillingStsListTable = ({
   setPage,
   refetch,
 }: {
+  user: User;
   isLoading: boolean;
   page: number;
   //kokyakuId: number;
@@ -70,8 +72,6 @@ export const BillingStsListTable = ({
 }) => {
   /** テーブル1ページの行数 */
   const rowsPerPage = ROWS_PER_MASTER_TABLE_PAGE;
-  /** ユーザー情報 */
-  const user = useUserStore((state) => state.user);
 
   const list = useMemo(
     () => (rowsPerPage > 0 ? billSts.slice((page - 1) * rowsPerPage, page * rowsPerPage) : billSts),
@@ -144,6 +144,7 @@ export const BillingStsListTable = ({
             <TableBody>
               {list.map((j, index) => (
                 <BillingStsRow
+                  user={user}
                   key={index}
                   juchu={j}
                   refetch={refetch}
@@ -187,19 +188,18 @@ export const BillingStsListTable = ({
  * @returns {JSX.Element} 開閉するテーブルの行のコンポーネント
  */
 const BillingStsRow = ({
+  user,
   juchu,
   refetch,
   setSnackBarOpen,
   setSnackBarMessage,
 }: {
+  user: User;
   juchu: BillingStsTableValues;
   refetch: () => Promise<void>;
   setSnackBarOpen: () => void;
   setSnackBarMessage: React.Dispatch<React.SetStateAction<string>>;
 }) => {
-  /* ログインユーザー */
-  const user = useUserStore((state) => state.user);
-
   /* 行の開閉 */
   const [open, setOpen] = useState(false);
 

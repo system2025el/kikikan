@@ -32,18 +32,16 @@ import { Controller, useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 
 import { BASHO_ID, JUCHU_KIZAI_HEAD_KBN, LOCK_SHUBETU, SAGYO_KBN_ID } from '@/app/_lib/constants';
-import { useUserStore } from '@/app/_lib/stores/usestore';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { getNyukoDate, getShukoDate } from '@/app/(main)/_lib/date-funcs';
 import { useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
 import { lockCheck, lockRelease } from '@/app/(main)/_lib/lock';
 import { permission } from '@/app/(main)/_lib/permission';
-import { LockValues } from '@/app/(main)/_lib/types';
+import { LockValues, User } from '@/app/(main)/_lib/types';
 import { BackButton } from '@/app/(main)/_ui/buttons';
 import { DateTime, TestDate } from '@/app/(main)/_ui/date';
 import { IsDirtyAlertDialog, useDirty } from '@/app/(main)/_ui/dirty-context';
 import { Loading, LoadingOverlay } from '@/app/(main)/_ui/loading';
-import { PermissionGuard } from '@/app/(main)/_ui/permission-guard';
 import {
   checkShukoStatus,
   getDetailJuchuHead,
@@ -75,6 +73,7 @@ import {
 import { KeepContainerTable, KeepEqTable } from './equipment-keep-order-detail-table';
 
 export const EquipmentKeepOrderDetail = (props: {
+  user: User;
   juchuHeadData: DetailOerValues;
   oyaJuchuKizaiHeadData: OyaJuchuKizaiNyushukoValues;
   keepJuchuKizaiHeadData: KeepJuchuKizaiHeadValues;
@@ -86,7 +85,7 @@ export const EquipmentKeepOrderDetail = (props: {
 }) => {
   const router = useRouter();
   // user情報
-  const user = useUserStore((state) => state.user);
+  const user = props.user;
   // 受注機材ヘッダー保存フラグ
   const saveKizaiHead = props.keepJuchuKizaiHeadData.juchuKizaiHeadId !== 0 ? true : false;
 
@@ -1208,466 +1207,461 @@ export const EquipmentKeepOrderDetail = (props: {
       {isLoading ? (
         <LoadingOverlay />
       ) : (
-        <PermissionGuard
-          category={'juchu'}
-          required={getValues('juchuKizaiHeadId') === 0 ? permission.juchu_upd : permission.juchu_ref}
-        >
-          <Container disableGutters sx={{ minWidth: '100%', pb: 10 }} maxWidth={'xl'}>
-            <form onSubmit={handleSubmit(onSubmit)}>
-              <Box display={'flex'} justifyContent={'end'} mb={1}>
-                <Grid2 container spacing={4}>
-                  {lockData && (
-                    <Grid2 container alignItems={'center'} spacing={2}>
-                      <Typography>{lockData.addDat && toJapanTimeString(new Date(lockData.addDat))}</Typography>
-                      <Typography>{lockData.addUser}</Typography>
-                      <Typography>編集中</Typography>
-                    </Grid2>
-                  )}
-                  {shukoFixFlag && nyukoFixFlag ? (
-                    <Box display={'flex'} alignItems={'center'}>
-                      <Typography>出発、到着済</Typography>
-                    </Box>
-                  ) : nyukoFixFlag ? (
-                    <Box display={'flex'} alignItems={'center'}>
-                      <Typography>到着済</Typography>
-                    </Box>
-                  ) : (
-                    <></>
-                  )}
-                  <Grid2 container display={saveKizaiHead ? 'flex' : 'none'} alignItems={'center'} spacing={1}>
-                    {!edit || shukoFixFlag ? <Typography>閲覧モード</Typography> : <Typography>編集モード</Typography>}
-                    <Button
-                      disabled={!!lockData || shukoFixFlag || user?.permission.juchu === permission.juchu_ref}
-                      onClick={handleEdit}
-                    >
-                      変更
-                    </Button>
+        <Container disableGutters sx={{ minWidth: '100%', pb: 10 }} maxWidth={'xl'}>
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <Box display={'flex'} justifyContent={'end'} mb={1}>
+              <Grid2 container spacing={4}>
+                {lockData && (
+                  <Grid2 container alignItems={'center'} spacing={2}>
+                    <Typography>{lockData.addDat && toJapanTimeString(new Date(lockData.addDat))}</Typography>
+                    <Typography>{lockData.addUser}</Typography>
+                    <Typography>編集中</Typography>
                   </Grid2>
-                  <Button onClick={back}>
-                    <Box display={'flex'} alignItems={'center'}>
-                      <ArrowLeftIcon fontSize="small" />
-                      受注
-                    </Box>
+                )}
+                {shukoFixFlag && nyukoFixFlag ? (
+                  <Box display={'flex'} alignItems={'center'}>
+                    <Typography>出発、到着済</Typography>
+                  </Box>
+                ) : nyukoFixFlag ? (
+                  <Box display={'flex'} alignItems={'center'}>
+                    <Typography>到着済</Typography>
+                  </Box>
+                ) : (
+                  <></>
+                )}
+                <Grid2 container display={saveKizaiHead ? 'flex' : 'none'} alignItems={'center'} spacing={1}>
+                  {!edit || shukoFixFlag ? <Typography>閲覧モード</Typography> : <Typography>編集モード</Typography>}
+                  <Button
+                    disabled={!!lockData || shukoFixFlag || user?.permission.juchu === permission.juchu_ref}
+                    onClick={handleEdit}
+                  >
+                    変更
                   </Button>
                 </Grid2>
-              </Box>
-              {/*受注ヘッダー*/}
-              <Accordion
-                expanded={expanded}
-                onChange={handleExpansion}
+                <Button onClick={back}>
+                  <Box display={'flex'} alignItems={'center'}>
+                    <ArrowLeftIcon fontSize="small" />
+                    受注
+                  </Box>
+                </Button>
+              </Grid2>
+            </Box>
+            {/*受注ヘッダー*/}
+            <Accordion
+              expanded={expanded}
+              onChange={handleExpansion}
+              sx={{
+                marginTop: 2,
+                borderRadius: 1,
+                overflow: 'hidden',
+              }}
+              variant="outlined"
+            >
+              <AccordionSummary
+                expandIcon={<ExpandMoreIcon />}
+                component="div"
                 sx={{
-                  marginTop: 2,
-                  borderRadius: 1,
-                  overflow: 'hidden',
-                }}
-                variant="outlined"
-              >
-                <AccordionSummary
-                  expandIcon={<ExpandMoreIcon />}
-                  component="div"
-                  sx={{
+                  minHeight: '30px',
+                  maxHeight: '30px',
+                  '&.Mui-expanded': {
                     minHeight: '30px',
                     maxHeight: '30px',
-                    '&.Mui-expanded': {
-                      minHeight: '30px',
-                      maxHeight: '30px',
-                    },
-                  }}
-                >
-                  <Box display="flex" justifyContent="space-between" alignItems="center" width="100%">
-                    <Grid2 container display="flex" justifyContent="space-between" spacing={2}>
-                      <Typography>受注ヘッダー</Typography>
-                      <Grid2 container display={expanded ? 'none' : 'flex'} spacing={2}>
-                        <Typography>公演名</Typography>
-                        <Typography>{juchuHeadData.koenNam}</Typography>
-                      </Grid2>
+                  },
+                }}
+              >
+                <Box display="flex" justifyContent="space-between" alignItems="center" width="100%">
+                  <Grid2 container display="flex" justifyContent="space-between" spacing={2}>
+                    <Typography>受注ヘッダー</Typography>
+                    <Grid2 container display={expanded ? 'none' : 'flex'} spacing={2}>
+                      <Typography>公演名</Typography>
+                      <Typography>{juchuHeadData.koenNam}</Typography>
                     </Grid2>
-                  </Box>
-                </AccordionSummary>
-                <AccordionDetails sx={{ padding: 0 }}>
-                  <Divider />
-                  <Grid2 container display="flex">
-                    <Grid2>
-                      <Grid2 container margin={2} spacing={2}>
-                        <Grid2 container display="flex" direction="row" alignItems="center">
-                          <Grid2 display="flex" direction="row" alignItems="center">
-                            <Typography marginRight={3} whiteSpace="nowrap">
-                              受注番号
-                            </Typography>
-                            <TextField defaultValue={juchuHeadData.juchuHeadId} disabled></TextField>
-                          </Grid2>
-                          <Grid2 display="flex" direction="row" alignItems="center">
-                            <Typography mr={2}>受注ステータス</Typography>
-                            <Select value={juchuHeadData.juchuSts} disabled>
-                              <MenuItem value={0}>入力中</MenuItem>
-                              <MenuItem value={1}>仮受注</MenuItem>
-                              <MenuItem value={2}>処理中</MenuItem>
-                              <MenuItem value={3}>確定</MenuItem>
-                              <MenuItem value={4}>貸出済み</MenuItem>
-                              <MenuItem value={5}>返却済み</MenuItem>
-                              <MenuItem value={9}>受注キャンセル</MenuItem>
-                            </Select>
-                          </Grid2>
+                  </Grid2>
+                </Box>
+              </AccordionSummary>
+              <AccordionDetails sx={{ padding: 0 }}>
+                <Divider />
+                <Grid2 container display="flex">
+                  <Grid2>
+                    <Grid2 container margin={2} spacing={2}>
+                      <Grid2 container display="flex" direction="row" alignItems="center">
+                        <Grid2 display="flex" direction="row" alignItems="center">
+                          <Typography marginRight={3} whiteSpace="nowrap">
+                            受注番号
+                          </Typography>
+                          <TextField defaultValue={juchuHeadData.juchuHeadId} disabled></TextField>
+                        </Grid2>
+                        <Grid2 display="flex" direction="row" alignItems="center">
+                          <Typography mr={2}>受注ステータス</Typography>
+                          <Select value={juchuHeadData.juchuSts} disabled>
+                            <MenuItem value={0}>入力中</MenuItem>
+                            <MenuItem value={1}>仮受注</MenuItem>
+                            <MenuItem value={2}>処理中</MenuItem>
+                            <MenuItem value={3}>確定</MenuItem>
+                            <MenuItem value={4}>貸出済み</MenuItem>
+                            <MenuItem value={5}>返却済み</MenuItem>
+                            <MenuItem value={9}>受注キャンセル</MenuItem>
+                          </Select>
                         </Grid2>
                       </Grid2>
-                      <Box sx={styles.container}>
-                        <Typography marginRight={5} whiteSpace="nowrap">
-                          受注日
-                        </Typography>
-                        <TestDate date={juchuHeadData.juchuDat} onChange={() => {}} disabled />
-                      </Box>
-                      <Box sx={styles.container}>
-                        <Typography marginRight={5} whiteSpace="nowrap">
-                          入力者
-                        </Typography>
-                        <TextField defaultValue={juchuHeadData.nyuryokuUser} disabled></TextField>
-                      </Box>
                     </Grid2>
-                    <Grid2>
-                      <Box sx={{ display: 'flex', alignItems: 'center', ml: 2, mt: { xs: 0, sm: 0, md: 2 } }}>
-                        <Typography marginRight={5} whiteSpace="nowrap">
-                          公演名
-                        </Typography>
-                        <TextField defaultValue={juchuHeadData.koenNam} disabled></TextField>
-                      </Box>
-                      <Box sx={styles.container}>
-                        <Typography marginRight={3} whiteSpace="nowrap">
-                          公演場所
-                        </Typography>
-                        <TextField defaultValue={juchuHeadData.koenbashoNam} disabled></TextField>
-                      </Box>
-                      <Box sx={styles.container}>
-                        <Typography marginRight={7} whiteSpace="nowrap">
-                          顧客
-                        </Typography>
-                        <TextField defaultValue={juchuHeadData.kokyaku.kokyakuNam} disabled></TextField>
-                      </Box>
-                    </Grid2>
+                    <Box sx={styles.container}>
+                      <Typography marginRight={5} whiteSpace="nowrap">
+                        受注日
+                      </Typography>
+                      <TestDate date={juchuHeadData.juchuDat} onChange={() => {}} disabled />
+                    </Box>
+                    <Box sx={styles.container}>
+                      <Typography marginRight={5} whiteSpace="nowrap">
+                        入力者
+                      </Typography>
+                      <TextField defaultValue={juchuHeadData.nyuryokuUser} disabled></TextField>
+                    </Box>
                   </Grid2>
-                </AccordionDetails>
-              </Accordion>
-              {/*受注明細ヘッダー(キープ)*/}
-              <Accordion
+                  <Grid2>
+                    <Box sx={{ display: 'flex', alignItems: 'center', ml: 2, mt: { xs: 0, sm: 0, md: 2 } }}>
+                      <Typography marginRight={5} whiteSpace="nowrap">
+                        公演名
+                      </Typography>
+                      <TextField defaultValue={juchuHeadData.koenNam} disabled></TextField>
+                    </Box>
+                    <Box sx={styles.container}>
+                      <Typography marginRight={3} whiteSpace="nowrap">
+                        公演場所
+                      </Typography>
+                      <TextField defaultValue={juchuHeadData.koenbashoNam} disabled></TextField>
+                    </Box>
+                    <Box sx={styles.container}>
+                      <Typography marginRight={7} whiteSpace="nowrap">
+                        顧客
+                      </Typography>
+                      <TextField defaultValue={juchuHeadData.kokyaku.kokyakuNam} disabled></TextField>
+                    </Box>
+                  </Grid2>
+                </Grid2>
+              </AccordionDetails>
+            </Accordion>
+            {/*受注明細ヘッダー(キープ)*/}
+            <Accordion
+              sx={{
+                marginTop: 2,
+                borderRadius: 1,
+                overflow: 'hidden',
+              }}
+              variant="outlined"
+              defaultExpanded={!saveKizaiHead}
+            >
+              <AccordionSummary
+                expandIcon={<ExpandMoreIcon />}
+                component="div"
                 sx={{
-                  marginTop: 2,
-                  borderRadius: 1,
-                  overflow: 'hidden',
-                }}
-                variant="outlined"
-                defaultExpanded={!saveKizaiHead}
-              >
-                <AccordionSummary
-                  expandIcon={<ExpandMoreIcon />}
-                  component="div"
-                  sx={{
+                  minHeight: '30px',
+                  maxHeight: '30px',
+                  '&.Mui-expanded': {
                     minHeight: '30px',
                     maxHeight: '30px',
-                    '&.Mui-expanded': {
-                      minHeight: '30px',
-                      maxHeight: '30px',
-                    },
-                    bgcolor: 'green',
-                    color: 'white',
-                  }}
-                >
-                  <Box display="flex" alignItems={'center'} justifyContent="space-between" width={'100%'}>
-                    <Typography>受注機材ヘッダー(キープ)</Typography>
-                  </Box>
-                </AccordionSummary>
-                <AccordionDetails sx={{ padding: 0 }}>
-                  <Divider />
-                  <Grid2 container alignItems="center" spacing={2} p={2}>
-                    <Grid2 container alignItems="center">
-                      <Typography>受注明細名</Typography>
-                      <TextFieldElement
-                        name="headNam"
-                        control={control}
-                        disabled={!edit}
-                        sx={{ width: 400 }}
-                      ></TextFieldElement>
-                    </Grid2>
-                  </Grid2>
-                  <Grid2 container p={2} spacing={2}>
-                    <Grid2 order={{ xl: 1 }} width={300}>
-                      <Typography>親伝票出庫日時</Typography>
-                      <Grid2>
-                        <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
-                        <DateTime
-                          date={oyaJuchuKizaiHeadData.kicsShukoDat && new Date(oyaJuchuKizaiHeadData.kicsShukoDat)}
-                          onChange={() => {}}
-                          onAccept={() => {}}
-                          disabled
-                        />
-                      </Grid2>
-                      <Grid2>
-                        <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
-                        <DateTime
-                          date={oyaJuchuKizaiHeadData.yardShukoDat && new Date(oyaJuchuKizaiHeadData.yardShukoDat)}
-                          onChange={() => {}}
-                          onAccept={() => {}}
-                          disabled
-                        />
-                      </Grid2>
-                    </Grid2>
-                    <Grid2 width={300} order={{ xl: 4 }}>
-                      <Typography>親伝票入庫日時</Typography>
-                      <Grid2>
-                        <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
-                        <DateTime
-                          date={oyaJuchuKizaiHeadData.kicsNyukoDat && new Date(oyaJuchuKizaiHeadData.kicsNyukoDat)}
-                          onChange={() => {}}
-                          onAccept={() => {}}
-                          disabled
-                        />
-                      </Grid2>
-                      <Grid2>
-                        <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
-                        <DateTime
-                          date={oyaJuchuKizaiHeadData.yardNyukoDat && new Date(oyaJuchuKizaiHeadData.yardNyukoDat)}
-                          onChange={() => {}}
-                          onAccept={() => {}}
-                          disabled
-                        />
-                      </Grid2>
-                    </Grid2>
-                    <Grid2 width={300} order={{ xl: 2 }}>
-                      <Typography>キープ入庫日時</Typography>
-                      <Grid2>
-                        <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
-                        <Controller
-                          name="kicsNyukoDat"
-                          control={control}
-                          render={({ field, fieldState }) => (
-                            <DateTime
-                              date={field.value}
-                              minDate={oyaShukoDate ?? undefined}
-                              maxDate={oyaNyukoDate ?? undefined}
-                              onChange={handleKicsNyukoChange}
-                              onAccept={handleKicsNyukoAccept}
-                              fieldstate={fieldState}
-                              disabled={!edit || nyukoFixFlag}
-                              onClear={() => {
-                                field.onChange(null);
-                                trigger(['kicsNyukoDat', 'yardNyukoDat']);
-                                const yardNyukoDat = getValues('yardNyukoDat');
-                                setKeepJuchuKizaiMeisaiList((prev) =>
-                                  prev.map((d) =>
-                                    yardNyukoDat
-                                      ? { ...d, shozokuId: BASHO_ID.yard }
-                                      : { ...d, shozokuId: d.mShozokuId }
-                                  )
-                                );
-                              }}
-                            />
-                          )}
-                        />
-                      </Grid2>
-                      <Grid2>
-                        <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
-                        <Controller
-                          name="yardNyukoDat"
-                          control={control}
-                          render={({ field, fieldState }) => (
-                            <DateTime
-                              date={field.value}
-                              minDate={oyaShukoDate ?? undefined}
-                              maxDate={oyaNyukoDate ?? undefined}
-                              onChange={handleYardNyukoChange}
-                              onAccept={handleYardNyukoAccept}
-                              fieldstate={fieldState}
-                              disabled={!edit || nyukoFixFlag}
-                              onClear={() => {
-                                field.onChange(null);
-                                trigger(['kicsNyukoDat', 'yardNyukoDat']);
-                                const kicsNyukoDat = getValues('kicsNyukoDat');
-                                setKeepJuchuKizaiMeisaiList((prev) =>
-                                  prev.map((d) =>
-                                    kicsNyukoDat
-                                      ? { ...d, shozokuId: BASHO_ID.kics }
-                                      : { ...d, shozokuId: d.mShozokuId }
-                                  )
-                                );
-                              }}
-                            />
-                          )}
-                        />
-                      </Grid2>
-                    </Grid2>
-                    <Grid2 width={300} order={{ xl: 3 }}>
-                      <Typography>キープ出庫日時</Typography>
-                      <Grid2>
-                        <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
-                        <Controller
-                          name="kicsShukoDat"
-                          control={control}
-                          render={({ field, fieldState }) => (
-                            <DateTime
-                              date={field.value}
-                              minDate={oyaShukoDate ?? undefined}
-                              maxDate={oyaNyukoDate ?? undefined}
-                              onChange={handleKicsShukoChange}
-                              onAccept={handleKicsShukoAccept}
-                              fieldstate={fieldState}
-                              disabled={!edit || shukoFixFlag}
-                              onClear={() => {
-                                field.onChange(null);
-                                trigger(['kicsNyukoDat', 'kicsShukoDat', 'yardShukoDat']);
-                              }}
-                            />
-                          )}
-                        />
-                      </Grid2>
-                      <Grid2>
-                        <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
-                        <Controller
-                          name="yardShukoDat"
-                          control={control}
-                          render={({ field, fieldState }) => (
-                            <DateTime
-                              date={field.value}
-                              minDate={oyaShukoDate ?? undefined}
-                              maxDate={oyaNyukoDate ?? undefined}
-                              onChange={handleYardShukoChange}
-                              onAccept={handleYardShukoAccept}
-                              fieldstate={fieldState}
-                              disabled={!edit || shukoFixFlag}
-                              onClear={() => {
-                                field.onChange(null);
-                                trigger(['yardNyukoDat', 'kicsShukoDat', 'yardShukoDat']);
-                              }}
-                            />
-                          )}
-                        />
-                      </Grid2>
-                    </Grid2>
-                  </Grid2>
-                  <Box display={'flex'} alignItems="center" p={2}>
-                    <Typography mr={2}>メモ</Typography>
-                    <TextFieldElement
-                      name="mem"
-                      control={control}
-                      multiline
-                      rows={3}
-                      fullWidth
-                      disabled={!edit}
-                      // sx={{
-                      //   '& .MuiInputBase-root': {
-                      //     resize: 'both',
-                      //     overflow: 'auto',
-                      //     alignItems: 'flex-start',
-                      //   },
-                      //   '& .MuiInputBase-inputMultiline': {
-                      //     textAlign: 'left',
-                      //     paddingTop: '8px',
-                      //   },
-                      // }}
-                    ></TextFieldElement>
-                  </Box>
-                </AccordionDetails>
-              </Accordion>
-              {/** 固定ボタン 保存＆ページトップ */}
-              <Box position={'fixed'} zIndex={1050} bottom={25} right={25} alignItems={'center'}>
-                <Fab
-                  variant="extended"
-                  color="primary"
-                  type="submit"
-                  sx={{ mr: 2 }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                  }}
-                  disabled={!edit || isLoading || isDetailLoading}
-                >
-                  <SaveAsIcon sx={{ mr: 1 }} />
-                  保存
-                </Fab>
-                <Fab color="primary" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-                  <ArrowUpwardIcon />
-                </Fab>
-              </Box>
-            </form>
-            {/*受注明細(機材)*/}
-            {saveKizaiHead && (
-              <Paper variant="outlined" sx={{ mt: 2 }}>
-                <Box display="flex" alignItems="center" px={2} height={'30px'}>
-                  <Typography>受注明細(機材)</Typography>
+                  },
+                  bgcolor: 'green',
+                  color: 'white',
+                }}
+              >
+                <Box display="flex" alignItems={'center'} justifyContent="space-between" width={'100%'}>
+                  <Typography>受注機材ヘッダー(キープ)</Typography>
                 </Box>
+              </AccordionSummary>
+              <AccordionDetails sx={{ padding: 0 }}>
                 <Divider />
-
-                <Dialog open={EqSelectionDialogOpen} maxWidth="sm" fullWidth>
-                  <OyaEqSelectionDialog
-                    juchuHeadId={juchuHeadData.juchuHeadId}
-                    oyaJuchuKizaiHeadId={oyaJuchuKizaiHeadData.juchuKizaiHeadId}
-                    setEqpts={setEqpts}
-                    onClose={handleCloseEqDialog}
-                  />
-                </Dialog>
-                {isDetailLoading ? (
-                  <Loading />
-                ) : (
-                  <>
-                    <Box width="100%">
-                      <Grid2 container my={1} mx={1} spacing={2}>
-                        <Button disabled={!edit || nyukoFixFlag} onClick={handleOpenEqDialog}>
-                          <AddIcon fontSize="small" />
-                          機材追加
-                        </Button>
-                        {(keepJuchuKizaiMeisaiList.filter((d) => !d.delFlag).length !== 0 ||
-                          keepJuchuContainerMeisaiList.filter((d) => !d.delFlag).length !== 0) && (
-                          <Button
-                            color="error"
-                            disabled={
-                              !edit ||
-                              nyukoFixFlag ||
-                              (keepJuchuKizaiMeisaiList.filter((d) => !d.delFlag && d.selected).length === 0 &&
-                                keepJuchuContainerMeisaiList.filter((d) => !d.delFlag && d.selected).length === 0)
-                            }
-                            onClick={handleDelete}
-                          >
-                            <Delete fontSize="small" />
-                            削除
-                          </Button>
+                <Grid2 container alignItems="center" spacing={2} p={2}>
+                  <Grid2 container alignItems="center">
+                    <Typography>受注明細名</Typography>
+                    <TextFieldElement
+                      name="headNam"
+                      control={control}
+                      disabled={!edit}
+                      sx={{ width: 400 }}
+                    ></TextFieldElement>
+                  </Grid2>
+                </Grid2>
+                <Grid2 container p={2} spacing={2}>
+                  <Grid2 order={{ xl: 1 }} width={300}>
+                    <Typography>親伝票出庫日時</Typography>
+                    <Grid2>
+                      <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
+                      <DateTime
+                        date={oyaJuchuKizaiHeadData.kicsShukoDat && new Date(oyaJuchuKizaiHeadData.kicsShukoDat)}
+                        onChange={() => {}}
+                        onAccept={() => {}}
+                        disabled
+                      />
+                    </Grid2>
+                    <Grid2>
+                      <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
+                      <DateTime
+                        date={oyaJuchuKizaiHeadData.yardShukoDat && new Date(oyaJuchuKizaiHeadData.yardShukoDat)}
+                        onChange={() => {}}
+                        onAccept={() => {}}
+                        disabled
+                      />
+                    </Grid2>
+                  </Grid2>
+                  <Grid2 width={300} order={{ xl: 4 }}>
+                    <Typography>親伝票入庫日時</Typography>
+                    <Grid2>
+                      <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
+                      <DateTime
+                        date={oyaJuchuKizaiHeadData.kicsNyukoDat && new Date(oyaJuchuKizaiHeadData.kicsNyukoDat)}
+                        onChange={() => {}}
+                        onAccept={() => {}}
+                        disabled
+                      />
+                    </Grid2>
+                    <Grid2>
+                      <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
+                      <DateTime
+                        date={oyaJuchuKizaiHeadData.yardNyukoDat && new Date(oyaJuchuKizaiHeadData.yardNyukoDat)}
+                        onChange={() => {}}
+                        onAccept={() => {}}
+                        disabled
+                      />
+                    </Grid2>
+                  </Grid2>
+                  <Grid2 width={300} order={{ xl: 2 }}>
+                    <Typography>キープ入庫日時</Typography>
+                    <Grid2>
+                      <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
+                      <Controller
+                        name="kicsNyukoDat"
+                        control={control}
+                        render={({ field, fieldState }) => (
+                          <DateTime
+                            date={field.value}
+                            minDate={oyaShukoDate ?? undefined}
+                            maxDate={oyaNyukoDate ?? undefined}
+                            onChange={handleKicsNyukoChange}
+                            onAccept={handleKicsNyukoAccept}
+                            fieldstate={fieldState}
+                            disabled={!edit || nyukoFixFlag}
+                            onClear={() => {
+                              field.onChange(null);
+                              trigger(['kicsNyukoDat', 'yardNyukoDat']);
+                              const yardNyukoDat = getValues('yardNyukoDat');
+                              setKeepJuchuKizaiMeisaiList((prev) =>
+                                prev.map((d) =>
+                                  yardNyukoDat
+                                    ? { ...d, shozokuId: BASHO_ID.yard }
+                                    : { ...d, shozokuId: d.mShozokuId }
+                                )
+                              );
+                            }}
+                          />
                         )}
-                      </Grid2>
-                      <Box
-                        width={'min-content'}
-                        display={
-                          Object.keys(keepJuchuKizaiMeisaiList.filter((d) => !d.delFlag)).length > 0 ? 'block' : 'none'
-                        }
-                      >
-                        <KeepEqTable
-                          rows={keepJuchuKizaiMeisaiList}
-                          edit={edit}
-                          nyukoFixFlag={nyukoFixFlag}
-                          oyaShukoDate={oyaShukoDate}
-                          handleMemoChange={handleMemoChange}
-                          handleCellChange={handleCellChange}
-                          handleEqSelect={handleEqSelect}
-                          handleEqAllSelect={handleEqAllSelect}
-                        />
-                      </Box>
-                    </Box>
+                      />
+                    </Grid2>
+                    <Grid2>
+                      <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
+                      <Controller
+                        name="yardNyukoDat"
+                        control={control}
+                        render={({ field, fieldState }) => (
+                          <DateTime
+                            date={field.value}
+                            minDate={oyaShukoDate ?? undefined}
+                            maxDate={oyaNyukoDate ?? undefined}
+                            onChange={handleYardNyukoChange}
+                            onAccept={handleYardNyukoAccept}
+                            fieldstate={fieldState}
+                            disabled={!edit || nyukoFixFlag}
+                            onClear={() => {
+                              field.onChange(null);
+                              trigger(['kicsNyukoDat', 'yardNyukoDat']);
+                              const kicsNyukoDat = getValues('kicsNyukoDat');
+                              setKeepJuchuKizaiMeisaiList((prev) =>
+                                prev.map((d) =>
+                                  kicsNyukoDat
+                                    ? { ...d, shozokuId: BASHO_ID.kics }
+                                    : { ...d, shozokuId: d.mShozokuId }
+                                )
+                              );
+                            }}
+                          />
+                        )}
+                      />
+                    </Grid2>
+                  </Grid2>
+                  <Grid2 width={300} order={{ xl: 3 }}>
+                    <Typography>キープ出庫日時</Typography>
+                    <Grid2>
+                      <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
+                      <Controller
+                        name="kicsShukoDat"
+                        control={control}
+                        render={({ field, fieldState }) => (
+                          <DateTime
+                            date={field.value}
+                            minDate={oyaShukoDate ?? undefined}
+                            maxDate={oyaNyukoDate ?? undefined}
+                            onChange={handleKicsShukoChange}
+                            onAccept={handleKicsShukoAccept}
+                            fieldstate={fieldState}
+                            disabled={!edit || shukoFixFlag}
+                            onClear={() => {
+                              field.onChange(null);
+                              trigger(['kicsNyukoDat', 'kicsShukoDat', 'yardShukoDat']);
+                            }}
+                          />
+                        )}
+                      />
+                    </Grid2>
+                    <Grid2>
+                      <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
+                      <Controller
+                        name="yardShukoDat"
+                        control={control}
+                        render={({ field, fieldState }) => (
+                          <DateTime
+                            date={field.value}
+                            minDate={oyaShukoDate ?? undefined}
+                            maxDate={oyaNyukoDate ?? undefined}
+                            onChange={handleYardShukoChange}
+                            onAccept={handleYardShukoAccept}
+                            fieldstate={fieldState}
+                            disabled={!edit || shukoFixFlag}
+                            onClear={() => {
+                              field.onChange(null);
+                              trigger(['yardNyukoDat', 'kicsShukoDat', 'yardShukoDat']);
+                            }}
+                          />
+                        )}
+                      />
+                    </Grid2>
+                  </Grid2>
+                </Grid2>
+                <Box display={'flex'} alignItems="center" p={2}>
+                  <Typography mr={2}>メモ</Typography>
+                  <TextFieldElement
+                    name="mem"
+                    control={control}
+                    multiline
+                    rows={3}
+                    fullWidth
+                    disabled={!edit}
+                    // sx={{
+                    //   '& .MuiInputBase-root': {
+                    //     resize: 'both',
+                    //     overflow: 'auto',
+                    //     alignItems: 'flex-start',
+                    //   },
+                    //   '& .MuiInputBase-inputMultiline': {
+                    //     textAlign: 'left',
+                    //     paddingTop: '8px',
+                    //   },
+                    // }}
+                  ></TextFieldElement>
+                </Box>
+              </AccordionDetails>
+            </Accordion>
+            {/** 固定ボタン 保存＆ページトップ */}
+            <Box position={'fixed'} zIndex={1050} bottom={25} right={25} alignItems={'center'}>
+              <Fab
+                variant="extended"
+                color="primary"
+                type="submit"
+                sx={{ mr: 2 }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+                disabled={!edit || isLoading || isDetailLoading}
+              >
+                <SaveAsIcon sx={{ mr: 1 }} />
+                保存
+              </Fab>
+              <Fab color="primary" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+                <ArrowUpwardIcon />
+              </Fab>
+            </Box>
+          </form>
+          {/*受注明細(機材)*/}
+          {saveKizaiHead && (
+            <Paper variant="outlined" sx={{ mt: 2 }}>
+              <Box display="flex" alignItems="center" px={2} height={'30px'}>
+                <Typography>受注明細(機材)</Typography>
+              </Box>
+              <Divider />
+
+              <Dialog open={EqSelectionDialogOpen} maxWidth="sm" fullWidth>
+                <OyaEqSelectionDialog
+                  juchuHeadId={juchuHeadData.juchuHeadId}
+                  oyaJuchuKizaiHeadId={oyaJuchuKizaiHeadData.juchuKizaiHeadId}
+                  setEqpts={setEqpts}
+                  onClose={handleCloseEqDialog}
+                />
+              </Dialog>
+              {isDetailLoading ? (
+                <Loading />
+              ) : (
+                <>
+                  <Box width="100%">
+                    <Grid2 container my={1} mx={1} spacing={2}>
+                      <Button disabled={!edit || nyukoFixFlag} onClick={handleOpenEqDialog}>
+                        <AddIcon fontSize="small" />
+                        機材追加
+                      </Button>
+                      {(keepJuchuKizaiMeisaiList.filter((d) => !d.delFlag).length !== 0 ||
+                        keepJuchuContainerMeisaiList.filter((d) => !d.delFlag).length !== 0) && (
+                        <Button
+                          color="error"
+                          disabled={
+                            !edit ||
+                            nyukoFixFlag ||
+                            (keepJuchuKizaiMeisaiList.filter((d) => !d.delFlag && d.selected).length === 0 &&
+                              keepJuchuContainerMeisaiList.filter((d) => !d.delFlag && d.selected).length === 0)
+                          }
+                          onClick={handleDelete}
+                        >
+                          <Delete fontSize="small" />
+                          削除
+                        </Button>
+                      )}
+                    </Grid2>
                     <Box
-                      display={keepJuchuContainerMeisaiList.filter((d) => !d.delFlag).length > 0 ? 'block' : 'none'}
-                      py={2}
-                      width={'fit-content'}
+                      width={'min-content'}
+                      display={
+                        Object.keys(keepJuchuKizaiMeisaiList.filter((d) => !d.delFlag)).length > 0 ? 'block' : 'none'
+                      }
                     >
-                      <KeepContainerTable
-                        rows={keepJuchuContainerMeisaiList}
+                      <KeepEqTable
+                        rows={keepJuchuKizaiMeisaiList}
                         edit={edit}
                         nyukoFixFlag={nyukoFixFlag}
                         oyaShukoDate={oyaShukoDate}
-                        handleContainerMemoChange={handleKeepContainerMemoChange}
-                        handleContainerCellChange={handleKeepContainerCellChange}
-                        handleCtnSelect={handleCtnSelect}
-                        handleCtnAllSelect={handleCtnAllSelect}
+                        handleMemoChange={handleMemoChange}
+                        handleCellChange={handleCellChange}
+                        handleEqSelect={handleEqSelect}
+                        handleEqAllSelect={handleEqAllSelect}
                       />
                     </Box>
-                  </>
-                )}
-              </Paper>
-            )}
-          </Container>
-        </PermissionGuard>
+                  </Box>
+                  <Box
+                    display={keepJuchuContainerMeisaiList.filter((d) => !d.delFlag).length > 0 ? 'block' : 'none'}
+                    py={2}
+                    width={'fit-content'}
+                  >
+                    <KeepContainerTable
+                      rows={keepJuchuContainerMeisaiList}
+                      edit={edit}
+                      nyukoFixFlag={nyukoFixFlag}
+                      oyaShukoDate={oyaShukoDate}
+                      handleContainerMemoChange={handleKeepContainerMemoChange}
+                      handleContainerCellChange={handleKeepContainerCellChange}
+                      handleCtnSelect={handleCtnSelect}
+                      handleCtnAllSelect={handleCtnAllSelect}
+                    />
+                  </Box>
+                </>
+              )}
+            </Paper>
+          )}
+        </Container>
       )}
       <AlertDialog open={alertOpen} title={alertTitle} message={alertMessage} onClick={() => setAlertOpen(false)} />
       <IsDirtyAlertDialog open={dirtyOpen} onClick={handleResultDialog} />

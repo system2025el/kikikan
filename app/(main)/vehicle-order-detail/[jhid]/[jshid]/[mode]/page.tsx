@@ -1,6 +1,10 @@
+import { Typography } from '@mui/material';
 import { Metadata } from 'next';
+import { redirect } from 'next/navigation';
 import { Suspense } from 'react';
 
+import { getCurrentUser } from '@/app/(main)/_lib/funcs';
+import { permission } from '@/app/(main)/_lib/permission';
 import { LoadingOverlay } from '@/app/(main)/_ui/loading';
 import { getDetailJuchuHead } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
 
@@ -30,9 +34,23 @@ const Page = async (props: {
   const edit = params.mode === 'edit' ? true : false;
   /**  */
 
+  const user = await getCurrentUser();
+  if (!user) {
+    await redirect('/login');
+    return;
+  }
+
+  const required = Number(params.jshid) === 0 ? permission.juchu_upd : permission.juchu_ref;
+  const hasPermission = !!(user.permission.juchu & required);
+
+  if (!hasPermission) {
+    return <Typography>このページを閲覧する権限がありません。</Typography>;
+  }
+
   return (
     <Suspense fallback={<LoadingOverlay />}>
       <VehicleOrderDetail
+        user={user}
         juchuHeadData={juchuHeadData}
         sharyoHeadId={Number(params.jshid)}
         idoJuchuKizaiMeisaiData={undefined}

@@ -4,7 +4,8 @@ import { PoolClient } from 'pg';
 
 import { JuchuContainerMeisaiValues } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';
 
-import { SCHEMA, supabase } from '../supabase';
+import { SCHEMA } from '../supabase';
+import { createClient } from '../supabase-server';
 import { JuchuCtnMeisai } from '../types/t_juchu_ctn_meisai-type';
 
 /**
@@ -14,6 +15,7 @@ import { JuchuCtnMeisai } from '../types/t_juchu_ctn_meisai-type';
  * @returns
  */
 export const selectJuchuContainerMeisaiMaxId = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
+  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)

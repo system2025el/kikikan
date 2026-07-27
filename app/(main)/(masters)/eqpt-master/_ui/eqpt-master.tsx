@@ -19,11 +19,10 @@ import { grey } from '@mui/material/colors';
 import { useEffect, useState } from 'react';
 import { CheckboxElement, Controller, TextFieldElement, useForm } from 'react-hook-form-mui';
 
-import { useUserStore } from '@/app/_lib/stores/usestore';
 import { permission } from '@/app/(main)/_lib/permission';
+import { User } from '@/app/(main)/_lib/types';
 import { selectNone, SelectTypes } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
-import { PermissionGuard } from '@/app/(main)/_ui/permission-guard';
 import { MuiTablePagination } from '@/app/(main)/_ui/table-pagination';
 
 import { FAKE_NEW_ID, ROWS_PER_MASTER_TABLE_PAGE } from '../../_lib/constants';
@@ -33,11 +32,9 @@ import { getFilteredEqpts } from '../_lib/funcs';
 import { EqptsMasterTableValues } from '../_lib/types';
 import { EqMasterDialog } from './eqpt-master-dialog';
 
-export const EqptMaster = () => {
+export const EqptMaster = ({ user }: { user: User }) => {
   /* テーブル1ページの行数 */
   const rowsPerPage = ROWS_PER_MASTER_TABLE_PAGE;
-  /* user情報 */
-  const user = useUserStore((state) => state.user);
   /* useState ------------------------------------------------- */
   /** 表示する機材の配列 */
   const [eqpts, setEqpts] = useState<EqptsMasterTableValues[]>([]);

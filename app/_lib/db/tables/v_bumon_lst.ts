@@ -3,13 +3,15 @@
 import { escapeLikeString } from '@/app/(main)/_lib/escape-string';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 
-import { SCHEMA, supabase } from '../supabase';
+import { SCHEMA } from '../supabase';
+import { createClient } from '../supabase-server';
 
 /**
  * DBから有効な部門を取得する関数
  * @returns 有効な部門のidと名前の配列
  */
 export const selectActiveBumons = async () => {
+  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)
@@ -28,6 +30,7 @@ export const selectActiveBumons = async () => {
  * @returns bumon_name, dai_bumon_id, shukei_bumon_idで検索された部門マスタの配列 検索無しなら全件
  */
 export const selectFilteredBumons = async (queries: { q: string; d: number | null; s: number | null }) => {
+  const supabase = await createClient();
   const builder = supabase
     .schema(SCHEMA)
     .from('v_bumon_lst')
