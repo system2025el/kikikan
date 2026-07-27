@@ -213,7 +213,7 @@ export const usePdf = (): [(param: BillHeadValues, keisho: string) => Promise<Bl
     } else {
       // 会社名
       clientInfoY -= 25; // 会社名だけ少し間隔をあける
-      const companyName = param.aite.nam ? `${param.aite.nam}${keisho}` : '';
+      const companyName = param.aite.nam ? `${param.aite.nam}  ${keisho}` : '';
       drawTextWithAutoResize(companyName, clientInfoX, clientInfoY, formatSize, maxWidth);
 
       // 顧客番号
