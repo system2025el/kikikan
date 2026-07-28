@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { Suspense } from 'react';
 
 import Login from '@/app/login/_ui/login';
 
@@ -8,6 +9,10 @@ export const metadata: Metadata = {
 };
 
 const Page = () => {
-  return <Login />;
+  return (
+    <Suspense fallback={null}>
+      <Login />
+    </Suspense>
+  );
 };
 export default Page;
