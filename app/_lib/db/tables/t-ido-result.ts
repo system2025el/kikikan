@@ -2,7 +2,7 @@
 
 import { PoolClient } from 'pg';
 
-import { SCHEMA } from '../supabase';
+import { SCHEMA } from '../schema';
 
 export const deleteIdoResult = async (
   sagyoKbnId: number,

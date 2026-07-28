@@ -23,8 +23,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { permission } from '@/app/(main)/_lib/permission';
+import { User } from '@/app/(main)/_lib/types';
 import { Loading } from '@/app/(main)/_ui/loading';
-import { PermissionGuard } from '@/app/(main)/_ui/permission-guard';
 import { MuiTablePagination } from '@/app/(main)/_ui/table-pagination';
 
 import { FAKE_NEW_ID, ROWS_PER_MASTER_TABLE_PAGE } from '../../_lib/constants';
@@ -38,7 +38,7 @@ import { UsersMasterDialog } from './users-master-dialog';
  * 担当者マスタ画面
  * @returns {JSX.Element} 担当者マスタ画面コンポーネント
  */
-export const UsersMaster = () => {
+export const UsersMaster = ({ user }: { user: User }) => {
   /* 1ページごとの表示数 */
   const rowsPerPage = ROWS_PER_MASTER_TABLE_PAGE;
 
@@ -124,135 +124,132 @@ export const UsersMaster = () => {
   if (error) throw error;
 
   return (
-    <PermissionGuard category={'loginSetting'} required={permission.login}>
-      <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
-        <Paper variant="outlined">
-          <Box
-            width={'100%'}
-            display={'flex'}
-            px={2}
-            sx={{ minHeight: '30px', maxHeight: '30px' }}
-            alignItems={'center'}
-          >
-            <Typography>担当者マスタ検索</Typography>
-          </Box>
-          <Divider />
-          <Box width={'100%'} px={2} py={0.5} component={'form'} onSubmit={handleSubmit(onSubmit)}>
-            <Stack justifyContent={'space-between'} alignItems={'start'}>
-              <Stack alignItems={'baseline'}>
-                <Typography>担当者名キーワード</Typography>
-                <TextFieldElement name="query" control={control} helperText={'名前の部分一致検索'} />
-              </Stack>
-              <Box alignSelf={'end'}>
-                <Button type="submit" loading={isLoading}>
-                  <SearchIcon />
-                  検索
-                </Button>
-              </Box>
+    <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
+      <Paper variant="outlined">
+        <Box width={'100%'} display={'flex'} px={2} sx={{ minHeight: '30px', maxHeight: '30px' }} alignItems={'center'}>
+          <Typography>担当者マスタ検索</Typography>
+        </Box>
+        <Divider />
+        <Box width={'100%'} px={2} py={0.5} component={'form'} onSubmit={handleSubmit(onSubmit)}>
+          <Stack justifyContent={'space-between'} alignItems={'start'}>
+            <Stack alignItems={'baseline'}>
+              <Typography>担当者名キーワード</Typography>
+              <TextFieldElement name="query" control={control} helperText={'名前の部分一致検索'} />
             </Stack>
-          </Box>
-        </Paper>
-        <Box>
-          <Typography pt={1} pl={2}>
-            一覧
-          </Typography>
-          <Divider />
-          <Grid2 container mt={0.5} mx={0.5} justifyContent={'space-between'} alignItems={'center'}>
-            <Grid2 spacing={1}>
-              <MuiTablePagination arrayList={users ?? []} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
+            <Box alignSelf={'end'}>
+              <Button type="submit" loading={isLoading}>
+                <SearchIcon />
+                検索
+              </Button>
+            </Box>
+          </Stack>
+        </Box>
+      </Paper>
+      <Box>
+        <Typography pt={1} pl={2}>
+          一覧
+        </Typography>
+        <Divider />
+        <Grid2 container mt={0.5} mx={0.5} justifyContent={'space-between'} alignItems={'center'}>
+          <Grid2 spacing={1}>
+            <MuiTablePagination arrayList={users ?? []} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
+          </Grid2>
+          <Grid2 container spacing={3} alignItems={'center'}>
+            <Grid2>
+              <Typography color="error" variant="body2">
+                ※マスタは削除できません。登録画面で無効化してください
+              </Typography>
             </Grid2>
-            <Grid2 container spacing={3} alignItems={'center'}>
-              <Grid2>
-                <Typography color="error" variant="body2">
-                  ※マスタは削除できません。登録画面で無効化してください
-                </Typography>
-              </Grid2>
-              <Grid2>
-                <Button onClick={() => handleOpenDialog(String(FAKE_NEW_ID))}>
-                  <AddIcon fontSize="small" />
-                  新規
-                </Button>
-              </Grid2>
+            <Grid2>
+              <Button onClick={() => handleOpenDialog(String(FAKE_NEW_ID))}>
+                <AddIcon fontSize="small" />
+                新規
+              </Button>
             </Grid2>
           </Grid2>
-          {isLoading ? (
-            <Loading />
-          ) : !users || users.length === 0 ? (
-            <Typography>該当するデータがありません</Typography>
-          ) : (
-            <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
-              <Table sx={{ minWidth: '100%' }} aria-labelledby="tableTitle" padding="none" stickyHeader>
-                <TableHead sx={{ bgcolor: 'primary.light' }}>
-                  <TableRow sx={{ whiteSpace: 'nowrap' }}>
-                    <TableCell width={50} />
-                    {userMHeader.map((h) => (
-                      <TableCell key={h.key}>{h.label}</TableCell>
-                    ))}
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {list!.map((l) => {
-                    const isDeleted = l.delFlg === true;
-                    return (
-                      <TableRow hover key={l.tblDspId}>
-                        <TableCell
-                          width={50}
-                          sx={{
-                            bgcolor: isDeleted ? grey[300] : undefined,
-                            paddingLeft: 1,
-                            paddingRight: 1,
-                            textAlign: 'end',
-                          }}
+        </Grid2>
+        {isLoading ? (
+          <Loading />
+        ) : !users || users.length === 0 ? (
+          <Typography>該当するデータがありません</Typography>
+        ) : (
+          <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
+            <Table sx={{ minWidth: '100%' }} aria-labelledby="tableTitle" padding="none" stickyHeader>
+              <TableHead sx={{ bgcolor: 'primary.light' }}>
+                <TableRow sx={{ whiteSpace: 'nowrap' }}>
+                  <TableCell width={50} />
+                  {userMHeader.map((h) => (
+                    <TableCell key={h.key}>{h.label}</TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {list!.map((l) => {
+                  const isDeleted = l.delFlg === true;
+                  return (
+                    <TableRow hover key={l.tblDspId}>
+                      <TableCell
+                        width={50}
+                        sx={{
+                          bgcolor: isDeleted ? grey[300] : undefined,
+                          paddingLeft: 1,
+                          paddingRight: 1,
+                          textAlign: 'end',
+                        }}
+                      >
+                        {l.tblDspId}
+                      </TableCell>
+                      <TableCell sx={{ bgcolor: isDeleted ? grey[300] : undefined, whiteSpace: 'nowrap' }}>
+                        <Button
+                          variant="text"
+                          size="medium"
+                          onClick={() => handleOpenDialog(l.mailAdr)}
+                          sx={{ p: 0, paddingLeft: 1, m: 0, minWidth: 1, justifyContent: 'left' }}
                         >
-                          {l.tblDspId}
-                        </TableCell>
-                        <TableCell sx={{ bgcolor: isDeleted ? grey[300] : undefined, whiteSpace: 'nowrap' }}>
-                          <Button
-                            variant="text"
-                            size="medium"
-                            onClick={() => handleOpenDialog(l.mailAdr)}
-                            sx={{ p: 0, paddingLeft: 1, m: 0, minWidth: 1, justifyContent: 'left' }}
-                          >
-                            <LightTooltipWithText variant={'button'} maxWidth={300}>
-                              {l.tantouNam}
-                            </LightTooltipWithText>
-                          </Button>
-                        </TableCell>
-                        <TableCell sx={{ bgcolor: isDeleted ? grey[300] : undefined, whiteSpace: 'nowrap' }}>
-                          {l.mailAdr}
-                        </TableCell>
-                        <TableCell sx={{ bgcolor: isDeleted ? grey[300] : undefined, whiteSpace: 'nowrap' }}>
-                          {l.shainCod ?? ''}
-                        </TableCell>
-                        <TableCell sx={{ bgcolor: isDeleted ? grey[300] : undefined, whiteSpace: 'nowrap' }}>
-                          <LightTooltipWithText variant={'body2'} maxWidth={300}>
-                            {l.mem}
+                          <LightTooltipWithText variant={'button'} maxWidth={300}>
+                            {l.tantouNam}
                           </LightTooltipWithText>
-                        </TableCell>
-                        <TableCell sx={{ bgcolor: isDeleted ? grey[300] : undefined, whiteSpace: 'nowrap' }}>
-                          {l.lastLogin}
-                        </TableCell>
-                        <TableCell sx={{ bgcolor: isDeleted ? grey[300] : undefined, whiteSpace: 'nowrap' }}>
-                          {isDeleted && <>無効</>}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                  {emptyRows > 0 && (
-                    <TableRow style={{ height: 25 * emptyRows }}>
-                      <TableCell colSpan={userMHeader.length + 1} />
+                        </Button>
+                      </TableCell>
+                      <TableCell sx={{ bgcolor: isDeleted ? grey[300] : undefined, whiteSpace: 'nowrap' }}>
+                        {l.mailAdr}
+                      </TableCell>
+                      <TableCell sx={{ bgcolor: isDeleted ? grey[300] : undefined, whiteSpace: 'nowrap' }}>
+                        {l.shainCod ?? ''}
+                      </TableCell>
+                      <TableCell sx={{ bgcolor: isDeleted ? grey[300] : undefined, whiteSpace: 'nowrap' }}>
+                        <LightTooltipWithText variant={'body2'} maxWidth={300}>
+                          {l.mem}
+                        </LightTooltipWithText>
+                      </TableCell>
+                      <TableCell sx={{ bgcolor: isDeleted ? grey[300] : undefined, whiteSpace: 'nowrap' }}>
+                        {l.lastLogin}
+                      </TableCell>
+                      <TableCell sx={{ bgcolor: isDeleted ? grey[300] : undefined, whiteSpace: 'nowrap' }}>
+                        {isDeleted && <>無効</>}
+                      </TableCell>
                     </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          )}
+                  );
+                })}
+                {emptyRows > 0 && (
+                  <TableRow style={{ height: 25 * emptyRows }}>
+                    <TableCell colSpan={userMHeader.length + 1} />
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
 
-          <Dialog open={dialogOpen} fullScreen>
-            <UsersMasterDialog currentMailAdr={openId} handleClose={handleCloseDialog} refetchUsers={refetchUsers} />
-          </Dialog>
-        </Box>
-      </Container>
-    </PermissionGuard>
+        <Dialog open={dialogOpen} fullScreen>
+          <UsersMasterDialog
+            user={user}
+            currentMailAdr={openId}
+            handleClose={handleCloseDialog}
+            refetchUsers={refetchUsers}
+          />
+        </Dialog>
+      </Box>
+    </Container>
   );
 };

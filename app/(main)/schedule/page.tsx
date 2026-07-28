@@ -1,5 +1,7 @@
 import { Metadata } from 'next';
+import { redirect } from 'next/navigation';
 
+import { getCurrentUser } from '../_lib/funcs';
 import { Schedule } from './_ui/schedule';
 
 export const metadata: Metadata = {
@@ -8,7 +10,12 @@ export const metadata: Metadata = {
 };
 
 const Page = async () => {
-  return <Schedule />;
+  const user = await getCurrentUser();
+  if (!user) {
+    await redirect('/login');
+    return;
+  }
+  return <Schedule user={user} />;
 };
 
 export default Page;

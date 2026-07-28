@@ -2,7 +2,8 @@
 
 import { PoolClient } from 'pg';
 
-import { SCHEMA, supabase } from '../supabase';
+import { SCHEMA } from '../schema';
+import { createClient } from '../supabase-server';
 import { IdoDen } from '../types/t-ido-den-type';
 
 /**
@@ -10,6 +11,7 @@ import { IdoDen } from '../types/t-ido-den-type';
  * @returns
  */
 export const selectIdoDenMaxId = async () => {
+  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)

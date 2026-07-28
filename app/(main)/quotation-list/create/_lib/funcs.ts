@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 import pool from '@/app/_lib/db/postgres';
-import { SCHEMA } from '@/app/_lib/db/supabase';
+import { SCHEMA } from '@/app/_lib/db/schema';
 import { insertQuotHead } from '@/app/_lib/db/tables/t-mitu-head';
 import { insertQuotMeisai } from '@/app/_lib/db/tables/t-mitu-meisai';
 import { insertQuotMeisaiHead } from '@/app/_lib/db/tables/t-mitu-meisai-head';

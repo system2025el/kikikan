@@ -12,7 +12,7 @@ import {
   useForm,
 } from 'react-hook-form-mui';
 
-import { User, useUserStore } from '@/app/_lib/stores/usestore';
+import { User } from '@/app/(main)/_lib/types';
 import { FormBox } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
 
@@ -34,7 +34,7 @@ export const CustomersMasterDialog = ({
   handleClose,
   refetchCustomers,
 }: {
-  user: User | null;
+  user: User;
   customerId: number;
   handleClose: () => void;
   refetchCustomers: () => void;

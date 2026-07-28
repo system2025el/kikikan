@@ -1,13 +1,19 @@
+'use server';
+
 import dayjs from 'dayjs';
 
 import { JUCHU_KIZAI_HEAD_KBN } from '../../constants';
-import { SCHEMA, supabase } from '../supabase';
+import { SCHEMA } from '../schema';
+import { createClient } from '../supabase-server';
 
 export const selectLoanJuchuData = async (kizaiId: number, date: Date) => {
+  const supabase = await createClient();
+
   // 開始日
   const strDat = dayjs(date).tz('Asia/Tokyo').startOf('day').toISOString();
   // 開始日から+90日した日付
   const endDat = dayjs(date).tz('Asia/Tokyo').add(90, 'day').endOf('day').toISOString();
+
   try {
     return await supabase
       .schema(SCHEMA)
@@ -27,6 +33,8 @@ export const selectLoanJuchuData = async (kizaiId: number, date: Date) => {
 };
 
 export const selectLoanJuchuReturnData = async (kizaiId: number, date: Date) => {
+  const supabase = await createClient();
+
   // 開始日から+90日した日付
   const endDat = dayjs(date).tz('Asia/Tokyo').add(90, 'day').endOf('day').toISOString();
   try {

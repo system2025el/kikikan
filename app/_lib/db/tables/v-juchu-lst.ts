@@ -9,7 +9,8 @@ import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 import { OrderSearchValues } from '@/app/(main)/order-list/_lib/types';
 
 import pool from '../postgres';
-import { SCHEMA, supabase } from '../supabase';
+import { SCHEMA } from '../schema';
+import { createClient } from '../supabase-server';
 
 // .tz()を使う準備
 dayjs.extend(utc);
@@ -21,6 +22,7 @@ dayjs.extend(timezone);
  * @returns
  */
 export const selectJuchu = async (id: number) => {
+  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)
@@ -59,6 +61,7 @@ export const selectJuchuHeadIds = async (strDat: string) => {
 };
 
 export const selectPdfJuchuHead = async (juchuHeadId: number) => {
+  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)
@@ -84,6 +87,7 @@ export const selectFilteredJuchus = async (
   }
 ) => {
   const { criteria, selectedDate, customer, listSort, stageName, orderStartDate, orderFinishDate } = query;
+  const supabase = await createClient();
   // 基本のクエリ
   const builder = supabase.schema(SCHEMA).from('v_juchu_lst').select(`
     juchu_head_id, juchu_sts_nam, koen_nam, koenbasho_nam, kokyaku_nam, juchu_dat, juchu_str_dat, juchu_end_dat

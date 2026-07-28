@@ -3,7 +3,7 @@ import { Grid2 } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { TextFieldElement, useForm } from 'react-hook-form-mui';
 
-import { useUserStore } from '@/app/_lib/stores/usestore';
+import { User } from '@/app/(main)/_lib/types';
 import { Loading } from '@/app/(main)/_ui/loading';
 
 import { FormBox } from '../../../_ui/form-box';
@@ -20,17 +20,16 @@ import { SectionsMasterDialogSchema, SectionsMasterDialogValues } from '../_lib/
  * @returns {JSX.Element} 部門マスタ詳細ダイアログコンポーネント
  */
 export const SectionsMasterDialog = ({
+  user,
   sectionId,
   handleClose,
   refetchSections,
 }: {
+  user: User;
   sectionId: number;
   handleClose: () => void;
   refetchSections: () => void;
 }) => {
-  // ログインユーザ
-  const user = useUserStore((state) => state.user);
-
   /* useState -------------------------------------- */
   /* 部門 */
   /* DBのローディング状態 */

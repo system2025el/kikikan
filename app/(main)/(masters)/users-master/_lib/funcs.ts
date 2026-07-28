@@ -3,8 +3,10 @@
 import { revalidatePath } from 'next/cache';
 
 import pool from '@/app/_lib/db/postgres';
-import { supabase /*supabaseAdmin*/ } from '@/app/_lib/db/supabase';
-import { supabaseAdmin } from '@/app/_lib/db/supabase-admin';
+import { createAdminClient } from '@/app/_lib/db/supabase-admin';
+import { createClient } from '@/app/_lib/db/supabase-server';
+// import { supabase /*supabaseAdmin*/ } from '@/app/_lib/db/supabase';
+// import { supabaseAdmin } from '@/app/_lib/db/supabase-admin';
 import {
   insertNewUser,
   selectFilteredUsers,
@@ -136,26 +138,40 @@ export const addNewUser = async (data: UsersMasterDialogValues, user: string) =>
     add_user: user,
   };
   const connection = await pool.connect();
+  //const supabase = await createClient();
+
   try {
     await connection.query('BEGIN');
     // 担当者マスタ更新
     const result = await insertNewUser(insertData, connection);
 
-    // 認証メール送信
-    const { error } = await supabase.auth.signUp({
-      email: data.mailAdr,
-      password: 'password',
-      // 開発用
-      options: { emailRedirectTo: /*`${getUrl()}login`*/ `${getUrl()}signup` },
+    // const { error } = await supabase.auth.signUp({
+    //   email: data.mailAdr,
+    //   password: 'password',
+    //   // 開発用
+    //   // options: { emailRedirectTo: /*`${getUrl()}login`*/ `${getUrl()}signup` },
+    //   options: { emailRedirectTo: /*`${getUrl()}login`*/ `${getUrl()}auth/callback` },
 
-      // 本番用
-      // options: { emailRedirectTo: /*`${getUrl()}login`*/ `https://kikikan-psi.vercel.app/signup` },
+    //   // 本番用
+    //   // options: { emailRedirectTo: /*`${getUrl()}login`*/ `https://kikikan-psi.vercel.app/signup` },
+    //   // options: { emailRedirectTo: /*`${getUrl()}login`*/ `https://kikikan-psi.vercel.app/auth/callback` },
+    // });
+
+    // 認証メール送信
+    const supabaseAdmin = await createAdminClient();
+
+    const { error } = await supabaseAdmin.auth.admin.inviteUserByEmail(data.mailAdr, {
+      redirectTo: `${getUrl()}auth/callback`,
+      data: { setup_completed: false },
     });
 
-    // 招待
-    // const { error } = await supabaseAdmin.auth.admin.inviteUserByEmail(data.mailAdr, {
-    //   redirectTo: `${getUrl()}signup`,
+    // const { error } = await supabase.auth.signInWithOtp({
+    //   email: data.mailAdr,
+    //   options: {
+    //     emailRedirectTo: `${getUrl()}`,
+    //   },
     // });
+
     await revalidatePath('/users-master');
     if (error) {
       await connection.query('ROLLBACK');
@@ -229,6 +245,7 @@ export const updateUser = async (currentEmail: string, data: UsersMasterDialogVa
  */
 export const deleteUsers = async (mailAdr: string, user: string) => {
   const connection = await pool.connect();
+  const supabaseAdmin = await createAdminClient();
   try {
     const { data: users, error: listError } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 });
     if (listError) {
@@ -278,25 +295,33 @@ export const restoreUsers = async (mailAdr: string, user: string) => {
   };
 
   const connection = await pool.connect();
+  //const supabase = await createClient();
   try {
     await connection.query('BEGIN');
     // 担当者マスタ更新
     await updMUserDelFlg(delData, connection);
+
+    // const { error } = await supabase.auth.signUp({
+    //   email: mailAdr,
+    //   password: 'password',
+    //   // 開発用
+    //   // options: { emailRedirectTo: /*`${getUrl()}login`*/ `${getUrl()}signup` },
+    //   options: { emailRedirectTo: /*`${getUrl()}login`*/ `${getUrl()}auth/callback` },
+
+    //   // 本番用
+    //   // options: { emailRedirectTo: /*`${getUrl()}login`*/ `https://kikikan-psi.vercel.app/signup` },
+    //   // options: { emailRedirectTo: /*`${getUrl()}login`*/ `https://kikikan-psi.vercel.app/auth/callback` },
+    // });
+
     // 認証メール送信
-    const { error } = await supabase.auth.signUp({
-      email: mailAdr,
-      password: 'password',
-      // 開発用
-      options: { emailRedirectTo: /*`${getUrl()}login`*/ `${getUrl()}signup` },
-
-      // 本番用
-      // options: { emailRedirectTo: /*`${getUrl()}login`*/ `https://kikikan-psi.vercel.app/signup` },
-    });
-
-    // 招待
+    const supabaseAdmin = await createAdminClient();
     // const { error } = await supabaseAdmin.auth.admin.inviteUserByEmail(mailAdr, {
     //   redirectTo: `${getUrl()}signup`,
     // });
+    const { error } = await supabaseAdmin.auth.admin.inviteUserByEmail(mailAdr, {
+      redirectTo: `${getUrl()}auth/callback`,
+      data: { setup_completed: false },
+    });
 
     if (error) {
       throw new Error('[supabase.auth.signUp] DBエラー:', { cause: error });
@@ -325,25 +350,34 @@ export const restoreUsersAndShainCod = async (mailAdr: string, shainCod: string 
   };
 
   const connection = await pool.connect();
+  //const supabase = await createClient();
+
   try {
     await connection.query('BEGIN');
     // 担当者マスタ更新
     await updMUserDelFlgAndShainCod(delData, connection);
+
+    // const { error } = await supabase.auth.signUp({
+    //   email: mailAdr,
+    //   password: 'password',
+    //   // 開発用
+    //   // options: { emailRedirectTo: /*`${getUrl()}login`*/ `${getUrl()}signup` },
+    //   options: { emailRedirectTo: /*`${getUrl()}login`*/ `${getUrl()}auth/callback` },
+
+    //   // 本番用
+    //   // options: { emailRedirectTo: /*`${getUrl()}login`*/ `https://kikikan-psi.vercel.app/signup` },
+    //   // options: { emailRedirectTo: /*`${getUrl()}login`*/ `https://kikikan-psi.vercel.app/auth/callback` },
+    // });
+
     // 認証メール送信
-    const { error } = await supabase.auth.signUp({
-      email: mailAdr,
-      password: 'password',
-      // 開発用
-      options: { emailRedirectTo: /*`${getUrl()}login`*/ `${getUrl()}signup` },
-
-      // 本番用
-      // options: { emailRedirectTo: /*`${getUrl()}login`*/ `https://kikikan-psi.vercel.app/signup` },
-    });
-
-    // 招待
+    const supabaseAdmin = await createAdminClient();
     // const { error } = await supabaseAdmin.auth.admin.inviteUserByEmail(mailAdr, {
     //   redirectTo: `${getUrl()}signup`,
     // });
+    const { error } = await supabaseAdmin.auth.admin.inviteUserByEmail(mailAdr, {
+      redirectTo: `${getUrl()}auth/callback`,
+      data: { setup_completed: false },
+    });
 
     if (error) {
       throw new Error('[supabase.auth.signUp] DBエラー:', { cause: error });

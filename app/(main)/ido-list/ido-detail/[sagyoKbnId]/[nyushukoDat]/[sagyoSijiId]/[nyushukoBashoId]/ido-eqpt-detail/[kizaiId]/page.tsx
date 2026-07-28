@@ -1,6 +1,10 @@
+import { Typography } from '@mui/material';
 import { Metadata } from 'next';
+import { redirect } from 'next/navigation';
 
 import { SAGYO_KBN_ID } from '@/app/_lib/constants';
+import { getCurrentUser } from '@/app/(main)/_lib/funcs';
+import { permission } from '@/app/(main)/_lib/permission';
 
 import { getIdoDenDetail, getIdoEqptDetail, getIdoFix } from './_lib/funcs';
 import { IdoEqptDetail } from './_ui/ido-eqpt-detail';
@@ -20,6 +24,18 @@ const Page = async (props: {
   }>;
 }) => {
   const params = await props.params;
+
+  const user = await getCurrentUser();
+  if (!user) {
+    await redirect('/login');
+    return;
+  }
+
+  const hasPermission = !!(user.permission.nyushuko & permission.nyushuko_ref);
+
+  if (!hasPermission) {
+    return <Typography>このページを閲覧する権限がありません。</Typography>;
+  }
 
   // 区分
   const fixKbn =
@@ -44,6 +60,13 @@ const Page = async (props: {
     getIdoFix(fixKbn, Number(params.sagyoSijiId), params.nyushukoDat, Number(params.nyushukoBashoId)),
   ]);
 
-  return <IdoEqptDetail idoDenDetailData={idoDenDetailData} idoEqptDetailData={idoEqptDetailData} fixFlag={fixFlag} />;
+  return (
+    <IdoEqptDetail
+      user={user}
+      idoDenDetailData={idoDenDetailData}
+      idoEqptDetailData={idoEqptDetailData}
+      fixFlag={fixFlag}
+    />
+  );
 };
 export default Page;

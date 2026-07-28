@@ -1,4 +1,9 @@
+import { Typography } from '@mui/material';
 import { Metadata } from 'next';
+import { redirect } from 'next/navigation';
+
+import { getCurrentUser } from '@/app/(main)/_lib/funcs';
+import { permission } from '@/app/(main)/_lib/permission';
 
 import { getShukoEqptDetail, getShukoEqptDetailTable, getShukoFixFlag } from './_lib/funcs';
 import { ShukoEqptDetailTableValues, ShukoEqptDetailValues } from './_lib/types';
@@ -22,6 +27,18 @@ const Page = async (props: {
   }>;
 }) => {
   const params = await props.params;
+
+  const user = await getCurrentUser();
+  if (!user) {
+    await redirect('/login');
+    return;
+  }
+
+  const hasPermission = !!(user.permission.nyushuko & permission.nyushuko_ref);
+
+  if (!hasPermission) {
+    return <Typography>このページを閲覧する権限がありません。</Typography>;
+  }
 
   const date = decodeURIComponent(params.nyushukoDat);
 
@@ -62,6 +79,7 @@ const Page = async (props: {
 
   return (
     <ShukoEqptDetail
+      user={user}
       shukoEqptDetailData={shukoEqptDetailData}
       shukoEqptDetailTableData={shukoEqptDetailTableData}
       fixFlag={fixFlag}

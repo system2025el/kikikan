@@ -2,7 +2,8 @@
 
 import { PoolClient } from 'pg';
 
-import { SCHEMA, supabase } from '../supabase';
+import { SCHEMA } from '../schema';
+import { createClient } from '../supabase-server';
 import { JuchuKizaiNyushuko } from '../types/t-juchu-kizai-nyushuko-type';
 
 /**
@@ -12,6 +13,7 @@ import { JuchuKizaiNyushuko } from '../types/t-juchu-kizai-nyushuko-type';
  * @returns 受注機材入出庫データ
  */
 export const selectJuchuKizaiNyushuko = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
+  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)
@@ -35,6 +37,7 @@ export const selectJuchuKizaiNyushukoConfirmSingle = async (data: {
   nyushuko_shubetu_id: number;
   nyushuko_basho_id: number;
 }) => {
+  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)
@@ -60,6 +63,7 @@ export const selectJuchuKizaiNyushukoConfirmList = async (data: {
   juchu_kizai_head_id: number;
   nyushuko_shubetu_id: number;
 }) => {
+  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)

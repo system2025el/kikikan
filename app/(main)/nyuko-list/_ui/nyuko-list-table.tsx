@@ -16,16 +16,16 @@ import { useRouter } from 'next/navigation';
 import { Dispatch, SetStateAction, useState } from 'react';
 
 import { BASHO_ID, JUCHU_KIZAI_HEAD_KBN, SAGYO_KBN_ID } from '@/app/_lib/constants';
-import { User } from '@/app/_lib/stores/usestore';
 
 import { dispColors } from '../../_lib/colors';
 import { toJapanTimeString } from '../../_lib/date-conversion';
 import { permission } from '../../_lib/permission';
+import { User } from '../../_lib/types';
 import { LoadingOverlay } from '../../_ui/loading';
 import { NyukoTableValues } from '../_lib/types';
 
 export const NyukoListTable = (props: {
-  user: User | null;
+  user: User;
   datas: NyukoTableValues[];
   onSelectionChange: Dispatch<SetStateAction<number[]>>;
 }) => {

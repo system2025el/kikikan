@@ -2,9 +2,8 @@
 
 import { DialogTitle, lighten, Stack, Toolbar, Typography, useTheme } from '@mui/material';
 
-import { User } from '@/app/_lib/stores/usestore';
-
 import { permission } from '../../_lib/permission';
+import { User } from '../../_lib/types';
 import { CloseMasterDialogButton, DeleteButton, MakeEditModeButton, SubmitButton } from '../../_ui/buttons';
 
 /**
@@ -24,7 +23,7 @@ export const MasterDialogTitle = ({
   handleEditable,
   setAction,
 }: {
-  user: User | null;
+  user: User;
   editable: boolean;
   isNew: boolean;
   isDirty: boolean;

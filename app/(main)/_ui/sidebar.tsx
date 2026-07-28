@@ -18,9 +18,11 @@ import Typography from '@mui/material/Typography';
 import * as React from 'react';
 import { useState } from 'react';
 
-import { useUserStore } from '@/app/_lib/stores/usestore';
 import { BreadCrumbs } from '@/app/(main)/_lib/breadcrumbs';
 import NavLinks from '@/app/(main)/_ui/links';
+
+import { User } from '../_lib/types';
+import { useUser } from './user-context';
 
 const drawerWidth = 240;
 
@@ -79,12 +81,13 @@ const Main = styled('main', {
 
 type Props = {
   children: React.ReactNode;
+  user: User;
 };
 
-const Sidebar = ({ children }: Props) => {
+const Sidebar = ({ children, user }: Props) => {
   const [open, setOpen] = useState(true);
   const theme = useTheme();
-  const user = useUserStore((state) => state.user);
+  // const user = useUserStore((state) => state.user);
 
   const toggleDrawer = () => {
     setOpen(!open);
@@ -122,7 +125,7 @@ const Sidebar = ({ children }: Props) => {
         <Toolbar />
         <Divider />
         <Box sx={{ overflow: 'auto' }}>
-          <NavLinks />
+          <NavLinks user={user} />
         </Box>
       </Drawer>
       {/**メイン */}

@@ -27,10 +27,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { toJapanMDString } from '@/app/(main)/_lib/date-conversion';
 import { permission } from '@/app/(main)/_lib/permission';
+import { User } from '@/app/(main)/_lib/types';
 import { BackButton } from '@/app/(main)/_ui/buttons';
 import { Calendar } from '@/app/(main)/_ui/date';
 import { Loading } from '@/app/(main)/_ui/loading';
-import { PermissionGuard } from '@/app/(main)/_ui/permission-guard';
 
 import {
   getAllLoanUseData,
@@ -43,13 +43,14 @@ import { LoanJuchu, LoanKizai, LoanStockTableValues, LoanUseTableValues } from '
 import { LoanSituationTable, UseTable } from './loan-situation-table';
 
 export const LoanSituation = (props: {
+  user: User;
   kizaiData: LoanKizai;
   date: string | undefined;
   // loanJuchuData: LoanJuchu[];
   // eqUseData: LoanUseTableValues[][];
   // eqStockData: LoanStockTableValues[];
 }) => {
-  const { kizaiData, date } = props;
+  const { kizaiData, date, user } = props;
 
   // ref
   const leftRef = useRef<HTMLDivElement>(null);
@@ -500,7 +501,7 @@ export const LoanSituation = (props: {
             }}
           >
             <Box height={31} mt={1} mb={0.5} />
-            <LoanSituationTable rows={loanJuchuList} ref={leftRef} />
+            <LoanSituationTable user={user} rows={loanJuchuList} ref={leftRef} />
           </Grid2>
           <Grid2 overflow="auto" size={{ xs: 'grow', sm: 'grow', md: 'grow' }}>
             <Box display={'flex'} alignItems={'center'} height={31} mt={1} mb={0.5}>

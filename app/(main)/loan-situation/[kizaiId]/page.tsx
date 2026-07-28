@@ -1,6 +1,8 @@
 import { addDays, subDays } from 'date-fns';
 import { Metadata } from 'next';
+import { redirect } from 'next/navigation';
 
+import { getCurrentUser } from '../../_lib/funcs';
 import { getLoanJuchuData, getLoanKizaiData } from './_lib/funcs';
 import { LoanStockTableValues, LoanUseTableValues } from './_lib/types';
 import { LoanSituation } from './_ui/loan-situation';
@@ -16,6 +18,12 @@ const Page = async (props: { params: Promise<{ kizaiId: string }>; searchParams:
 
   const searchParams = await props.searchParams;
   const date = searchParams.date;
+
+  const user = await getCurrentUser();
+  if (!user) {
+    await redirect('/login');
+    return;
+  }
 
   const kizaiData = await getLoanKizaiData(kizaiId);
 
@@ -56,6 +64,7 @@ const Page = async (props: { params: Promise<{ kizaiId: string }>; searchParams:
 
   return (
     <LoanSituation
+      user={user}
       kizaiData={kizaiData}
       date={date}
       // loanJuchuData={filterLoanJuchuData}

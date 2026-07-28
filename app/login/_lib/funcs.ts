@@ -1,7 +1,8 @@
 'use server';
 
-import { supabase } from '@/app/_lib/db/supabase';
+import { createClient } from '@/app/_lib/db/supabase-server';
 
+// import { supabase } from '@/app/_lib/db/supabase-server';
 import { UserValues } from './types';
 
 /**
@@ -10,13 +11,8 @@ import { UserValues } from './types';
  * @returns {Promise<AuthTokenResponsePassword>} ログイン処理結果
  */
 export const login = async (data: UserValues) => {
-  // try {
-  //   return await supabase.auth.signInWithPassword({ email: data.email, password: data.password });
-  // } catch (e) {
-  //   console.error(e);
-  //   throw e;
-  // }
   try {
+    const supabase = await createClient();
     // 2. 取り出したインスタンスに対して .auth を呼び出す
     return await supabase.auth.signInWithPassword({
       email: data.email,
@@ -41,6 +37,7 @@ export const login = async (data: UserValues) => {
  * @param {string} refresh_token
  */
 export const setSession = async (access_token: string, refresh_token: string) => {
+  const supabase = await createClient();
   supabase.auth.setSession({ access_token, refresh_token }).then(({ data, error }) => {
     if (data.session) {
       return data.session;
@@ -50,5 +47,6 @@ export const setSession = async (access_token: string, refresh_token: string) =>
 
 /* ログアウトクリック時 */
 export const handleLogout = async () => {
+  const supabase = await createClient();
   await supabase.auth.signOut();
 };

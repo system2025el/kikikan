@@ -38,18 +38,16 @@ import { TextFieldElement } from 'react-hook-form-mui';
 import { set } from 'zod';
 
 import { JUCHU_KIZAI_HEAD_KBN, LOCK_SHUBETU } from '@/app/_lib/constants';
-import { useUserStore } from '@/app/_lib/stores/usestore';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { getNyukoDate, getRange, getShukoDate } from '@/app/(main)/_lib/date-funcs';
 import { addLock, getLock } from '@/app/(main)/_lib/funcs';
 import { lockCheck, lockRelease } from '@/app/(main)/_lib/lock';
 import { permission } from '@/app/(main)/_lib/permission';
-import { LockValues } from '@/app/(main)/_lib/types';
+import { LockValues, User } from '@/app/(main)/_lib/types';
 import { BackButton } from '@/app/(main)/_ui/buttons';
 import DateX, { RSuiteDateRangePicker, TestDate } from '@/app/(main)/_ui/date';
 import { IsDirtyAlertDialog, useDirty } from '@/app/(main)/_ui/dirty-context';
 import { Loading, LoadingOverlay } from '@/app/(main)/_ui/loading';
-import { PermissionGuard } from '@/app/(main)/_ui/permission-guard';
 import { SelectTable } from '@/app/(main)/_ui/table';
 import { WillDeleteAlertDialog } from '@/app/(main)/(masters)/_ui/dialogs';
 import { equipmentRows, users, vehicleHeaders, vehicleRows } from '@/app/(main)/order/[juchuHeadId]/[mode]/_lib/data';
@@ -83,6 +81,7 @@ import { LocationSelectDialog } from './location-selection';
 import { OrderEqTable, OrderVehicleTable } from './order-table';
 
 export const Order = (props: {
+  user: User;
   juchuHeadData: OrderValues;
   juchuKizaiHeadDatas: EqTableValues[] | undefined;
   juchusharyoHeadDatas: VehicleTableValues[] | undefined;
@@ -92,7 +91,7 @@ export const Order = (props: {
 }) => {
   const router = useRouter();
   // user情報
-  const user = useUserStore((state) => state.user);
+  const user = props.user;
   // userList
   const userList = props.userList;
   // 保存フラグ
@@ -973,455 +972,450 @@ export const Order = (props: {
   if (isError) throw isError;
 
   return (
-    <PermissionGuard
-      category={'juchu'}
-      required={getValues('juchuHeadId') === 0 ? permission.juchu_upd : permission.juchu_ref}
-    >
-      <Container disableGutters sx={{ minWidth: '100%', pb: 10 }} maxWidth={'xl'}>
-        <Box display={save ? 'flex' : 'none'} justifyContent={'end'} mb={1}>
-          {lockData && (
-            <Grid2 container alignItems={'center'} spacing={2} px={4}>
-              <Typography>{lockData.addDat && toJapanTimeString(new Date(lockData.addDat))}</Typography>
-              <Typography>{lockData.addUser}</Typography>
-              <Typography>編集中</Typography>
-            </Grid2>
-          )}
-          <Grid2 container alignItems={'center'} spacing={2}>
-            {!edit ? <Typography>閲覧モード</Typography> : <Typography>編集モード</Typography>}
-            <Button disabled={!!lockData || user?.permission.juchu === permission.juchu_ref} onClick={handleEdit}>
-              変更
-            </Button>
+    <Container disableGutters sx={{ minWidth: '100%', pb: 10 }} maxWidth={'xl'}>
+      <Box display={save ? 'flex' : 'none'} justifyContent={'end'} mb={1}>
+        {lockData && (
+          <Grid2 container alignItems={'center'} spacing={2} px={4}>
+            <Typography>{lockData.addDat && toJapanTimeString(new Date(lockData.addDat))}</Typography>
+            <Typography>{lockData.addUser}</Typography>
+            <Typography>編集中</Typography>
           </Grid2>
-        </Box>
-        {/* --------------------------------受注ヘッダー------------------------------------- */}
-        <Paper variant="outlined">
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <Grid2 container display="flex" alignItems="center" justifyContent="space-between" px={2}>
-              <Grid2>
-                <Typography>受注ヘッダー</Typography>
-              </Grid2>
-              <Grid2 container spacing={1} sx={{ display: save ? 'inline-flex' : 'none' }}>
-                <Button
-                  onClick={() => {
-                    window.open(`/quotation-list/create?juchuId=${getValues('juchuHeadId')}`);
-                  }}
-                  disabled={isDirty || !(user && user?.permission.juchu & permission.juchu_upd)}
-                >
-                  <CreateIcon fontSize="small" />
-                  見積作成
-                </Button>
-                <Button color="error" onClick={handleHeadDeleteDialogOpen} disabled={!edit}>
-                  <Delete fontSize="small" />
-                  伝票削除
-                </Button>
-              </Grid2>
+        )}
+        <Grid2 container alignItems={'center'} spacing={2}>
+          {!edit ? <Typography>閲覧モード</Typography> : <Typography>編集モード</Typography>}
+          <Button disabled={!!lockData || user?.permission.juchu === permission.juchu_ref} onClick={handleEdit}>
+            変更
+          </Button>
+        </Grid2>
+      </Box>
+      {/* --------------------------------受注ヘッダー------------------------------------- */}
+      <Paper variant="outlined">
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <Grid2 container display="flex" alignItems="center" justifyContent="space-between" px={2}>
+            <Grid2>
+              <Typography>受注ヘッダー</Typography>
             </Grid2>
-            <Divider />
-            <Grid2 container spacing={{ xs: 0, sm: 0, md: 2 }}>
-              <Grid2 size={{ xs: 12, sm: 12, md: 6 }}>
-                <Box sx={styles.container}>
-                  <Typography marginRight={7} whiteSpace="nowrap">
-                    受注番号
-                  </Typography>
-                  {getValues('juchuHeadId') === 0 ? (
-                    <TextField slotProps={{ input: { readOnly: true } }} sx={{ width: 120 }} />
-                  ) : (
-                    <TextFieldElement
-                      name="juchuHeadId"
-                      control={control}
-                      type="number"
-                      sx={{
-                        '& input[type=number]::-webkit-inner-spin-button': {
-                          WebkitAppearance: 'none',
-                          margin: 0,
-                        },
-                        width: 120,
-                      }}
-                      slotProps={{ input: { readOnly: true } }}
-                    />
-                  )}
-                </Box>
-                <Box sx={styles.container}>
-                  <Typography mr={1}>受注ステータス</Typography>
-                  <FormControl size="small" sx={{ width: 160 }}>
-                    <Controller
-                      name="juchuSts"
-                      control={control}
-                      render={({ field }) => (
-                        <Select {...field} disabled={!edit}>
-                          <MenuItem value={0}>入力中</MenuItem>
-                          <MenuItem value={1}>仮受注</MenuItem>
-                          <MenuItem value={2}>処理中</MenuItem>
-                          <MenuItem value={3}>確定</MenuItem>
-                          <MenuItem value={4}>貸出済み</MenuItem>
-                          <MenuItem value={5}>返却済み</MenuItem>
-                          <MenuItem value={9}>受注キャンセル</MenuItem>
-                        </Select>
-                      )}
-                    />
-                  </FormControl>
-                </Box>
-                <Box sx={styles.container}>
-                  <Typography marginRight={9}>受注日</Typography>
-                  <Controller
-                    name="juchuDat"
+            <Grid2 container spacing={1} sx={{ display: save ? 'inline-flex' : 'none' }}>
+              <Button
+                onClick={() => {
+                  window.open(`/quotation-list/create?juchuId=${getValues('juchuHeadId')}`);
+                }}
+                disabled={isDirty || !(user && user?.permission.juchu & permission.juchu_upd)}
+              >
+                <CreateIcon fontSize="small" />
+                見積作成
+              </Button>
+              <Button color="error" onClick={handleHeadDeleteDialogOpen} disabled={!edit}>
+                <Delete fontSize="small" />
+                伝票削除
+              </Button>
+            </Grid2>
+          </Grid2>
+          <Divider />
+          <Grid2 container spacing={{ xs: 0, sm: 0, md: 2 }}>
+            <Grid2 size={{ xs: 12, sm: 12, md: 6 }}>
+              <Box sx={styles.container}>
+                <Typography marginRight={7} whiteSpace="nowrap">
+                  受注番号
+                </Typography>
+                {getValues('juchuHeadId') === 0 ? (
+                  <TextField slotProps={{ input: { readOnly: true } }} sx={{ width: 120 }} />
+                ) : (
+                  <TextFieldElement
+                    name="juchuHeadId"
                     control={control}
-                    render={({ field, fieldState }) => (
-                      <TestDate
-                        onBlur={field.onBlur}
-                        date={field.value}
-                        onChange={(newDate) => field.onChange(newDate?.toDate())}
-                        fieldstate={fieldState}
-                        disabled={!edit}
-                        onClear={() => field.onChange(null)}
-                      />
-                    )}
+                    type="number"
+                    sx={{
+                      '& input[type=number]::-webkit-inner-spin-button': {
+                        WebkitAppearance: 'none',
+                        margin: 0,
+                      },
+                      width: 120,
+                    }}
+                    slotProps={{ input: { readOnly: true } }}
                   />
-                </Box>
-                <Box sx={styles.container}>
-                  <Typography marginRight={9}>入力者</Typography>
-                  <FormControl size="small" sx={{ width: 160, minWidth: '80px' }}>
-                    <Controller
-                      name="nyuryokuUser"
-                      control={control}
-                      render={({ field, fieldState }) => (
-                        <Select
-                          {...field}
-                          defaultValue={props.juchuHeadData.nyuryokuUser}
-                          disabled={!edit}
-                          error={!!fieldState.error}
-                          renderValue={(selected) => {
-                            const user = userList.find((u) => u.tantouNam === selected);
-                            return user ? user.tantouNam : `${selected}`;
-                          }}
-                        >
-                          {userList.map((u) => (
-                            <MenuItem key={u.mailAdr} value={u.tantouNam}>
-                              {u.tantouNam}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      )}
-                    />
-                    <FormHelperText sx={{ color: 'error.main' }}>{errors.nyuryokuUser?.message}</FormHelperText>
-                  </FormControl>
-                </Box>
-                <Box sx={styles.container}>
-                  <Typography mr={2}>出庫日/入庫日</Typography>
+                )}
+              </Box>
+              <Box sx={styles.container}>
+                <Typography mr={1}>受注ステータス</Typography>
+                <FormControl size="small" sx={{ width: 160 }}>
                   <Controller
-                    name="juchuRange"
+                    name="juchuSts"
                     control={control}
                     render={({ field }) => (
-                      <Box>
-                        <RSuiteDateRangePicker value={field.value} onChange={field.onChange} disabled={!edit} />
-                        {errors.juchuRange && (
-                          <Typography color="error" fontSize={'small'} sx={{ ml: 2 }}>
-                            {errors.juchuRange.message}
-                          </Typography>
-                        )}
-                      </Box>
+                      <Select {...field} disabled={!edit}>
+                        <MenuItem value={0}>入力中</MenuItem>
+                        <MenuItem value={1}>仮受注</MenuItem>
+                        <MenuItem value={2}>処理中</MenuItem>
+                        <MenuItem value={3}>確定</MenuItem>
+                        <MenuItem value={4}>貸出済み</MenuItem>
+                        <MenuItem value={5}>返却済み</MenuItem>
+                        <MenuItem value={9}>受注キャンセル</MenuItem>
+                      </Select>
                     )}
                   />
-                </Box>
-              </Grid2>
-              <Grid2 size={{ xs: 12, sm: 12, md: 6 }}>
-                <Box sx={styles.container}>
-                  <Typography marginRight={7}>公演名</Typography>
-                  <TextFieldElement name="koenNam" control={control} fullWidth disabled={!edit}></TextFieldElement>
-                </Box>
-                <Box sx={styles.container}>
-                  <Typography marginRight={5}>公演場所</Typography>
-                  <TextFieldElement name="koenbashoNam" control={control} fullWidth disabled={!edit}></TextFieldElement>
-                  <Button style={{ marginLeft: 5 }} onClick={() => handleOpenLocationDialog()} disabled={!edit}>
-                    検索
-                  </Button>
-                </Box>
-                <Box sx={styles.container}>
-                  <Typography marginRight={9}>顧客</Typography>
+                </FormControl>
+              </Box>
+              <Box sx={styles.container}>
+                <Typography marginRight={9}>受注日</Typography>
+                <Controller
+                  name="juchuDat"
+                  control={control}
+                  render={({ field, fieldState }) => (
+                    <TestDate
+                      onBlur={field.onBlur}
+                      date={field.value}
+                      onChange={(newDate) => field.onChange(newDate?.toDate())}
+                      fieldstate={fieldState}
+                      disabled={!edit}
+                      onClear={() => field.onChange(null)}
+                    />
+                  )}
+                />
+              </Box>
+              <Box sx={styles.container}>
+                <Typography marginRight={9}>入力者</Typography>
+                <FormControl size="small" sx={{ width: 160, minWidth: '80px' }}>
                   <Controller
-                    name="kokyaku.kokyakuNam"
+                    name="nyuryokuUser"
                     control={control}
                     render={({ field, fieldState }) => (
-                      <>
-                        <TextField
-                          value={field.value}
-                          slotProps={{ input: { readOnly: true } }}
-                          error={!!fieldState.error}
-                          helperText={fieldState.error?.message}
-                          fullWidth
-                        />
-                        <Button style={{ marginLeft: 5 }} onClick={() => handleOpenCustomerDialog()} disabled={!edit}>
-                          検索
-                        </Button>
-                      </>
+                      <Select
+                        {...field}
+                        defaultValue={props.juchuHeadData.nyuryokuUser}
+                        disabled={!edit}
+                        error={!!fieldState.error}
+                        renderValue={(selected) => {
+                          const user = userList.find((u) => u.tantouNam === selected);
+                          return user ? user.tantouNam : `${selected}`;
+                        }}
+                      >
+                        {userList.map((u) => (
+                          <MenuItem key={u.mailAdr} value={u.tantouNam}>
+                            {u.tantouNam}
+                          </MenuItem>
+                        ))}
+                      </Select>
                     )}
                   />
-                </Box>
-                <Box sx={styles.container}>
-                  <Typography marginRight={3}>顧客担当者</Typography>
-                  <TextFieldElement name="kokyakuTantoNam" control={control} disabled={!edit}></TextFieldElement>
-                </Box>
-                <Box sx={styles.container}>
-                  <Typography mr={7}>税区分</Typography>
-                  <FormControl size="small" sx={{ width: '8%', minWidth: '80px' }}>
-                    <Controller
-                      name="zeiKbn"
-                      control={control}
-                      render={({ field }) => (
-                        <Select {...field} disabled={!edit}>
-                          <MenuItem value={0}>無し</MenuItem>
-                          <MenuItem value={1}>内税</MenuItem>
-                          <MenuItem value={2}>外税</MenuItem>
-                        </Select>
+                  <FormHelperText sx={{ color: 'error.main' }}>{errors.nyuryokuUser?.message}</FormHelperText>
+                </FormControl>
+              </Box>
+              <Box sx={styles.container}>
+                <Typography mr={2}>出庫日/入庫日</Typography>
+                <Controller
+                  name="juchuRange"
+                  control={control}
+                  render={({ field }) => (
+                    <Box>
+                      <RSuiteDateRangePicker value={field.value} onChange={field.onChange} disabled={!edit} />
+                      {errors.juchuRange && (
+                        <Typography color="error" fontSize={'small'} sx={{ ml: 2 }}>
+                          {errors.juchuRange.message}
+                        </Typography>
                       )}
-                    />
-                  </FormControl>
-                </Box>
+                    </Box>
+                  )}
+                />
+              </Box>
+            </Grid2>
+            <Grid2 size={{ xs: 12, sm: 12, md: 6 }}>
+              <Box sx={styles.container}>
+                <Typography marginRight={7}>公演名</Typography>
+                <TextFieldElement name="koenNam" control={control} fullWidth disabled={!edit}></TextFieldElement>
+              </Box>
+              <Box sx={styles.container}>
+                <Typography marginRight={5}>公演場所</Typography>
+                <TextFieldElement name="koenbashoNam" control={control} fullWidth disabled={!edit}></TextFieldElement>
+                <Button style={{ marginLeft: 5 }} onClick={() => handleOpenLocationDialog()} disabled={!edit}>
+                  検索
+                </Button>
+              </Box>
+              <Box sx={styles.container}>
+                <Typography marginRight={9}>顧客</Typography>
+                <Controller
+                  name="kokyaku.kokyakuNam"
+                  control={control}
+                  render={({ field, fieldState }) => (
+                    <>
+                      <TextField
+                        value={field.value}
+                        slotProps={{ input: { readOnly: true } }}
+                        error={!!fieldState.error}
+                        helperText={fieldState.error?.message}
+                        fullWidth
+                      />
+                      <Button style={{ marginLeft: 5 }} onClick={() => handleOpenCustomerDialog()} disabled={!edit}>
+                        検索
+                      </Button>
+                    </>
+                  )}
+                />
+              </Box>
+              <Box sx={styles.container}>
+                <Typography marginRight={3}>顧客担当者</Typography>
+                <TextFieldElement name="kokyakuTantoNam" control={control} disabled={!edit}></TextFieldElement>
+              </Box>
+              <Box sx={styles.container}>
+                <Typography mr={7}>税区分</Typography>
+                <FormControl size="small" sx={{ width: '8%', minWidth: '80px' }}>
+                  <Controller
+                    name="zeiKbn"
+                    control={control}
+                    render={({ field }) => (
+                      <Select {...field} disabled={!edit}>
+                        <MenuItem value={0}>無し</MenuItem>
+                        <MenuItem value={1}>内税</MenuItem>
+                        <MenuItem value={2}>外税</MenuItem>
+                      </Select>
+                    )}
+                  />
+                </FormControl>
+              </Box>
+            </Grid2>
+          </Grid2>
+          <Box display={'flex'} alignItems={'center'} px={2} pb={2}>
+            <Typography marginRight={3}>メモ</Typography>
+            <TextFieldElement
+              name="mem"
+              control={control}
+              multiline
+              rows={3}
+              fullWidth
+              disabled={!edit}
+              // sx={{
+              //   '& .MuiInputBase-root': {
+              //     resize: 'both',
+              //     overflow: 'auto',
+              //     alignItems: 'flex-start',
+              //   },
+              //   '& .MuiInputBase-inputMultiline': {
+              //     textAlign: 'left',
+              //     paddingTop: '8px',
+              //   },
+              // }}
+            ></TextFieldElement>
+          </Box>
+          {/** 固定ボタン 保存＆ページトップ */}
+          <Box position={'fixed'} zIndex={1050} bottom={25} right={25} alignItems={'center'}>
+            <Fab variant="extended" color="primary" type="submit" sx={{ mr: 2 }} disabled={!edit || isLoading}>
+              <SaveAsIcon sx={{ mr: 1 }} />
+              保存
+            </Fab>
+            <Fab color="primary" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+              <ArrowUpwardIcon />
+            </Fab>
+          </Box>
+        </form>
+        {/* 公演場所検索ダイアログ */}
+        <Dialog open={locationDialogOpen} fullScreen>
+          <LocationSelectDialog
+            handleLocSelect={handleLocSelect}
+            handleCloseLocationDialog={handleCloseLocationDailog}
+            lock={lock}
+          />
+        </Dialog>
+        {/* 顧客検索ダイアログ */}
+        <Dialog open={customerDialogOpen} fullScreen>
+          <CustomerSelectionDialog
+            handleCustSelect={handleCustSelect}
+            handleCloseCustDialog={handleCloseCustomerDialog}
+            lock={lock}
+          />
+        </Dialog>
+      </Paper>
+      {/* --------------------------------受注明細（機材）------------------------------------- */}
+      {save && (
+        <Accordion sx={{ marginTop: 2, borderRadius: 1, overflow: 'hidden' }} defaultExpanded variant="outlined">
+          <AccordionSummary
+            expandIcon={<ExpandMoreIcon />}
+            component="div"
+            sx={{
+              minHeight: '30px',
+              maxHeight: '30px',
+              '&.Mui-expanded': {
+                minHeight: '30px',
+                maxHeight: '30px',
+              },
+            }}
+          >
+            <Grid2 container alignItems="center" justifyContent="space-between" sx={{ width: '100%' }} spacing={1}>
+              <Grid2>
+                <Typography>受注機材ヘッダー一覧</Typography>
+              </Grid2>
+              <Grid2 container display="flex" alignItems="center" spacing={1}>
+                <Typography>合計金額</Typography>
+                <Typography
+                  sx={{
+                    width: '40%',
+                    minWidth: '90px',
+                  }}
+                >
+                  ¥{priceTotal.toLocaleString()}
+                </Typography>
+              </Grid2>
+              <Grid2 container spacing={1}>
+                <Button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleAddEq();
+                  }}
+                  disabled={!edit}
+                >
+                  <AddIcon fontSize="small" />
+                  機材入力
+                </Button>
+                <Button
+                  color="error"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleAddReturn();
+                  }}
+                  disabled={!edit}
+                >
+                  <AddIcon fontSize="small" />
+                  返却入力
+                </Button>
+                <Button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleAddKeep();
+                  }}
+                  disabled={!edit}
+                  sx={{ bgcolor: 'green' }}
+                >
+                  <AddIcon fontSize="small" />
+                  キープ入力
+                </Button>
+                <Button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleOpenCopyDialog();
+                  }}
+                  disabled={!edit}
+                >
+                  <ContentCopyIcon fontSize="small" />
+                  コピー
+                </Button>
+                <Button
+                  color="error"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleKizaiHeadDeleteCheck();
+                  }}
+                  disabled={!edit}
+                >
+                  <Delete fontSize="small" />
+                  受注明細削除
+                </Button>
               </Grid2>
             </Grid2>
-            <Box display={'flex'} alignItems={'center'} px={2} pb={2}>
-              <Typography marginRight={3}>メモ</Typography>
-              <TextFieldElement
-                name="mem"
-                control={control}
-                multiline
-                rows={3}
-                fullWidth
-                disabled={!edit}
-                // sx={{
-                //   '& .MuiInputBase-root': {
-                //     resize: 'both',
-                //     overflow: 'auto',
-                //     alignItems: 'flex-start',
-                //   },
-                //   '& .MuiInputBase-inputMultiline': {
-                //     textAlign: 'left',
-                //     paddingTop: '8px',
-                //   },
-                // }}
-              ></TextFieldElement>
-            </Box>
-            {/** 固定ボタン 保存＆ページトップ */}
-            <Box position={'fixed'} zIndex={1050} bottom={25} right={25} alignItems={'center'}>
-              <Fab variant="extended" color="primary" type="submit" sx={{ mr: 2 }} disabled={!edit || isLoading}>
-                <SaveAsIcon sx={{ mr: 1 }} />
-                保存
-              </Fab>
-              <Fab color="primary" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-                <ArrowUpwardIcon />
-              </Fab>
-            </Box>
-          </form>
-          {/* 公演場所検索ダイアログ */}
-          <Dialog open={locationDialogOpen} fullScreen>
-            <LocationSelectDialog
-              handleLocSelect={handleLocSelect}
-              handleCloseLocationDialog={handleCloseLocationDailog}
-              lock={lock}
+          </AccordionSummary>
+          <Dialog open={copyOpen} sx={{ zIndex: 1201 }}>
+            <CopyDialog
+              selectEqHeader={selectEqHeader}
+              handleCopyConfirmed={handleCopyConfirmed}
+              handleCloseCopyDialog={handleCloseCopyDialog}
             />
           </Dialog>
-          {/* 顧客検索ダイアログ */}
-          <Dialog open={customerDialogOpen} fullScreen>
-            <CustomerSelectionDialog
-              handleCustSelect={handleCustSelect}
-              handleCloseCustDialog={handleCloseCustomerDialog}
-              lock={lock}
-            />
-          </Dialog>
-        </Paper>
-        {/* --------------------------------受注明細（機材）------------------------------------- */}
-        {save && (
-          <Accordion sx={{ marginTop: 2, borderRadius: 1, overflow: 'hidden' }} defaultExpanded variant="outlined">
-            <AccordionSummary
-              expandIcon={<ExpandMoreIcon />}
-              component="div"
-              sx={{
-                minHeight: '30px',
-                maxHeight: '30px',
-                '&.Mui-expanded': {
-                  minHeight: '30px',
-                  maxHeight: '30px',
-                },
-              }}
-            >
-              <Grid2 container alignItems="center" justifyContent="space-between" sx={{ width: '100%' }} spacing={1}>
-                <Grid2>
-                  <Typography>受注機材ヘッダー一覧</Typography>
-                </Grid2>
-                <Grid2 container display="flex" alignItems="center" spacing={1}>
-                  <Typography>合計金額</Typography>
-                  <Typography
-                    sx={{
-                      width: '40%',
-                      minWidth: '90px',
-                    }}
-                  >
-                    ¥{priceTotal.toLocaleString()}
-                  </Typography>
-                </Grid2>
-                <Grid2 container spacing={1}>
-                  <Button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleAddEq();
-                    }}
-                    disabled={!edit}
-                  >
-                    <AddIcon fontSize="small" />
-                    機材入力
-                  </Button>
-                  <Button
-                    color="error"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleAddReturn();
-                    }}
-                    disabled={!edit}
-                  >
-                    <AddIcon fontSize="small" />
-                    返却入力
-                  </Button>
-                  <Button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleAddKeep();
-                    }}
-                    disabled={!edit}
-                    sx={{ bgcolor: 'green' }}
-                  >
-                    <AddIcon fontSize="small" />
-                    キープ入力
-                  </Button>
-                  <Button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleOpenCopyDialog();
-                    }}
-                    disabled={!edit}
-                  >
-                    <ContentCopyIcon fontSize="small" />
-                    コピー
-                  </Button>
-                  <Button
-                    color="error"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleKizaiHeadDeleteCheck();
-                    }}
-                    disabled={!edit}
-                  >
-                    <Delete fontSize="small" />
-                    受注明細削除
-                  </Button>
-                </Grid2>
-              </Grid2>
-            </AccordionSummary>
-            <Dialog open={copyOpen} sx={{ zIndex: 1201 }}>
-              <CopyDialog
-                selectEqHeader={selectEqHeader}
-                handleCopyConfirmed={handleCopyConfirmed}
-                handleCloseCopyDialog={handleCloseCopyDialog}
-              />
-            </Dialog>
-            <AccordionDetails sx={{ padding: 0 }}>
-              {isJuchuKizaiLoading ? (
-                <Loading />
-              ) : (
-                eqHeaderList &&
-                eqHeaderList?.length > 0 && (
-                  <OrderEqTable
-                    orderEqRows={eqHeaderList}
-                    edit={edit}
-                    selectEq={selectEq}
-                    onEqSelectionChange={handleEqSelectionChange}
-                    handleClickEqOrderName={handleClickEqOrderName}
-                  />
-                )
-              )}
-            </AccordionDetails>
-          </Accordion>
-        )}
-        {/* -------------------------車両----------------------------------- */}
-        {save && (
-          <Accordion sx={{ marginTop: 2, borderRadius: 1, overflow: 'hidden' }} defaultExpanded variant="outlined">
-            <AccordionSummary
-              expandIcon={<ExpandMoreIcon />}
-              component="div"
-              sx={{
-                minHeight: '30px',
-                maxHeight: '30px',
-                '&.Mui-expanded': {
-                  minHeight: '30px',
-                  maxHeight: '30px',
-                },
-              }}
-            >
-              <Grid2 container alignItems="center" justifyContent="space-between" sx={{ width: '100%' }} spacing={1}>
-                <Grid2>
-                  <Typography>受注車両ヘッダー一覧</Typography>
-                </Grid2>
-                <Grid2 container spacing={1}>
-                  <Button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleAddVehicle();
-                    }}
-                    disabled={!edit}
-                  >
-                    <AddIcon fontSize="small" />
-                    車両入力
-                  </Button>
-                  <Button
-                    color="error"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleHeadDeleteVehsDialogOpen();
-                    }}
-                    disabled={!edit || selectedVehs.length === 0}
-                  >
-                    <Delete fontSize="small" />
-                    車両明細削除
-                  </Button>
-                </Grid2>
-              </Grid2>
-            </AccordionSummary>
-            <AccordionDetails sx={{ padding: 0 }}>
-              {vehicleHeaderList && vehicleHeaderList?.length > 0 ? (
-                <OrderVehicleTable
-                  selected={selectedVehs}
-                  orderVehicleRows={vehicleHeaderList}
+          <AccordionDetails sx={{ padding: 0 }}>
+            {isJuchuKizaiLoading ? (
+              <Loading />
+            ) : (
+              eqHeaderList &&
+              eqHeaderList?.length > 0 && (
+                <OrderEqTable
+                  orderEqRows={eqHeaderList}
                   edit={edit}
-                  setSelected={setSelectedVehs}
+                  selectEq={selectEq}
+                  onEqSelectionChange={handleEqSelectionChange}
+                  handleClickEqOrderName={handleClickEqOrderName}
                 />
-              ) : (
-                <Typography mx={5} variant="body2">
-                  車両明細がありません
-                </Typography>
-              )}
-            </AccordionDetails>
-          </Accordion>
-        )}
-        <IsDirtyAlertDialog open={dirtyOpen} onClick={handleResultDialog} />
-        <AlertDialog open={alertOpen} title={alertTitle} message={alertMessage} onClick={() => setAlertOpen(false)} />
-        <HeadDeleteConfirmDialog open={headDeleteOpen} onClick={handleHeadDelete} />
-        <KizaiHeadDeleteConfirmDialog open={kizaiHeadDeleteOpen} onClick={handleKizaiHeadDelete} />
-        <WillDeleteAlertDialog
-          open={sharyoHeadDeleteOpen}
-          data={`${selectedVehs.length}件の車両明細`}
-          title="削除"
-          handleCloseDelete={() => setSharyoHeadDeleteOpen(false)}
-          handleConfirmDelete={() => handleDeleteVehs()}
-        />
-        <Snackbar
-          open={snackBarOpen}
-          autoHideDuration={6000}
-          onClose={() => setSnackBarOpen(false)}
-          message={snackBarMessage}
-          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-          sx={{ marginTop: '65px' }}
-        />
-      </Container>
-    </PermissionGuard>
+              )
+            )}
+          </AccordionDetails>
+        </Accordion>
+      )}
+      {/* -------------------------車両----------------------------------- */}
+      {save && (
+        <Accordion sx={{ marginTop: 2, borderRadius: 1, overflow: 'hidden' }} defaultExpanded variant="outlined">
+          <AccordionSummary
+            expandIcon={<ExpandMoreIcon />}
+            component="div"
+            sx={{
+              minHeight: '30px',
+              maxHeight: '30px',
+              '&.Mui-expanded': {
+                minHeight: '30px',
+                maxHeight: '30px',
+              },
+            }}
+          >
+            <Grid2 container alignItems="center" justifyContent="space-between" sx={{ width: '100%' }} spacing={1}>
+              <Grid2>
+                <Typography>受注車両ヘッダー一覧</Typography>
+              </Grid2>
+              <Grid2 container spacing={1}>
+                <Button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleAddVehicle();
+                  }}
+                  disabled={!edit}
+                >
+                  <AddIcon fontSize="small" />
+                  車両入力
+                </Button>
+                <Button
+                  color="error"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleHeadDeleteVehsDialogOpen();
+                  }}
+                  disabled={!edit || selectedVehs.length === 0}
+                >
+                  <Delete fontSize="small" />
+                  車両明細削除
+                </Button>
+              </Grid2>
+            </Grid2>
+          </AccordionSummary>
+          <AccordionDetails sx={{ padding: 0 }}>
+            {vehicleHeaderList && vehicleHeaderList?.length > 0 ? (
+              <OrderVehicleTable
+                selected={selectedVehs}
+                orderVehicleRows={vehicleHeaderList}
+                edit={edit}
+                setSelected={setSelectedVehs}
+              />
+            ) : (
+              <Typography mx={5} variant="body2">
+                車両明細がありません
+              </Typography>
+            )}
+          </AccordionDetails>
+        </Accordion>
+      )}
+      <IsDirtyAlertDialog open={dirtyOpen} onClick={handleResultDialog} />
+      <AlertDialog open={alertOpen} title={alertTitle} message={alertMessage} onClick={() => setAlertOpen(false)} />
+      <HeadDeleteConfirmDialog open={headDeleteOpen} onClick={handleHeadDelete} />
+      <KizaiHeadDeleteConfirmDialog open={kizaiHeadDeleteOpen} onClick={handleKizaiHeadDelete} />
+      <WillDeleteAlertDialog
+        open={sharyoHeadDeleteOpen}
+        data={`${selectedVehs.length}件の車両明細`}
+        title="削除"
+        handleCloseDelete={() => setSharyoHeadDeleteOpen(false)}
+        handleConfirmDelete={() => handleDeleteVehs()}
+      />
+      <Snackbar
+        open={snackBarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackBarOpen(false)}
+        message={snackBarMessage}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        sx={{ marginTop: '65px' }}
+      />
+    </Container>
   );
 };
 
