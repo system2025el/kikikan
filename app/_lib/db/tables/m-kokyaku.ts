@@ -4,7 +4,7 @@ import { escapeLikeString, escapeOrLikeString } from '@/app/(main)/_lib/escape-s
 import { CustomersMasterDialogValues } from '@/app/(main)/(masters)/customers-master/_lib/types';
 
 import pool from '../postgres';
-import { SCHEMA } from '../supabase';
+import { SCHEMA } from '../schema';
 import { createClient } from '../supabase-server';
 import { MKokyakuDBValues } from '../types/m-kokyaku-type';
 

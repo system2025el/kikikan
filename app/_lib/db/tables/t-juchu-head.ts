@@ -1,6 +1,6 @@
 'use server';
 
-import { SCHEMA } from '../supabase';
+import { SCHEMA } from '../schema';
 import { createClient } from '../supabase-server';
 import { JuchuHead } from '../types/t-juchu-head-type';
 

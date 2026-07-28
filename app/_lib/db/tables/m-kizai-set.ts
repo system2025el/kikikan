@@ -5,7 +5,7 @@ import { PoolClient } from 'pg';
 import { escapeLikeString } from '@/app/(main)/_lib/escape-string';
 
 import pool from '../postgres';
-import { SCHEMA } from '../supabase';
+import { SCHEMA } from '../schema';
 import { createClient } from '../supabase-server';
 import { MKizaiSetDBValues } from '../types/m-kizai-set-type';
 

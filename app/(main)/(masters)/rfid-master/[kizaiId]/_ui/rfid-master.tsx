@@ -279,7 +279,6 @@ export const RfidMaster = ({ user, kizaiId }: { user: User; kizaiId: number }) =
   }, [kizaiId]);
 
   return (
-    // <PermissionGuard category={'masters'} required={permission.mst_ref}>
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
       <Grid2 container display={'flex'} justifyContent={'end'} mb={0.5}>
         <Button onClick={() => window.close()}>閉じる</Button>
@@ -571,7 +570,6 @@ export const RfidMaster = ({ user, kizaiId }: { user: User; kizaiId: number }) =
         sx={{ marginTop: '65px' }}
       />
     </Container>
-    // </PermissionGuard>
   );
 };
 

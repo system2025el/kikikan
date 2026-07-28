@@ -3,7 +3,7 @@
 import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 
 import pool from '../postgres';
-import { SCHEMA } from '../supabase';
+import { SCHEMA } from '../schema';
 
 /**
  * 作業日指定移動リスト取得

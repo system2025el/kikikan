@@ -1,7 +1,7 @@
 'use server';
 import { PoolClient } from 'pg';
 
-import { SCHEMA } from '../supabase';
+import { SCHEMA } from '../schema';
 import { createClient } from '../supabase-server';
 import { MituHead } from '../types/t-mitu-head-types';
 

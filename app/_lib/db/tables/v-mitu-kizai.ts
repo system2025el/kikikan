@@ -1,5 +1,5 @@
 'use server';
-import { SCHEMA } from '../supabase';
+import { SCHEMA } from '../schema';
 import { createClient } from '../supabase-server';
 
 /**

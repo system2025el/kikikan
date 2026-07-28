@@ -7,7 +7,7 @@ import { KeepJuchuKizaiHeadValues } from '@/app/(main)/(eq-order-detail)/eq-keep
 import { JuchuKizaiHeadValues } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';
 
 import pool from '../postgres';
-import { SCHEMA } from '../supabase';
+import { SCHEMA } from '../schema';
 import { createClient } from '../supabase-server';
 import { JuchuKizaiHead } from '../types/t-juchu-kizai-head-type';
 

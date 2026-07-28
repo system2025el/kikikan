@@ -5,7 +5,7 @@ import { escapeLikeString } from '@/app/(main)/_lib/escape-string';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 import { QuotSearchValues } from '@/app/(main)/quotation-list/_lib/types';
 
-import { SCHEMA } from '../supabase';
+import { SCHEMA } from '../schema';
 import { createClient } from '../supabase-server';
 
 export const selectFilteredQuot = async ({

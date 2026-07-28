@@ -9,7 +9,7 @@ import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 import { OrderSearchValues } from '@/app/(main)/order-list/_lib/types';
 
 import pool from '../postgres';
-import { SCHEMA } from '../supabase';
+import { SCHEMA } from '../schema';
 import { createClient } from '../supabase-server';
 
 // .tz()を使う準備

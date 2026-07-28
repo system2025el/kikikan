@@ -2,7 +2,7 @@
 
 import { PoolClient } from 'pg';
 
-import { SCHEMA } from '../supabase';
+import { SCHEMA } from '../schema';
 import { createClient } from '../supabase-server';
 import { SeikyuHead } from '../types/t-seikyu-head-type';
 

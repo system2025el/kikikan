@@ -4,7 +4,7 @@ import { escapeLikeString } from '@/app/(main)/_lib/escape-string';
 import { ShukeibumonsMasterDialogValues } from '@/app/(main)/(masters)/shukeibumons-master/_lib/types';
 
 import pool from '../postgres';
-import { SCHEMA } from '../supabase';
+import { SCHEMA } from '../schema';
 import { createClient } from '../supabase-server';
 import { MShukeibumonDBValues } from '../types/m-shukeibumon-type';
 

@@ -2,7 +2,7 @@
 import { BASHO_ID, NYUSHUKO_SHUBETU_ID } from '@/app/_lib/constants';
 
 import pool from '../postgres';
-import { SCHEMA } from '../supabase';
+import { SCHEMA } from '../schema';
 
 /**
  * 出庫日未定（0時 or NULL）の機材データを取得する

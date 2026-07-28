@@ -1,7 +1,7 @@
 'use server';
 
 import pool from '../postgres';
-import { SCHEMA } from '../supabase';
+import { SCHEMA } from '../schema';
 
 export const selectNyushukoOne = async (
   juchuHeadId: number,

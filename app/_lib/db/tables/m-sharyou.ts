@@ -3,7 +3,7 @@
 import { VehsMasterDialogValues } from '@/app/(main)/(masters)/vehicles-master/_lib/types';
 
 import pool from '../postgres';
-import { SCHEMA } from '../supabase';
+import { SCHEMA } from '../schema';
 import { createClient } from '../supabase-server';
 import { MSharyoDBValues } from '../types/m-sharyo-type';
 

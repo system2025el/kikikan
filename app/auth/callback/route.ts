@@ -3,11 +3,15 @@ import { NextResponse } from 'next/server';
 
 import { createClient } from '@/app/_lib/db/supabase-server';
 
+// オープンリダイレクト対策: 同一オリジンの相対パスであることを確認する
+const isSafeNextPath = (value: string) => value.startsWith('/') && !value.startsWith('//') && !value.startsWith('/\\');
+
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
   const token_hash = requestUrl.searchParams.get('token_hash');
   const type = requestUrl.searchParams.get('type') as EmailOtpType | null;
-  const next = requestUrl.searchParams.get('next') ?? '/signup';
+  const rawNext = requestUrl.searchParams.get('next');
+  const next = rawNext && isSafeNextPath(rawNext) ? rawNext : '/signup';
 
   const origin = requestUrl.origin;
 

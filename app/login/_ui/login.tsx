@@ -52,7 +52,6 @@ const Login = () => {
   const onSubmit = async (data: UserValues) => {
     try {
       const { error } = await login(data);
-      // const { error } = await supabase.auth.signInWithPassword({ email: data.email, password: data.password });
       if (error) {
         const errorLog = new Error('[supabase.auth.signInWithPassword] DBエラー');
         serverErrorLog(errorLog.message);
@@ -71,13 +70,6 @@ const Login = () => {
       await serverErrorLog(errorLog.message);
       setError(`ログインに失敗しました。`);
     }
-
-    // if (true) {
-    //   // OKの場合。
-    // router.push('/dashboard');
-    // } else {
-    //   // NGの場合
-    // }
   };
 
   const handleMockClick = () => {
@@ -98,23 +90,6 @@ const Login = () => {
     router.push('/dashboard');
   };
 
-  // useEffect(() => {
-  //   // const hash = window.location.hash;
-  //   // const params = new URLSearchParams(hash.slice(1)); // '#' を除いてパース！
-  //   // const access_token = params.get('access_token');
-  //   // const refresh_token = params.get('refresh_token');
-  //   // if (access_token && refresh_token) {
-  //   //   setSession(access_token, refresh_token);
-  //   // }
-  //   const initializeAuth = async () => {
-  //     // await handleLogout();
-  //     await supabase.auth.signOut();
-  //     clearUser();
-  //   };
-  //   initializeAuth();
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, []);
-
   useEffect(() => {
     const MIGRATION_KEY = 'auth_migration';
 
@@ -129,30 +104,7 @@ const Login = () => {
       localStorage.removeItem('user-storage');
       localStorage.setItem(MIGRATION_KEY, 'true');
     }
-
-    // const checkAndClear = async () => {
-    //   const session = await sessionCheck();
-
-    //   if (!session) {
-    //     await handleLogout();
-    //     clearUser();
-    //   }
-    // };
-    // checkAndClear();
   }, []);
-
-  // useEffect(() => {
-  //   if (!isHydrated) return;
-  //   const checkUser = async () => {
-  //     const {
-  //       data: { user: authUser },
-  //     } = await supabase.auth.getUser();
-  //     if (authUser && user) {
-  //       router.push('/dashboard');
-  //     }
-  //   };
-  //   checkUser();
-  // }, [isHydrated, user, router, clearUser]);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>

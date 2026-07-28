@@ -3,7 +3,7 @@
 import { BasesMasterDialogValues } from '@/app/(main)/(masters)/bases-master/_lib/types';
 
 import pool from '../postgres';
-import { SCHEMA } from '../supabase';
+import { SCHEMA } from '../schema';
 import { createClient } from '../supabase-server';
 import { MShozokuDBValues } from '../types/m-shozoku-type';
 

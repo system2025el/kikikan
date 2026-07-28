@@ -3,7 +3,7 @@
 import dayjs from 'dayjs';
 
 import { JUCHU_KIZAI_HEAD_KBN } from '../../constants';
-import { SCHEMA } from '../supabase';
+import { SCHEMA } from '../schema';
 import { createClient } from '../supabase-server';
 
 export const selectLoanJuchuData = async (kizaiId: number, date: Date) => {

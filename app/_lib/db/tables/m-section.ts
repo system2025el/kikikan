@@ -3,7 +3,7 @@
 import { SectionsMasterDialogValues } from '@/app/(main)/(masters)/sections-master/_lib/types';
 
 import pool from '../postgres';
-import { SCHEMA } from '../supabase';
+import { SCHEMA } from '../schema';
 import { createClient } from '../supabase-server';
 import { MSectionDBValues } from '../types/m-section-type';
 

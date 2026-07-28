@@ -71,7 +71,6 @@ const Layout = async ({ children }: Readonly<{ children: React.ReactNode }>) => 
   /* jsx
   ---------------------------------------------------------------------------------------------------- */
   return (
-    // <AuthGuard>
     <CustomProvider locale={jaJP}>
       <DirtyProvider>
         <UserStoreInitializer /*user={userData}*/ />
@@ -80,7 +79,6 @@ const Layout = async ({ children }: Readonly<{ children: React.ReactNode }>) => 
         </UserProvider>
       </DirtyProvider>
     </CustomProvider>
-    // </AuthGuard>
   );
 };
 export default Layout;

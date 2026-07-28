@@ -141,7 +141,6 @@ export const EqptMaster = ({ user }: { user: User }) => {
   if (error) throw error;
 
   return (
-    // <PermissionGuard category={'masters'} required={permission.mst_ref}>
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
       <Paper variant="outlined">
         <Box width={'100%'} display={'flex'} px={2} sx={{ minHeight: '30px', maxHeight: '30px' }} alignItems={'center'}>
@@ -287,6 +286,5 @@ export const EqptMaster = ({ user }: { user: User }) => {
         </Dialog>
       </Box>
     </Container>
-    // </PermissionGuard>
   );
 };

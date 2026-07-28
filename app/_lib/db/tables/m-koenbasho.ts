@@ -4,7 +4,7 @@ import { escapeLikeString, escapeOrLikeString } from '@/app/(main)/_lib/escape-s
 import { LocsMasterDialogValues } from '@/app/(main)/(masters)/locations-master/_lib/types';
 
 import pool from '../postgres';
-import { SCHEMA } from '../supabase';
+import { SCHEMA } from '../schema';
 import { createClient } from '../supabase-server';
 import { MKoenbashoDBValues } from '../types/m-koenbasho-type';
 

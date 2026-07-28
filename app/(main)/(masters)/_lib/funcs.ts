@@ -1,7 +1,7 @@
 'use server';
 
 import pool from '@/app/_lib/db/postgres';
-import { SCHEMA } from '@/app/_lib/db/supabase';
+import { SCHEMA } from '@/app/_lib/db/schema';
 import { selectActiveDaibumons } from '@/app/_lib/db/tables/m-daibumon';
 import { selectBundledEqpts } from '@/app/_lib/db/tables/m-kizai';
 import { selectBundledEqptIds } from '@/app/_lib/db/tables/m-kizai-set';

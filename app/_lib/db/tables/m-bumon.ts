@@ -5,7 +5,7 @@ import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 import { BumonsMasterDialogValues } from '@/app/(main)/(masters)/bumons-master/_lib/types';
 
 import pool from '../postgres';
-import { SCHEMA } from '../supabase';
+import { SCHEMA } from '../schema';
 import { createClient } from '../supabase-server';
 import { MBumonDBValues } from '../types/m-bumon-type';
 

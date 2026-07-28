@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 
 import pool from '@/app/_lib/db/postgres';
-import { SCHEMA } from '@/app/_lib/db/supabase';
+import { SCHEMA } from '@/app/_lib/db/schema';
 import { delAndInsertSeikyuDat } from '@/app/_lib/db/tables/t-seikyu-date-juchu-kizai';
 import { updateBillHead } from '@/app/_lib/db/tables/t-seikyu-head';
 import { deleteBillMeisai, insertBillMeisai, updateBillMeisai } from '@/app/_lib/db/tables/t-seikyu-meisai';

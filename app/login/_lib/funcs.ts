@@ -11,12 +11,6 @@ import { UserValues } from './types';
  * @returns {Promise<AuthTokenResponsePassword>} ログイン処理結果
  */
 export const login = async (data: UserValues) => {
-  // try {
-  //   return await supabase.auth.signInWithPassword({ email: data.email, password: data.password });
-  // } catch (e) {
-  //   console.error(e);
-  //   throw e;
-  // }
   try {
     const supabase = await createClient();
     // 2. 取り出したインスタンスに対して .auth を呼び出す

@@ -4,7 +4,7 @@ import { escapeLikeString } from '@/app/(main)/_lib/escape-string';
 import { DaibumonsMasterDialogValues } from '@/app/(main)/(masters)/daibumons-master/_lib/types';
 
 import pool from '../postgres';
-import { SCHEMA } from '../supabase';
+import { SCHEMA } from '../schema';
 import { createClient } from '../supabase-server';
 import { MDaibumonDBValues } from '../types/m-daibumon-type';
 
