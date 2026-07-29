@@ -2257,6 +2257,7 @@ export const confirmHonbanbi = async (
       }
       throw error;
     }
+    return true;
   } catch (e) {
     if (e instanceof Error) {
       console.error(`[ERROR] ${e.message}`);
