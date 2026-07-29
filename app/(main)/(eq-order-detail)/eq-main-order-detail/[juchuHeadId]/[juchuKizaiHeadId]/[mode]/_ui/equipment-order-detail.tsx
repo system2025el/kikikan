@@ -56,6 +56,7 @@ import { addLock, getDic, getLock } from '@/app/(main)/_lib/funcs';
 import { useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
 import { lockCheck, lockRelease } from '@/app/(main)/_lib/lock';
 import { permission } from '@/app/(main)/_lib/permission';
+import { openOrFocusTab } from '@/app/(main)/_lib/tab-focus';
 import { LockValues, User } from '@/app/(main)/_lib/types';
 import { BackButton } from '@/app/(main)/_ui/buttons';
 import { Calendar, DateTime, TestDate } from '@/app/(main)/_ui/date';
@@ -2024,7 +2025,7 @@ const EquipmentOrderDetail = (props: {
       setCopyDialogOpen(false);
       setSnackBarMessage('コピーしました');
       setSnackBarOpen(true);
-      window.open(`/eq-main-order-detail/${juchuHeadData.juchuHeadId}/${newJuchuKizaiHeadId}/view`);
+      openOrFocusTab(`/eq-main-order-detail/${juchuHeadData.juchuHeadId}/${newJuchuKizaiHeadId}/view`);
     } else {
       setSnackBarMessage('コピーに失敗しました');
       setSnackBarOpen(true);
@@ -2196,7 +2197,7 @@ const EquipmentOrderDetail = (props: {
       setSeparationDialogOpen(false);
       setSnackBarMessage('分離しました');
       setSnackBarOpen(true);
-      window.open(`/eq-main-order-detail/${juchuHeadData.juchuHeadId}/${newJuchuKizaiHeadId}/view`);
+      openOrFocusTab(`/eq-main-order-detail/${juchuHeadData.juchuHeadId}/${newJuchuKizaiHeadId}/view`);
     } else {
       setSnackBarMessage('分離に失敗しました');
       setSnackBarOpen(true);
@@ -2889,7 +2890,7 @@ const EquipmentOrderDetail = (props: {
                             />
                             <Button
                               onClick={() =>
-                                window.open(
+                                openOrFocusTab(
                                   `/vehicle-order-detail/${juchuHeadData.juchuHeadId}/0/edit?kbn=1&date=${field.value?.toISOString()}&basho=1`
                                 )
                               }
@@ -2923,7 +2924,7 @@ const EquipmentOrderDetail = (props: {
                             />
                             <Button
                               onClick={() =>
-                                window.open(
+                                openOrFocusTab(
                                   `/vehicle-order-detail/${juchuHeadData.juchuHeadId}/0/edit?kbn=1&date=${field.value?.toISOString()}&basho=2`
                                 )
                               }
@@ -2963,7 +2964,7 @@ const EquipmentOrderDetail = (props: {
                             />
                             <Button
                               onClick={() =>
-                                window.open(
+                                openOrFocusTab(
                                   `/vehicle-order-detail/${juchuHeadData.juchuHeadId}/0/edit?kbn=2&date=${field.value?.toISOString()}&basho=1`
                                 )
                               }
@@ -3000,7 +3001,7 @@ const EquipmentOrderDetail = (props: {
                             />
                             <Button
                               onClick={() =>
-                                window.open(
+                                openOrFocusTab(
                                   `/vehicle-order-detail/${juchuHeadData.juchuHeadId}/0/edit?kbn=2&date=${field.value?.toISOString()}&basho=2`
                                 )
                               }

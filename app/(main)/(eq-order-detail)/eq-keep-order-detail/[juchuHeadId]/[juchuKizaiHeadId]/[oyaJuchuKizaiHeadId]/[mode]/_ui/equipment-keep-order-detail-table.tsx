@@ -25,6 +25,7 @@ import { grey } from '@mui/material/colors';
 import React, { useRef, useState } from 'react';
 
 import { BASHO_ID } from '@/app/_lib/constants';
+import { openOrFocusTab } from '@/app/(main)/_lib/tab-focus';
 import { MemoTooltip } from '@/app/(main)/(eq-order-detail)/_ui/memo-tooltip';
 
 import { KeepJuchuContainerMeisaiValues, KeepJuchuKizaiMeisaiValues } from '../_lib/types';
@@ -243,7 +244,7 @@ const KeepEqTableRow = React.memo(
             variant="text"
             sx={{ p: 0, justifyContent: 'start', textTransform: 'none', color: 'text.primary' }}
             onClick={() =>
-              window.open(`/loan-situation/${row.kizaiId}?date=${oyaShukoDate ? oyaShukoDate.toISOString() : ''}`)
+              openOrFocusTab(`/loan-situation/${row.kizaiId}?date=${oyaShukoDate ? oyaShukoDate.toISOString() : ''}`)
             }
           >
             {row.kizaiNam}
@@ -385,7 +386,7 @@ const KeepContainerTableRow = React.memo(
             variant="text"
             sx={{ p: 0, justifyContent: 'start', textTransform: 'none', color: 'text.primary' }}
             onClick={() =>
-              window.open(`/loan-situation/${row.kizaiId}?date=${oyaShukoDate ? oyaShukoDate.toISOString() : ''}`)
+              openOrFocusTab(`/loan-situation/${row.kizaiId}?date=${oyaShukoDate ? oyaShukoDate.toISOString() : ''}`)
             }
           >
             {row.kizaiNam}

@@ -29,6 +29,7 @@ import { useMemo, useState } from 'react';
 
 import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { permission } from '@/app/(main)/_lib/permission';
+import { openOrFocusTab } from '@/app/(main)/_lib/tab-focus';
 import { User } from '@/app/(main)/_lib/types';
 import { CloseMasterDialogButton } from '@/app/(main)/_ui/buttons';
 import { FormDateX } from '@/app/(main)/_ui/date';
@@ -263,7 +264,7 @@ const BillingStsRow = ({
           <Button
             variant="text"
             sx={{ p: 0, m: 0, minWidth: 1, justifyContent: 'left' }}
-            onClick={() => window.open(`/order/${juchu.juchuId}/view`)}
+            onClick={() => openOrFocusTab(`/order/${juchu.juchuId}/view`)}
           >
             <Box width={60}>{juchu.juchuId}</Box>
           </Button>

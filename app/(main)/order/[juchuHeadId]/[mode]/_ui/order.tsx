@@ -43,6 +43,7 @@ import { getNyukoDate, getRange, getShukoDate } from '@/app/(main)/_lib/date-fun
 import { addLock, getLock } from '@/app/(main)/_lib/funcs';
 import { lockCheck, lockRelease } from '@/app/(main)/_lib/lock';
 import { permission } from '@/app/(main)/_lib/permission';
+import { openOrFocusTab } from '@/app/(main)/_lib/tab-focus';
 import { LockValues, User } from '@/app/(main)/_lib/types';
 import { BackButton } from '@/app/(main)/_ui/buttons';
 import DateX, { RSuiteDateRangePicker, TestDate } from '@/app/(main)/_ui/date';
@@ -581,7 +582,7 @@ export const Order = (props: {
             setEqHeaderList(juchuKizaiHeadDatas);
             setIsJuchuKizaiLoading(false);
           } else {
-            window.open(`/order/${data.juchuHeadid}/view`);
+            openOrFocusTab(`/order/${data.juchuHeadid}/view`);
           }
         } else {
           setSnackBarMessage('コピーに失敗しました');
@@ -722,7 +723,7 @@ export const Order = (props: {
       const lockResult = await lock();
 
       if (lockResult) {
-        window.open(`/vehicle-order-detail/${props.juchuHeadData.juchuHeadId}/0/edit`);
+        openOrFocusTab(`/vehicle-order-detail/${props.juchuHeadData.juchuHeadId}/0/edit`);
       }
     } catch (e) {
       setSnackBarMessage('サーバー接続エラー');
@@ -998,7 +999,7 @@ export const Order = (props: {
             <Grid2 container spacing={1} sx={{ display: save ? 'inline-flex' : 'none' }}>
               <Button
                 onClick={() => {
-                  window.open(`/quotation-list/create?juchuId=${getValues('juchuHeadId')}`);
+                  openOrFocusTab(`/quotation-list/create?juchuId=${getValues('juchuHeadId')}`);
                 }}
                 disabled={isDirty || !(user && user?.permission.juchu & permission.juchu_upd)}
               >

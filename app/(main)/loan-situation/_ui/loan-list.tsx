@@ -22,6 +22,7 @@ import { useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 
 import { permission } from '../../_lib/permission';
+import { openOrFocusTab } from '../../_lib/tab-focus';
 import { Loading } from '../../_ui/loading';
 import { MuiTablePagination } from '../../_ui/table-pagination';
 import { ROWS_PER_MASTER_TABLE_PAGE } from '../../(masters)/_lib/constants';
@@ -171,7 +172,7 @@ export const LoanList = () => {
                     <TableCell align="left" style={styles.style}>
                       <Button
                         variant="text"
-                        onClick={() => window.open(`/loan-situation/${loan.kizaiId}`)}
+                        onClick={() => openOrFocusTab(`/loan-situation/${loan.kizaiId}`)}
                         sx={{ justifyContent: 'start', p: 0, textTransform: 'none' }}
                       >
                         {loan.kizaiNam}

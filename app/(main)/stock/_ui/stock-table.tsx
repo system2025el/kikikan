@@ -13,6 +13,7 @@ import {
 import { red } from '@mui/material/colors';
 
 import { toJapanMDString } from '../../_lib/date-conversion';
+import { openOrFocusTab } from '../../_lib/tab-focus';
 import { EqTableValues, StockTableValues } from '../_lib/types';
 
 type EqTableProps = {
@@ -62,7 +63,7 @@ export const EqTable = (props: EqTableProps) => {
               <TableCell align="left" style={styles.row} sx={{ bgcolor: index % 2 === 1 ? borderColor : undefined }}>
                 <Button
                   variant="text"
-                  onClick={() => window.open(`/loan-situation/${row.kizaiId}`)}
+                  onClick={() => openOrFocusTab(`/loan-situation/${row.kizaiId}`)}
                   sx={{ p: 0, m: 0, justifyContent: 'start', height: 20, textTransform: 'none' }}
                 >
                   {row.kizaiNam}

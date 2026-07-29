@@ -13,6 +13,7 @@ import {
 } from '@mui/material';
 import React from 'react';
 
+import { openOrFocusTab } from '../../_lib/tab-focus';
 import { MinusZaikoValues } from '../_lib/types';
 
 /**
@@ -56,7 +57,7 @@ export const EqptTable = ({ eqpts }: { eqpts: MinusZaikoValues[] }) => {
                       backgroundColor: 'transparent', // ホバー時の背景色を無効化
                     },
                   }}
-                  onClick={() => window.open(`/loan-situation/${eqpt.kizaiId}`, '_blank')}
+                  onClick={() => openOrFocusTab(`/loan-situation/${eqpt.kizaiId}`)}
                 >
                   {eqpt.kizaiNam}
                 </Button>
