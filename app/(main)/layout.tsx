@@ -5,7 +5,7 @@ import 'rsuite/dist/rsuite-no-reset.min.css';
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
-import React from 'react';
+import React, { Suspense } from 'react';
 import { CustomProvider } from 'rsuite';
 import { jaJP } from 'rsuite/esm/locales';
 
@@ -15,6 +15,7 @@ import ThemeProvider from '@/app/_ui/theme-provider';
 import { getCurrentUser } from './_lib/funcs';
 import { DirtyProvider } from './_ui/dirty-context';
 import Sidebar from './_ui/sidebar';
+import { TabFocusResponder } from './_ui/tab-focus-responder';
 import { UserProvider } from './_ui/user-context';
 import { UserStoreInitializer } from './_ui/userstoreInitializer';
 
@@ -74,6 +75,9 @@ const Layout = async ({ children }: Readonly<{ children: React.ReactNode }>) => 
     <CustomProvider locale={jaJP}>
       <DirtyProvider>
         <UserStoreInitializer /*user={userData}*/ />
+        <Suspense fallback={null}>
+          <TabFocusResponder />
+        </Suspense>
         <UserProvider user={userData}>
           <Sidebar user={userData}>{children}</Sidebar>
         </UserProvider>

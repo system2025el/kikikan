@@ -19,6 +19,7 @@ import { useState } from 'react';
 import { BASHO_ID } from '@/app/_lib/constants';
 import { dispColors, statusColors } from '@/app/(main)/_lib/colors';
 import { permission } from '@/app/(main)/_lib/permission';
+import { openOrFocusTab } from '@/app/(main)/_lib/tab-focus';
 import { User } from '@/app/(main)/_lib/types';
 import { useDirty } from '@/app/(main)/_ui/dirty-context';
 
@@ -139,7 +140,7 @@ export const ShukoIdoDenTable = (props: {
                 <TableCell padding="checkbox" align="center">
                   <IconButton
                     onClick={() =>
-                      window.open(`/loan-situation/${row.kizaiId}?date=${row.nyushukoDat ? row.nyushukoDat : ''}`)
+                      openOrFocusTab(`/loan-situation/${row.kizaiId}?date=${row.nyushukoDat ? row.nyushukoDat : ''}`)
                     }
                   >
                     <EventNoteIcon />
