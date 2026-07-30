@@ -91,7 +91,7 @@ const Login = () => {
   };
 
   useEffect(() => {
-    const MIGRATION_KEY = 'auth_migration';
+    const MIGRATION_KEY = 'auth_migration_v2';
 
     if (typeof window === 'undefined') return;
 
@@ -102,6 +102,7 @@ const Login = () => {
         }
       });
       localStorage.removeItem('user-storage');
+      localStorage.removeItem('auth_migration'); // 旧フラグも削除
       localStorage.setItem(MIGRATION_KEY, 'true');
     }
   }, []);
