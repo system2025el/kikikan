@@ -5,8 +5,7 @@ import { PoolClient } from 'pg';
 import { escapeLikeString } from '@/app/(main)/_lib/escape-string';
 
 import pool from '../postgres';
-import { SCHEMA } from '../schema';
-import { createClient } from '../supabase-server';
+import { SCHEMA, supabase } from '../supabase';
 import { MKizaiSetDBValues } from '../types/m-kizai-set-type';
 
 /**
@@ -185,7 +184,6 @@ export const updateEqptSetDB = async (data: MKizaiSetDBValues[], connection: Poo
  * @param {number} kizaiId 削除対象の親機材ID
  */
 export const deleteEqptSets = async (kizaiId: number) => {
-  const supabase = await createClient();
   try {
     await supabase.schema(SCHEMA).from('m_kizai_set').delete().eq('kizai_id', kizaiId).select('*');
   } catch (e) {

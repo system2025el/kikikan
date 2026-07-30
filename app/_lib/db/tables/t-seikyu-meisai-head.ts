@@ -1,8 +1,7 @@
 'use server';
 import { PoolClient } from 'pg';
 
-import { SCHEMA } from '../schema';
-import { createClient } from '../supabase-server';
+import { SCHEMA, supabase } from '../supabase';
 import { SeikyuMeisaiHead } from '../types/t-seikyu-meisai-head-type';
 
 /**
@@ -77,7 +76,6 @@ export const updateBillMeisaiHead = async (data: SeikyuMeisaiHead[], connection:
  * @returns 請求明細ヘッドの配列
  */
 export const selectBillMeisaiHead = async (id: number) => {
-  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)

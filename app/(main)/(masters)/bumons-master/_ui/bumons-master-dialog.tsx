@@ -4,7 +4,7 @@ import { grey } from '@mui/material/colors';
 import { useEffect, useState } from 'react';
 import { Controller, TextareaAutosizeElement, TextFieldElement, useForm } from 'react-hook-form-mui';
 
-import { User } from '@/app/(main)/_lib/types';
+import { User, useUserStore } from '@/app/_lib/stores/usestore';
 import { Loading } from '@/app/(main)/_ui/loading';
 
 import { FormBox, selectNone, SelectTypes } from '../../../_ui/form-box';
@@ -27,7 +27,7 @@ export const BumonsMasterDialog = ({
   handleClose,
   refetchBumons,
 }: {
-  user: User;
+  user: User | null;
   bumonId: number;
   handleClose: () => void;
   refetchBumons: () => void;

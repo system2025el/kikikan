@@ -1,9 +1,5 @@
-import { Typography } from '@mui/material';
 import { Metadata } from 'next';
-import { redirect } from 'next/navigation';
 
-import { getCurrentUser } from '../../_lib/funcs';
-import { permission } from '../../_lib/permission';
 import { getMaxHonbanbiQty, getOrderForQuotation } from '../_lib/funcs';
 import { JuchuValues, QuotHeadValues } from '../_lib/types';
 import { Quotation } from '../_ui/quotation';
@@ -16,18 +12,6 @@ export const metadata: Metadata = {
 const Page = async ({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) => {
   const searchParam = await searchParams;
   const juchuId = Number(searchParam.juchuId);
-
-  const user = await getCurrentUser();
-  if (!user) {
-    await redirect('/login');
-    return;
-  }
-
-  const hasPermission = !!(user.permission.juchu & permission.juchu_upd);
-
-  if (!hasPermission) {
-    return <Typography>このページを閲覧する権限がありません。</Typography>;
-  }
 
   let order: JuchuValues | null = null;
   let honbanbiQty: number | null = null;
@@ -86,7 +70,6 @@ const Page = async ({ searchParams }: { searchParams: Promise<{ [key: string]: s
 
   return (
     <Quotation
-      user={user}
       isNew={true}
       order={
         order ?? {

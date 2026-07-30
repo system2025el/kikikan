@@ -4,8 +4,9 @@ import { Container, Snackbar, Stack } from '@mui/material';
 import { useState } from 'react';
 import { read, utils } from 'xlsx';
 
+import { useUserStore } from '@/app/_lib/stores/usestore';
 import { permission } from '@/app/(main)/_lib/permission';
-import { User } from '@/app/(main)/_lib/types';
+import { PermissionGuard } from '@/app/(main)/_ui/permission-guard';
 
 import { ImportEqptRfidData } from '../_lib/funcs';
 import { EqptImportRowType, EqptImportType, eqptSchema, parseNumber } from '../_lib/types';
@@ -15,7 +16,10 @@ import { Section } from './section';
  * マスタインポート画面
  * @returns {JSX.Element} マスタインポート画面のコンポーネント
  */
-export const ImportMaster = ({ user }: { user: User }) => {
+export const ImportMaster = () => {
+  // ログインユーザ
+  const user = useUserStore((state) => state.user);
+
   const errorRows: number[] = [];
   /* useState ----------------------------------------------------- */
   /** インポートした機材RFIDマスタファイル名 */
@@ -161,25 +165,27 @@ export const ImportMaster = ({ user }: { user: User }) => {
   };
 
   return (
-    <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
-      <Stack direction={'column'} spacing={5} sx={{ minWidth: '100%' }}>
-        <Section
-          masterName={'機材RFID'}
-          fileName={eqptFileName}
-          handleFileUpload={handleFileUpload}
-          handleImport={handleImportEqpt}
-          fileInputId="eqpts-excel-file"
-          push={push}
+    <PermissionGuard category={'masters'} required={permission.mst_upd}>
+      <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
+        <Stack direction={'column'} spacing={5} sx={{ minWidth: '100%' }}>
+          <Section
+            masterName={'機材RFID'}
+            fileName={eqptFileName}
+            handleFileUpload={handleFileUpload}
+            handleImport={handleImportEqpt}
+            fileInputId="eqpts-excel-file"
+            push={push}
+          />
+        </Stack>
+        <Snackbar
+          open={snackBarOpen}
+          autoHideDuration={6000}
+          onClose={() => setSnackBarOpen(false)}
+          message={snackBarMessage}
+          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+          sx={{ marginTop: '65px' }}
         />
-      </Stack>
-      <Snackbar
-        open={snackBarOpen}
-        autoHideDuration={6000}
-        onClose={() => setSnackBarOpen(false)}
-        message={snackBarMessage}
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-        sx={{ marginTop: '65px' }}
-      />
-    </Container>
+      </Container>
+    </PermissionGuard>
   );
 };

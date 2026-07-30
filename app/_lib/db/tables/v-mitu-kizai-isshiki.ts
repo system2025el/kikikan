@@ -1,6 +1,5 @@
 'use server';
-import { SCHEMA } from '../schema';
-import { createClient } from '../supabase-server';
+import { SCHEMA, supabase } from '../supabase';
 
 /**
  * 受注機材ヘッダーリスト取得
@@ -8,7 +7,6 @@ import { createClient } from '../supabase-server';
  * @returns
  */
 export const selectKizaiHeadListWithIsshikiForMitu = async (juchuHeadId: number, kizaiHeadId: number) => {
-  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)

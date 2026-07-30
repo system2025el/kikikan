@@ -1,7 +1,7 @@
 'use server';
 
 import pool from '../postgres';
-import { SCHEMA } from '../schema';
+import { SCHEMA } from '../supabase';
 
 // /**
 //  * 機材明細用在庫データ取得

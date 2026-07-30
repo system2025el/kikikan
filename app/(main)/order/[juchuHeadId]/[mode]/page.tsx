@@ -1,9 +1,6 @@
-import { Typography } from '@mui/material';
 import { Metadata } from 'next';
-import { redirect } from 'next/navigation';
 
-import { getCurrentUser } from '@/app/(main)/_lib/funcs';
-import { permission } from '@/app/(main)/_lib/permission';
+import { useUserStore } from '@/app/_lib/stores/usestore';
 import { Order } from '@/app/(main)/order/[juchuHeadId]/[mode]/_ui/order';
 
 import { getJuchuHead, getJuchuKizaiHeadList, getJuchuSharyoHeadList, getUsers } from './_lib/funcs';
@@ -20,19 +17,6 @@ const Page = async (props: { params: Promise<{ juchuHeadId: string; mode: string
   const juchuHeadId = Number(params.juchuHeadId);
   // 編集モード(edit:編集、view:閲覧)
   const edit = params.mode === 'edit' ? true : false;
-
-  const user = await getCurrentUser();
-  if (!user) {
-    await redirect('/login');
-    return;
-  }
-
-  const required = juchuHeadId === 0 ? permission.juchu_upd : permission.juchu_ref;
-  const hasPermission = !!(user.permission.juchu & required);
-
-  if (!hasPermission) {
-    return <Typography>このページを閲覧する権限がありません。</Typography>;
-  }
 
   const userList = await getUsers();
 
@@ -62,7 +46,6 @@ const Page = async (props: { params: Promise<{ juchuHeadId: string; mode: string
 
     return (
       <Order
-        user={user}
         juchuHeadData={newJuchuHeadData}
         juchuKizaiHeadDatas={newJuchuKizaiHeadData}
         juchusharyoHeadDatas={newJuchuSharyoHeadData}
@@ -84,7 +67,6 @@ const Page = async (props: { params: Promise<{ juchuHeadId: string; mode: string
     }
     return (
       <Order
-        user={user}
         juchuHeadData={juchuHeadData}
         juchuKizaiHeadDatas={juchuKizaiHeadDatas}
         juchusharyoHeadDatas={juchuSharyoHeadDatas}

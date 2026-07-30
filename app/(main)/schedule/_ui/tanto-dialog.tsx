@@ -5,9 +5,10 @@ import { Box, Button, Dialog, DialogTitle, Grid2, Stack, Typography } from '@mui
 import { useEffect, useState } from 'react';
 import { CheckboxElement, TextFieldElement, useForm } from 'react-hook-form-mui';
 
+import { useUserStore } from '@/app/_lib/stores/usestore';
+
 import { toJapanYMDAndDayString } from '../../_lib/date-conversion';
 import { permission } from '../../_lib/permission';
-import { User } from '../../_lib/types';
 import { CloseMasterDialogButton } from '../../_ui/buttons';
 import { insertWeeklyData } from '../_lib/funcs';
 import { WeeklySchema, WeeklyValues } from '../_lib/types';
@@ -18,18 +19,19 @@ import { WeeklySchema, WeeklyValues } from '../_lib/types';
  * @returns {JSX.Element} ダイアログコンポーネント
  */
 export const TantoDialog = ({
-  user,
   open,
   datas,
   setOpen,
   refetch,
 }: {
-  user: User;
   open: boolean;
   datas: WeeklyValues;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
   refetch: () => void;
 }) => {
+  /* ログインユーザー */
+  const user = useUserStore((state) => state.user);
+
   /* useState ---------------------------------------------------------------- */
   /** 処理中 */
   const [isProcessing, setIsProcessing] = useState(false);

@@ -1,10 +1,8 @@
 'use server';
 
-import { SCHEMA } from '../schema';
-import { createClient } from '../supabase-server';
+import { SCHEMA, supabase } from '../supabase';
 
 export const selectActiveSagyoSts = async () => {
-  const supabase = await createClient();
   try {
     return supabase.schema(SCHEMA).from('m_sagyo_sts').select('sts_id, sts_nam').order('sts_id');
   } catch (e) {

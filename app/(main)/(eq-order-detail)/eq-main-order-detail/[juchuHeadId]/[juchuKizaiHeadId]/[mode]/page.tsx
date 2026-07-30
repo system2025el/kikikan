@@ -1,12 +1,8 @@
-import { Typography } from '@mui/material';
 import { subDays } from 'date-fns';
 import { Metadata } from 'next';
-import { redirect } from 'next/navigation';
 
 import { JUCHU_KIZAI_HEAD_KBN, SAGYO_KBN_ID } from '@/app/_lib/constants';
 import { getNyukoDate, getRange, getShukoDate } from '@/app/(main)/_lib/date-funcs';
-import { getCurrentUser } from '@/app/(main)/_lib/funcs';
-import { permission } from '@/app/(main)/_lib/permission';
 
 import { getColor, getDetailJuchuHead, getJuchuContainerMeisai, getNyushukoFixFlag } from '../../../../_lib/funcs';
 import { getHonbanbi, getIdoJuchuKizaiMeisai, getJuchuKizaiHead, getJuchuKizaiMeisai } from './_lib/funcs';
@@ -38,19 +34,6 @@ const Page = async (props: { params: Promise<{ juchuHeadId: string; juchuKizaiHe
   const juchuHeadId = Number(params.juchuHeadId);
   // 受注機材ヘッダーid
   const juchuKizaiHeadId = Number(params.juchuKizaiHeadId);
-
-  const user = await getCurrentUser();
-  if (!user) {
-    await redirect('/login');
-    return;
-  }
-
-  const required = juchuKizaiHeadId === 0 ? permission.juchu_upd : permission.juchu_ref;
-  const hasPermission = !!(user.permission.juchu & required);
-
-  if (!hasPermission) {
-    return <Typography>このページを閲覧する権限がありません。</Typography>;
-  }
 
   // 受注ヘッダーデータ、出発フラグ、本番日背景色
   const [juchuHeadData, shukoFixFlag, nyukoFixFlag, honbanbiColor] = await Promise.all([
@@ -89,7 +72,6 @@ const Page = async (props: { params: Promise<{ juchuHeadId: string; juchuKizaiHe
 
     return (
       <EquipmentOrderDetail
-        user={user}
         juchuHeadData={juchuHeadData}
         juchuKizaiHeadData={newJuchuKizaiHeadData}
         juchuHonbanbiData={newJuchuHonbanbiData}
@@ -114,7 +96,6 @@ const Page = async (props: { params: Promise<{ juchuHeadId: string; juchuKizaiHe
 
     return (
       <EquipmentOrderDetail
-        user={user}
         juchuHeadData={juchuHeadData}
         juchuKizaiHeadData={juchuKizaiHeadData}
         juchuHonbanbiData={juchuHonbanbiData}

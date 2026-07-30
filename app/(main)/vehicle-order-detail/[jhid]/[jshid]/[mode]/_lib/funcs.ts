@@ -3,7 +3,7 @@
 import { redirect } from 'next/navigation';
 
 import pool from '@/app/_lib/db/postgres';
-import { SCHEMA } from '@/app/_lib/db/schema';
+import { SCHEMA, supabase } from '@/app/_lib/db/supabase';
 import { selectActiveVehs } from '@/app/_lib/db/tables/m-sharyou';
 import {
   deleteJuchuSharyoHead,

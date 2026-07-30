@@ -5,7 +5,7 @@ import { Grid2, Snackbar } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { CheckboxElement, TextareaAutosizeElement, TextFieldElement, useForm } from 'react-hook-form-mui';
 
-import { User } from '@/app/(main)/_lib/types';
+import { User, useUserStore } from '@/app/_lib/stores/usestore';
 import { FormBox } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
 
@@ -27,7 +27,7 @@ export const LocationsMasterDialog = ({
   handleClose,
   refetchLocs,
 }: {
-  user: User;
+  user: User | null;
   locationId: number;
   handleClose: () => void;
   refetchLocs: () => Promise<void>;

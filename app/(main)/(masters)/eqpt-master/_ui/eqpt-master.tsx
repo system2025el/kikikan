@@ -19,10 +19,11 @@ import { grey } from '@mui/material/colors';
 import { useEffect, useState } from 'react';
 import { CheckboxElement, Controller, TextFieldElement, useForm } from 'react-hook-form-mui';
 
+import { useUserStore } from '@/app/_lib/stores/usestore';
 import { permission } from '@/app/(main)/_lib/permission';
-import { User } from '@/app/(main)/_lib/types';
 import { selectNone, SelectTypes } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
+import { PermissionGuard } from '@/app/(main)/_ui/permission-guard';
 import { MuiTablePagination } from '@/app/(main)/_ui/table-pagination';
 
 import { FAKE_NEW_ID, ROWS_PER_MASTER_TABLE_PAGE } from '../../_lib/constants';
@@ -32,9 +33,11 @@ import { getFilteredEqpts } from '../_lib/funcs';
 import { EqptsMasterTableValues } from '../_lib/types';
 import { EqMasterDialog } from './eqpt-master-dialog';
 
-export const EqptMaster = ({ user }: { user: User }) => {
+export const EqptMaster = () => {
   /* テーブル1ページの行数 */
   const rowsPerPage = ROWS_PER_MASTER_TABLE_PAGE;
+  /* user情報 */
+  const user = useUserStore((state) => state.user);
   /* useState ------------------------------------------------- */
   /** 表示する機材の配列 */
   const [eqpts, setEqpts] = useState<EqptsMasterTableValues[]>([]);
@@ -141,6 +144,7 @@ export const EqptMaster = ({ user }: { user: User }) => {
   if (error) throw error;
 
   return (
+    // <PermissionGuard category={'masters'} required={permission.mst_ref}>
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
       <Paper variant="outlined">
         <Box width={'100%'} display={'flex'} px={2} sx={{ minHeight: '30px', maxHeight: '30px' }} alignItems={'center'}>
@@ -286,5 +290,6 @@ export const EqptMaster = ({ user }: { user: User }) => {
         </Dialog>
       </Box>
     </Container>
+    // </PermissionGuard>
   );
 };

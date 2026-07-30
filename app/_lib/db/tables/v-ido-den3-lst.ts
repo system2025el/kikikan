@@ -2,8 +2,7 @@
 
 import { PoolClient } from 'pg';
 
-import { SCHEMA } from '../schema';
-import { createClient } from '../supabase-server';
+import { SCHEMA, supabase } from '../supabase';
 
 /**
  * 移動伝票取得
@@ -14,7 +13,6 @@ import { createClient } from '../supabase-server';
  * @returns
  */
 export const selectIdoDen = async (sagyoKbnId: number, sagyoSijiId: number, sagyoDenDat: string, sagyoId: number) => {
-  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)
@@ -38,7 +36,6 @@ export const selectIdoDenOne = async (
   sagyoId: number,
   kizaiId: number
 ) => {
-  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)

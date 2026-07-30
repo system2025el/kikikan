@@ -1,12 +1,8 @@
-import { Typography } from '@mui/material';
 import { subDays } from 'date-fns';
 import { Metadata } from 'next';
-import { redirect } from 'next/navigation';
 
 import { JUCHU_KIZAI_HEAD_KBN, SAGYO_KBN_ID } from '@/app/_lib/constants';
 import { getNyukoDate, getRange, getShukoDate } from '@/app/(main)/_lib/date-funcs';
-import { getCurrentUser } from '@/app/(main)/_lib/funcs';
-import { permission } from '@/app/(main)/_lib/permission';
 import { StockTableValues } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';
 
 import { getDetailJuchuHead, getJuchuKizaiNyushuko, getNyushukoFixFlag } from '../../../../../_lib/funcs';
@@ -53,19 +49,6 @@ const Page = async (props: {
   // 編集モード(edit:編集、view:閲覧)
   const edit = params.mode === 'edit' ? true : false;
 
-  const user = await getCurrentUser();
-  if (!user) {
-    await redirect('/login');
-    return;
-  }
-
-  const required = juchuKizaiHeadId === 0 ? permission.juchu_upd : permission.juchu_ref;
-  const hasPermission = !!(user.permission.juchu & required);
-
-  if (!hasPermission) {
-    return <Typography>このページを閲覧する権限がありません。</Typography>;
-  }
-
   // 受注ヘッダーデータ、親受注機材入出庫データ、入庫フラグ
   const [juchuHeadData, oyaJuchuKizaiHeadData, nyukoFixFlag] = await Promise.all([
     getDetailJuchuHead(juchuHeadId),
@@ -109,7 +92,6 @@ const Page = async (props: {
 
     return (
       <EquipmentReturnOrderDetail
-        user={user}
         juchuHeadData={juchuHeadData}
         oyaJuchuKizaiHeadData={oyaJuchuKizaiHeadData}
         returnJuchuKizaiHeadData={newReturnJuchuKizaiHeadData}
@@ -132,7 +114,6 @@ const Page = async (props: {
 
     return (
       <EquipmentReturnOrderDetail
-        user={user}
         juchuHeadData={juchuHeadData}
         oyaJuchuKizaiHeadData={oyaJuchuKizaiHeadData}
         returnJuchuKizaiHeadData={returnJuchuKizaiHeadData}

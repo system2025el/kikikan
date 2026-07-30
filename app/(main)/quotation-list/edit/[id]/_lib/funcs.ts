@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 
 import pool from '@/app/_lib/db/postgres';
-import { SCHEMA } from '@/app/_lib/db/schema';
+import { SCHEMA } from '@/app/_lib/db/supabase';
 import { updateQuotHead } from '@/app/_lib/db/tables/t-mitu-head';
 import { deleteQuotMeisai, insertQuotMeisai, updateQuotMeisai } from '@/app/_lib/db/tables/t-mitu-meisai';
 import {

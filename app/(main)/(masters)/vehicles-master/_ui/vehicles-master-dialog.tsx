@@ -3,7 +3,7 @@ import { Grid2, Snackbar } from '@mui/material';
 import { JSX, useEffect, useState } from 'react';
 import { CheckboxElement, TextareaAutosizeElement, TextFieldElement, useForm } from 'react-hook-form-mui';
 
-import { User } from '@/app/(main)/_lib/types';
+import { User, useUserStore } from '@/app/_lib/stores/usestore';
 
 import { FormBox } from '../../../_ui/form-box';
 import { Loading } from '../../../_ui/loading';
@@ -24,7 +24,7 @@ export const VehiclesMasterDialog = ({
   handleClose,
   refetchVehs,
 }: {
-  user: User;
+  user: User | null;
   vehicleId: number;
   handleClose: () => void;
   refetchVehs: () => Promise<void>;

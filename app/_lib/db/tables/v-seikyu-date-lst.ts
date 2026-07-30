@@ -9,8 +9,7 @@ import { BillingStsSearchValues, UnbilledCustsSearchValues } from '@/app/(main)/
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 
 import pool from '../postgres';
-import { SCHEMA } from '../schema';
-import { createClient } from '../supabase-server';
+import { SCHEMA, supabase } from '../supabase';
 
 /**
  * 受注請求状況一覧を取得する関数
@@ -19,7 +18,6 @@ import { createClient } from '../supabase-server';
  */
 export const selectFilteredBillingSituations = async (queries: BillingStsSearchValues) => {
   const { selectedDate, radio, radioKokyaku, kokyaku, unbilledCusts, kokyakuTantoNam, sts } = queries;
-  const supabase = await createClient();
 
   const builder = supabase.schema(SCHEMA).from('v_seikyu_date_lst').select('*').eq('shuko_fix_flg', 1);
 
@@ -389,7 +387,6 @@ export const selectJuchuKizaiHeadNamListFormBill = async (queries: {
   juchuId: number | null;
   dat: Date;
 }) => {
-  const supabase = await createClient();
   const builder = supabase
     .schema(SCHEMA)
     .from('v_seikyu_date_lst')
@@ -575,7 +572,6 @@ export const selectJuchuKizaiMeisaiDetailsForBill = async (juchuId: number, kiza
 
 export const selectUnbilledCusts = async (queries: UnbilledCustsSearchValues) => {
   const { kokyaku, radio, selectedDate } = queries;
-  const supabase = await createClient();
 
   const builder = supabase
     .schema(SCHEMA)

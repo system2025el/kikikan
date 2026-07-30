@@ -4,7 +4,6 @@ import AddIcon from '@mui/icons-material/Add';
 import { Box, Button, Container, Dialog, Divider, Grid2, Paper, TableContainer, Typography } from '@mui/material';
 import { SetStateAction, useEffect, useState } from 'react';
 
-import { User } from '@/app/(main)/_lib/types';
 import { Loading } from '@/app/(main)/_ui/loading';
 import { MuiTablePagination } from '@/app/(main)/_ui/table-pagination';
 
@@ -21,7 +20,7 @@ import { BasesMasterDialog } from './bases-master-dailog';
  * @param {bases} 拠点リスト配列
  * @returns {JSX.Element} 拠点マスタコンポーネント
  */
-export const BasesMaster = ({ user }: { user: User }) => {
+export const BasesMaster = () => {
   /** 1ページごとの表示数 */
   const rowsPerPage = ROWS_PER_MASTER_TABLE_PAGE;
 
@@ -126,7 +125,7 @@ export const BasesMaster = ({ user }: { user: User }) => {
           </TableContainer>
         )}
         <Dialog open={dialogOpen} fullScreen>
-          <BasesMasterDialog user={user} handleClose={handleCloseDialog} baseId={openId} refetchBases={refetchBases} />
+          <BasesMasterDialog handleClose={handleCloseDialog} baseId={openId} refetchBases={refetchBases} />
         </Dialog>
       </Box>
     </Container>

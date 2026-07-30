@@ -2,8 +2,7 @@
 
 import { PoolClient } from 'pg';
 
-import { SCHEMA } from '../schema';
-import { createClient } from '../supabase-server';
+import { SCHEMA, supabase } from '../supabase';
 import { JuchuKizaiMeisai } from '../types/t-juchu-kizai-meisai-type';
 
 /**
@@ -13,7 +12,6 @@ import { JuchuKizaiMeisai } from '../types/t-juchu-kizai-meisai-type';
  * @returns 受注機材明細id最大値
  */
 export const selectJuchuKizaiMeisaiMaxId = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
-  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)
@@ -38,7 +36,6 @@ export const selectJuchuKizaiMeisaiMaxId = async (juchuHeadId: number, juchuKiza
  * @returns
  */
 export const selectJuchuKizaiMeisaiKizaiTanka = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
-  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)

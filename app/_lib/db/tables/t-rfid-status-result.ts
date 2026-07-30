@@ -2,8 +2,7 @@
 
 import { PoolClient } from 'pg';
 
-import { SCHEMA } from '../schema';
-import { createClient } from '../supabase-server';
+import { SCHEMA, supabase } from '../supabase';
 import { RfidStatusResultValues } from '../types/t-rfid-status-result-type';
 
 /**
@@ -75,7 +74,6 @@ export const insertNewRfidSts = async (data: RfidStatusResultValues, connection:
  * @returns {{}}
  */
 export const selectOneRfidStatusResult = async (id: string) => {
-  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)

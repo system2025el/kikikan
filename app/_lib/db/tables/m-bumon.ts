@@ -5,8 +5,7 @@ import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 import { BumonsMasterDialogValues } from '@/app/(main)/(masters)/bumons-master/_lib/types';
 
 import pool from '../postgres';
-import { SCHEMA } from '../schema';
-import { createClient } from '../supabase-server';
+import { SCHEMA, supabase } from '../supabase';
 import { MBumonDBValues } from '../types/m-bumon-type';
 
 // /**
@@ -61,7 +60,6 @@ import { MBumonDBValues } from '../types/m-bumon-type';
  * @returns bumon_idが一致する部門
  */
 export const selectOneBumon = async (id: number) => {
-  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)
@@ -117,7 +115,6 @@ export const insertNewBumon = async (data: BumonsMasterDialogValues, user: strin
  * @param id 更新する部門のbumon_id
  */
 export const upDateBumonDB = async (data: MBumonDBValues) => {
-  const supabase = await createClient();
   try {
     await supabase
       .schema(SCHEMA)

@@ -3,8 +3,7 @@
 import { PoolClient } from 'pg';
 
 import pool from '../postgres';
-import { SCHEMA } from '../schema';
-import { createClient } from '../supabase-server';
+import { SCHEMA, supabase } from '../supabase';
 import { MRfidDBValues } from '../types/m-rfid-type';
 
 /**
@@ -13,7 +12,6 @@ import { MRfidDBValues } from '../types/m-rfid-type';
  * @returns
  */
 export const selectCountOfTheEqpt = async (id: number) => {
-  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)
@@ -156,7 +154,6 @@ export const updateRfidTagDelFlgs = async (
  * @param {{ del_flg: number; upd_dat: string; upd_user: string }} data 更新するデータ
  */
 export const updRfidDelFlgDB = async (tagId: string, data: { del_flg: number; upd_dat: string; upd_user: string }) => {
-  const supabase = await createClient();
   try {
     return await supabase.schema(SCHEMA).from('m_rfid').update(data).like('rfid_tag_id', tagId);
   } catch (e) {

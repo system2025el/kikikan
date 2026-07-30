@@ -1,15 +1,10 @@
 'use server';
 
-// import { supabase } from '@/app/_lib/db/supabase';
-import { cache } from 'react';
-
-import { createClient } from '@/app/_lib/db/supabase-server';
+import { supabase } from '@/app/_lib/db/supabase';
 import { selectDic } from '@/app/_lib/db/tables/m-dic';
 import { deleteLock, insertLock, selectLock, updateLock } from '@/app/_lib/db/tables/t-lock';
 
-// import { User } from '@/app/_lib/stores/usestore';
-import { getChosenUser } from '../(masters)/users-master/_lib/funcs';
-import { LockValues, User } from './types';
+import { LockValues } from './types';
 
 /**
  * インデント文字取得
@@ -175,45 +170,8 @@ export const delLock = async (lockShubetu: number, headId: number) => {
  * @returns
  */
 export const sessionCheck = async () => {
-  const supabase = await createClient();
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  return user;
+    data: { session },
+  } = await supabase.auth.getSession();
+  return session;
 };
-
-/**
- * ログアウト処理
- */
-export const logout = async () => {
-  const supabase = await createClient();
-  const { error } = await supabase.auth.signOut();
-  if (error) {
-    console.error(error);
-    throw new Error('[supabase.auth.signOut] DBエラー:', { cause: error });
-  }
-};
-
-/**
- * 現在のユーザー情報を取得
- */
-export const getCurrentUser = cache(async () => {
-  const supabase = await createClient();
-  const {
-    data: { user: authUser },
-  } = await supabase.auth.getUser();
-
-  if (!authUser) return null;
-
-  const data = await getChosenUser(authUser.email!);
-  if (!data) return null;
-
-  const user: User = {
-    id: data.shainCod ?? '',
-    name: data.tantouNam,
-    email: data.mailAdr,
-    permission: data.permission,
-  };
-
-  return user;
-});

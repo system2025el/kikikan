@@ -18,9 +18,9 @@ import { usePathname, useRouter } from 'next/navigation';
 import { Dispatch, SetStateAction, useState } from 'react';
 
 import { JUCHU_KIZAI_HEAD_KBN } from '@/app/_lib/constants';
+import { User } from '@/app/_lib/stores/usestore';
 import { dispColors, statusColors } from '@/app/(main)/_lib/colors';
 import { permission } from '@/app/(main)/_lib/permission';
-import { User } from '@/app/(main)/_lib/types';
 
 import { ShukoDetailTableValues } from '../_lib/types';
 

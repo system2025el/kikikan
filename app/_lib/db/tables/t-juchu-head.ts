@@ -1,7 +1,6 @@
 'use server';
 
-import { SCHEMA } from '../schema';
-import { createClient } from '../supabase-server';
+import { SCHEMA, supabase } from '../supabase';
 import { JuchuHead } from '../types/t-juchu-head-type';
 
 /**
@@ -9,7 +8,6 @@ import { JuchuHead } from '../types/t-juchu-head-type';
  * @returns 受注ヘッダーid最大値
  */
 export const selectMaxId = async () => {
-  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)
@@ -31,7 +29,6 @@ export const selectMaxId = async () => {
  * @returns 受注ヘッダーデータ
  */
 export const selectJuchuHead = async (juchuHeadId: number) => {
-  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)
@@ -52,7 +49,6 @@ export const selectJuchuHead = async (juchuHeadId: number) => {
  * @param juchuHeadId 受注ヘッダーid
  */
 export const insertJuchuHead = async (data: JuchuHead) => {
-  const supabase = await createClient();
   try {
     return await supabase.schema(SCHEMA).from('t_juchu_head').insert(data);
   } catch (e) {
@@ -66,7 +62,6 @@ export const insertJuchuHead = async (data: JuchuHead) => {
  * @returns 正誤
  */
 export const updateJuchuHead = async (data: JuchuHead) => {
-  const supabase = await createClient();
   try {
     return await supabase.schema(SCHEMA).from('t_juchu_head').update(data).eq('juchu_head_id', data.juchu_head_id);
   } catch (e) {

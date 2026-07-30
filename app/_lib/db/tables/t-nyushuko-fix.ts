@@ -2,8 +2,7 @@
 
 import { PoolClient } from 'pg';
 
-import { SCHEMA } from '../schema';
-import { createClient } from '../supabase-server';
+import { SCHEMA, supabase } from '../supabase';
 import { NyushukoFix } from '../types/t-nyushuko-fix-type';
 
 /**
@@ -15,7 +14,6 @@ import { NyushukoFix } from '../types/t-nyushuko-fix-type';
  * @returns
  */
 export const selectNyushukoFixFlag = async (juchuHeadId: number, juchuKizaiHeadId: number, sagyoKbnId: number) => {
-  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)
@@ -45,7 +43,6 @@ export const selectSagyoIdFilterNyushukoFixFlag = async (
   sagyoDenDat: string,
   sagyoId: number
 ) => {
-  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)
@@ -72,7 +69,6 @@ export const selectNyushukoFixConfirm = async (data: {
   juchu_kizai_head_id: number;
   sagyo_id: number;
 }) => {
-  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)

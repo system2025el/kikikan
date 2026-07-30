@@ -4,8 +4,7 @@ import { escapeLikeString } from '@/app/(main)/_lib/escape-string';
 import { ShukeibumonsMasterDialogValues } from '@/app/(main)/(masters)/shukeibumons-master/_lib/types';
 
 import pool from '../postgres';
-import { SCHEMA } from '../schema';
-import { createClient } from '../supabase-server';
+import { SCHEMA, supabase } from '../supabase';
 import { MShukeibumonDBValues } from '../types/m-shukeibumon-type';
 
 /**
@@ -13,7 +12,6 @@ import { MShukeibumonDBValues } from '../types/m-shukeibumon-type';
  * @returns 有効な集計部門のidと名前の配列
  */
 export const selectActiveShukeibumons = async () => {
-  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)
@@ -32,7 +30,6 @@ export const selectActiveShukeibumons = async () => {
  * @returns shukei_bumon_nameで検索された集計部門マスタの配列 検索無しなら全件
  */
 export const selectFilteredShukeibumons = async (query: string) => {
-  const supabase = await createClient();
   const builder = supabase
     .schema(SCHEMA)
     .from('m_shukei_bumon')
@@ -57,7 +54,6 @@ export const selectFilteredShukeibumons = async (query: string) => {
  * @returns shukei_bumon_idが一致する集計部門
  */
 export const selectOneShukeibumon = async (id: number) => {
-  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)
@@ -103,7 +99,6 @@ export const insertNewShukeibumon = async (data: ShukeibumonsMasterDialogValues,
  * @param id 更新する集計部門のshukei_bumon_id
  */
 export const upDateShukeibumonDB = async (data: MShukeibumonDBValues) => {
-  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)

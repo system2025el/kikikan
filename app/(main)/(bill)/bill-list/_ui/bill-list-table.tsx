@@ -25,9 +25,9 @@ import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form-mui';
 
+import { useUserStore } from '@/app/_lib/stores/usestore';
 import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { permission } from '@/app/(main)/_lib/permission';
-import { User } from '@/app/(main)/_lib/types';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
 import { MuiTablePagination } from '@/app/(main)/_ui/table-pagination';
@@ -38,7 +38,6 @@ import { getFilteredBills, updBillDelFlg } from '../_lib/funcs';
 import { BillSearchValues, BillsListTableValues } from '../_lib/types';
 
 export const BillListTable = ({
-  user,
   bills,
   isLoading,
   page,
@@ -49,7 +48,6 @@ export const BillListTable = ({
   setIsFirst,
   setPage,
 }: {
-  user: User;
   bills: BillsListTableValues[];
   isLoading: boolean;
   isFirst: boolean;
@@ -63,6 +61,8 @@ export const BillListTable = ({
 }) => {
   /** テーブル1ページの行数 */
   const rowsPerPage = ROWS_PER_MASTER_TABLE_PAGE;
+  /** ユーザー情報 */
+  const user = useUserStore((state) => state.user);
 
   /* useState -------------------------------------------------- */
   /** 削除ダイアログの開閉 */

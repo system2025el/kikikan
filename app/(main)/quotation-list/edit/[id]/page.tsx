@@ -1,9 +1,4 @@
-import { Typography } from '@mui/material';
 import { Metadata } from 'next';
-import { redirect } from 'next/navigation';
-
-import { getCurrentUser } from '@/app/(main)/_lib/funcs';
-import { permission } from '@/app/(main)/_lib/permission';
 
 import { getChosenQuot } from '../../_lib/funcs';
 import { QuotHeadValues } from '../../_lib/types';
@@ -17,19 +12,6 @@ export const metadata: Metadata = {
 const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
   const param = await params;
   const quotId = Number(param.id);
-
-  const user = await getCurrentUser();
-  if (!user) {
-    await redirect('/login');
-    return;
-  }
-
-  const hasPermission = !!(user.permission.juchu & permission.juchu_ref);
-
-  if (!hasPermission) {
-    return <Typography>このページを閲覧する権限がありません。</Typography>;
-  }
-
   const data = await getChosenQuot(quotId);
   const quot: QuotHeadValues = {
     ...data.m,
@@ -58,7 +40,7 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
     nebikiAmt: null,
     zeiKbn: null,
   };
-  return <Quotation user={user} order={order} isNew={false} quot={quot} />;
+  return <Quotation order={order} isNew={false} quot={quot} />;
 };
 
 export default Page;

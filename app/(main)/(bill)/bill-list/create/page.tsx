@@ -1,10 +1,6 @@
-import { Typography } from '@mui/material';
 import { Metadata } from 'next';
-import { redirect } from 'next/navigation';
 
 import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
-import { getCurrentUser } from '@/app/(main)/_lib/funcs';
-import { permission } from '@/app/(main)/_lib/permission';
 import { getChosenCustomerIdAndName } from '@/app/(main)/(masters)/customers-master/_lib/funcs';
 
 import { BillHeadValues } from '../_lib/types';
@@ -19,18 +15,6 @@ export const metadata: Metadata = {
 const Page = async ({ searchParams }: { searchParams: Promise<{ [key: string]: string | undefined }> }) => {
   const searchParam = await searchParams;
   const { kokyakuId, date, flg, tantou } = searchParam;
-
-  const user = await getCurrentUser();
-  if (!user) {
-    await redirect('/login');
-    return;
-  }
-
-  const hasPermission = !!(user.permission.juchu & permission.juchu_upd);
-
-  if (!hasPermission) {
-    return <Typography>このページを閲覧する権限がありません。</Typography>;
-  }
 
   const custs = await getChosenCustomerIdAndName(Number(kokyakuId));
   const juchus = await getJuchusForBill({
@@ -86,7 +70,7 @@ const Page = async ({ searchParams }: { searchParams: Promise<{ [key: string]: s
     zeiAmt: zeiAmt === 0 ? null : zeiAmt,
     gokeiAmt: chukei + zeiAmt,
   };
-  return <Bill user={user} isNew={true} bill={bill} />;
+  return <Bill isNew={true} bill={bill} />;
 };
 
 export default Page;

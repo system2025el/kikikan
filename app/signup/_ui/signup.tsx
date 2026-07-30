@@ -1,15 +1,14 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Box, Button, Stack, Typography } from '@mui/material';
+import { Box, Button, Stack, TextField, Typography } from '@mui/material';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { TextFieldElement, useForm } from 'react-hook-form-mui';
 
-// import { supabase } from '@/app/_lib/db/supabase';
-import { LoadingOverlay } from '@/app/(main)/_ui/loading';
+import { supabase } from '@/app/_lib/db/supabase';
+import { Loading } from '@/app/(main)/_ui/loading';
 
-import { signup } from '../_lib/funcs';
 import { SignupSchema, SignupValues } from '../_lib/types';
 
 export const Signup = () => {
@@ -33,85 +32,54 @@ export const Signup = () => {
       return;
     }
 
-    setIsProcessing(true);
-    setError('');
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
 
-    try {
-      const result = await signup(data.password, data.email);
-
-      if (result.error) {
-        setError(result.error);
-        setIsProcessing(false);
-      } else {
-        router.replace('/login');
-      }
-    } catch (e) {
-      setError('通信エラーが発生しました。');
-      setIsProcessing(false);
+    if (userError || !user) {
+      setError('セッションが切断されました。再度メールから開き直してください。');
+      return;
     }
 
-    // const {
-    //   data: { user },
-    //   error: userError,
-    // } = await supabase.auth.getUser();
+    if (user?.email === data.email) {
+      const { error: updateError } = await supabase.auth.updateUser({ password: data.password });
 
-    // if (userError || !user) {
-    //   setError('セッションが切断されました。再度メールから開き直してください。');
-    //   return;
-    // }
-
-    // if (user?.email === data.email) {
-    //   const { error: updateError } = await supabase.auth.updateUser({ password: data.password });
-
-    //   if (updateError) {
-    //     setError(`登録に失敗しました: ${updateError.message}`);
-    //   } else {
-    //     await supabase.auth.signOut();
-    //     router.replace('/login');
-    //   }
-    // } else {
-    //   setError('入力されたメールアドレスが登録情報と一致しません。');
-    // }
+      if (updateError) {
+        setError(`登録に失敗しました: ${updateError.message}`);
+      } else {
+        await supabase.auth.signOut();
+        router.replace('/login');
+      }
+    } else {
+      setError('入力されたメールアドレスが登録情報と一致しません。');
+    }
   };
 
-  // useEffect(() => {
-  //   const supabase = createClient();
+  useEffect(() => {
+    const handleCallback = async () => {
+      const { searchParams } = new URL(window.location.href);
+      const code = searchParams.get('code');
+      if (code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(code);
+        if (error) {
+          setError('認証コードが無効または期限切れです。');
+        }
+      } else {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        if (!session) {
+          setError('認証セッションが見つかりません。メールのリンクからアクセスしてください。');
+        }
+      }
+      setIsProcessing(false);
+    };
 
-  //   const handleAuth = async () => {
-  //     // 1. URLのハッシュを取得
-  //     const hash = window.location.hash;
-  //     if (!hash) {
-  //       console.log('URLにハッシュがありません');
-  //       return;
-  //     }
+    handleCallback();
+  }, []);
 
-  //     // 2. ハッシュから access_token と refresh_token を抽出
-  //     const params = new URLSearchParams(hash.substring(1));
-  //     const accessToken = params.get('access_token');
-  //     const refreshToken = params.get('refresh_token');
-
-  //     if (accessToken && refreshToken) {
-  //       console.log('ハッシュからトークンを抽出しました。セットします...');
-
-  //       // 3. SDKにセッションを強制セット
-  //       const { data, error } = await supabase.auth.setSession({
-  //         access_token: accessToken,
-  //         refresh_token: refreshToken,
-  //       });
-
-  //       if (error) {
-  //         console.error('セッションセット失敗:', error.message);
-  //       } else {
-  //         console.log('セッションセット成功！イベントを確認します...');
-  //         // ここで F12 の Cookie / LocalStorage を確認してください
-  //       }
-  //     }
-  //   };
-
-  //   handleAuth();
-  // }, []);
-
-  if (isProcessing) return <LoadingOverlay />;
+  if (isProcessing) return <Loading />;
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>

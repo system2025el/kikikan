@@ -4,8 +4,7 @@ import { escapeLikeString, escapeOrLikeString } from '@/app/(main)/_lib/escape-s
 import { LocsMasterDialogValues } from '@/app/(main)/(masters)/locations-master/_lib/types';
 
 import pool from '../postgres';
-import { SCHEMA } from '../schema';
-import { createClient } from '../supabase-server';
+import { SCHEMA, supabase } from '../supabase';
 import { MKoenbashoDBValues } from '../types/m-koenbasho-type';
 
 /**
@@ -13,7 +12,6 @@ import { MKoenbashoDBValues } from '../types/m-koenbasho-type';
  * @returns 有効な顧客のリスト
  */
 export const selectActiveLocations = async () => {
-  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)
@@ -33,7 +31,6 @@ export const selectActiveLocations = async () => {
  * @returns {Promise<LocsDialogValues[]>} 公演場所マスタテーブルに表示するデータ（ 検索キーワードが空の場合は全て ）
  */
 export const selectFilteredLocs = async (query: string) => {
-  const supabase = await createClient();
   const builder = supabase
     .schema(SCHEMA)
     .from('m_koenbasho')
@@ -59,7 +56,6 @@ export const selectFilteredLocs = async (query: string) => {
  * @returns 公演場所IDが一致する公演場所情報
  */
 export const selectOneLoc = async (id: number) => {
-  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)
@@ -124,7 +120,6 @@ export const insertNewLoc = async (data: LocsMasterDialogValues, user: string) =
  * @param id 更新する公演場所のkoenbasho_id
  */
 export const upDateLocDB = async (data: MKoenbashoDBValues) => {
-  const supabase = await createClient();
   try {
     await supabase
       .schema(SCHEMA)

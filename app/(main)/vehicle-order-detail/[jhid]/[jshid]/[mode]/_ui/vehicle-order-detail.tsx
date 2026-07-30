@@ -43,12 +43,13 @@ import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import { SelectElement, TextFieldElement } from 'react-hook-form-mui';
 
 import { LOCK_SHUBETU } from '@/app/_lib/constants';
+import { useUserStore } from '@/app/_lib/stores/usestore';
 import { toJapanTimeString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { addLock, delLock, getLock } from '@/app/(main)/_lib/funcs';
 import { useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
 import { lockCheck, lockRelease } from '@/app/(main)/_lib/lock';
 import { permission } from '@/app/(main)/_lib/permission';
-import { LockValues, User } from '@/app/(main)/_lib/types';
+import { LockValues } from '@/app/(main)/_lib/types';
 import { BackButton, CloseMasterDialogButton } from '@/app/(main)/_ui/buttons';
 import { DateTime, TestDate } from '@/app/(main)/_ui/date';
 import { IsDirtyAlertDialog, useDirty } from '@/app/(main)/_ui/dirty-context';
@@ -79,12 +80,10 @@ import {
 } from '../_lib/funcs';
 
 const VehicleOrderDetail = ({
-  user,
   juchuHeadData,
   sharyoHeadId,
   edit,
 }: {
-  user: User;
   juchuHeadData: DetailOerValues;
   sharyoHeadId: number;
   idoJuchuKizaiMeisaiData: IdoJuchuKizaiMeisaiValues[] | undefined;
@@ -97,6 +96,8 @@ const VehicleOrderDetail = ({
   edit: boolean;
   fixFlag: boolean;
 }) => {
+  /** ログインユーザ */
+  const user = useUserStore((state) => state.user);
   /** ルーター */
   const router = useRouter();
   /** クエリパラメータ */

@@ -2,8 +2,7 @@
 
 import { PoolClient } from 'pg';
 
-import { SCHEMA } from '../schema';
-import { createClient } from '../supabase-server';
+import { SCHEMA, supabase } from '../supabase';
 import { SeikyuHead } from '../types/t-seikyu-head-type';
 
 /**
@@ -71,7 +70,6 @@ export const updateBillHead = async (data: SeikyuHead, connection: PoolClient) =
  * @returns 請求ヘッド情報
  */
 export const selectChosenSeikyu = async (id: number) => {
-  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)
@@ -95,7 +93,6 @@ export const selectChosenSeikyu = async (id: number) => {
  * @param {number[]}ids 請求ヘッダIDの配列
  */
 export const updBillHeadDelFlg = async (ids: number[]) => {
-  const supabase = await createClient();
   try {
     await supabase.schema(SCHEMA).from('t_seikyu_head').update({ del_flg: 1 }).in('seikyu_head_id', ids);
   } catch (e) {

@@ -2,7 +2,7 @@
 
 import { PoolClient } from 'pg';
 
-import { SCHEMA } from '../schema';
+import { SCHEMA } from '../supabase';
 import { MIsshikiSetDBValues } from '../types/m-issiki-set-type';
 
 /**

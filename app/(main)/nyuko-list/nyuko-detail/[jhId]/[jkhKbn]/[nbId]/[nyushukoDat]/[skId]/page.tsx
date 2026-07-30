@@ -1,9 +1,4 @@
-import { Typography } from '@mui/material';
 import { Metadata } from 'next';
-import { redirect } from 'next/navigation';
-
-import { getCurrentUser } from '@/app/(main)/_lib/funcs';
-import { permission } from '@/app/(main)/_lib/permission';
 
 import { getNyukoDetail, getNyukoDetailTable, getNyukoFixFlag } from './_lib/funcs';
 import { NyukoDetailValues } from './_lib/types';
@@ -44,18 +39,6 @@ const Page = async (props: {
 }) => {
   const params = await props.params;
 
-  const user = await getCurrentUser();
-  if (!user) {
-    await redirect('/login');
-    return;
-  }
-
-  const hasPermission = !!(user.permission.nyushuko & permission.nyushuko_ref);
-
-  if (!hasPermission) {
-    return <Typography>このページを閲覧する権限がありません。</Typography>;
-  }
-
   // 入庫詳細、入庫詳細テーブルデータ
   const [nyukoDetailData, nyukoDetailTableData] = await Promise.all([
     getNyukoDetail(
@@ -86,12 +69,7 @@ const Page = async (props: {
     Number(params.nbId)
   );
   return (
-    <NyukoDetail
-      user={user}
-      nyukoDetailData={nyukoDetailData}
-      nyukoDetailTableData={nyukoDetailTableData}
-      fixFlag={fixFlag}
-    />
+    <NyukoDetail nyukoDetailData={nyukoDetailData} nyukoDetailTableData={nyukoDetailTableData} fixFlag={fixFlag} />
   );
 };
 export default Page;

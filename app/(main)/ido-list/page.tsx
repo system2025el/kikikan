@@ -1,10 +1,6 @@
-import { Typography } from '@mui/material';
 import { Metadata } from 'next';
-import { redirect } from 'next/navigation';
 
 import { toJapanYMDString } from '../_lib/date-conversion';
-import { getCurrentUser } from '../_lib/funcs';
-import { permission } from '../_lib/permission';
 import { getIdoList } from './_lib/funcs';
 import { IdoTableValues } from './_lib/types';
 import { IdoList } from './_ui/ido-list';
@@ -15,17 +11,12 @@ export const metadata: Metadata = {
 };
 
 const Page = async () => {
-  const user = await getCurrentUser();
-  if (!user) {
-    await redirect('/login');
-    return;
-  }
+  // const date = toJapanYMDString(undefined, '-');
+  // const idoData = await getIdoList(date);
 
-  const hasPermission = !!(user.permission.nyushuko & permission.nyushuko_ref);
-
-  if (!hasPermission) {
-    return <Typography>このページを閲覧する権限がありません。</Typography>;
-  }
+  // if (!idoData) {
+  //   return <div>エラー</div>;
+  // }
   return <IdoList />;
 };
 export default Page;

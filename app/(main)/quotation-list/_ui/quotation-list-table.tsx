@@ -27,8 +27,9 @@ import {
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
+import { useUserStore } from '@/app/_lib/stores/usestore';
+
 import { permission } from '../../_lib/permission';
-import { User } from '../../_lib/types';
 import { Loading } from '../../_ui/loading';
 import { MuiTablePagination } from '../../_ui/table-pagination';
 import { ROWS_PER_MASTER_TABLE_PAGE } from '../../(masters)/_lib/constants';
@@ -42,7 +43,6 @@ import { CreateQuotDialog } from './create-quot-dialog';
  * @returns 見積一覧テーブルのコンポーネント
  */
 export const QuotationListTable = ({
-  user,
   quots,
   isLoading,
   page,
@@ -53,7 +53,6 @@ export const QuotationListTable = ({
   setIsFirst,
   setPage,
 }: {
-  user: User;
   quots: QuotTableValues[];
   isLoading: boolean;
   page: number;
@@ -70,6 +69,8 @@ export const QuotationListTable = ({
   const router = useRouter();
   /** ダイアログ開いたときにフォーカス管理するRef */
   const inputRef = useRef<HTMLInputElement>(null);
+  /** ユーザー情報 */
+  const user = useUserStore((state) => state.user);
 
   /* useState ------------------------------------- */
   /** ダイアログの開閉 */

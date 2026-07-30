@@ -5,7 +5,7 @@ import { PoolClient } from 'pg';
 import { fakeToNull } from '@/app/(main)/(masters)/_lib/value-converters';
 import { EqptsMasterDialogValues } from '@/app/(main)/(masters)/eqpt-master/_lib/types';
 
-import { SCHEMA } from '../schema';
+import { SCHEMA } from '../supabase';
 
 /**
  * 機材履歴マスタに挿入する関数

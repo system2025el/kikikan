@@ -7,7 +7,7 @@ import {
 } from '@/app/(main)/(masters)/masters-import/_lib/types';
 
 import { refreshVRfid } from '../postgres';
-import { SCHEMA } from '../schema';
+import { SCHEMA } from '../supabase';
 import { updateMasterUpdates } from './m-master-update';
 
 /**

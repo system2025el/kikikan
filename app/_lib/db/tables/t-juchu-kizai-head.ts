@@ -7,8 +7,7 @@ import { KeepJuchuKizaiHeadValues } from '@/app/(main)/(eq-order-detail)/eq-keep
 import { JuchuKizaiHeadValues } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';
 
 import pool from '../postgres';
-import { SCHEMA } from '../schema';
-import { createClient } from '../supabase-server';
+import { SCHEMA, supabase } from '../supabase';
 import { JuchuKizaiHead } from '../types/t-juchu-kizai-head-type';
 
 /**
@@ -16,7 +15,6 @@ import { JuchuKizaiHead } from '../types/t-juchu-kizai-head-type';
  * @returns 受注機材ヘッダーid最大値
  */
 export const selectJuchuKizaiHeadMaxId = async (juchuHeadId: number) => {
-  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)
@@ -40,7 +38,6 @@ export const selectJuchuKizaiHeadMaxId = async (juchuHeadId: number) => {
  * @returns 受注機材ヘッダーデータ
  */
 export const selectJuchuKizaiHead = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
-  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)
@@ -63,7 +60,6 @@ export const selectJuchuKizaiHead = async (juchuHeadId: number, juchuKizaiHeadId
  * @returns 受注機材ヘッダーデータ
  */
 export const selectKeepJuchuKizaiHead = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
-  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)
@@ -84,7 +80,6 @@ export const selectKeepJuchuKizaiHead = async (juchuHeadId: number, juchuKizaiHe
  * @returns 受注機材ヘッダーデータ
  */
 export const selectReturnJuchuKizaiHead = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
-  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)
@@ -106,7 +101,6 @@ export const selectReturnJuchuKizaiHead = async (juchuHeadId: number, juchuKizai
  * @returns
  */
 export const selectChildJuchuKizaiHeadConfirm = async (juchuHeadId: number, juchuKizaiHeadIdv: number[]) => {
-  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)
@@ -127,7 +121,6 @@ export const selectChildJuchuKizaiHeadConfirm = async (juchuHeadId: number, juch
  * @returns
  */
 export const selectJuchuHonbanbiQty = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
-  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)
@@ -147,7 +140,6 @@ export const selectJuchuHonbanbiQty = async (juchuHeadId: number, juchuKizaiHead
  * @returns
  */
 export const selectMaxJuchuHonbanbiQty = async (juchuId: number) => {
-  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)

@@ -17,9 +17,10 @@ import { useEffect, useState } from 'react';
 import { TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { deleteEqptSets } from '@/app/_lib/db/tables/m-kizai-set';
+import { useUserStore } from '@/app/_lib/stores/usestore';
 import { permission } from '@/app/(main)/_lib/permission';
-import { User } from '@/app/(main)/_lib/types';
 import { Loading } from '@/app/(main)/_ui/loading';
+import { PermissionGuard } from '@/app/(main)/_ui/permission-guard';
 import { MuiTablePagination } from '@/app/(main)/_ui/table-pagination';
 
 import { FAKE_NEW_ID, ROWS_PER_MASTER_TABLE_PAGE } from '../../_lib/constants';
@@ -34,9 +35,11 @@ import { EqptSetsMasterDialog } from './eqpt-set-master-dialog';
  * @param {eqptSets} 機材セットリスト
  * @returns {JSX.Element} 機材セットマスタコンポーネント
  */
-export const EqptSetsMaster = ({ user }: { user: User }) => {
+export const EqptSetsMaster = () => {
   /* 1ページごとの表示数 */
   const rowsPerPage = ROWS_PER_MASTER_TABLE_PAGE;
+  /* user情報 */
+  const user = useUserStore((state) => state.user);
 
   /* useState ------------------------------------- */
   /** 表示する機材セットの配列 */
@@ -113,70 +116,78 @@ export const EqptSetsMaster = ({ user }: { user: User }) => {
   if (error) throw error;
 
   return (
-    <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
-      <Paper variant="outlined">
-        <Box width={'100%'} display={'flex'} px={2} sx={{ minHeight: '30px', maxHeight: '30px' }} alignItems={'center'}>
-          <Typography>機材セットマスタ検索</Typography>
-        </Box>
-        <Divider />
-        <Box width={'100%'} px={2} py={0.5} component={'form'} onSubmit={handleSubmit(onSubmit)}>
-          <Stack justifyContent={'space-between'} alignItems={'start'}>
-            <Stack alignItems={'baseline'}>
-              <Typography noWrap>機材セット名キーワード</Typography>
-              <TextFieldElement name="query" control={control} sx={{ width: 400 }} />
+    <PermissionGuard category={'masters'} required={permission.mst_ref}>
+      <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
+        <Paper variant="outlined">
+          <Box
+            width={'100%'}
+            display={'flex'}
+            px={2}
+            sx={{ minHeight: '30px', maxHeight: '30px' }}
+            alignItems={'center'}
+          >
+            <Typography>機材セットマスタ検索</Typography>
+          </Box>
+          <Divider />
+          <Box width={'100%'} px={2} py={0.5} component={'form'} onSubmit={handleSubmit(onSubmit)}>
+            <Stack justifyContent={'space-between'} alignItems={'start'}>
+              <Stack alignItems={'baseline'}>
+                <Typography noWrap>機材セット名キーワード</Typography>
+                <TextFieldElement name="query" control={control} sx={{ width: 400 }} />
+              </Stack>
+              <Box alignSelf={'end'}>
+                <Button type="submit" loading={isLoading}>
+                  <SearchIcon />
+                  検索
+                </Button>
+              </Box>
             </Stack>
-            <Box alignSelf={'end'}>
-              <Button type="submit" loading={isLoading}>
-                <SearchIcon />
-                検索
+          </Box>
+        </Paper>
+        <Box>
+          <Typography pt={1} pl={2}>
+            一覧
+          </Typography>
+          <Divider />
+          <Grid2 container mt={0.5} mx={0.5} justifyContent={'space-between'} alignItems={'center'}>
+            <Grid2 spacing={1}>
+              <MuiTablePagination arrayList={eqptSets ?? []} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
+            </Grid2>
+            <Grid2 container spacing={3}>
+              <Button
+                onClick={() => handleOpenDialog(FAKE_NEW_ID)}
+                disabled={!((user?.permission.masters ?? 0) & permission.mst_upd)}
+              >
+                <AddIcon fontSize="small" />
+                新規
               </Button>
-            </Box>
-          </Stack>
-        </Box>
-      </Paper>
-      <Box>
-        <Typography pt={1} pl={2}>
-          一覧
-        </Typography>
-        <Divider />
-        <Grid2 container mt={0.5} mx={0.5} justifyContent={'space-between'} alignItems={'center'}>
-          <Grid2 spacing={1}>
-            <MuiTablePagination arrayList={eqptSets ?? []} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
+            </Grid2>
           </Grid2>
-          <Grid2 container spacing={3}>
-            <Button
-              onClick={() => handleOpenDialog(FAKE_NEW_ID)}
-              disabled={!((user?.permission.masters ?? 0) & permission.mst_upd)}
-            >
-              <AddIcon fontSize="small" />
-              新規
-            </Button>
-          </Grid2>
-        </Grid2>
-        {isLoading ? (
-          <Loading />
-        ) : !eqptSets || eqptSets.length === 0 ? (
-          <Typography>該当するデータがありません</Typography>
-        ) : (
-          <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
-            <MasterTable
-              headers={eqptSetMHeader}
-              datas={eqptSets.map((l) => ({ ...l, id: l.oyaEqptId, name: l.oyaEqptNam }))}
-              handleOpenDialog={handleOpenDialog}
-              page={page}
-              rowsPerPage={rowsPerPage}
+          {isLoading ? (
+            <Loading />
+          ) : !eqptSets || eqptSets.length === 0 ? (
+            <Typography>該当するデータがありません</Typography>
+          ) : (
+            <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
+              <MasterTable
+                headers={eqptSetMHeader}
+                datas={eqptSets.map((l) => ({ ...l, id: l.oyaEqptId, name: l.oyaEqptNam }))}
+                handleOpenDialog={handleOpenDialog}
+                page={page}
+                rowsPerPage={rowsPerPage}
+              />
+            </TableContainer>
+          )}
+          <Dialog open={dialogOpen} fullScreen>
+            <EqptSetsMasterDialog
+              user={user}
+              handleClose={handleCloseDialog}
+              oyaId={openId}
+              refetchEqptSets={refetchEqptSets}
             />
-          </TableContainer>
-        )}
-        <Dialog open={dialogOpen} fullScreen>
-          <EqptSetsMasterDialog
-            user={user}
-            handleClose={handleCloseDialog}
-            oyaId={openId}
-            refetchEqptSets={refetchEqptSets}
-          />
-        </Dialog>
-      </Box>
-    </Container>
+          </Dialog>
+        </Box>
+      </Container>
+    </PermissionGuard>
   );
 };

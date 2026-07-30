@@ -1,6 +1,12 @@
 import { Pool } from 'pg';
 
-import { SCHEMA } from './schema';
+import { SCHEMA } from './supabase';
+
+// const pool = new Pool({
+//   connectionString: process.env.DATABASE_URL,
+// });
+
+// export default pool;
 
 const globalForPool = global as unknown as { pool?: Pool };
 

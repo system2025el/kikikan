@@ -8,7 +8,7 @@ import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { WeeklySearchValues } from '@/app/(main)/schedule/_lib/types';
 
 import pool from '../postgres';
-import { SCHEMA } from '../schema';
+import { SCHEMA } from '../supabase';
 import { JuchuSharyoHeadDBValues } from '../types/t-juchu-sharyo-head-type';
 
 /**

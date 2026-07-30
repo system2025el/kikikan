@@ -9,7 +9,7 @@ import { NyukoListSearchValues } from '@/app/(main)/nyuko-list/_lib/types';
 import { ShukoListSearchValues } from '@/app/(main)/shuko-list/_lib/types';
 
 import pool from '../postgres';
-import { SCHEMA } from '../schema';
+import { SCHEMA, supabase } from '../supabase';
 
 // .tz()を使う準備
 dayjs.extend(utc);

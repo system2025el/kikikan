@@ -7,8 +7,7 @@ import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 import { OrderSearchValues } from '@/app/(main)/order-list/_lib/types';
 
 import pool from '../postgres';
-import { SCHEMA } from '../schema';
-import { createClient } from '../supabase-server';
+import { SCHEMA, supabase } from '../supabase';
 
 /**
  * 条件が一致する機材を取得する関数
@@ -22,7 +21,6 @@ export const selectFilteredEqpts = async (queries: {
   b: number | null;
   ngFlg?: boolean;
 }) => {
-  const supabase = await createClient();
   const builder = supabase
     .schema(SCHEMA)
     .from('v_kizai_lst')
@@ -145,7 +143,6 @@ export const selectFilteredEqpts = async (queries: {
  * @returns 機材ID, 機材名, 所属ID, 所属名, 機材グループコード, 表示順, 定価, ランクごとの価格, 保有数
  */
 export const selectChosenEqptsDetails = async (idList: number[]) => {
-  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)
@@ -167,7 +164,6 @@ export const selectChosenEqptsDetails = async (idList: number[]) => {
  * @returns 機材ID, 機材名, 所属ID, 所属名, 機材グループコード, 表示順, 定価, ランクごとの価格, 保有数
  */
 export const selectChosenIdoEqptsDetails = async (idList: number[]) => {
-  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)
@@ -189,7 +185,6 @@ export const selectChosenIdoEqptsDetails = async (idList: number[]) => {
  * @returns 機材id,機材名,定価,保有数
  */
 export const selectLoanKizai = async (kizaiId: number) => {
-  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)
@@ -208,7 +203,6 @@ export const selectLoanKizai = async (kizaiId: number) => {
  * @returns 機材id,機材名,保有数,部門id,部門名
  */
 export const selectStockKizai = async (bumonId: number, keyword: string) => {
-  const supabase = await createClient();
   try {
     const builder = supabase
       .schema(SCHEMA)

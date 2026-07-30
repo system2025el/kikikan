@@ -6,7 +6,7 @@ import utc from 'dayjs/plugin/utc';
 import { revalidatePath } from 'next/cache';
 
 import pool from '@/app/_lib/db/postgres';
-import { SCHEMA } from '@/app/_lib/db/schema';
+import { SCHEMA } from '@/app/_lib/db/supabase';
 import { delAndInsertSeikyuDat } from '@/app/_lib/db/tables/t-seikyu-date-juchu-kizai';
 import { insertBillHead } from '@/app/_lib/db/tables/t-seikyu-head';
 import { insertBillMeisai } from '@/app/_lib/db/tables/t-seikyu-meisai';

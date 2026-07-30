@@ -6,8 +6,7 @@ import { escapeLikeString } from '@/app/(main)/_lib/escape-string';
 import { UsersMasterDialogValues } from '@/app/(main)/(masters)/users-master/_lib/types';
 
 import pool from '../postgres';
-import { SCHEMA } from '../schema';
-import { createClient } from '../supabase-server';
+import { SCHEMA, supabase } from '../supabase';
 import { MUserDBValues } from '../types/m-use-type';
 
 /**
@@ -199,7 +198,6 @@ export const updMUserDelFlgAndShainCod = async (
  * @param {string} cod 社員コード
  */
 export const checkShainCod = async (cod: string) => {
-  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)
@@ -218,7 +216,6 @@ export const checkShainCod = async (cod: string) => {
  * @param {string} cod メールアドレス
  */
 export const checkMailAdr = async (adr: string) => {
-  const supabase = await createClient();
   try {
     return await supabase.schema(SCHEMA).from('m_user').select('*').eq('mail_adr', adr).maybeSingle();
   } catch (e) {

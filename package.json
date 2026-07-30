@@ -41,7 +41,8 @@
     "rsuite": "^5.80.0",
     "supabase": "^2.75.5",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
-    "zod": "^3.25.51"
+    "zod": "^3.25.51",
+    "zustand": "^5.0.6"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

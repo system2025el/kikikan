@@ -28,9 +28,9 @@ import { BASHO_ID, NYUSHUKO_SHUBETU_ID } from '@/app/_lib/constants';
 import { weeklyColors } from '../../_lib/colors';
 import { toJapanDayString, toJapanHHmmString, toJapanYMDAndDayString } from '../../_lib/date-conversion';
 import { permission } from '../../_lib/permission';
-import { User } from '../../_lib/types';
 import { FormDateX } from '../../_ui/date';
 import { LoadingOverlay } from '../../_ui/loading';
+import { PermissionGuard } from '../../_ui/permission-guard';
 import { LightTooltipWithText } from '../../(masters)/_ui/tables';
 import { getWeeklyScheduleList } from '../_lib/funcs';
 import { WeeklyScheduleValues, WeeklySearchSchema, WeeklySearchValues, WeeklyValues } from '../_lib/types';
@@ -40,7 +40,7 @@ import { TantoDialog } from './tanto-dialog';
  * Weekly スケジュール画面
  * @returns {JSX.Element} Weekly スケジュール画面
  */
-export const Schedule = ({ user }: { user: User }) => {
+export const Schedule = () => {
   /* useState ------------------------------------------------------------ */
   /** 表示するスケジュールのリスト */
   const [scheList, setScheList] = useState<WeeklyScheduleValues[]>([]);
@@ -274,7 +274,6 @@ export const Schedule = ({ user }: { user: User }) => {
 
           {/** 日直入力ダイアログ */}
           <TantoDialog
-            user={user}
             open={dialogOpen}
             datas={selectedDatas}
             setOpen={setDialogOpen}

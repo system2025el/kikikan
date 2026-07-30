@@ -2,8 +2,7 @@
 
 import { PoolClient } from 'pg';
 
-import { SCHEMA } from '../schema';
-import { createClient } from '../supabase-server';
+import { SCHEMA, supabase } from '../supabase';
 import { IdoDenJuchu } from '../types/t-ido-den-juchu-type';
 
 /**
@@ -11,7 +10,6 @@ import { IdoDenJuchu } from '../types/t-ido-den-juchu-type';
  * @returns 移動伝票受注id最大値
  */
 export const selectIdoDenJuchuMaxId = async () => {
-  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)

@@ -2,8 +2,7 @@
 
 import { PoolClient } from 'pg';
 
-import { SCHEMA } from '../schema';
-import { createClient } from '../supabase-server';
+import { SCHEMA, supabase } from '../supabase';
 
 /**
  * マスタ更新テーブルにレコード追加する関数
@@ -11,7 +10,6 @@ import { createClient } from '../supabase-server';
  */
 export const updateMasterUpdates = async (masterNam: string, connection: PoolClient) => {
   const date = new Date().toISOString();
-  const supabase = await createClient();
   try {
     await supabase.schema(SCHEMA).from('m_master_update').update({ upd_dat: date }).eq('master_nam', masterNam);
   } catch (e) {

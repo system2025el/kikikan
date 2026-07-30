@@ -23,6 +23,7 @@ import { TextFieldElement } from 'react-hook-form-mui';
 
 import { permission } from '../../_lib/permission';
 import { Loading } from '../../_ui/loading';
+import { PermissionGuard } from '../../_ui/permission-guard';
 import { MuiTablePagination } from '../../_ui/table-pagination';
 import { ROWS_PER_MASTER_TABLE_PAGE } from '../../(masters)/_lib/constants';
 import { LightTooltipWithText } from '../../(masters)/_ui/tables';

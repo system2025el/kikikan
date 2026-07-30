@@ -4,8 +4,7 @@ import { connect } from 'http2';
 import { PoolClient } from 'pg';
 
 import pool from '../postgres';
-import { SCHEMA } from '../schema';
-import { createClient } from '../supabase-server';
+import { SCHEMA, supabase } from '../supabase';
 import { SeikyuDatJuchuKizai } from '../types/t-seikyu-date-juchu-kizai-type';
 
 /**
@@ -13,7 +12,6 @@ import { SeikyuDatJuchuKizai } from '../types/t-seikyu-date-juchu-kizai-type';
  * @param {SeikyuDatJuchuKizai} newData t_seikyu_date_juchu_kizaiの型
  */
 export const upsertSeikyuDat = async (newData: SeikyuDatJuchuKizai) => {
-  const supabase = await createClient();
   try {
     await supabase
       .schema(SCHEMA)

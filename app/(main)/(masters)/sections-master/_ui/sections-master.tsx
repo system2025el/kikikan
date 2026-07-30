@@ -19,7 +19,6 @@ import { grey } from '@mui/material/colors';
 import { useEffect, useState } from 'react';
 import { Controller, TextFieldElement, useForm } from 'react-hook-form-mui';
 
-import { User } from '@/app/(main)/_lib/types';
 import { selectNone, SelectTypes } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
 import { MuiTablePagination } from '@/app/(main)/_ui/table-pagination';
@@ -34,10 +33,9 @@ import { SectionsMasterDialog } from './sections-master-dialog';
 /**
  * 課マスタ画面
  * @param {sections} 課リスト
- * @param {user} 現在のユーザー
  * @returns {JSX.Element} 課マスタコンポーネント
  */
-export const SectionsMaster = ({ user }: { user: User }) => {
+export const SectionsMaster = () => {
   /** 1ページごとの表示数 */
   const rowsPerPage = ROWS_PER_MASTER_TABLE_PAGE;
 
@@ -163,12 +161,7 @@ export const SectionsMaster = ({ user }: { user: User }) => {
           </TableContainer>
         )}
         <Dialog open={dialogOpen} fullScreen>
-          <SectionsMasterDialog
-            user={user}
-            handleClose={handleCloseDialog}
-            sectionId={openId}
-            refetchSections={refetchSections}
-          />
+          <SectionsMasterDialog handleClose={handleCloseDialog} sectionId={openId} refetchSections={refetchSections} />
         </Dialog>
       </Box>
     </Container>

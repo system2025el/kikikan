@@ -3,8 +3,7 @@
 import { BasesMasterDialogValues } from '@/app/(main)/(masters)/bases-master/_lib/types';
 
 import pool from '../postgres';
-import { SCHEMA } from '../schema';
-import { createClient } from '../supabase-server';
+import { SCHEMA, supabase } from '../supabase';
 import { MShozokuDBValues } from '../types/m-shozoku-type';
 
 /**
@@ -12,7 +11,6 @@ import { MShozokuDBValues } from '../types/m-shozoku-type';
  * @returns 有効な所属のidと名前の配列
  */
 export const selectActiveShozokus = async () => {
-  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)
@@ -31,7 +29,6 @@ export const selectActiveShozokus = async () => {
  * @returns shozoku_nameで検索された所属マスタの配列 検索無しなら全件
  */
 export const selectFilteredShozokus = async (query: string) => {
-  const supabase = await createClient();
   const builder = supabase
     .schema(SCHEMA)
     .from('m_shozoku')
@@ -54,7 +51,6 @@ export const selectFilteredShozokus = async (query: string) => {
  * @returns shozoku_idが一致する所属
  */
 export const selectOneShozoku = async (id: number) => {
-  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)
@@ -99,7 +95,6 @@ export const insertNewShozoku = async (data: BasesMasterDialogValues, user: stri
  * @param id 更新する所属のshozoku_id
  */
 export const upDateShozokuDB = async (data: MShozokuDBValues) => {
-  const supabase = await createClient();
   try {
     await supabase
       .schema(SCHEMA)

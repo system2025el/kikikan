@@ -16,9 +16,9 @@ import {
 import { usePathname, useRouter } from 'next/navigation';
 import { Fragment, useState } from 'react';
 
+import { useUserStore } from '@/app/_lib/stores/usestore';
 import { permission } from '@/app/(main)/_lib/permission';
 
-import { User } from '../_lib/types';
 import { useDirty } from './dirty-context';
 
 /* サイドバーの中身のタイプ */
@@ -74,7 +74,7 @@ const stockIOList: MenuItem[] = [
  * サイドバー
  * @returns サイドバーのコンポーネント
  */
-export default function NavLinks({ user }: { user: User }) {
+export default function NavLinks() {
   /* 現在のページの色 */
   const theme = useTheme();
   const currentPgColor = alpha(theme.palette.primary.light, 0.2);
@@ -82,7 +82,7 @@ export default function NavLinks({ user }: { user: User }) {
   const pathname = usePathname();
   /*  */
   const router = useRouter();
-  //const user = useUserStore((state) => state.user);
+  const user = useUserStore((state) => state.user);
   const { isDirty } = useDirty();
   const { requestNavigation, isPending } = useDirty();
 
@@ -191,7 +191,7 @@ export default function NavLinks({ user }: { user: User }) {
       {/* 受注管理 */}
       <ListItemButton
         onClick={orderClick}
-        sx={{ display: (user?.permission.juchu ?? 0) & permission.juchu_ref ? 'flex' : 'none' }}
+        sx={{ display: user!.permission.juchu & permission.juchu_ref ? 'flex' : 'none' }}
       >
         <ListItemIcon>
           <StopSharpIcon />
@@ -203,7 +203,7 @@ export default function NavLinks({ user }: { user: User }) {
         in={orderOpen}
         timeout="auto"
         unmountOnExit
-        sx={{ display: (user?.permission.juchu ?? 0) & permission.juchu_ref ? 'flex' : 'none' }}
+        sx={{ display: user!.permission.juchu & permission.juchu_ref ? 'flex' : 'none' }}
       >
         <List component="div" disablePadding>
           {orderList.map((text) => (
@@ -213,11 +213,7 @@ export default function NavLinks({ user }: { user: User }) {
               sx={{
                 backgroundColor: isSelected(text.url) ? currentPgColor : undefined,
                 display:
-                  text.name === '新規受注'
-                    ? (user?.permission.juchu ?? 0) & permission.juchu_upd
-                      ? 'flex'
-                      : 'none'
-                    : 'flex',
+                  text.name === '新規受注' ? (user!.permission.juchu & permission.juchu_upd ? 'flex' : 'none') : 'flex',
               }}
             >
               <ListItemButton onClick={() => handleNavigation(text.url)} dense disabled={isPending}>
@@ -261,7 +257,7 @@ export default function NavLinks({ user }: { user: User }) {
       {/* 入出庫管理 */}
       <ListItemButton
         onClick={stockIOClick}
-        sx={{ display: (user?.permission.nyushuko ?? 0) & permission.nyushuko_ref ? 'flex' : 'none' }}
+        sx={{ display: user!.permission.nyushuko & permission.nyushuko_ref ? 'flex' : 'none' }}
       >
         <ListItemIcon>
           <StopSharpIcon />
@@ -273,7 +269,7 @@ export default function NavLinks({ user }: { user: User }) {
         in={stockIOOpen}
         timeout="auto"
         unmountOnExit
-        sx={{ display: (user?.permission.nyushuko ?? 0) & permission.nyushuko_ref ? 'flex' : 'none' }}
+        sx={{ display: user!.permission.nyushuko & permission.nyushuko_ref ? 'flex' : 'none' }}
       >
         <List disablePadding>
           {stockIOList.map((text) => (
@@ -310,7 +306,7 @@ export default function NavLinks({ user }: { user: User }) {
       {/* マスタ管理 */}
       <ListItemButton
         onClick={masterClick}
-        sx={{ display: (user?.permission.masters ?? 0) & permission.mst_ref ? 'flex' : 'none' }}
+        sx={{ display: user!.permission.masters & permission.mst_ref ? 'flex' : 'none' }}
       >
         <ListItemIcon>
           <StopSharpIcon />
@@ -322,7 +318,7 @@ export default function NavLinks({ user }: { user: User }) {
         in={masterOpen}
         timeout="auto"
         unmountOnExit
-        sx={{ display: (user?.permission.masters ?? 0) & permission.mst_ref ? 'flex' : 'none' }}
+        sx={{ display: user!.permission.masters & permission.mst_ref ? 'flex' : 'none' }}
       >
         <List component="div" disablePadding>
           {masterList.map((text, index) => (
@@ -334,7 +330,7 @@ export default function NavLinks({ user }: { user: User }) {
                   backgroundColor: isSelected(text.url) ? currentPgColor : undefined,
                   display:
                     text.name === 'マスタインポート' || text.name === 'マスタエクスポート'
-                      ? (user?.permission.masters ?? 0) & permission.mst_upd
+                      ? user!.permission.masters & permission.mst_upd
                         ? 'flex'
                         : 'none'
                       : 'flex',
@@ -347,7 +343,7 @@ export default function NavLinks({ user }: { user: User }) {
                   />
                 </ListItemButton>
               </ListItem>
-              {index === 9 && !!((user?.permission.masters ?? 0) & permission.mst_upd) && <Divider sx={{ ml: 8 }} />}
+              {index === 9 && !!(user!.permission.masters & permission.mst_upd) && <Divider sx={{ ml: 8 }} />}
             </Fragment>
           ))}
         </List>
@@ -355,7 +351,7 @@ export default function NavLinks({ user }: { user: User }) {
       {/* 設定 */}
       <ListItemButton
         onClick={settingClick}
-        sx={{ display: (user?.permission.loginSetting ?? 0) & permission.login ? 'flex' : 'none' }}
+        sx={{ display: user!.permission.loginSetting & permission.login ? 'flex' : 'none' }}
       >
         <ListItemIcon>
           <StopSharpIcon />
@@ -367,7 +363,7 @@ export default function NavLinks({ user }: { user: User }) {
         in={settingOpen}
         timeout="auto"
         unmountOnExit
-        sx={{ display: (user?.permission.loginSetting ?? 0) & permission.login ? 'flex' : 'none' }}
+        sx={{ display: user!.permission.loginSetting & permission.login ? 'flex' : 'none' }}
       >
         <List component="div" disablePadding>
           {settingList.map((text) => (

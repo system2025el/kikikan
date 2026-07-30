@@ -2,8 +2,7 @@
 
 import { PoolClient } from 'pg';
 
-import { SCHEMA } from '../schema';
-import { createClient } from '../supabase-server';
+import { SCHEMA, supabase } from '../supabase';
 import { NyushukoDen } from '../types/t-nyushuko-den-type';
 
 /**
@@ -690,7 +689,6 @@ export const selectContainerNyushukoDenConfirm = async (data: {
   kizai_id: number;
   sagyo_id: number;
 }) => {
-  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)
@@ -795,7 +793,6 @@ export const updateResultAdjQty = async (data: NyushukoDen) => {
   //       ${whereClause}
   //   `;
   try {
-    const supabase = await createClient();
     return await supabase
       .schema(SCHEMA)
       .from('t_nyushuko_den')

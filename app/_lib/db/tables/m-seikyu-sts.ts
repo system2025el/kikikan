@@ -1,14 +1,12 @@
 'use server';
 
-import { SCHEMA } from '../schema';
-import { createClient } from '../supabase-server';
+import { SCHEMA, supabase } from '../supabase';
 
 /**
  * 有効な請求ステータスを取得する関数
  * @returns 有効な請求ステータスのIDと名前の配列
  */
 export const selectActiveSeikyuSts = async () => {
-  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)

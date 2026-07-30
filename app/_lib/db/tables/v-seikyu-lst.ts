@@ -6,7 +6,7 @@ import { BillSearchValues } from '@/app/(main)/(bill)/bill-list/_lib/types';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 
 import pool from '../postgres';
-import { SCHEMA } from '../schema';
+import { SCHEMA, supabase } from '../supabase';
 
 export const selectFilteredBills = async (queries: BillSearchValues) => {
   const { billId, billingSts, range, kokyaku, seikyuHeadNam } = queries;

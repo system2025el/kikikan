@@ -3,7 +3,7 @@ import { Grid2 } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { TextFieldElement, useForm } from 'react-hook-form-mui';
 
-import { User } from '@/app/(main)/_lib/types';
+import { useUserStore } from '@/app/_lib/stores/usestore';
 
 import { FormBox } from '../../../_ui/form-box';
 import { Loading } from '../../../_ui/loading';
@@ -20,16 +20,15 @@ import { BasesMasterDialogSchema, BasesMasterDialogValues } from '../_lib/types'
  * @returns {JSX.Element} 拠点マスタ詳細ダイアログコンポーネント
  */
 export const BasesMasterDialog = ({
-  user,
   baseId,
   handleClose,
   refetchBases,
 }: {
-  user: User;
   baseId: number;
   handleClose: () => void;
   refetchBases: () => void;
 }) => {
+  const user = useUserStore((state) => state.user);
   /* useState -------------------------------------- */
   /* 拠点 */
   /* 新規作成かどうか */

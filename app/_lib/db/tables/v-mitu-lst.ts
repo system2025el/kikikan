@@ -5,8 +5,7 @@ import { escapeLikeString } from '@/app/(main)/_lib/escape-string';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 import { QuotSearchValues } from '@/app/(main)/quotation-list/_lib/types';
 
-import { SCHEMA } from '../schema';
-import { createClient } from '../supabase-server';
+import { SCHEMA, supabase } from '../supabase';
 
 export const selectFilteredQuot = async ({
   mituId,
@@ -17,7 +16,6 @@ export const selectFilteredQuot = async ({
   mituDat,
   nyuryokuUser,
 }: QuotSearchValues) => {
-  const supabase = await createClient();
   /* 検索ビルダー */
   const builder = supabase
     .schema(SCHEMA)

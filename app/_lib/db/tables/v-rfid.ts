@@ -1,8 +1,7 @@
 'use server';
 
 import pool from '../postgres';
-import { SCHEMA } from '../schema';
-import { createClient } from '../supabase-server';
+import { SCHEMA, supabase } from '../supabase';
 
 /**
  * タグIDが一致するRFIDタグの情報を取得する関数
@@ -10,7 +9,6 @@ import { createClient } from '../supabase-server';
  * @returns {{}}
  */
 export const selectOneRfid = async (id: string) => {
-  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)
@@ -68,7 +66,6 @@ export const selectRfidsOfTheKizai = async (kizaiId: number) => {
  * @returns {{}[]}
  */
 export const selectElNumExists = async (elNum: number) => {
-  const supabase = await createClient();
   const builder = supabase.schema(SCHEMA).from('v_rfid').select('*').eq('el_num', elNum).maybeSingle();
   try {
     return await builder;

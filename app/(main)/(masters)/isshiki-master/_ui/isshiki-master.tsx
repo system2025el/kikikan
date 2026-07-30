@@ -19,9 +19,10 @@ import {
 } from '@mui/material';
 import { useEffect, useState } from 'react';
 
+import { useUserStore } from '@/app/_lib/stores/usestore';
 import { permission } from '@/app/(main)/_lib/permission';
-import { User } from '@/app/(main)/_lib/types';
 import { Loading } from '@/app/(main)/_ui/loading';
+import { PermissionGuard } from '@/app/(main)/_ui/permission-guard';
 import { MuiTablePagination } from '@/app/(main)/_ui/table-pagination';
 
 import { FAKE_NEW_ID, ROWS_PER_MASTER_TABLE_PAGE } from '../../_lib/constants';
@@ -36,9 +37,11 @@ import { IsshikisMasterDialog } from './isshiki-master-dialog';
  * @param {isshikis} 一式リスト
  * @returns {JSX.Element} 一式マスタコンポーネント
  */
-export const IsshikisMaster = ({ user }: { user: User }) => {
+export const IsshikisMaster = () => {
   /* 1ページごとの表示数 */
   const rowsPerPage = ROWS_PER_MASTER_TABLE_PAGE;
+  /* user情報 */
+  const user = useUserStore((state) => state.user);
 
   /* useState ------------------------------------- */
   /** 表示する一式の配列 */
@@ -148,103 +151,111 @@ export const IsshikisMaster = ({ user }: { user: User }) => {
   if (error) throw error;
 
   return (
-    <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
-      <Paper variant="outlined">
-        <Box width={'100%'} display={'flex'} px={2} sx={{ minHeight: '30px', maxHeight: '30px' }} alignItems={'center'}>
-          <Typography>一式マスタ検索</Typography>
-        </Box>
-      </Paper>
-      <Box>
-        <Typography pt={1} pl={2}>
-          一覧
-        </Typography>
-        <Divider />
-        <Grid2 container mt={0.5} mx={0.5} justifyContent={'space-between'} alignItems={'center'}>
-          <Grid2 spacing={1}>
-            <MuiTablePagination arrayList={isshikis ?? []} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
-          </Grid2>
-          <Grid2 container spacing={3}>
-            <Grid2 alignContent={'center'}>
-              {/* <Typography color="error" variant="body2">
+    <PermissionGuard category={'masters'} required={permission.mst_ref}>
+      <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
+        <Paper variant="outlined">
+          <Box
+            width={'100%'}
+            display={'flex'}
+            px={2}
+            sx={{ minHeight: '30px', maxHeight: '30px' }}
+            alignItems={'center'}
+          >
+            <Typography>一式マスタ検索</Typography>
+          </Box>
+        </Paper>
+        <Box>
+          <Typography pt={1} pl={2}>
+            一覧
+          </Typography>
+          <Divider />
+          <Grid2 container mt={0.5} mx={0.5} justifyContent={'space-between'} alignItems={'center'}>
+            <Grid2 spacing={1}>
+              <MuiTablePagination arrayList={isshikis ?? []} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
+            </Grid2>
+            <Grid2 container spacing={3}>
+              <Grid2 alignContent={'center'}>
+                {/* <Typography color="error" variant="body2">
                   ※マスタは削除できません。登録画面で無効化してください
                 </Typography> */}
-            </Grid2>
-            <Grid2 container spacing={1}>
-              <Button
-                onClick={() => handleOpenDialog(FAKE_NEW_ID)}
-                disabled={!((user?.permission.masters ?? 0) & permission.mst_upd)}
-              >
-                <AddIcon fontSize="small" />
-                新規
-              </Button>
-              <Button
-                color="error"
-                onClick={() => setDeleteDialogOpen(true)}
-                disabled={selectedIds.length === 0 || !((user?.permission.masters ?? 0) & permission.mst_upd)}
-              >
-                <DeleteIcon fontSize="small" />
-                削除
-              </Button>
+              </Grid2>
+              <Grid2 container spacing={1}>
+                <Button
+                  onClick={() => handleOpenDialog(FAKE_NEW_ID)}
+                  disabled={!((user?.permission.masters ?? 0) & permission.mst_upd)}
+                >
+                  <AddIcon fontSize="small" />
+                  新規
+                </Button>
+                <Button
+                  color="error"
+                  onClick={() => setDeleteDialogOpen(true)}
+                  disabled={selectedIds.length === 0 || !((user?.permission.masters ?? 0) & permission.mst_upd)}
+                >
+                  <DeleteIcon fontSize="small" />
+                  削除
+                </Button>
+              </Grid2>
             </Grid2>
           </Grid2>
-        </Grid2>
-        {isLoading ? (
-          <Loading />
-        ) : !isshikis || isshikis.length === 0 ? (
-          <Typography>該当するデータがありません</Typography>
-        ) : (
-          <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
-            {/* <MasterTable
+          {isLoading ? (
+            <Loading />
+          ) : !isshikis || isshikis.length === 0 ? (
+            <Typography>該当するデータがありません</Typography>
+          ) : (
+            <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
+              {/* <MasterTable
                 headers={isshikiMHeader}
                 datas={isshikis.map((l) => ({ ...l, id: l.isshikiId, name: l.isshikiNam }))}
                 handleOpenDialog={handleOpenDialog}
                 page={page}
                 rowsPerPage={rowsPerPage}
               /> */}
-            <MasterTableOfIsshiki
-              headers={isshikiMHeader}
-              datas={isshikis.map((l) => ({ ...l, id: l.isshikiId, name: l.isshikiNam }))}
-              selectedIds={selectedIds}
-              handleOpenDialog={handleOpenDialog}
-              page={page}
-              rowsPerPage={rowsPerPage}
-              handleSelectAllClick={handleSelectAllClick}
-              handleSelect={handleSelect}
+              <MasterTableOfIsshiki
+                headers={isshikiMHeader}
+                datas={isshikis.map((l) => ({ ...l, id: l.isshikiId, name: l.isshikiNam }))}
+                selectedIds={selectedIds}
+                handleOpenDialog={handleOpenDialog}
+                page={page}
+                rowsPerPage={rowsPerPage}
+                handleSelectAllClick={handleSelectAllClick}
+                handleSelect={handleSelect}
+              />
+            </TableContainer>
+          )}
+          <Dialog open={dialogOpen} fullScreen>
+            <IsshikisMasterDialog
+              user={user}
+              handleClose={handleCloseDialog}
+              isshikiId={openId}
+              refetchIsshikis={refetchIsshikis}
+              setSnackBarOpen={setSnackBarOpen}
+              setSnackBarMessage={setSnackBarMessage}
             />
-          </TableContainer>
-        )}
-        <Dialog open={dialogOpen} fullScreen>
-          <IsshikisMasterDialog
-            user={user}
-            handleClose={handleCloseDialog}
-            isshikiId={openId}
-            refetchIsshikis={refetchIsshikis}
-            setSnackBarOpen={setSnackBarOpen}
-            setSnackBarMessage={setSnackBarMessage}
+          </Dialog>
+          <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
+            <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
+              <WarningIcon color="error" />
+              <Box>削除</Box>
+            </DialogTitle>
+            <DialogContentText m={2}>{selectedIds.length}件削除されます。</DialogContentText>
+            <DialogActions>
+              <Button color="error" onClick={() => handleClickDelete(selectedIds)} loading={isLoading}>
+                削除
+              </Button>
+              <Button onClick={() => setDeleteDialogOpen(false)}>戻る</Button>
+            </DialogActions>
+          </Dialog>
+          <Snackbar
+            open={snackBarOpen}
+            autoHideDuration={6000}
+            onClose={() => setSnackBarOpen(false)}
+            message={snackBarMessage}
+            anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+            sx={{ marginTop: '65px' }}
           />
-        </Dialog>
-        <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
-          <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
-            <WarningIcon color="error" />
-            <Box>削除</Box>
-          </DialogTitle>
-          <DialogContentText m={2}>{selectedIds.length}件削除されます。</DialogContentText>
-          <DialogActions>
-            <Button color="error" onClick={() => handleClickDelete(selectedIds)} loading={isLoading}>
-              削除
-            </Button>
-            <Button onClick={() => setDeleteDialogOpen(false)}>戻る</Button>
-          </DialogActions>
-        </Dialog>
-        <Snackbar
-          open={snackBarOpen}
-          autoHideDuration={6000}
-          onClose={() => setSnackBarOpen(false)}
-          message={snackBarMessage}
-          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-          sx={{ marginTop: '65px' }}
-        />
-      </Box>
-    </Container>
+        </Box>
+      </Container>
+    </PermissionGuard>
   );
 };
