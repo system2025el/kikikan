@@ -28,7 +28,6 @@ import React, { useRef, useState } from 'react';
 
 import { BASHO_ID } from '@/app/_lib/constants';
 import { toJapanMDString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
-import { openOrFocusTab } from '@/app/(main)/_lib/tab-focus';
 import { MemoTooltip } from '@/app/(main)/(eq-order-detail)/_ui/memo-tooltip';
 import { getStockRowBackgroundColor } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/colorselect';
 import {
@@ -395,9 +394,7 @@ const ReturnEqTableRow = React.memo(
             variant="text"
             sx={{ p: 0, justifyContent: 'start', textTransform: 'none', color: 'text.primary' }}
             onClick={() =>
-              openOrFocusTab(
-                `/loan-situation/${row.kizaiId}?date=${returnNyukoDate ? returnNyukoDate.toISOString() : ''}`
-              )
+              window.open(`/loan-situation/${row.kizaiId}?date=${returnNyukoDate ? returnNyukoDate.toISOString() : ''}`)
             }
           >
             {row.kizaiNam}
@@ -541,9 +538,7 @@ const ReturnContainerTableRow = React.memo(
             variant="text"
             sx={{ p: 0, justifyContent: 'start', textTransform: 'none', color: 'text.primary' }}
             onClick={() =>
-              openOrFocusTab(
-                `/loan-situation/${row.kizaiId}?date=${returnNyukoDate ? returnNyukoDate.toISOString() : ''}`
-              )
+              window.open(`/loan-situation/${row.kizaiId}?date=${returnNyukoDate ? returnNyukoDate.toISOString() : ''}`)
             }
           >
             {row.kizaiNam}

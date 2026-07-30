@@ -27,7 +27,6 @@ import { useForm } from 'react-hook-form-mui';
 
 import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { permission } from '@/app/(main)/_lib/permission';
-import { openOrFocusTab } from '@/app/(main)/_lib/tab-focus';
 import { User } from '@/app/(main)/_lib/types';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
@@ -175,7 +174,7 @@ export const BillListTable = ({
           <Grid2 container spacing={1}>
             <Button
               onClick={() => {
-                openOrFocusTab(`bill-list/copy?seikyuId=${selectedIds[0]}`);
+                window.open(`bill-list/copy?seikyuId=${selectedIds[0]}`);
               }}
               disabled={selectedIds.length !== 1 || user?.permission.juchu === permission.juchu_ref}
             >
@@ -258,7 +257,7 @@ export const BillListTable = ({
                         disabled={isLoading}
                         sx={{ p: 0, m: 0, minWidth: 1, justifyContent: 'left' }}
                         onClick={() => {
-                          openOrFocusTab(`/bill-list/edit/${bill.billHeadId}`);
+                          window.open(`/bill-list/edit/${bill.billHeadId}`);
                         }}
                       >
                         <Box minWidth={60}>{bill.billHeadId}</Box>

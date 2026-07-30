@@ -28,7 +28,6 @@ import { useRouter } from 'next/navigation';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import { permission } from '../../_lib/permission';
-import { openOrFocusTab } from '../../_lib/tab-focus';
 import { User } from '../../_lib/types';
 import { Loading } from '../../_ui/loading';
 import { MuiTablePagination } from '../../_ui/table-pagination';
@@ -179,7 +178,7 @@ export const QuotationListTable = ({
               <Grid2>
                 <Button
                   onClick={() => {
-                    openOrFocusTab(`quotation-list/copy?mituId=${selectedIds[0]}`);
+                    window.open(`quotation-list/copy?mituId=${selectedIds[0]}`);
                   }}
                   disabled={selectedIds.length !== 1 || user?.permission.juchu === permission.juchu_ref}
                 >
@@ -272,7 +271,7 @@ export const QuotationListTable = ({
                           size="small"
                           sx={{ py: 0.2, px: 0, m: 0, minWidth: 0 }}
                           onClick={() => {
-                            openOrFocusTab(`/quotation-list/edit/${quotation.mituHeadId}`);
+                            window.open(`/quotation-list/edit/${quotation.mituHeadId}`);
                           }}
                         >
                           <Box minWidth={60}>{quotation.mituHeadId}</Box>
@@ -285,7 +284,7 @@ export const QuotationListTable = ({
                             size="small"
                             sx={{ py: 0.2, px: 0, m: 0, minWidth: 1 }}
                             onClick={() => {
-                              openOrFocusTab(`/order/${quotation.juchuHeadId}/view`);
+                              window.open(`/order/${quotation.juchuHeadId}/view`);
                             }}
                           >
                             {quotation.juchuHeadId}

@@ -27,7 +27,6 @@ import React, { useRef, useState } from 'react';
 
 import { BASHO_ID, SAGYO_SIJI_ID } from '@/app/_lib/constants';
 import { toJapanMDString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
-import { openOrFocusTab } from '@/app/(main)/_lib/tab-focus';
 import { TestDate } from '@/app/(main)/_ui/date';
 import { MemoTooltip } from '@/app/(main)/(eq-order-detail)/_ui/memo-tooltip';
 
@@ -378,7 +377,7 @@ const EqTableRow = React.memo(
             variant="text"
             sx={{ p: 0, justifyContent: 'start', textTransform: 'none', color: 'text.primary' }}
             onClick={() =>
-              openOrFocusTab(`/loan-situation/${row.kizaiId}?date=${shukoDate ? shukoDate.toISOString() : ''}`)
+              window.open(`/loan-situation/${row.kizaiId}?date=${shukoDate ? shukoDate.toISOString() : ''}`)
             }
           >
             {row.kizaiNam}
@@ -562,7 +561,7 @@ const IdoEqTableRow = React.memo(
             variant="text"
             sx={{ p: 0, justifyContent: 'start', textTransform: 'none', color: 'text.primary' }}
             onClick={() =>
-              openOrFocusTab(`/loan-situation/${row.kizaiId}?date=${shukoDate ? shukoDate.toISOString() : ''}`)
+              window.open(`/loan-situation/${row.kizaiId}?date=${shukoDate ? shukoDate.toISOString() : ''}`)
             }
           >
             {row.kizaiNam}
@@ -730,7 +729,7 @@ const ContainerTableRow = React.memo(
             variant="text"
             sx={{ p: 0, justifyContent: 'start', textTransform: 'none', color: 'text.primary' }}
             onClick={() =>
-              openOrFocusTab(`/loan-situation/${row.kizaiId}?date=${shukoDate ? shukoDate.toISOString() : ''}`)
+              window.open(`/loan-situation/${row.kizaiId}?date=${shukoDate ? shukoDate.toISOString() : ''}`)
             }
           >
             {row.kizaiNam}

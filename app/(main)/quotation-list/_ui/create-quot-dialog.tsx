@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
 import { TextFieldElement, useForm } from 'react-hook-form-mui';
 
-import { openOrFocusTab } from '../../_lib/tab-focus';
 import { CloseMasterDialogButton } from '../../_ui/buttons';
 
 /**
@@ -30,7 +29,7 @@ export const CreateQuotDialog = ({
   /* methods ------------------------------------- */
   /** 自動生成ボタン押下 */
   const onSubmit = (data: { juchuHeadId: number | null }) => {
-    openOrFocusTab(`/quotation-list/create?juchuId=${data.juchuHeadId}`);
+    window.open(`/quotation-list/create?juchuId=${data.juchuHeadId}`);
     reset();
     setDialogOpen(false);
   };
@@ -68,7 +67,7 @@ export const CreateQuotDialog = ({
           <Button
             onClick={() => {
               setDialogOpen(false);
-              openOrFocusTab('/quotation-list/create');
+              window.open('/quotation-list/create');
             }}
           >
             手動生成

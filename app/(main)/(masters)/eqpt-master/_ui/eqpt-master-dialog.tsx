@@ -11,7 +11,6 @@ import {
   useForm,
 } from 'react-hook-form-mui';
 
-import { openOrFocusTab } from '@/app/(main)/_lib/tab-focus';
 import { User } from '@/app/(main)/_lib/types';
 
 import { FormBox, selectNone, SelectTypes } from '../../../_ui/form-box';
@@ -250,7 +249,7 @@ export const EqMasterDialog = ({
                   }}
                 />
                 <Box ml={1}>
-                  <Button onClick={() => openOrFocusTab(`/rfid-master/${eqptId}`)} disabled={isNew}>
+                  <Button onClick={() => window.open(`/rfid-master/${eqptId}`)} disabled={isNew}>
                     RFIDマスタ
                   </Button>
                 </Box>

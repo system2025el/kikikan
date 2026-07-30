@@ -16,7 +16,6 @@ import {
 import { JUCHU_KIZAI_HEAD_KBN } from '@/app/_lib/constants';
 import { toJapanMDString } from '@/app/(main)/_lib/date-conversion';
 import { permission } from '@/app/(main)/_lib/permission';
-import { openOrFocusTab } from '@/app/(main)/_lib/tab-focus';
 import { User } from '@/app/(main)/_lib/types';
 import { LightTooltipWithText } from '@/app/(main)/(masters)/_ui/tables';
 
@@ -84,7 +83,7 @@ export const LoanSituationTable = (props: LoanSituationTableProps) => {
                 <Button
                   variant="text"
                   sx={{ p: 0, height: '15px', m: 0, minWidth: 0, width: 1 }}
-                  onClick={() => openOrFocusTab(`/order/${row.juchuHeadId}/view`)}
+                  onClick={() => window.open(`/order/${row.juchuHeadId}/view`)}
                   disabled={user?.permission.juchu === permission.none}
                 >
                   {row.juchuHeadId}
@@ -125,7 +124,7 @@ export const LoanSituationTable = (props: LoanSituationTableProps) => {
                       row.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.normal
                         ? `/eq-main-order-detail/${row.juchuHeadId}/${row.juchuKizaiHeadId}/view`
                         : `/eq-return-order-detail/${row.juchuHeadId}/${row.juchuKizaiHeadId}/${row.oyaJuchuKizaiHeadId}/view`;
-                    openOrFocusTab(path);
+                    window.open(path);
                   }}
                   disabled={user?.permission.juchu === permission.none}
                 >

@@ -19,7 +19,6 @@ import { useRouter } from 'next/navigation';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { dispColors } from '../../_lib/colors';
-import { openOrFocusTab } from '../../_lib/tab-focus';
 import { Loading } from '../../_ui/loading';
 import { MuiTablePagination } from '../../_ui/table-pagination';
 import { ROWS_PER_MASTER_TABLE_PAGE } from '../../(masters)/_lib/constants';
@@ -101,7 +100,7 @@ export const EqptOrderTable = ({
                         size="small"
                         sx={{ py: 0.2, px: 1, m: 0, width: 'auto' }}
                         onClick={() => {
-                          openOrFocusTab(`/order/${order.juchuHeadId}/${'view'}`);
+                          window.open(`/order/${order.juchuHeadId}/${'view'}`);
                         }}
                       >
                         {order.juchuHeadId}
@@ -131,7 +130,7 @@ export const EqptOrderTable = ({
                                   : dispColors.main,
                         }}
                         onClick={() => {
-                          openOrFocusTab(
+                          window.open(
                             order.headKbn === 1
                               ? `/eq-main-order-detail/${order.juchuHeadId}/${order.kizaiHeadId}/view`
                               : order.headKbn === 2

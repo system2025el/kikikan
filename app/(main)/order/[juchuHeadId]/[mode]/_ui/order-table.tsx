@@ -20,7 +20,6 @@ import { useState } from 'react';
 
 import { JUCHU_KIZAI_HEAD_KBN } from '@/app/_lib/constants';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
-import { openOrFocusTab } from '@/app/(main)/_lib/tab-focus';
 
 import { EqTableValues, VehicleTableValues } from '../_lib/types';
 
@@ -238,7 +237,7 @@ export const OrderVehicleTable: React.FC<OrderVehicleTableProps> = ({
               <TableCell padding="none">{index + 1}</TableCell>
               <TableCell align="left">
                 <Button
-                  onClick={() => openOrFocusTab(`/vehicle-order-detail/${row.juchuHeadId}/${row.sharyoHeadId}/${mode}`)}
+                  onClick={() => window.open(`/vehicle-order-detail/${row.juchuHeadId}/${row.sharyoHeadId}/${mode}`)}
                   variant="text"
                   sx={{
                     color: 'primary',
