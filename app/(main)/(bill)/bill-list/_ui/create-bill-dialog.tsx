@@ -14,6 +14,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { CheckboxElement, SelectElement, TextFieldElement } from 'react-hook-form-mui';
 
 import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
+import { openOrFocusTab } from '@/app/(main)/_lib/tab-focus';
 import { CloseMasterDialogButton } from '@/app/(main)/_ui/buttons';
 import { FormDateX } from '@/app/(main)/_ui/date';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
@@ -52,7 +53,7 @@ export const CreateBillDialog = ({
     date: Date | null;
     showDetailFlg: boolean;
   }) => {
-    window.open(
+    openOrFocusTab(
       `bill-list/create?kokyakuId=${data.kokyaku}&date=${toJapanYMDString(data.date ?? undefined, '-')}&flg=${data.showDetailFlg}&tantou=${data.tantouNam}`
     );
     setDialogOpen(false);

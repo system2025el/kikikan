@@ -20,6 +20,7 @@ import { BASHO_ID, JUCHU_KIZAI_HEAD_KBN, SAGYO_KBN_ID } from '@/app/_lib/constan
 import { dispColors } from '../../_lib/colors';
 import { toJapanTimeString } from '../../_lib/date-conversion';
 import { permission } from '../../_lib/permission';
+import { openOrFocusTab } from '../../_lib/tab-focus';
 import { User } from '../../_lib/types';
 import { LoadingOverlay } from '../../_ui/loading';
 import { NyukoTableValues } from '../_lib/types';
@@ -48,7 +49,7 @@ export const NyukoListTable = (props: {
   };
 
   const handleClickRow = (row: NyukoTableValues) => {
-    window.open(
+    openOrFocusTab(
       `nyuko-list/nyuko-detail/${row.juchuHeadId}/${row.juchuKizaiHeadKbn}/${row.nyushukoBashoId}/${new Date(row.nyushukoDat).toISOString()}/${SAGYO_KBN_ID.nyukoCount}`
     );
   };
@@ -103,7 +104,7 @@ export const NyukoListTable = (props: {
                 <Button
                   variant="text"
                   size="small"
-                  onClick={() => window.open(`/order/${row.juchuHeadId}/view`)}
+                  onClick={() => openOrFocusTab(`/order/${row.juchuHeadId}/view`)}
                   sx={{ py: 0, px: 1 }}
                   disabled={!(user && user.permission.juchu & permission.juchu_ref)}
                 >

@@ -17,6 +17,7 @@ import { JUCHU_KIZAI_HEAD_KBN } from '@/app/_lib/constants';
 
 import { dispColors } from '../../_lib/colors';
 import { toJapanTimeString } from '../../_lib/date-conversion';
+import { openOrFocusTab } from '../../_lib/tab-focus';
 import { LightTooltipWithText } from '../../(masters)/_ui/tables';
 import { DashboardTableValues } from '../_lib/types';
 
@@ -55,7 +56,7 @@ export const VehiclesTable = ({ orders }: { orders: DashboardTableValues[] }) =>
                   variant="text"
                   size="small"
                   // sx={{ py: 0.2, px: 1, m: 0, width: 'auto' }}
-                  onClick={() => window.open(`/order/${order.juchuHeadId}/${'view'}`)}
+                  onClick={() => openOrFocusTab(`/order/${order.juchuHeadId}/${'view'}`)}
                 >
                   {order.juchuHeadId}
                 </Button>
@@ -89,7 +90,7 @@ export const VehiclesTable = ({ orders }: { orders: DashboardTableValues[] }) =>
                           : order.headKbn === JUCHU_KIZAI_HEAD_KBN.keep
                             ? `/eq-keep-order-detail/${order.juchuHeadId}/${order.kizaiHeadId}/${order.oyaJuchuKizaiHeadId}/view`
                             : `/eq-main-order-detail/${order.juchuHeadId}/${order.kizaiHeadId}/view`;
-                    window.open(path);
+                    openOrFocusTab(path);
                   }}
                 >
                   <LightTooltipWithText variant={'button'} maxWidth={300}>
