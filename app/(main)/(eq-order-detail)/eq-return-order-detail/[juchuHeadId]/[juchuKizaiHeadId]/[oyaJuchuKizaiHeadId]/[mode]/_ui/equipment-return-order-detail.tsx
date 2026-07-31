@@ -203,7 +203,7 @@ export const EquipmentReturnOrderDetail = (props: {
   // 受注ヘッダーアコーディオン制御
   const [juchuHeadExpanded, setJuchuHeadExpanded] = useState(false);
   // 受注機材ヘッダーアコーディオン制御
-  const [juchuKizaiHeadExpanded, setJuchuKizaiHeadExpanded] = useState(false);
+  const [juchuKizaiHeadExpanded, setJuchuKizaiHeadExpanded] = useState(!saveKizaiHead);
   // ポッパー制御
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -1640,7 +1640,6 @@ export const EquipmentReturnOrderDetail = (props: {
                 overflow: 'hidden',
               }}
               variant="outlined"
-              defaultExpanded={!saveKizaiHead}
             >
               <AccordionSummary
                 expandIcon={<ExpandMoreIcon />}

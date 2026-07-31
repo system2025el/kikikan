@@ -168,7 +168,7 @@ export const EquipmentKeepOrderDetail = (props: {
   // 受注ヘッダーアコーディオン制御
   const [juchuHeadExpanded, setJuchuHeadExpanded] = useState(false);
   // 受注機材ヘッダーアコーディオン制御
-  const [juchuKizaiHeadExpanded, setJuchuKizaiHeadExpanded] = useState(false);
+  const [juchuKizaiHeadExpanded, setJuchuKizaiHeadExpanded] = useState(!saveKizaiHead);
 
   // context
   const { setIsDirty /*setLock*/ } = useDirty();
@@ -1348,7 +1348,6 @@ export const EquipmentKeepOrderDetail = (props: {
                 overflow: 'hidden',
               }}
               variant="outlined"
-              defaultExpanded={!saveKizaiHead}
             >
               <AccordionSummary
                 expandIcon={<ExpandMoreIcon />}
