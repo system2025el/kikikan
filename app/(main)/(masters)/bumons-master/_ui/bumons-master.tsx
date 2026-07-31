@@ -16,7 +16,7 @@ import {
   Typography,
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Controller, TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { permission } from '@/app/(main)/_lib/permission';
@@ -56,6 +56,8 @@ export const BumonsMaster = ({ user }: { user: User }) => {
   const [openId, setOpenID] = useState<number>(FAKE_NEW_ID);
   /** 詳細ダイアログの開閉状態 */
   const [dialogOpen, setDialogOpen] = useState(false);
+  /** テーブルのスクロールコンテナ */
+  const tableContainerRef = useRef<HTMLDivElement>(null);
 
   /* useForm ---------------------------------------- */
   const { control, handleSubmit, getValues } = useForm({
@@ -122,6 +124,11 @@ export const BumonsMaster = ({ user }: { user: User }) => {
     };
     getList();
   }, []);
+
+  // ページ切り替え時にスクロール位置をトップに戻す
+  useEffect(() => {
+    tableContainerRef.current?.scrollTo(0, 0);
+  }, [page]);
 
   if (error) throw error;
 
@@ -227,7 +234,7 @@ export const BumonsMaster = ({ user }: { user: User }) => {
         ) : !bumons || bumons.length === 0 ? (
           <Typography>該当するデータがありません</Typography>
         ) : (
-          <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
+          <TableContainer ref={tableContainerRef} component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
             <MasterTable
               headers={bumonsMHeader}
               datas={bumons.map((l) => ({ ...l, id: l.bumonId, name: l.bumonNam }))}

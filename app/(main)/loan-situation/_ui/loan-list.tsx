@@ -17,7 +17,7 @@ import {
   Typography,
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 
@@ -75,8 +75,15 @@ export const LoanList = () => {
     () => (rowsPerPage > 0 ? rows.slice((page - 1) * rowsPerPage, page * rowsPerPage) : rows),
     [page, rows, rowsPerPage]
   );
+  /** テーブルのスクロールコンテナ */
+  const tableContainerRef = useRef<HTMLDivElement>(null);
 
   /* useEffect ----------------------------------- */
+  // ページ切り替え時にスクロール位置をトップに戻す
+  useEffect(() => {
+    tableContainerRef.current?.scrollTo(0, 0);
+  }, [page]);
+
   /** 初期表示 */
   useEffect(() => {
     const getList = async () => {
@@ -124,7 +131,7 @@ export const LoanList = () => {
         ) : !rows || rows!.length === 0 ? (
           <Typography ml={2}>該当するデータがありません</Typography>
         ) : (
-          <TableContainer component={Paper} sx={{ maxHeight: '80vh', mt: 1 }} square>
+          <TableContainer ref={tableContainerRef} component={Paper} sx={{ maxHeight: '80vh', mt: 1 }} square>
             <Table stickyHeader size="small">
               <TableHead>
                 <TableRow sx={{ whiteSpace: 'nowrap' }}>

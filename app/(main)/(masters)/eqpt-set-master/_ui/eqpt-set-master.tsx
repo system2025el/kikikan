@@ -13,7 +13,7 @@ import {
   TableContainer,
   Typography,
 } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { deleteEqptSets } from '@/app/_lib/db/tables/m-kizai-set';
@@ -51,6 +51,8 @@ export const EqptSetsMaster = ({ user }: { user: User }) => {
   const [openId, setOpenID] = useState<number>(FAKE_NEW_ID);
   /* 詳細ダイアログの開閉状態 */
   const [dialogOpen, setDialogOpen] = useState(false);
+  /** テーブルのスクロールコンテナ */
+  const tableContainerRef = useRef<HTMLDivElement>(null);
 
   /* useForm ------------------------------------ */
   const { control, handleSubmit, getValues } = useForm({
@@ -110,6 +112,11 @@ export const EqptSetsMaster = ({ user }: { user: User }) => {
     getList();
   }, []);
 
+  // ページ切り替え時にスクロール位置をトップに戻す
+  useEffect(() => {
+    tableContainerRef.current?.scrollTo(0, 0);
+  }, [page]);
+
   if (error) throw error;
 
   return (
@@ -158,7 +165,7 @@ export const EqptSetsMaster = ({ user }: { user: User }) => {
         ) : !eqptSets || eqptSets.length === 0 ? (
           <Typography>該当するデータがありません</Typography>
         ) : (
-          <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
+          <TableContainer ref={tableContainerRef} component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
             <MasterTable
               headers={eqptSetMHeader}
               datas={eqptSets.map((l) => ({ ...l, id: l.oyaEqptId, name: l.oyaEqptNam }))}

@@ -17,7 +17,7 @@ import {
   TableContainer,
   Typography,
 } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { permission } from '@/app/(main)/_lib/permission';
 import { User } from '@/app/(main)/_lib/types';
@@ -61,6 +61,8 @@ export const IsshikisMaster = ({ user }: { user: User }) => {
   const [snackBarOpen, setSnackBarOpen] = useState(false);
   // スナックバーメッセージ
   const [snackBarMessage, setSnackBarMessage] = useState('');
+  /** テーブルのスクロールコンテナ */
+  const tableContainerRef = useRef<HTMLDivElement>(null);
 
   /* methods ------------------------------------- */
 
@@ -145,6 +147,11 @@ export const IsshikisMaster = ({ user }: { user: User }) => {
     getList();
   }, []);
 
+  // ページ切り替え時にスクロール位置をトップに戻す
+  useEffect(() => {
+    tableContainerRef.current?.scrollTo(0, 0);
+  }, [page]);
+
   if (error) throw error;
 
   return (
@@ -193,7 +200,7 @@ export const IsshikisMaster = ({ user }: { user: User }) => {
         ) : !isshikis || isshikis.length === 0 ? (
           <Typography>該当するデータがありません</Typography>
         ) : (
-          <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
+          <TableContainer ref={tableContainerRef} component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
             {/* <MasterTable
                 headers={isshikiMHeader}
                 datas={isshikis.map((l) => ({ ...l, id: l.isshikiId, name: l.isshikiNam }))}

@@ -11,7 +11,7 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { Loading } from '@/app/(main)/_ui/loading';
 
@@ -50,8 +50,15 @@ export const IdoEqptTable = ({
     return datas.filter((eq) => eq.bumonId === bumonId);
   }, [datas, searching, bumonId]);
 
+  const tableContainerRef = useRef<HTMLDivElement>(null);
+
+  // 部門切り替え・検索時にスクロール位置をトップに戻す
+  useEffect(() => {
+    tableContainerRef.current?.scrollTo(0, 0);
+  }, [bumonId, searching]);
+
   return (
-    <TableContainer component={Paper} variant="outlined" square sx={{ height: '75vh' }}>
+    <TableContainer ref={tableContainerRef} component={Paper} variant="outlined" square sx={{ height: '75vh' }}>
       {isLoading ? (
         <Loading />
       ) : (
