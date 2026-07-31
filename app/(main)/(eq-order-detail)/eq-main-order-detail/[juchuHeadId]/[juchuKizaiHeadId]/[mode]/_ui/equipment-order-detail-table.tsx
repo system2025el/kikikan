@@ -384,7 +384,12 @@ const EqTableRow = React.memo(
             {row.kizaiNam}
           </Button>
         </TableCell>
-        <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: lightBlue[100] }}>
+        <TableCell
+          style={styles.row}
+          align="right"
+          size="small"
+          sx={{ bgcolor: lightBlue[100], color: row.planQty === 0 ? 'red' : 'inherit' }}
+        >
           {row.planQty}
         </TableCell>
         <TableCell style={styles.row} align="right" size="small">
