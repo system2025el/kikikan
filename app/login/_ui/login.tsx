@@ -17,6 +17,7 @@ const Login = () => {
   // const user = useUserStore((state) => state.user);
   const searchParams = useSearchParams();
 
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>('');
   // const [isHydrated, setIsHydrated] = useState(false);
 
@@ -50,6 +51,7 @@ const Login = () => {
   });
 
   const onSubmit = async (data: UserValues) => {
+    setIsLoading(true);
     try {
       const { error } = await login(data);
       if (error) {
@@ -69,6 +71,8 @@ const Login = () => {
       const errorLog = e as Error;
       await serverErrorLog(errorLog.message);
       setError(`ログインに失敗しました。`);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -91,7 +95,7 @@ const Login = () => {
   };
 
   useEffect(() => {
-    const MIGRATION_KEY = 'auth_migration';
+    const MIGRATION_KEY = 'auth_migration_v2';
 
     if (typeof window === 'undefined') return;
 
@@ -102,6 +106,7 @@ const Login = () => {
         }
       });
       localStorage.removeItem('user-storage');
+      localStorage.removeItem('auth_migration'); // 旧フラグも削除
       localStorage.setItem(MIGRATION_KEY, 'true');
     }
   }, []);
@@ -132,7 +137,9 @@ const Login = () => {
           {/* <TextField type="password" fullWidth /> */}
         </Box>
         <Box display="flex" width={'30%'} justifyContent="flex-end">
-          <Button type="submit">次へ</Button>
+          <Button type="submit" loading={isLoading}>
+            次へ
+          </Button>
           {/* <Button onClick={handleMockClick}>次へ</Button> */}
         </Box>
       </Stack>
