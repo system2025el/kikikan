@@ -6,8 +6,8 @@ import { useFieldArray, useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 
 import { checkExIsshiki } from '@/app/_lib/db/tables/m-kizai';
-import { User, useUserStore } from '@/app/_lib/stores/usestore';
 import { permission } from '@/app/(main)/_lib/permission';
+import { User } from '@/app/(main)/_lib/types';
 import { FormBox, SelectTypes } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
 
@@ -32,7 +32,7 @@ export const IsshikisMasterDialog = ({
   setSnackBarOpen,
   setSnackBarMessage,
 }: {
-  user: User | null;
+  user: User;
   isshikiId: number;
   handleClose: () => void;
   refetchIsshikis: () => void;

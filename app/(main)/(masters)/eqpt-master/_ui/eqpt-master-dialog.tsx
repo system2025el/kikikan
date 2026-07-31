@@ -11,7 +11,7 @@ import {
   useForm,
 } from 'react-hook-form-mui';
 
-import { User, useUserStore } from '@/app/_lib/stores/usestore';
+import { User } from '@/app/(main)/_lib/types';
 
 import { FormBox, selectNone, SelectTypes } from '../../../_ui/form-box';
 import { Loading } from '../../../_ui/loading';
@@ -29,7 +29,7 @@ export const EqMasterDialog = ({
   handleClose,
   refetchEqpts,
 }: {
-  user: User | null;
+  user: User;
   eqptId: number;
   handleClose: () => void;
   refetchEqpts: () => Promise<void>;

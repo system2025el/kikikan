@@ -1,7 +1,8 @@
 'use server';
 
 import pool from '../postgres';
-import { SCHEMA, supabase } from '../supabase';
+import { SCHEMA } from '../schema';
+import { createClient } from '../supabase-server';
 
 export const selectNyushukoDetail = async (
   juchuHeadId: number,
@@ -70,6 +71,7 @@ export const selectCtnNyushukoDetail = async (
   nyushukoDat: string,
   sagyoKbnId: number
 ) => {
+  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)
@@ -98,6 +100,7 @@ export const selectNyushukoDetailOne = async (
   sagyoKbnId: number,
   kizaiId: number
 ) => {
+  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)

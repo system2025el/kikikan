@@ -2,7 +2,8 @@
 
 import { PoolClient } from 'pg';
 
-import { SCHEMA, supabase } from '../supabase';
+import { SCHEMA } from '../schema';
+import { createClient } from '../supabase-server';
 import { IdoFix } from '../types/t-ido-fix-type';
 
 /**
@@ -10,6 +11,7 @@ import { IdoFix } from '../types/t-ido-fix-type';
  * @returns
  */
 export const selectIdoFixMaxId = async () => {
+  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)
@@ -39,6 +41,7 @@ export const selectIdoFix = async (
   sagyoDenDatDat: string,
   sagyoId: number
 ) => {
+  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)
@@ -64,6 +67,7 @@ export const selectIdoFix = async (
  * @returns
  */
 export const insertIdoFix = async (data: IdoFix) => {
+  const supabase = await createClient();
   try {
     return await supabase.schema(SCHEMA).from('t_ido_fix').insert(data);
   } catch (e) {
@@ -82,6 +86,7 @@ export const deleteIdoFix = async (
   sagyoDenDatDat: string,
   sagyoId: number
 ) => {
+  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)

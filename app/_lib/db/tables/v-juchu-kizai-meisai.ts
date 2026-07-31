@@ -1,7 +1,8 @@
 'use server';
 
 import pool from '../postgres';
-import { SCHEMA, supabase } from '../supabase';
+import { SCHEMA } from '../schema';
+import { createClient } from '../supabase-server';
 
 /**
  * メイン受注機材明細リスト取得
@@ -59,6 +60,7 @@ export const selectJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHead
  * @returns 受注機材明細リスト
  */
 export const selectOyaJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
+  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)
@@ -82,6 +84,7 @@ export const selectOyaJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiH
  * @returns キープ受注機材明細
  */
 export const selectKeepJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
+  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)
@@ -105,6 +108,7 @@ export const selectKeepJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizai
  * @returns キープ受注機材明細
  */
 export const selectReturnJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
+  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)

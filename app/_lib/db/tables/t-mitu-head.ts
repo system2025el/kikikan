@@ -1,7 +1,8 @@
 'use server';
 import { PoolClient } from 'pg';
 
-import { SCHEMA, supabase } from '../supabase';
+import { SCHEMA } from '../schema';
+import { createClient } from '../supabase-server';
 import { MituHead } from '../types/t-mitu-head-types';
 
 /**
@@ -69,6 +70,7 @@ export const updateQuotHead = async (data: MituHead, connection: PoolClient) => 
  * @returns 見積ヘッド情報
  */
 export const selectChosenMitu = async (id: number) => {
+  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)
@@ -92,6 +94,7 @@ export const selectChosenMitu = async (id: number) => {
  * @param {number[]}ids 見積ヘッダIDの配列
  */
 export const updQuotHeadDelFlg = async (ids: number[]) => {
+  const supabase = await createClient();
   try {
     await supabase.schema(SCHEMA).from('t_mitu_head').update({ del_flg: 1 }).in('mitu_head_id', ids);
   } catch (e) {

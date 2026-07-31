@@ -17,7 +17,7 @@ import { useEffect, useState } from 'react';
 import { RadioButtonGroup, TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { checkMailAdr, checkShainCod, selectActiveUsers } from '@/app/_lib/db/tables/m-user';
-import { useUserStore } from '@/app/_lib/stores/usestore';
+import { User } from '@/app/(main)/_lib/types';
 import { FormBox } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
 
@@ -51,17 +51,16 @@ import { UsersMasterDialogValues, UsersMaterDialogSchema } from '../_lib/types';
  * @returns {JSX.Element} 担当者マスタの詳細ダイアログコンポーネント
  */
 export const UsersMasterDialog = ({
+  user,
   currentMailAdr,
   handleClose,
   refetchUsers,
 }: {
+  user: User;
   currentMailAdr: string;
   handleClose: () => void;
   refetchUsers: () => void;
 }) => {
-  // ログインユーザ
-  const user = useUserStore((state) => state.user);
-
   /* useState --------------------- */
   /** DBのローディング状態 */
   const [isLoading, setIsLoading] = useState(true);

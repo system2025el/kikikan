@@ -3,7 +3,7 @@
 import { escapeLikeString } from '@/app/(main)/_lib/escape-string';
 
 import pool from '../postgres';
-import { SCHEMA, supabase } from '../supabase';
+import { SCHEMA } from '../schema';
 
 /**
  * 有効な機材を取得する関数

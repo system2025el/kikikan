@@ -9,7 +9,8 @@ import { escapeLikeString } from '@/app/(main)/_lib/escape-string';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 import { EqptOrderSearchValues } from '@/app/(main)/eqpt-order-list/_lib/types';
 
-import { SCHEMA, supabase } from '../supabase';
+import { SCHEMA } from '../schema';
+import { createClient } from '../supabase-server';
 
 // .tz()を使う準備
 dayjs.extend(utc);
@@ -21,6 +22,7 @@ dayjs.extend(timezone);
  * @returns
  */
 export const selectJuchuKizaiHeadList = async (juchuHeadId: number) => {
+  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)
@@ -41,6 +43,7 @@ export const selectJuchuKizaiHeadList = async (juchuHeadId: number) => {
  * @returns
  */
 export const selectJuchuKizaiHeadNamList = async (juchuHeadId: number) => {
+  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)
@@ -60,6 +63,7 @@ export const selectPdfJuchuKizaiHead = async (
   nyushukoBashoId: number
 ) => {
   const ids = juchuKizaiHeadIds.split(',').map(Number);
+  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)
@@ -89,6 +93,7 @@ export const selectFilteredKizaiHead = async ({
   koenbashoNam,
   listSort,
 }: EqptOrderSearchValues) => {
+  const supabase = await createClient();
   // 基本のセレクト
   const builder = supabase
     .schema(SCHEMA)
@@ -305,6 +310,7 @@ export const selectFilteredKizaiHead = async ({
  * @returns
  */
 export const selectChildJuchuKizaiHead = async (juchuHeadId: number, oyaJuchuKizaiHeadId: number) => {
+  const supabase = await createClient();
   try {
     return await supabase
       .schema(SCHEMA)

@@ -3,11 +3,14 @@
 import WarningIcon from '@mui/icons-material/Warning';
 import { Box, Button, Dialog, DialogActions, DialogContentText, DialogTitle } from '@mui/material';
 import { usePathname, useRouter } from 'next/navigation';
-import { createContext, useContext, useEffect, useState, useTransition } from 'react';
+import { createContext, useContext, useEffect, useRef, useState, useTransition } from 'react';
 
-import { supabase } from '@/app/_lib/db/supabase';
 import { serverErrorLog } from '@/app/_lib/funcs';
-import { useUserStore } from '@/app/_lib/stores/usestore';
+
+import { logout } from '../_lib/funcs';
+
+// 他タブへのログアウト伝播用チャンネル名
+const LOGOUT_BROADCAST_CHANNEL = 'auth-logout';
 
 type DirtyContextType = {
   isDirty: boolean;
@@ -22,7 +25,6 @@ const DirtyContext = createContext<DirtyContextType | undefined>(undefined);
 
 export const DirtyProvider = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
-  const clearUser = useUserStore((state) => state.clearUser);
   //const pathname = usePathname();
   //const user = useUserStore((state) => state.user);
   const [isDirty, setIsDirty] = useState(false);
@@ -30,6 +32,19 @@ export const DirtyProvider = ({ children }: { children: React.ReactNode }) => {
   const [pendingPath, setPendingPath] = useState<string | null>(null);
   const [showDialog, setShowDialog] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const logoutChannelRef = useRef<BroadcastChannel | null>(null);
+
+  // 他タブでのログアウトを受信したら、このタブもログイン画面へ
+  useEffect(() => {
+    if (typeof BroadcastChannel === 'undefined') return;
+
+    const channel = new BroadcastChannel(LOGOUT_BROADCAST_CHANNEL);
+    channel.onmessage = () => {
+      router.replace('/login');
+    };
+    logoutChannelRef.current = channel;
+    return () => channel.close();
+  }, [router]);
 
   const requestNavigation = (path: string) => {
     if (isPending) return;
@@ -68,7 +83,6 @@ export const DirtyProvider = ({ children }: { children: React.ReactNode }) => {
         } else {
           router.push(pendingPath);
         }
-
         setPendingPath(null);
       });
     }
@@ -76,18 +90,14 @@ export const DirtyProvider = ({ children }: { children: React.ReactNode }) => {
 
   const executeLogout = async () => {
     try {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        throw new Error(`[supabase.auth.signOut] エラー: ${error.message}`);
-      }
-      clearUser();
+      await logout();
 
+      logoutChannelRef.current?.postMessage('logout');
       router.refresh();
       router.replace('/login');
     } catch (e) {
       const errorLog = e as Error;
       await serverErrorLog(errorLog.message);
-      console.error('ログアウトエラー：', e);
     }
   };
 

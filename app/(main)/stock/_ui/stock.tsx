@@ -25,7 +25,6 @@ import { TextFieldElement } from 'react-hook-form-mui';
 import { permission } from '../../_lib/permission';
 import { Calendar } from '../../_ui/date';
 import { Loading } from '../../_ui/loading';
-import { PermissionGuard } from '../../_ui/permission-guard';
 import { FAKE_NEW_ID } from '../../(masters)/_lib/constants';
 import { getAllStockData, getBumonsData, getEqData } from '../_lib/funcs';
 import { Bumon, EqTableValues, StockTableValues } from '../_lib/types';

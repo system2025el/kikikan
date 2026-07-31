@@ -24,10 +24,10 @@ import { CheckboxButtonGroup, RadioButtonGroup, SelectElement, TextFieldElement 
 import { set } from 'zod';
 
 import { permission } from '@/app/(main)/_lib/permission';
+import { User } from '@/app/(main)/_lib/types';
 import { FormDateX } from '@/app/(main)/_ui/date';
 import { selectNone, SelectTypes } from '@/app/(main)/_ui/form-box';
 import { LoadingOverlay } from '@/app/(main)/_ui/loading';
-import { PermissionGuard } from '@/app/(main)/_ui/permission-guard';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 import { getCustomerSelection } from '@/app/(main)/(masters)/_lib/funcs';
 
@@ -42,7 +42,7 @@ import { UnbilledCustsDialog } from './unbilled-Custs-dialog';
  * @param param0
  * @returns {JAX.Element} 受注請求状況一覧画面のコンポーネント
  */
-export const BillingStsList = () => {
+export const BillingStsList = ({ user }: { user: User }) => {
   /* useState --------------------------------------------------------------- */
   /* ローディング */
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -169,7 +169,7 @@ export const BillingStsList = () => {
   if (isError) throw isError;
 
   return (
-    <PermissionGuard category={'juchu'} required={permission.juchu_ref}>
+    <>
       <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
         {isFirst && isLoading && <LoadingOverlay />}
         <Paper variant="outlined">
@@ -383,6 +383,7 @@ export const BillingStsList = () => {
           </Grid2>
         </Paper>
         <BillingStsListTable
+          user={user}
           isLoading={isLoading}
           page={page}
           custs={custs}
@@ -403,6 +404,6 @@ export const BillingStsList = () => {
           onClose={handleCloseUnbilledCustsDialog}
         />
       </Dialog>
-    </PermissionGuard>
+    </>
   );
 };
