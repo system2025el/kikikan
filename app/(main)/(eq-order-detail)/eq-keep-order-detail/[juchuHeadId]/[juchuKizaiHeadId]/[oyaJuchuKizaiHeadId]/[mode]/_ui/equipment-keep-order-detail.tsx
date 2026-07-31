@@ -165,8 +165,10 @@ export const EquipmentKeepOrderDetail = (props: {
   // スナックバーメッセージ
   const [snackBarMessage, setSnackBarMessage] = useState('');
 
-  // アコーディオン制御
-  const [expanded, setExpanded] = useState(false);
+  // 受注ヘッダーアコーディオン制御
+  const [juchuHeadExpanded, setJuchuHeadExpanded] = useState(false);
+  // 受注機材ヘッダーアコーディオン制御
+  const [juchuKizaiHeadExpanded, setJuchuKizaiHeadExpanded] = useState(false);
 
   // context
   const { setIsDirty /*setLock*/ } = useDirty();
@@ -1098,11 +1100,6 @@ export const EquipmentKeepOrderDetail = (props: {
     setIsProcessing(false);
   };
 
-  // アコーディオン開閉
-  const handleExpansion = () => {
-    setExpanded((prevExpanded) => !prevExpanded);
-  };
-
   /**
    * useEffect
    */
@@ -1248,8 +1245,8 @@ export const EquipmentKeepOrderDetail = (props: {
             </Box>
             {/*受注ヘッダー*/}
             <Accordion
-              expanded={expanded}
-              onChange={handleExpansion}
+              expanded={juchuHeadExpanded}
+              onChange={() => setJuchuHeadExpanded(!juchuHeadExpanded)}
               sx={{
                 marginTop: 2,
                 borderRadius: 1,
@@ -1272,7 +1269,7 @@ export const EquipmentKeepOrderDetail = (props: {
                 <Box display="flex" justifyContent="space-between" alignItems="center" width="100%">
                   <Grid2 container display="flex" justifyContent="space-between" spacing={2}>
                     <Typography>受注ヘッダー</Typography>
-                    <Grid2 container display={expanded ? 'none' : 'flex'} spacing={2}>
+                    <Grid2 container display={juchuHeadExpanded ? 'none' : 'flex'} spacing={2}>
                       <Typography>公演名</Typography>
                       <Typography>{juchuHeadData.koenNam}</Typography>
                     </Grid2>
@@ -1343,6 +1340,8 @@ export const EquipmentKeepOrderDetail = (props: {
             </Accordion>
             {/*受注明細ヘッダー(キープ)*/}
             <Accordion
+              expanded={juchuKizaiHeadExpanded}
+              onChange={() => setJuchuKizaiHeadExpanded(!juchuKizaiHeadExpanded)}
               sx={{
                 marginTop: 2,
                 borderRadius: 1,
@@ -1366,7 +1365,13 @@ export const EquipmentKeepOrderDetail = (props: {
                 }}
               >
                 <Box display="flex" alignItems={'center'} justifyContent="space-between" width={'100%'}>
-                  <Typography>受注機材ヘッダー(キープ)</Typography>
+                  <Grid2 container display="flex" justifyContent="space-between" spacing={2}>
+                    <Typography>受注機材ヘッダー(キープ)</Typography>
+                    <Grid2 container display={juchuKizaiHeadExpanded ? 'none' : 'flex'} spacing={2}>
+                      <Typography>受注明細名</Typography>
+                      <Typography>{getValues('headNam')}</Typography>
+                    </Grid2>
+                  </Grid2>
                 </Box>
               </AccordionSummary>
               <AccordionDetails sx={{ padding: 0 }}>
@@ -1447,9 +1452,7 @@ export const EquipmentKeepOrderDetail = (props: {
                               const yardNyukoDat = getValues('yardNyukoDat');
                               setKeepJuchuKizaiMeisaiList((prev) =>
                                 prev.map((d) =>
-                                  yardNyukoDat
-                                    ? { ...d, shozokuId: BASHO_ID.yard }
-                                    : { ...d, shozokuId: d.mShozokuId }
+                                  yardNyukoDat ? { ...d, shozokuId: BASHO_ID.yard } : { ...d, shozokuId: d.mShozokuId }
                                 )
                               );
                             }}
@@ -1477,9 +1480,7 @@ export const EquipmentKeepOrderDetail = (props: {
                               const kicsNyukoDat = getValues('kicsNyukoDat');
                               setKeepJuchuKizaiMeisaiList((prev) =>
                                 prev.map((d) =>
-                                  kicsNyukoDat
-                                    ? { ...d, shozokuId: BASHO_ID.kics }
-                                    : { ...d, shozokuId: d.mShozokuId }
+                                  kicsNyukoDat ? { ...d, shozokuId: BASHO_ID.kics } : { ...d, shozokuId: d.mShozokuId }
                                 )
                               );
                             }}
@@ -1545,17 +1546,6 @@ export const EquipmentKeepOrderDetail = (props: {
                     rows={3}
                     fullWidth
                     disabled={!edit}
-                    // sx={{
-                    //   '& .MuiInputBase-root': {
-                    //     resize: 'both',
-                    //     overflow: 'auto',
-                    //     alignItems: 'flex-start',
-                    //   },
-                    //   '& .MuiInputBase-inputMultiline': {
-                    //     textAlign: 'left',
-                    //     paddingTop: '8px',
-                    //   },
-                    // }}
                   ></TextFieldElement>
                 </Box>
               </AccordionDetails>

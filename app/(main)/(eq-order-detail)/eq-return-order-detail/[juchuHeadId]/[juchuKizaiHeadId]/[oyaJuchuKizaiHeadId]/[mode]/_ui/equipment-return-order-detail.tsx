@@ -200,8 +200,10 @@ export const EquipmentReturnOrderDetail = (props: {
   // スナックバーメッセージ
   const [snackBarMessage, setSnackBarMessage] = useState('');
 
-  // アコーディオン制御
-  const [expanded, setExpanded] = useState(false);
+  // 受注ヘッダーアコーディオン制御
+  const [juchuHeadExpanded, setJuchuHeadExpanded] = useState(false);
+  // 受注機材ヘッダーアコーディオン制御
+  const [juchuKizaiHeadExpanded, setJuchuKizaiHeadExpanded] = useState(false);
   // ポッパー制御
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -1362,11 +1364,6 @@ export const EquipmentReturnOrderDetail = (props: {
     setIsProcessing(false);
   };
 
-  // アコーディオン開閉
-  const handleExpansion = () => {
-    setExpanded((prevExpanded) => !prevExpanded);
-  };
-
   /**
    * useEffect
    */
@@ -1520,10 +1517,7 @@ export const EquipmentReturnOrderDetail = (props: {
                 )}
                 <Grid2 container display={saveKizaiHead ? 'flex' : 'none'} alignItems={'center'} spacing={1}>
                   {!edit ? <Typography>閲覧モード</Typography> : <Typography>編集モード</Typography>}
-                  <Button
-                    disabled={!!lockData || user?.permission.juchu === permission.juchu_ref}
-                    onClick={handleEdit}
-                  >
+                  <Button disabled={!!lockData || user?.permission.juchu === permission.juchu_ref} onClick={handleEdit}>
                     変更
                   </Button>
                 </Grid2>
@@ -1537,8 +1531,8 @@ export const EquipmentReturnOrderDetail = (props: {
             </Box>
             {/*受注ヘッダー*/}
             <Accordion
-              expanded={expanded}
-              onChange={handleExpansion}
+              expanded={juchuHeadExpanded}
+              onChange={() => setJuchuHeadExpanded(!juchuHeadExpanded)}
               sx={{
                 marginTop: 2,
                 borderRadius: 1,
@@ -1561,7 +1555,7 @@ export const EquipmentReturnOrderDetail = (props: {
                 <Box display="flex" justifyContent="space-between" alignItems="center" width="100%">
                   <Grid2 container display="flex" justifyContent="space-between" spacing={2}>
                     <Typography>受注ヘッダー</Typography>
-                    <Grid2 container display={expanded ? 'none' : 'flex'} spacing={2}>
+                    <Grid2 container display={juchuHeadExpanded ? 'none' : 'flex'} spacing={2}>
                       <Typography>公演名</Typography>
                       <Typography>{juchuHeadData.koenNam}</Typography>
                     </Grid2>
@@ -1638,6 +1632,8 @@ export const EquipmentReturnOrderDetail = (props: {
             {/*返却受注明細ヘッダー*/}
 
             <Accordion
+              expanded={juchuKizaiHeadExpanded}
+              onChange={() => setJuchuKizaiHeadExpanded(!juchuKizaiHeadExpanded)}
               sx={{
                 marginTop: 2,
                 borderRadius: 1,
@@ -1661,7 +1657,13 @@ export const EquipmentReturnOrderDetail = (props: {
                 }}
               >
                 <Box display="flex" alignItems="center" justifyContent="space-between" width={'100%'}>
-                  <Typography>受注機材ヘッダー(返却)</Typography>
+                  <Grid2 container display="flex" justifyContent="space-between" spacing={2}>
+                    <Typography>受注機材ヘッダー(返却)</Typography>
+                    <Grid2 container display={juchuKizaiHeadExpanded ? 'none' : 'flex'} spacing={2}>
+                      <Typography>受注明細名</Typography>
+                      <Typography>{getValues('headNam')}</Typography>
+                    </Grid2>
+                  </Grid2>
                 </Box>
               </AccordionSummary>
               <AccordionDetails sx={{ padding: 0 }}>
@@ -1914,17 +1916,6 @@ export const EquipmentReturnOrderDetail = (props: {
                     rows={3}
                     fullWidth
                     disabled={!edit}
-                    // sx={{
-                    //   '& .MuiInputBase-root': {
-                    //     resize: 'both',
-                    //     overflow: 'auto',
-                    //     alignItems: 'flex-start',
-                    //   },
-                    //   '& .MuiInputBase-inputMultiline': {
-                    //     textAlign: 'left',
-                    //     paddingTop: '8px',
-                    //   },
-                    // }}
                   ></TextFieldElement>
                 </Box>
               </AccordionDetails>

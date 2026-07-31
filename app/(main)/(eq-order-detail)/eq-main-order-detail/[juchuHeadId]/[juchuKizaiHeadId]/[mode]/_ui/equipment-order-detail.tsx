@@ -228,8 +228,10 @@ const EquipmentOrderDetail = (props: {
   // スナックバーメッセージ
   const [snackBarMessage, setSnackBarMessage] = useState('');
 
-  // アコーディオン制御
-  const [expanded, setExpanded] = useState(false);
+  // 受注ヘッダーアコーディオン制御
+  const [juchuHeadExpanded, setJuchuHeadExpanded] = useState(false);
+  // 受注機材ヘッダーアコーディオン制御
+  const [juchuKizaiHeadExpanded, setJuchuKizaiHeadExpanded] = useState(false);
   // ポッパー制御
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -1693,10 +1695,10 @@ const EquipmentOrderDetail = (props: {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // アコーディオン開閉
-  const handleExpansion = () => {
-    setExpanded((prevExpanded) => !prevExpanded);
-  };
+  // // アコーディオン開閉
+  // const handleExpansion = () => {
+  //   setJuchuHeadExpanded((prevExpanded) => !prevExpanded);
+  // };
 
   /**
    * 機材追加時
@@ -2538,8 +2540,8 @@ const EquipmentOrderDetail = (props: {
             </Box>
             {/*-------受注ヘッダー-------*/}
             <Accordion
-              expanded={expanded}
-              onChange={handleExpansion}
+              expanded={juchuHeadExpanded}
+              onChange={() => setJuchuHeadExpanded(!juchuHeadExpanded)}
               sx={{
                 marginTop: 2,
                 borderRadius: 1,
@@ -2562,7 +2564,7 @@ const EquipmentOrderDetail = (props: {
                 <Box display="flex" justifyContent="space-between" alignItems="center" width="100%">
                   <Grid2 container display="flex" justifyContent="space-between" spacing={2}>
                     <Typography>受注ヘッダー</Typography>
-                    <Grid2 container display={expanded ? 'none' : 'flex'} spacing={2}>
+                    <Grid2 container display={juchuHeadExpanded ? 'none' : 'flex'} spacing={2}>
                       <Typography>公演名</Typography>
                       <Typography>{juchuHeadData.koenNam}</Typography>
                     </Grid2>
@@ -2645,6 +2647,8 @@ const EquipmentOrderDetail = (props: {
             </Accordion>
             {/*-------受注機材ヘッダー-------*/}
             <Accordion
+              expanded={juchuKizaiHeadExpanded}
+              onChange={() => setJuchuKizaiHeadExpanded(!juchuKizaiHeadExpanded)}
               sx={{
                 marginTop: 2,
                 borderRadius: 1,
@@ -2666,7 +2670,13 @@ const EquipmentOrderDetail = (props: {
                 }}
               >
                 <Box display="flex" alignItems={'center'} justifyContent="space-between" width={'100%'}>
-                  <Typography>受注機材ヘッダー</Typography>
+                  <Grid2 container display="flex" justifyContent="space-between" spacing={2}>
+                    <Typography>受注機材ヘッダー</Typography>
+                    <Grid2 container display={juchuKizaiHeadExpanded ? 'none' : 'flex'} spacing={2}>
+                      <Typography>受注明細名</Typography>
+                      <Typography>{getValues('headNam')}</Typography>
+                    </Grid2>
+                  </Grid2>
                 </Box>
               </AccordionSummary>
               <AccordionDetails sx={{ padding: 0 }}>
@@ -2677,9 +2687,6 @@ const EquipmentOrderDetail = (props: {
                     name="headNam"
                     control={control}
                     disabled={!edit}
-                    slotProps={{
-                      input: { readOnly: shukoFixFlag },
-                    }}
                     sx={{ width: 400 }}
                   ></TextFieldElement>
                 </Grid2>
@@ -3048,20 +3055,6 @@ const EquipmentOrderDetail = (props: {
                     rows={3}
                     fullWidth
                     disabled={!edit}
-                    slotProps={{
-                      input: { readOnly: shukoFixFlag },
-                    }}
-                    // sx={{
-                    //   '& .MuiInputBase-root': {
-                    //     resize: 'both',
-                    //     overflow: 'auto',
-                    //     alignItems: 'flex-start',
-                    //   },
-                    //   '& .MuiInputBase-inputMultiline': {
-                    //     textAlign: 'left',
-                    //     paddingTop: '8px',
-                    //   },
-                    // }}
                   ></TextFieldElement>
                 </Box>
               </AccordionDetails>
