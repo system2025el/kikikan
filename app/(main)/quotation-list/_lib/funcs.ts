@@ -373,7 +373,7 @@ export const getJuchuKizaiHeadNamListForQuot = async (juchuId: number) => {
   try {
     const { data, error } = await selectJuchuKizaiHeadNamList(juchuId);
     if (error) {
-      throw new Error('[selectJuchuKizaiHeadList] DBエラー:', { cause: error });
+      throw new Error('[selectJuchuKizaiHeadNamList] DBエラー:', { cause: error });
     }
     if (!data || data.length === 0) {
       return [];
