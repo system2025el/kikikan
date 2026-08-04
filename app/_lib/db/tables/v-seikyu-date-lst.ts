@@ -339,6 +339,7 @@ export const selectFilteredJuchuDetailsForBill = async (queries: {
         kizai.kizai_nam,
         meisai.kizai_tanka_amt,
         meisai.plan_kizai_qty as plan_qty,
+        meisai.dsp_ord_num,
         COALESCE(meisai.indent_num, 0) as indent_num
       FROM
         ${SCHEMA}.v_seikyu_date_lst as v
@@ -368,7 +369,7 @@ export const selectFilteredJuchuDetailsForBill = async (queries: {
 
   query += `
        ORDER BY
-        v.juchu_head_id ASC, v.juchu_kizai_head_id ASC;
+        v.juchu_head_id ASC, v.juchu_kizai_head_id ASC, meisai.dsp_ord_num ASC;
     `;
 
   try {
@@ -548,7 +549,8 @@ export const selectJuchuKizaiMeisaiDetailsForBill = async (juchuId: number, kiza
       kizai.kizai_nam,
       meisai.kizai_tanka_amt,
       COALESCE(meisai.indent_num, 0) as indent_num,
-      meisai.plan_kizai_qty as plan_qty
+      meisai.plan_kizai_qty as plan_qty,
+      meisai.dsp_ord_num
     FROM
       ${SCHEMA}.v_seikyu_date_lst as v
     LEFT JOIN
@@ -560,7 +562,9 @@ export const selectJuchuKizaiMeisaiDetailsForBill = async (juchuId: number, kiza
     WHERE
       v.juchu_head_id = $1
     AND
-      v.juchu_kizai_head_id = $2; 
+      v.juchu_kizai_head_id = $2
+    ORDER BY
+      meisai.dsp_ord_num ASC;
   `;
 
   // 実行時に渡す値の配列

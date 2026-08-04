@@ -5,6 +5,7 @@ import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
 import { revalidatePath } from 'next/cache';
 
+import { DIC_ID } from '@/app/_lib/constants';
 import { selectOneCustomer } from '@/app/_lib/db/tables/m-kokyaku';
 import { selectActiveSeikyuSts } from '@/app/_lib/db/tables/m-seikyu-sts';
 import { selectChosenSeikyu, updBillHeadDelFlg } from '@/app/_lib/db/tables/t-seikyu-head';
@@ -19,6 +20,7 @@ import { selectFilteredBills } from '@/app/_lib/db/tables/v-seikyu-lst';
 import { SeikyuMeisaiHead } from '@/app/_lib/db/types/t-seikyu-meisai-head-type';
 import { SeikyuMeisai } from '@/app/_lib/db/types/t-seikyu-meisai-type';
 import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
+import { getDic } from '@/app/(main)/_lib/funcs';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 
@@ -356,6 +358,7 @@ export const getJuchuKizaiMeisaiHeadForBill = async (juchuHeadId: number, kizaiH
  */
 export const getJuchuKizaiMeisaiDetailsForBill = async (juchuHeadId: number, kizaiHeadId: number, dat: Date) => {
   try {
+    const indentChara = await getDic(DIC_ID.indentChara);
     const data = await selectJuchuKizaiMeisaiDetailsForBill(juchuHeadId, kizaiHeadId, dat);
 
     if (!data) {
@@ -396,7 +399,7 @@ export const getJuchuKizaiMeisaiDetailsForBill = async (juchuHeadId: number, kiz
       const planQty = Number(currentRow.plan_qty) || 0;
 
       acc[groupKey].meisai.push({
-        nam: currentRow.kizai_nam ? `${' * '.repeat(currentRow.indent_num ?? 0)}${currentRow.kizai_nam}` : null,
+        nam: currentRow.kizai_nam ? `${indentChara.repeat(currentRow.indent_num ?? 0)}${currentRow.kizai_nam}` : null,
         qty: planQty,
         honbanbiQty: honbanbiQty,
         tankaAmt: tankaAmt,
