@@ -34,7 +34,7 @@ import { TextFieldElement } from 'react-hook-form-mui';
 import { BASHO_ID, JUCHU_KIZAI_HEAD_KBN, LOCK_SHUBETU, SAGYO_KBN_ID } from '@/app/_lib/constants';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { getNyukoDate, getShukoDate } from '@/app/(main)/_lib/date-funcs';
-import { useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
+import { useStableCallback, useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
 import { lockCheck, lockRelease } from '@/app/(main)/_lib/lock';
 import { permission } from '@/app/(main)/_lib/permission';
 import { LockValues, User } from '@/app/(main)/_lib/types';
@@ -658,7 +658,7 @@ export const EquipmentKeepOrderDetail = (props: {
    * @param rowIndex 入力された行番号
    * @param memo キープメモ内容
    */
-  const handleMemoChange = async (rowIndex: number, memo: string) => {
+  const handleMemoChange = useStableCallback(async (rowIndex: number, memo: string) => {
     if (isProcessing) return;
     setIsProcessing(true);
 
@@ -683,14 +683,14 @@ export const EquipmentKeepOrderDetail = (props: {
     } finally {
       setIsProcessing(false);
     }
-  };
+  });
 
   /**
    * 機材テーブルのキープ数入力時
    * @param kizaiId 機材id
    * @param keepValue キープ数
    */
-  const handleCellChange = (rowIndex: number, keepValue: number) => {
+  const handleCellChange = useStableCallback((rowIndex: number, keepValue: number) => {
     setKeepJuchuKizaiMeisaiList((prev) => {
       const visibleIndex = prev
         .map((data, index) => (!data.delFlag ? index : null))
@@ -701,23 +701,23 @@ export const EquipmentKeepOrderDetail = (props: {
 
       return prev.map((data, i) => (i === index ? { ...data, keepQty: keepValue } : data));
     });
-  };
+  });
 
   /**
    * 機材テーブルのチェックボックス押下時
    * @param row
    */
-  const handleEqSelect = (row: KeepJuchuKizaiMeisaiValues) => {
+  const handleEqSelect = useStableCallback((row: KeepJuchuKizaiMeisaiValues) => {
     setKeepJuchuKizaiMeisaiList((prev) =>
       prev.map((data) => (data === row ? { ...data, selected: !data.selected } : data))
     );
-  };
+  });
 
   /**
    * 機材テーブルの全選択チェックボックス押下時
    * @returns
    */
-  const handleEqAllSelect = () => {
+  const handleEqAllSelect = useStableCallback(() => {
     const selectEq = keepJuchuKizaiMeisaiList.filter((data) => !data.delFlag && data.selected);
 
     if (selectEq.length === keepJuchuKizaiMeisaiList.filter((data) => !data.delFlag).length) {
@@ -727,14 +727,14 @@ export const EquipmentKeepOrderDetail = (props: {
       setKeepJuchuKizaiMeisaiList((prev) => prev.map((data) => ({ ...data, selected: true })));
       return;
     }
-  };
+  });
 
   /**
    * コンテナメモ入力時
    * @param kizaiId 機材id
    * @param memo コンテナメモ内容
    */
-  const handleKeepContainerMemoChange = async (rowIndex: number, memo: string) => {
+  const handleKeepContainerMemoChange = useStableCallback(async (rowIndex: number, memo: string) => {
     if (isProcessing) return;
     setIsProcessing(true);
 
@@ -759,7 +759,7 @@ export const EquipmentKeepOrderDetail = (props: {
     } finally {
       setIsProcessing(false);
     }
-  };
+  });
 
   /**
    * コンテナテーブル使用数入力時
@@ -767,36 +767,38 @@ export const EquipmentKeepOrderDetail = (props: {
    * @param kicsKeepQty KICSコンテナ数
    * @param yardKeepQty YARDコンテナ数
    */
-  const handleKeepContainerCellChange = (rowIndex: number, kicsKeepQty: number, yardKeepQty: number) => {
-    setKeepJuchuContainerMeisaiList((prev) => {
-      const visibleIndex = prev
-        .map((data, index) => (!data.delFlag ? index : null))
-        .filter((index) => index !== null) as number[];
+  const handleKeepContainerCellChange = useStableCallback(
+    (rowIndex: number, kicsKeepQty: number, yardKeepQty: number) => {
+      setKeepJuchuContainerMeisaiList((prev) => {
+        const visibleIndex = prev
+          .map((data, index) => (!data.delFlag ? index : null))
+          .filter((index) => index !== null) as number[];
 
-      const index = visibleIndex[rowIndex];
-      if (index === undefined) return prev;
+        const index = visibleIndex[rowIndex];
+        if (index === undefined) return prev;
 
-      return prev.map((data, i) =>
-        i === index ? { ...data, kicsKeepQty: kicsKeepQty, yardKeepQty: yardKeepQty } : data
-      );
-    });
-  };
+        return prev.map((data, i) =>
+          i === index ? { ...data, kicsKeepQty: kicsKeepQty, yardKeepQty: yardKeepQty } : data
+        );
+      });
+    }
+  );
 
   /**
    * コンテナテーブルのチェックボックス押下時
    * @param row
    */
-  const handleCtnSelect = (row: KeepJuchuContainerMeisaiValues) => {
+  const handleCtnSelect = useStableCallback((row: KeepJuchuContainerMeisaiValues) => {
     setKeepJuchuContainerMeisaiList((prev) =>
       prev.map((data) => (data === row ? { ...data, selected: !data.selected } : data))
     );
-  };
+  });
 
   /**
    * コンテナテーブルの全選択チェックボックス押下時
    * @returns
    */
-  const handleCtnAllSelect = () => {
+  const handleCtnAllSelect = useStableCallback(() => {
     const selectCtn = keepJuchuContainerMeisaiList.filter((data) => !data.delFlag && data.selected);
 
     if (selectCtn.length === keepJuchuContainerMeisaiList.filter((data) => !data.delFlag).length) {
@@ -806,7 +808,7 @@ export const EquipmentKeepOrderDetail = (props: {
       setKeepJuchuContainerMeisaiList((prev) => prev.map((data) => ({ ...data, selected: true })));
       return;
     }
-  };
+  });
 
   /**
    * KICS出庫日変更時
@@ -1571,7 +1573,7 @@ export const EquipmentKeepOrderDetail = (props: {
           </form>
           {/*受注明細(機材)*/}
           {saveKizaiHead && (
-            <Paper variant="outlined" sx={{ mt: 2 }}>
+            <Paper variant="outlined" sx={{ mt: 2, contain: 'layout paint' }}>
               <Box display="flex" alignItems="center" px={2} height={'30px'}>
                 <Typography>受注明細(機材)</Typography>
               </Box>

@@ -22,7 +22,7 @@ import {
   Typography,
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
-import React, { useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 
 import { BASHO_ID } from '@/app/_lib/constants';
 import { openOrFocusTab } from '@/app/(main)/_lib/tab-focus';
@@ -41,7 +41,7 @@ type KeepEqTableProps = {
   handleEqAllSelect: () => void;
 };
 
-export const KeepEqTable: React.FC<KeepEqTableProps> = ({
+const KeepEqTableComponent: React.FC<KeepEqTableProps> = ({
   rows,
   edit,
   nyukoFixFlag,
@@ -52,10 +52,11 @@ export const KeepEqTable: React.FC<KeepEqTableProps> = ({
   handleEqAllSelect,
 }) => {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const keepRefCallbacks = useRef(new Map<number, (el: HTMLInputElement | null) => void>());
 
   const visibleRows = rows.filter((row) => !row.delFlag);
 
-  const handleKeyDown = (e: React.KeyboardEvent, rowIndex: number) => {
+  const handleKeyDown = useCallback((e: React.KeyboardEvent, rowIndex: number) => {
     if (e.key === 'Enter') {
       e.preventDefault();
       inputRefs.current[rowIndex + 1]?.focus();
@@ -66,11 +67,18 @@ export const KeepEqTable: React.FC<KeepEqTableProps> = ({
       e.preventDefault();
       inputRefs.current[rowIndex - 1]?.focus();
     }
-  };
+  }, []);
 
-  const handleKeepRef = (rowIndex: number) => (el: HTMLInputElement | null) => {
-    inputRefs.current[rowIndex] = el;
-  };
+  const handleKeepRef = useCallback((rowIndex: number) => {
+    let callback = keepRefCallbacks.current.get(rowIndex);
+    if (!callback) {
+      callback = (el: HTMLInputElement | null) => {
+        inputRefs.current[rowIndex] = el;
+      };
+      keepRefCallbacks.current.set(rowIndex, callback);
+    }
+    return callback;
+  }, []);
 
   return (
     <TableContainer style={{ overflow: 'scroll', maxHeight: '80vh' }}>
@@ -170,6 +178,9 @@ export const KeepEqTable: React.FC<KeepEqTableProps> = ({
     </TableContainer>
   );
 };
+
+export const KeepEqTable = React.memo(KeepEqTableComponent);
+KeepEqTable.displayName = 'KeepEqTable';
 
 type KeepEqTableRowProps = {
   row: KeepJuchuKizaiMeisaiValues;
@@ -509,7 +520,7 @@ const KeepContainerTableRow = React.memo(
 
 KeepContainerTableRow.displayName = 'KeepContainerTableRow';
 
-export const KeepContainerTable = (props: {
+const KeepContainerTableComponent = (props: {
   rows: KeepJuchuContainerMeisaiValues[];
   edit: boolean;
   nyukoFixFlag: boolean;
@@ -678,6 +689,9 @@ export const KeepContainerTable = (props: {
     </TableContainer>
   );
 };
+
+export const KeepContainerTable = React.memo(KeepContainerTableComponent);
+KeepContainerTable.displayName = 'KeepContainerTable';
 
 /* style
 ---------------------------------------------------------------------------------------------------- */
