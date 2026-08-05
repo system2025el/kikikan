@@ -2,6 +2,7 @@
 
 import 'dayjs/locale/ja';
 
+import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import SearchIcon from '@mui/icons-material/Search';
 import {
   Autocomplete,
@@ -28,7 +29,7 @@ import { selectNone, SelectTypes } from '../../_ui/form-box';
 import { FAKE_NEW_ID } from '../../(masters)/_lib/constants';
 import { getCustomerSelection } from '../../(masters)/_lib/funcs';
 import { getLocsSelection } from '../../(masters)/locations-master/_lib/funcs';
-import { radioData } from '../_lib/datas';
+import { DEFAULT_SEARCH_VALUES, radioData } from '../_lib/datas';
 import { getFilteredOrderList } from '../_lib/funcs';
 import { EqptOrderListTableValues, EqptOrderSearchValues } from '../_lib/types';
 import { EqptOrderTable } from './eqpt-order-table';
@@ -55,13 +56,7 @@ export const EqptOrderList = () => {
 
   /* useForm ------------------------------------------ */
   const { control, handleSubmit, reset, getValues, watch } = useForm<EqptOrderSearchValues>({
-    defaultValues: {
-      radio: 'shuko',
-      selectedDate: { value: '5', range: { from: null, to: null } },
-      kokyaku: '',
-      koenbashoNam: '',
-      listSort: { sort: 'shuko', order: 'asc' },
-    },
+    defaultValues: DEFAULT_SEARCH_VALUES,
   });
   /** 検索条件の種別の監視 */
   const selectedDateValue = watch('selectedDate.value');
@@ -114,12 +109,7 @@ export const EqptOrderList = () => {
       reset(searchParams);
       getList(searchParams);
     } else {
-      getList({
-        radio: 'shuko',
-        selectedDate: { value: '5', range: { from: null, to: null } },
-        kokyaku: '',
-        listSort: { sort: 'shuko', order: 'asc' },
-      });
+      getList(DEFAULT_SEARCH_VALUES);
     }
   }, [reset]);
 
@@ -312,7 +302,11 @@ export const EqptOrderList = () => {
                     row
                   />
                   <Grid2 size={'grow'} alignItems={'self-end'}>
-                    <Box justifySelf={'end'}>
+                    <Box justifySelf={'end'} display={'flex'} gap={1}>
+                      <Button type="button" onClick={() => reset(DEFAULT_SEARCH_VALUES)}>
+                        <RestartAltIcon />
+                        検索条件クリア
+                      </Button>
                       <Button type="submit" loading={isLoading}>
                         <SearchIcon />
                         検索
