@@ -174,6 +174,9 @@ export const selectFilteredBillingSituations = async (queries: BillingStsSearchV
   } else if (sts.length === 1 && sts[0] === '2') {
     builder.eq('seikyu_jokyo_total_sts_id', 9).eq('seikyu_jokyo_sts_id', 9);
   }
+
+  builder.order('kokyaku_id');
+  builder.order('nyuko_dat');
   try {
     return await builder;
   } catch (e) {
