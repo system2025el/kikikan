@@ -837,10 +837,10 @@ export const Quotation = ({
                   </Button>
                 </Box>
               </Box>
-              {/* その他テーブル ------------------------------------------------------------ */}
+              {/* 諸経費テーブル ------------------------------------------------------------ */}
               <Box margin={0.5} padding={0.8} borderTop={1} borderColor={'divider'}>
                 <Typography variant="h6" pl={2}>
-                  その他
+                  諸経費
                 </Typography>
                 {otherFields.fields.map((field, index) => (
                   <Box key={field.id} p={1}>
@@ -858,7 +858,7 @@ export const Quotation = ({
                         mituMeisaiHeadNam: '',
                         mituMeisaiKbn: 2,
                         nebikiNam: '値引き',
-                        nebikiAftNam: 'その他',
+                        nebikiAftNam: '諸経費',
                         biko1: '',
                         biko2: '',
                         biko3: '',
