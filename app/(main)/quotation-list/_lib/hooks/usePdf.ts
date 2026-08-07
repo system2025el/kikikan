@@ -1150,8 +1150,8 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
       fontSize = 8;
       maxWidth = 310;
 
-      if (!item1 && !item4) {
-        workPage.drawText(formatTextLine('', customFont, fontSize, maxWidth), {
+      if (!item2 && !item3 && !item4) {
+        workPage.drawText(formatTextLine(item1 ?? '', customFont, fontSize, maxWidth), {
           x: 35,
           y: startY - rowHeight * (index + 1) + 3,
           font: customFont, // カスタムフォントの設定
