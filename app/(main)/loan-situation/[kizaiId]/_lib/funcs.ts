@@ -2,6 +2,7 @@
 
 import { QueryResult } from 'pg';
 
+import { selectColor } from '@/app/_lib/db/tables/m-honbanbi-color';
 import { selectMergeUseListBulk, selectStockList, selectUseListBulk } from '@/app/_lib/db/tables/stock-table';
 import { selectLoanJuchuData, selectLoanJuchuReturnData } from '@/app/_lib/db/tables/v-juchu-kizai-den';
 import { selectJuchuHeadIds } from '@/app/_lib/db/tables/v-juchu-lst';
@@ -9,7 +10,14 @@ import { selectLoanKizai } from '@/app/_lib/db/tables/v-kizai-list';
 import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { getNyukoDate, getShukoDate } from '@/app/(main)/_lib/date-funcs';
 
-import { LoanConfirmJuchuHeadId, LoanJuchu, LoanKizai, LoanStockTableValues, LoanUseTableValues } from './types';
+import {
+  HonbanbiColorValues,
+  LoanConfirmJuchuHeadId,
+  LoanJuchu,
+  LoanKizai,
+  LoanStockTableValues,
+  LoanUseTableValues,
+} from './types';
 
 /**
  * 貸出状況用機材データ取得
@@ -256,6 +264,35 @@ export const getLoanStockData = async (kizaiId: number, date: Date) => {
     const result: QueryResult<LoanStockTableValues> = await selectStockList(kizaiId, stringDate);
     const data: LoanStockTableValues[] = result.rows;
     return data;
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
+    throw e;
+  }
+};
+
+/**
+ * 本番日背景色取得
+ * @returns
+ */
+export const getColor = async () => {
+  try {
+    const { data, error } = await selectColor();
+    if (error) {
+      throw new Error('[selectColor] DBエラー:', { cause: error });
+    }
+
+    const honbanbiColor: HonbanbiColorValues[] = data.map((d) => ({
+      colorId: d.clolor_id,
+      colorNam: d.color_nam,
+    }));
+    return honbanbiColor;
   } catch (e) {
     if (e instanceof Error) {
       console.error(`[ERROR] ${e.message}`);
