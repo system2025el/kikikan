@@ -1949,7 +1949,7 @@ const EquipmentOrderDetail = (props: {
 
   // コピー処理
   const handleCopyConfirmed = async (
-    headNam: string,
+    headNam: string | null,
     selectEq: JuchuKizaiMeisaiValues[],
     selectCtn: JuchuContainerMeisaiValues[]
   ) => {
@@ -2070,7 +2070,7 @@ const EquipmentOrderDetail = (props: {
 
   // 分離処理
   const handleSeparationConfirmed = async (
-    headNam: string,
+    headNam: string | null,
     selectEq: JuchuKizaiMeisaiValues[],
     selectCtn: JuchuContainerMeisaiValues[]
   ) => {
@@ -2413,7 +2413,10 @@ const EquipmentOrderDetail = (props: {
   }, [user]);
 
   // 割引率（金額）が変化するたびに割引金額（確定）へ反映
+  // 既に一致している場合（例：nebikiAmtがnull、waribikiRatAmtが0）はsetValueを呼ばない。
+  // 呼んでしまうとshouldDirtyにより、何も編集していなくても未保存扱いになってしまう。
   useEffect(() => {
+    if ((nebikiAmt ?? 0) === waribikiRatAmt) return;
     setValue('nebikiAmt', waribikiRatAmt, { shouldDirty: true, shouldValidate: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [waribikiRatAmt]);

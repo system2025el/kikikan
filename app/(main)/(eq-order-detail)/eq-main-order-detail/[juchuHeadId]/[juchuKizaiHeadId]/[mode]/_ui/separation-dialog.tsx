@@ -45,7 +45,7 @@ export const SeparationDialog = ({
   juchuKizaiMeisaiList: JuchuKizaiMeisaiValues[];
   juchuContainerMeisaiList: JuchuContainerMeisaiValues[];
   handleSeparationConfirmed: (
-    headNam: string,
+    headNam: string | null,
     selectEq: JuchuKizaiMeisaiValues[],
     selectCtn: JuchuContainerMeisaiValues[]
   ) => void;

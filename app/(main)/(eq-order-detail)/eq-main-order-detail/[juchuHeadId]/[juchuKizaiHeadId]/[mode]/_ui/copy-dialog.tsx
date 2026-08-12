@@ -36,7 +36,7 @@ export const CopyDialog = ({
   juchuKizaiMeisaiList: JuchuKizaiMeisaiValues[];
   juchuContainerMeisaiList: JuchuContainerMeisaiValues[];
   handleCopyConfirmed: (
-    headNam: string,
+    headNam: string | null,
     selectEq: JuchuKizaiMeisaiValues[],
     selectCtn: JuchuContainerMeisaiValues[]
   ) => void;

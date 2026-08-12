@@ -113,7 +113,7 @@ export type LocsDialogValues = {
 
 export const BaseCopyDialogSchema = z.object({
   juchuHeadid: z.string().optional(),
-  headNam: z.string({ message: validationMessages.required() }).min(1, { message: validationMessages.required() }),
+  headNam: z.string().max(50, { message: validationMessages.maxStringLength(50) }).nullable(),
   kicsShukoDat: z.date().nullable(),
   kicsNyukoDat: z.date().nullable(),
   yardShukoDat: z.date().nullable(),
@@ -126,9 +126,9 @@ export const CopyDialogSchema = (origin: EqTableValues | null) =>
   z.object({
     juchuHeadid: z.string().optional(),
     headNam: z
-      .string({ message: validationMessages.required() })
-      .min(1, { message: validationMessages.required() })
-      .max(20, { message: validationMessages.maxStringLength(20) }),
+      .string()
+      .max(50, { message: validationMessages.maxStringLength(50) })
+      .nullable(),
     kicsShukoDat:
       origin && origin.kicsShukoDat ? z.date({ message: validationMessages.required() }) : z.date().nullable(),
     kicsNyukoDat:
@@ -142,7 +142,7 @@ export const CopyDialogSchema = (origin: EqTableValues | null) =>
 export type CopyJuchuKizaiHeadValue = {
   juchuHeadId: number;
   mem: string | null;
-  headNam: string;
+  headNam: string | null;
   kicsShukoDat: Date | null;
   kicsNyukoDat: Date | null;
   yardShukoDat: Date | null;

@@ -153,9 +153,9 @@ export type SelectedEqptsValues = {
 
 export const DialogSchema = z.object({
   headNam: z
-    .string({ message: validationMessages.required() })
-    .min(1, { message: validationMessages.required() })
-    .max(20, { message: validationMessages.maxStringLength(20) }),
+    .string()
+    .max(50, { message: validationMessages.maxStringLength(50) })
+    .nullable(),
 });
 
 export type DialogValues = z.infer<typeof DialogSchema>;
