@@ -29,7 +29,10 @@ npm run fix             # prettier --write + eslint --fix（コミット前に�
 **データアクセス — 同一DBに対する2種類のクライアント**:
 
 - `app/_lib/db/postgres.ts` — 生の `pg` `Pool`（HMRを跨いで生き残るよう `globalForPool` でシングルトン化）。手書きSQL、トランザクション（`PoolClient`）、複雑・大量データのクエリに使用。
-- `app/_lib/db/supabase.ts` — Supabase JSクライアント（PostgREST）。シンプルなCRUDと `supabase.auth` に使用。`SCHEMA` 定数（現在は `'public'`）をエクスポートしており、各所で `.schema(SCHEMA)` として利用している。スキーマ名を直書きせずこの定数を切り替えることで、アプリ全体を別のPostgresスキーマ（例：開発用スキーマ）に向けられる。
+- Supabase JSクライアント（PostgREST）はシンプルなCRUDと `supabase.auth` に使用し、実行環境で2ファイルに分かれている。どちらも `createClient()` という同名の関数をexportしているため、importするファイルを間違えないこと。
+  - `app/_lib/db/supabase-server.ts` — サーバー用（`createServerClient` + `next/headers` の `cookies`）。`tables/*.ts` などサーバー側は基本これを使う。`await createClient()` と非同期。
+  - `app/_lib/db/supabase-client.ts` — ブラウザ用（`createBrowserClient`）。
+- `app/_lib/db/schema.ts` — `SCHEMA` 定数（現在は `'public'`）。各所で `.schema(SCHEMA)` や生SQLの `${SCHEMA}.テーブル名` として利用している。スキーマ名を直書きせずこの定数を切り替えることで、アプリ全体を別のPostgresスキーマ（例：開発用スキーマ）に向けられる。
 - `app/_lib/db/supabase-admin.ts` — service-role クライアント。サーバー専用。クライアントコンポーネントに絶対にimportしないこと。
 - `app/_lib/db/tables/*.ts` — テーブル/ビューごとにクエリ関数をまとめたファイル（`'use server'`）。ファイル名の接頭辞が種別を表す：`m-*` はマスタテーブル、`t-*` はトランザクションテーブル、`v-*` はビュー。
 - `app/_lib/db/types/*.ts` — テーブルごとに手動管理している行の型定義、および Supabase の `Database` 型を自動生成した `types.ts`。`types.ts` は手動編集せず、スキーマ変更時は Supabase CLI で再生成すること。
@@ -43,11 +46,13 @@ npm run fix             # prettier --write + eslint --fix（コミット前に�
 - 命名で層を判別できる：`tables/*.ts` は `select*`/`insert*`/`update*`/`delete*`/`check*`（get/fetchは使わない）、`funcs.ts` は逆に `get*` が使われる。
 - pgでの書き込みは `BEGIN` → 処理 → `updateMasterUpdates()` → `COMMIT`（catchで`ROLLBACK`、finallyで`connection.release()`）というトランザクションパターンを使う。`updateMasterUpdates` はマスタ更新のたびに呼ぶ。
 
-**認証・権限**:
+**認証・権限**: 認証は `@supabase/ssr` によるcookieベースのサーバーサイド認証。クライアント側にセッションを保持する仕組み（`localStorage` やZustandストア）は使っていない。
 
-- クライアント側で Supabase Auth を使用。ログインユーザー情報と独自のビットマスク権限は Zustand ストア `app/_lib/stores/usestore.ts` にキャッシュされ、`localStorage` の `user-storage` キーに永続化される。
-- `app/(main)/_ui/auth-guard.tsx` が `(main)` レイアウトをラップし、hydration完了までレンダーをブロックし、ユーザーが存在しない/Supabaseセッションが無効な場合は `/login` にリダイレクトする。また `SIGNED_OUT` イベントを監視して状態をクリアする。
-- `app/(main)/_ui/permission-guard.tsx` は、`app/(main)/_lib/permission.ts` で定義されたビットマスクとのビットAND演算により、カテゴリ（`juchu`、`nyushuko`、`masters`、`loginSetting`、`ht`）単位でページの一部表示を制御する。`*_full` の定数は `*_ref` と `*_upd` のビットOR。
+- **ルートの保護は `middleware.ts`**（ルート直下）。全リクエストで `supabase.auth.getUser()` を呼んでトークンを検証・リフレッシュし、未ログインなら `/login` にリダイレクトする。公開パスは `/`・`/login`・`/error` のみで、`signup`・`auth`・静的ファイルは matcher 側で除外している。招待直後（`user_metadata.setup_completed === false`）は `/signup` へ、ログイン済みで `/login` を開いたら `/dashboard` へ飛ばす。リダイレクト時もリフレッシュ済みcookieを引き継ぐ実装になっているので、この関数を触るときは `redirectWithCookies` を経由すること。
+- **ユーザー情報の受け渡し**: `app/(main)/layout.tsx` が `getCurrentUser()`（`app/(main)/_lib/funcs.ts`）でユーザーを解決し、`UserProvider`（`app/(main)/_ui/user-context.tsx`）で配下に渡す。クライアントコンポーネントは `useUser()` で参照する。`getCurrentUser` は Supabase authユーザーのメールアドレスで `m_user` を引き、ビットマスク権限を含む `User` 型を返す（`react`の`cache`でリクエスト単位にメモ化）。取得できなければ `/login` へリダイレクトする。
+- Server Component 側では `getCurrentUser()` を直接呼んでチェックしているページもある（受注機材明細など）。`(main)` 配下の新規ページで権限判定が必要なら、propsで受け取るか `getCurrentUser()` を呼ぶ。
+- `app/(main)/_ui/userstoreInitializer.tsx` はページ遷移のたびに `router.refresh()` して最新のユーザー情報（権限変更など）を反映する。DBへの問い合わせすぎを防ぐため60秒間引きしている。
+- 権限は `app/(main)/_lib/permission.ts` のビットマスクとビットAND演算で判定する。`User.permission` は `juchu`・`nyushuko`・`masters`・`loginSetting`・`ht`・`schedule` の6カテゴリに分かれた数値で、定数側は `juchu_ref: 1`／`juchu_upd: 2`／`nyushuko_*: 4,8`／`mst_*: 16,32`／`ht: 64`／`login: 128`／`sche_upd: 256`／`system: 65535`。`*_full` の定数は `*_ref` と `*_upd` のビットOR。
 
 **排他ロック**: `app/(main)/_lib/lock.ts` は、`t-lock` テーブルを使った編集画面向けの排他制御（悲観的ロック）を実装している（受注・見積の明細画面など）。`lockCheck` は10分間有効なロックを新規作成/更新するか、他ユーザーが保持中であれば既存ロック情報を返す。`lockRelease` はロックを解除する。複数ユーザーが同時に開き得る編集画面を新規追加する際は、この仕組みを使うこと。
 
