@@ -212,11 +212,7 @@ export const ShukoEqptDetail = (props: {
             <Box display={'flex'} alignItems={'center'}>
               <Typography mr={2}>棚番</Typography>
               <TextField
-                value={joinStrings(
-                  shukoEqptDetailData.bldCod,
-                  shukoEqptDetailData.tanaCod,
-                  shukoEqptDetailData.edaCod
-                )}
+                value={joinStrings(shukoEqptDetailData.bldCod, shukoEqptDetailData.tanaCod, shukoEqptDetailData.edaCod)}
                 disabled
               />
             </Box>

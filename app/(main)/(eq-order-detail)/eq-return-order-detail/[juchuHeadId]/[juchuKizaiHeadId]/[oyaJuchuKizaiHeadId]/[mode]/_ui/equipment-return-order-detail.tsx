@@ -50,7 +50,7 @@ import { BASHO_ID, JUCHU_KIZAI_HEAD_KBN, LOCK_SHUBETU, SAGYO_KBN_ID } from '@/ap
 import { toJapanTimeString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { getNyukoDate, getRange, getShukoDate } from '@/app/(main)/_lib/date-funcs';
 import { addLock, getLock } from '@/app/(main)/_lib/funcs';
-import { useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
+import { useStableCallback, useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
 import { lockCheck, lockRelease } from '@/app/(main)/_lib/lock';
 import { permission } from '@/app/(main)/_lib/permission';
 import { LockValues, User } from '@/app/(main)/_lib/types';
@@ -200,8 +200,10 @@ export const EquipmentReturnOrderDetail = (props: {
   // スナックバーメッセージ
   const [snackBarMessage, setSnackBarMessage] = useState('');
 
-  // アコーディオン制御
-  const [expanded, setExpanded] = useState(false);
+  // 受注ヘッダーアコーディオン制御
+  const [juchuHeadExpanded, setJuchuHeadExpanded] = useState(false);
+  // 受注機材ヘッダーアコーディオン制御
+  const [juchuKizaiHeadExpanded, setJuchuKizaiHeadExpanded] = useState(!saveKizaiHead);
   // ポッパー制御
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -904,7 +906,7 @@ export const EquipmentReturnOrderDetail = (props: {
    * @param rowIndex 行数
    * @param memo メモ内容
    */
-  const handleMemoChange = async (rowIndex: number, memo: string) => {
+  const handleMemoChange = useStableCallback(async (rowIndex: number, memo: string) => {
     if (isProcessing) return;
     setIsProcessing(true);
 
@@ -929,7 +931,7 @@ export const EquipmentReturnOrderDetail = (props: {
     } finally {
       setIsProcessing(false);
     }
-  };
+  });
 
   /**
    * 機材テーブルの受注数、予備数入力時
@@ -937,7 +939,7 @@ export const EquipmentReturnOrderDetail = (props: {
    * @param kizaiId 機材id
    * @param planQty 合計
    */
-  const handleCellChange = (rowIndex: number, kizaiId: number, planQty: number) => {
+  const handleCellChange = useStableCallback((rowIndex: number, kizaiId: number, planQty: number) => {
     const updatedEqStockData = eqStockListRef.current[rowIndex];
     const targetIndex = updatedEqStockData
       .map((d, index) => (dateRange.includes(toJapanYMDString(d.calDat)) ? index : -1))
@@ -964,23 +966,23 @@ export const EquipmentReturnOrderDetail = (props: {
 
       return prev.map((data, i) => (i === index ? { ...data, planQty: planQty } : data));
     });
-  };
+  });
 
   /**
    * 機材テーブルのチェックボックス押下時
    * @param row
    */
-  const handleEqSelect = (row: ReturnJuchuKizaiMeisaiValues) => {
+  const handleEqSelect = useStableCallback((row: ReturnJuchuKizaiMeisaiValues) => {
     setReturnJuchuKizaiMeisaiList((prev) =>
       prev.map((data) => (data === row ? { ...data, selected: !data.selected } : data))
     );
-  };
+  });
 
   /**
    * 機材テーブルの全選択チェックボックス押下時
    * @returns
    */
-  const handleEqAllSelect = () => {
+  const handleEqAllSelect = useStableCallback(() => {
     const selectEq = returnJuchuKizaiMeisaiList.filter((data) => !data.delFlag && data.selected);
 
     if (selectEq.length === returnJuchuKizaiMeisaiList.filter((data) => !data.delFlag).length) {
@@ -990,14 +992,14 @@ export const EquipmentReturnOrderDetail = (props: {
       setReturnJuchuKizaiMeisaiList((prev) => prev.map((data) => ({ ...data, selected: true })));
       return;
     }
-  };
+  });
 
   /**
    * コンテナメモ入力時
    * @param kizaiId 機材id
    * @param memo コンテナメモ内容
    */
-  const handleReturnContainerMemoChange = async (rowIndex: number, memo: string) => {
+  const handleReturnContainerMemoChange = useStableCallback(async (rowIndex: number, memo: string) => {
     if (isProcessing) return;
     setIsProcessing(true);
 
@@ -1022,7 +1024,7 @@ export const EquipmentReturnOrderDetail = (props: {
     } finally {
       setIsProcessing(false);
     }
-  };
+  });
 
   /**
    * コンテナテーブル使用数入力時
@@ -1031,43 +1033,45 @@ export const EquipmentReturnOrderDetail = (props: {
    * @param planYardKizaiQty YARDコンテナ数
    * @param planQty コンテナ合計数
    */
-  const handleReturnContainerCellChange = (rowIndex: number, planKicsKizaiQty: number, planYardKizaiQty: number) => {
-    setReturnJuchuContainerMeisaiList((prev) => {
-      const visibleIndex = prev
-        .map((data, index) => (!data.delFlag ? index : null))
-        .filter((index) => index !== null) as number[];
+  const handleReturnContainerCellChange = useStableCallback(
+    (rowIndex: number, planKicsKizaiQty: number, planYardKizaiQty: number) => {
+      setReturnJuchuContainerMeisaiList((prev) => {
+        const visibleIndex = prev
+          .map((data, index) => (!data.delFlag ? index : null))
+          .filter((index) => index !== null) as number[];
 
-      const index = visibleIndex[rowIndex];
-      if (index === undefined) return prev;
+        const index = visibleIndex[rowIndex];
+        if (index === undefined) return prev;
 
-      return prev.map((data, i) =>
-        i === index
-          ? {
-              ...data,
-              planKicsKizaiQty: planKicsKizaiQty,
-              planYardKizaiQty: planYardKizaiQty,
-              planQty: planKicsKizaiQty + planYardKizaiQty,
-            }
-          : data
-      );
-    });
-  };
+        return prev.map((data, i) =>
+          i === index
+            ? {
+                ...data,
+                planKicsKizaiQty: planKicsKizaiQty,
+                planYardKizaiQty: planYardKizaiQty,
+                planQty: planKicsKizaiQty + planYardKizaiQty,
+              }
+            : data
+        );
+      });
+    }
+  );
 
   /**
    * コンテナテーブルのチェックボックス押下時
    * @param row
    */
-  const handleCtnSelect = (row: ReturnJuchuContainerMeisaiValues) => {
+  const handleCtnSelect = useStableCallback((row: ReturnJuchuContainerMeisaiValues) => {
     setReturnJuchuContainerMeisaiList((prev) =>
       prev.map((data) => (data === row ? { ...data, selected: !data.selected } : data))
     );
-  };
+  });
 
   /**
    * コンテナテーブルの全選択チェックボックス押下時
    * @returns
    */
-  const handleCtnAllSelect = () => {
+  const handleCtnAllSelect = useStableCallback(() => {
     const selectCtn = returnJuchuContainerMeisaiList.filter((data) => !data.delFlag && data.selected);
 
     if (selectCtn.length === returnJuchuContainerMeisaiList.filter((data) => !data.delFlag).length) {
@@ -1077,7 +1081,7 @@ export const EquipmentReturnOrderDetail = (props: {
       setReturnJuchuContainerMeisaiList((prev) => prev.map((data) => ({ ...data, selected: true })));
       return;
     }
-  };
+  });
 
   /**
    * KICS入庫日変更時
@@ -1362,11 +1366,6 @@ export const EquipmentReturnOrderDetail = (props: {
     setIsProcessing(false);
   };
 
-  // アコーディオン開閉
-  const handleExpansion = () => {
-    setExpanded((prevExpanded) => !prevExpanded);
-  };
-
   /**
    * useEffect
    */
@@ -1520,10 +1519,7 @@ export const EquipmentReturnOrderDetail = (props: {
                 )}
                 <Grid2 container display={saveKizaiHead ? 'flex' : 'none'} alignItems={'center'} spacing={1}>
                   {!edit ? <Typography>閲覧モード</Typography> : <Typography>編集モード</Typography>}
-                  <Button
-                    disabled={!!lockData || user?.permission.juchu === permission.juchu_ref}
-                    onClick={handleEdit}
-                  >
+                  <Button disabled={!!lockData || user?.permission.juchu === permission.juchu_ref} onClick={handleEdit}>
                     変更
                   </Button>
                 </Grid2>
@@ -1537,8 +1533,8 @@ export const EquipmentReturnOrderDetail = (props: {
             </Box>
             {/*受注ヘッダー*/}
             <Accordion
-              expanded={expanded}
-              onChange={handleExpansion}
+              expanded={juchuHeadExpanded}
+              onChange={() => setJuchuHeadExpanded(!juchuHeadExpanded)}
               sx={{
                 marginTop: 2,
                 borderRadius: 1,
@@ -1561,7 +1557,7 @@ export const EquipmentReturnOrderDetail = (props: {
                 <Box display="flex" justifyContent="space-between" alignItems="center" width="100%">
                   <Grid2 container display="flex" justifyContent="space-between" spacing={2}>
                     <Typography>受注ヘッダー</Typography>
-                    <Grid2 container display={expanded ? 'none' : 'flex'} spacing={2}>
+                    <Grid2 container display={juchuHeadExpanded ? 'none' : 'flex'} spacing={2}>
                       <Typography>公演名</Typography>
                       <Typography>{juchuHeadData.koenNam}</Typography>
                     </Grid2>
@@ -1638,13 +1634,14 @@ export const EquipmentReturnOrderDetail = (props: {
             {/*返却受注明細ヘッダー*/}
 
             <Accordion
+              expanded={juchuKizaiHeadExpanded}
+              onChange={() => setJuchuKizaiHeadExpanded(!juchuKizaiHeadExpanded)}
               sx={{
                 marginTop: 2,
                 borderRadius: 1,
                 overflow: 'hidden',
               }}
               variant="outlined"
-              defaultExpanded={!saveKizaiHead}
             >
               <AccordionSummary
                 expandIcon={<ExpandMoreIcon />}
@@ -1661,7 +1658,13 @@ export const EquipmentReturnOrderDetail = (props: {
                 }}
               >
                 <Box display="flex" alignItems="center" justifyContent="space-between" width={'100%'}>
-                  <Typography>受注機材ヘッダー(返却)</Typography>
+                  <Grid2 container display="flex" justifyContent="space-between" spacing={2}>
+                    <Typography>受注機材ヘッダー(返却)</Typography>
+                    <Grid2 container display={juchuKizaiHeadExpanded ? 'none' : 'flex'} spacing={2}>
+                      <Typography>受注明細名</Typography>
+                      <Typography>{getValues('headNam')}</Typography>
+                    </Grid2>
+                  </Grid2>
                 </Box>
               </AccordionSummary>
               <AccordionDetails sx={{ padding: 0 }}>
@@ -1914,17 +1917,6 @@ export const EquipmentReturnOrderDetail = (props: {
                     rows={3}
                     fullWidth
                     disabled={!edit}
-                    // sx={{
-                    //   '& .MuiInputBase-root': {
-                    //     resize: 'both',
-                    //     overflow: 'auto',
-                    //     alignItems: 'flex-start',
-                    //   },
-                    //   '& .MuiInputBase-inputMultiline': {
-                    //     textAlign: 'left',
-                    //     paddingTop: '8px',
-                    //   },
-                    // }}
                   ></TextFieldElement>
                 </Box>
               </AccordionDetails>
@@ -1951,7 +1943,7 @@ export const EquipmentReturnOrderDetail = (props: {
           </form>
           {/*返却受注明細(機材)*/}
           {saveKizaiHead && (
-            <Paper variant="outlined" sx={{ mt: 2 }}>
+            <Paper variant="outlined" sx={{ mt: 2, contain: 'layout paint' }}>
               <Box display="flex" justifyContent="space-between" alignItems="center" px={2} height={'30px'}>
                 <Typography>受注明細(機材)</Typography>
               </Box>

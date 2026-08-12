@@ -13,7 +13,7 @@ import {
   TableContainer,
   Typography,
 } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { permission } from '@/app/(main)/_lib/permission';
@@ -48,6 +48,8 @@ export const CustomersMaster = ({ user }: { user: User }) => {
   const [openId, setOpenID] = useState(FAKE_NEW_ID);
   /** 顧客詳細ダイアログの開閉状態 */
   const [dialogOpen, setDialogOpen] = useState(false);
+  /** テーブルのスクロールコンテナ */
+  const tableContainerRef = useRef<HTMLDivElement>(null);
 
   /* useForm ------------------------------- */
   const { control, handleSubmit, getValues } = useForm({
@@ -106,6 +108,11 @@ export const CustomersMaster = ({ user }: { user: User }) => {
     getList();
   }, []);
 
+  // ページ切り替え時にスクロール位置をトップに戻す
+  useEffect(() => {
+    tableContainerRef.current?.scrollTo(0, 0);
+  }, [page]);
+
   if (error) throw error;
 
   return (
@@ -163,7 +170,7 @@ export const CustomersMaster = ({ user }: { user: User }) => {
         {isLoading ? (
           <Loading />
         ) : customers && customers.length > 0 ? (
-          <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
+          <TableContainer ref={tableContainerRef} component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
             <MasterTable
               headers={cMHeader}
               datas={customers.map((l) => ({

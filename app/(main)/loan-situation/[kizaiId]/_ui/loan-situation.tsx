@@ -39,18 +39,19 @@ import {
   getLoanJuchuReturnData,
   getLoanStockData,
 } from '../_lib/funcs';
-import { LoanJuchu, LoanKizai, LoanStockTableValues, LoanUseTableValues } from '../_lib/types';
+import { HonbanbiColorValues, LoanJuchu, LoanKizai, LoanStockTableValues, LoanUseTableValues } from '../_lib/types';
 import { LoanSituationTable, UseTable } from './loan-situation-table';
 
 export const LoanSituation = (props: {
   user: User;
   kizaiData: LoanKizai;
+  colorData: HonbanbiColorValues[];
   date: string | undefined;
   // loanJuchuData: LoanJuchu[];
   // eqUseData: LoanUseTableValues[][];
   // eqStockData: LoanStockTableValues[];
 }) => {
-  const { kizaiData, date, user } = props;
+  const { kizaiData, date, user, colorData } = props;
 
   // ref
   const leftRef = useRef<HTMLDivElement>(null);
@@ -504,26 +505,79 @@ export const LoanSituation = (props: {
             <LoanSituationTable user={user} rows={loanJuchuList} ref={leftRef} />
           </Grid2>
           <Grid2 overflow="auto" size={{ xs: 'grow', sm: 'grow', md: 'grow' }}>
-            <Box display={'flex'} alignItems={'center'} height={31} mt={1} mb={0.5}>
-              <Box display={loanJuchuList.length > 0 ? 'flex' : 'none'} alignItems={'end'} mr={2}>
-                <Typography fontSize={'small'}>使用数</Typography>
+            <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'} height={31} mt={1} mb={0.5}>
+              <Box display={'flex'} alignItems={'center'}>
+                <Box display={loanJuchuList.length > 0 ? 'flex' : 'none'} alignItems={'end'} mr={2}>
+                  <Typography fontSize={'small'}>使用数</Typography>
+                </Box>
+                <Button onClick={handleBackDateChange}>
+                  <ArrowBackIosNewIcon fontSize="small" />
+                </Button>
+                <Button variant="outlined" onClick={handleClick}>
+                  日付選択
+                </Button>
+                <Popper open={open} anchorEl={anchorEl} placement="bottom-start" sx={{ zIndex: 1202 }}>
+                  <ClickAwayListener onClickAway={handleClickAway}>
+                    <Paper elevation={3} sx={{ mt: 1 }}>
+                      <Calendar date={selectDate} onChange={handleDateChange} />
+                    </Paper>
+                  </ClickAwayListener>
+                </Popper>
+                <Button onClick={handleForwardDateChange}>
+                  <ArrowForwardIosIcon fontSize="small" />
+                </Button>
               </Box>
-              <Button onClick={handleBackDateChange}>
-                <ArrowBackIosNewIcon fontSize="small" />
-              </Button>
-              <Button variant="outlined" onClick={handleClick}>
-                日付選択
-              </Button>
-              <Popper open={open} anchorEl={anchorEl} placement="bottom-start" sx={{ zIndex: 1202 }}>
-                <ClickAwayListener onClickAway={handleClickAway}>
-                  <Paper elevation={3} sx={{ mt: 1 }}>
-                    <Calendar date={selectDate} onChange={handleDateChange} />
-                  </Paper>
-                </ClickAwayListener>
-              </Popper>
-              <Button onClick={handleForwardDateChange}>
-                <ArrowForwardIosIcon fontSize="small" />
-              </Button>
+              <Box display={'flex'} alignItems={'center'}>
+                <Typography
+                  minWidth={60}
+                  textAlign={'center'}
+                  sx={{ backgroundColor: colorData.find((c) => c.colorId === 2)?.colorNam }}
+                >
+                  出庫
+                </Typography>
+                <Typography
+                  minWidth={60}
+                  textAlign={'center'}
+                  sx={{ backgroundColor: colorData.find((c) => c.colorId === 3)?.colorNam }}
+                >
+                  入庫
+                </Typography>
+                <Typography
+                  minWidth={60}
+                  textAlign={'center'}
+                  sx={{ backgroundColor: colorData.find((c) => c.colorId === 1)?.colorNam }}
+                >
+                  使用日
+                </Typography>
+                <Typography
+                  minWidth={60}
+                  textAlign={'center'}
+                  sx={{ backgroundColor: colorData.find((c) => c.colorId === 10)?.colorNam }}
+                >
+                  仕込み
+                </Typography>
+                <Typography
+                  minWidth={60}
+                  textAlign={'center'}
+                  sx={{ backgroundColor: colorData.find((c) => c.colorId === 20)?.colorNam }}
+                >
+                  RH
+                </Typography>
+                <Typography
+                  minWidth={60}
+                  textAlign={'center'}
+                  sx={{ backgroundColor: colorData.find((c) => c.colorId === 30)?.colorNam }}
+                >
+                  GP
+                </Typography>
+                <Typography
+                  minWidth={60}
+                  textAlign={'center'}
+                  sx={{ backgroundColor: colorData.find((c) => c.colorId === 40)?.colorNam }}
+                >
+                  本番
+                </Typography>
+              </Box>
             </Box>
             <UseTable eqUseList={eqUseList} eqStockList={eqStockList} ref={rightRef} />
           </Grid2>

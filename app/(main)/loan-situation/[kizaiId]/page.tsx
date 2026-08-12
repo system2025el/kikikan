@@ -3,7 +3,7 @@ import { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
 import { getCurrentUser } from '../../_lib/funcs';
-import { getLoanJuchuData, getLoanKizaiData } from './_lib/funcs';
+import { getColor, getLoanJuchuData, getLoanKizaiData } from './_lib/funcs';
 import { LoanStockTableValues, LoanUseTableValues } from './_lib/types';
 import { LoanSituation } from './_ui/loan-situation';
 
@@ -25,7 +25,7 @@ const Page = async (props: { params: Promise<{ kizaiId: string }>; searchParams:
     return;
   }
 
-  const kizaiData = await getLoanKizaiData(kizaiId);
+  const [kizaiData, colorData] = await Promise.all([getLoanKizaiData(kizaiId), getColor()]);
 
   // // ヘッダー開始日
   // const strDat = subDays(new Date(), 1);
@@ -66,6 +66,7 @@ const Page = async (props: { params: Promise<{ kizaiId: string }>; searchParams:
     <LoanSituation
       user={user}
       kizaiData={kizaiData}
+      colorData={colorData}
       date={date}
       // loanJuchuData={filterLoanJuchuData}
       // eqUseData={eqUseData}

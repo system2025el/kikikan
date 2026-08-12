@@ -434,10 +434,7 @@ export const Quotation = ({
                   </Box>
                   <Box sx={styles.container}>
                     <Typography marginRight={5}>受注開始</Typography>
-                    <TextField
-                      value={order.juchuRange.strt ? toJapanYMDString(order.juchuRange.strt) : ''}
-                      disabled
-                    />
+                    <TextField value={order.juchuRange.strt ? toJapanYMDString(order.juchuRange.strt) : ''} disabled />
                   </Box>
                   <Box sx={styles.container}>
                     <Typography marginRight={5}>受注終了</Typography>
@@ -626,11 +623,7 @@ export const Quotation = ({
                           autoSelect
                           sx={{ width: 300 }}
                           renderInput={(params) => (
-                            <TextField
-                              {...params}
-                              error={!!fieldState.error}
-                              helperText={fieldState.error?.message}
-                            />
+                            <TextField {...params} error={!!fieldState.error} helperText={fieldState.error?.message} />
                           )}
                           options={options.custs}
                           getOptionLabel={(option) => (typeof option === 'string' ? option : option.label)}
@@ -650,12 +643,7 @@ export const Quotation = ({
                   </Box>
                   <Box sx={styles.container}>
                     <Typography marginRight={5}>実施場所</Typography>
-                    <TextFieldElement
-                      name="koenbashoNam"
-                      control={control}
-                      sx={{ width: 600 }}
-                      disabled={!editable}
-                    />
+                    <TextFieldElement name="koenbashoNam" control={control} sx={{ width: 600 }} disabled={!editable} />
                   </Box>
                   <Box sx={styles.container}>
                     <Typography marginRight={5}>貸出期間</Typography>
@@ -849,10 +837,10 @@ export const Quotation = ({
                   </Button>
                 </Box>
               </Box>
-              {/* その他テーブル ------------------------------------------------------------ */}
+              {/* 諸経費テーブル ------------------------------------------------------------ */}
               <Box margin={0.5} padding={0.8} borderTop={1} borderColor={'divider'}>
                 <Typography variant="h6" pl={2}>
-                  その他
+                  諸経費
                 </Typography>
                 {otherFields.fields.map((field, index) => (
                   <Box key={field.id} p={1}>
@@ -870,7 +858,7 @@ export const Quotation = ({
                         mituMeisaiHeadNam: '',
                         mituMeisaiKbn: 2,
                         nebikiNam: '値引き',
-                        nebikiAftNam: 'その他',
+                        nebikiAftNam: '諸経費',
                         biko1: '',
                         biko2: '',
                         biko3: '',

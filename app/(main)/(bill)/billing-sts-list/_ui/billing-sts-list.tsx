@@ -353,7 +353,7 @@ export const BillingStsList = ({ user }: { user: User }) => {
               </Grid2>
             </Grid2> */}
             <Grid2 size={12} display={'flex'}>
-              <Grid2 container size={'grow'} alignItems={'center'}>
+              <Grid2 container alignItems={'center'}>
                 <Typography noWrap mr={5}>
                   請求状況
                 </Typography>
@@ -373,7 +373,7 @@ export const BillingStsList = ({ user }: { user: User }) => {
                   row
                 />
               </Grid2>
-              <Grid2 alignSelf={'end'}>
+              <Grid2 alignSelf={'end'} ml={2}>
                 <Button type="submit" loading={isLoading}>
                   <SearchIcon />
                   検索

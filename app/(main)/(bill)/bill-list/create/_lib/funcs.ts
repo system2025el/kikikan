@@ -133,7 +133,7 @@ export const getJuchusForBill = async (queries: {
                     m.shokei_amt
                 )
                 .map((m) => ({
-                  nam: `${m.head_nam}一式`,
+                  nam: /*`${m.head_nam}一式`*/ '照明機材一式',
                   qty: 1,
                   honbanbiQty: (Number(m.honbanbi_qty) ?? 0) + (Number(m.add_dat_qty) ?? 0),
                   tankaAmt: Number(m.shokei_amt),

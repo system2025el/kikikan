@@ -2,7 +2,7 @@
 
 import AddIcon from '@mui/icons-material/Add';
 import { Box, Button, Container, Dialog, Divider, Grid2, Paper, TableContainer, Typography } from '@mui/material';
-import { SetStateAction, useEffect, useState } from 'react';
+import { SetStateAction, useEffect, useRef, useState } from 'react';
 
 import { User } from '@/app/(main)/_lib/types';
 import { Loading } from '@/app/(main)/_ui/loading';
@@ -38,6 +38,8 @@ export const BasesMaster = ({ user }: { user: User }) => {
   const [openId, setOpenID] = useState<number>(FAKE_NEW_ID);
   /* 詳細ダイアログの開閉状態 */
   const [dialogOpen, setDialogOpen] = useState(false);
+  /** テーブルのスクロールコンテナ */
+  const tableContainerRef = useRef<HTMLDivElement>(null);
 
   /* methods ---------------------------------------- */
   /* 詳細ダイアログを開く関数 */
@@ -78,6 +80,11 @@ export const BasesMaster = ({ user }: { user: User }) => {
     getList();
   }, []);
 
+  // ページ切り替え時にスクロール位置をトップに戻す
+  useEffect(() => {
+    tableContainerRef.current?.scrollTo(0, 0);
+  }, [page]);
+
   if (error) throw error;
 
   return (
@@ -115,7 +122,7 @@ export const BasesMaster = ({ user }: { user: User }) => {
         ) : !bases || bases.length === 0 ? (
           <Typography>該当するデータがありません</Typography>
         ) : (
-          <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
+          <TableContainer ref={tableContainerRef} component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
             <MasterTable
               headers={bMHeader}
               datas={bases.map((l) => ({ ...l, id: l.shozokuId, name: l.shozokuNam }))}

@@ -25,7 +25,7 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { permission } from '@/app/(main)/_lib/permission';
@@ -80,6 +80,13 @@ export const BillingStsListTable = ({
   );
   // テーブル最後のページ用の空データの長さ
   const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - billSts.length) : 0;
+  /** テーブルのスクロールコンテナ */
+  const tableContainerRef = useRef<HTMLDivElement>(null);
+
+  // ページ切り替え時にスクロール位置をトップに戻す
+  useEffect(() => {
+    tableContainerRef.current?.scrollTo(0, 0);
+  }, [page]);
 
   /* useState --------------------------------------------------------- */
   /* 請求新規作成ダイアログ開閉 */
@@ -128,7 +135,7 @@ export const BillingStsListTable = ({
       ) : !list || list.length === 0 ? (
         <Typography justifySelf={'center'}>該当する受注請求状況がありません</Typography>
       ) : (
-        <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 0.5 }}>
+        <TableContainer ref={tableContainerRef} component={Paper} square sx={{ maxHeight: '90vh', mt: 0.5 }}>
           <Table stickyHeader size="small" padding="none">
             <TableHead>
               <TableRow sx={{ whiteSpace: 'nowrap' }}>

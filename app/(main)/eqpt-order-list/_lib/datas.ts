@@ -1,3 +1,14 @@
+import { EqptOrderSearchValues } from './types';
+
+/** 検索条件の初期値 */
+export const DEFAULT_SEARCH_VALUES: EqptOrderSearchValues = {
+  radio: 'shuko',
+  selectedDate: { value: '5', range: { from: null, to: null } },
+  kokyaku: '',
+  koenbashoNam: '',
+  listSort: { sort: 'shuko', order: 'asc' },
+};
+
 /** ラヂオボタン用データ */
 export const radioData = [
   { id: '1', label: '先月全て' },

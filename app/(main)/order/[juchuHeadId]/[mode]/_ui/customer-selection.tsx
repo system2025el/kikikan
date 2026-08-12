@@ -21,7 +21,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 
@@ -61,6 +61,13 @@ export const CustomerSelectionDialog = (props: {
   );
   // テーブル最後のページ用の空データの長さ
   const emptyRows = page > 1 && custs ? Math.max(0, page * rowsPerPage - custs.length) : 0;
+  /** テーブルのスクロールコンテナ */
+  const tableContainerRef = useRef<HTMLDivElement>(null);
+
+  // ページ切り替え時にスクロール位置をトップに戻す
+  useEffect(() => {
+    tableContainerRef.current?.scrollTo(0, 0);
+  }, [page]);
 
   /* useForm ------------------- */
   const { control, handleSubmit } = useForm({
@@ -140,7 +147,7 @@ export const CustomerSelectionDialog = (props: {
         ) : !list || list!.length === 0 ? (
           <Typography>該当するデータがありません</Typography>
         ) : (
-          <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 1 }}>
+          <TableContainer ref={tableContainerRef} component={Paper} square sx={{ maxHeight: '90vh', mt: 1 }}>
             <Table stickyHeader padding="none">
               <TableHead>
                 <TableRow>

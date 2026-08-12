@@ -24,7 +24,7 @@ import {
 } from '@mui/material';
 import { grey, lightBlue } from '@mui/material/colors';
 import { Dayjs } from 'dayjs';
-import React, { useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 
 import { BASHO_ID } from '@/app/_lib/constants';
 import { toJapanMDString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
@@ -46,7 +46,7 @@ type ReturnStockTableProps = {
   ref: React.RefObject<HTMLDivElement | null>;
 };
 
-export const ReturnStockTable: React.FC<ReturnStockTableProps> = ({
+const ReturnStockTableComponent: React.FC<ReturnStockTableProps> = ({
   eqStockList,
   dateRange,
   stockTableHeaderDateRange,
@@ -111,6 +111,9 @@ export const ReturnStockTable: React.FC<ReturnStockTableProps> = ({
   );
 };
 
+export const ReturnStockTable = React.memo(ReturnStockTableComponent);
+ReturnStockTable.displayName = 'ReturnStockTable';
+
 export type ReturnStockTableRowProps = {
   row: StockTableValues[];
   index: number;
@@ -160,7 +163,7 @@ type ReturnEqTableProps = {
   ref: React.RefObject<HTMLDivElement | null>;
 };
 
-export const ReturnEqTable: React.FC<ReturnEqTableProps> = ({
+const ReturnEqTableComponent: React.FC<ReturnEqTableProps> = ({
   rows,
   edit,
   nyukoFixFlag,
@@ -173,10 +176,12 @@ export const ReturnEqTable: React.FC<ReturnEqTableProps> = ({
 }) => {
   const inputOrderRefs = useRef<(HTMLInputElement | null)[]>([]);
   const inputYobiRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const orderRefCallbacks = useRef(new Map<number, (el: HTMLInputElement | null) => void>());
+  const yobiRefCallbacks = useRef(new Map<number, (el: HTMLInputElement | null) => void>());
 
   const visibleRows = rows.filter((row) => !row.delFlag);
 
-  const handleOrderKeyDown = (e: React.KeyboardEvent, rowIndex: number) => {
+  const handleOrderKeyDown = useCallback((e: React.KeyboardEvent, rowIndex: number) => {
     if (e.key === 'Enter') {
       e.preventDefault();
       inputOrderRefs.current[rowIndex + 1]?.focus();
@@ -190,13 +195,20 @@ export const ReturnEqTable: React.FC<ReturnEqTableProps> = ({
       e.preventDefault();
       inputYobiRefs.current[rowIndex]?.focus();
     }
-  };
+  }, []);
 
-  const handleOrderRef = (rowIndex: number) => (el: HTMLInputElement | null) => {
-    inputOrderRefs.current[rowIndex] = el;
-  };
+  const handleOrderRef = useCallback((rowIndex: number) => {
+    let callback = orderRefCallbacks.current.get(rowIndex);
+    if (!callback) {
+      callback = (el: HTMLInputElement | null) => {
+        inputOrderRefs.current[rowIndex] = el;
+      };
+      orderRefCallbacks.current.set(rowIndex, callback);
+    }
+    return callback;
+  }, []);
 
-  const handleYobiKeyDown = (e: React.KeyboardEvent, rowIndex: number) => {
+  const handleYobiKeyDown = useCallback((e: React.KeyboardEvent, rowIndex: number) => {
     if (e.key === 'Enter') {
       e.preventDefault();
       inputYobiRefs.current[rowIndex + 1]?.focus();
@@ -210,11 +222,18 @@ export const ReturnEqTable: React.FC<ReturnEqTableProps> = ({
       e.preventDefault();
       inputOrderRefs.current[rowIndex]?.focus();
     }
-  };
+  }, []);
 
-  const handleYobiRef = (rowIndex: number) => (el: HTMLInputElement | null) => {
-    inputYobiRefs.current[rowIndex] = el;
-  };
+  const handleYobiRef = useCallback((rowIndex: number) => {
+    let callback = yobiRefCallbacks.current.get(rowIndex);
+    if (!callback) {
+      callback = (el: HTMLInputElement | null) => {
+        inputYobiRefs.current[rowIndex] = el;
+      };
+      yobiRefCallbacks.current.set(rowIndex, callback);
+    }
+    return callback;
+  }, []);
 
   return (
     <TableContainer ref={ref} style={{ overflow: 'scroll', maxHeight: '80vh' }}>
@@ -317,6 +336,9 @@ export const ReturnEqTable: React.FC<ReturnEqTableProps> = ({
   );
 };
 
+export const ReturnEqTable = React.memo(ReturnEqTableComponent);
+ReturnEqTable.displayName = 'ReturnEqTable';
+
 type ReturnEqTableRowProps = {
   row: ReturnJuchuKizaiMeisaiValues;
   rowIndex: number;
@@ -347,7 +369,6 @@ const ReturnEqTableRow = React.memo(
     handleOrderKeyDown,
     handleYobiKeyDown,
   }: ReturnEqTableRowProps) => {
-    console.log('明細描画', rowIndex);
     return (
       <TableRow hover>
         <TableCell
@@ -496,7 +517,6 @@ const ReturnContainerTableRow = React.memo(
     handleKicsKeyDown,
     handleYardKeyDown,
   }: ReturnContainerTableRowProps) => {
-    console.log('コンテナ描画', rowIndex);
     return (
       <TableRow hover>
         <TableCell
@@ -677,7 +697,7 @@ const ReturnContainerTableRow = React.memo(
 
 ReturnContainerTableRow.displayName = 'ReturnContainerTableRow';
 
-export const ReturnContainerTable = (props: {
+const ReturnContainerTableComponent = (props: {
   rows: ReturnJuchuContainerMeisaiValues[];
   edit: boolean;
   nyukoFixFlag: boolean;
@@ -849,6 +869,9 @@ export const ReturnContainerTable = (props: {
     </TableContainer>
   );
 };
+
+export const ReturnContainerTable = React.memo(ReturnContainerTableComponent);
+ReturnContainerTable.displayName = 'ReturnContainerTable';
 
 /* style
 ---------------------------------------------------------------------------------------------------- */

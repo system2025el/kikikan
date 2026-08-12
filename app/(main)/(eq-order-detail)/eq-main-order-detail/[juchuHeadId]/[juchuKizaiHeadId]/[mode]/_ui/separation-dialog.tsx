@@ -260,14 +260,20 @@ export const SeparationDialog = ({
                         <TableCell align="right">
                           <TextField
                             value={row.separatePlanKizaiQty}
-                            type="number"
+                            type="tel"
                             onChange={(e) => {
-                              if (Number(e.target.value) <= row.planKizaiQty) {
+                              const newValue = Number(e.target.value);
+                              if (newValue <= row.planKizaiQty) {
                                 setSeparationEq((prev) =>
-                                  prev.map((d, i) =>
-                                    i === index ? { ...d, separatePlanKizaiQty: Number(e.target.value) } : d
-                                  )
+                                  prev.map((d, i) => (i === index ? { ...d, separatePlanKizaiQty: newValue } : d))
                                 );
+                                if (newValue === 0 && row.separatePlanYobiQty === 0) {
+                                  setSelectedEq((prev) => prev.filter((id) => id !== row.dspOrdNum));
+                                } else {
+                                  setSelectedEq((prev) =>
+                                    prev.includes(row.dspOrdNum) ? prev : [...prev, row.dspOrdNum]
+                                  );
+                                }
                               }
                             }}
                             slotProps={{
@@ -299,14 +305,20 @@ export const SeparationDialog = ({
                         <TableCell align="right">
                           <TextField
                             value={row.separatePlanYobiQty}
-                            type="number"
+                            type="tel"
                             onChange={(e) => {
-                              if (Number(e.target.value) <= row.planYobiQty) {
+                              const newValue = Number(e.target.value);
+                              if (newValue <= row.planYobiQty) {
                                 setSeparationEq((prev) =>
-                                  prev.map((d, i) =>
-                                    i === index ? { ...d, separatePlanYobiQty: Number(e.target.value) } : d
-                                  )
+                                  prev.map((d, i) => (i === index ? { ...d, separatePlanYobiQty: newValue } : d))
                                 );
+                                if (newValue === 0 && row.separatePlanKizaiQty === 0) {
+                                  setSelectedEq((prev) => prev.filter((id) => id !== row.dspOrdNum));
+                                } else {
+                                  setSelectedEq((prev) =>
+                                    prev.includes(row.dspOrdNum) ? prev : [...prev, row.dspOrdNum]
+                                  );
+                                }
                               }
                             }}
                             slotProps={{
@@ -384,14 +396,20 @@ export const SeparationDialog = ({
                         <TableCell align="right">
                           <TextField
                             value={row.separatePlanKicsKizaiQty}
-                            type="number"
+                            type="tel"
                             onChange={(e) => {
-                              if (Number(e.target.value) <= row.planKicsKizaiQty) {
+                              const newValue = Number(e.target.value);
+                              if (newValue <= row.planKicsKizaiQty) {
                                 setSeparationCtn((prev) =>
-                                  prev.map((d, i) =>
-                                    i === index ? { ...d, separatePlanKicsKizaiQty: Number(e.target.value) } : d
-                                  )
+                                  prev.map((d, i) => (i === index ? { ...d, separatePlanKicsKizaiQty: newValue } : d))
                                 );
+                                if (newValue === 0 && row.separatePlanYardKizaiQty === 0) {
+                                  setSelectedCtn((prev) => prev.filter((id) => id !== row.dspOrdNum));
+                                } else {
+                                  setSelectedCtn((prev) =>
+                                    prev.includes(row.dspOrdNum) ? prev : [...prev, row.dspOrdNum]
+                                  );
+                                }
                               }
                             }}
                             slotProps={{
@@ -423,14 +441,20 @@ export const SeparationDialog = ({
                         <TableCell align="right">
                           <TextField
                             value={row.separatePlanYardKizaiQty}
-                            type="number"
+                            type="tel"
                             onChange={(e) => {
-                              if (Number(e.target.value) <= row.planYardKizaiQty) {
+                              const newValue = Number(e.target.value);
+                              if (newValue <= row.planYardKizaiQty) {
                                 setSeparationCtn((prev) =>
-                                  prev.map((d, i) =>
-                                    i === index ? { ...d, separatePlanYardKizaiQty: Number(e.target.value) } : d
-                                  )
+                                  prev.map((d, i) => (i === index ? { ...d, separatePlanYardKizaiQty: newValue } : d))
                                 );
+                                if (newValue === 0 && row.separatePlanKicsKizaiQty === 0) {
+                                  setSelectedCtn((prev) => prev.filter((id) => id !== row.dspOrdNum));
+                                } else {
+                                  setSelectedCtn((prev) =>
+                                    prev.includes(row.dspOrdNum) ? prev : [...prev, row.dspOrdNum]
+                                  );
+                                }
                               }
                             }}
                             slotProps={{

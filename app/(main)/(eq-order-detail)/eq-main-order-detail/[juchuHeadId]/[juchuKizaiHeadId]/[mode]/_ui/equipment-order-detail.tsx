@@ -53,7 +53,7 @@ import {
 import { toJapanTimeString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { getNyukoDate, getRange, getShukoDate } from '@/app/(main)/_lib/date-funcs';
 import { addLock, getDic, getLock } from '@/app/(main)/_lib/funcs';
-import { useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
+import { useStableCallback, useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
 import { lockCheck, lockRelease } from '@/app/(main)/_lib/lock';
 import { permission } from '@/app/(main)/_lib/permission';
 import { openOrFocusTab } from '@/app/(main)/_lib/tab-focus';
@@ -228,8 +228,10 @@ const EquipmentOrderDetail = (props: {
   // スナックバーメッセージ
   const [snackBarMessage, setSnackBarMessage] = useState('');
 
-  // アコーディオン制御
-  const [expanded, setExpanded] = useState(false);
+  // 受注ヘッダーアコーディオン制御
+  const [juchuHeadExpanded, setJuchuHeadExpanded] = useState(false);
+  // 受注機材ヘッダーアコーディオン制御
+  const [juchuKizaiHeadExpanded, setJuchuKizaiHeadExpanded] = useState(!saveKizaiHead);
   // ポッパー制御
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -1070,7 +1072,7 @@ const EquipmentOrderDetail = (props: {
    * @param kizaiId 機材id
    * @param memo メモ内容
    */
-  const handleMemoChange = async (rowIndex: number, memo: string) => {
+  const handleMemoChange = useStableCallback(async (rowIndex: number, memo: string) => {
     if (isProcessing) return;
     setIsProcessing(true);
 
@@ -1095,14 +1097,14 @@ const EquipmentOrderDetail = (props: {
     } finally {
       setIsProcessing(false);
     }
-  };
+  });
 
   /**
    * 機材連絡メモ入力時
    * @param kizaiId 機材id
    * @param memo メモ内容
    */
-  const handleMemo2Change = async (rowIndex: number, memo: string) => {
+  const handleMemo2Change = useStableCallback(async (rowIndex: number, memo: string) => {
     if (isProcessing) return;
     setIsProcessing(true);
 
@@ -1127,7 +1129,7 @@ const EquipmentOrderDetail = (props: {
     } finally {
       setIsProcessing(false);
     }
-  };
+  });
 
   /**
    * 機材テーブルの受注数、予備数入力時
@@ -1136,71 +1138,67 @@ const EquipmentOrderDetail = (props: {
    * @param planYobiQty 予備数
    * @param planQty 合計
    */
-  const handleCellChange = (
-    rowIndex: number,
-    kizaiId: number,
-    planKizaiQty: number,
-    planYobiQty: number,
-    planQty: number
-  ) => {
-    const updatedEqStockData = eqStockListRef.current[rowIndex];
-    const targetIndex = updatedEqStockData
-      .map((d, index) => (dateRange.includes(toJapanYMDString(d.calDat)) ? index : -1))
-      .filter((index) => index !== -1);
+  const handleCellChange = useStableCallback(
+    (rowIndex: number, kizaiId: number, planKizaiQty: number, planYobiQty: number, planQty: number) => {
+      const updatedEqStockData = eqStockListRef.current[rowIndex];
+      const targetIndex = updatedEqStockData
+        .map((d, index) => (dateRange.includes(toJapanYMDString(d.calDat)) ? index : -1))
+        .filter((index) => index !== -1);
 
-    setEqStockList((prev) =>
-      prev.map((data) =>
-        data[0].kizaiId === kizaiId
-          ? data.map((d, i) =>
-              targetIndex.includes(i)
-                ? { ...d, zaikoQty: Number(d.zaikoQty) + planQty - planKizaiQty - planYobiQty }
-                : d
-            )
-          : data
-      )
-    );
-
-    setJuchuKizaiMeisaiList((prev) => {
-      const visibleIndex = prev
-        .map((data, index) => (!data.delFlag ? index : null))
-        .filter((index) => index !== null) as number[];
-
-      const index = visibleIndex[rowIndex];
-      if (index === undefined) return prev;
-
-      return prev.map((data, i) =>
-        i === index
-          ? { ...data, planKizaiQty: planKizaiQty, planYobiQty: planYobiQty, planQty: planKizaiQty + planYobiQty }
-          : data
+      setEqStockList((prev) =>
+        prev.map((data) =>
+          data[0].kizaiId === kizaiId
+            ? data.map((d, i) =>
+                targetIndex.includes(i)
+                  ? { ...d, zaikoQty: Number(d.zaikoQty) + planQty - planKizaiQty - planYobiQty }
+                  : d
+              )
+            : data
+        )
       );
-    });
-  };
+
+      setJuchuKizaiMeisaiList((prev) => {
+        const visibleIndex = prev
+          .map((data, index) => (!data.delFlag ? index : null))
+          .filter((index) => index !== null) as number[];
+
+        const index = visibleIndex[rowIndex];
+        if (index === undefined) return prev;
+
+        return prev.map((data, i) =>
+          i === index
+            ? { ...data, planKizaiQty: planKizaiQty, planYobiQty: planYobiQty, planQty: planKizaiQty + planYobiQty }
+            : data
+        );
+      });
+    }
+  );
 
   /**
    * 機材テーブルのチェックボックス押下時
    * @param row
    */
-  const handleEqSelect = (row: JuchuKizaiMeisaiValues) => {
+  const handleEqSelect = useStableCallback((row: JuchuKizaiMeisaiValues) => {
     setJuchuKizaiMeisaiList((prev) =>
       prev.map((data) => (data === row ? { ...data, selected: !data.selected } : data))
     );
-  };
+  });
 
   /**
    * 機材テーブルの全選択チェックボックス押下時
    * @returns
    */
-  const handleEqAllSelect = () => {
-    const selectEq = juchuKizaiMeisaiList.filter((data) => !data.delFlag && data.selected);
+  const handleEqAllSelect = useStableCallback(() => {
+    setJuchuKizaiMeisaiList((prev) => {
+      const selectEq = prev.filter((data) => !data.delFlag && data.selected);
 
-    if (selectEq.length === juchuKizaiMeisaiList.filter((data) => !data.delFlag).length) {
-      setJuchuKizaiMeisaiList((prev) => prev.map((data) => ({ ...data, selected: false })));
-      return;
-    } else {
-      setJuchuKizaiMeisaiList((prev) => prev.map((data) => ({ ...data, selected: true })));
-      return;
-    }
-  };
+      if (selectEq.length === prev.filter((data) => !data.delFlag).length) {
+        return prev.map((data) => ({ ...data, selected: false }));
+      } else {
+        return prev.map((data) => ({ ...data, selected: true }));
+      }
+    });
+  });
 
   /**
    * 移動機材テーブルの移動日時の×ボタン押下時
@@ -1693,10 +1691,10 @@ const EquipmentOrderDetail = (props: {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // アコーディオン開閉
-  const handleExpansion = () => {
-    setExpanded((prevExpanded) => !prevExpanded);
-  };
+  // // アコーディオン開閉
+  // const handleExpansion = () => {
+  //   setJuchuHeadExpanded((prevExpanded) => !prevExpanded);
+  // };
 
   /**
    * 機材追加時
@@ -2414,6 +2412,12 @@ const EquipmentOrderDetail = (props: {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
+  // 割引率（金額）が変化するたびに割引金額（確定）へ反映
+  useEffect(() => {
+    setValue('nebikiAmt', waribikiRatAmt, { shouldDirty: true, shouldValidate: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [waribikiRatAmt]);
+
   useEffect(() => {
     const dirty = isDirty || otherDirty ? true : false;
     setIsDirty(dirty);
@@ -2538,8 +2542,8 @@ const EquipmentOrderDetail = (props: {
             </Box>
             {/*-------受注ヘッダー-------*/}
             <Accordion
-              expanded={expanded}
-              onChange={handleExpansion}
+              expanded={juchuHeadExpanded}
+              onChange={() => setJuchuHeadExpanded(!juchuHeadExpanded)}
               sx={{
                 marginTop: 2,
                 borderRadius: 1,
@@ -2562,7 +2566,7 @@ const EquipmentOrderDetail = (props: {
                 <Box display="flex" justifyContent="space-between" alignItems="center" width="100%">
                   <Grid2 container display="flex" justifyContent="space-between" spacing={2}>
                     <Typography>受注ヘッダー</Typography>
-                    <Grid2 container display={expanded ? 'none' : 'flex'} spacing={2}>
+                    <Grid2 container display={juchuHeadExpanded ? 'none' : 'flex'} spacing={2}>
                       <Typography>公演名</Typography>
                       <Typography>{juchuHeadData.koenNam}</Typography>
                     </Grid2>
@@ -2645,13 +2649,14 @@ const EquipmentOrderDetail = (props: {
             </Accordion>
             {/*-------受注機材ヘッダー-------*/}
             <Accordion
+              expanded={juchuKizaiHeadExpanded}
+              onChange={() => setJuchuKizaiHeadExpanded(!juchuKizaiHeadExpanded)}
               sx={{
                 marginTop: 2,
                 borderRadius: 1,
                 overflow: 'hidden',
               }}
               variant="outlined"
-              defaultExpanded={!saveKizaiHead}
             >
               <AccordionSummary
                 expandIcon={<ExpandMoreIcon />}
@@ -2666,7 +2671,13 @@ const EquipmentOrderDetail = (props: {
                 }}
               >
                 <Box display="flex" alignItems={'center'} justifyContent="space-between" width={'100%'}>
-                  <Typography>受注機材ヘッダー</Typography>
+                  <Grid2 container display="flex" justifyContent="space-between" spacing={2}>
+                    <Typography>受注機材ヘッダー</Typography>
+                    <Grid2 container display={juchuKizaiHeadExpanded ? 'none' : 'flex'} spacing={2}>
+                      <Typography>受注明細名</Typography>
+                      <Typography>{getValues('headNam')}</Typography>
+                    </Grid2>
+                  </Grid2>
                 </Box>
               </AccordionSummary>
               <AccordionDetails sx={{ padding: 0 }}>
@@ -2677,9 +2688,6 @@ const EquipmentOrderDetail = (props: {
                     name="headNam"
                     control={control}
                     disabled={!edit}
-                    slotProps={{
-                      input: { readOnly: shukoFixFlag },
-                    }}
                     sx={{ width: 400 }}
                   ></TextFieldElement>
                 </Grid2>
@@ -3048,20 +3056,6 @@ const EquipmentOrderDetail = (props: {
                     rows={3}
                     fullWidth
                     disabled={!edit}
-                    slotProps={{
-                      input: { readOnly: shukoFixFlag },
-                    }}
-                    // sx={{
-                    //   '& .MuiInputBase-root': {
-                    //     resize: 'both',
-                    //     overflow: 'auto',
-                    //     alignItems: 'flex-start',
-                    //   },
-                    //   '& .MuiInputBase-inputMultiline': {
-                    //     textAlign: 'left',
-                    //     paddingTop: '8px',
-                    //   },
-                    // }}
                   ></TextFieldElement>
                 </Box>
               </AccordionDetails>
@@ -3088,7 +3082,7 @@ const EquipmentOrderDetail = (props: {
           </form>
           {/*-------受注明細(機材)-------*/}
           {saveKizaiHead && (
-            <Paper variant="outlined" sx={{ mt: 2 }}>
+            <Paper variant="outlined" sx={{ mt: 2, contain: 'layout paint' }}>
               <Box display="flex" justifyContent="space-between" alignItems="center" px={2} height={'30px'}>
                 <Typography>受注明細(機材)</Typography>
                 <Grid2 container spacing={2}>
