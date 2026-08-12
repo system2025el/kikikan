@@ -338,9 +338,7 @@ export const IdoDetail = (props: {
             )}
             <Button
               onClick={handleFix}
-              disabled={
-                fixFlag || idoDetailList.length === 0 || user?.permission.nyushuko === permission.nyushuko_ref
-              }
+              disabled={fixFlag || idoDetailList.length === 0 || user?.permission.nyushuko === permission.nyushuko_ref}
               sx={{
                 backgroundColor: idoDetailData.sagyoKbnId === SAGYO_KBN_ID.idoShuko ? 'primary' : 'yellow',
                 color: idoDetailData.sagyoKbnId === SAGYO_KBN_ID.idoShuko ? 'white' : 'black',
@@ -359,13 +357,7 @@ export const IdoDetail = (props: {
           </Grid2>
         </Box>
         <Divider />
-        <Grid2
-          container
-          size={{ xs: 12, sm: 12, md: 6 }}
-          direction={'column'}
-          p={{ sx: 1, sm: 1, md: 2 }}
-          spacing={1}
-        >
+        <Grid2 container size={{ xs: 12, sm: 12, md: 6 }} direction={'column'} p={{ sx: 1, sm: 1, md: 2 }} spacing={1}>
           <Box display={'flex'} alignItems={'center'}>
             <Typography mr={3}>移動予定日</Typography>
             <TestDate date={new Date(idoDetailData.nyushukoDat)} onChange={() => {}} disabled />

@@ -7,11 +7,12 @@ import { LoanEqTableValues } from './types';
 /**
  * 機材マスタテーブルのデータを取得する関数
  * @param query 検索キーワード
+ * @param section 課の配列
  * @returns {Promise<LoanEqTableValues[]>} 機材マスタテーブルに表示するデータ（ 検索キーワードが空の場合は全て ）
  */
-export const getFilteredEqpts = async (query: string = '') => {
+export const getFilteredEqpts = async (query: string = '', section: string[] = []) => {
   try {
-    const { data, error } = await selectFilteredEqpts({ q: query, d: null, s: null, b: null });
+    const { data, error } = await selectFilteredEqpts({ q: query, d: null, s: null, b: null, section });
 
     if (error) {
       throw new Error('[selectFilteredEqpts] DBエラー:', { cause: error });
@@ -25,6 +26,7 @@ export const getFilteredEqpts = async (query: string = '') => {
       kizaiQty: Number(d.kizai_qty ?? 0) + Number(d.kizai_ng_qty ?? 0),
       kizaiNgQty: d.kizai_ng_qty,
       shozokuNam: d.shozoku_nam,
+      sectionNam: d.section_nam,
       mem: d.mem,
       bumonNam: d.bumon_nam,
       daibumonNam: d.dai_bumon_nam,

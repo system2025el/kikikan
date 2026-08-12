@@ -337,9 +337,11 @@ const MeisaiTblHeaderComponent = ({
                 type="text"
                 onFocus={(e) => {
                   setIsEditing(true);
+                  const target = e.target;
                   const rawValue = String(field.value ?? '');
                   setTimeout(() => {
-                    e.target.value = rawValue;
+                    target.value = rawValue;
+                    target.select();
                   }, 1);
                 }}
                 onBlur={(e) => {

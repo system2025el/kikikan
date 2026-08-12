@@ -19,7 +19,7 @@ import {
   Typography,
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { permission } from '@/app/(main)/_lib/permission';
@@ -62,6 +62,13 @@ export const UsersMaster = ({ user }: { user: User }) => {
     [page, rowsPerPage, users]
   );
   const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - users!.length) : 0;
+  /** テーブルのスクロールコンテナ */
+  const tableContainerRef = useRef<HTMLDivElement>(null);
+
+  // ページ切り替え時にスクロール位置をトップに戻す
+  useEffect(() => {
+    tableContainerRef.current?.scrollTo(0, 0);
+  }, [page]);
 
   /* useForm ----------------------------------------------- */
   const { control, handleSubmit, getValues } = useForm({
@@ -173,7 +180,7 @@ export const UsersMaster = ({ user }: { user: User }) => {
         ) : !users || users.length === 0 ? (
           <Typography>該当するデータがありません</Typography>
         ) : (
-          <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
+          <TableContainer ref={tableContainerRef} component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
             <Table sx={{ minWidth: '100%' }} aria-labelledby="tableTitle" padding="none" stickyHeader>
               <TableHead sx={{ bgcolor: 'primary.light' }}>
                 <TableRow sx={{ whiteSpace: 'nowrap' }}>

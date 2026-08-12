@@ -136,10 +136,66 @@ export const LoanSituationTable = (props: LoanSituationTableProps) => {
                 </Button>
               </TableCell>
               <TableCell style={styles.row} sx={{ textAlign: 'center' }}>
-                {row.shukoDat ? toJapanMDString(row.shukoDat) : ''}
+                {row.shukoDat ? (
+                  <Button
+                    variant="text"
+                    onClick={() => {
+                      sessionStorage.setItem(
+                        'shukoListSearchParams',
+                        JSON.stringify({
+                          selectedDate: {
+                            value: '4',
+                            range: {
+                              from: null,
+                              to: null,
+                            },
+                          },
+                          juchuHeadId: row.juchuHeadId,
+                          shukoBasho: 0,
+                          kokyaku: '',
+                          section: [],
+                        })
+                      );
+                      openOrFocusTab('/shuko-list');
+                    }}
+                    sx={{ p: 0, height: '15px', m: 0, minWidth: 0, width: 1 }}
+                  >
+                    {toJapanMDString(row.shukoDat)}
+                  </Button>
+                ) : (
+                  ''
+                )}
               </TableCell>
               <TableCell style={styles.row} sx={{ textAlign: 'center' }}>
-                {row.nyukoDat ? toJapanMDString(row.nyukoDat) : ''}
+                {row.nyukoDat ? (
+                  <Button
+                    variant="text"
+                    onClick={() => {
+                      sessionStorage.setItem(
+                        'nyukoListSearchParams',
+                        JSON.stringify({
+                          selectedDate: {
+                            value: '4',
+                            range: {
+                              from: null,
+                              to: null,
+                            },
+                          },
+                          juchuHeadId: row.juchuHeadId,
+                          nyukoBasho: 0,
+                          kokyaku: '',
+                          section: [],
+                        })
+                      );
+                      openOrFocusTab('/nyuko-list');
+                    }}
+                    sx={{ p: 0, height: '15px', m: 0, minWidth: 0, width: 1 }}
+                  >
+                    {toJapanMDString(row.nyukoDat)}
+                  </Button>
+                ) : (
+                  ''
+                )}
               </TableCell>
             </TableRow>
           ))}

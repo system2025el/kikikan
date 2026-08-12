@@ -92,6 +92,13 @@ export const QuotationListTable = ({
   }, [page, rowsPerPage, quots]);
   /** テーブル最後のページ用の空データの長さ */
   const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - quots.length) : 0;
+  /** テーブルのスクロールコンテナ */
+  const tableContainerRef = useRef<HTMLDivElement>(null);
+
+  // ページ切り替え時にスクロール位置をトップに戻す
+  useEffect(() => {
+    tableContainerRef.current?.scrollTo(0, 0);
+  }, [page]);
 
   /* methods -------------------------------------------- */
   /** 削除ボタン押下時処理 */
@@ -197,7 +204,7 @@ export const QuotationListTable = ({
         ) : !list || list.length === 0 ? (
           <Typography justifySelf={'center'}>該当する見積がありません</Typography>
         ) : (
-          <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 0.5 }}>
+          <TableContainer ref={tableContainerRef} component={Paper} square sx={{ maxHeight: '90vh', mt: 0.5 }}>
             <Table stickyHeader size="small" padding="none">
               <TableHead>
                 <TableRow sx={{ whiteSpace: 'nowrap' }}>

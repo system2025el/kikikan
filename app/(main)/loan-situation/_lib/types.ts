@@ -9,6 +9,7 @@ export type LoanEqTableValues = {
   dspFlg: boolean | null;
   mem: string | null;
   regAmt: number | null;
+  sectionNam: string | null;
   shozokuNam: string | null;
   shukeibumonNam: string | null;
 };

@@ -160,7 +160,7 @@ export const BillList = ({ user }: { user: User }) => {
           py={0.5}
         >
           <Grid2 container spacing={1}>
-            <Grid2 size={{ sm: 12, md: 3 }} sx={styles.container}>
+            <Grid2 size={{ sm: 12, md: 'auto' }} sx={styles.container}>
               <Typography noWrap mr={7}>
                 請求番号
               </Typography>
@@ -244,7 +244,7 @@ export const BillList = ({ user }: { user: User }) => {
           </Grid2>
 
           <Grid2 container sx={styles.container}>
-            <Grid2 display={'flex'} size={'grow'} alignItems={'center'}>
+            <Grid2 display={'flex'} alignItems={'center'}>
               <Typography noWrap mr={11}>
                 顧客
               </Typography>
@@ -289,7 +289,7 @@ export const BillList = ({ user }: { user: User }) => {
                   )}
                 /> */}
             </Grid2>
-            <Grid2 alignSelf={'end'}>
+            <Grid2 alignSelf={'end'} ml={2}>
               <Button type="submit" loading={isLoading}>
                 <SearchIcon />
                 検索

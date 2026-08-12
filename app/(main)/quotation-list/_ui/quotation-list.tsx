@@ -159,7 +159,7 @@ export const QuotationList = ({ user }: { user: User }) => {
           onSubmit={handleSubmit(onSubmit)}
         >
           <Grid2 container spacing={1}>
-            <Grid2 size={{ sm: 12, md: 3 }} sx={styles.container}>
+            <Grid2 size={{ sm: 12, md: 'auto' }} sx={styles.container}>
               <Typography noWrap mr={7}>
                 見積番号
               </Typography>
@@ -179,8 +179,8 @@ export const QuotationList = ({ user }: { user: User }) => {
                 }}
               />
             </Grid2>
-            <Grid2 size={{ sm: 12, md: 6 }} sx={styles.container}>
-              <Typography noWrap mr={5}>
+            <Grid2 size={{ sm: 12, md: 'auto' }} sx={styles.container}>
+              <Typography noWrap mr={{ sm: 7, md: 2 }}>
                 受注番号
               </Typography>
               <TextFieldElement
@@ -285,7 +285,7 @@ export const QuotationList = ({ user }: { user: User }) => {
               )}
             />
           </Grid2>
-          <Grid2 container justifyContent={'space-between'}>
+          <Grid2 container>
             <Grid2 sx={styles.container}>
               <Typography noWrap mr={9}>
                 入力者
@@ -308,7 +308,7 @@ export const QuotationList = ({ user }: { user: User }) => {
                 )}
               />
             </Grid2>
-            <Grid2 alignSelf={'end'} justifySelf={'end'}>
+            <Grid2 alignSelf={'end'} ml={2}>
               <Button type="submit" loading={isLoading}>
                 <SearchIcon />
                 検索

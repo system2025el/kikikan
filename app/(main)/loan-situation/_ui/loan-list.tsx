@@ -17,16 +17,17 @@ import {
   Typography,
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
-import { useEffect, useMemo, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { TextFieldElement } from 'react-hook-form-mui';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { CheckboxButtonGroup, TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { permission } from '../../_lib/permission';
 import { openOrFocusTab } from '../../_lib/tab-focus';
+import { SelectTypes } from '../../_ui/form-box';
 import { Loading } from '../../_ui/loading';
 import { MuiTablePagination } from '../../_ui/table-pagination';
 import { ROWS_PER_MASTER_TABLE_PAGE } from '../../(masters)/_lib/constants';
 import { LightTooltipWithText } from '../../(masters)/_ui/tables';
+import { getSectionShortSelections } from '../../(masters)/sections-master/_lib/funcs';
 import { getFilteredEqpts } from '../_lib/funcs';
 import { LoanEqTableValues } from '../_lib/types';
 
@@ -40,24 +41,36 @@ export const LoanList = () => {
   const [error, setError] = useState<Error | null>(null);
   const [page, setPage] = useState(1);
   const [rows, setRows] = useState<LoanEqTableValues[]>([]);
+  // 選択肢(課)
+  const [options, setOptions] = useState<{ sect: SelectTypes[] }>({ sect: [] });
 
   /* useForm ---------------------------------------- */
   const { control, handleSubmit } = useForm({
     mode: 'onSubmit',
-    defaultValues: { query: '' },
+    defaultValues: { query: '', section: [] as string[] },
   });
 
   /* 検索ボタン押下時 */
-  const onSubmit = async (data: { query: string | undefined }) => {
+  const onSubmit = async (data: { query: string | undefined; section: string[] }) => {
     setIsLoading(true);
     try {
-      const newList = await getFilteredEqpts(data.query!);
+      const newList = await getFilteredEqpts(data.query!, data.section);
       setPage(1);
       setRows(newList);
     } catch (e) {
       setError(e instanceof Error ? e : new Error(String(e)));
     }
     setIsLoading(false);
+  };
+
+  /** 選択肢の取得 */
+  const getOptions = async () => {
+    try {
+      const sect = await getSectionShortSelections();
+      setOptions({ sect: sect });
+    } catch (e) {
+      setError(e instanceof Error ? e : new Error(String(e)));
+    }
   };
 
   // 行移動
@@ -75,10 +88,19 @@ export const LoanList = () => {
     () => (rowsPerPage > 0 ? rows.slice((page - 1) * rowsPerPage, page * rowsPerPage) : rows),
     [page, rows, rowsPerPage]
   );
+  /** テーブルのスクロールコンテナ */
+  const tableContainerRef = useRef<HTMLDivElement>(null);
 
   /* useEffect ----------------------------------- */
+  // ページ切り替え時にスクロール位置をトップに戻す
+  useEffect(() => {
+    tableContainerRef.current?.scrollTo(0, 0);
+  }, [page]);
+
   /** 初期表示 */
   useEffect(() => {
+    getOptions();
+
     const getList = async () => {
       setIsLoading(true);
       try {
@@ -108,6 +130,12 @@ export const LoanList = () => {
           <Grid2 container alignItems={'center'} m={2} spacing={2}>
             <Typography>受注機材名キーワード</Typography>
             <TextFieldElement name="query" control={control} sx={{ width: 400 }} />
+            <Box display={'flex'} alignItems="center">
+              <Typography mr={2}>課</Typography>
+              <Box border={1} borderColor={'divider'} borderRadius={1} pl={1}>
+                <CheckboxButtonGroup name="section" control={control} options={options.sect} row />
+              </Box>
+            </Box>
             <Button type="submit" loading={isLoading}>
               <SearchIcon fontSize="small" />
               検索
@@ -124,7 +152,7 @@ export const LoanList = () => {
         ) : !rows || rows!.length === 0 ? (
           <Typography ml={2}>該当するデータがありません</Typography>
         ) : (
-          <TableContainer component={Paper} sx={{ maxHeight: '80vh', mt: 1 }} square>
+          <TableContainer ref={tableContainerRef} component={Paper} sx={{ maxHeight: '80vh', mt: 1 }} square>
             <Table stickyHeader size="small">
               <TableHead>
                 <TableRow sx={{ whiteSpace: 'nowrap' }}>
@@ -134,6 +162,9 @@ export const LoanList = () => {
                   </TableCell>
                   <TableCell align="left" style={styles.style}>
                     所属
+                  </TableCell>
+                  <TableCell align="left" style={styles.style}>
+                    課
                   </TableCell>
                   <TableCell align="right" style={styles.style}>
                     保有数
@@ -180,6 +211,9 @@ export const LoanList = () => {
                     </TableCell>
                     <TableCell align="left" style={styles.style}>
                       {loan.shozokuNam === 'KICS' ? 'K' : loan.shozokuNam === 'YARD' ? 'Y' : 'その他'}
+                    </TableCell>
+                    <TableCell align="left" style={styles.style}>
+                      {loan.sectionNam}
                     </TableCell>
                     <TableCell align="right" style={styles.style}>
                       {loan.kizaiQty}

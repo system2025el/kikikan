@@ -101,7 +101,7 @@ const Page = async (props: {
       juchuHonbanbiQty: oyaJuchuHonbanbiQty ?? 0,
       //nebikiAmt: null,
       mem: null,
-      headNam: juchuHeadData.koenNam,
+      headNam: '',
       oyaJuchuKizaiHeadId: oyaJuchuKizaiHeadId,
       kicsNyukoDat: null,
       yardNyukoDat: null,

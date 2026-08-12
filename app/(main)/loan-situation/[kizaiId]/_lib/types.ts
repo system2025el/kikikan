@@ -38,3 +38,8 @@ export type LoanStockTableValues = {
 export type LoanConfirmJuchuHeadId = {
   juchuHeadId: number;
 };
+
+export type HonbanbiColorValues = {
+  colorId: number;
+  colorNam: string;
+};

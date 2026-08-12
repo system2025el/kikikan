@@ -1,0 +1,13 @@
+# 接続URL（パスワードを含む。絶対にコミットしない）
+.stg_url
+.prod_url
+
+# ダウンロードしたPostgreSQLクライアント
+pgclient/
+pg*.zip
+
+# 生成物（本番データ・ログ）
+prod_data.sql
+precheck_*.txt
+cnt_*.txt
+*.log
