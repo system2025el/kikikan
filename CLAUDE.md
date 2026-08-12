@@ -55,6 +55,18 @@ npm run fix             # prettier --write + eslint --fix（コミット前に�
 
 **マテリアライズドビュー**: `postgres.ts` の `refreshVRfid()` は `v_rfid` マテリアライズドビューを手動でリフレッシュする。設計上、エラーは握りつぶしてログ出力のみ行う（リフレッシュ失敗を理由に呼び出し元の更新処理自体を失敗させないため）。RFIDのステータスに影響する書き込みの後に呼び出すこと。
 
+**`t_juchu_kizai_honbanbi` は「本番日」ではなく使用日カレンダー**: 名前とカラム名（`juchu_honbanbi_dat`、`juchu_honbanbi_shubetu_id`）が「本番日」だが、実体は**受注機材ヘッダー単位の使用日を1日1行で持つカレンダー**であり、仕込み・本番といったイベント日だけのテーブルではない。種別IDは `HONBANBI_SHUBETU_ID`（`app/_lib/constants.ts`）と `m_honbanbi_color` に対応する：`1` 使用中（出庫日〜入庫日の全日）、`2` 出庫日、`3` 入庫日、`10` 仕込み、`20` RH、`30` GP、`40` 本番。
+
+- 機材明細画面の保存時、種別 `1` は `deleteSiyouHonbanbi`（種別1のみDELETE）→ `getRange(出庫日, 入庫日)` の全日を再INSERTという作り直し方式で更新する。種別 `2`/`3` は出庫日・入庫日にupsert、種別 `10`〜`40` は本番日入力ダイアログの差分（追加・更新・削除）で更新する。返却受注機材ヘッダーには「返却日〜親の入庫日」の範囲で種別 `1` が作られる。
+- 出庫日・入庫日が未設定だと `getRange` が空配列を返し、種別 `1` の行が1件も作られない（＝在庫を消費しない）点に注意。
+
+**在庫数の算出**: 在庫数は `v_zaiko_qty.zaiko_qty = v_kizai_qty.kizai_qty − v_juchu_kizai_dat_qty.plan_qty` で求まる。機材明細画面や貸出状況の在庫テーブルはこのビューを日付でCROSS JOINして表示している（`app/_lib/db/tables/stock-table.ts`）。
+
+- 分子の保有数 `kizai_qty` は**RFIDタグの実本数**（`v_rfid` で `del_flg = 0` かつ `rfid_kizai_sts < 100` またはNULL。100以上はNG・廃棄・紛失・無効化）。ピッキング中や出発済みなどの作業ステータスは保有数に影響しない。所属（KICS/YARD）別ではなく全体合計。
+- 分母の `plan_qty` は `t_juchu_kizai_honbanbi` の日付（種別を問わず `DISTINCT`）に紐づく `plan_kizai_qty + plan_yobi_qty` の全受注合計。上記の通り種別 `1` が期間全日に入るため、**引き当ては出庫日〜入庫日の全日に効く**。同じ日に種別1と種別40があっても `DISTINCT` で1回にまとまり二重計上はされない。コンテナ明細（`t_juchu_ctn_meisai`）もUNION ALLで加算される。
+- 除外条件は `t_juchu_head.del_flg = 0` のみで、`juchu_sts`（入力中・受注キャンセル等）は考慮されない。キープヘッダーの `keep_qty` は集計対象外。返却ヘッダーの明細はマイナス数量で保存され、合算により在庫が戻る。
+- 該当日に行が無い場合は在庫データではなく保有数をそのまま表示する（`COALESCE(v.zaiko_qty, k.kizai_qty)`）。画面側で編集中の増減は出庫日〜入庫日の範囲だけをローカル補正しており、これはDB側の引き当て範囲と一致している。
+
 ## コーディング規約
 
 - import順序は `eslint-plugin-simple-import-sort` により強制される（`import/order` ではない）。`npm run fix` で自動修正可能。
