@@ -21,13 +21,14 @@ export const selectFilteredEqpts = async (queries: {
   s: number | null;
   b: number | null;
   ngFlg?: boolean;
+  section?: string[];
 }) => {
   const supabase = await createClient();
   const builder = supabase
     .schema(SCHEMA)
     .from('v_kizai_lst')
     .select(
-      'kizai_id, kizai_nam, kizai_qty, kizai_ng_qty, shozoku_nam, mem, bumon_nam, dai_bumon_nam, shukei_bumon_nam, reg_amt, dsp_flg, del_flg, rfid_kics_qty, rfid_yard_qty'
+      'kizai_id, kizai_nam, kizai_qty, kizai_ng_qty, shozoku_nam, section_nam, mem, bumon_nam, dai_bumon_nam, shukei_bumon_nam, reg_amt, dsp_flg, del_flg, rfid_kics_qty, rfid_yard_qty'
     );
 
   if (queries.q && queries.q.trim() !== '') {
@@ -45,6 +46,9 @@ export const selectFilteredEqpts = async (queries: {
   }
   if (queries.ngFlg) {
     builder.gt('kizai_ng_qty', 0);
+  }
+  if (queries.section && queries.section.length !== 0) {
+    builder.in('section_nam', queries.section);
   }
   //   let query = `
   //     select distinct
