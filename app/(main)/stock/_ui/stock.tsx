@@ -1,5 +1,6 @@
 'use client';
 
+import { zodResolver } from '@hookform/resolvers/zod';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import SearchIcon from '@mui/icons-material/Search';
@@ -27,7 +28,7 @@ import { Calendar } from '../../_ui/date';
 import { Loading } from '../../_ui/loading';
 import { FAKE_NEW_ID } from '../../(masters)/_lib/constants';
 import { getAllStockData, getBumonsData, getEqData } from '../_lib/funcs';
-import { Bumon, EqTableValues, StockTableValues } from '../_lib/types';
+import { Bumon, EqTableValues, StockSearchSchema, StockSearchValues, StockTableValues } from '../_lib/types';
 import { EqStockTable, EqTable } from './stock-table';
 
 export const Stock = () => {
@@ -57,8 +58,16 @@ export const Stock = () => {
   const isSyncing = useRef(false);
 
   /* 検索useForm-------------------------- */
-  const { control, handleSubmit, reset } = useForm<{ bumonId: number; keyword: string }>({
+  const {
+    control,
+    handleSubmit,
+    reset,
+    trigger,
+    formState: { errors },
+  } = useForm<StockSearchValues>({
     mode: 'onSubmit',
+    reValidateMode: 'onChange',
+    resolver: zodResolver(StockSearchSchema),
     defaultValues: { bumonId: FAKE_NEW_ID, keyword: '' },
   });
 
@@ -93,8 +102,7 @@ export const Stock = () => {
    * 検索ボタン押下時
    * @param data フォームデータ(部門id)
    */
-  const onSubmit = async (data: { bumonId: number; keyword: string }) => {
-    if (!data.bumonId) return;
+  const onSubmit = async (data: StockSearchValues) => {
     setIsLoading(true);
     try {
       const newEqList = await getEqData(data.bumonId, data.keyword);
@@ -224,14 +232,22 @@ export const Stock = () => {
       <Divider />
       <Box>
         <form onSubmit={handleSubmit(onSubmit)}>
-          <Grid2 container alignItems="center" p={2} spacing={2}>
+          <Grid2 container alignItems="baseline" p={2} spacing={2}>
             <Grid2 container alignItems="center">
               <Typography>部門</Typography>
               <Controller
                 name="bumonId"
                 control={control}
                 render={({ field }) => (
-                  <Select {...field} sx={{ minWidth: 250 }}>
+                  <Select
+                    {...field}
+                    onChange={(e) => {
+                      field.onChange(e);
+                      trigger('keyword');
+                    }}
+                    error={!!errors.keyword}
+                    sx={{ minWidth: 250 }}
+                  >
                     <MenuItem value={FAKE_NEW_ID}>未選択</MenuItem>
                     {bumons.length > 0 &&
                       bumons.map((d: Bumon) => (
@@ -243,7 +259,7 @@ export const Stock = () => {
                 )}
               />
             </Grid2>
-            <Grid2 container alignItems="center">
+            <Grid2 container alignItems="baseline">
               <Typography>機材名キーワード</Typography>
               <TextFieldElement name="keyword" control={control} sx={{ width: 400 }} />
             </Grid2>
