@@ -2,14 +2,19 @@
 
 import { revalidatePath } from 'next/cache';
 
+import { selectOneEqpt } from '@/app/_lib/db/tables/m-kizai';
+import { selectBundledEqptIds, selectSetOptions } from '@/app/_lib/db/tables/m-kizai-set';
 import { selectActiveMituSts } from '@/app/_lib/db/tables/m-mitu-sts';
 import { selectActiveUsers } from '@/app/_lib/db/tables/m-user';
 import { selectMaxJuchuHonbanbiQty } from '@/app/_lib/db/tables/t-juchu-kizai-head';
 import { selectChosenMitu, updQuotHeadDelFlg } from '@/app/_lib/db/tables/t-mitu-head';
 import { selectQuotMeisai } from '@/app/_lib/db/tables/t-mitu-meisai';
 import { selectQuotMeisaiHead } from '@/app/_lib/db/tables/t-mitu-meisai-head';
+import { selectActiveBumons } from '@/app/_lib/db/tables/v_bumon_lst';
 import { selectJuchuKizaiHeadNamList } from '@/app/_lib/db/tables/v-juchu-kizai-head-lst';
 import { selectJuchu } from '@/app/_lib/db/tables/v-juchu-lst';
+import { selectChosenEqptsDetails } from '@/app/_lib/db/tables/v-kizai-list';
+import { selectActiveEqpts } from '@/app/_lib/db/tables/v-kizai-lst-sel';
 import { selectKizaiHeadListForMitu } from '@/app/_lib/db/tables/v-mitu-kizai';
 import { selectKizaiHeadListWithIsshikiForMitu } from '@/app/_lib/db/tables/v-mitu-kizai-isshiki';
 import { selectFilteredQuot } from '@/app/_lib/db/tables/v-mitu-lst';
@@ -20,7 +25,14 @@ import { SelectTypes } from '@/app/(main)/_ui/form-box';
 
 import { permission } from '../../_lib/permission';
 import { FAKE_NEW_ID } from '../../(masters)/_lib/constants';
-import { JuchuValues, QuotHeadValues, QuotMeisaiHeadValues, QuotSearchValues } from './types';
+import {
+  EqptSelection,
+  JuchuValues,
+  QuotHeadValues,
+  QuotMeisaiHeadValues,
+  QuotSearchValues,
+  SelectedEqptsValues,
+} from './types';
 
 /**
  * 請求一覧に表示する配列を取得する関数
@@ -481,6 +493,162 @@ export const updQuotDelFlg = async (ids: number[]) => {
     await updQuotHeadDelFlg(ids);
     await revalidatePath('/quotation-list');
   } catch (e) {
+    throw e;
+  }
+};
+
+/**
+ * 機材選択画面に表示するための、無効化フラグなし・表示順の部門の配列を取得する関数
+ * @returns 無効化フラグなし、表示順部門の配列
+ */
+export const getBumonsForEqptSelection = async () => {
+  try {
+    const { data, error } = await selectActiveBumons();
+    if (error) {
+      throw new Error('[selectActiveBumons] DBエラー:', { cause: error });
+    }
+    if (!data || data.length === 0) {
+      return [];
+    }
+    return data.map((d, index) => ({
+      id: d.bumon_id!,
+      label: d.bumon_nam ?? '',
+      tblDspNum: index,
+    }));
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
+    throw e;
+  }
+};
+
+/**
+ * セットオプションを持つ機材のIDの配列を取得する関数
+ * @param idList 選ばれた機材たちの機材IDリスト
+ * @returns セットオプション付きの機材の配列、なかった場合は空配列を返す
+ */
+export const checkSetoptions = async (idList: number[]): Promise<number[]> => {
+  try {
+    const { rows: setIdList } = await selectBundledEqptIds(idList);
+    if (!setIdList || setIdList.length === 0) return [];
+    return Array.from(new Set(setIdList.map((d) => d.kizai_id)));
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
+    throw e;
+  }
+};
+
+/**
+ * 機材選択に表示するための機材リスト
+ * @param query 検索キーワード
+ * @returns 検索キーワードに合致する機材の配列
+ */
+export const getEqptsForEqptSelection = async (query: string = ''): Promise<EqptSelection[] | undefined> => {
+  try {
+    const data = await selectActiveEqpts(query);
+    if (!data || data.rowCount === 0) {
+      return [];
+    }
+    return data.rows;
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
+    throw e;
+  }
+};
+
+/**
+ * 最終的に選ばれたすべの機材IDから、機材の配列を取得する関数
+ * @param idList 最終的に選ばれたすべの機材IDの配列
+ * @returns {SelectedEqptsValues[]} 見積の機材明細に渡す機材の配列
+ */
+export const getSelectedEqpts = async (idList: number[]) => {
+  try {
+    const { data, error } = await selectChosenEqptsDetails(idList);
+    if (error) {
+      throw new Error('[selectChosenEqptsDetails] DBエラー:', { cause: error });
+    }
+    if (!data) return [];
+    const selectedEqpts: SelectedEqptsValues[] = data.map((d) => ({
+      kizaiId: d.kizai_id ?? 0,
+      kizaiNam: d.kizai_nam ?? '',
+      shozokuId: d.shozoku_id ?? 0,
+      shozokuNam: d.shozoku_nam ?? '',
+      kizaiGrpCod: d.kizai_grp_cod ?? '',
+      dspOrdNum: d.dsp_ord_num ?? 0,
+      regAmt: d.reg_amt ?? 0,
+      kizaiQty: d.kizai_qty ?? 0,
+      ctnFlg: d.ctn_flg === 1 ? true : false,
+      indentNum: 0,
+    }));
+    return selectedEqpts;
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
+    throw e;
+  }
+};
+
+/**
+ * セットオプション付き機材の、セットオプション機材リストを取得する関数
+ * @param kizaiId セットオプション付き機材の機材ID
+ * @returns {EqptSelection[]} セットオプションの配列
+ */
+export const getSetOptions = async (kizaiId: number) => {
+  try {
+    let setList: EqptSelection[];
+
+    const [setOptions, eqptNam] = await Promise.all([selectSetOptions(kizaiId), selectOneEqpt(kizaiId)]);
+    if (!setOptions || eqptNam.error) {
+      throw new Error('セットオプション取得時エラー');
+    }
+    if (!setOptions.rows || setOptions.rowCount === 0) {
+      setList = [];
+    }
+    setList = setOptions.rows.map((d) => ({
+      kizaiId: d.set_kizai_id,
+      kizaiNam: d.kizai_nam,
+      shozokuNam: d.shozoku_nam,
+      bumonId: d.bumon_id,
+      kizaiGrpCod: d.kizai_grp_cod,
+      ctnFlg: d.ctn_flg,
+    }));
+
+    return { setList: setList, eqptNam: eqptNam.data.kizai_nam ?? '' };
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
