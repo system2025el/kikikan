@@ -232,6 +232,8 @@ const EquipmentOrderDetail = (props: {
   const [juchuHeadExpanded, setJuchuHeadExpanded] = useState(false);
   // 受注機材ヘッダーアコーディオン制御
   const [juchuKizaiHeadExpanded, setJuchuKizaiHeadExpanded] = useState(!saveKizaiHead);
+  // 移動機材アコーディオン制御
+  const [idoEqTableExpanded, setIdoEqTableExpanded] = useState(false);
   // ポッパー制御
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -3285,21 +3287,6 @@ const EquipmentOrderDetail = (props: {
                     </Box>
                   </Box>
                   <Box
-                    display={
-                      Object.keys(idoJuchuKizaiMeisaiList.filter((d) => !d.delFlag)).length > 0 ? 'block' : 'none'
-                    }
-                    py={2}
-                  >
-                    <IdoEqTable
-                      rows={idoJuchuKizaiMeisaiList}
-                      edit={edit}
-                      shukoFixFlag={shukoFixFlag}
-                      shukoDate={shukoDate}
-                      handleCellDateChange={handleCellDateChange}
-                      handleCellDateClear={handleCellDateClear}
-                    />
-                  </Box>
-                  <Box
                     display={juchuContainerMeisaiList.filter((d) => !d.delFlag).length > 0 ? 'block' : 'none'}
                     py={2}
                     width={'fit-content'}
@@ -3318,6 +3305,45 @@ const EquipmentOrderDetail = (props: {
                 </>
               )}
             </Paper>
+          )}
+          {/*-------移動機材-------*/}
+          {saveKizaiHead && idoJuchuKizaiMeisaiList.filter((d) => !d.delFlag).length > 0 && (
+            <Accordion
+              expanded={idoEqTableExpanded}
+              onChange={() => setIdoEqTableExpanded(!idoEqTableExpanded)}
+              sx={{
+                marginTop: 2,
+                borderRadius: 1,
+                overflow: 'hidden',
+              }}
+              variant="outlined"
+            >
+              <AccordionSummary
+                expandIcon={<ExpandMoreIcon />}
+                component="div"
+                sx={{
+                  minHeight: '30px',
+                  maxHeight: '30px',
+                  '&.Mui-expanded': {
+                    minHeight: '30px',
+                    maxHeight: '30px',
+                  },
+                }}
+              >
+                <Typography>移動機材</Typography>
+              </AccordionSummary>
+              <AccordionDetails sx={{ padding: 0 }}>
+                <Divider />
+                <IdoEqTable
+                  rows={idoJuchuKizaiMeisaiList}
+                  edit={edit}
+                  shukoFixFlag={shukoFixFlag}
+                  shukoDate={shukoDate}
+                  handleCellDateChange={handleCellDateChange}
+                  handleCellDateClear={handleCellDateClear}
+                />
+              </AccordionDetails>
+            </Accordion>
           )}
           {/*-------本番日-------*/}
           {saveKizaiHead && (
