@@ -2,7 +2,7 @@
 
 import { ZodError, ZodIssue } from 'zod';
 
-import pool from '@/app/_lib/db/postgres';
+import pool, { refreshVRfid } from '@/app/_lib/db/postgres';
 import {
   checkBumon,
   checkDaibumon,
@@ -138,6 +138,10 @@ export const ImportEqptRfidData = async (data: EqptImportType[], user: string) =
     console.error('インポートエラー', e);
     throw e;
   } finally {
+    // コミット確定後の状態でリフレッシュする（失敗してもインポート自体は成功扱いのまま）
+    refreshVRfid().catch((err) => {
+      console.error('バックグラウンドでのマテビュー更新に失敗:', err);
+    });
     // なんにしてもpool解放
     connection.release();
   }
