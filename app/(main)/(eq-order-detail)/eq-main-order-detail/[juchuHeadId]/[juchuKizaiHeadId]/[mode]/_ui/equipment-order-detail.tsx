@@ -2135,16 +2135,22 @@ const EquipmentOrderDetail = (props: {
 
     // 元データ更新
     const selectDspOrdNum = [...selectEq.map((d) => d.dspOrdNum), ...selectCtn.map((d) => d.dspOrdNum)];
-    const updateJuchuKizaiMeisaiList = juchuKizaiMeisaiList.map((data) =>
-      selectDspOrdNum.includes(data.dspOrdNum)
-        ? {
-            ...data,
-            planKizaiQty: data.planKizaiQty - selectEq.find((d) => d.dspOrdNum === data.dspOrdNum)!.planKizaiQty,
-            planYobiQty: data.planYobiQty - selectEq.find((d) => d.dspOrdNum === data.dspOrdNum)!.planYobiQty,
-            planQty: data.planQty - selectEq.find((d) => d.dspOrdNum === data.dspOrdNum)!.planQty,
-          }
-        : data
-    );
+    const updateJuchuKizaiMeisaiList = juchuKizaiMeisaiList.map((data) => {
+      const eq = selectEq.find((d) => d.dspOrdNum === data.dspOrdNum);
+      if (!eq) return data;
+
+      const planKizaiQty = data.planKizaiQty - eq.planKizaiQty;
+      const planYobiQty = data.planYobiQty - eq.planYobiQty;
+
+      return {
+        ...data,
+        planKizaiQty,
+        planYobiQty,
+        planQty: data.planQty - eq.planQty,
+        // 受注数、予備数が両方0になった場合は削除
+        delFlag: planKizaiQty === 0 && planYobiQty === 0,
+      };
+    });
 
     const updateJuchuContainerMeisaiList = juchuContainerMeisaiList.map((data) =>
       selectDspOrdNum.includes(data.dspOrdNum)
@@ -2159,16 +2165,22 @@ const EquipmentOrderDetail = (props: {
         : data
     );
 
-    const updateIdoJuchuKizaiMeisaiList = idoData.map((data) =>
-      ids.includes(data.kizaiId)
-        ? {
-            ...data,
-            planKizaiQty: data.planKizaiQty - idoList.find((d) => d.kizaiId === data.kizaiId)!.planKizaiQty,
-            planYobiQty: data.planYobiQty - idoList.find((d) => d.kizaiId === data.kizaiId)!.planYobiQty,
-            planQty: data.planQty - idoList.find((d) => d.kizaiId === data.kizaiId)!.planQty,
-          }
-        : data
-    );
+    const updateIdoJuchuKizaiMeisaiList = idoData.map((data) => {
+      const ido = idoList.find((d) => d.kizaiId === data.kizaiId);
+      if (!ido) return data;
+
+      const planKizaiQty = data.planKizaiQty - ido.planKizaiQty;
+      const planYobiQty = data.planYobiQty - ido.planYobiQty;
+
+      return {
+        ...data,
+        planKizaiQty,
+        planYobiQty,
+        planQty: data.planQty - ido.planQty,
+        // 受注数、予備数が両方0になった場合は削除
+        delFlag: planKizaiQty === 0 && planYobiQty === 0,
+      };
+    });
 
     // 分離処理
     const newJuchuKizaiHeadId = await juchuMeisaiSeparation(
@@ -2187,12 +2199,34 @@ const EquipmentOrderDetail = (props: {
     );
 
     if (newJuchuKizaiHeadId) {
-      setOriginJuchuKizaiMeisaiList(updateJuchuKizaiMeisaiList);
-      setJuchuKizaiMeisaiList(updateJuchuKizaiMeisaiList);
+      // 削除された明細を除いた状態に更新
+      const remainJuchuKizaiMeisaiList = updateJuchuKizaiMeisaiList.filter((data) => !data.delFlag);
+      // 分離対象外の移動明細を残したまま、分離対象の移動明細のみ差し替える
+      const updateIdoMap = new Map(updateIdoJuchuKizaiMeisaiList.map((data) => [data.kizaiId, data]));
+      const remainIdoJuchuKizaiMeisaiList = idoJuchuKizaiMeisaiList
+        .map((data) => updateIdoMap.get(data.kizaiId) ?? data)
+        .filter((data) => !data.delFlag);
+      // 在庫テーブルは表示中の機材明細と同じ並びのため、削除された明細のindexを除く
+      let visibleIndex = 0;
+      const deleteStockIndexes: number[] = [];
+      juchuKizaiMeisaiList.forEach((data, i) => {
+        if (data.delFlag) return;
+        if (updateJuchuKizaiMeisaiList[i].delFlag) {
+          deleteStockIndexes.push(visibleIndex);
+        }
+        visibleIndex++;
+      });
+
+      setOriginJuchuKizaiMeisaiList(remainJuchuKizaiMeisaiList);
+      setJuchuKizaiMeisaiList(remainJuchuKizaiMeisaiList);
       setOriginJuchuContainerMeisaiList(updateJuchuContainerMeisaiList);
       setJuchuContainerMeisaiList(updateJuchuContainerMeisaiList);
-      setOriginIdoJuchuKizaiMeisaiList(updateIdoJuchuKizaiMeisaiList);
-      setIdoJuchuKizaiMeisaiList(updateIdoJuchuKizaiMeisaiList);
+      setOriginIdoJuchuKizaiMeisaiList(remainIdoJuchuKizaiMeisaiList);
+      setIdoJuchuKizaiMeisaiList(remainIdoJuchuKizaiMeisaiList);
+      if (deleteStockIndexes.length > 0) {
+        setOriginEqStockList((prev) => prev.filter((_, index) => !deleteStockIndexes.includes(index)));
+        setEqStockList((prev) => prev.filter((_, index) => !deleteStockIndexes.includes(index)));
+      }
 
       setSeparationDialogOpen(false);
       setSnackBarMessage('分離しました');
