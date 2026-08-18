@@ -137,7 +137,7 @@ export const EqptOrderList = () => {
                 sx={{ bgcolor: 'white', minWidth: 150 }}
               />
             </Grid2>
-            <Grid2 container spacing={2} sx={styles.container} ml={1}>
+            <Grid2 container spacing={2} sx={styles.container} ml={1} size={'grow'}>
               <RadioButtonGroup control={control} name="selectedDate.value" options={radioData} row />
               {selectedDateValue === '8' && (
                 <Stack direction="row" spacing={2} alignItems="center">
@@ -168,6 +168,10 @@ export const EqptOrderList = () => {
                   />
                 </Stack>
               )}
+              <Button type="button" onClick={() => reset(DEFAULT_SEARCH_VALUES)} sx={{ ml: 'auto' }}>
+                <RestartAltIcon />
+                検索条件クリア
+              </Button>
             </Grid2>
             <Grid2 container width={'100%'}>
               <Grid2 container direction={'column'} size={5.5}>
@@ -303,10 +307,6 @@ export const EqptOrderList = () => {
                   />
                   <Grid2 size={'grow'} alignItems={'self-end'}>
                     <Box justifySelf={'end'} display={'flex'} gap={1}>
-                      <Button type="button" onClick={() => reset(DEFAULT_SEARCH_VALUES)}>
-                        <RestartAltIcon />
-                        検索条件クリア
-                      </Button>
                       <Button type="submit" loading={isLoading}>
                         <SearchIcon />
                         検索
