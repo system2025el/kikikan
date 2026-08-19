@@ -2900,6 +2900,7 @@ export const juchuMeisaiCopy = async (
  */
 export const juchuMeisaiSeparation = async (
   juchuKizaiHeadData: JuchuKizaiHeadValues,
+  motoJuchuKizaiHeadData: JuchuKizaiHeadValues,
   shukoDate: Date,
   nyukoDate: Date,
   dateRange: string[],
@@ -2924,6 +2925,9 @@ export const juchuMeisaiSeparation = async (
 
     // 受注機材ヘッダー追加
     await addJuchuKizaiHead(newJuchuKizaiHeadId, juchuKizaiHeadData, JUCHU_KIZAI_HEAD_KBN.normal, userNam, connection);
+
+    // 元受注機材ヘッダー更新（分離により機材合計が変わるため、再計算した割引金額を保存する）
+    await updJuchuKizaiHead(motoJuchuKizaiHeadData, userNam, connection);
 
     // 受注機材入出庫追加
     await addJuchuKizaiNyushuko(
@@ -2988,11 +2992,22 @@ export const juchuMeisaiSeparation = async (
       // 機材入出庫伝票追加
       await addNyushukoDen(juchuKizaiHeadData, newJuchuKizaiMeisai, userNam, connection);
 
-      // 元受注機材明細更新
-      await updJuchuKizaiMeisai(updateEq, userNam, connection);
+      // 元受注機材明細（受注数・予備数が両方0）削除
+      const deleteEq = updateEq.filter((d) => d.delFlag);
+      if (deleteEq.length > 0) {
+        await delJuchuKizaiMeisai(deleteEq, connection);
+        await delNyushukoDen(deleteEq, connection);
+        await delNyushukoResult(deleteEq, connection);
+      }
 
-      // 元機材入出庫伝票更新
-      await updNyushukoDen(juchuKizaiHeadData, updateEq, userNam, connection);
+      // 元受注機材明細更新
+      const remainEq = updateEq.filter((d) => !d.delFlag);
+      if (remainEq.length > 0) {
+        await updJuchuKizaiMeisai(remainEq, userNam, connection);
+
+        // 元機材入出庫伝票更新
+        await updNyushukoDen(juchuKizaiHeadData, remainEq, userNam, connection);
+      }
     }
 
     // 受注コンテナ明細
@@ -3248,8 +3263,20 @@ export const juchuMeisaiSeparation = async (
       // 移動受注機材明細追加
       await addIdoDenJuchu(newIdoDenId, newIdoList, userNam, connection);
 
+      // 元移動受注機材明細（受注数・予備数が両方0）削除
+      const deleteIdo = updateIdoList.filter((d) => d.idoDenId && d.delFlag);
+      if (deleteIdo.length > 0) {
+        await delIdoDenJuchu(
+          deleteIdo.map((d) => d.idoDenId as number),
+          connection
+        );
+      }
+
       // 元移動受注機材明細更新
-      await updIdoDenJuchu(updateIdoList, userNam, connection);
+      const remainIdo = updateIdoList.filter((d) => !d.delFlag);
+      if (remainIdo.length > 0) {
+        await updIdoDenJuchu(remainIdo, userNam, connection);
+      }
     }
 
     // 受注本番日追加

@@ -399,25 +399,26 @@ export const Schedule = ({ user }: { user: User }) => {
                           }}
                         >
                           <Box height={20.1} display={'flex'}>
-                            <Box justifyContent={'end'} width={37} sx={styles.boxStyle} /*fontSize={'0.75rem'}*/>
+                            <Box justifyContent={'center'} width={45} sx={styles.boxStyle} /*fontSize={'0.75rem'}*/>
                               {time.nyushukoDat ? toJapanHHmmString(time.nyushukoDat) : ''}
                             </Box>
                             <Divider orientation="vertical" />
                             <Box
-                              width={43}
+                              width={55}
                               sx={styles.boxStyle}
                               bgcolor={
                                 time.nyushukoShubetuId === NYUSHUKO_SHUBETU_ID.shuko
                                   ? weeklyColors.shuko
                                   : weeklyColors.nyuko
                               }
+                              pl={0.5}
                               //fontSize={'0.75rem'}
                             >
                               {time.nyushukoShubetuId === NYUSHUKO_SHUBETU_ID.shuko ? '積み' : '降ろし'}
                             </Box>
                             <Divider orientation="vertical" />
                             <Box
-                              width={150}
+                              width={165}
                               sx={styles.boxStyle}
                               bgcolor={
                                 time.nyushukoBashoId === BASHO_ID.kics
@@ -426,24 +427,26 @@ export const Schedule = ({ user }: { user: User }) => {
                                     ? weeklyColors.atsugi
                                     : weeklyColors.yard
                               }
+                              pl={'5px'}
                             >
-                              <LightTooltipWithText variant={'body2'} maxWidth={150}>
+                              <LightTooltipWithText variant={'body2'} maxWidth={160}>
                                 {time.kokyakuNam}
                               </LightTooltipWithText>
                             </Box>
                           </Box>
                           <Divider variant="fullWidth" />
                           <Box height={20.1} display={'flex'}>
-                            <Box justifyContent={'end'} width={37} sx={styles.boxStyle} />
+                            <Box justifyContent={'center'} width={45} sx={styles.boxStyle} />
                             <Divider orientation="vertical" />
                             <Box
-                              width={43}
+                              width={55}
                               sx={styles.boxStyle}
                               bgcolor={
                                 time.nyushukoShubetuId === NYUSHUKO_SHUBETU_ID.shuko
                                   ? weeklyColors.shuko
                                   : weeklyColors.nyuko
                               }
+                              pl={0.5}
                               //fontSize={'0.75rem'}
                             >
                               {time.sharyos[0]?.nam ?? ''}
@@ -451,7 +454,7 @@ export const Schedule = ({ user }: { user: User }) => {
                             </Box>
                             <Divider orientation="vertical" />
                             <Box
-                              width={150}
+                              width={165}
                               sx={styles.boxStyle}
                               bgcolor={
                                 time.nyushukoBashoId === BASHO_ID.kics
@@ -460,24 +463,26 @@ export const Schedule = ({ user }: { user: User }) => {
                                     ? weeklyColors.atsugi
                                     : weeklyColors.yard
                               }
+                              pl={'5px'}
                             >
-                              <LightTooltipWithText variant={'body2'} maxWidth={150}>
+                              <LightTooltipWithText variant={'body2'} maxWidth={160}>
                                 {time.koenNam}
                               </LightTooltipWithText>
                             </Box>
                           </Box>
                           <Divider />
                           <Box height={20.1} display={'flex'}>
-                            <Box justifyContent={'end'} width={37} sx={styles.boxStyle} />
+                            <Box justifyContent={'center'} width={45} sx={styles.boxStyle} />
                             <Divider orientation="vertical" />
                             <Box
-                              width={43}
+                              width={55}
                               sx={styles.boxStyle}
                               bgcolor={
                                 time.nyushukoShubetuId === NYUSHUKO_SHUBETU_ID.shuko
                                   ? weeklyColors.shuko
                                   : weeklyColors.nyuko
                               }
+                              pl={0.5}
                               //fontSize={'0.75rem'}
                             >
                               {time.sharyos[1]?.nam ?? ''}
@@ -485,7 +490,7 @@ export const Schedule = ({ user }: { user: User }) => {
                             </Box>
                             <Divider orientation="vertical" />
                             <Box
-                              width={150}
+                              width={165}
                               sx={styles.boxStyle}
                               bgcolor={
                                 time.nyushukoBashoId === BASHO_ID.kics
@@ -494,8 +499,9 @@ export const Schedule = ({ user }: { user: User }) => {
                                     ? weeklyColors.atsugi
                                     : weeklyColors.yard
                               }
+                              pl={'5px'}
                             >
-                              <LightTooltipWithText variant={'body2'} maxWidth={150}>
+                              <LightTooltipWithText variant={'body2'} maxWidth={160}>
                                 {time.sharyoHeadNam}
                               </LightTooltipWithText>
                             </Box>

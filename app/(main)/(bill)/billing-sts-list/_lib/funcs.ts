@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 
-import { upsertSeikyuDat } from '@/app/_lib/db/tables/t-seikyu-date-juchu-kizai';
+import { deleteSeikyuDat, upsertSeikyuDat } from '@/app/_lib/db/tables/t-seikyu-date-juchu-kizai';
 import { selectFilteredBillingSituations, selectUnbilledCusts } from '@/app/_lib/db/tables/v-seikyu-date-lst';
 import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
@@ -81,19 +81,23 @@ export const changeSeikyuDat = async (
   }: {
     juchuId: number;
     kziHeadId: number;
-    newDat: Date;
+    newDat: Date | null;
   },
   user: string
 ) => {
-  const upsertData = {
-    juchu_head_id: juchuId,
-    juchu_kizai_head_id: kziHeadId,
-    seikyu_dat: toJapanYMDString(newDat, '-'),
-    add_dat: new Date().toISOString(),
-    add_user: user,
-  };
   try {
-    await upsertSeikyuDat(upsertData);
+    if (newDat) {
+      await upsertSeikyuDat({
+        juchu_head_id: juchuId,
+        juchu_kizai_head_id: kziHeadId,
+        seikyu_dat: toJapanYMDString(newDat, '-'),
+        add_dat: new Date().toISOString(),
+        add_user: user,
+      });
+    } else {
+      // 未請求に戻す（該当行を削除）
+      await deleteSeikyuDat({ juchu_head_id: juchuId, juchu_kizai_head_id: kziHeadId });
+    }
     await revalidatePath('/billing-sts-list');
   } catch (e) {
     if (e instanceof Error) {

@@ -239,3 +239,39 @@ export const QuotHeadSchema = z.object({
  * 明細書全体のタイプ
  */
 export type QuotHeadValues = z.infer<typeof QuotHeadSchema>;
+
+/**
+ * 機材選択画面で表示する機材の型
+ */
+export type EqptSelection = {
+  kizaiId: number;
+  kizaiNam: string;
+  shozokuNam: string;
+  bumonId: number;
+  kizaiGrpCod: string;
+  ctnFlg: boolean;
+};
+
+/**
+ * 機材明細に渡す選択された機材の型
+ */
+export type SelectedEqptsValues = {
+  kizaiId: number;
+  kizaiNam: string;
+  shozokuId: number;
+  shozokuNam: string;
+  kizaiGrpCod: string;
+  dspOrdNum: number;
+  regAmt: number;
+  kizaiQty: number;
+  ctnFlg: boolean;
+  indentNum: number;
+};
+
+/**
+ * セットオプション選択時の親機材・子機材のグループ
+ */
+export type EqptGroup = {
+  parent: SelectedEqptsValues;
+  children: SelectedEqptsValues[];
+};

@@ -8,10 +8,10 @@ import { SCHEMA } from '../schema';
 /**
  * 作業日指定移動リスト取得
  * @param sagyoDenDat 作業日
- * @param sagyoSijiId 作業指示id
+ * @param sagyoSijiIds 作業指示idの配列（v_ido_den3が重いため、複数の作業指示を1回のクエリでまとめて取得する）
  * @returns
  */
-export const selectFilteredIdoList = async (sagyoDenDat: string, sagyoSijiId: number) => {
+export const selectFilteredIdoList = async (sagyoDenDat: string, sagyoSijiIds: number[]) => {
   const query = `
     SELECT 
         distinct 
@@ -32,14 +32,16 @@ export const selectFilteredIdoList = async (sagyoDenDat: string, sagyoSijiId: nu
         ${SCHEMA}.v_ido_den3 as den3
 
     WHERE
-        den3.nyushuko_dat = '${sagyoDenDat}' --その日だけ抽出
-        AND den3.sagyo_siji_id = ${sagyoSijiId}
+        den3.nyushuko_dat = $1::date --その日だけ抽出
+        AND den3.sagyo_siji_id = ANY($2::int[])
 
     ORDER BY
         den3.nyushuko_dat
   `;
+  const values = [sagyoDenDat, sagyoSijiIds];
+
   try {
-    return (await pool.query(query)).rows;
+    return (await pool.query(query, values)).rows;
   } catch (e) {
     throw new Error('[selectFilteredIdoList] DBエラー:', { cause: e });
   }
