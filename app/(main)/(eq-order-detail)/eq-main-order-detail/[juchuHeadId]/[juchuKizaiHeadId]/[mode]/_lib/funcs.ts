@@ -2900,6 +2900,7 @@ export const juchuMeisaiCopy = async (
  */
 export const juchuMeisaiSeparation = async (
   juchuKizaiHeadData: JuchuKizaiHeadValues,
+  motoJuchuKizaiHeadData: JuchuKizaiHeadValues,
   shukoDate: Date,
   nyukoDate: Date,
   dateRange: string[],
@@ -2924,6 +2925,9 @@ export const juchuMeisaiSeparation = async (
 
     // 受注機材ヘッダー追加
     await addJuchuKizaiHead(newJuchuKizaiHeadId, juchuKizaiHeadData, JUCHU_KIZAI_HEAD_KBN.normal, userNam, connection);
+
+    // 元受注機材ヘッダー更新（分離により機材合計が変わるため、再計算した割引金額を保存する）
+    await updJuchuKizaiHead(motoJuchuKizaiHeadData, userNam, connection);
 
     // 受注機材入出庫追加
     await addJuchuKizaiNyushuko(
