@@ -6,7 +6,6 @@ import {
   TanabanImportTypes,
 } from '@/app/(main)/(masters)/masters-import/_lib/types';
 
-import { refreshVRfid } from '../postgres';
 import { SCHEMA } from '../schema';
 import { updateMasterUpdates } from './m-master-update';
 
@@ -164,7 +163,7 @@ export const checkRfid = async (list: RfidImportTypes[], connection: PoolClient,
       // PostgreSQLのパラメータ上限(65,535)に対して余裕を持たせる。3 * 5000件 + 2 = 15,002パラメータ
       const CHUNK_SIZE = 5000;
 
-      for (let i = 0; i < insertList.length; i += CHUNK_SIZE) {
+      for (let i = 0; i < updateList.length; i += CHUNK_SIZE) {
         // 今回処理する分だけ切り出す
         const chunk = updateList.slice(i, i + CHUNK_SIZE);
         const updatePlaceholders = chunk
@@ -194,10 +193,6 @@ export const checkRfid = async (list: RfidImportTypes[], connection: PoolClient,
     }
   } catch (e) {
     throw new Error('[checkRfid] DBエラー:', { cause: e });
-  } finally {
-    refreshVRfid().catch((err) => {
-      console.error('バックグラウンドでのマテビュー更新に失敗:', err);
-    });
   }
 };
 

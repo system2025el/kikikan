@@ -2,13 +2,14 @@ import AddIcon from '@mui/icons-material/Add';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { Autocomplete, Box, Button, Grid2, IconButton, TextField } from '@mui/material';
+import { Autocomplete, Box, Button, Dialog, Grid2, IconButton, TextField } from '@mui/material';
 import { memo, useEffect, useState } from 'react';
 import { Controller, useFieldArray, useFormContext, useWatch } from 'react-hook-form';
 import { SelectElement, TextFieldElement } from 'react-hook-form-mui';
 
 import { quotationLaborSelectItems } from '../_lib/datas';
-import { QuotHeadValues } from '../_lib/types';
+import { QuotHeadValues, SelectedEqptsValues } from '../_lib/types';
+import { QuotEqptSelectionDialog } from './equipment-selection-dialog';
 import { ReadOnlyYenNumberElement } from './yen';
 
 /**
@@ -161,7 +162,24 @@ const MeisaiLinesComponent = ({
   // フォームのフィールド（明細）
   const meisaiFields = useFieldArray({ control, name: `meisaiHeads.${sectionNam}.${index}.meisai` });
 
+  /* useState ------------------------------------------------------ */
+  // 機材追加ダイアログ制御
+  const [eqSelectionDialogOpen, setEqSelectionDialogOpen] = useState(false);
+
   /* methods ------------------------------------------------------ */
+  /** 機材選択ダイアログで選択された機材を明細行として追加する */
+  const handleAddEqpts = (eqpts: SelectedEqptsValues[]) => {
+    meisaiFields.append(
+      eqpts.map((d) => ({
+        nam: d.kizaiNam,
+        qty: 0,
+        honbanbiQty: 0,
+        tankaAmt: d.regAmt,
+        shokeiAmt: null,
+      }))
+    );
+  };
+
   /** 明細項目の順番を帰るボタン押下時 */
   const moveRow = (i: number, direction: number) => {
     meisaiFields.move(i, i + direction);
@@ -419,7 +437,7 @@ const MeisaiLinesComponent = ({
           </Grid2>
         </Box>
       ))}
-      <Grid2 container px={2} alignItems={'center'}>
+      <Grid2 container px={2} alignItems={'center'} spacing={1}>
         <Grid2 size={0.5} />
         <Button
           size="small"
@@ -431,7 +449,21 @@ const MeisaiLinesComponent = ({
           <AddIcon fontSize="small" />
           項目
         </Button>
+        {sectionNam === 'kizai' && (
+          <Button size="small" onClick={() => setEqSelectionDialogOpen(true)} disabled={!editable}>
+            <AddIcon fontSize="small" />
+            機材追加
+          </Button>
+        )}
       </Grid2>
+      {sectionNam === 'kizai' && (
+        <Dialog open={eqSelectionDialogOpen} fullScreen>
+          <QuotEqptSelectionDialog
+            onSelect={handleAddEqpts}
+            handleCloseDialog={() => setEqSelectionDialogOpen(false)}
+          />
+        </Dialog>
+      )}
     </Box>
   );
 };

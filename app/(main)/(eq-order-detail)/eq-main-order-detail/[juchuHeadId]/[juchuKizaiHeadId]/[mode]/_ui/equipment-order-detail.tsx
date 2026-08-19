@@ -105,6 +105,25 @@ import { EqptSelectionDialog } from './equipment-selection-dailog';
 import { SeparationDialog } from './separation-dialog';
 import { SortDialog } from './sort-dialog';
 
+/**
+ * 機材明細の単価×受注数の合計を算出する（削除された明細は除く）
+ * @param meisaiList 受注機材明細リスト
+ */
+const calcPriceBase = (meisaiList: JuchuKizaiMeisaiValues[]) =>
+  meisaiList.filter((d) => !d.delFlag).reduce((sum, row) => sum + row.kizaiTankaAmt * row.planKizaiQty, 0);
+
+/**
+ * 機材明細から割引金額（確定）を算出する
+ * @param meisaiList 受注機材明細リスト
+ * @param juchuHonbanbiQty 本番日数
+ * @param nebikiRat 割引率
+ */
+const calcNebikiAmt = (
+  meisaiList: JuchuKizaiMeisaiValues[],
+  juchuHonbanbiQty: number | null | undefined,
+  nebikiRat: number | null | undefined
+) => calcPriceBase(meisaiList) * (juchuHonbanbiQty ?? 0) * ((nebikiRat ?? 0) / 100);
+
 const EquipmentOrderDetail = (props: {
   user: User;
   juchuHeadData: DetailOerValues;
@@ -232,6 +251,8 @@ const EquipmentOrderDetail = (props: {
   const [juchuHeadExpanded, setJuchuHeadExpanded] = useState(false);
   // 受注機材ヘッダーアコーディオン制御
   const [juchuKizaiHeadExpanded, setJuchuKizaiHeadExpanded] = useState(!saveKizaiHead);
+  // 移動機材アコーディオン制御
+  const [idoEqTableExpanded, setIdoEqTableExpanded] = useState(false);
   // ポッパー制御
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -292,6 +313,9 @@ const EquipmentOrderDetail = (props: {
   const leftRef = useRef<HTMLDivElement>(null);
   const rightRef = useRef<HTMLDivElement>(null);
   const isSyncing = useRef(false);
+  // 割引率・本番日数・機材数量を一度でも編集したか。
+  // trueの間は割引金額（確定）を自動計算値に追従させ、保存済みデータを読み直す（reset）際にfalseへ戻す
+  const nebikiSyncedRef = useRef(false);
 
   /* useForm ------------------------- */
   const {
@@ -331,13 +355,13 @@ const EquipmentOrderDetail = (props: {
   /** 割引金額の監視 */
   const nebikiAmt = watch('nebikiAmt');
 
+  // 金額算出の元になる単価×受注数の合計（現在値・保存済み）。削除された明細は除く。
+  // メモ等の金額に無関係な項目は含まれないため、それらを編集してもこの値は変化しない
+  const priceBase = useMemo(() => calcPriceBase(juchuKizaiMeisaiList), [juchuKizaiMeisaiList]);
+  const originPriceBase = useMemo(() => calcPriceBase(originJuchuKizaiMeisaiList), [originJuchuKizaiMeisaiList]);
+
   // 合計金額
-  const priceTotal = useMemo(() => {
-    return juchuKizaiMeisaiList.reduce(
-      (sum, row) => sum + row.kizaiTankaAmt * row.planKizaiQty * (juchuHonbanbiQty ?? 0),
-      0
-    );
-  }, [juchuKizaiMeisaiList, juchuHonbanbiQty]);
+  const priceTotal = priceBase * (juchuHonbanbiQty ?? 0);
 
   // 割引率（金額）
   const waribikiRatAmt = priceTotal * ((nebikiRat ?? 0) / 100);
@@ -401,6 +425,8 @@ const EquipmentOrderDetail = (props: {
           yardShukoDat: juchuHeadData.juchuRange ? juchuHeadData.juchuRange[0] : null,
           yardNyukoDat: juchuHeadData.juchuRange ? juchuHeadData.juchuRange[1] : null,
         };
+        // 割引金額（確定）の自動追従を解除
+        nebikiSyncedRef.current = false;
         reset(newJuchuKizaiHeadData);
       } else {
         setIsDetailLoading(true);
@@ -446,6 +472,8 @@ const EquipmentOrderDetail = (props: {
               )
             : [];
 
+        // 割引金額（確定）の自動追従を解除
+        nebikiSyncedRef.current = false;
         reset(juchuKizaiHeadData);
         setOriginJuchuKizaiMeisaiList(juchuKizaiMeisaiData ?? []);
         setJuchuKizaiMeisaiList(juchuKizaiMeisaiData ?? []);
@@ -733,6 +761,9 @@ const EquipmentOrderDetail = (props: {
           juchuContainerMeisaiList,
           userNam
         );
+
+        // 保存した内容が新たな基準になるため、割引金額（確定）の自動追従を解除
+        nebikiSyncedRef.current = false;
 
         // 画面情報更新
         try {
@@ -1670,6 +1701,8 @@ const EquipmentOrderDetail = (props: {
         setSnackBarOpen(true);
       }
       setEdit(false);
+      // 割引金額（確定）の自動追従を解除
+      nebikiSyncedRef.current = false;
       reset();
       setSelectDate(shukoDate ? shukoDate : new Date());
       setJuchuHonbanbiList(originJuchuHonbanbiList);
@@ -2093,8 +2126,13 @@ const EquipmentOrderDetail = (props: {
     // ユーザー名
     const userNam = user.name;
 
-    // 受注機材ヘッダー
-    const newJuchuKizaiHead = { ...getValues(), headNam: headNam };
+    // 受注機材ヘッダー（分離先）
+    // 分離先は分離する明細のみを持つため、その合計から割引金額（確定）を再計算する
+    const newJuchuKizaiHead = {
+      ...getValues(),
+      headNam: headNam,
+      nebikiAmt: calcNebikiAmt(selectEq, getValues('juchuHonbanbiQty'), getValues('nebikiRat')),
+    };
 
     // 機材id
     const ids = [...new Set(selectEq.map((d) => d.kizaiId))];
@@ -2133,16 +2171,22 @@ const EquipmentOrderDetail = (props: {
 
     // 元データ更新
     const selectDspOrdNum = [...selectEq.map((d) => d.dspOrdNum), ...selectCtn.map((d) => d.dspOrdNum)];
-    const updateJuchuKizaiMeisaiList = juchuKizaiMeisaiList.map((data) =>
-      selectDspOrdNum.includes(data.dspOrdNum)
-        ? {
-            ...data,
-            planKizaiQty: data.planKizaiQty - selectEq.find((d) => d.dspOrdNum === data.dspOrdNum)!.planKizaiQty,
-            planYobiQty: data.planYobiQty - selectEq.find((d) => d.dspOrdNum === data.dspOrdNum)!.planYobiQty,
-            planQty: data.planQty - selectEq.find((d) => d.dspOrdNum === data.dspOrdNum)!.planQty,
-          }
-        : data
-    );
+    const updateJuchuKizaiMeisaiList = juchuKizaiMeisaiList.map((data) => {
+      const eq = selectEq.find((d) => d.dspOrdNum === data.dspOrdNum);
+      if (!eq) return data;
+
+      const planKizaiQty = data.planKizaiQty - eq.planKizaiQty;
+      const planYobiQty = data.planYobiQty - eq.planYobiQty;
+
+      return {
+        ...data,
+        planKizaiQty,
+        planYobiQty,
+        planQty: data.planQty - eq.planQty,
+        // 受注数、予備数が両方0になった場合は削除
+        delFlag: planKizaiQty === 0 && planYobiQty === 0,
+      };
+    });
 
     const updateJuchuContainerMeisaiList = juchuContainerMeisaiList.map((data) =>
       selectDspOrdNum.includes(data.dspOrdNum)
@@ -2157,20 +2201,36 @@ const EquipmentOrderDetail = (props: {
         : data
     );
 
-    const updateIdoJuchuKizaiMeisaiList = idoData.map((data) =>
-      ids.includes(data.kizaiId)
-        ? {
-            ...data,
-            planKizaiQty: data.planKizaiQty - idoList.find((d) => d.kizaiId === data.kizaiId)!.planKizaiQty,
-            planYobiQty: data.planYobiQty - idoList.find((d) => d.kizaiId === data.kizaiId)!.planYobiQty,
-            planQty: data.planQty - idoList.find((d) => d.kizaiId === data.kizaiId)!.planQty,
-          }
-        : data
+    const updateIdoJuchuKizaiMeisaiList = idoData.map((data) => {
+      const ido = idoList.find((d) => d.kizaiId === data.kizaiId);
+      if (!ido) return data;
+
+      const planKizaiQty = data.planKizaiQty - ido.planKizaiQty;
+      const planYobiQty = data.planYobiQty - ido.planYobiQty;
+
+      return {
+        ...data,
+        planKizaiQty,
+        planYobiQty,
+        planQty: data.planQty - ido.planQty,
+        // 受注数、予備数が両方0になった場合は削除
+        delFlag: planKizaiQty === 0 && planYobiQty === 0,
+      };
+    });
+
+    // 受注機材ヘッダー（分離元）
+    // 分離元は残った明細の合計から割引金額（確定）を再計算する
+    const motoNebikiAmt = calcNebikiAmt(
+      updateJuchuKizaiMeisaiList,
+      getValues('juchuHonbanbiQty'),
+      getValues('nebikiRat')
     );
+    const motoJuchuKizaiHead = { ...getValues(), nebikiAmt: motoNebikiAmt };
 
     // 分離処理
     const newJuchuKizaiHeadId = await juchuMeisaiSeparation(
       newJuchuKizaiHead,
+      motoJuchuKizaiHead,
       shukoDate,
       nyukoDate,
       dateRange,
@@ -2185,12 +2245,38 @@ const EquipmentOrderDetail = (props: {
     );
 
     if (newJuchuKizaiHeadId) {
-      setOriginJuchuKizaiMeisaiList(updateJuchuKizaiMeisaiList);
-      setJuchuKizaiMeisaiList(updateJuchuKizaiMeisaiList);
+      // 削除された明細を除いた状態に更新
+      const remainJuchuKizaiMeisaiList = updateJuchuKizaiMeisaiList.filter((data) => !data.delFlag);
+      // 分離対象外の移動明細を残したまま、分離対象の移動明細のみ差し替える
+      const updateIdoMap = new Map(updateIdoJuchuKizaiMeisaiList.map((data) => [data.kizaiId, data]));
+      const remainIdoJuchuKizaiMeisaiList = idoJuchuKizaiMeisaiList
+        .map((data) => updateIdoMap.get(data.kizaiId) ?? data)
+        .filter((data) => !data.delFlag);
+      // 在庫テーブルは表示中の機材明細と同じ並びのため、削除された明細のindexを除く
+      let visibleIndex = 0;
+      const deleteStockIndexes: number[] = [];
+      juchuKizaiMeisaiList.forEach((data, i) => {
+        if (data.delFlag) return;
+        if (updateJuchuKizaiMeisaiList[i].delFlag) {
+          deleteStockIndexes.push(visibleIndex);
+        }
+        visibleIndex++;
+      });
+
+      // 分離元の内容はサーバー側で保存済みのため、再計算した割引金額（確定）を新しい基準として反映する
+      nebikiSyncedRef.current = false;
+      reset(motoJuchuKizaiHead);
+
+      setOriginJuchuKizaiMeisaiList(remainJuchuKizaiMeisaiList);
+      setJuchuKizaiMeisaiList(remainJuchuKizaiMeisaiList);
       setOriginJuchuContainerMeisaiList(updateJuchuContainerMeisaiList);
       setJuchuContainerMeisaiList(updateJuchuContainerMeisaiList);
-      setOriginIdoJuchuKizaiMeisaiList(updateIdoJuchuKizaiMeisaiList);
-      setIdoJuchuKizaiMeisaiList(updateIdoJuchuKizaiMeisaiList);
+      setOriginIdoJuchuKizaiMeisaiList(remainIdoJuchuKizaiMeisaiList);
+      setIdoJuchuKizaiMeisaiList(remainIdoJuchuKizaiMeisaiList);
+      if (deleteStockIndexes.length > 0) {
+        setOriginEqStockList((prev) => prev.filter((_, index) => !deleteStockIndexes.includes(index)));
+        setEqStockList((prev) => prev.filter((_, index) => !deleteStockIndexes.includes(index)));
+      }
 
       setSeparationDialogOpen(false);
       setSnackBarMessage('分離しました');
@@ -2412,14 +2498,44 @@ const EquipmentOrderDetail = (props: {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
-  // 割引率（金額）が変化するたびに割引金額（確定）へ反映
-  // 既に一致している場合（例：nebikiAmtがnull、waribikiRatAmtが0）はsetValueを呼ばない。
-  // 呼んでしまうとshouldDirtyにより、何も編集していなくても未保存扱いになってしまう。
+  // 割引金額（確定）を、金額の元になる項目（機材数量・割引率・本番日数）の編集に追従させる。
+  // useEffectは初期表示でも必ず発火し、明細はクライアント側で非同期取得するためpriceTotalは
+  // 「0→実値」と必ず変化する。そのため「値が変化したか」だけでは初期表示とユーザー編集を区別できず、
+  // 保存済みの割引金額（率と無関係に手入力された定額割引など）を初期表示時に上書きしてしまう。
+  // よって保存済みデータ（originPriceBase・defaultValues）と比較して編集の有無を判定する。
+  // 一度でも編集されたらnebikiSyncedRefで追従を有効にし続けることで、割引率を元の値に戻した場合も
+  // 手入力値ではなく自動計算値になる（解除は保存済みデータを読み直すresetのタイミング）。
+  // ※nebikiAmtは手入力も可能なため依存に含めない（含めると手入力した値が即座に上書きされる）
   useEffect(() => {
+    // データ読み込み中はフォーム（defaultValues）と明細（origin）の更新タイミングがずれるため判定しない。
+    // 特に保存後の再取得ではreset(data)の後に明細の再取得をawaitしており、その間は
+    // 保存前のoriginと比較され「編集あり」と誤判定されてしまう。
+    if (isLoading || isDetailLoading) return;
+
+    if (
+      priceBase !== originPriceBase ||
+      nebikiRat !== defaultValues?.nebikiRat ||
+      juchuHonbanbiQty !== defaultValues?.juchuHonbanbiQty
+    ) {
+      nebikiSyncedRef.current = true;
+    }
+    if (!nebikiSyncedRef.current) return;
+
+    // 既に一致している場合はsetValueを呼ばない。
+    // 呼んでしまうとshouldDirtyにより、何も編集していなくても未保存扱いになってしまう。
     if ((nebikiAmt ?? 0) === waribikiRatAmt) return;
     setValue('nebikiAmt', waribikiRatAmt, { shouldDirty: true, shouldValidate: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [waribikiRatAmt]);
+  }, [
+    priceBase,
+    originPriceBase,
+    nebikiRat,
+    juchuHonbanbiQty,
+    waribikiRatAmt,
+    defaultValues,
+    isLoading,
+    isDetailLoading,
+  ]);
 
   useEffect(() => {
     const dirty = isDirty || otherDirty ? true : false;
@@ -2862,7 +2978,7 @@ const EquipmentOrderDetail = (props: {
                       <Grid2 size={6} sx={styles.grid2Row}>
                         <Typography>割引後金額（割引金額）</Typography>
                         <TextField
-                          value={nebikiAftAmt ? `¥${nebikiAftAmt.toLocaleString()}` : ''}
+                          value={nebikiAftAmt ? `¥${nebikiAftAmt.toLocaleString()}` : '¥0'}
                           type="text"
                           sx={{
                             width: 150,
@@ -3285,21 +3401,6 @@ const EquipmentOrderDetail = (props: {
                     </Box>
                   </Box>
                   <Box
-                    display={
-                      Object.keys(idoJuchuKizaiMeisaiList.filter((d) => !d.delFlag)).length > 0 ? 'block' : 'none'
-                    }
-                    py={2}
-                  >
-                    <IdoEqTable
-                      rows={idoJuchuKizaiMeisaiList}
-                      edit={edit}
-                      shukoFixFlag={shukoFixFlag}
-                      shukoDate={shukoDate}
-                      handleCellDateChange={handleCellDateChange}
-                      handleCellDateClear={handleCellDateClear}
-                    />
-                  </Box>
-                  <Box
                     display={juchuContainerMeisaiList.filter((d) => !d.delFlag).length > 0 ? 'block' : 'none'}
                     py={2}
                     width={'fit-content'}
@@ -3318,6 +3419,45 @@ const EquipmentOrderDetail = (props: {
                 </>
               )}
             </Paper>
+          )}
+          {/*-------移動機材-------*/}
+          {saveKizaiHead && idoJuchuKizaiMeisaiList.filter((d) => !d.delFlag).length > 0 && (
+            <Accordion
+              expanded={idoEqTableExpanded}
+              onChange={() => setIdoEqTableExpanded(!idoEqTableExpanded)}
+              sx={{
+                marginTop: 2,
+                borderRadius: 1,
+                overflow: 'hidden',
+              }}
+              variant="outlined"
+            >
+              <AccordionSummary
+                expandIcon={<ExpandMoreIcon />}
+                component="div"
+                sx={{
+                  minHeight: '30px',
+                  maxHeight: '30px',
+                  '&.Mui-expanded': {
+                    minHeight: '30px',
+                    maxHeight: '30px',
+                  },
+                }}
+              >
+                <Typography>移動機材</Typography>
+              </AccordionSummary>
+              <AccordionDetails sx={{ padding: 0 }}>
+                <Divider />
+                <IdoEqTable
+                  rows={idoJuchuKizaiMeisaiList}
+                  edit={edit}
+                  shukoFixFlag={shukoFixFlag}
+                  shukoDate={shukoDate}
+                  handleCellDateChange={handleCellDateChange}
+                  handleCellDateClear={handleCellDateClear}
+                />
+              </AccordionDetails>
+            </Accordion>
           )}
           {/*-------本番日-------*/}
           {saveKizaiHead && (

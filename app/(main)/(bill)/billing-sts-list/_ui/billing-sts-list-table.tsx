@@ -237,7 +237,7 @@ const BillingStsRow = ({
     const changeTo = {
       juchuId: m.juchuId,
       kziHeadId: m.kziHeadId,
-      newDat: newDat! > m.nyukoDat ? m.nyukoDat : newDat! < m.shukoDat ? m.shukoDat : newDat!,
+      newDat: newDat ? (newDat > m.nyukoDat ? m.nyukoDat : newDat < m.shukoDat ? m.shukoDat : newDat) : null,
     };
     try {
       await changeSeikyuDat(changeTo, user?.name ?? '');
@@ -445,10 +445,11 @@ const BillingStsRow = ({
                 <Button
                   onClick={() => handleChangeDat()}
                   disabled={
-                    !newDat ||
-                    (meisaiToUpd.currentDat
-                      ? toJapanYMDString(meisaiToUpd.currentDat) === toJapanYMDString(newDat)
-                      : false)
+                    newDat
+                      ? meisaiToUpd.currentDat
+                        ? toJapanYMDString(meisaiToUpd.currentDat) === toJapanYMDString(newDat)
+                        : false
+                      : !meisaiToUpd.currentDat
                   }
                 >
                   変更

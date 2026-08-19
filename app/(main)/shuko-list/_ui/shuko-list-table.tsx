@@ -89,9 +89,9 @@ export const ShukoListTable = (props: {
             <TableCell align="center">最終確認</TableCell>
             <TableCell align="left">入力者</TableCell>
             <TableCell align="left">公演名</TableCell>
+            <TableCell align="left">顧客名</TableCell>
             <TableCell align="left">受注明細</TableCell>
             <TableCell align="left">公演場所</TableCell>
-            <TableCell align="left">顧客名</TableCell>
             <TableCell align="right">機材総数</TableCell>
           </TableRow>
         </TableHead>
@@ -183,6 +183,7 @@ export const ShukoListTable = (props: {
               </TableCell>
               <TableCell align="left">{row.nyuryokuUser}</TableCell>
               <TableCell align="left">{row.koenNam}</TableCell>
+              <TableCell align="left">{row.kokyakuNam}</TableCell>
               <TableCell align="left">
                 <Typography
                   variant="body2"
@@ -200,7 +201,6 @@ export const ShukoListTable = (props: {
                 </Typography>
               </TableCell>
               <TableCell align="left">{row.koenbashoNam}</TableCell>
-              <TableCell align="left">{row.kokyakuNam}</TableCell>
               <TableCell align="right">{row.schkPlanQty}</TableCell>
             </TableRow>
           ))}

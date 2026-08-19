@@ -2,7 +2,7 @@
 
 import { ZodError, ZodIssue } from 'zod';
 
-import pool from '@/app/_lib/db/postgres';
+import pool, { refreshVRfid } from '@/app/_lib/db/postgres';
 import {
   checkBumon,
   checkDaibumon,
@@ -105,7 +105,7 @@ export const ImportEqptRfidData = async (data: EqptImportType[], user: string) =
           del_flg: d.del_flg,
           shozoku_id: d.shozoku_id,
           el_num: d.el_num,
-          mem: d.del_flg === 1 ? d.mem : null,
+          mem: d.mem,
         }))
         .filter((d) => d.rfid_tag_id && d.rfid_tag_id.trim() !== '')
         .map((v) => [v.rfid_tag_id, v])
@@ -138,6 +138,10 @@ export const ImportEqptRfidData = async (data: EqptImportType[], user: string) =
     console.error('インポートエラー', e);
     throw e;
   } finally {
+    // コミット確定後の状態でリフレッシュする（失敗してもインポート自体は成功扱いのまま）
+    refreshVRfid().catch((err) => {
+      console.error('バックグラウンドでのマテビュー更新に失敗:', err);
+    });
     // なんにしてもpool解放
     connection.release();
   }

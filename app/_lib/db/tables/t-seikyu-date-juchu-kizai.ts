@@ -29,6 +29,24 @@ export const upsertSeikyuDat = async (newData: SeikyuDatJuchuKizai) => {
 };
 
 /**
+ * 受注請求完了日テーブル t_seikyu_date_juchu_kizai から該当行を削除する関数（未請求に戻す）
+ * @param target 削除対象の受注ヘッドID・受注機材ヘッドID
+ */
+export const deleteSeikyuDat = async (target: { juchu_head_id: number; juchu_kizai_head_id: number }) => {
+  const supabase = await createClient();
+  try {
+    await supabase
+      .schema(SCHEMA)
+      .from('t_seikyu_date_juchu_kizai')
+      .delete()
+      .eq('juchu_head_id', target.juchu_head_id)
+      .eq('juchu_kizai_head_id', target.juchu_kizai_head_id);
+  } catch (e) {
+    throw new Error('[deleteSeikyuDat] DBエラー:', { cause: e });
+  }
+};
+
+/**
  * トランザクション用：受注請求完了日テーブル t_seikyu_date_juchu_kizai を更新する関数
  * @param {SeikyuDatJuchuKizai} newData t_seikyu_date_juchu_kizaiの型
  */
