@@ -2898,7 +2898,7 @@ const EquipmentOrderDetail = (props: {
                       <Grid2 size={6} sx={styles.grid2Row}>
                         <Typography>割引後金額（割引金額）</Typography>
                         <TextField
-                          value={nebikiAftAmt ? `¥${nebikiAftAmt.toLocaleString()}` : ''}
+                          value={nebikiAftAmt ? `¥${nebikiAftAmt.toLocaleString()}` : '¥0'}
                           type="text"
                           sx={{
                             width: 150,
