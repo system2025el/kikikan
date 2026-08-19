@@ -105,7 +105,7 @@ export const ImportEqptRfidData = async (data: EqptImportType[], user: string) =
           del_flg: d.del_flg,
           shozoku_id: d.shozoku_id,
           el_num: d.el_num,
-          mem: d.del_flg === 1 ? d.mem : null,
+          mem: d.mem,
         }))
         .filter((d) => d.rfid_tag_id && d.rfid_tag_id.trim() !== '')
         .map((v) => [v.rfid_tag_id, v])
