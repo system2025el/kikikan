@@ -101,7 +101,7 @@ export const selectFilteredKizaiHead = async ({
     .schema(SCHEMA)
     .from('v_juchu_kizai_head_lst')
     .select(
-      `juchu_head_id, juchu_kizai_head_id, juchu_kizai_head_kbn, kokyaku_nam, koen_nam, koenbasho_nam, head_nam, juchu_dat, kics_shuko_dat, kics_nyuko_dat, yard_shuko_dat, yard_nyuko_dat, oya_juchu_kizai_head_id, nyuryoku_user`
+      `juchu_head_id, juchu_kizai_head_id, juchu_kizai_head_kbn, kokyaku_nam, koen_nam, koenbasho_nam, head_nam, juchu_dat, kics_shuko_dat, kics_nyuko_dat, yard_shuko_dat, yard_nyuko_dat, oya_juchu_kizai_head_id, nyuryoku_user, add_dat`
     );
 
   // 検索条件日付
@@ -116,7 +116,12 @@ export const selectFilteredKizaiHead = async ({
     case 'juchu': // '受注日が'
       dateColumn = 'juchu_dat';
       break;
+    case 'add': // '作成日が'
+      dateColumn = 'add_dat';
+      break;
   }
+  // kics/yardの所属別に分かれていない単一列かどうか
+  const isDirectDateColumn = dateColumn === 'juchu_dat' || dateColumn === 'add_dat';
 
   if (dateColumn) {
     switch (selectedDate?.value) {
@@ -125,7 +130,7 @@ export const selectFilteredKizaiHead = async ({
         const startOfLastMonth = dayjs().tz('Asia/Tokyo').subtract(1, 'month').startOf('month');
         const startOfThisMonth = dayjs().tz('Asia/Tokyo').startOf('month');
         builder.or(
-          dateColumn === 'juchu_dat'
+          isDirectDateColumn
             ? `and(${dateColumn}.gte.${startOfLastMonth.format('YYYY-MM-DD')},${dateColumn}.lt.${startOfThisMonth.format('YYYY-MM-DD')})`
             : // yardが先月の範囲
               `and(yard_${dateColumn}.gte.${startOfLastMonth.toISOString()},yard_${dateColumn}.lt.${startOfThisMonth.toISOString()}),` +
@@ -139,7 +144,7 @@ export const selectFilteredKizaiHead = async ({
         const startOfThisMonth = dayjs().tz('Asia/Tokyo').startOf('month');
         const startOfNextMonth = dayjs().tz('Asia/Tokyo').add(1, 'month').startOf('month');
         builder.or(
-          dateColumn === 'juchu_dat'
+          isDirectDateColumn
             ? `and(${dateColumn}.gte.${startOfThisMonth.format('YYYY-MM-DD')},${dateColumn}.lt.${startOfNextMonth.format('YYYY-MM-DD')})`
             : // yardが今月の範囲
               `and(yard_${dateColumn}.gte.${startOfThisMonth.toISOString()},yard_${dateColumn}.lt.${startOfNextMonth.toISOString()}),` +
@@ -153,7 +158,7 @@ export const selectFilteredKizaiHead = async ({
         const startOfYesterday = dayjs().tz('Asia/Tokyo').subtract(1, 'day').startOf('day');
         const startOfToday = dayjs().tz('Asia/Tokyo').startOf('day');
         builder.or(
-          dateColumn === 'juchu_dat'
+          isDirectDateColumn
             ? `and(${dateColumn}.gte.${startOfYesterday.format('YYYY-MM-DD')},${dateColumn}.lt.${startOfToday.format('YYYY-MM-DD')})`
             : // yardが昨日の範囲内
               `and(yard_${dateColumn}.gte.${startOfYesterday.toISOString()},yard_${dateColumn}.lt.${startOfToday.toISOString()}),` +
@@ -167,7 +172,7 @@ export const selectFilteredKizaiHead = async ({
         const startOfToday = dayjs().tz('Asia/Tokyo').startOf('day');
         const startOfTomorrow = dayjs().tz('Asia/Tokyo').add(1, 'day').startOf('day');
         builder.or(
-          dateColumn === 'juchu_dat'
+          isDirectDateColumn
             ? `and(${dateColumn}.gte.${startOfToday.format('YYYY-MM-DD')},${dateColumn}.lt.${startOfTomorrow.format('YYYY-MM-DD')})`
             : // yardが今日の範囲内
               `and(yard_${dateColumn}.gte.${startOfToday.toISOString()},yard_${dateColumn}.lt.${startOfTomorrow.toISOString()}),` +
@@ -180,7 +185,7 @@ export const selectFilteredKizaiHead = async ({
         // '今日以降'
         const startOfToday = dayjs().tz('Asia/Tokyo').startOf('day');
         builder.or(
-          dateColumn === 'juchu_dat'
+          isDirectDateColumn
             ? `${dateColumn}.gte.${startOfToday.format('YYYY-MM-DD')}`
             : `yard_${dateColumn}.gte.${startOfToday.toISOString()},kics_${dateColumn}.gte.${startOfToday.toISOString()}`
         );
@@ -191,7 +196,7 @@ export const selectFilteredKizaiHead = async ({
         const startOfTomorrow = dayjs().tz('Asia/Tokyo').add(1, 'day').startOf('day');
         const startOfDayAfterTomorrow = dayjs().tz('Asia/Tokyo').add(2, 'day').startOf('day');
         builder.or(
-          dateColumn === 'juchu_dat'
+          isDirectDateColumn
             ? `and(${dateColumn}.gte.${startOfTomorrow.format('YYYY-MM-DD')},${dateColumn}.lt.${startOfDayAfterTomorrow.format('YYYY-MM-DD')})`
             : // yardが明日の範囲内
               `and(yard_${dateColumn}.gte.${startOfTomorrow.toISOString()},yard_${dateColumn}.lt.${startOfDayAfterTomorrow.toISOString()}),` +
@@ -204,7 +209,7 @@ export const selectFilteredKizaiHead = async ({
         // '明日以降'
         const tomorrowAndAfter = dayjs().tz('Asia/Tokyo').add(1, 'day').startOf('day');
         builder.or(
-          dateColumn === 'juchu_dat'
+          isDirectDateColumn
             ? `${dateColumn}.gte.${tomorrowAndAfter.format('YYYY-MM-DD')}`
             : `yard_${dateColumn}.gte.${tomorrowAndAfter.toISOString()},kics_${dateColumn}.gte.${tomorrowAndAfter.toISOString()}`
         );
@@ -218,7 +223,7 @@ export const selectFilteredKizaiHead = async ({
           const startOfDay = dayjs(selectedDate.range.from).tz('Asia/Tokyo').startOf('day');
           const startOfnextDay = dayjs(selectedDate.range.to).tz('Asia/Tokyo').add(1, 'day').startOf('day');
           builder.or(
-            dateColumn === 'juchu_dat'
+            isDirectDateColumn
               ? `and(${dateColumn}.gte.${startOfDay.format('YYYY-MM-DD')},${dateColumn}.lt.${startOfnextDay.format('YYYY-MM-DD')})`
               : // yardが今日の範囲内
                 `and(yard_${dateColumn}.gte.${startOfDay.toISOString()},yard_${dateColumn}.lt.${startOfnextDay.toISOString()}),` +
@@ -230,7 +235,7 @@ export const selectFilteredKizaiHead = async ({
           const startOfDay = dayjs(selectedDate.range.from).tz('Asia/Tokyo').startOf('day');
 
           builder.or(
-            dateColumn === 'juchu_dat'
+            isDirectDateColumn
               ? `${dateColumn}.gte.${startOfDay.format('YYYY-MM-DD')}`
               : `yard_${dateColumn}.gte.${startOfDay.toISOString()},kics_${dateColumn}.gte.${startOfDay.toISOString()}`
           );
@@ -239,7 +244,7 @@ export const selectFilteredKizaiHead = async ({
           const nextDay = dayjs(selectedDate.range.to).tz('Asia/Tokyo').add(1, 'day').startOf('day');
 
           builder.or(
-            dateColumn === 'juchu_dat'
+            isDirectDateColumn
               ? `${dateColumn}.lt.${nextDay.format('YYYY-MM-DD')}`
               : `yard_${dateColumn}.lt.${nextDay.toISOString()},kics_${dateColumn}.lt.${nextDay.toISOString()}`
           );
@@ -294,6 +299,7 @@ export const selectFilteredKizaiHead = async ({
     juchuDat: 'juchu_dat',
     koenNam: 'koen_nam',
     kokyakuNam: 'kokyaku_nam',
+    addDat: 'add_dat',
   };
   // キーでソート基準のカラムを指定
   const sortCOlumn = sortMap[sort];

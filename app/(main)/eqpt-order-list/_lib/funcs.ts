@@ -55,6 +55,7 @@ export const getFilteredOrderList = async (
       yNyukoDat: d.yard_nyuko_dat ? toJapanTimeString(d.yard_nyuko_dat) : '-',
       juchuDat: d.juchu_dat ? toJapanYMDString(d.juchu_dat) : '',
       nyuryokuUser: d.nyuryoku_user ?? '',
+      addDat: d.add_dat ? toJapanYMDString(d.add_dat) : '',
     }));
   } catch (e) {
     if (e instanceof Error) {

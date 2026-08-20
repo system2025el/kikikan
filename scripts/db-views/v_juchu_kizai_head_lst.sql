@@ -1,8 +1,9 @@
 -- =====================================================================
 -- v_juchu_kizai_head_lst 列追加版
 --
--- 変更内容: 既存列の末尾に t_juchu_head.nyuryoku_user（担当者）を1列追加。
---           既存列の値・順序は不変。
+-- 変更内容: 本番の元の定義（rollback.sql）の末尾に、
+--           t_juchu_head.nyuryoku_user（入力者）と t_juchu_kizai_head.add_dat（登録日時）を
+--           2列追加。既存列の値・順序は不変。本番未適用のため、この1本で両方を反映する。
 -- 取得元  : ステージング jimqcvyaoddsxbcrsnfs / public スキーマ（適用済みの定義）
 -- =====================================================================
 
@@ -52,7 +53,8 @@ WITH (security_invoker = on) AS
      t_juchu_head.juchu_dat,
      COALESCE(kics_nyuko_fix.sagyo_fix_flg, 0) AS kics_nyuko_fix_flg,
      COALESCE(yard_nyuko_fix.sagyo_fix_flg, 0) AS yard_nyuko_fix_flg,
-     t_juchu_head.nyuryoku_user
+     t_juchu_head.nyuryoku_user,
+     t_juchu_kizai_head.add_dat
     FROM t_juchu_head
       LEFT JOIN t_juchu_kizai_head ON t_juchu_head.juchu_head_id = t_juchu_kizai_head.juchu_head_id
       LEFT JOIN t_juchu_kizai_meisai ON t_juchu_kizai_head.juchu_head_id = t_juchu_kizai_meisai.juchu_head_id AND t_juchu_kizai_head.juchu_kizai_head_id = t_juchu_kizai_meisai.juchu_kizai_head_id
@@ -98,5 +100,5 @@ WITH (security_invoker = on) AS
       LEFT JOIN t_nyushuko_fix kics_nyuko_fix ON t_juchu_kizai_head.juchu_head_id = kics_nyuko_fix.juchu_head_id AND t_juchu_kizai_head.juchu_kizai_head_id = kics_nyuko_fix.juchu_kizai_head_id AND kics_nyuko_fix.sagyo_kbn_id = 70 AND kics_nyuko_fix.sagyo_id = 1
       LEFT JOIN t_nyushuko_fix yard_nyuko_fix ON t_juchu_kizai_head.juchu_head_id = yard_nyuko_fix.juchu_head_id AND t_juchu_kizai_head.juchu_kizai_head_id = yard_nyuko_fix.juchu_kizai_head_id AND yard_nyuko_fix.sagyo_kbn_id = 70 AND yard_nyuko_fix.sagyo_id = 2
    WHERE t_juchu_head.del_flg = 0
-   GROUP BY t_juchu_head.juchu_head_id, t_juchu_head.koen_nam, t_juchu_head.koenbasho_nam, t_juchu_head.kokyaku_id, m_kokyaku.kokyaku_nam, t_juchu_kizai_head.juchu_kizai_head_id, t_juchu_kizai_head.head_nam, '（仮）TODO'::text, kics_shuko.nyushuko_dat, kics_nyuko.nyushuko_dat, yard_shuko.nyushuko_dat, yard_nyuko.nyushuko_dat, t_juchu_kizai_head.nebiki_amt, t_juchu_kizai_head.mem, t_juchu_kizai_head.dsp_ord_num, t_juchu_kizai_head.oya_juchu_kizai_head_id, t_juchu_kizai_head.ht_kbn, t_juchu_kizai_head.juchu_kizai_head_kbn, v_honbanbi_calc.juchu_honbanbi_calc_qty, t_juchu_kizai_head.nebiki_rat, kics_shuko_fix.sagyo_fix_flg, yard_shuko_fix.sagyo_fix_flg, t_juchu_head.juchu_dat, kics_nyuko_fix.sagyo_fix_flg, yard_nyuko_fix.sagyo_fix_flg, t_juchu_head.nyuryoku_user
+   GROUP BY t_juchu_head.juchu_head_id, t_juchu_head.koen_nam, t_juchu_head.koenbasho_nam, t_juchu_head.kokyaku_id, m_kokyaku.kokyaku_nam, t_juchu_kizai_head.juchu_kizai_head_id, t_juchu_kizai_head.head_nam, '（仮）TODO'::text, kics_shuko.nyushuko_dat, kics_nyuko.nyushuko_dat, yard_shuko.nyushuko_dat, yard_nyuko.nyushuko_dat, t_juchu_kizai_head.nebiki_amt, t_juchu_kizai_head.mem, t_juchu_kizai_head.dsp_ord_num, t_juchu_kizai_head.oya_juchu_kizai_head_id, t_juchu_kizai_head.ht_kbn, t_juchu_kizai_head.juchu_kizai_head_kbn, v_honbanbi_calc.juchu_honbanbi_calc_qty, t_juchu_kizai_head.nebiki_rat, kics_shuko_fix.sagyo_fix_flg, yard_shuko_fix.sagyo_fix_flg, t_juchu_head.juchu_dat, kics_nyuko_fix.sagyo_fix_flg, yard_nyuko_fix.sagyo_fix_flg, t_juchu_head.nyuryoku_user, t_juchu_kizai_head.add_dat
    ORDER BY t_juchu_head.juchu_head_id, t_juchu_kizai_head.juchu_kizai_head_id, t_juchu_kizai_head.head_nam;

@@ -30,6 +30,14 @@ import { getFilteredOrderList, getUsersSelection } from '../_lib/funcs';
 import { EqptOrderListTableValues, EqptOrderSearchValues } from '../_lib/types';
 import { EqptOrderTable } from './eqpt-order-table';
 
+/** 検索条件に対応するソート項目 */
+const RADIO_TO_SORT: Record<string, string> = {
+  shuko: 'shuko',
+  nyuko: 'nyuko',
+  juchu: 'juchuDat',
+  add: 'addDat',
+};
+
 /**
  * 受注明細一覧画面
  * @param param0
@@ -53,7 +61,7 @@ export const EqptOrderList = () => {
   const [error, setError] = useState<Error | null>(null);
 
   /* useForm ------------------------------------------ */
-  const { control, handleSubmit, reset, getValues, watch } = useForm<EqptOrderSearchValues>({
+  const { control, handleSubmit, reset, getValues, watch, setValue } = useForm<EqptOrderSearchValues>({
     defaultValues: DEFAULT_SEARCH_VALUES,
   });
   /** 検索条件の種別の監視 */
@@ -137,7 +145,9 @@ export const EqptOrderList = () => {
                   { id: 'shuko', label: '出庫日が' },
                   { id: 'nyuko', label: '入庫日が' },
                   { id: 'juchu', label: '受注日が' },
+                  { id: 'add', label: '作成日が' },
                 ]}
+                onChange={(value) => setValue('listSort.sort', RADIO_TO_SORT[value] ?? 'shuko')}
                 sx={{ bgcolor: 'white', minWidth: 150 }}
               />
             </Grid2>
@@ -307,6 +317,7 @@ export const EqptOrderList = () => {
                       { id: 'juchuDat', label: '受注日' },
                       { id: 'koenNam', label: '公演名' },
                       { id: 'kokyakuNam', label: '顧客名' },
+                      { id: 'addDat', label: '作成日' },
                     ]}
                     sx={{ minWidth: 150 }}
                   />
