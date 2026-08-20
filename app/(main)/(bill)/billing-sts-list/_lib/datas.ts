@@ -1,3 +1,6 @@
+/** 請求状況一覧の取得対象から除外する顧客ID（(株)エンジニア・ライティング） */
+export const EXCLUDED_KOKYAKU_ID = 1013;
+
 /** ラヂオボタン用データ */
 export const radioData = [
   { id: '1', label: '先月全て' },

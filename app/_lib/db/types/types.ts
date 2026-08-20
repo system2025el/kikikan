@@ -3111,6 +3111,7 @@ export type Database = {
       };
       v_juchu_kizai_head_lst: {
         Row: {
+          add_dat: string | null;
           dsp_ord_num: number | null;
           genebi: number | null;
           head_nam: string;
@@ -3134,6 +3135,7 @@ export type Database = {
           nebiki_amt: number | null;
           nebiki_rat: number | null;
           nyuko_dat: string | null;
+          nyuryoku_user: string | null;
           oya_juchu_kizai_head_id: number | null;
           rihabi: number | null;
           sagyo_sts_nam: string | null;

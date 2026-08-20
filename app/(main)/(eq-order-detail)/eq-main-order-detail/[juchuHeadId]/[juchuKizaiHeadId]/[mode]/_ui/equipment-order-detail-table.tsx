@@ -743,15 +743,6 @@ const ContainerTableRow = React.memo(
         >
           {rowIndex + 1}
         </TableCell>
-        <TableCell style={styles.row} align="center" size="small">
-          <MemoTooltip
-            name={row.kizaiNam}
-            memo={row.mem ? row.mem : ''}
-            handleMemoChange={handleContainerMemoChange}
-            rowIndex={rowIndex}
-            disabled={!edit || shukoFixFlag}
-          />
-        </TableCell>
         <TableCell style={styles.row} align="left" size="small">
           <Button
             variant="text"
@@ -853,6 +844,15 @@ const ContainerTableRow = React.memo(
         </TableCell>
         <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: lightBlue[100] }}>
           {row.planQty}
+        </TableCell>
+        <TableCell style={styles.row} align="center" size="small">
+          <MemoTooltip
+            name={row.kizaiNam}
+            memo={row.mem ? row.mem : ''}
+            handleMemoChange={handleContainerMemoChange}
+            rowIndex={rowIndex}
+            disabled={!edit || shukoFixFlag}
+          />
         </TableCell>
       </TableRow>
     );
@@ -977,9 +977,6 @@ export const ContainerTable = (props: {
             </TableCell>
             <TableCell size="small" style={styles.header} />
             <TableCell align="left" size="small" style={styles.header}>
-              メモ
-            </TableCell>
-            <TableCell align="left" size="small" style={styles.header}>
               機材名
             </TableCell>
             <TableCell align="right" size="small" style={styles.header}>
@@ -990,6 +987,9 @@ export const ContainerTable = (props: {
             </TableCell>
             <TableCell align="right" size="small" style={styles.header}>
               合計数
+            </TableCell>
+            <TableCell align="left" size="small" style={styles.header}>
+              連絡
             </TableCell>
           </TableRow>
         </TableHead>

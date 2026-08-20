@@ -1,3 +1,4 @@
+-- 適用状況: ステージング 2026-08-17 / 本番 2026-08-19
 -- v_nyushuko_total_time_sts 高速化版
 --
 -- 変更内容: v_nyushuko_sts を4回自己JOINしていた構造を、

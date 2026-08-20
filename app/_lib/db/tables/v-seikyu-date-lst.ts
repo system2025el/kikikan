@@ -5,6 +5,7 @@ import dayjs from 'dayjs';
 import { HONBANBI_SHUBETU_ID } from '@/app/_lib/constants';
 import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { escapeLikeString } from '@/app/(main)/_lib/escape-string';
+import { EXCLUDED_KOKYAKU_ID } from '@/app/(main)/(bill)/billing-sts-list/_lib/datas';
 import { BillingStsSearchValues, UnbilledCustsSearchValues } from '@/app/(main)/(bill)/billing-sts-list/_lib/types';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 
@@ -21,7 +22,12 @@ export const selectFilteredBillingSituations = async (queries: BillingStsSearchV
   const { selectedDate, radio, radioKokyaku, kokyaku, unbilledCusts, kokyakuTantoNam, sts } = queries;
   const supabase = await createClient();
 
-  const builder = supabase.schema(SCHEMA).from('v_seikyu_date_lst').select('*').eq('shuko_fix_flg', 1);
+  const builder = supabase
+    .schema(SCHEMA)
+    .from('v_seikyu_date_lst')
+    .select('*')
+    .eq('shuko_fix_flg', 1)
+    .neq('kokyaku_id', EXCLUDED_KOKYAKU_ID);
 
   // 検索条件日付
   let dateColumn = '';
@@ -589,7 +595,8 @@ export const selectUnbilledCusts = async (queries: UnbilledCustsSearchValues) =>
     .from('v_seikyu_date_lst')
     .select('kokyaku_nam')
     .eq('shuko_fix_flg', 1)
-    .in('seikyu_jokyo_sts_id', [0, 1]);
+    .in('seikyu_jokyo_sts_id', [0, 1])
+    .neq('kokyaku_id', EXCLUDED_KOKYAKU_ID);
 
   // 検索条件日付
   let dateColumn = '';

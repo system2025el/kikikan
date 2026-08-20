@@ -31,7 +31,7 @@ import { LoadingOverlay } from '@/app/(main)/_ui/loading';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 import { getCustomerSelection } from '@/app/(main)/(masters)/_lib/funcs';
 
-import { radioData } from '../_lib/datas';
+import { EXCLUDED_KOKYAKU_ID, radioData } from '../_lib/datas';
 import { getFilteredBillingSituations } from '../_lib/funcs';
 import { BillingStsSearchValues, BillingStsTableValues } from '../_lib/types';
 import { BillingStsListTable } from './billing-sts-list-table';
@@ -146,9 +146,9 @@ export const BillingStsList = ({ user }: { user: User }) => {
 
     const getOptions = async () => {
       try {
-        // 選択肢取得
+        // 選択肢取得（(株)エンジニア・ライティングは対象外）
         const [clist] = await Promise.all([getCustomerSelection()]);
-        setCusts(clist);
+        setCusts(clist.filter((c) => c.id !== EXCLUDED_KOKYAKU_ID));
       } catch (e) {
         setIsError(e instanceof Error ? e : new Error(String(e)));
       }
