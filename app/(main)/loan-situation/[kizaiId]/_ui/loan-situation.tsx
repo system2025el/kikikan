@@ -423,6 +423,9 @@ export const LoanSituation = (props: {
 
   return (
     <Box>
+      <Box display={'flex'} justifyContent={'end'} mb={0.5}>
+        <Button onClick={() => window.close()}>閉じる</Button>
+      </Box>
       <Paper variant="outlined">
         <Box display="flex" justifyContent="space-between" alignItems="center" px={2} width="100%">
           <Typography>貸出状況</Typography>
