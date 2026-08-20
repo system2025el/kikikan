@@ -15,6 +15,7 @@ export type EqptOrderListTableValues = {
   kShukoDat: string | null;
   kNyukoDat: string | null;
   juchuDat: string | null;
+  nyuryokuUser: string;
 };
 
 /**
@@ -36,4 +37,5 @@ export type EqptOrderSearchValues = {
   koenNam?: string | null;
   koenbashoNam?: string | null;
   listSort: { sort: string; order: string };
+  nyuryokuUser: string | null;
 };

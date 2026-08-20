@@ -7,6 +7,7 @@ export const DEFAULT_SEARCH_VALUES: EqptOrderSearchValues = {
   kokyaku: '',
   koenbashoNam: '',
   listSort: { sort: 'shuko', order: 'asc' },
+  nyuryokuUser: '',
 };
 
 /** ラヂオボタン用データ */

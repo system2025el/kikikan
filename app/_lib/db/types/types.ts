@@ -3134,6 +3134,7 @@ export type Database = {
           nebiki_amt: number | null;
           nebiki_rat: number | null;
           nyuko_dat: string | null;
+          nyuryoku_user: string | null;
           oya_juchu_kizai_head_id: number | null;
           rihabi: number | null;
           sagyo_sts_nam: string | null;

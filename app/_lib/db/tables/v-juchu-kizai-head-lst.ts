@@ -93,6 +93,7 @@ export const selectFilteredKizaiHead = async ({
   koenNam,
   koenbashoNam,
   listSort,
+  nyuryokuUser,
 }: EqptOrderSearchValues) => {
   const supabase = await createClient();
   // 基本のセレクト
@@ -100,7 +101,7 @@ export const selectFilteredKizaiHead = async ({
     .schema(SCHEMA)
     .from('v_juchu_kizai_head_lst')
     .select(
-      `juchu_head_id, juchu_kizai_head_id, juchu_kizai_head_kbn, kokyaku_nam, koen_nam, koenbasho_nam, head_nam, juchu_dat, kics_shuko_dat, kics_nyuko_dat, yard_shuko_dat, yard_nyuko_dat, oya_juchu_kizai_head_id`
+      `juchu_head_id, juchu_kizai_head_id, juchu_kizai_head_kbn, kokyaku_nam, koen_nam, koenbasho_nam, head_nam, juchu_dat, kics_shuko_dat, kics_nyuko_dat, yard_shuko_dat, yard_nyuko_dat, oya_juchu_kizai_head_id, nyuryoku_user`
     );
 
   // 検索条件日付
@@ -276,6 +277,10 @@ export const selectFilteredKizaiHead = async ({
   if (koenbashoNam && koenbashoNam.trim() !== '') {
     const escapedKoenbashoNam = escapeLikeString(koenbashoNam);
     builder.ilike('koenbasho_nam', `%${escapedKoenbashoNam}%`);
+  }
+  // 入力者が選択されていたら
+  if (nyuryokuUser && nyuryokuUser.trim() !== '') {
+    builder.eq('nyuryoku_user', nyuryokuUser);
   }
 
   // ソート処理

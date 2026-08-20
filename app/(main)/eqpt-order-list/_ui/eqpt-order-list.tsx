@@ -11,26 +11,22 @@ import {
   Container,
   Divider,
   Grid2,
-  MenuItem,
   Paper,
-  Select,
   Stack,
   TextField,
   Typography,
 } from '@mui/material';
-import { grey } from '@mui/material/colors';
 import { useEffect, useState, useTransition } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { RadioButtonGroup, SelectElement, TextFieldElement } from 'react-hook-form-mui';
 
 import { permission } from '../../_lib/permission';
 import { FormDateX } from '../../_ui/date';
-import { selectNone, SelectTypes } from '../../_ui/form-box';
-import { FAKE_NEW_ID } from '../../(masters)/_lib/constants';
+import { SelectTypes } from '../../_ui/form-box';
 import { getCustomerSelection } from '../../(masters)/_lib/funcs';
 import { getLocsSelection } from '../../(masters)/locations-master/_lib/funcs';
 import { DEFAULT_SEARCH_VALUES, radioData } from '../_lib/datas';
-import { getFilteredOrderList } from '../_lib/funcs';
+import { getFilteredOrderList, getUsersSelection } from '../_lib/funcs';
 import { EqptOrderListTableValues, EqptOrderSearchValues } from '../_lib/types';
 import { EqptOrderTable } from './eqpt-order-table';
 
@@ -51,6 +47,8 @@ export const EqptOrderList = () => {
   const [customers, setCustomers] = useState<SelectTypes[] | undefined>([]);
   /** */
   const [locs, setLocs] = useState<SelectTypes[] | undefined>([]);
+  /** 入力者選択肢 */
+  const [users, setUsers] = useState<SelectTypes[] | undefined>([]);
   // エラーハンドリング
   const [error, setError] = useState<Error | null>(null);
 
@@ -89,10 +87,16 @@ export const EqptOrderList = () => {
 
     const getList = async (data: EqptOrderSearchValues) => {
       try {
-        const [o, c, l] = await Promise.all([getFilteredOrderList(data), getCustomerSelection(), getLocsSelection()]);
+        const [o, c, l, u] = await Promise.all([
+          getFilteredOrderList(data),
+          getCustomerSelection(),
+          getLocsSelection(),
+          getUsersSelection(),
+        ]);
         setOrderList(o);
         setCustomers(c);
         setLocs(l);
+        setUsers(u);
         setIsLoading(false);
       } catch (e) {
         setError(e instanceof Error ? e : new Error(String(e)));
@@ -275,6 +279,17 @@ export const EqptOrderList = () => {
                         getOptionLabel={(option) => (typeof option === 'string' ? option : option.label)}
                       />
                     )}
+                  />
+                </Stack>
+                <Stack direction="row" spacing={2} sx={styles.container}>
+                  <Typography noWrap minWidth={90}>
+                    入力者
+                  </Typography>
+                  <SelectElement
+                    name="nyuryokuUser"
+                    control={control}
+                    options={[{ id: '', label: ' ' }, ...(users ?? [])]}
+                    sx={{ width: 150 }}
                   />
                 </Stack>
                 <Stack direction="row" spacing={2} sx={styles.container}>

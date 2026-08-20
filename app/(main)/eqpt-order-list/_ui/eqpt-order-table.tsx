@@ -97,6 +97,7 @@ export const EqptOrderTable = ({
                   <TableCell align="left">受注日</TableCell>
                   <TableCell align="left">出庫日時</TableCell>
                   <TableCell align="left">入庫日時</TableCell>
+                  <TableCell align="left">入力者</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -183,11 +184,16 @@ export const EqptOrderTable = ({
                         {`Y  ${order.yNyukoDat}`}
                       </LightTooltipWithText>
                     </TableCell>
+                    <TableCell>
+                      <LightTooltipWithText variant={'body2'} maxWidth={120}>
+                        {order.nyuryokuUser}
+                      </LightTooltipWithText>
+                    </TableCell>
                   </TableRow>
                 ))}
                 {emptyRows > 0 && (
                   <TableRow style={{ height: 31 * emptyRows }}>
-                    <TableCell colSpan={11} />
+                    <TableCell colSpan={9} />
                   </TableRow>
                 )}
               </TableBody>

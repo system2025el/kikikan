@@ -4,9 +4,12 @@ import dayjs from 'dayjs';
 import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
 
+import { selectActiveUsers } from '@/app/_lib/db/tables/m-user';
 import { selectFilteredKizaiHead } from '@/app/_lib/db/tables/v-juchu-kizai-head-lst';
 
 import { toJapanTimeString, toJapanYMDString } from '../../_lib/date-conversion';
+import { permission } from '../../_lib/permission';
+import { SelectTypes } from '../../_ui/form-box';
 import { FAKE_NEW_ID } from '../../(masters)/_lib/constants';
 import { EqptOrderListTableValues, EqptOrderSearchValues } from './types';
 
@@ -25,6 +28,7 @@ export const getFilteredOrderList = async (
     selectedDate: { value: '5', range: { from: null, to: null } },
     kokyaku: '',
     listSort: { sort: 'shuko', order: 'asc' },
+    nyuryokuUser: '',
   }
 ): Promise<EqptOrderListTableValues[]> => {
   try {
@@ -50,6 +54,7 @@ export const getFilteredOrderList = async (
       yShukoDat: d.yard_shuko_dat ? toJapanTimeString(d.yard_shuko_dat) : '-',
       yNyukoDat: d.yard_nyuko_dat ? toJapanTimeString(d.yard_nyuko_dat) : '-',
       juchuDat: d.juchu_dat ? toJapanYMDString(d.juchu_dat) : '',
+      nyuryokuUser: d.nyuryoku_user ?? '',
     }));
   } catch (e) {
     if (e instanceof Error) {
@@ -62,5 +67,34 @@ export const getFilteredOrderList = async (
     }
     throw e;
   } finally {
+  }
+};
+
+/**
+ * 入力者検索条件の選択肢取得（受注編集権限を持つユーザーのみ）
+ * @returns 入力者の選択肢リスト
+ */
+export const getUsersSelection = async (): Promise<SelectTypes[]> => {
+  try {
+    const rows = await selectActiveUsers();
+    if (!rows || rows.length === 0) {
+      return [];
+    }
+    return rows
+      .filter((d) => d.permission & permission.juchu_upd)
+      .map((d) => ({
+        id: d.user_nam,
+        label: d.user_nam,
+      }));
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
+    throw e;
   }
 };
