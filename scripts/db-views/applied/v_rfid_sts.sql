@@ -1,4 +1,4 @@
--- 適用状況: ステージング 2026-08-18 / 本番 2026-08-19
+-- 適用状況: 開発環境(preview/public) 2026-08-18 / 本番 2026-08-19
 -- v_rfid_sts 高速化版
 --
 -- 変更内容: rfid_tag_id ごとの「最新の upd_dat/upd_user」「最新の非NULL shozoku_id」
