@@ -3550,6 +3550,7 @@ export type Database = {
           memv: string | null;
           nchk_plan_qty: number | null;
           nyuko_fix_flg: number | null;
+          nyuryoku_user: string | null;
           nyushuko_basho_id: number | null;
           nyushuko_dat: string | null;
           nyushuko_shubetu_id: number | null;

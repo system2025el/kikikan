@@ -61,6 +61,7 @@ export const getShukoDetail = async (
       kokyakuNam: data[0].kokyaku_nam,
       juchuDat: data[0].juchu_dat,
       memv: data[0].memv,
+      nyuryokuUser: data[0].nyuryoku_user,
     };
 
     return nyukoDetailData;

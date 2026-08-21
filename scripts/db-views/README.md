@@ -57,12 +57,25 @@
 | `v_juchu_kizai_head_lst` | 末尾に `nyuryoku_user`（入力者）と `add_dat`（作成日）の2列を追加。既存列の値は不変                | 適用済み（08-20確認）| 未適用 | `4a335287` / `be8a69c2`|
 | `v_nyushuko_den_lst`     | **①** `mem2` を `COALESCE(t_juchu_kizai_meisai.mem2, t_juchu_ctn_meisai.mem)` に変更＋コンテナ明細をJOIN／**②** 末尾に `add_user`・`upd_user` の2列を追加（34→36列） | ① 08-20確認 ② 2026-08-21 | 未適用 | ① `51905975` ② 未コミット |
 | `v_nyushuko_den2_lst`    | 末尾に `add_user`・`upd_user` の2列を追加（29→31列）。`v_nyushuko_den_lst` から素通し               | 2026-08-21           | 未適用 | 未コミット             |
+| `v_nyushuko_den_head`    | 末尾に `nyuryoku_user`（入力者、`varchar(100)`）の1列を追加（17→18列）                             | 2026-08-21           | 未適用 | 未コミット             |
+| `v_nyushuko_den2_head`   | 末尾に `nyuryoku_user` の1列を追加（20→21列）。`v_nyushuko_den_head` から素通し                     | 2026-08-21           | 未適用 | 未コミット             |
 
-**適用順序**: `v_nyushuko_den2_lst` は `v_nyushuko_den_lst` の列追加が前提です。必ず `v_nyushuko_den_lst.sql` → `v_nyushuko_den2_lst.sql` の順に適用してください。
+**適用順序**: 親→子の順に適用してください。逆順だと子が存在しない列を参照してエラーになります。
+
+| 適用順序                                              | ロールバック順序（逆）                                 |
+| ----------------------------------------------------- | ------------------------------------------------------ |
+| `v_nyushuko_den_lst.sql` → `v_nyushuko_den2_lst.sql`  | `v_nyushuko_den2_lst` → `v_nyushuko_den_lst`           |
+| `v_nyushuko_den_head.sql` → `v_nyushuko_den2_head.sql`| `v_nyushuko_den2_head` → `v_nyushuko_den_head`         |
 
 `v_nyushuko_den_lst` の変更①は**列追加ではなく既存列 `mem2` の値が変わる変更**です。コンテナ明細は同一キーに `shozoku_id` 別で複数行あり、JOIN条件を誤ると `sum(plan_qty)` 等がfanoutして二重集計になります。本番適用前に行数と `mem2` の差分検証を必ず行ってください（ファイル冒頭のコメントに詳細あり）。
 
 変更②（`add_user`/`upd_user`）は開発環境で検証済みです。両ビューの `GROUP BY` キーが `t_nyushuko_den` の主キー7列を含んでいて1グループ=1行のため、2列を `GROUP BY` に足しても行は分裂しません（`v_nyushuko_den_lst` 124,923行・`v_nyushuko_den2_lst` 123,033行のまま、既存列の差分0）。
+
+`*_head` 系の `nyuryoku_user` も同様に検証済みです。`t_juchu_head` の主キーは `juchu_head_id` 単独で、`v_nyushuko_den_head` の `GROUP BY` にも `v_nyushuko_den2_head` の `DISTINCT` 対象列にも `juchu_head_id` が入っているため、関数従属で行は増えません（3,611行 / 3,649行のまま、既存列の差分0）。`t_juchu_head` は元々 `v_nyushuko_den_head` に `del_flg = 0` の INNER JOIN で入っているので、JOINの追加は不要でした。
+
+### 集約ビューに列を足すときの判断
+
+`GROUP BY` や `SELECT DISTINCT` を持つビューに列を足すと**行数が変わり得ます**。追加する列が既存のグループ化キーに**関数従属している**（＝キーが決まれば値が1つに決まる）なら `GROUP BY` / `DISTINCT` に足しても行は分裂しないので、`max()` で包む必要はありません。判定は「追加元テーブルの主キーが既存のキーに含まれているか」を見るのが早いです。含まれていない場合は `max()` で包むか、そもそも行数が増える前提で影響を確認してください。
 
 ### ファイルとして管理していない差分
 
