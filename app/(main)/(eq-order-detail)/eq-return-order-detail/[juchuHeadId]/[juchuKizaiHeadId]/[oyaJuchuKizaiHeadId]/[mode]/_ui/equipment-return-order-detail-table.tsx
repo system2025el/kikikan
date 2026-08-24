@@ -160,6 +160,7 @@ type ReturnEqTableProps = {
   handleEqSelect: (row: ReturnJuchuKizaiMeisaiValues) => void;
   handleEqAllSelect: () => void;
   handleMemoChange: (rowIndex: number, memo: string) => void;
+  handleMemo2Change: (rowIndex: number, memo2: string) => void;
   ref: React.RefObject<HTMLDivElement | null>;
 };
 
@@ -172,6 +173,7 @@ const ReturnEqTableComponent: React.FC<ReturnEqTableProps> = ({
   handleEqSelect,
   handleEqAllSelect,
   handleMemoChange,
+  handleMemo2Change,
   ref,
 }) => {
   const inputOrderRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -310,6 +312,9 @@ const ReturnEqTableComponent: React.FC<ReturnEqTableProps> = ({
             <TableCell align="right" size="small" style={styles.header} sx={{ position: 'sticky', top: 25, zIndex: 2 }}>
               予備
             </TableCell>
+            <TableCell align="right" size="small" style={styles.header} sx={{ position: 'sticky', top: 25, zIndex: 2 }}>
+              連絡
+            </TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -328,6 +333,7 @@ const ReturnEqTableComponent: React.FC<ReturnEqTableProps> = ({
               handleOrderKeyDown={handleOrderKeyDown}
               handleYobiKeyDown={handleYobiKeyDown}
               handleCellChange={handleCellChange}
+              handleMemo2Change={handleMemo2Change}
             />
           ))}
         </TableBody>
@@ -349,6 +355,7 @@ type ReturnEqTableRowProps = {
   handleYobiRef: (el: HTMLInputElement | null) => void;
   handleEqSelect: (row: ReturnJuchuKizaiMeisaiValues) => void;
   handleMemoChange: (rowIndex: number, memo: string) => void;
+  handleMemo2Change: (rowIndex: number, memo2: string) => void;
   handleCellChange: (rowIndex: number, kizaiId: number, planQty: number) => void;
   handleOrderKeyDown: (e: React.KeyboardEvent, rowIndex: number) => void;
   handleYobiKeyDown: (e: React.KeyboardEvent, rowIndex: number) => void;
@@ -365,6 +372,7 @@ const ReturnEqTableRow = React.memo(
     handleYobiRef,
     handleEqSelect,
     handleMemoChange,
+    handleMemo2Change,
     handleCellChange,
     handleOrderKeyDown,
     handleYobiKeyDown,
@@ -477,6 +485,15 @@ const ReturnEqTableRow = React.memo(
             disabled={!edit || nyukoFixFlag}
           />
         </TableCell>
+        <TableCell style={styles.row} align="center" size="small">
+          <MemoTooltip
+            name={row.kizaiNam}
+            memo={row.mem2 ?? ''}
+            handleMemoChange={handleMemo2Change}
+            rowIndex={rowIndex}
+            disabled={!edit || nyukoFixFlag}
+          />
+        </TableCell>
       </TableRow>
     );
   },
@@ -546,15 +563,6 @@ const ReturnContainerTableRow = React.memo(
           }}
         >
           {rowIndex + 1}
-        </TableCell>
-        <TableCell style={styles.row} align="center" size="small">
-          <MemoTooltip
-            name={row.kizaiNam}
-            memo={row.mem ? row.mem : ''}
-            handleMemoChange={handleContainerMemoChange}
-            rowIndex={rowIndex}
-            disabled={!edit || nyukoFixFlag}
-          />
         </TableCell>
         <TableCell style={styles.row} align="left" size="small">
           <Button
@@ -682,6 +690,15 @@ const ReturnContainerTableRow = React.memo(
         <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: lightBlue[100], color: 'red' }}>
           {row.planQty}
         </TableCell>
+        <TableCell style={styles.row} align="center" size="small">
+          <MemoTooltip
+            name={row.kizaiNam}
+            memo={row.mem ? row.mem : ''}
+            handleMemoChange={handleContainerMemoChange}
+            rowIndex={rowIndex}
+            disabled={!edit || nyukoFixFlag}
+          />
+        </TableCell>
       </TableRow>
     );
   },
@@ -768,7 +785,7 @@ const ReturnContainerTableComponent = (props: {
       <Table stickyHeader sx={{ borderCollapse: 'separate', borderSpacing: 0 }}>
         <TableHead>
           <TableRow>
-            <TableCell size="small" sx={{ bgcolor: 'white', position: 'sticky', top: 0, zIndex: 2 }} colSpan={4} />
+            <TableCell size="small" sx={{ bgcolor: 'white', position: 'sticky', top: 0, zIndex: 2 }} colSpan={3} />
             <TableCell
               align="center"
               size="small"
@@ -824,9 +841,6 @@ const ReturnContainerTableComponent = (props: {
             </TableCell>
             <TableCell size="small" style={styles.header} sx={{ position: 'sticky', top: 25, zIndex: 2 }} />
             <TableCell align="left" size="small" style={styles.header} sx={{ position: 'sticky', top: 25, zIndex: 2 }}>
-              メモ
-            </TableCell>
-            <TableCell align="left" size="small" style={styles.header} sx={{ position: 'sticky', top: 25, zIndex: 2 }}>
               機材名
             </TableCell>
             <TableCell align="right" size="small" style={styles.header} sx={{ position: 'sticky', top: 25, zIndex: 2 }}>
@@ -843,6 +857,9 @@ const ReturnContainerTableComponent = (props: {
             </TableCell>
             <TableCell align="right" size="small" style={styles.header} sx={{ position: 'sticky', top: 25, zIndex: 2 }}>
               合計
+            </TableCell>
+            <TableCell align="left" size="small" style={styles.header} sx={{ position: 'sticky', top: 25, zIndex: 2 }}>
+              連絡
             </TableCell>
           </TableRow>
         </TableHead>

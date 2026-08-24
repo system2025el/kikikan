@@ -36,6 +36,7 @@ type KeepEqTableProps = {
   nyukoFixFlag: boolean;
   oyaShukoDate: Date | null;
   handleMemoChange: (rowIndex: number, memo: string) => void;
+  handleMemo2Change: (rowIndex: number, memo: string) => void;
   handleCellChange: (rowIndex: number, keepValue: number) => void;
   handleEqSelect: (row: KeepJuchuKizaiMeisaiValues) => void;
   handleEqAllSelect: () => void;
@@ -47,6 +48,7 @@ const KeepEqTableComponent: React.FC<KeepEqTableProps> = ({
   nyukoFixFlag,
   oyaShukoDate,
   handleMemoChange,
+  handleMemo2Change,
   handleCellChange,
   handleEqSelect,
   handleEqAllSelect,
@@ -155,6 +157,9 @@ const KeepEqTableComponent: React.FC<KeepEqTableProps> = ({
             <TableCell align="right" size="small" style={styles.header} sx={{ position: 'sticky', top: 25, zIndex: 2 }}>
               予備
             </TableCell>
+            <TableCell align="right" size="small" style={styles.header} sx={{ position: 'sticky', top: 25, zIndex: 2 }}>
+              連絡
+            </TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -168,6 +173,7 @@ const KeepEqTableComponent: React.FC<KeepEqTableProps> = ({
               oyaShukoDate={oyaShukoDate}
               handleKeepRef={handleKeepRef(rowIndex)}
               handleMemoChange={handleMemoChange}
+              handleMemo2Change={handleMemo2Change}
               handleEqSelect={handleEqSelect}
               handleKeyDown={handleKeyDown}
               handleCellChange={handleCellChange}
@@ -190,6 +196,7 @@ type KeepEqTableRowProps = {
   oyaShukoDate: Date | null;
   handleKeepRef: (el: HTMLInputElement | null) => void;
   handleMemoChange: (rowIndex: number, memo: string) => void;
+  handleMemo2Change: (rowIndex: number, memo: string) => void;
   handleCellChange: (rowIndex: number, keepValue: number) => void;
   handleEqSelect: (row: KeepJuchuKizaiMeisaiValues) => void;
   handleKeyDown: (e: React.KeyboardEvent, rowIndex: number) => void;
@@ -203,6 +210,7 @@ const KeepEqTableRow = React.memo(
     nyukoFixFlag,
     oyaShukoDate,
     handleMemoChange,
+    handleMemo2Change,
     handleCellChange,
     handleEqSelect,
     handleKeepRef,
@@ -313,6 +321,15 @@ const KeepEqTableRow = React.memo(
             disabled={!edit || nyukoFixFlag}
           />
         </TableCell>
+        <TableCell style={styles.row} align="center" size="small">
+          <MemoTooltip
+            name={row.kizaiNam}
+            memo={row.mem2 ?? ''}
+            handleMemoChange={handleMemo2Change}
+            rowIndex={rowIndex}
+            disabled={!edit || nyukoFixFlag}
+          />
+        </TableCell>
       </TableRow>
     );
   },
@@ -382,15 +399,6 @@ const KeepContainerTableRow = React.memo(
           }}
         >
           {rowIndex + 1}
-        </TableCell>
-        <TableCell style={styles.row} align="center" size="small">
-          <MemoTooltip
-            name={row.kizaiNam}
-            memo={row.mem ? row.mem : ''}
-            handleMemoChange={handleContainerMemoChange}
-            rowIndex={rowIndex}
-            disabled={!edit || nyukoFixFlag}
-          />
         </TableCell>
         <TableCell style={styles.row} align="left" size="small">
           <Button
@@ -505,6 +513,15 @@ const KeepContainerTableRow = React.memo(
             disabled={!edit || nyukoFixFlag}
           />
         </TableCell>
+        <TableCell style={styles.row} align="center" size="small">
+          <MemoTooltip
+            name={row.kizaiNam}
+            memo={row.mem ? row.mem : ''}
+            handleMemoChange={handleContainerMemoChange}
+            rowIndex={rowIndex}
+            disabled={!edit || nyukoFixFlag}
+          />
+        </TableCell>
       </TableRow>
     );
   },
@@ -591,7 +608,7 @@ const KeepContainerTableComponent = (props: {
       <Table stickyHeader sx={{ borderCollapse: 'separate', borderSpacing: 0 }}>
         <TableHead>
           <TableRow>
-            <TableCell size="small" sx={{ bgcolor: 'white', position: 'sticky', top: 0, zIndex: 2 }} colSpan={4} />
+            <TableCell size="small" sx={{ bgcolor: 'white', position: 'sticky', top: 0, zIndex: 2 }} colSpan={3} />
             <TableCell
               align="center"
               size="small"
@@ -647,9 +664,6 @@ const KeepContainerTableComponent = (props: {
             </TableCell>
             <TableCell size="small" style={styles.header} sx={{ position: 'sticky', top: 25, zIndex: 2 }} />
             <TableCell align="left" size="small" style={styles.header} sx={{ position: 'sticky', top: 25, zIndex: 2 }}>
-              メモ
-            </TableCell>
-            <TableCell align="left" size="small" style={styles.header} sx={{ position: 'sticky', top: 25, zIndex: 2 }}>
               機材名
             </TableCell>
             <TableCell align="right" size="small" style={styles.header} sx={{ position: 'sticky', top: 25, zIndex: 2 }}>
@@ -663,6 +677,9 @@ const KeepContainerTableComponent = (props: {
             </TableCell>
             <TableCell align="right" size="small" style={styles.header} sx={{ position: 'sticky', top: 25, zIndex: 2 }}>
               Y
+            </TableCell>
+            <TableCell align="left" size="small" style={styles.header} sx={{ position: 'sticky', top: 25, zIndex: 2 }}>
+              連絡
             </TableCell>
           </TableRow>
         </TableHead>

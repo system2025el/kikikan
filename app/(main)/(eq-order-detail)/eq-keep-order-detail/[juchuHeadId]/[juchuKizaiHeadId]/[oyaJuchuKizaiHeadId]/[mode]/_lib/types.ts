@@ -61,6 +61,7 @@ export type KeepJuchuKizaiMeisaiValues = {
   shozokuId: number;
   shozokuNam: string;
   mem: string | null;
+  mem2: string | null;
   kizaiId: number;
   kizaiNam: string;
   oyaPlanKizaiQty: number;

@@ -686,6 +686,38 @@ export const EquipmentKeepOrderDetail = (props: {
   });
 
   /**
+   * 機材キープ連絡メモ入力時
+   * @param kizaiId 機材id
+   * @param memo メモ内容
+   */
+  const handleMemo2Change = useStableCallback(async (rowIndex: number, memo: string) => {
+    if (isProcessing) return;
+    setIsProcessing(true);
+
+    try {
+      const lockResult = await lock();
+
+      if (lockResult) {
+        setKeepJuchuKizaiMeisaiList((prev) => {
+          const visibleIndex = prev
+            .map((data, index) => (!data.delFlag ? index : null))
+            .filter((index) => index !== null) as number[];
+
+          const index = visibleIndex[rowIndex];
+          if (index === undefined) return prev;
+
+          return prev.map((data, i) => (i === index ? { ...data, mem2: memo } : data));
+        });
+      }
+    } catch (e) {
+      setSnackBarMessage('サーバー接続エラー');
+      setSnackBarOpen(true);
+    } finally {
+      setIsProcessing(false);
+    }
+  });
+
+  /**
    * 機材テーブルのキープ数入力時
    * @param kizaiId 機材id
    * @param keepValue キープ数
@@ -985,6 +1017,7 @@ export const EquipmentKeepOrderDetail = (props: {
           shozokuId: kicsDat && !yardDat ? BASHO_ID.kics : !kicsDat && yardDat ? BASHO_ID.yard : d.mShozokuId,
           shozokuNam: d.shozokuNam,
           mem: '',
+          mem2: '',
           kizaiId: d.kizaiId,
           kizaiNam: d.kizaiNam,
           oyaPlanKizaiQty: d.planKizaiQty,
@@ -1626,6 +1659,7 @@ export const EquipmentKeepOrderDetail = (props: {
                         nyukoFixFlag={nyukoFixFlag}
                         oyaShukoDate={oyaShukoDate}
                         handleMemoChange={handleMemoChange}
+                        handleMemo2Change={handleMemo2Change}
                         handleCellChange={handleCellChange}
                         handleEqSelect={handleEqSelect}
                         handleEqAllSelect={handleEqAllSelect}
