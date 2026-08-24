@@ -9,6 +9,7 @@ export type NyukoListSearchValues = {
   juchuHeadId: number | null;
   nyukoBasho: number;
   kokyaku: string | null;
+  koenNam: string | null;
   section: string[];
 };
 

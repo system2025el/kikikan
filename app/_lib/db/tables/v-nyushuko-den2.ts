@@ -119,6 +119,11 @@ export const selectFilteredShukoList = async (queries: ShukoListSearchValues) =>
     const escapedKokyaku = escapeLikeString(queries.kokyaku);
     query += ` AND d2.kokyaku_nam ILIKE ${p(`%${escapedKokyaku}%`)}`;
   }
+  // 公演名
+  if (queries.koenNam && queries.koenNam.trim() !== '') {
+    const escapedKoenNam = escapeLikeString(queries.koenNam);
+    query += ` AND d2.koen_nam ILIKE ${p(`%${escapedKoenNam}%`)}`;
+  }
   // 課
   if (queries.section && queries.section.length !== 0) {
     const likeClouds = queries.section
@@ -230,6 +235,11 @@ export const selectFilteredNyukoList = async (queries: NyukoListSearchValues) =>
   if (queries.kokyaku && queries.kokyaku.trim() !== '') {
     const escapedKokyaku = escapeLikeString(queries.kokyaku);
     query += ` AND d2.kokyaku_nam ILIKE ${p(`%${escapedKokyaku}%`)}`;
+  }
+  // 公演名
+  if (queries.koenNam && queries.koenNam.trim() !== '') {
+    const escapedKoenNam = escapeLikeString(queries.koenNam);
+    query += ` AND d2.koen_nam ILIKE ${p(`%${escapedKoenNam}%`)}`;
   }
   // 課
   if (queries.section && queries.section.length !== 0) {
