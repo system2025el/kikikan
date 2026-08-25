@@ -242,6 +242,12 @@ export const NyukoEqptDetail = (props: {
                 )}
               />
             </Box>
+            <Box display={'flex'} alignItems={'center'}>
+              <Typography mr={2}>最終作業者</Typography>
+              <Typography>
+                {nyukoEqptDetailData.updUser ? nyukoEqptDetailData.updUser : nyukoEqptDetailData.addUser}
+              </Typography>
+            </Box>
             <Box>
               <Typography color="error" fontSize={'small'} sx={{ whiteSpace: 'pre-line', wordBreak: 'break-all' }}>
                 {

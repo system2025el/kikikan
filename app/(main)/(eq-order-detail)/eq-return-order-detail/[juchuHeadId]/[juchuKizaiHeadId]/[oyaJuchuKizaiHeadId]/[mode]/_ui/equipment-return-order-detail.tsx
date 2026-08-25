@@ -934,6 +934,38 @@ export const EquipmentReturnOrderDetail = (props: {
   });
 
   /**
+   * 機材返却連絡メモ入力時
+   * @param kizaiId 機材id
+   * @param memo メモ内容
+   */
+  const handleMemo2Change = useStableCallback(async (rowIndex: number, memo: string) => {
+    if (isProcessing) return;
+    setIsProcessing(true);
+
+    try {
+      const lockResult = await lock();
+
+      if (lockResult) {
+        setReturnJuchuKizaiMeisaiList((prev) => {
+          const visibleIndex = prev
+            .map((data, index) => (!data.delFlag ? index : null))
+            .filter((index) => index !== null) as number[];
+
+          const index = visibleIndex[rowIndex];
+          if (index === undefined) return prev;
+
+          return prev.map((data, i) => (i === index ? { ...data, mem2: memo } : data));
+        });
+      }
+    } catch (e) {
+      setSnackBarMessage('サーバー接続エラー');
+      setSnackBarOpen(true);
+    } finally {
+      setIsProcessing(false);
+    }
+  });
+
+  /**
    * 機材テーブルの受注数、予備数入力時
    * @param rowIndex 行数
    * @param kizaiId 機材id
@@ -1240,6 +1272,7 @@ export const EquipmentReturnOrderDetail = (props: {
           shozokuId: kicsDat && !yardDat ? BASHO_ID.kics : !kicsDat && yardDat ? BASHO_ID.yard : d.mShozokuId,
           shozokuNam: d.shozokuNam,
           mem: '',
+          mem2: '',
           kizaiId: d.kizaiId,
           kizaiTankaAmt: d.kizaiTankaAmt,
           kizaiNam: d.kizaiNam,
@@ -2010,6 +2043,7 @@ export const EquipmentReturnOrderDetail = (props: {
                           handleEqSelect={handleEqSelect}
                           handleEqAllSelect={handleEqAllSelect}
                           handleMemoChange={handleMemoChange}
+                          handleMemo2Change={handleMemo2Change}
                           ref={leftRef}
                         />
                       </Box>

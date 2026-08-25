@@ -15,7 +15,16 @@ import { SCHEMA } from '../schema';
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
+// 生SQL文字列に値を直接連結せず $n プレースホルダで渡すためのヘルパー
+const createParamPusher = (values: unknown[]) => (value: unknown) => {
+  values.push(value);
+  return `$${values.length}`;
+};
+
 export const selectFilteredShukoList = async (queries: ShukoListSearchValues) => {
+  const values: unknown[] = [NYUSHUKO_SHUBETU_ID.shuko];
+  const p = createParamPusher(values);
+
   let query = `
     SELECT
       d2.juchu_head_id,
@@ -39,7 +48,7 @@ export const selectFilteredShukoList = async (queries: ShukoListSearchValues) =>
     FROM
       ${SCHEMA}.v_nyushuko_den2 as d2
     WHERE
-      d2.nyushuko_shubetu_id = ${NYUSHUKO_SHUBETU_ID.shuko}
+      d2.nyushuko_shubetu_id = $1
   `;
 
   // 入出庫日
@@ -48,21 +57,21 @@ export const selectFilteredShukoList = async (queries: ShukoListSearchValues) =>
       // '昨日'
       const startOfYesterday = dayjs().tz('Asia/Tokyo').subtract(1, 'day').startOf('day').toISOString();
       const startOfToday = dayjs().tz('Asia/Tokyo').startOf('day').toISOString();
-      query += ` AND d2.nyushuko_dat >= '${startOfYesterday}' AND d2.nyushuko_dat < '${startOfToday}'`;
+      query += ` AND d2.nyushuko_dat >= ${p(startOfYesterday)} AND d2.nyushuko_dat < ${p(startOfToday)}`;
       break;
     }
     case '2': {
       // '今日'
       const startOfToday = dayjs().tz('Asia/Tokyo').startOf('day').toISOString();
       const startOfTomorrow = dayjs().tz('Asia/Tokyo').add(1, 'day').startOf('day').toISOString();
-      query += ` AND d2.nyushuko_dat >= '${startOfToday}' AND d2.nyushuko_dat < '${startOfTomorrow}'`;
+      query += ` AND d2.nyushuko_dat >= ${p(startOfToday)} AND d2.nyushuko_dat < ${p(startOfTomorrow)}`;
       break;
     }
     case '3': {
       // '明日'
       const startOfTomorrow = dayjs().tz('Asia/Tokyo').add(1, 'day').startOf('day').toISOString();
       const startOfDayAfterTomorrow = dayjs().tz('Asia/Tokyo').add(2, 'day').startOf('day').toISOString();
-      query += ` AND d2.nyushuko_dat >= '${startOfTomorrow}' AND d2.nyushuko_dat < '${startOfDayAfterTomorrow}'`;
+      query += ` AND d2.nyushuko_dat >= ${p(startOfTomorrow)} AND d2.nyushuko_dat < ${p(startOfDayAfterTomorrow)}`;
       break;
     }
     case '4': {
@@ -75,12 +84,12 @@ export const selectFilteredShukoList = async (queries: ShukoListSearchValues) =>
           .add(1, 'day')
           .startOf('day')
           .toISOString();
-        query += ` AND d2.nyushuko_dat >= '${startOfDay}' AND d2.nyushuko_dat < '${startOfnextDay}'`;
+        query += ` AND d2.nyushuko_dat >= ${p(startOfDay)} AND d2.nyushuko_dat < ${p(startOfnextDay)}`;
       } else if (queries.selectedDate.range.from) {
         // fromだけの場合
         const startOfDay = dayjs(queries.selectedDate.range.from).tz('Asia/Tokyo').startOf('day').toISOString();
 
-        query += ` AND d2.nyushuko_dat >= '${startOfDay}'`;
+        query += ` AND d2.nyushuko_dat >= ${p(startOfDay)}`;
       } else if (queries.selectedDate.range.to) {
         // toだけの場合
         const startOfnextDay = dayjs(queries.selectedDate.range.to)
@@ -89,7 +98,7 @@ export const selectFilteredShukoList = async (queries: ShukoListSearchValues) =>
           .startOf('day')
           .toISOString();
 
-        query += ` AND d2.nyushuko_dat < '${startOfnextDay}'`;
+        query += ` AND d2.nyushuko_dat < ${p(startOfnextDay)}`;
       }
       break;
     }
@@ -99,33 +108,43 @@ export const selectFilteredShukoList = async (queries: ShukoListSearchValues) =>
 
   // 受注番号
   if (queries.juchuHeadId !== null) {
-    query += ` AND d2.juchu_head_id = ${queries.juchuHeadId}`;
+    query += ` AND d2.juchu_head_id = ${p(queries.juchuHeadId)}`;
   }
   // 出庫場所
   if (queries.shukoBasho !== 0) {
-    query += ` AND d2.nyushuko_basho_id = ${queries.shukoBasho}`;
+    query += ` AND d2.nyushuko_basho_id = ${p(queries.shukoBasho)}`;
   }
   // 顧客名称
   if (queries.kokyaku && queries.kokyaku.trim() !== '') {
     const escapedKokyaku = escapeLikeString(queries.kokyaku);
-    query += ` AND d2.kokyaku_nam ILIKE '%${escapedKokyaku}%'`;
+    query += ` AND d2.kokyaku_nam ILIKE ${p(`%${escapedKokyaku}%`)}`;
+  }
+  // 公演名
+  if (queries.koenNam && queries.koenNam.trim() !== '') {
+    const escapedKoenNam = escapeLikeString(queries.koenNam);
+    query += ` AND d2.koen_nam ILIKE ${p(`%${escapedKoenNam}%`)}`;
   }
   // 課
   if (queries.section && queries.section.length !== 0) {
-    const likeClouds = queries.section.map((d) => ` d2.section_namv::TEXT LIKE '%${d}%'`).join(' OR');
+    const likeClouds = queries.section
+      .map((d) => `d2.section_namv::TEXT LIKE ${p(`%${escapeLikeString(d)}%`)}`)
+      .join(' OR');
     query += ` AND (${likeClouds})`;
   }
 
   query += ' ORDER BY d2.nyushuko_dat';
 
   try {
-    return (await pool.query(query)).rows;
+    return (await pool.query(query, values)).rows;
   } catch (e) {
     throw new Error('[selectFilteredShukoList] DBエラー:', { cause: e });
   }
 };
 
 export const selectFilteredNyukoList = async (queries: NyukoListSearchValues) => {
+  const values: unknown[] = [NYUSHUKO_SHUBETU_ID.nyuko];
+  const p = createParamPusher(values);
+
   let query = `
     SELECT
       d2.juchu_head_id,
@@ -146,7 +165,7 @@ export const selectFilteredNyukoList = async (queries: NyukoListSearchValues) =>
     FROM
       ${SCHEMA}.v_nyushuko_den2 as d2
     WHERE
-      d2.nyushuko_shubetu_id = ${NYUSHUKO_SHUBETU_ID.nyuko}
+      d2.nyushuko_shubetu_id = $1
   `;
 
   // 入出庫日
@@ -155,21 +174,21 @@ export const selectFilteredNyukoList = async (queries: NyukoListSearchValues) =>
       // '昨日'
       const startOfYesterday = dayjs().tz('Asia/Tokyo').subtract(1, 'day').startOf('day').toISOString();
       const startOfToday = dayjs().tz('Asia/Tokyo').startOf('day').toISOString();
-      query += ` AND d2.nyushuko_dat >= '${startOfYesterday}' AND d2.nyushuko_dat < '${startOfToday}'`;
+      query += ` AND d2.nyushuko_dat >= ${p(startOfYesterday)} AND d2.nyushuko_dat < ${p(startOfToday)}`;
       break;
     }
     case '2': {
       // '今日'
       const startOfToday = dayjs().tz('Asia/Tokyo').startOf('day').toISOString();
       const startOfTomorrow = dayjs().tz('Asia/Tokyo').add(1, 'day').startOf('day').toISOString();
-      query += ` AND d2.nyushuko_dat >= '${startOfToday}' AND d2.nyushuko_dat < '${startOfTomorrow}'`;
+      query += ` AND d2.nyushuko_dat >= ${p(startOfToday)} AND d2.nyushuko_dat < ${p(startOfTomorrow)}`;
       break;
     }
     case '3': {
       // '明日'
       const startOfTomorrow = dayjs().tz('Asia/Tokyo').add(1, 'day').startOf('day').toISOString();
       const startOfDayAfterTomorrow = dayjs().tz('Asia/Tokyo').add(2, 'day').startOf('day').toISOString();
-      query += ` AND d2.nyushuko_dat >= '${startOfTomorrow}' AND d2.nyushuko_dat < '${startOfDayAfterTomorrow}'`;
+      query += ` AND d2.nyushuko_dat >= ${p(startOfTomorrow)} AND d2.nyushuko_dat < ${p(startOfDayAfterTomorrow)}`;
       break;
     }
     case '4': {
@@ -182,12 +201,12 @@ export const selectFilteredNyukoList = async (queries: NyukoListSearchValues) =>
           .add(1, 'day')
           .startOf('day')
           .toISOString();
-        query += ` AND d2.nyushuko_dat >= '${startOfDay}' AND d2.nyushuko_dat < '${startOfnextDay}'`;
+        query += ` AND d2.nyushuko_dat >= ${p(startOfDay)} AND d2.nyushuko_dat < ${p(startOfnextDay)}`;
       } else if (queries.selectedDate.range.from) {
         // fromだけの場合
         const startOfDay = dayjs(queries.selectedDate.range.from).tz('Asia/Tokyo').startOf('day').toISOString();
 
-        query += ` AND d2.nyushuko_dat >= '${startOfDay}'`;
+        query += ` AND d2.nyushuko_dat >= ${p(startOfDay)}`;
       } else if (queries.selectedDate.range.to) {
         // toだけの場合
         const startOfnextDay = dayjs(queries.selectedDate.range.to)
@@ -196,7 +215,7 @@ export const selectFilteredNyukoList = async (queries: NyukoListSearchValues) =>
           .startOf('day')
           .toISOString();
 
-        query += ` AND d2.nyushuko_dat < '${startOfnextDay}'`;
+        query += ` AND d2.nyushuko_dat < ${p(startOfnextDay)}`;
       }
       break;
     }
@@ -206,27 +225,34 @@ export const selectFilteredNyukoList = async (queries: NyukoListSearchValues) =>
 
   // 受注番号
   if (queries.juchuHeadId !== null) {
-    query += ` AND d2.juchu_head_id = ${queries.juchuHeadId}`;
+    query += ` AND d2.juchu_head_id = ${p(queries.juchuHeadId)}`;
   }
   // 入庫場所
   if (queries.nyukoBasho !== 0) {
-    query += ` AND d2.nyushuko_basho_id = ${queries.nyukoBasho}`;
+    query += ` AND d2.nyushuko_basho_id = ${p(queries.nyukoBasho)}`;
   }
   // 顧客名称
   if (queries.kokyaku && queries.kokyaku.trim() !== '') {
     const escapedKokyaku = escapeLikeString(queries.kokyaku);
-    query += ` AND d2.kokyaku_nam ILIKE '%${escapedKokyaku}%'`;
+    query += ` AND d2.kokyaku_nam ILIKE ${p(`%${escapedKokyaku}%`)}`;
+  }
+  // 公演名
+  if (queries.koenNam && queries.koenNam.trim() !== '') {
+    const escapedKoenNam = escapeLikeString(queries.koenNam);
+    query += ` AND d2.koen_nam ILIKE ${p(`%${escapedKoenNam}%`)}`;
   }
   // 課
   if (queries.section && queries.section.length !== 0) {
-    const likeClouds = queries.section.map((d) => ` d2.section_namv::TEXT LIKE '%${d}%'`).join(' OR');
+    const likeClouds = queries.section
+      .map((d) => `d2.section_namv::TEXT LIKE ${p(`%${escapeLikeString(d)}%`)}`)
+      .join(' OR');
     query += ` AND (${likeClouds})`;
   }
 
   query += ' ORDER BY d2.nyushuko_dat';
 
   try {
-    return (await pool.query(query)).rows;
+    return (await pool.query(query, values)).rows;
   } catch (e) {
     throw new Error('[selectFilteredNyukoList] DBエラー:', { cause: e });
   }

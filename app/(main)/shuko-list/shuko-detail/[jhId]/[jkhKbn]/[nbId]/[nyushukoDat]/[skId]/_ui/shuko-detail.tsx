@@ -257,7 +257,9 @@ export const ShukoDetail = (props: {
             <Box display={'flex'} alignItems={'center'}>
               <Typography mr={4}>受注番号</Typography>
               <TextField value={shukoDetailData.juchuHeadId} sx={{ width: 100 }} disabled />
-              <Typography mx={2}>受注日</Typography>
+            </Box>
+            <Box display={'flex'} alignItems={'center'}>
+              <Typography mr={6}>受注日</Typography>
               <TestDate
                 date={shukoDetailData.juchuDat ? new Date(shukoDetailData.juchuDat) : null}
                 onChange={() => {}}
@@ -294,6 +296,10 @@ export const ShukoDetail = (props: {
             <Box display={'flex'} alignItems={'center'}>
               <Typography mr={6}>顧客名</Typography>
               <TextField value={shukoDetailData.kokyakuNam ?? ''} fullWidth disabled />
+            </Box>
+            <Box display={'flex'} alignItems={'center'}>
+              <Typography mr={2}>受注担当者</Typography>
+              <TextField value={shukoDetailData.nyuryokuUser ?? ''} disabled sx={{ width: 160 }} />
             </Box>
           </Grid2>
         </Grid2>

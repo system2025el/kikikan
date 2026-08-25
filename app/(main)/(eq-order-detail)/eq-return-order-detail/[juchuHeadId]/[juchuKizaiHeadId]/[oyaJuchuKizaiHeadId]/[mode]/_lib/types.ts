@@ -40,6 +40,7 @@ export type ReturnJuchuKizaiMeisaiValues = {
   shozokuId: number;
   shozokuNam: string;
   mem: string | null;
+  mem2: string | null;
   kizaiId: number;
   kizaiTankaAmt: number;
   kizaiNam: string;

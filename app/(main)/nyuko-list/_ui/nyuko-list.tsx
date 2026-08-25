@@ -64,6 +64,7 @@ export const NyukoList = (props: { user: User }) => {
       juchuHeadId: null,
       nyukoBasho: 0,
       kokyaku: '',
+      koenNam: '',
       section: [],
     },
   });
@@ -274,6 +275,10 @@ export const NyukoList = (props: { user: User }) => {
                   />
                 )}
               />
+            </Grid2>
+            <Grid2 display={'flex'} alignItems={'center'}>
+              <Typography mr={1}>公演名</Typography>
+              <TextFieldElement name="koenNam" control={control} sx={{ width: 300 }} />
             </Grid2>
             <Grid2 display={'flex'} alignItems={'center'}>
               <Typography noWrap mr={1}>

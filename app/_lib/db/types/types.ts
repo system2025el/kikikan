@@ -3550,6 +3550,7 @@ export type Database = {
           memv: string | null;
           nchk_plan_qty: number | null;
           nyuko_fix_flg: number | null;
+          nyuryoku_user: string | null;
           nyushuko_basho_id: number | null;
           nyushuko_dat: string | null;
           nyushuko_shubetu_id: number | null;
@@ -3564,6 +3565,7 @@ export type Database = {
       };
       v_nyushuko_den2_lst: {
         Row: {
+          add_user: string | null;
           bld_cod: string | null;
           ctn_flg: number | null;
           dsp_ord_num_meisai: number | null;
@@ -3593,6 +3595,7 @@ export type Database = {
           sagyo_kbn_nam_short: string | null;
           shozoku_nam: string | null;
           tana_cod: string | null;
+          upd_user: string | null;
         };
         Relationships: [];
       };

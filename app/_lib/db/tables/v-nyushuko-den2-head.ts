@@ -19,7 +19,8 @@ export const selectNyushukoOne = async (
         koenbasho_nam,
         kokyaku_nam,
         juchu_dat,
-        memv
+        memv,
+        nyuryoku_user
       FROM ${SCHEMA}.v_nyushuko_den2_head
       WHERE juchu_head_id = $1
         AND juchu_kizai_head_kbnv = $2
