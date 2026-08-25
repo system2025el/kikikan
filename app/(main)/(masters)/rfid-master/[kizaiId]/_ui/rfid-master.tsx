@@ -32,7 +32,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { permission } from '@/app/(main)/_lib/permission';
 import { User } from '@/app/(main)/_lib/types';
-import { SelectTypes } from '@/app/(main)/_ui/form-box';
+import { selectNone, SelectTypes } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
 import { MuiTablePagination } from '@/app/(main)/_ui/table-pagination';
 
@@ -64,6 +64,8 @@ export const RfidMaster = ({ user, kizaiId }: { user: User; kizaiId: number }) =
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   /** 選ばれた機材ステータス */
   const [selectedSts, setSelectedSts] = useState<SelectTypes>();
+  /** ソート対象の機材ステータス */
+  const [sortSts, setSortSts] = useState<SelectTypes>(selectNone);
   /** スナックバーの表示するかしないか */
   const [snackBarOpen, setSnackBarOpen] = useState(false);
   /** スナックバーのメッセージ */
@@ -134,6 +136,16 @@ export const RfidMaster = ({ user, kizaiId }: { user: User; kizaiId: number }) =
   // );
   // /** テーブル最後のページ用の空データの長さ */
   // const emptyRows = theRfids && page > 1 ? Math.max(0, page * rowsPerPage - theRfids.length) : 0;
+
+  /** ソート対象ステータスを先頭にまとめたRFIDタグリスト */
+  const sortedRfids = useMemo(() => {
+    if (!theRfids || sortSts.id === FAKE_NEW_ID) return theRfids;
+    return [...theRfids].sort((a, b) => {
+      const aMatch = a.stsId === sortSts.id ? 0 : 1;
+      const bMatch = b.stsId === sortSts.id ? 0 : 1;
+      return aMatch - bMatch;
+    });
+  }, [theRfids, sortSts]);
 
   /* methods ------------------------------------------ */
   /**
@@ -315,6 +327,24 @@ export const RfidMaster = ({ user, kizaiId }: { user: User; kizaiId: number }) =
           <Box sx={styles.container}>
             <Typography mr={3}>機材名</Typography>
             <TextField value={kizaiNam} sx={{ width: 400 }} disabled />
+            <Typography ml={3} mr={1}>
+              ステータスでソート
+            </Typography>
+            <Select
+              value={sortSts.id}
+              onChange={(event) => {
+                const selectedId = Number(event.target.value);
+                const selectedObj = [selectNone, ...stsOption].find((s) => Number(s.id) === selectedId);
+                setSortSts(selectedObj ?? selectNone);
+              }}
+              sx={{ width: 200 }}
+            >
+              {[selectNone, ...stsOption].map((s) => (
+                <MenuItem key={s.id} value={Number(s.id)} sx={s.id === FAKE_NEW_ID ? { color: grey[600] } : undefined}>
+                  {s.label}
+                </MenuItem>
+              ))}
+            </Select>
           </Box>
           <Box sx={styles.container}>
             <Typography mr={3}>機材ステータス一括変更</Typography>
@@ -357,7 +387,6 @@ export const RfidMaster = ({ user, kizaiId }: { user: User; kizaiId: number }) =
               <MuiTablePagination arrayList={theRfids ?? []} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
             </Grid2> */}
         <Grid2 container mt={0.5} justifyContent={'end'}>
-          {/* <Grid2> */}
           <Button
             onClick={() => handleOpenDialog(String(FAKE_NEW_ID))}
             disabled={!((user?.permission.masters ?? 0) & permission.mst_upd)}
@@ -365,7 +394,6 @@ export const RfidMaster = ({ user, kizaiId }: { user: User; kizaiId: number }) =
             <AddIcon fontSize="small" />
             新規
           </Button>
-          {/* </Grid2> */}
         </Grid2>
         {/* </Grid2> */}
         {isLoading ? (
@@ -410,7 +438,7 @@ export const RfidMaster = ({ user, kizaiId }: { user: User; kizaiId: number }) =
                 </TableHead>
                 <TableBody>
                   {
-                    /*list!*/ theRfids.map((row) => {
+                    /*list!*/ (sortedRfids ?? theRfids).map((row) => {
                       const isItemSelected = selectedTags.includes(row.rfidTagId);
 
                       return (
