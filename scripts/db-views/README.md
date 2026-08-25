@@ -59,6 +59,9 @@
 | `v_nyushuko_den2_lst`    | 末尾に `add_user`・`upd_user` の2列を追加（29→31列）。`v_nyushuko_den_lst` から素通し               | 2026-08-21           | 未適用 | 未コミット             |
 | `v_nyushuko_den_head`    | 末尾に `nyuryoku_user`（入力者、`varchar(100)`）の1列を追加（17→18列）                             | 2026-08-21           | 未適用 | 未コミット             |
 | `v_nyushuko_den2_head`   | 末尾に `nyuryoku_user` の1列を追加（20→21列）。`v_nyushuko_den_head` から素通し                     | 2026-08-21           | 未適用 | 未コミット             |
+| `v_rfid_sts`             | ORDER BYの異なる窓関数3つを `GROUP BY` の集約1パスに置き換え（`v_rfid` のリフレッシュ高速化・第2弾）。列構成は不変 | 2026-08-25           | 未適用 | 未コミット             |
+
+`v_rfid_sts` は `applied/` にも同名ファイルがあります（2026-08-19に本番適用済みの窓関数版）。**同じビューへの2回目の変更**なので、`applied/` 側は履歴としてそのまま残し、今回の変更は `staging-only/` に置いています。`staging-only/v_rfid_sts.rollback.sql` の中身は `applied/v_rfid_sts.sql`（＝本番の現在の定義）と同一です。本番適用時は `applied/` 側の2ファイルを削除し、`staging-only/` 側を `applied/` へ移動してください。
 
 **適用順序**: 親→子の順に適用してください。逆順だと子が存在しない列を参照してエラーになります。
 
@@ -72,6 +75,8 @@
 変更②（`add_user`/`upd_user`）は開発環境で検証済みです。両ビューの `GROUP BY` キーが `t_nyushuko_den` の主キー7列を含んでいて1グループ=1行のため、2列を `GROUP BY` に足しても行は分裂しません（`v_nyushuko_den_lst` 124,923行・`v_nyushuko_den2_lst` 123,033行のまま、既存列の差分0）。
 
 `*_head` 系の `nyuryoku_user` も同様に検証済みです。`t_juchu_head` の主キーは `juchu_head_id` 単独で、`v_nyushuko_den_head` の `GROUP BY` にも `v_nyushuko_den2_head` の `DISTINCT` 対象列にも `juchu_head_id` が入っているため、関数従属で行は増えません（3,611行 / 3,649行のまま、既存列の差分0）。`t_juchu_head` は元々 `v_nyushuko_den_head` に `del_flg = 0` の INNER JOIN で入っているので、JOINの追加は不要でした。
+
+`v_rfid_sts`（集約1パス版）は開発環境・本番の両方で `EXCEPT ALL` 双方向の差分0を確認済みです（開発環境103,116行／本番103,509行、本番は読み取りのみで未変更）。マテビュー `v_rfid` の実体でも全11列で差分0（102,868行）。同一 `rfid_tag_id`・同一 `upd_dat` で値が割れる「タイ」が両環境とも0件のため、`first_value` と `array_agg` のタイ時の非決定性による差異は起こりません。`REFRESH MATERIALIZED VIEW public.v_rfid` は約4.9〜6.1秒 → 約1.34〜1.37秒。**この高速化は5つのソーステーブルの `idx_*` カバリングインデックスに依存する**（Index Only Scan + Merge Append により無ソートになる）ため、それらを削除・変更すると劣化します。詳細はファイル冒頭のコメントを参照。
 
 ### 集約ビューに列を足すときの判断
 

@@ -110,11 +110,33 @@ export const selectDetailStockListBulk = async (
       ),
         target_kizai AS (
             -- 対象の機材情報を一度に取得（$1は機材IDの配列 [1, 2, 3...]）
-            SELECT kizai_id, kizai_qty 
-            FROM ${SCHEMA}.v_kizai_qty 
-            WHERE kizai_id = ANY($1) 
+            SELECT kizai_id, kizai_qty
+            FROM ${SCHEMA}.v_kizai_qty
+            WHERE kizai_id = ANY($1)
+        ),
+        -- v_zaiko_qty / v_honbanbi_juchu_kizai は全受注・全日付を横断する
+        -- GROUP BY (kizai_id, plan_dat) の集約ビュー。絞り込みをJOIN条件で渡すと
+        -- 「JOIN相手から来る値」になって集約の内側に押し込めず、全受注を集約し切ってから
+        -- 捨てることになる（機材1件でも約1.9秒かかっていた）。
+        -- kizai_id も plan_dat もGROUP BYのキーなので、ここで定数の述語として先に当てておくと
+        -- 集約の内側まで押し込まれる。日付範囲は上の generate_series(0, 90) と一致させること。
+        zaiko AS (
+            SELECT plan_dat, kizai_id, juchu_qty, zaiko_qty
+            FROM ${SCHEMA}.v_zaiko_qty
+            WHERE kizai_id = ANY($1)
+              AND plan_dat >= $4::date
+              AND plan_dat < $4::date + 91
+        ),
+        honbanbi AS (
+            SELECT plan_dat, kizai_id, juchu_honbanbi_shubetu_id, juchu_honbanbi_shubetu_color
+            FROM ${SCHEMA}.v_honbanbi_juchu_kizai
+            WHERE kizai_id = ANY($1)
+              AND juchu_head_id = $2
+              AND juchu_kizai_head_id = $3
+              AND plan_dat >= $4::date
+              AND plan_dat < $4::date + 91
         )
-        SELECT 
+        SELECT
             d.cal_dat AS "calDat",
             k.kizai_id AS "kizaiId",
             k.kizai_qty AS "kizaiQty",
@@ -122,18 +144,16 @@ export const selectDetailStockListBulk = async (
             COALESCE(v.zaiko_qty, k.kizai_qty)::integer AS "zaikoQty",
             COALESCE(h.juchu_honbanbi_shubetu_id, 0) AS "juchuHonbanbiShubetuId",
             COALESCE(h.juchu_honbanbi_shubetu_color, 'white') AS "juchuHonbanbiColor"
-        FROM 
+        FROM
             target_days d
-        CROSS JOIN 
+        CROSS JOIN
             target_kizai k -- 日付と機材の全組み合わせを作成
-        LEFT JOIN 
-            ${SCHEMA}.v_zaiko_qty v ON v.plan_dat = d.cal_dat AND v.kizai_id = k.kizai_id
-        LEFT JOIN 
-            ${SCHEMA}.v_honbanbi_juchu_kizai h ON h.plan_dat = d.cal_dat 
+        LEFT JOIN
+            zaiko v ON v.plan_dat = d.cal_dat AND v.kizai_id = k.kizai_id
+        LEFT JOIN
+            honbanbi h ON h.plan_dat = d.cal_dat
             AND h.kizai_id = k.kizai_id
-            AND h.juchu_head_id = $2 
-            AND h.juchu_kizai_head_id = $3
-        ORDER BY 
+        ORDER BY
             k.kizai_id, d.cal_dat;
     `;
 
@@ -518,23 +538,35 @@ export const selectStockListBulk = async (kizaiIds: number[], date: string) => {
 target_kizai AS (
     -- 対象機材のリストとマスターの保有数を一括取得
     -- $1 は [101, 102, 103...] という機材IDの配列
-    SELECT kizai_id, kizai_qty 
-    FROM ${SCHEMA}.v_kizai_qty 
-    WHERE kizai_id = ANY($1) 
+    SELECT kizai_id, kizai_qty
+    FROM ${SCHEMA}.v_kizai_qty
+    WHERE kizai_id = ANY($1)
+),
+-- v_zaiko_qty は全受注・全日付を横断する GROUP BY (kizai_id, plan_dat) の集約ビュー。
+-- 絞り込みをJOIN条件で渡すと「JOIN相手から来る値」になって集約の内側に押し込めず、
+-- 全受注を集約し切ってから捨てることになる（50機材でも約1.9秒かかっていた）。
+-- kizai_id も plan_dat もGROUP BYのキーなので、ここで定数の述語として先に当てておくと
+-- 集約の内側まで押し込まれる。日付範囲は上の generate_series(0, 90) と一致させること。
+zaiko AS (
+    SELECT plan_dat, kizai_id, zaiko_qty
+    FROM ${SCHEMA}.v_zaiko_qty
+    WHERE kizai_id = ANY($1)
+      AND plan_dat >= $2::date
+      AND plan_dat < $2::date + 91
 )
-SELECT 
+SELECT
     d.cal_dat AS "calDat",
     k.kizai_id AS "kizaiId",
     -- 在庫データがあればそれを使用、なければマスターの保有数を使用
     COALESCE(v.zaiko_qty, k.kizai_qty)::integer AS "zaikoQty"
-FROM 
+FROM
     target_days d
-CROSS JOIN 
+CROSS JOIN
     target_kizai k -- 日付 × 全機材 のマトリクスを作成
-LEFT JOIN 
-    ${SCHEMA}.v_zaiko_qty v ON v.plan_dat = d.cal_dat 
+LEFT JOIN
+    zaiko v ON v.plan_dat = d.cal_dat
     AND v.kizai_id = k.kizai_id
-ORDER BY 
+ORDER BY
     k.kizai_id, d.cal_dat;
     `;
 
