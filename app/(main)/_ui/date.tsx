@@ -2,19 +2,13 @@
 
 import 'dayjs/locale/ja';
 
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import ClearIcon from '@mui/icons-material/Clear';
-import { IconButton } from '@mui/material';
 import { grey } from '@mui/material/colors';
-import { DatePicker, DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { DatePicker, DateTimePicker } from '@mui/x-date-pickers';
 import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
-import { PickerValue } from '@mui/x-date-pickers/internals';
-import { DateValidationError } from '@mui/x-date-pickers/models';
 import { subDays } from 'date-fns';
 import dayjs, { Dayjs } from 'dayjs';
 import { useMemo, useState } from 'react';
-import { ControllerFieldState, ControllerRenderProps, FieldErrors, Noop, useFormContext } from 'react-hook-form';
+import { Noop } from 'react-hook-form';
 import { DateRangePicker } from 'rsuite';
 
 import { toJapanYMDString } from '../_lib/date-conversion';
@@ -22,199 +16,90 @@ import { toJapanYMDString } from '../_lib/date-conversion';
 
 dayjs.locale('ja'); // カレンダーの曜日のフォーマット
 
-const today = dayjs();
+/**
+ * クリアボタンの表示制御。
+ * MUIXの既定は「マウス環境ではホバー/フォーカス時のみ表示」かつ「値が空でもボタン自体は描画する」ため、
+ * 値があるときは常時表示、空のときは常に非表示になるよう上書きする。
+ * @param visible 表示するかどうか（通常は値の有無）
+ */
+const clearButtonSx = (visible: boolean) => {
+  const opacity = visible ? 1 : 0;
 
-export const Calendar = (props: { date: Date; onChange: (value: Dayjs | null, view: string) => void }) => {
-  const { date, onChange } = props;
-  const [view, setView] = useState<'year' | 'month' | 'day'>('day');
+  return {
+    '& .clearButton': { opacity },
+    '@media (pointer: fine)': {
+      '& .clearButton': { opacity },
+      '&:hover, &:focus-within': { '.clearButton': { opacity } },
+    },
+  };
+};
+
+/**
+ * カレンダーの表示単位
+ */
+export type CalendarView = 'year' | 'month' | 'day';
+
+/**
+ * 日付を選択するカレンダーコンポーネント
+ * @param props value 選択中の日付 onChange 変更時の処理（第2引数は選択時の表示単位）
+ * @returns {JSX.Element} MUIX DateCalendarコンポーネント
+ */
+export const Calendar = ({
+  value,
+  onChange,
+}: {
+  value?: Date | null;
+  onChange?: (date: Date | null, view: CalendarView) => void;
+}) => {
+  const [view, setView] = useState<CalendarView>('day');
 
   return (
     <DateCalendar
       slotProps={{
         calendarHeader: { format: 'YYYY年MM月' },
       }} // カレンダーヘッダーのフォーマット
-      value={dayjs(date)}
+      value={value ? dayjs(value) : null}
       views={['year', 'month', 'day']}
-      onChange={(value) => onChange(value, view)}
+      onChange={(newValue: Dayjs | null) => onChange?.(newValue ? newValue.toDate() : null, view)}
       onViewChange={(newView) => setView(newView)}
-    ></DateCalendar>
-  );
-};
-
-/**
- * 日付を選択し取得するコンポーネント
- * @param props sx スタイル disbled disabledかどうか
- * @returns {JSX.Element} MUIX DatePickerコンポーネント
- */
-const DateX = (props: { sx?: object; disabled?: boolean }) => {
-  const [error, setError] = useState<DateValidationError | null>(null);
-  const { sx, disabled } = props;
-  const errorMessage = useMemo(() => {
-    switch (error) {
-      case 'maxDate':
-      case 'minDate': {
-        return 'Please select a date';
-      }
-
-      case 'invalidDate': {
-        return 'Your date is not valid';
-      }
-
-      default: {
-        return '';
-      }
-    }
-  }, [error]);
-
-  return (
-    <DatePicker
-      name="date"
-      format="YYYY/MM/DD" // テキストエリア内のフォーマット
-      slotProps={{
-        textField: {
-          helperText: errorMessage,
-          size: 'small',
-          sx: {
-            bgcolor: disabled ? grey[200] : 'white',
-            width: '25%',
-            minWidth: 150,
-            padding: 0,
-            '.Mui-disabled': {
-              WebkitTextFillColor: 'black',
-            },
-            ...sx,
-          },
-        },
-        toolbar: {
-          hidden: true,
-        },
-        calendarHeader: { format: 'YYYY年MM月' },
-      }} // カレンダーヘッダーのフォーマット
-      defaultValue={today}
-      onError={(newError: DateValidationError) => setError(newError)}
-      views={['year', 'month', 'day']}
-      disabled={disabled}
     />
   );
 };
 
-export default DateX;
-
 /**
- * 日付を選択し取得するコンポーネント
+ * 日時を選択し取得するコンポーネント
  * @param props sx スタイル disbled disabledかどうか
- * @returns {JSX.Element} MUIX DatePickerコンポーネント
+ * @returns {JSX.Element} MUIX DateTimePickerコンポーネント
  */
-export const TestDate = (props: {
+export const DateTime = ({
+  sx,
+  disabled,
+  value,
+  error,
+  helperText,
+  minDate,
+  maxDate,
+  timeSteps,
+  notClearable,
+  onChange,
+  onAccept,
+}: {
   sx?: object;
   disabled?: boolean;
-  date: Date | null;
+  value?: Date | null;
+  error?: boolean;
+  helperText?: string;
   minDate?: Date;
   maxDate?: Date;
-  onBlur?: Noop;
-  fieldstate?: ControllerFieldState;
-  onChange: (value: Dayjs | null) => void;
-  onClear?: () => void;
-}) => {
-  const { sx, disabled, date, minDate, maxDate, onBlur, fieldstate, onChange, onClear } = props;
-
-  //カレンダーの表示を制御する
-  const [open, setOpen] = useState(false);
-
-  return (
-    <DatePicker
-      name="date"
-      format="YYYY/MM/DD" // テキストエリア内のフォーマット
-      open={open}
-      onOpen={() => setOpen(true)}
-      onClose={() => setOpen(false)}
-      slotProps={{
-        textField: {
-          helperText: fieldstate?.error?.message,
-          FormHelperTextProps: {
-            sx: { color: 'error.main', fontSize: '0.75rem' },
-          },
-          size: 'small',
-          sx: {
-            bgcolor: disabled ? grey[200] : 'white',
-            width: 160,
-            minWidth: 160,
-            padding: 0,
-            '.Mui-disabled': {
-              WebkitTextFillColor: 'black',
-            },
-            ...sx,
-          },
-          error: fieldstate?.invalid,
-          InputProps: {
-            endAdornment: (
-              <>
-                {date && onClear && (
-                  <IconButton size="small" sx={{ p: 0 }} onClick={onClear} disabled={disabled}>
-                    <ClearIcon fontSize="small" />
-                  </IconButton>
-                )}
-                <IconButton size="small" sx={{ p: 0 }} onClick={() => setOpen(true)} disabled={disabled}>
-                  <CalendarTodayIcon fontSize="small" />
-                </IconButton>
-              </>
-            ),
-          },
-        },
-        toolbar: {
-          hidden: true,
-        },
-        calendarHeader: { format: 'YYYY年MM月' },
-      }} // カレンダーヘッダーのフォーマット
-      value={date && dayjs(date)}
-      minDate={minDate && dayjs(minDate)}
-      maxDate={maxDate && dayjs(maxDate)}
-      views={['year', 'month', 'day']}
-      disabled={disabled}
-      onChange={onChange}
-      onAccept={onBlur}
-    />
-  );
-};
-
-export const DateTime = (props: {
-  sx?: object;
-  disabled?: boolean;
-  date: Date | null;
-  minDate?: Date;
-  maxDate?: Date;
-  fieldstate?: ControllerFieldState;
   timeSteps?: number;
-  disableClearable?: boolean;
-  //isDialog?: boolean;
-  onChange: (value: Dayjs | null) => void;
-  onAccept: (value: Dayjs | null) => void;
-  onClear?: () => void;
+  notClearable?: boolean;
+  onChange?: (date: Date | null) => void;
+  onAccept?: (date: Date | null) => void;
 }) => {
-  const {
-    sx,
-    disabled,
-    date,
-    minDate,
-    maxDate,
-    fieldstate,
-    timeSteps,
-    disableClearable,
-    //isDialog,
-    onChange,
-    onAccept,
-    onClear,
-  } = props;
-
-  //カレンダーの表示を制御する
-  const [open, setOpen] = useState(false);
-
-  //const shouldDisablePortal = isDialog === true;
-
   /** 表示用に時間を丸める計算 */
   const roundedValue = useMemo(() => {
-    if (!date) return null;
-    const d = dayjs(date);
+    if (!value) return null;
+    const d = dayjs(value);
     const step = timeSteps ?? 5; // デフォルト値も考慮
     // 分数を取得
     const currentMinute = d.minute();
@@ -222,64 +107,45 @@ export const DateTime = (props: {
     const roundedMinute = Math.round(currentMinute / step) * step;
 
     return d.minute(roundedMinute).second(0);
-  }, [date, timeSteps]);
+  }, [value, timeSteps]);
 
   return (
     <DateTimePicker
       name="date"
       format="YYYY/MM/DD HH:mm"
-      open={open}
-      onOpen={() => setOpen(true)}
-      onClose={() => setOpen(false)}
       timeSteps={{ minutes: timeSteps ?? 5 }}
       slotProps={{
         actionBar: { actions: ['accept', 'cancel'] },
+        field: {
+          clearable: notClearable ? false : true,
+        },
         textField: {
-          helperText: fieldstate?.error?.message,
-          FormHelperTextProps: {
-            sx: { color: 'error.main', fontSize: '0.75rem' },
-          },
+          error,
+          helperText,
           size: 'small',
           sx: {
             bgcolor: disabled ? grey[200] : 'white',
-            width: 220,
+            width: 230,
             padding: 0,
             '.Mui-disabled': {
               WebkitTextFillColor: 'black',
             },
+            ...clearButtonSx(!!value),
             ...sx,
-          },
-          error: fieldstate?.invalid,
-          InputProps: {
-            endAdornment: (
-              <>
-                {date && !disableClearable && (
-                  <IconButton size="small" sx={{ p: 0 }} onClick={onClear} disabled={disabled}>
-                    <ClearIcon fontSize="small" />
-                  </IconButton>
-                )}
-                <IconButton size="small" sx={{ p: 0 }} onClick={() => setOpen(true)} disabled={disabled}>
-                  <CalendarTodayIcon fontSize="small" />
-                </IconButton>
-              </>
-            ),
           },
         },
         toolbar: {
           hidden: true,
         },
         calendarHeader: { format: 'YYYY年MM月' },
-        // popper: {
-        //   disablePortal: shouldDisablePortal,
-        // },
       }} // カレンダーヘッダーのフォーマット
-      value={/*date && dayjs(date)*/ roundedValue}
+      value={roundedValue}
       minDate={minDate && dayjs(minDate)}
       maxDate={maxDate && dayjs(maxDate)}
       views={['year', 'month', 'day', 'hours', 'minutes']}
       disabled={disabled}
-      onChange={onChange}
-      onAccept={onAccept}
+      onChange={(newValue: Dayjs | null) => onChange?.(newValue ? newValue.toDate() : null)}
+      onAccept={(newValue: Dayjs | null) => onAccept?.(newValue ? newValue.toDate() : null)}
     />
   );
 };
@@ -393,6 +259,7 @@ export const FormDateX = ({
   maxDate,
   notClearable,
   onChange,
+  onBlur,
 }: {
   sx?: object;
   disabled?: boolean;
@@ -404,6 +271,7 @@ export const FormDateX = ({
   maxDate?: Date;
   notClearable?: boolean;
   onChange?: (date: Date | null) => void;
+  onBlur?: Noop;
 }) => {
   return (
     <DatePicker
@@ -419,11 +287,12 @@ export const FormDateX = ({
           size: 'small',
           sx: {
             bgcolor: disabled ? grey[200] : 'white',
-            width: 200,
+            width: 190,
             padding: 0,
             '.Mui-disabled': {
               WebkitTextFillColor: 'black',
             },
+            ...clearButtonSx(!!value),
             pointerEvents: readonly ? 'none' : undefined,
             backgroundColor: readonly ? grey[200] : undefined,
             color: readonly ? '#888' : undefined,
@@ -450,9 +319,10 @@ export const FormDateX = ({
         readonly
           ? () => {}
           : (newValue: Dayjs | null) => {
-              onChange!(newValue ? newValue.toDate() : null);
+              onChange?.(newValue ? newValue.toDate() : null);
             }
       }
+      onAccept={onBlur}
     />
   );
 };

@@ -45,16 +45,10 @@ export const TimeTest = () => {
             name="created"
             render={({ field, fieldState }) => (
               <DateTime
-                date={field.value}
-                onChange={(newDate: Dayjs | null) => {
-                  if (newDate === null) return;
-                  fsetvalue('created', newDate.toDate(), { shouldDirty: true });
-                }}
-                onAccept={(newDate: Dayjs | null) => {
-                  if (newDate === null) return;
-                }}
-                fieldstate={fieldState}
-                onClear={() => fsetvalue('created', null, { shouldDirty: true })}
+                value={field.value}
+                onChange={(newDate) => fsetvalue('created', newDate, { shouldDirty: true })}
+                error={!!fieldState.error}
+                helperText={fieldState.error?.message}
               />
             )}
           />
@@ -93,16 +87,10 @@ export const TimeTest = () => {
               name="created"
               render={({ field, fieldState }) => (
                 <DateTime
-                  date={field.value}
-                  onChange={(newDate: Dayjs | null) => {
-                    if (newDate === null) return;
-                    ssetvalue('created', newDate.toDate(), { shouldDirty: true });
-                  }}
-                  onAccept={(newDate: Dayjs | null) => {
-                    if (newDate === null) return;
-                  }}
-                  fieldstate={fieldState}
-                  onClear={() => ssetvalue('created', null, { shouldDirty: true })}
+                  value={field.value}
+                  onChange={(newDate) => ssetvalue('created', newDate, { shouldDirty: true })}
+                  error={!!fieldState.error}
+                  helperText={fieldState.error?.message}
                 />
               )}
             />

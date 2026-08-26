@@ -25,7 +25,7 @@ import { dispColors, statusColors } from '@/app/(main)/_lib/colors';
 import { permission } from '@/app/(main)/_lib/permission';
 import { User } from '@/app/(main)/_lib/types';
 import { BackButton } from '@/app/(main)/_ui/buttons';
-import { DateTime, TestDate } from '@/app/(main)/_ui/date';
+import { DateTime } from '@/app/(main)/_ui/date';
 
 import { delNyukoFix, updNyukoDetail } from '../_lib/funcs';
 import { NyukoDetailTableValues, NyukoDetailValues } from '../_lib/types';
@@ -174,12 +174,7 @@ export const NyukoDetail = (props: {
             </Box>
             <Box display={'flex'} alignItems={'center'}>
               <Typography mr={4}>入庫日時</Typography>
-              <DateTime
-                date={nyukoDetailData.nyushukoDat ? new Date(nyukoDetailData.nyushukoDat) : null}
-                onChange={() => {}}
-                onAccept={() => {}}
-                disabled
-              />
+              <DateTime value={nyukoDetailData.nyushukoDat ? new Date(nyukoDetailData.nyushukoDat) : null} disabled />
             </Box>
             <Box display={'flex'} alignItems={'center'}>
               <Typography mr={4}>入庫場所</Typography>

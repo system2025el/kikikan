@@ -30,7 +30,7 @@ import { useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
 import { permission } from '@/app/(main)/_lib/permission';
 import { User } from '@/app/(main)/_lib/types';
 import { BackButton } from '@/app/(main)/_ui/buttons';
-import { TestDate } from '@/app/(main)/_ui/date';
+import { FormDateX } from '@/app/(main)/_ui/date';
 import { useDirty } from '@/app/(main)/_ui/dirty-context';
 import { LoadingOverlay } from '@/app/(main)/_ui/loading';
 
@@ -360,7 +360,7 @@ export const IdoDetail = (props: {
         <Grid2 container size={{ xs: 12, sm: 12, md: 6 }} direction={'column'} p={{ sx: 1, sm: 1, md: 2 }} spacing={1}>
           <Box display={'flex'} alignItems={'center'}>
             <Typography mr={3}>移動予定日</Typography>
-            <TestDate date={new Date(idoDetailData.nyushukoDat)} onChange={() => {}} disabled />
+            <FormDateX sx={{ width: 160 }} value={new Date(idoDetailData.nyushukoDat)} disabled notClearable />
           </Box>
           <Box display={'flex'} alignItems={'center'}>
             <Typography mr={5}>移動指示</Typography>

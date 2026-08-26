@@ -23,7 +23,6 @@ import {
   Typography,
 } from '@mui/material';
 import { grey, lightBlue } from '@mui/material/colors';
-import { Dayjs } from 'dayjs';
 import React, { useCallback, useRef, useState } from 'react';
 
 import { BASHO_ID } from '@/app/_lib/constants';

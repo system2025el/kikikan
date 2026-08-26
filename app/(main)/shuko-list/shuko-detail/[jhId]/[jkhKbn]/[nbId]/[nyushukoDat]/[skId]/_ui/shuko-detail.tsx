@@ -26,7 +26,7 @@ import { dispColors, statusColors } from '@/app/(main)/_lib/colors';
 import { permission } from '@/app/(main)/_lib/permission';
 import { User } from '@/app/(main)/_lib/types';
 import { BackButton } from '@/app/(main)/_ui/buttons';
-import { DateTime, TestDate } from '@/app/(main)/_ui/date';
+import { DateTime, FormDateX } from '@/app/(main)/_ui/date';
 import { LoadingOverlay } from '@/app/(main)/_ui/loading';
 
 import {
@@ -260,20 +260,16 @@ export const ShukoDetail = (props: {
             </Box>
             <Box display={'flex'} alignItems={'center'}>
               <Typography mr={6}>受注日</Typography>
-              <TestDate
-                date={shukoDetailData.juchuDat ? new Date(shukoDetailData.juchuDat) : null}
-                onChange={() => {}}
+              <FormDateX
+                sx={{ width: 160 }}
+                value={shukoDetailData.juchuDat ? new Date(shukoDetailData.juchuDat) : null}
                 disabled
+                notClearable
               />
             </Box>
             <Box display={'flex'} alignItems={'center'}>
               <Typography mr={4}>出庫日時</Typography>
-              <DateTime
-                date={shukoDetailData.nyushukoDat ? new Date(shukoDetailData.nyushukoDat) : null}
-                onChange={() => {}}
-                onAccept={() => {}}
-                disabled
-              />
+              <DateTime value={shukoDetailData.nyushukoDat ? new Date(shukoDetailData.nyushukoDat) : null} disabled />
             </Box>
             <Box display={'flex'} alignItems={'center'}>
               <Typography mr={4}>出庫場所</Typography>

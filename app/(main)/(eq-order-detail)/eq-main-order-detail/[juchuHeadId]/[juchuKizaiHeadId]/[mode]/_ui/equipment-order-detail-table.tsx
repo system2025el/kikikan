@@ -22,13 +22,12 @@ import {
   Typography,
 } from '@mui/material';
 import { blue, grey, lightBlue } from '@mui/material/colors';
-import { Dayjs } from 'dayjs';
 import React, { useCallback, useRef } from 'react';
 
 import { BASHO_ID, SAGYO_SIJI_ID } from '@/app/_lib/constants';
 import { toJapanMDString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { openOrFocusTab } from '@/app/(main)/_lib/tab-focus';
-import { TestDate } from '@/app/(main)/_ui/date';
+import { FormDateX } from '@/app/(main)/_ui/date';
 import { MemoTooltip } from '@/app/(main)/(eq-order-detail)/_ui/memo-tooltip';
 
 import { getDateHeaderBackgroundColor, getStockRowBackgroundColor } from '../_lib/colorselect';
@@ -528,7 +527,7 @@ type IdoEqTableProps = {
   edit: boolean;
   shukoFixFlag: boolean;
   shukoDate: Date | null;
-  handleCellDateChange: (kizaiId: number, date: Dayjs | null) => void;
+  handleCellDateChange: (kizaiId: number, date: Date | null) => void;
   handleCellDateClear: (kizaiId: number) => void;
 };
 
@@ -538,7 +537,7 @@ type IdoEqTableRowProps = {
   edit: boolean;
   shukoFixFlag: boolean;
   shukoDate: Date | null;
-  handleCellDateChange: (kizaiId: number, date: Dayjs | null) => void;
+  handleCellDateChange: (kizaiId: number, date: Date | null) => void;
   handleCellDateClear: (kizaiId: number) => void;
 };
 
@@ -561,8 +560,9 @@ const IdoEqTableRow = React.memo(
         </TableCell>
         <TableCell style={styles.row} size="small">
           <Box display="flex" width={'200px'}>
-            <TestDate
+            <FormDateX
               sx={{
+                width: 160,
                 '& .MuiPickersInputBase-root': {
                   height: '23px',
                 },
@@ -573,9 +573,8 @@ const IdoEqTableRow = React.memo(
                   padding: 0,
                 },
               }}
-              date={row.sagyoDenDat}
-              onChange={(date) => handleCellDateChange(row.kizaiId, date)}
-              onClear={() => handleCellDateClear(row.kizaiId)}
+              value={row.sagyoDenDat}
+              onChange={(date) => (date ? handleCellDateChange(row.kizaiId, date) : handleCellDateClear(row.kizaiId))}
               disabled={!edit || shukoFixFlag}
             />
             {row.sagyoSijiId && <Typography>{row.sagyoSijiId === SAGYO_SIJI_ID.ky ? 'K→Y' : 'Y→K'}</Typography>}
