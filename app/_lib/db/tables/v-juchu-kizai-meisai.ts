@@ -66,7 +66,7 @@ export const selectOyaJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiH
       .schema(SCHEMA)
       .from('v_juchu_kizai_meisai')
       .select(
-        'juchu_head_id, juchu_kizai_head_id, juchu_kizai_meisai_id, shozoku_id, shozoku_nam, kizai_id, kizai_nam, plan_kizai_qty, plan_yobi_qty, dsp_ord_num, indent_num'
+        'juchu_head_id, juchu_kizai_head_id, juchu_kizai_meisai_id, shozoku_id, shozoku_nam, kizai_id, kizai_nam, plan_kizai_qty, plan_yobi_qty, dsp_ord_num, indent_num, mem, mem2'
       )
       .eq('juchu_head_id', juchuHeadId)
       .eq('juchu_kizai_head_id', juchuKizaiHeadId)

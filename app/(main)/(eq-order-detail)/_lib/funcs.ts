@@ -390,6 +390,8 @@ export const getOyaJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHead
       planYobiQty: d.plan_yobi_qty ?? 0,
       dspOrdNum: d.dsp_ord_num ?? 0,
       indentNum: d.indent_num ?? 0,
+      mem: d.mem,
+      mem2: d.mem2,
     }));
     return juchuKizaiMeisaiData;
   } catch (e) {
