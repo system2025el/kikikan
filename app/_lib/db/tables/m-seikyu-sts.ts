@@ -15,6 +15,7 @@ export const selectActiveSeikyuSts = async () => {
       .from('m_seikyu_sts')
       .select('sts_id, sts_nam')
       .neq('del_flg', 1)
+      .in('sts_id', [2, 3, 9])
       .order('sts_id');
   } catch (e) {
     throw new Error('[selectActiveSeikyuSts] DBエラー:', { cause: e });
