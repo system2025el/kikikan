@@ -56,6 +56,8 @@ export const RfidDeleteDialog = ({
   const [isSaving, setIsSaving] = useState(false);
   /** 削除確認（はい・いいえ）ダイアログの開閉状態 */
   const [confirmOpen, setConfirmOpen] = useState(false);
+  /** 保存（決定）確認（はい・いいえ）ダイアログの開閉状態 */
+  const [saveConfirmOpen, setSaveConfirmOpen] = useState(false);
   /** 未確定の削除予定を残したまま閉じようとした時の確認ダイアログ */
   const [closeConfirmOpen, setCloseConfirmOpen] = useState(false);
   /** スナックバー */
@@ -161,7 +163,7 @@ export const RfidDeleteDialog = ({
       >
         <Box display={'flex'} alignItems={'center'}>
           <WarningIcon sx={{ mr: 1 }} />
-          <Typography variant="h6">RFIDタグ物理削除（この操作は元に戻せません）</Typography>
+          <Typography variant="h6">RFIDタグ削除（この操作は元に戻せません）</Typography>
         </Box>
         <IconButton onClick={handleClickClose} sx={{ color: 'error.contrastText' }}>
           <CloseIcon />
@@ -336,7 +338,7 @@ export const RfidDeleteDialog = ({
                 color="error"
                 variant="contained"
                 loading={isSaving}
-                onClick={handleSave}
+                onClick={() => setSaveConfirmOpen(true)}
                 disabled={pendingDelete.length === 0 || !canDelete}
               >
                 保存（決定）
@@ -360,6 +362,32 @@ export const RfidDeleteDialog = ({
             はい
           </Button>
           <Button onClick={handleConfirmNo}>いいえ</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* 保存（決定）確認（はい・いいえ） */}
+      <Dialog open={saveConfirmOpen} onClose={() => setSaveConfirmOpen(false)}>
+        <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
+          <WarningIcon color="error" sx={{ mr: 1 }} />
+          <Box>削除の最終確認</Box>
+        </DialogTitle>
+        <DialogContentText m={2}>
+          削除予定リストの{pendingDelete.length}件のRFIDタグを削除します。
+          <br />
+          この操作は元に戻せません。よろしいですか？
+        </DialogContentText>
+        <DialogActions>
+          <Button
+            color="error"
+            loading={isSaving}
+            onClick={() => {
+              setSaveConfirmOpen(false);
+              handleSave();
+            }}
+          >
+            はい
+          </Button>
+          <Button onClick={() => setSaveConfirmOpen(false)}>いいえ</Button>
         </DialogActions>
       </Dialog>
 
