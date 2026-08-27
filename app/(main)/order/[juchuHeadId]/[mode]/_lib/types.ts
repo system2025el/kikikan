@@ -222,3 +222,14 @@ export type UsersValue = {
   tantouNam: string;
   mailAdr: string;
 };
+
+/** 受注添付ファイル（PDF）の1件 */
+export type TempuValues = {
+  juchuTempuId: number;
+  /** 原本ファイル名。Storage上のキーとは別 */
+  fileNam: string;
+  /** バイト数 */
+  fileSiz: number;
+  addDat: string | null;
+  addUser: string;
+};

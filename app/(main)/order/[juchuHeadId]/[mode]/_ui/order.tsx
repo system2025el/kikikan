@@ -3,6 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import AddIcon from '@mui/icons-material/Add';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
 import CheckIcon from '@mui/icons-material/Check';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CreateIcon from '@mui/icons-material/Create';
@@ -13,6 +14,7 @@ import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
+  Badge,
   Box,
   Button,
   Container,
@@ -72,6 +74,7 @@ import {
   KokyakuValues,
   OrderSchema,
   OrderValues,
+  TempuValues,
   UsersValue,
   VehicleTableValues,
 } from '../_lib/types';
@@ -80,6 +83,7 @@ import { CopyDialog } from './copy-dialog';
 import { CustomerSelectionDialog } from './customer-selection';
 import { LocationSelectDialog } from './location-selection';
 import { OrderEqTable, OrderVehicleTable } from './order-table';
+import { TempuDialog } from './tempu-dialog';
 
 export const Order = (props: {
   user: User;
@@ -87,6 +91,7 @@ export const Order = (props: {
   juchuKizaiHeadDatas: EqTableValues[] | undefined;
   juchusharyoHeadDatas: VehicleTableValues[] | undefined;
   userList: UsersValue[];
+  juchuTempuDatas: TempuValues[];
   edit: boolean;
   //lockData: LockValues | null;
 }) => {
@@ -143,6 +148,10 @@ export const Order = (props: {
   const [snackBarOpen, setSnackBarOpen] = useState(false);
   // スナックバーメッセージ
   const [snackBarMessage, setSnackBarMessage] = useState('');
+  // 添付ファイルダイアログ制御
+  const [tempuOpen, setTempuOpen] = useState(false);
+  // 添付ファイルデータ（フォームのdirtyとは無関係なのでsetIsDirtyは触らない）
+  const [tempuList, setTempuList] = useState<TempuValues[]>(props.juchuTempuDatas);
 
   // 機材テーブル選択行
   const [selectEq, setSelectEq] = useState<number | null>(null);
@@ -983,6 +992,15 @@ export const Order = (props: {
           </Grid2>
         )}
         <Grid2 container alignItems={'center'} spacing={2}>
+          <Badge badgeContent={tempuList.length} color="primary">
+            <Button
+              onClick={() => setTempuOpen(true)}
+              disabled={!(user && user.permission.juchu & permission.juchu_ref)}
+            >
+              <AttachFileIcon fontSize="small" />
+              添付ファイル
+            </Button>
+          </Badge>
           {!edit ? <Typography>閲覧モード</Typography> : <Typography>編集モード</Typography>}
           <Button disabled={!!lockData || user?.permission.juchu === permission.juchu_ref} onClick={handleEdit}>
             変更
@@ -1407,6 +1425,14 @@ export const Order = (props: {
         title="削除"
         handleCloseDelete={() => setSharyoHeadDeleteOpen(false)}
         handleConfirmDelete={() => handleDeleteVehs()}
+      />
+      <TempuDialog
+        open={tempuOpen}
+        juchuHeadId={getValues('juchuHeadId')}
+        canUpdate={!!(user && user.permission.juchu & permission.juchu_upd)}
+        tempuList={tempuList}
+        onChange={setTempuList}
+        onClose={() => setTempuOpen(false)}
       />
       <Snackbar
         open={snackBarOpen}

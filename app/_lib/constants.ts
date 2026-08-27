@@ -79,6 +79,20 @@ export const DIC_ID = {
 } as const;
 
 /**
+ * 受注添付ファイル（t_juchu_tempu / Storageバケット juchu-tempu）
+ */
+export const JUCHU_TEMPU = {
+  /** バケット名。本番・ステージング共通 */
+  bucket: 'juchu-tempu',
+  /** 1ファイルの上限（20MB）。バケット側の file_size_limit と一致させること */
+  maxSize: 20 * 1024 * 1024,
+  /** 1受注あたりの添付件数の上限 */
+  maxCount: 20,
+  /** 署名付きURLの有効期限（秒）。PDFビューアの再読込に耐えるため長めにしている */
+  signedUrlSec: 600,
+} as const;
+
+/**
  * 受注本番日種別ID（juchu_honbanbi_shubetu_id）
  */
 export const HONBANBI_SHUBETU_ID = {

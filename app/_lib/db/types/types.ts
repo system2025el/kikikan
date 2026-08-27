@@ -1777,6 +1777,51 @@ export type Database = {
         };
         Relationships: [];
       };
+      t_juchu_tempu: {
+        Row: {
+          add_dat: string | null;
+          add_user: string | null;
+          del_flg: number | null;
+          file_nam: string;
+          file_pat: string;
+          file_siz: number | null;
+          juchu_head_id: number;
+          juchu_tempu_id: number;
+          mem: string | null;
+          mime_typ: string | null;
+          upd_dat: string | null;
+          upd_user: string | null;
+        };
+        Insert: {
+          add_dat?: string | null;
+          add_user?: string | null;
+          del_flg?: number | null;
+          file_nam: string;
+          file_pat: string;
+          file_siz?: number | null;
+          juchu_head_id: number;
+          juchu_tempu_id?: number;
+          mem?: string | null;
+          mime_typ?: string | null;
+          upd_dat?: string | null;
+          upd_user?: string | null;
+        };
+        Update: {
+          add_dat?: string | null;
+          add_user?: string | null;
+          del_flg?: number | null;
+          file_nam?: string;
+          file_pat?: string;
+          file_siz?: number | null;
+          juchu_head_id?: number;
+          juchu_tempu_id?: number;
+          mem?: string | null;
+          mime_typ?: string | null;
+          upd_dat?: string | null;
+          upd_user?: string | null;
+        };
+        Relationships: [];
+      };
       t_lock: {
         Row: {
           add_dat: string | null;

@@ -7,6 +7,7 @@ import { permission } from '@/app/(main)/_lib/permission';
 import { Order } from '@/app/(main)/order/[juchuHeadId]/[mode]/_ui/order';
 
 import { getJuchuHead, getJuchuKizaiHeadList, getJuchuSharyoHeadList, getUsers } from './_lib/funcs';
+import { getJuchuTempuList } from './_lib/tempu-funcs';
 import { EqTableValues, OrderValues, VehicleTableValues } from './_lib/types';
 
 export const metadata: Metadata = {
@@ -67,16 +68,18 @@ const Page = async (props: { params: Promise<{ juchuHeadId: string; mode: string
         juchuKizaiHeadDatas={newJuchuKizaiHeadData}
         juchusharyoHeadDatas={newJuchuSharyoHeadData}
         userList={userList}
+        juchuTempuDatas={[]}
         edit={edit}
       />
     );
     // 既存
   } else {
-    // 受注ヘッダーデータ、受注機材ヘッダーデータ、受注車両ヘッダーデータ
-    const [juchuHeadData, juchuKizaiHeadDatas, juchuSharyoHeadDatas] = await Promise.all([
+    // 受注ヘッダーデータ、受注機材ヘッダーデータ、受注車両ヘッダーデータ、添付ファイルデータ
+    const [juchuHeadData, juchuKizaiHeadDatas, juchuSharyoHeadDatas, juchuTempuDatas] = await Promise.all([
       getJuchuHead(juchuHeadId),
       getJuchuKizaiHeadList(juchuHeadId),
       getJuchuSharyoHeadList(juchuHeadId),
+      getJuchuTempuList(juchuHeadId),
     ]);
 
     if (!juchuHeadData) {
@@ -89,6 +92,7 @@ const Page = async (props: { params: Promise<{ juchuHeadId: string; mode: string
         juchuKizaiHeadDatas={juchuKizaiHeadDatas}
         juchusharyoHeadDatas={juchuSharyoHeadDatas}
         userList={userList}
+        juchuTempuDatas={juchuTempuDatas}
         edit={edit}
       />
     );
