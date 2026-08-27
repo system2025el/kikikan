@@ -38,6 +38,8 @@ export type OyaJuchuKizaiMeisaiValues = {
   planYobiQty: number;
   dspOrdNum: number;
   indentNum: number;
+  mem: string | null;
+  mem2: string | null;
 };
 
 export type OyaJuchuContainerMeisaiValues = {

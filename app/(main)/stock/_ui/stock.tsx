@@ -18,13 +18,12 @@ import {
   Typography,
 } from '@mui/material';
 import { addDays, addMonths, set, subDays, subMonths } from 'date-fns';
-import dayjs, { Dayjs } from 'dayjs';
 import { useEffect, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 
 import { permission } from '../../_lib/permission';
-import { Calendar } from '../../_ui/date';
+import { Calendar, CalendarView } from '../../_ui/date';
 import { Loading } from '../../_ui/loading';
 import { FAKE_NEW_ID } from '../../(masters)/_lib/constants';
 import { getAllStockData, getBumonsData, getEqData } from '../_lib/funcs';
@@ -136,9 +135,9 @@ export const Stock = () => {
    * @param view 選択項目
    * @returns
    */
-  const handleDateChange = async (date: Dayjs | null, view: string) => {
+  const handleDateChange = async (date: Date | null, view: CalendarView) => {
     if (!date) return;
-    setSelectDate(date.toDate());
+    setSelectDate(date);
 
     if (view === 'day') {
       setIsLoading(true);
@@ -147,7 +146,7 @@ export const Stock = () => {
       const uniqueKizaiIds = Array.from(new Set(kizaiIds));
 
       try {
-        const allStockData: StockTableValues[] = await getAllStockData(uniqueKizaiIds, subDays(date.toDate(), 1));
+        const allStockData: StockTableValues[] = await getAllStockData(uniqueKizaiIds, subDays(date, 1));
 
         const stockMap = new Map<number, StockTableValues[]>();
         for (const row of allStockData) {
@@ -171,12 +170,12 @@ export const Stock = () => {
   // 3か月前
   const handleBackDateChange = () => {
     const date = subMonths(new Date(selectDate), 3);
-    handleDateChange(dayjs(date), 'day');
+    handleDateChange(date, 'day');
   };
   // 3か月後
   const handleForwardDateChange = () => {
     const date = addMonths(new Date(selectDate), 3);
-    handleDateChange(dayjs(date), 'day');
+    handleDateChange(date, 'day');
   };
 
   /**
@@ -303,7 +302,7 @@ export const Stock = () => {
               <Popper open={open} anchorEl={anchorEl} placement="bottom-start" sx={{ zIndex: 1202 }}>
                 <ClickAwayListener onClickAway={handleClickAway}>
                   <Paper elevation={3} sx={{ mt: 1 }}>
-                    <Calendar date={selectDate} onChange={handleDateChange} />
+                    <Calendar value={selectDate} onChange={handleDateChange} />
                   </Paper>
                 </ClickAwayListener>
               </Popper>

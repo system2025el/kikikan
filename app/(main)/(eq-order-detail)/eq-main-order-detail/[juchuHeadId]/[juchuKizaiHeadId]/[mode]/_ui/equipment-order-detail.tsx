@@ -34,7 +34,6 @@ import {
   Typography,
 } from '@mui/material';
 import { addDays, addMonths, set, setDate, subDays, subMonths } from 'date-fns';
-import dayjs, { Dayjs } from 'dayjs';
 import { redirect, useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import React from 'react';
@@ -59,7 +58,7 @@ import { permission } from '@/app/(main)/_lib/permission';
 import { openOrFocusTab } from '@/app/(main)/_lib/tab-focus';
 import { LockValues, User } from '@/app/(main)/_lib/types';
 import { BackButton } from '@/app/(main)/_ui/buttons';
-import { Calendar, DateTime, TestDate } from '@/app/(main)/_ui/date';
+import { Calendar, CalendarView, DateTime, FormDateX } from '@/app/(main)/_ui/date';
 import { IsDirtyAlertDialog, useDirty } from '@/app/(main)/_ui/dirty-context';
 import { Loading, LoadingOverlay } from '@/app/(main)/_ui/loading';
 import {
@@ -934,9 +933,9 @@ const EquipmentOrderDetail = (props: {
    * 日付選択カレンダー選択時
    * @param date カレンダー選択日付
    */
-  const handleDateChange = async (date: Dayjs | null, view: string) => {
+  const handleDateChange = async (date: Date | null, view: CalendarView) => {
     if (!date) return;
-    setSelectDate(date.toDate());
+    setSelectDate(date);
 
     if (view === 'day') {
       setIsDetailLoading(true);
@@ -946,7 +945,7 @@ const EquipmentOrderDetail = (props: {
         const updatedEqStockData = await updateEqStock(
           getValues('juchuHeadId'),
           getValues('juchuKizaiHeadId'),
-          date.toDate(),
+          date,
           filterJuchuKizaiMeisaiList
         );
 
@@ -987,12 +986,12 @@ const EquipmentOrderDetail = (props: {
   // 3か月前
   const handleBackDateChange = () => {
     const date = subDays(new Date(selectDate), 91);
-    handleDateChange(dayjs(date), 'day');
+    handleDateChange(date, 'day');
   };
   // 3か月後
   const handleForwardDateChange = () => {
     const date = addDays(new Date(selectDate), 91);
-    handleDateChange(dayjs(date), 'day');
+    handleDateChange(date, 'day');
   };
 
   /**
@@ -1254,16 +1253,15 @@ const EquipmentOrderDetail = (props: {
    * @param kizaiId 機材id
    * @param date 日付
    */
-  const handleCellDateChange = (kizaiId: number, date: Dayjs | null) => {
+  const handleCellDateChange = (kizaiId: number, date: Date | null) => {
     if (date !== null) {
-      const newDate = date.toDate();
       // 移動機材明細、所属変更
       setIdoJuchuKizaiMeisaiList((prev) =>
         prev.map((row) =>
           row.kizaiId === kizaiId && !row.delFlag
             ? {
                 ...row,
-                sagyoDenDat: newDate,
+                sagyoDenDat: date,
                 sagyoSijiId: row.mShozokuId === BASHO_ID.kics ? SAGYO_SIJI_ID.ky : SAGYO_SIJI_ID.yk,
                 shozokuId: row.mShozokuId === BASHO_ID.kics ? BASHO_ID.yard : BASHO_ID.kics,
               }
@@ -1372,9 +1370,9 @@ const EquipmentOrderDetail = (props: {
    * KICS出庫日変更時
    * @param newDate KICS出庫日
    */
-  const handleKicsShukoChange = (newDate: Dayjs | null) => {
+  const handleKicsShukoChange = (newDate: Date | null) => {
     if (newDate === null) return;
-    setValue('kicsShukoDat', newDate.toDate(), { shouldDirty: true });
+    setValue('kicsShukoDat', newDate, { shouldDirty: true });
   };
 
   /**
@@ -1382,7 +1380,7 @@ const EquipmentOrderDetail = (props: {
    * @param newDate KICS出庫日
    * @returns
    */
-  const handleKicsShukoAccept = async (newDate: Dayjs | null) => {
+  const handleKicsShukoAccept = async (newDate: Date | null) => {
     if (isProcessing) return;
     setIsProcessing(true);
 
@@ -1397,17 +1395,17 @@ const EquipmentOrderDetail = (props: {
 
         const yardShukoDat = getValues('yardShukoDat');
 
-        const hours = newDate.hour();
-        const minutes = newDate.minute();
+        const hours = newDate.getHours();
+        const minutes = newDate.getMinutes();
 
         const totalMinutes = hours * 60 + minutes;
 
         if (yardShukoDat === null) {
           if (totalMinutes === 0) {
-            setIdoDat(newDate.toDate());
+            setIdoDat(newDate);
             setMoveOpen(true);
           } else {
-            setIdoDat(subDays(newDate.toDate(), 1));
+            setIdoDat(subDays(newDate, 1));
             setMoveOpen(true);
           }
         } else {
@@ -1427,16 +1425,16 @@ const EquipmentOrderDetail = (props: {
    * YARD出庫日変更時
    * @param newDate YARD出庫日
    */
-  const handleYardShukoChange = async (newDate: Dayjs | null) => {
+  const handleYardShukoChange = async (newDate: Date | null) => {
     if (newDate === null) return;
-    setValue('yardShukoDat', newDate.toDate(), { shouldDirty: true });
+    setValue('yardShukoDat', newDate, { shouldDirty: true });
   };
 
   /**
    * YARD出庫日確定時
    * @param newDate YARD出庫日
    */
-  const handleYardShukoAccept = async (newDate: Dayjs | null) => {
+  const handleYardShukoAccept = async (newDate: Date | null) => {
     if (isProcessing) return;
     setIsProcessing(true);
 
@@ -1451,16 +1449,16 @@ const EquipmentOrderDetail = (props: {
 
         const kicsShukoDat = getValues('kicsShukoDat');
 
-        const hours = newDate.hour();
-        const minutes = newDate.minute();
+        const hours = newDate.getHours();
+        const minutes = newDate.getMinutes();
 
         const totalMinutes = hours * 60 + minutes;
 
         if (kicsShukoDat === null && hours < 12 && totalMinutes !== 0) {
-          setIdoDat(subDays(newDate.toDate(), 1));
+          setIdoDat(subDays(newDate, 1));
           setMoveOpen(true);
         } else if (kicsShukoDat === null && (hours >= 12 || totalMinutes === 0)) {
-          setIdoDat(newDate.toDate());
+          setIdoDat(newDate);
           setMoveOpen(true);
         } else if (kicsShukoDat !== null) {
           setIdoDat(null);
@@ -1479,16 +1477,16 @@ const EquipmentOrderDetail = (props: {
    * KICS入庫日変更時
    * @param newDate KICS入庫日
    */
-  const handleKicsNyukoChange = async (newDate: Dayjs | null) => {
+  const handleKicsNyukoChange = async (newDate: Date | null) => {
     if (newDate === null) return;
-    setValue('kicsNyukoDat', newDate.toDate(), { shouldDirty: true });
+    setValue('kicsNyukoDat', newDate, { shouldDirty: true });
   };
 
   /**
    * KICS入庫日確定時
    * @param newDate KICS入庫日
    */
-  const handleKicsNyukoAccept = async (newDate: Dayjs | null) => {
+  const handleKicsNyukoAccept = async (newDate: Date | null) => {
     if (isProcessing) return;
     setIsProcessing(true);
 
@@ -1517,16 +1515,16 @@ const EquipmentOrderDetail = (props: {
    * YARD入庫日時変更時
    * @param newDate YARD入庫日
    */
-  const handleYardNyukoChange = (newDate: Dayjs | null) => {
+  const handleYardNyukoChange = (newDate: Date | null) => {
     if (newDate === null) return;
-    setValue('yardNyukoDat', newDate.toDate(), { shouldDirty: true });
+    setValue('yardNyukoDat', newDate, { shouldDirty: true });
   };
 
   /**
    * YARD入庫日時確定時
    * @param newDate YARD入庫日
    */
-  const handleYardNyukoAccept = async (newDate: Dayjs | null) => {
+  const handleYardNyukoAccept = async (newDate: Date | null) => {
     if (isProcessing) return;
     setIsProcessing(true);
 
@@ -2720,7 +2718,7 @@ const EquipmentOrderDetail = (props: {
                       <Typography marginRight={10} whiteSpace="nowrap">
                         受注日
                       </Typography>
-                      <TestDate date={juchuHeadData.juchuDat} onChange={() => {}} disabled />
+                      <FormDateX sx={{ width: 160 }} value={juchuHeadData.juchuDat} disabled notClearable />
                     </Box>
                     <Box sx={styles.container}>
                       <Typography marginRight={10} whiteSpace="nowrap">
@@ -3003,17 +3001,19 @@ const EquipmentOrderDetail = (props: {
                         render={({ field, fieldState }) => (
                           <Box sx={styles.grid2Row}>
                             <DateTime
-                              date={field.value}
+                              value={field.value}
                               maxDate={
                                 juchuHonbanbiList.length > 0
                                   ? new Date(juchuHonbanbiList[0].juchuHonbanbiDat)
                                   : undefined
                               }
-                              onChange={handleKicsShukoChange}
+                              onChange={(newDate) =>
+                                newDate === null ? handleKicsClear() : handleKicsShukoChange(newDate)
+                              }
                               onAccept={handleKicsShukoAccept}
-                              fieldstate={fieldState}
+                              error={!!fieldState.error}
+                              helperText={fieldState.error?.message}
                               disabled={!edit || shukoFixFlag}
-                              onClear={handleKicsClear}
                             />
                             <Button
                               onClick={() =>
@@ -3037,17 +3037,19 @@ const EquipmentOrderDetail = (props: {
                         render={({ field, fieldState }) => (
                           <Box sx={styles.grid2Row}>
                             <DateTime
-                              date={field.value}
+                              value={field.value}
                               maxDate={
                                 juchuHonbanbiList.length > 0
                                   ? new Date(juchuHonbanbiList[0].juchuHonbanbiDat)
                                   : undefined
                               }
-                              onChange={handleYardShukoChange}
+                              onChange={(newDate) =>
+                                newDate === null ? handleYardClear() : handleYardShukoChange(newDate)
+                              }
                               onAccept={handleYardShukoAccept}
-                              fieldstate={fieldState}
+                              error={!!fieldState.error}
+                              helperText={fieldState.error?.message}
                               disabled={!edit || shukoFixFlag}
-                              onClear={handleYardClear}
                             />
                             <Button
                               onClick={() =>
@@ -3074,20 +3076,24 @@ const EquipmentOrderDetail = (props: {
                         render={({ field, fieldState }) => (
                           <Box sx={styles.grid2Row}>
                             <DateTime
-                              date={field.value}
+                              value={field.value}
                               minDate={
                                 juchuHonbanbiList.length > 0
                                   ? new Date(juchuHonbanbiList[juchuHonbanbiList.length - 1].juchuHonbanbiDat)
                                   : undefined
                               }
-                              onChange={handleKicsNyukoChange}
-                              onAccept={handleKicsNyukoAccept}
-                              fieldstate={fieldState}
-                              disabled={!edit || nyukoFixFlag}
-                              onClear={() => {
-                                field.onChange(null);
-                                trigger(['kicsNyukoDat', 'yardNyukoDat']);
+                              onChange={(newDate) => {
+                                if (newDate === null) {
+                                  field.onChange(null);
+                                  trigger(['kicsNyukoDat', 'yardNyukoDat']);
+                                  return;
+                                }
+                                handleKicsNyukoChange(newDate);
                               }}
+                              onAccept={handleKicsNyukoAccept}
+                              error={!!fieldState.error}
+                              helperText={fieldState.error?.message}
+                              disabled={!edit || nyukoFixFlag}
                             />
                             <Button
                               onClick={() =>
@@ -3111,20 +3117,24 @@ const EquipmentOrderDetail = (props: {
                         render={({ field, fieldState }) => (
                           <Box sx={styles.grid2Row}>
                             <DateTime
-                              date={field.value}
+                              value={field.value}
                               minDate={
                                 juchuHonbanbiList.length > 0
                                   ? new Date(juchuHonbanbiList[juchuHonbanbiList.length - 1].juchuHonbanbiDat)
                                   : undefined
                               }
-                              onChange={handleYardNyukoChange}
-                              onAccept={handleYardNyukoAccept}
-                              fieldstate={fieldState}
-                              disabled={!edit || nyukoFixFlag}
-                              onClear={() => {
-                                field.onChange(null);
-                                trigger(['kicsNyukoDat', 'yardNyukoDat']);
+                              onChange={(newDate) => {
+                                if (newDate === null) {
+                                  field.onChange(null);
+                                  trigger(['kicsNyukoDat', 'yardNyukoDat']);
+                                  return;
+                                }
+                                handleYardNyukoChange(newDate);
                               }}
+                              onAccept={handleYardNyukoAccept}
+                              error={!!fieldState.error}
+                              helperText={fieldState.error?.message}
+                              disabled={!edit || nyukoFixFlag}
                             />
                             <Button
                               onClick={() =>
@@ -3383,7 +3393,7 @@ const EquipmentOrderDetail = (props: {
                         <Popper open={open} anchorEl={anchorEl} placement="bottom-start" sx={{ zIndex: 1000 }}>
                           <ClickAwayListener onClickAway={handleClickAway}>
                             <Paper elevation={3} sx={{ mt: 1 }}>
-                              <Calendar date={selectDate} onChange={handleDateChange} />
+                              <Calendar value={selectDate} onChange={handleDateChange} />
                             </Paper>
                           </ClickAwayListener>
                         </Popper>

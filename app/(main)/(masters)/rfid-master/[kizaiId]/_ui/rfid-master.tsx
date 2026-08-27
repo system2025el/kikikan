@@ -1,5 +1,6 @@
 'use client';
 import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
 import SaveAsIcon from '@mui/icons-material/SaveAs';
 import {
   Box,
@@ -41,6 +42,7 @@ import { getRfidKizaiStsSelection } from '../../../_lib/funcs';
 import { LightTooltipWithText } from '../../../_ui/tables';
 import { getEqptNam, getRfidsOfTheKizai, updateRfidTagSts } from '../_lib/funcs';
 import { RfidsMasterTableValues } from '../_lib/types';
+import { RfidDeleteDialog } from './rfid-delete-dialog';
 import { RfidMasterDialog } from './rfid-master-dialog';
 
 export const RfidMaster = ({ user, kizaiId }: { user: User; kizaiId: number }) => {
@@ -76,6 +78,8 @@ export const RfidMaster = ({ user, kizaiId }: { user: User; kizaiId: number }) =
   const [openId, setOpenID] = useState<string>(String(FAKE_NEW_ID));
   /* 詳細ダイアログの開閉状態 */
   const [dialogOpen, setDialogOpen] = useState(false);
+  /* 物理削除ダイアログの開閉状態 */
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   /** NGメモ必須ダイアログの開閉状態 */
   const [memOpen, setMemOpen] = useState(false);
   /** NGメモ */
@@ -386,7 +390,16 @@ export const RfidMaster = ({ user, kizaiId }: { user: User; kizaiId: number }) =
         {/* <Grid2 spacing={1}>
               <MuiTablePagination arrayList={theRfids ?? []} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
             </Grid2> */}
-        <Grid2 container mt={0.5} justifyContent={'end'}>
+        <Grid2 container mt={0.5} justifyContent={'end'} spacing={2}>
+          <Button
+            color="error"
+            variant="contained"
+            onClick={() => setDeleteDialogOpen(true)}
+            disabled={!((user?.permission.masters ?? 0) & permission.mst_upd)}
+          >
+            <DeleteIcon fontSize="small" />
+            削除管理
+          </Button>
           <Button
             onClick={() => handleOpenDialog(String(FAKE_NEW_ID))}
             disabled={!((user?.permission.masters ?? 0) & permission.mst_upd)}
@@ -544,6 +557,14 @@ export const RfidMaster = ({ user, kizaiId }: { user: User; kizaiId: number }) =
             rfidId={openId}
             refetchRfids={refetchRfids}
             kizaiId={kizaiId}
+          />
+        </Dialog>
+        <Dialog open={deleteDialogOpen} fullScreen>
+          <RfidDeleteDialog
+            user={user}
+            kizaiId={kizaiId}
+            handleClose={() => setDeleteDialogOpen(false)}
+            refetchRfids={refetchRfids}
           />
         </Dialog>
         <Dialog open={memOpen} onClose={() => setMemOpen(false)}>

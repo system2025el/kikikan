@@ -103,16 +103,11 @@ export const CopyDialog = ({
                   control={control}
                   render={({ field, fieldState }) => (
                     <DateTime
-                      {...field}
-                      date={field.value}
-                      onChange={(date) => field.onChange(date?.toDate())}
-                      onAccept={() => {}}
-                      fieldstate={fieldState}
+                      value={field.value}
+                      onChange={field.onChange}
+                      error={!!fieldState.error}
+                      helperText={fieldState.error?.message}
                       disabled={!selectEqHeader?.kicsShukoDat}
-                      onClear={() => {
-                        field.onChange(null);
-                      }}
-                      //isDialog
                     />
                   )}
                 />
@@ -124,16 +119,11 @@ export const CopyDialog = ({
                   control={control}
                   render={({ field, fieldState }) => (
                     <DateTime
-                      {...field}
-                      date={field.value}
-                      onChange={(date) => field.onChange(date?.toDate())}
-                      onAccept={() => {}}
-                      fieldstate={fieldState}
+                      value={field.value}
+                      onChange={field.onChange}
+                      error={!!fieldState.error}
+                      helperText={fieldState.error?.message}
                       disabled={!selectEqHeader?.yardShukoDat}
-                      onClear={() => {
-                        field.onChange(null);
-                      }}
-                      //isDialog
                     />
                   )}
                 />
@@ -148,16 +138,11 @@ export const CopyDialog = ({
                   control={control}
                   render={({ field, fieldState }) => (
                     <DateTime
-                      {...field}
-                      date={field.value}
-                      onChange={(date) => field.onChange(date?.toDate())}
-                      onAccept={() => {}}
-                      fieldstate={fieldState}
+                      value={field.value}
+                      onChange={field.onChange}
+                      error={!!fieldState.error}
+                      helperText={fieldState.error?.message}
                       disabled={!selectEqHeader?.kicsNyukoDat}
-                      onClear={() => {
-                        field.onChange(null);
-                      }}
-                      //isDialog
                     />
                   )}
                 />
@@ -169,16 +154,11 @@ export const CopyDialog = ({
                   control={control}
                   render={({ field, fieldState }) => (
                     <DateTime
-                      {...field}
-                      date={field.value}
-                      onChange={(date) => field.onChange(date?.toDate())}
-                      onAccept={() => {}}
-                      fieldstate={fieldState}
+                      value={field.value}
+                      onChange={field.onChange}
+                      error={!!fieldState.error}
+                      helperText={fieldState.error?.message}
                       disabled={!selectEqHeader?.yardNyukoDat}
-                      onClear={() => {
-                        field.onChange(null);
-                      }}
-                      //isDialog
                     />
                   )}
                 />

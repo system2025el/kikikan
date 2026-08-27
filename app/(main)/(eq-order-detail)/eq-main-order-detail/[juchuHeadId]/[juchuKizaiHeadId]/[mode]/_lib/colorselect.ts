@@ -1,5 +1,3 @@
-import { Dayjs } from 'dayjs';
-
 import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 
 import { JuchuKizaiHonbanbiValues } from './types';

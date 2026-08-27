@@ -1414,7 +1414,7 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
 
     checkPageBreak(rowHeight * 3);
 
-    const textArray = formatTextArray(param.comment ?? '', customFont, 8, 290);
+    const textArray = formatTextArray(param.comment ?? '', customFont, 7, 310);
 
     let commentIndex = index;
     let innerIndex = 0;
@@ -1425,7 +1425,7 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
           x: 35,
           y: innerH - 10 * innerIndex,
           font: customFont, // カスタムフォントの設定
-          size: 8,
+          size: 7,
           //color: rgb(0, 0, 0),
           //lineHeight: 24,
           //opacity: 1,

@@ -8,7 +8,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { toJapanYMDString } from '../../_lib/date-conversion';
 import { permission } from '../../_lib/permission';
 import { User } from '../../_lib/types';
-import { TestDate } from '../../_ui/date';
+import { FormDateX } from '../../_ui/date';
 import { Loading } from '../../_ui/loading';
 import { getIdoList } from '../_lib/funcs';
 import { IdoTableValues } from '../_lib/types';
@@ -90,11 +90,17 @@ export const IdoList = () => {
                 name="idoDat"
                 control={control}
                 render={({ field, fieldState }) => (
-                  <TestDate
+                  <FormDateX
+                    sx={{ width: 160 }}
                     onBlur={field.onBlur}
-                    date={field.value}
-                    onChange={(newDate) => field.onChange(newDate?.toDate())}
-                    fieldstate={fieldState}
+                    value={field.value}
+                    onChange={(newDate) => {
+                      if (newDate === null) return; // クリア不可の必須項目のため空にはしない
+                      field.onChange(newDate);
+                    }}
+                    error={!!fieldState.error}
+                    helperText={fieldState.error?.message}
+                    notClearable
                   />
                 )}
               />

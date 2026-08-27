@@ -46,7 +46,7 @@ import { permission } from '@/app/(main)/_lib/permission';
 import { openOrFocusTab } from '@/app/(main)/_lib/tab-focus';
 import { LockValues, User } from '@/app/(main)/_lib/types';
 import { BackButton } from '@/app/(main)/_ui/buttons';
-import DateX, { RSuiteDateRangePicker, TestDate } from '@/app/(main)/_ui/date';
+import { FormDateX, RSuiteDateRangePicker } from '@/app/(main)/_ui/date';
 import { IsDirtyAlertDialog, useDirty } from '@/app/(main)/_ui/dirty-context';
 import { Loading, LoadingOverlay } from '@/app/(main)/_ui/loading';
 import { SelectTable } from '@/app/(main)/_ui/table';
@@ -1063,13 +1063,13 @@ export const Order = (props: {
                   name="juchuDat"
                   control={control}
                   render={({ field, fieldState }) => (
-                    <TestDate
+                    <FormDateX
                       onBlur={field.onBlur}
-                      date={field.value}
-                      onChange={(newDate) => field.onChange(newDate?.toDate())}
-                      fieldstate={fieldState}
+                      value={field.value}
+                      onChange={field.onChange}
+                      error={!!fieldState.error}
+                      helperText={fieldState.error?.message}
                       disabled={!edit}
-                      onClear={() => field.onChange(null)}
                     />
                   )}
                 />
