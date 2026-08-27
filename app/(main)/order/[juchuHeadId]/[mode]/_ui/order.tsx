@@ -34,7 +34,7 @@ import {
   Typography,
 } from '@mui/material';
 import { redirect, useRouter } from 'next/navigation';
-import { use, useEffect, useState } from 'react';
+import { use, useEffect, useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 import { set } from 'zod';
@@ -153,10 +153,8 @@ export const Order = (props: {
   // 添付ファイルデータ（フォームのdirtyとは無関係なのでsetIsDirtyは触らない）
   const [tempuList, setTempuList] = useState<TempuValues[]>(props.juchuTempuDatas);
 
-  // 機材テーブル選択行
-  const [selectEq, setSelectEq] = useState<number | null>(null);
-  // 機材選択データ
-  const [selectEqHeader, setSelectEqHeader] = useState<EqTableValues | null>(null);
+  // 機材テーブル選択ID配列
+  const [selectedEqs, setSelectedEqs] = useState<number[]>([]);
   // 車両テーブル選択ID配列
   const [selectedVehs, setSelectedVehs] = useState<number[]>([]);
   // 遷移先path
@@ -166,6 +164,14 @@ export const Order = (props: {
   const { setIsDirty, requestNavigation } = useDirty();
   // 合計金額
   const priceTotal = eqHeaderList!.reduce((sum, row) => sum + (row.shokei ?? 0), 0);
+
+  // 選択されている受注機材ヘッダーデータ
+  const selectedEqHeaders = useMemo(
+    () => eqHeaderList?.filter((d) => selectedEqs.includes(d.juchuKizaiHeadId)) ?? [],
+    [eqHeaderList, selectedEqs]
+  );
+  // 単一選択時の受注機材ヘッダーデータ（複数選択・未選択の場合はnull）
+  const selectEqHeader = selectedEqHeaders.length === 1 ? selectedEqHeaders[0] : null;
 
   /* useForm ------------------------- */
   const {
@@ -387,13 +393,7 @@ export const Order = (props: {
 
       if (lockResult) {
         const path = `/eq-main-order-detail/${props.juchuHeadData.juchuHeadId}/0/edit`;
-        // if (!isDirty) {
-        //   setIsLoading(true);
-        //   router.push(path);
-        // } else {
-        //   setPath(path);
-        //   setDirtyOpen(true);
-        // }
+
         if (!isDirty) setIsLoading(true);
         requestNavigation(path);
       }
@@ -421,23 +421,17 @@ export const Order = (props: {
             (selectEqHeader.yardShukoDat ? selectEqHeader.yardShukoFixFlg === 1 : true)
           ) {
             const path = `/eq-return-order-detail/${props.juchuHeadData.juchuHeadId}/0/${selectEqHeader.juchuKizaiHeadId}/edit`;
-            // if (!isDirty) {
-            //   setIsLoading(true);
-            //   router.push(path);
-            // } else {
-            //   setPath(path);
-            //   setDirtyOpen(true);
-            // }
+
             if (!isDirty) setIsLoading(true);
             requestNavigation(path);
           } else {
             setAlertTitle('選択項目を確認してください');
-            setAlertMessage('出発済のメイン明細を選択してください');
+            setAlertMessage('出発済のメイン明細を1つだけ選択してください');
             setAlertOpen(true);
           }
         } else {
           setAlertTitle('選択項目を確認してください');
-          setAlertMessage('出発済のメイン明細を選択してください');
+          setAlertMessage('出発済のメイン明細を1つだけ選択してください');
           setAlertOpen(true);
         }
       }
@@ -465,23 +459,17 @@ export const Order = (props: {
             (selectEqHeader.yardShukoDat ? selectEqHeader.yardShukoFixFlg === 1 : true)
           ) {
             const path = `/eq-keep-order-detail/${props.juchuHeadData.juchuHeadId}/0/${selectEqHeader.juchuKizaiHeadId}/edit`;
-            // if (!isDirty) {
-            //   setIsLoading(true);
-            //   router.push(path);
-            // } else {
-            //   setPath(path);
-            //   setDirtyOpen(true);
-            // }
+
             if (!isDirty) setIsLoading(true);
             requestNavigation(path);
           } else {
             setAlertTitle('選択項目を確認してください');
-            setAlertMessage('出発済のメイン明細を選択してください');
+            setAlertMessage('出発済のメイン明細を1つだけ選択してください');
             setAlertOpen(true);
           }
         } else {
           setAlertTitle('選択項目を確認してください');
-          setAlertMessage('出発済のメイン明細を選択してください');
+          setAlertMessage('出発済のメイン明細を1つだけ選択してください');
           setAlertOpen(true);
         }
       }
@@ -505,7 +493,7 @@ export const Order = (props: {
           setCopyOpen(true);
         } else {
           setAlertTitle('選択項目を確認してください');
-          setAlertMessage('メイン明細を選択してください');
+          setAlertMessage('メイン明細を1つだけ選択してください');
           setAlertOpen(true);
         }
       }
@@ -519,11 +507,6 @@ export const Order = (props: {
     if (isProcessing) return;
     setIsProcessing(true);
 
-    // const lockResult = await lock();
-
-    // if (lockResult) {
-    //   setCopyOpen(false);
-    // }
     setCopyOpen(false);
     setIsProcessing(false);
   };
@@ -616,30 +599,33 @@ export const Order = (props: {
       const lockResult = await lock();
 
       if (lockResult) {
-        if (!selectEqHeader || !eqHeaderList) {
+        if (selectedEqHeaders.length === 0 || !eqHeaderList) {
           setAlertTitle('選択項目を確認してください');
-          setAlertMessage('受注明細を1つ選択してください');
+          setAlertMessage('受注明細を選択してください');
           setAlertOpen(true);
           setIsProcessing(false);
           return;
         }
 
-        // 選択されたデータの子データ
-        const childData = eqHeaderList.find((d) => d.oyaJuchuKizaiHeadId === selectEqHeader.juchuKizaiHeadId);
+        // 子データ(返却・キープ)を持つ親データは、その子データがすべて選択されている必要がある
+        const hasUnselectedChild = selectedEqHeaders.some((parent) =>
+          eqHeaderList.some(
+            (d) => d.oyaJuchuKizaiHeadId === parent.juchuKizaiHeadId && !selectedEqs.includes(d.juchuKizaiHeadId)
+          )
+        );
 
-        if (childData) {
+        if (hasUnselectedChild) {
           setAlertTitle('選択項目を確認してください');
-          setAlertMessage('返却、キープが紐づいている場合は削除できません');
+          setAlertMessage('返却、キープが紐づく明細をすべて選択してください');
           setAlertOpen(true);
           setIsProcessing(false);
           return;
         }
 
         if (
-          selectEqHeader.kicsShukoFixFlg ||
-          selectEqHeader.yardShukoFixFlg ||
-          selectEqHeader.kicsNyukoFixFlg ||
-          selectEqHeader.yardNyukoFixFlg
+          selectedEqHeaders.some(
+            (d) => d.kicsShukoFixFlg || d.yardShukoFixFlg || d.kicsNyukoFixFlg || d.yardNyukoFixFlg
+          )
         ) {
           setAlertTitle('選択項目を確認してください');
           setAlertMessage('出発済、到着済の受注明細は削除できません');
@@ -670,23 +656,38 @@ export const Order = (props: {
 
       if (lockResult) {
         setKizaiHeadDeleteOpen(false);
-        if (result && selectEqHeader) {
+        if (result && selectedEqHeaders.length > 0) {
           setIsJuchuKizaiLoading(true);
 
-          const deleteResult = await delJuchuMeisai(selectEqHeader.juchuHeadId, selectEqHeader.juchuKizaiHeadId);
+          // 親を先に消すと子が孤児になるため、子データ(返却・キープ)から削除する
+          const deleteTargets = [...selectedEqHeaders].sort(
+            (a, b) => (a.oyaJuchuKizaiHeadId === null ? 1 : 0) - (b.oyaJuchuKizaiHeadId === null ? 1 : 0)
+          );
 
-          if (deleteResult) {
-            setEqHeaderList((prev) =>
-              prev?.filter((data) => data.juchuKizaiHeadId !== selectEqHeader.juchuKizaiHeadId)
-            );
-            setSelectEq(null);
-            setSelectEqHeader(null);
-            setSnackBarMessage('削除しました');
-            setSnackBarOpen(true);
-          } else {
-            setSnackBarMessage('削除に失敗しました');
-            setSnackBarOpen(true);
+          const deletedIds: number[] = [];
+          let deleteFailed = false;
+
+          for (const target of deleteTargets) {
+            const deleteResult = await delJuchuMeisai(target.juchuHeadId, target.juchuKizaiHeadId);
+
+            if (!deleteResult) {
+              deleteFailed = true;
+              break;
+            }
+            deletedIds.push(target.juchuKizaiHeadId);
           }
+
+          if (deletedIds.length > 0) {
+            setEqHeaderList((prev) => prev?.filter((data) => !deletedIds.includes(data.juchuKizaiHeadId)));
+            setSelectedEqs((prev) => prev.filter((id) => !deletedIds.includes(id)));
+          }
+
+          if (deleteFailed) {
+            setSnackBarMessage('削除に失敗しました');
+          } else {
+            setSnackBarMessage('削除しました');
+          }
+          setSnackBarOpen(true);
           setIsJuchuKizaiLoading(false);
         }
       }
@@ -711,14 +712,7 @@ export const Order = (props: {
           : row.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.keep
             ? `/eq-keep-order-detail/${row.juchuHeadId}/${row.juchuKizaiHeadId}/${row.oyaJuchuKizaiHeadId}/${mode}`
             : `/eq-main-order-detail/${row.juchuHeadId}/${row.juchuKizaiHeadId}/${mode}`;
-    // if (!isDirty) {
-    //   if (isLoading) return;
-    //   setIsLoading(true);
-    //   router.push(path);
-    // } else {
-    //   setPath(path);
-    //   setDirtyOpen(true);
-    // }
+
     if (!isDirty) setIsLoading(true);
     requestNavigation(path);
   };
@@ -803,17 +797,7 @@ export const Order = (props: {
     if (!user || isProcessing) return;
     setIsProcessing(true);
 
-    // if (result && path) {
-    //   const lockResult = await lock();
-    //   if (lockResult) {
-    //     if (isLoading) return;
-    //     setIsLoading(true);
-    //     setLockData(null);
-    //     setIsDirty(false);
-    //     router.push(path);
-    //     setPath(null);
-    //   }
-    /*} else*/ if (result /*&& !path*/) {
+    if (result) {
       try {
         await lockRelease(LOCK_SHUBETU.juchuHead, props.juchuHeadData.juchuHeadId, user.name, user.email);
       } catch (e) {
@@ -831,11 +815,9 @@ export const Order = (props: {
     setIsProcessing(false);
   };
 
-  // 受注機材ヘッダー一覧ラジオボタンクリック
-  const handleEqSelectionChange = (selectedId: number) => {
-    const selectData = eqHeaderList?.find((d) => d.juchuKizaiHeadId === selectedId);
-    setSelectEq(selectedId);
-    setSelectEqHeader(selectData!);
+  // 受注機材ヘッダー一覧チェックボックスクリック
+  const handleEqSelectionChange = (selectedIds: number[]) => {
+    setSelectedEqs(selectedIds);
   };
 
   // 公演場所検索ボタン押下
@@ -859,11 +841,6 @@ export const Order = (props: {
     if (isProcessing) return;
     setIsProcessing(true);
 
-    // const lockResult = await lock();
-
-    // if (lockResult) {
-    //   setLocationDialogOpen(false);
-    // }
     setLocationDialogOpen(false);
     setIsProcessing(false);
   };
@@ -908,11 +885,6 @@ export const Order = (props: {
     if (isProcessing) return;
     setIsProcessing(true);
 
-    // const lockResult = await lock();
-
-    // if (lockResult) {
-    //   setCustomerDialogOpen(false);
-    // }
     setCustomerDialogOpen(false);
     setIsProcessing(false);
   };
@@ -1346,7 +1318,7 @@ export const Order = (props: {
                 <OrderEqTable
                   orderEqRows={eqHeaderList}
                   edit={edit}
-                  selectEq={selectEq}
+                  selectedEqs={selectedEqs}
                   onEqSelectionChange={handleEqSelectionChange}
                   handleClickEqOrderName={handleClickEqOrderName}
                 />
@@ -1418,7 +1390,11 @@ export const Order = (props: {
       <IsDirtyAlertDialog open={dirtyOpen} onClick={handleResultDialog} />
       <AlertDialog open={alertOpen} title={alertTitle} message={alertMessage} onClick={() => setAlertOpen(false)} />
       <HeadDeleteConfirmDialog open={headDeleteOpen} onClick={handleHeadDelete} />
-      <KizaiHeadDeleteConfirmDialog open={kizaiHeadDeleteOpen} onClick={handleKizaiHeadDelete} />
+      <KizaiHeadDeleteConfirmDialog
+        open={kizaiHeadDeleteOpen}
+        count={selectedEqHeaders.length}
+        onClick={handleKizaiHeadDelete}
+      />
       <WillDeleteAlertDialog
         open={sharyoHeadDeleteOpen}
         data={`${selectedVehs.length}件の車両明細`}
