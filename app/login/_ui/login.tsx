@@ -58,20 +58,22 @@ const Login = () => {
         const errorLog = new Error('[supabase.auth.signInWithPassword] DBエラー');
         serverErrorLog(errorLog.message);
         setError('メールアドレスかパスワードがちがいます。');
+        setIsLoading(false);
         return;
       }
       const user = await getChosenUser(data.email);
       if (!user) {
         setError('メールアドレスかパスワードがちがいます。');
+        setIsLoading(false);
       } else {
         router.refresh();
         router.push('/dashboard');
-      } // ログイン後のページへリダイレクト
+        // 遷移が完了するまでローディングを解除しない（解除すると遷移前に再度ボタンを押せてしまうため）
+      }
     } catch (e) {
       const errorLog = e as Error;
       await serverErrorLog(errorLog.message);
       setError(`ログインに失敗しました。`);
-    } finally {
       setIsLoading(false);
     }
   };
