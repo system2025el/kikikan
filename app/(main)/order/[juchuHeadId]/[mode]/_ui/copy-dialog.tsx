@@ -7,17 +7,17 @@ import { Controller, useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 
 import { validationMessages } from '@/app/(main)/_lib/validation-messages';
-import { DateTime } from '@/app/(main)/_ui/date';
+import { FormDateX } from '@/app/(main)/_ui/date';
 import { Loading, LoadingOverlay } from '@/app/(main)/_ui/loading';
 
-import { CopyDialogSchema, CopyDialogValue, EqTableValues } from '../_lib/types';
+import { CopyDialogSchema, CopyDialogValue } from '../_lib/types';
 
 export const CopyDialog = ({
-  selectEqHeader,
+  selectedCount,
   handleCopyConfirmed,
   handleCloseCopyDialog,
 }: {
-  selectEqHeader: EqTableValues | null;
+  selectedCount: number;
   handleCopyConfirmed: (data: CopyDialogValue) => Promise<boolean | undefined>;
   handleCloseCopyDialog: () => void;
 }) => {
@@ -25,18 +25,16 @@ export const CopyDialog = ({
   const [isLoading, setIsLoading] = useState(false);
 
   /* useForm ------------------------- */
-  const { control, setError, handleSubmit } = useForm({
+  const { control, setError, handleSubmit } = useForm<CopyDialogValue>({
     mode: 'onChange',
     reValidateMode: 'onChange',
     defaultValues: {
       juchuHeadid: '',
       headNam: '',
-      kicsShukoDat: null,
-      kicsNyukoDat: null,
-      yardShukoDat: null,
-      yardNyukoDat: null,
+      shukoDat: null,
+      nyukoDat: null,
     },
-    resolver: zodResolver(CopyDialogSchema(selectEqHeader)),
+    resolver: zodResolver(CopyDialogSchema),
   });
 
   const onSubmit = async (data: CopyDialogValue) => {
@@ -54,7 +52,7 @@ export const CopyDialog = ({
   return (
     <Container sx={{ p: 1 }}>
       <form onSubmit={handleSubmit(onSubmit)}>
-        <Typography>コピー</Typography>
+        <Typography>{selectedCount > 1 ? `コピー（${selectedCount}件を1明細に合体）` : 'コピー'}</Typography>
         {isLoading && <LoadingOverlay />}
         <Paper variant="outlined">
           <Grid2 container alignItems={'baseline'} spacing={2} p={2} width={'400px'}>
@@ -95,75 +93,44 @@ export const CopyDialog = ({
               <TextFieldElement name="headNam" control={control} />
             </Grid2>
             <Box>
-              <Typography>出庫日時</Typography>
+              <Typography>出庫日</Typography>
               <Grid2>
-                <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
                 <Controller
-                  name="kicsShukoDat"
+                  name="shukoDat"
                   control={control}
                   render={({ field, fieldState }) => (
-                    <DateTime
+                    <FormDateX
                       value={field.value}
                       onChange={field.onChange}
+                      onBlur={field.onBlur}
                       error={!!fieldState.error}
                       helperText={fieldState.error?.message}
-                      disabled={!selectEqHeader?.kicsShukoDat}
-                    />
-                  )}
-                />
-              </Grid2>
-              <Grid2>
-                <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
-                <Controller
-                  name="yardShukoDat"
-                  control={control}
-                  render={({ field, fieldState }) => (
-                    <DateTime
-                      value={field.value}
-                      onChange={field.onChange}
-                      error={!!fieldState.error}
-                      helperText={fieldState.error?.message}
-                      disabled={!selectEqHeader?.yardShukoDat}
                     />
                   )}
                 />
               </Grid2>
             </Box>
             <Box>
-              <Typography>入庫日時</Typography>
+              <Typography>入庫日</Typography>
               <Grid2>
-                <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
                 <Controller
-                  name="kicsNyukoDat"
+                  name="nyukoDat"
                   control={control}
                   render={({ field, fieldState }) => (
-                    <DateTime
+                    <FormDateX
                       value={field.value}
                       onChange={field.onChange}
+                      onBlur={field.onBlur}
                       error={!!fieldState.error}
                       helperText={fieldState.error?.message}
-                      disabled={!selectEqHeader?.kicsNyukoDat}
-                    />
-                  )}
-                />
-              </Grid2>
-              <Grid2>
-                <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
-                <Controller
-                  name="yardNyukoDat"
-                  control={control}
-                  render={({ field, fieldState }) => (
-                    <DateTime
-                      value={field.value}
-                      onChange={field.onChange}
-                      error={!!fieldState.error}
-                      helperText={fieldState.error?.message}
-                      disabled={!selectEqHeader?.yardNyukoDat}
                     />
                   )}
                 />
               </Grid2>
             </Box>
+            <Typography variant="body2" color="text.secondary">
+              コピー先はYARDの出庫・入庫（0:00）で作成されます
+            </Typography>
           </Grid2>
         </Paper>
         <Box display={'flex'} justifyContent={'end'} my={1}>

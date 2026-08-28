@@ -65,6 +65,15 @@ export const toJapanTimeStampString = (input: Date | string | number = new Date(
 };
 
 /**
+ * 日本時間のその日の0時0分のDateに変換する関数
+ * @param {Date | string | number} input 引数無なら現在時刻 Date string number
+ * @returns {Date} 日本時間の00:00のDate
+ */
+export const toJapanStartOfDay = (input: Date | string | number = new Date()): Date => {
+  return dayjs(input).tz('Asia/Tokyo').startOf('day').toDate();
+};
+
+/**
  * 日本時間の曜日に変換する関数
  * @param {Date | string | number} input 引数無なら現在時刻 Date string number
  * @returns {string} 日本時間の曜日の文字列

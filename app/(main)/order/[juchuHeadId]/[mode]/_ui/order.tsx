@@ -41,7 +41,6 @@ import { set } from 'zod';
 
 import { JUCHU_KIZAI_HEAD_KBN, LOCK_SHUBETU } from '@/app/_lib/constants';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
-import { getNyukoDate, getRange, getShukoDate } from '@/app/(main)/_lib/date-funcs';
 import { addLock, getLock } from '@/app/(main)/_lib/funcs';
 import { lockCheck, lockRelease } from '@/app/(main)/_lib/lock';
 import { permission } from '@/app/(main)/_lib/permission';
@@ -489,12 +488,14 @@ export const Order = (props: {
       const lockResult = await lock();
 
       if (lockResult) {
-        if (selectEqHeader && selectEqHeader.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.normal) {
-          setCopyOpen(true);
-        } else {
+        const copyError = validateCopySelection();
+
+        if (copyError) {
           setAlertTitle('選択項目を確認してください');
-          setAlertMessage('メイン明細を1つだけ選択してください');
+          setAlertMessage(copyError);
           setAlertOpen(true);
+        } else {
+          setCopyOpen(true);
         }
       }
     } catch (e) {
@@ -503,6 +504,34 @@ export const Order = (props: {
     }
     setIsProcessing(false);
   };
+
+  /**
+   * コピー可能な選択状態かを判定する
+   * @returns エラーメッセージ（問題なければnull）
+   */
+  const validateCopySelection = () => {
+    if (selectedEqHeaders.length === 0) {
+      return 'コピーする受注明細を選択してください';
+    }
+
+    if (selectedEqHeaders.some((d) => d.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.keep)) {
+      return 'キープ明細はコピーできません';
+    }
+
+    // 返却明細は数量を引くだけなので、引く相手のメイン明細も選択されている必要がある
+    const hasOrphanReturn = selectedEqHeaders.some(
+      (d) =>
+        d.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.return &&
+        (d.oyaJuchuKizaiHeadId === null || !selectedEqs.includes(d.oyaJuchuKizaiHeadId))
+    );
+
+    if (hasOrphanReturn) {
+      return '返却明細をコピーする場合は、紐づくメイン明細も選択してください';
+    }
+
+    return null;
+  };
+
   const handleCloseCopyDialog = async () => {
     if (isProcessing) return;
     setIsProcessing(true);
@@ -516,7 +545,7 @@ export const Order = (props: {
    * @param result ボタン押下結果
    */
   const handleCopyConfirmed = async (data: CopyDialogValue) => {
-    if (!user || !selectEqHeader || isProcessing) return;
+    if (!user || selectedEqHeaders.length === 0 || isProcessing) return;
     setIsProcessing(true);
 
     try {
@@ -536,33 +565,7 @@ export const Order = (props: {
           return false;
         }
 
-        // 出庫日
-        const shukoDate = getShukoDate(
-          data.kicsShukoDat && new Date(data.kicsShukoDat),
-          data.yardShukoDat && new Date(data.yardShukoDat)
-        );
-        // 入庫日
-        const nyukoDate = getNyukoDate(
-          data.kicsNyukoDat && new Date(data.kicsNyukoDat),
-          data.yardNyukoDat && new Date(data.yardNyukoDat)
-        );
-        // 出庫日から入庫日
-        const dateRange = getRange(shukoDate, nyukoDate);
-
-        if (!shukoDate || !nyukoDate) {
-          setIsProcessing(false);
-          return;
-        }
-
-        const copyResult = await copyJuchuKizaiHeadMeisai(
-          selectEqHeader,
-          newJuchuHeadId,
-          data,
-          shukoDate,
-          nyukoDate,
-          dateRange,
-          userNam
-        );
+        const copyResult = await copyJuchuKizaiHeadMeisai(selectedEqHeaders, newJuchuHeadId, data, userNam);
 
         if (copyResult) {
           setCopyOpen(false);
@@ -1304,7 +1307,7 @@ export const Order = (props: {
           </AccordionSummary>
           <Dialog open={copyOpen} sx={{ zIndex: 1201 }}>
             <CopyDialog
-              selectEqHeader={selectEqHeader}
+              selectedCount={selectedEqHeaders.length}
               handleCopyConfirmed={handleCopyConfirmed}
               handleCloseCopyDialog={handleCloseCopyDialog}
             />
