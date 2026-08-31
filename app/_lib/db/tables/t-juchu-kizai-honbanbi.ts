@@ -283,6 +283,32 @@ export const deleteSiyouHonbanbi = async (juchuHeadId: number, juchuKizaiHeadId:
   }
 };
 
+/**
+ * 受注機材本番日(仕込・RH・GP・本番)削除
+ * 受注本番日テンプレートから展開し直す前に、対象ヘッダーの分を一旦消すために使う。
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param connection コネクション
+ */
+export const deleteEventHonbanbi = async (juchuHeadId: number, juchuKizaiHeadId: number, connection: PoolClient) => {
+  const query = `
+    DELETE FROM
+      ${SCHEMA}.t_juchu_kizai_honbanbi
+    WHERE
+      juchu_head_id = $1
+      AND juchu_kizai_head_id = $2
+      AND juchu_honbanbi_shubetu_id = ANY($3)
+  `;
+
+  const values = [juchuHeadId, juchuKizaiHeadId, [10, 20, 30, 40]];
+
+  try {
+    await connection.query(query, values);
+  } catch (e) {
+    throw new Error('[deleteEventHonbanbi] DBエラー:', { cause: e });
+  }
+};
+
 export const deleteJuchuKizaiHonbanbiFromOrder = async (
   juchuHeadId: number,
   juchuKizaiHeadId: number,

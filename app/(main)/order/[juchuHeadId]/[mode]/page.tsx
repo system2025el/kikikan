@@ -4,9 +4,10 @@ import { redirect } from 'next/navigation';
 
 import { getCurrentUser } from '@/app/(main)/_lib/funcs';
 import { permission } from '@/app/(main)/_lib/permission';
+import { getColor } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
 import { Order } from '@/app/(main)/order/[juchuHeadId]/[mode]/_ui/order';
 
-import { getJuchuHead, getJuchuKizaiHeadList, getJuchuSharyoHeadList, getUsers } from './_lib/funcs';
+import { getJuchuHead, getJuchuHonbanbi, getJuchuKizaiHeadList, getJuchuSharyoHeadList, getUsers } from './_lib/funcs';
 import { getJuchuTempuList } from './_lib/tempu-funcs';
 import { EqTableValues, OrderValues, VehicleTableValues } from './_lib/types';
 
@@ -35,7 +36,7 @@ const Page = async (props: { params: Promise<{ juchuHeadId: string; mode: string
     return <Typography>このページを閲覧する権限がありません。</Typography>;
   }
 
-  const userList = await getUsers();
+  const [userList, honbanbiColor] = await Promise.all([getUsers(), getColor()]);
 
   // 新規
   if (juchuHeadId === 0) {
@@ -69,18 +70,22 @@ const Page = async (props: { params: Promise<{ juchuHeadId: string; mode: string
         juchusharyoHeadDatas={newJuchuSharyoHeadData}
         userList={userList}
         juchuTempuDatas={[]}
+        juchuHonbanbiDatas={[]}
+        honbanbiColor={honbanbiColor}
         edit={edit}
       />
     );
     // 既存
   } else {
-    // 受注ヘッダーデータ、受注機材ヘッダーデータ、受注車両ヘッダーデータ、添付ファイルデータ
-    const [juchuHeadData, juchuKizaiHeadDatas, juchuSharyoHeadDatas, juchuTempuDatas] = await Promise.all([
-      getJuchuHead(juchuHeadId),
-      getJuchuKizaiHeadList(juchuHeadId),
-      getJuchuSharyoHeadList(juchuHeadId),
-      getJuchuTempuList(juchuHeadId),
-    ]);
+    // 受注ヘッダーデータ、受注機材ヘッダーデータ、受注車両ヘッダーデータ、添付ファイルデータ、受注本番日データ
+    const [juchuHeadData, juchuKizaiHeadDatas, juchuSharyoHeadDatas, juchuTempuDatas, juchuHonbanbiDatas] =
+      await Promise.all([
+        getJuchuHead(juchuHeadId),
+        getJuchuKizaiHeadList(juchuHeadId),
+        getJuchuSharyoHeadList(juchuHeadId),
+        getJuchuTempuList(juchuHeadId),
+        getJuchuHonbanbi(juchuHeadId),
+      ]);
 
     if (!juchuHeadData) {
       return <div>受注情報が見つかりません。</div>;
@@ -93,6 +98,8 @@ const Page = async (props: { params: Promise<{ juchuHeadId: string; mode: string
         juchusharyoHeadDatas={juchuSharyoHeadDatas}
         userList={userList}
         juchuTempuDatas={juchuTempuDatas}
+        juchuHonbanbiDatas={juchuHonbanbiDatas}
+        honbanbiColor={honbanbiColor}
         edit={edit}
       />
     );

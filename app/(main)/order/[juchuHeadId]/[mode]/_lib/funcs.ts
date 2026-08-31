@@ -24,10 +24,16 @@ import {
 import { deleteJuchuCtnMeisaiFromOrder, insertJuchuContainerMeisai } from '@/app/_lib/db/tables/t-juchu-ctn-meisai';
 import { insertJuchuHead, selectJuchuHead, selectMaxId, updateJuchuHead } from '@/app/_lib/db/tables/t-juchu-head';
 import {
+  deleteJuchuHonbanbi,
+  insertAllJuchuHonbanbi,
+  selectJuchuHonbanbi,
+} from '@/app/_lib/db/tables/t-juchu-honbanbi';
+import {
   deleteJuchuKizaiHead,
   insertJuchuKizaiHead,
   selectJuchuKizaiHead,
   selectJuchuKizaiHeadMaxId,
+  selectNormalKizaiHeadRanges,
 } from '@/app/_lib/db/tables/t-juchu-kizai-head';
 import { deleteJuchuKizaiHonbanbiFromOrder, insertAllHonbanbi } from '@/app/_lib/db/tables/t-juchu-kizai-honbanbi';
 import {
@@ -59,7 +65,9 @@ import { JuchuKizaiNyushuko } from '@/app/_lib/db/types/t-juchu-kizai-nyushuko-t
 import { NyushukoDen } from '@/app/_lib/db/types/t-nyushuko-den-type';
 import { toJapanStartOfDay, toJapanTimeString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { getRange } from '@/app/(main)/_lib/date-funcs';
+import { expandHonbanbiTemplate } from '@/app/(main)/_lib/honbanbi-funcs';
 import { permission } from '@/app/(main)/_lib/permission';
+import { HonbanbiValues } from '@/app/(main)/_lib/types';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 
 import {
@@ -2058,5 +2066,110 @@ export const getUsers = async () => {
       console.error(e);
     }
     throw e;
+  }
+};
+
+/**
+ * 受注本番日テンプレート取得
+ * @param juchuHeadId 受注ヘッダーid
+ * @returns 受注本番日テンプレート
+ */
+export const getJuchuHonbanbi = async (juchuHeadId: number) => {
+  try {
+    const { data, error } = await selectJuchuHonbanbi(juchuHeadId);
+
+    if (error) {
+      throw new Error('[getJuchuHonbanbi] DBエラー:', { cause: error });
+    }
+
+    const honbanbiList: HonbanbiValues[] = data.map((d) => ({
+      juchuHonbanbiShubetuId: d.juchu_honbanbi_shubetu_id,
+      juchuHonbanbiDat: new Date(d.juchu_honbanbi_dat),
+      mem: d.mem,
+      juchuHonbanbiAddQty: d.juchu_honbanbi_add_qty,
+    }));
+
+    return honbanbiList;
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
+    throw e;
+  }
+};
+
+/**
+ * 受注本番日を保存する。
+ * 入力内容を受注ヘッダー単位のテンプレートとして作り直し、
+ * 通常の受注機材ヘッダーそれぞれの出庫日〜入庫日に重なる日付を、そのヘッダーの本番日として展開する。
+ * @param juchuHeadId 受注ヘッダーid
+ * @param honbanbiList 受注本番日リスト
+ * @param userNam ユーザー名
+ * @returns 成功：true　失敗：false
+ */
+export const saveJuchuHonbanbi = async (juchuHeadId: number, honbanbiList: HonbanbiValues[], userNam: string) => {
+  const connection = await pool.connect();
+  const now = new Date().toISOString();
+
+  try {
+    await connection.query('BEGIN');
+
+    // 受注本番日テンプレートを作り直す
+    await deleteJuchuHonbanbi(juchuHeadId, connection);
+
+    if (honbanbiList.length > 0) {
+      await insertAllJuchuHonbanbi(
+        honbanbiList.map((d) => ({
+          juchu_head_id: juchuHeadId,
+          juchu_honbanbi_shubetu_id: d.juchuHonbanbiShubetuId,
+          juchu_honbanbi_dat: toJapanYMDString(d.juchuHonbanbiDat, '-'),
+          mem: d.mem ? d.mem : null,
+          juchu_honbanbi_add_qty: d.juchuHonbanbiAddQty,
+          add_dat: now,
+          add_user: userNam,
+          upd_dat: now,
+          upd_user: userNam,
+        })),
+        connection
+      );
+    }
+
+    // 通常の受注機材ヘッダーへ展開する（返却・キープは対象外）
+    const { rows: heads } = await selectNormalKizaiHeadRanges(juchuHeadId, connection);
+
+    for (const head of heads) {
+      await expandHonbanbiTemplate(
+        juchuHeadId,
+        head.juchuKizaiHeadId,
+        head.shukoDat,
+        head.nyukoDat,
+        honbanbiList,
+        userNam,
+        connection
+      );
+    }
+
+    await connection.query('COMMIT');
+
+    return true;
+  } catch (e) {
+    await connection.query('ROLLBACK');
+
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
+    return false;
+  } finally {
+    connection.release();
   }
 };

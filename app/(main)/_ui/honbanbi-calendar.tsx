@@ -7,11 +7,11 @@ import dayjs from 'dayjs';
 import { useCallback, useMemo, useRef, useState } from 'react';
 
 import { HONBANBI_SHUBETU_ID } from '@/app/_lib/constants';
-import { toJapanYMDAndDayString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 
-import { JuchuKizaiHonbanbiValues } from '../_lib/types';
+import { toJapanYMDAndDayString, toJapanYMDString } from '../_lib/date-conversion';
+import { HonbanbiValues } from '../_lib/types';
 
-/** ブラシで塗り分ける本番日種別（種別1〜3は明細画面の保存で自動生成されるためここでは扱わない） */
+/** ブラシで塗り分ける本番日種別（種別1〜3は入出庫日から自動生成されるためここでは扱わない） */
 const SHUBETU_LIST = [
   { id: HONBANBI_SHUBETU_ID.shikomi, label: '仕込' },
   { id: HONBANBI_SHUBETU_ID.rh, label: 'RH' },
@@ -20,20 +20,19 @@ const SHUBETU_LIST = [
 ];
 
 /**
- * 本番日リストを日付昇順（同日は種別昇順）に並べる。
- * 先頭・末尾が出庫日/入庫日の入力可能範囲（maxDate/minDate）に使われるため、
- * 常に「最も早い日」「最も遅い日」が端に来るようにしておく。
+ * 他種別が入っている日を示すドットの直径(px)
  */
-const sortHonbanbi = (list: JuchuKizaiHonbanbiValues[]) =>
+const DOT_SIZE = 8;
+
+/**
+ * 本番日リストを日付昇順（同日は種別昇順）に並べる
+ * @param list 本番日リスト
+ */
+const sortHonbanbi = (list: HonbanbiValues[]) =>
   [...list].sort((a, b) => {
     const diff = a.juchuHonbanbiDat.getTime() - b.juchuHonbanbiDat.getTime();
     return diff !== 0 ? diff : a.juchuHonbanbiShubetuId - b.juchuHonbanbiShubetuId;
   });
-
-/**
- * 他種別が入っている日を示すドットの直径(px)
- */
-const DOT_SIZE = 8;
 
 type HonbanbiDayProps = PickersDayProps & {
   selectedKeys?: Set<string>;
@@ -68,6 +67,8 @@ const HonbanbiDay = (props: HonbanbiDayProps) => {
                 fontWeight: 'bold',
                 border: '1px solid rgba(0, 0, 0, 0.3)',
                 '&:hover, &:focus': { bgcolor: brushColor },
+                // 閲覧のみでも選択状態が薄くならないようにする
+                '&.Mui-disabled': { bgcolor: brushColor, color: 'text.primary' },
               }
             : undefined
         }
@@ -104,16 +105,18 @@ const HonbanbiDay = (props: HonbanbiDayProps) => {
 };
 
 type HonbanbiCalendarProps = {
-  juchuHeadId: number;
-  juchuKizaiHeadId: number;
-  shukoDate: Date | null;
-  nyukoDate: Date | null;
-  juchuHonbanbiList: JuchuKizaiHonbanbiValues[];
-  juchuHonbanbiDeleteList: JuchuKizaiHonbanbiValues[];
+  /** 表示・編集する本番日リスト */
+  honbanbiList: HonbanbiValues[];
+  /** 種別ID → 色 */
   shubetuColorMap: Map<number, string>;
-  edit: boolean;
-  onChange: (list: JuchuKizaiHonbanbiValues[], deleteList: JuchuKizaiHonbanbiValues[]) => void;
-  lock: () => Promise<boolean | React.JSX.Element | undefined>;
+  /** 閲覧のみ（明細画面など）。trueなら日付・追加日数・メモを変更できない */
+  readOnly?: boolean;
+  /** カレンダーの初期表示月。未指定なら最初の本番日、それも無ければ当月 */
+  referenceDate?: Date | null;
+  /** 変更時。readOnly のときは呼ばれない */
+  onChange?: (list: HonbanbiValues[]) => void;
+  /** 最初の編集時に呼ばれる。falseを返すと変更を適用しない（ロック取得失敗時など） */
+  onBeforeEdit?: () => Promise<boolean>;
 };
 
 /**
@@ -122,42 +125,44 @@ type HonbanbiCalendarProps = {
  * 変更は都度 onChange で親に返し、DBへの反映は画面の保存ボタンが行う。
  */
 export const HonbanbiCalendar = ({
-  juchuHeadId,
-  juchuKizaiHeadId,
-  shukoDate,
-  nyukoDate,
-  juchuHonbanbiList,
-  juchuHonbanbiDeleteList,
+  honbanbiList,
   shubetuColorMap,
-  edit,
+  readOnly,
+  referenceDate,
   onChange,
-  lock,
+  onBeforeEdit,
 }: HonbanbiCalendarProps) => {
   // 塗る種別（ブラシ）
   const [shubetuId, setShubetuId] = useState<number>(HONBANBI_SHUBETU_ID.shikomi);
-  // ロック取得済みか
-  const lockedRef = useRef(false);
-  // ロック取得中のPromise（連続操作で多重に叩かないよう共有する）
-  const lockPromiseRef = useRef<Promise<boolean> | null>(null);
+  // 編集前処理が済んでいるか
+  const beforeEditDoneRef = useRef(false);
+  // 編集前処理中のPromise（連続操作で多重に走らせないよう共有する）
+  const beforeEditPromiseRef = useRef<Promise<boolean> | null>(null);
 
   // カレンダーの初期表示月
-  const referenceDate = useMemo(() => (shukoDate ? dayjs(shukoDate) : dayjs()), [shukoDate]);
+  const calendarStart = useMemo(() => {
+    if (referenceDate) return dayjs(referenceDate);
+    const sorted = sortHonbanbi(honbanbiList);
+    return sorted.length > 0 ? dayjs(sorted[0].juchuHonbanbiDat) : dayjs();
+    // 初期表示月は最初の描画時にだけ決めたいので honbanbiList の変化では追従させない
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [referenceDate]);
 
   // ブラシ中の種別で選択済みの日付
   const selectedKeys = useMemo(
     () =>
       new Set(
-        juchuHonbanbiList
+        honbanbiList
           .filter((d) => d.juchuHonbanbiShubetuId === shubetuId)
           .map((d) => toJapanYMDString(d.juchuHonbanbiDat))
       ),
-    [juchuHonbanbiList, shubetuId]
+    [honbanbiList, shubetuId]
   );
 
   // 日付 → ブラシ中以外の種別（セル下部のドット用）
   const otherShubetuMap = useMemo(() => {
     const map = new Map<string, number[]>();
-    juchuHonbanbiList.forEach((d) => {
+    honbanbiList.forEach((d) => {
       if (d.juchuHonbanbiShubetuId === shubetuId) return;
       if (!SHUBETU_LIST.some((s) => s.id === d.juchuHonbanbiShubetuId)) return;
 
@@ -171,46 +176,40 @@ export const HonbanbiCalendar = ({
       }
     });
     return map;
-  }, [juchuHonbanbiList, shubetuId]);
+  }, [honbanbiList, shubetuId]);
 
-  // ブラシ中の種別の一覧（追加日数・メモの入力欄）
-  const rows = useMemo(
-    () =>
-      juchuHonbanbiList
-        .filter((d) => d.juchuHonbanbiShubetuId === shubetuId)
-        .sort((a, b) => a.juchuHonbanbiDat.getTime() - b.juchuHonbanbiDat.getTime()),
-    [juchuHonbanbiList, shubetuId]
-  );
+  // 全種別の一覧（追加日数・メモの入力欄）。ブラシの種別に関わらず日付順に並べる
+  const rows = useMemo(() => sortHonbanbi(honbanbiList), [honbanbiList]);
 
   /**
-   * 最初の編集時だけロックを取得する。
-   * 取得できなければ親側で編集不可＋警告になるので、その場合は変更を適用しない。
+   * 最初の編集時だけ onBeforeEdit を実行する
    */
-  const ensureLock = useCallback(async () => {
-    if (lockedRef.current) return true;
+  const ensureBeforeEdit = useCallback(async () => {
+    if (!onBeforeEdit) return true;
+    if (beforeEditDoneRef.current) return true;
 
-    if (!lockPromiseRef.current) {
-      lockPromiseRef.current = lock().then((result) => {
-        lockedRef.current = !!result;
-        lockPromiseRef.current = null;
-        return !!result;
+    if (!beforeEditPromiseRef.current) {
+      beforeEditPromiseRef.current = onBeforeEdit().then((result) => {
+        beforeEditDoneRef.current = result;
+        beforeEditPromiseRef.current = null;
+        return result;
       });
     }
-    return lockPromiseRef.current;
-  }, [lock]);
+    return beforeEditPromiseRef.current;
+  }, [onBeforeEdit]);
 
   /**
-   * ロックを確認してから変更を適用する
+   * 編集前処理を確認してから変更を適用する
    * @param apply 変更後のリストを返す関数
    */
   const applyChange = useCallback(
-    async (apply: () => [JuchuKizaiHonbanbiValues[], JuchuKizaiHonbanbiValues[]]) => {
-      if (!(await ensureLock())) return;
+    async (apply: () => HonbanbiValues[]) => {
+      if (readOnly || !onChange) return;
+      if (!(await ensureBeforeEdit())) return;
 
-      const [list, deleteList] = apply();
-      onChange(list, deleteList);
+      onChange(apply());
     },
-    [ensureLock, onChange]
+    [readOnly, onChange, ensureBeforeEdit]
   );
 
   /**
@@ -219,43 +218,38 @@ export const HonbanbiCalendar = ({
    */
   const handleToggleDate = (date: Date) => {
     const key = toJapanYMDString(date);
-    const isSameCell = (d: JuchuKizaiHonbanbiValues) =>
+    const isSameCell = (d: HonbanbiValues) =>
       d.juchuHonbanbiShubetuId === shubetuId && toJapanYMDString(d.juchuHonbanbiDat) === key;
 
     void applyChange(() => {
-      if (juchuHonbanbiList.some(isSameCell)) {
-        return [
-          juchuHonbanbiList.filter((d) => !isSameCell(d)),
-          [...juchuHonbanbiDeleteList, ...juchuHonbanbiList.filter(isSameCell)],
-        ];
+      if (honbanbiList.some(isSameCell)) {
+        return honbanbiList.filter((d) => !isSameCell(d));
       }
 
-      const added: JuchuKizaiHonbanbiValues = {
-        juchuHeadId: juchuHeadId,
-        juchuKizaiHeadId: juchuKizaiHeadId,
+      const added: HonbanbiValues = {
         juchuHonbanbiShubetuId: shubetuId,
         juchuHonbanbiDat: new Date(key),
         mem: '',
         juchuHonbanbiAddQty: 0,
       };
-      // 一度消してから同じ日を入れ直した場合、削除リストに残っていると
-      // 保存時にDELETE→UPDATE(0件)となって行が消えるため、削除リストから外す
-      return [sortHonbanbi([...juchuHonbanbiList, added]), juchuHonbanbiDeleteList.filter((d) => !isSameCell(d))];
+      return sortHonbanbi([...honbanbiList, added]);
     });
   };
 
   /**
    * 追加日数・メモの更新
+   * @param targetShubetuId 対象の種別id
    * @param key 対象の日付キー
    * @param values 更新する値
    */
-  const handleRowChange = (key: string, values: Partial<JuchuKizaiHonbanbiValues>) => {
-    void applyChange(() => [
-      juchuHonbanbiList.map((d) =>
-        d.juchuHonbanbiShubetuId === shubetuId && toJapanYMDString(d.juchuHonbanbiDat) === key ? { ...d, ...values } : d
-      ),
-      juchuHonbanbiDeleteList,
-    ]);
+  const handleRowChange = (targetShubetuId: number, key: string, values: Partial<HonbanbiValues>) => {
+    void applyChange(() =>
+      honbanbiList.map((d) =>
+        d.juchuHonbanbiShubetuId === targetShubetuId && toJapanYMDString(d.juchuHonbanbiDat) === key
+          ? { ...d, ...values }
+          : d
+      )
+    );
   };
 
   return (
@@ -290,15 +284,9 @@ export const HonbanbiCalendar = ({
       <Box display="flex" gap={4} flexWrap="wrap" alignItems="flex-start">
         <DateCalendar
           value={null}
-          referenceDate={referenceDate}
+          referenceDate={calendarStart}
           views={['day']}
-          disabled={!edit}
-          // 出庫日〜入庫日の外は選べない（従来の minDate/maxDate と同じ制約）
-          shouldDisableDate={(date) => {
-            if (!shukoDate || !nyukoDate) return true;
-            const key = toJapanYMDString(date.toDate());
-            return key < toJapanYMDString(shukoDate) || key > toJapanYMDString(nyukoDate);
-          }}
+          readOnly={readOnly}
           onChange={(date) => date && handleToggleDate(date.toDate())}
           slots={{ day: HonbanbiDay }}
           slotProps={
@@ -317,36 +305,61 @@ export const HonbanbiCalendar = ({
         <Box flexGrow={1} minWidth={320}>
           {rows.length === 0 ? (
             <Typography color="text.secondary" py={2}>
-              {shukoDate && nyukoDate
-                ? 'カレンダーの日付をクリックして追加してください'
-                : '出庫日と入庫日を設定すると入力できます'}
+              {readOnly ? '設定されていません' : 'カレンダーの日付をクリックして追加してください'}
             </Typography>
           ) : (
             <>
               <Grid2 container spacing={2} alignItems="center">
-                <Grid2 size={4} maxWidth={150}>
+                <Grid2 size={2} maxWidth={70}>
+                  <Typography>種別</Typography>
+                </Grid2>
+                <Grid2 size={3} maxWidth={150}>
                   <Typography>日付</Typography>
                 </Grid2>
                 <Grid2 size={2} maxWidth={80}>
                   <Typography>追加日数</Typography>
                 </Grid2>
-                <Grid2 size={6} maxWidth={250}>
+                <Grid2 size={5} maxWidth={250}>
                   <Typography>メモ</Typography>
                 </Grid2>
               </Grid2>
               {rows.map((row) => {
                 const key = toJapanYMDString(row.juchuHonbanbiDat);
+                const shubetu = SHUBETU_LIST.find((s) => s.id === row.juchuHonbanbiShubetuId);
                 return (
-                  <Grid2 key={key} container spacing={2} alignItems="center" py={0.5}>
-                    <Grid2 size={4} maxWidth={150}>
+                  <Grid2
+                    key={`${row.juchuHonbanbiShubetuId}-${key}`}
+                    container
+                    spacing={2}
+                    alignItems="center"
+                    py={0.5}
+                  >
+                    <Grid2 size={2} maxWidth={70}>
+                      <Box
+                        sx={{
+                          bgcolor: shubetuColorMap.get(row.juchuHonbanbiShubetuId),
+                          border: '1px solid rgba(0, 0, 0, 0.2)',
+                          borderRadius: 1,
+                          textAlign: 'center',
+                          px: 1,
+                        }}
+                      >
+                        <Typography fontSize="small">{shubetu?.label}</Typography>
+                      </Box>
+                    </Grid2>
+                    <Grid2 size={3} maxWidth={150}>
                       <Typography>{toJapanYMDAndDayString(row.juchuHonbanbiDat)}</Typography>
                     </Grid2>
                     <Grid2 size={2} maxWidth={80}>
                       <TextField
                         value={row.juchuHonbanbiAddQty ?? 0}
-                        onChange={(e) => handleRowChange(key, { juchuHonbanbiAddQty: Number(e.target.value) })}
+                        onChange={(e) =>
+                          handleRowChange(row.juchuHonbanbiShubetuId, key, {
+                            juchuHonbanbiAddQty: Number(e.target.value),
+                          })
+                        }
                         type="number"
-                        disabled={!edit}
+                        disabled={readOnly}
                         onFocus={(e) => e.target.select()}
                         sx={{
                           width: '60px',
@@ -358,11 +371,11 @@ export const HonbanbiCalendar = ({
                         }}
                       />
                     </Grid2>
-                    <Grid2 size={6} maxWidth={250}>
+                    <Grid2 size={5} maxWidth={250}>
                       <TextField
                         value={row.mem ?? ''}
-                        onChange={(e) => handleRowChange(key, { mem: e.target.value })}
-                        disabled={!edit}
+                        onChange={(e) => handleRowChange(row.juchuHonbanbiShubetuId, key, { mem: e.target.value })}
+                        disabled={readOnly}
                         fullWidth
                       />
                     </Grid2>

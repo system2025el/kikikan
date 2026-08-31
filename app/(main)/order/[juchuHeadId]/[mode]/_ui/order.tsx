@@ -45,12 +45,14 @@ import { addLock, getLock } from '@/app/(main)/_lib/funcs';
 import { lockCheck, lockRelease } from '@/app/(main)/_lib/lock';
 import { permission } from '@/app/(main)/_lib/permission';
 import { openOrFocusTab } from '@/app/(main)/_lib/tab-focus';
-import { LockValues, User } from '@/app/(main)/_lib/types';
+import { HonbanbiValues, LockValues, User } from '@/app/(main)/_lib/types';
 import { BackButton } from '@/app/(main)/_ui/buttons';
 import { FormDateX, RSuiteDateRangePicker } from '@/app/(main)/_ui/date';
 import { IsDirtyAlertDialog, useDirty } from '@/app/(main)/_ui/dirty-context';
+import { HonbanbiCalendar } from '@/app/(main)/_ui/honbanbi-calendar';
 import { Loading, LoadingOverlay } from '@/app/(main)/_ui/loading';
 import { SelectTable } from '@/app/(main)/_ui/table';
+import { HonbanbiColorValues } from '@/app/(main)/(eq-order-detail)/eq-keep-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[oyaJuchuKizaiHeadId]/[mode]/_lib/types';
 import { WillDeleteAlertDialog } from '@/app/(main)/(masters)/_ui/dialogs';
 import { equipmentRows, users, vehicleHeaders, vehicleRows } from '@/app/(main)/order/[juchuHeadId]/[mode]/_lib/data';
 import { delJuchuSharyoMeisais } from '@/app/(main)/vehicle-order-detail/[jhid]/[jshid]/[mode]/_lib/funcs';
@@ -62,9 +64,11 @@ import {
   delJuchuHead,
   delJuchuMeisai,
   getJuchuHead,
+  getJuchuHonbanbi,
   getJuchuKizaiHeadList,
   getJuchuSharyoHeadList,
   getMaxId,
+  saveJuchuHonbanbi,
   updJuchuHead,
 } from '../_lib/funcs';
 import {
@@ -91,6 +95,8 @@ export const Order = (props: {
   juchusharyoHeadDatas: VehicleTableValues[] | undefined;
   userList: UsersValue[];
   juchuTempuDatas: TempuValues[];
+  juchuHonbanbiDatas: HonbanbiValues[];
+  honbanbiColor: HonbanbiColorValues[];
   edit: boolean;
   //lockData: LockValues | null;
 }) => {
@@ -152,6 +158,13 @@ export const Order = (props: {
   // 添付ファイルデータ（フォームのdirtyとは無関係なのでsetIsDirtyは触らない）
   const [tempuList, setTempuList] = useState<TempuValues[]>(props.juchuTempuDatas);
 
+  // 受注本番日元データ
+  const [originHonbanbiList, setOriginHonbanbiList] = useState<HonbanbiValues[]>(props.juchuHonbanbiDatas);
+  // 受注本番日リスト
+  const [honbanbiList, setHonbanbiList] = useState<HonbanbiValues[]>(props.juchuHonbanbiDatas);
+  // 本番日アコーディオン制御
+  const [honbanbiExpanded, setHonbanbiExpanded] = useState(true);
+
   // 機材テーブル選択ID配列
   const [selectedEqs, setSelectedEqs] = useState<number[]>([]);
   // 車両テーブル選択ID配列
@@ -171,6 +184,21 @@ export const Order = (props: {
   );
   // 単一選択時の受注機材ヘッダーデータ（複数選択・未選択の場合はnull）
   const selectEqHeader = selectedEqHeaders.length === 1 ? selectedEqHeaders[0] : null;
+
+  // 本番日種別Map
+  const shubetuColorMap = useMemo(() => {
+    const map = new Map<number, string>();
+    props.honbanbiColor.forEach((d) => {
+      map.set(d.colorId, d.colorNam);
+    });
+    return map;
+  }, [props.honbanbiColor]);
+
+  // 本番日が変更されているか（react-hook-formの管理外なので自前で判定する）
+  const honbanbiDirty = useMemo(
+    () => JSON.stringify(originHonbanbiList) !== JSON.stringify(honbanbiList),
+    [originHonbanbiList, honbanbiList]
+  );
 
   /* useForm ------------------------- */
   const {
@@ -208,8 +236,11 @@ export const Order = (props: {
     resolver: zodResolver(OrderSchema),
   });
 
+  // フォームと本番日を合わせた変更有無
+  const dirty = isDirty || honbanbiDirty;
+
   // ブラウザバック、F5、×ボタンでページを離れた際のhook
-  useUnsavedChangesWarning(isDirty);
+  useUnsavedChangesWarning(dirty);
 
   // ロック制御
   const lock = async () => {
@@ -237,11 +268,12 @@ export const Order = (props: {
       setAlertTitle('編集中');
       setAlertMessage(`${lockData.addUser}が編集中です`);
       setAlertOpen(true);
-      // 受注ヘッダーデータ、受注機材ヘッダーデータ、受注車両ヘッダーデータ
-      const [juchuHeadData, juchuKizaiHeadDatas, juchuSharyoHeadDatas] = await Promise.all([
+      // 受注ヘッダーデータ、受注機材ヘッダーデータ、受注車両ヘッダーデータ、受注本番日データ
+      const [juchuHeadData, juchuKizaiHeadDatas, juchuSharyoHeadDatas, juchuHonbanbiDatas] = await Promise.all([
         getJuchuHead(getValues('juchuHeadId')),
         getJuchuKizaiHeadList(getValues('juchuHeadId')),
         getJuchuSharyoHeadList(getValues('juchuHeadId')),
+        getJuchuHonbanbi(getValues('juchuHeadId')),
       ]);
       if (!juchuHeadData) {
         return <div>受注情報が見つかりません。</div>;
@@ -249,6 +281,8 @@ export const Order = (props: {
       reset(juchuHeadData);
       setEqHeaderList(juchuKizaiHeadDatas);
       setVehicleHeaderList(juchuSharyoHeadDatas);
+      setOriginHonbanbiList(juchuHonbanbiDatas);
+      setHonbanbiList(juchuHonbanbiDatas);
       return false;
     } catch (e) {
       throw e;
@@ -289,8 +323,16 @@ export const Order = (props: {
       // 更新
     } else {
       const updateResult = await updJuchuHead(data, user.name);
-      if (updateResult) {
+
+      // 本番日はフォーム外で管理しているため、受注ヘッダーの保存が通ってから別途保存する
+      const honbanbiResult = updateResult ? await saveJuchuHonbanbi(data.juchuHeadId, honbanbiList, user.name) : false;
+
+      if (updateResult && honbanbiResult) {
         reset(data);
+        setOriginHonbanbiList(honbanbiList);
+        // 本番日の展開で各ヘッダーの本番日数・金額が変わるため一覧を取り直す
+        const juchuKizaiHeadDatas = await getJuchuKizaiHeadList(data.juchuHeadId);
+        setEqHeaderList(juchuKizaiHeadDatas);
         setIsLoading(false);
         setSnackBarMessage('保存しました');
         setSnackBarOpen(true);
@@ -309,7 +351,7 @@ export const Order = (props: {
     if (!user) return;
     // 編集→閲覧
     if (edit) {
-      if (isDirty) {
+      if (dirty) {
         setDirtyOpen(true);
         return;
       }
@@ -949,8 +991,8 @@ export const Order = (props: {
   }, [user]);
 
   useEffect(() => {
-    setIsDirty(isDirty);
-  }, [isDirty, setIsDirty]);
+    setIsDirty(dirty);
+  }, [dirty, setIsDirty]);
 
   if (isLoading) return <LoadingOverlay />;
 
@@ -994,7 +1036,7 @@ export const Order = (props: {
                 onClick={() => {
                   openOrFocusTab(`/quotation-list/create?juchuId=${getValues('juchuHeadId')}`);
                 }}
-                disabled={isDirty || !(user && user?.permission.juchu & permission.juchu_upd)}
+                disabled={dirty || !(user && user?.permission.juchu & permission.juchu_upd)}
               >
                 <CreateIcon fontSize="small" />
                 見積作成
@@ -1218,6 +1260,40 @@ export const Order = (props: {
           />
         </Dialog>
       </Paper>
+      {/* --------------------------------本番日------------------------------------- */}
+      {save && (
+        <Accordion
+          expanded={honbanbiExpanded}
+          onChange={() => setHonbanbiExpanded(!honbanbiExpanded)}
+          sx={{ marginTop: 2, borderRadius: 1, overflow: 'hidden' }}
+          variant="outlined"
+        >
+          <AccordionSummary
+            expandIcon={<ExpandMoreIcon />}
+            component="div"
+            sx={{
+              minHeight: '30px',
+              maxHeight: '30px',
+              '&.Mui-expanded': {
+                minHeight: '30px',
+                maxHeight: '30px',
+              },
+            }}
+          >
+            <Typography>本番日</Typography>
+          </AccordionSummary>
+          <AccordionDetails sx={{ padding: 0 }}>
+            <Divider />
+            <HonbanbiCalendar
+              honbanbiList={honbanbiList}
+              shubetuColorMap={shubetuColorMap}
+              readOnly={!edit}
+              onChange={setHonbanbiList}
+              onBeforeEdit={async () => !!(await lock())}
+            />
+          </AccordionDetails>
+        </Accordion>
+      )}
       {/* --------------------------------受注明細（機材）------------------------------------- */}
       {save && (
         <Accordion sx={{ marginTop: 2, borderRadius: 1, overflow: 'hidden' }} defaultExpanded variant="outlined">
