@@ -30,6 +30,11 @@ const sortHonbanbi = (list: JuchuKizaiHonbanbiValues[]) =>
     return diff !== 0 ? diff : a.juchuHonbanbiShubetuId - b.juchuHonbanbiShubetuId;
   });
 
+/**
+ * 他種別が入っている日を示すドットの直径(px)
+ */
+const DOT_SIZE = 8;
+
 type HonbanbiDayProps = PickersDayProps & {
   selectedKeys?: Set<string>;
   otherShubetuMap?: Map<string, number[]>;
@@ -84,8 +89,8 @@ const HonbanbiDay = (props: HonbanbiDayProps) => {
             <Box
               key={id}
               sx={{
-                width: 5,
-                height: 5,
+                width: DOT_SIZE,
+                height: DOT_SIZE,
                 borderRadius: '50%',
                 bgcolor: shubetuColorMap?.get(id) ?? 'grey.500',
                 border: '1px solid rgba(0, 0, 0, 0.2)',
