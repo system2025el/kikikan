@@ -26,8 +26,14 @@ import { TextFieldElement } from 'react-hook-form-mui';
 import { BASHO_ID, NYUSHUKO_SHUBETU_ID } from '@/app/_lib/constants';
 
 import { weeklyColors } from '../../_lib/colors';
-import { toJapanDayString, toJapanHHmmString, toJapanYMDAndDayString } from '../../_lib/date-conversion';
+import {
+  toJapanDayString,
+  toJapanHHmmString,
+  toJapanYMDAndDayString,
+  toJapanYMDString,
+} from '../../_lib/date-conversion';
 import { permission } from '../../_lib/permission';
+import { openOrFocusTab } from '../../_lib/tab-focus';
 import { User } from '../../_lib/types';
 import { FormDateX } from '../../_ui/date';
 import { LoadingOverlay } from '../../_ui/loading';
@@ -76,6 +82,12 @@ export const Schedule = ({ user }: { user: User }) => {
   const startDate = useWatch({ control, name: 'startDate' });
   const endDate = useWatch({ control, name: 'endDate' });
 
+  /* permission ---------------------------------------------------------- */
+  /** 入出庫一覧の参照権限 */
+  const canRefNyushuko = !!(user?.permission.nyushuko & permission.nyushuko_ref);
+  /** 受注(伝票)画面の参照権限 */
+  const canRefJuchu = !!(user?.permission.juchu & permission.juchu_ref);
+
   // useEffect(() => {
   //   if (startDate && endDate) {
   //     // 終了日 - 開始日の計算
@@ -110,6 +122,38 @@ export const Schedule = ({ user }: { user: User }) => {
   const handleClickDateHead = (data: WeeklyValues) => {
     setSelectedDatas(data);
     setDialogOpen(true);
+  };
+
+  /**
+   * 積み/降ろし・車両の列をクリックしたときの処理。
+   * 積み(出庫)なら出庫一覧、降ろし(入庫)なら入庫一覧を、受注番号と入出庫日で絞り込んだ状態で別タブに開く。
+   * 一覧側は sessionStorage の検索条件を読んで初期表示するため、遷移前に書き込む。
+   */
+  const handleClickNyushuko = (juchuHeadId: number, nyushukoShubetuId: number | null, nyushukoDat: string | null) => {
+    if (!canRefNyushuko) return;
+
+    const isShuko = nyushukoShubetuId === NYUSHUKO_SHUBETU_ID.shuko;
+    // 入出庫日はその明細の1日だけに絞る（指定期間のfrom/toに同じ日を入れる）。
+    // 一覧側はDatePickerで手入力されたDateを想定しているため、同じ「ローカル0時のDate」の形にそろえる
+    const nyushukoDate = nyushukoDat ? dayjs(toJapanYMDString(nyushukoDat, '-')).toDate() : null;
+    sessionStorage.setItem(
+      isShuko ? 'shukoListSearchParams' : 'nyukoListSearchParams',
+      JSON.stringify({
+        selectedDate: { value: '4', range: { from: nyushukoDate, to: nyushukoDate } },
+        juchuHeadId: juchuHeadId,
+        [isShuko ? 'shukoBasho' : 'nyukoBasho']: 0,
+        kokyaku: '',
+        koenNam: '',
+        section: [],
+      })
+    );
+    openOrFocusTab(isShuko ? '/shuko-list' : '/nyuko-list');
+  };
+
+  /** 顧客名・公演名・車両ヘッダー名の列をクリックしたときの処理。受注(伝票)画面を別タブに開く */
+  const handleClickJuchu = (juchuHeadId: number) => {
+    if (!canRefJuchu) return;
+    openOrFocusTab(`/order/${juchuHeadId}/view`);
   };
 
   /* useEffect ----------------------------------------------------------- */
@@ -393,114 +437,78 @@ export const Schedule = ({ user }: { user: User }) => {
                         <Box
                           key={index}
                           width={1}
+                          display={'flex'}
                           sx={{
                             borderBottom: 1, // date.timeDatas.length === 1 || index + 1 !== date.timeDatas.length ? 1 : undefined,
-                            alignItems: 'start',
+                            alignItems: 'stretch',
                           }}
                         >
-                          <Box height={20.1} display={'flex'}>
-                            <Box justifyContent={'center'} width={45} sx={styles.boxStyle} /*fontSize={'0.75rem'}*/>
+                          {/* 時刻列（リンクなし） */}
+                          <Box width={45} /*fontSize={'0.75rem'}*/>
+                            <Box height={20.1} justifyContent={'center'} sx={styles.boxStyle}>
                               {time.nyushukoDat ? toJapanHHmmString(time.nyushukoDat) : ''}
                             </Box>
-                            <Divider orientation="vertical" />
-                            <Box
-                              width={55}
-                              sx={styles.boxStyle}
-                              bgcolor={
-                                time.nyushukoShubetuId === NYUSHUKO_SHUBETU_ID.shuko
-                                  ? weeklyColors.shuko
-                                  : weeklyColors.nyuko
-                              }
-                              pl={0.5}
-                              //fontSize={'0.75rem'}
-                            >
+                            <Divider />
+                            <Box height={20.1} />
+                            <Divider />
+                            <Box height={20.1} />
+                          </Box>
+                          <Divider orientation="vertical" flexItem />
+                          {/* 積み/降ろし・車両列：クリックで入出庫一覧を別タブに開く */}
+                          <Box
+                            width={55}
+                            bgcolor={
+                              time.nyushukoShubetuId === NYUSHUKO_SHUBETU_ID.shuko
+                                ? weeklyColors.shuko
+                                : weeklyColors.nyuko
+                            }
+                            //fontSize={'0.75rem'}
+                            sx={linkColumnSx(canRefNyushuko)}
+                            onClick={() =>
+                              handleClickNyushuko(time.juchuHeadId, time.nyushukoShubetuId, time.nyushukoDat)
+                            }
+                          >
+                            <Box height={20.1} pl={0.5} sx={styles.boxStyle}>
                               {time.nyushukoShubetuId === NYUSHUKO_SHUBETU_ID.shuko ? '積み' : '降ろし'}
                             </Box>
-                            <Divider orientation="vertical" />
-                            <Box
-                              width={165}
-                              sx={styles.boxStyle}
-                              bgcolor={
-                                time.nyushukoBashoId === BASHO_ID.kics
-                                  ? weeklyColors.kics
-                                  : time.nyushukoBashoId === BASHO_ID.others
-                                    ? weeklyColors.atsugi
-                                    : weeklyColors.yard
-                              }
-                              pl={'5px'}
-                            >
+                            <Divider />
+                            <Box height={20.1} pl={0.5} sx={styles.boxStyle}>
+                              {time.sharyos[0]?.nam ?? ''}
+                              {time.sharyos[0]?.daisu > 1 ? `×${time.sharyos[0]?.daisu}` : ''}
+                            </Box>
+                            <Divider />
+                            <Box height={20.1} pl={0.5} sx={styles.boxStyle}>
+                              {time.sharyos[1]?.nam ?? ''}
+                              {time.sharyos[1]?.daisu > 1 ? `×${time.sharyos[1]?.daisu}` : ''}
+                            </Box>
+                          </Box>
+                          <Divider orientation="vertical" flexItem />
+                          {/* 顧客名・公演名・車両ヘッダー名列：クリックで受注(伝票)画面を別タブに開く */}
+                          <Box
+                            width={165}
+                            bgcolor={
+                              time.nyushukoBashoId === BASHO_ID.kics
+                                ? weeklyColors.kics
+                                : time.nyushukoBashoId === BASHO_ID.others
+                                  ? weeklyColors.atsugi
+                                  : weeklyColors.yard
+                            }
+                            sx={linkColumnSx(canRefJuchu)}
+                            onClick={() => handleClickJuchu(time.juchuHeadId)}
+                          >
+                            <Box height={20.1} pl={'5px'} sx={styles.boxStyle}>
                               <LightTooltipWithText variant={'body2'} maxWidth={160}>
                                 {time.kokyakuNam}
                               </LightTooltipWithText>
                             </Box>
-                          </Box>
-                          <Divider variant="fullWidth" />
-                          <Box height={20.1} display={'flex'}>
-                            <Box justifyContent={'center'} width={45} sx={styles.boxStyle} />
-                            <Divider orientation="vertical" />
-                            <Box
-                              width={55}
-                              sx={styles.boxStyle}
-                              bgcolor={
-                                time.nyushukoShubetuId === NYUSHUKO_SHUBETU_ID.shuko
-                                  ? weeklyColors.shuko
-                                  : weeklyColors.nyuko
-                              }
-                              pl={0.5}
-                              //fontSize={'0.75rem'}
-                            >
-                              {time.sharyos[0]?.nam ?? ''}
-                              {time.sharyos[0]?.daisu > 1 ? `×${time.sharyos[0]?.daisu}` : ''}
-                            </Box>
-                            <Divider orientation="vertical" />
-                            <Box
-                              width={165}
-                              sx={styles.boxStyle}
-                              bgcolor={
-                                time.nyushukoBashoId === BASHO_ID.kics
-                                  ? weeklyColors.kics
-                                  : time.nyushukoBashoId === BASHO_ID.others
-                                    ? weeklyColors.atsugi
-                                    : weeklyColors.yard
-                              }
-                              pl={'5px'}
-                            >
+                            <Divider />
+                            <Box height={20.1} pl={'5px'} sx={styles.boxStyle}>
                               <LightTooltipWithText variant={'body2'} maxWidth={160}>
                                 {time.koenNam}
                               </LightTooltipWithText>
                             </Box>
-                          </Box>
-                          <Divider />
-                          <Box height={20.1} display={'flex'}>
-                            <Box justifyContent={'center'} width={45} sx={styles.boxStyle} />
-                            <Divider orientation="vertical" />
-                            <Box
-                              width={55}
-                              sx={styles.boxStyle}
-                              bgcolor={
-                                time.nyushukoShubetuId === NYUSHUKO_SHUBETU_ID.shuko
-                                  ? weeklyColors.shuko
-                                  : weeklyColors.nyuko
-                              }
-                              pl={0.5}
-                              //fontSize={'0.75rem'}
-                            >
-                              {time.sharyos[1]?.nam ?? ''}
-                              {time.sharyos[1]?.daisu > 1 ? `×${time.sharyos[1]?.daisu}` : ''}
-                            </Box>
-                            <Divider orientation="vertical" />
-                            <Box
-                              width={165}
-                              sx={styles.boxStyle}
-                              bgcolor={
-                                time.nyushukoBashoId === BASHO_ID.kics
-                                  ? weeklyColors.kics
-                                  : time.nyushukoBashoId === BASHO_ID.others
-                                    ? weeklyColors.atsugi
-                                    : weeklyColors.yard
-                              }
-                              pl={'5px'}
-                            >
+                            <Divider />
+                            <Box height={20.1} pl={'5px'} sx={styles.boxStyle}>
                               <LightTooltipWithText variant={'body2'} maxWidth={160}>
                                 {time.sharyoHeadNam}
                               </LightTooltipWithText>
@@ -537,3 +545,11 @@ const styles: { [key: string]: React.CSSProperties } = {
     whiteSpace: 'nowrap',
   },
 };
+
+/**
+ * 別画面へのリンクとして振る舞う列（3行まとめて1つのクリック領域）のsx。
+ * ホバー時は列全体を少し暗くして、押せる範囲が文字ではなく領域全体であることを示す。
+ * 参照権限が無い場合はリンクに見せない（クリックしても何も起きない）。
+ */
+const linkColumnSx = (enabled: boolean) =>
+  enabled ? { cursor: 'pointer', '&:hover': { boxShadow: 'inset 0 0 0 9999px rgba(0, 0, 0, 0.08)' } } : undefined;

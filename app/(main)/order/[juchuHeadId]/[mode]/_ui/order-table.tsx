@@ -4,7 +4,7 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { Box, Button, Collapse, IconButton, Radio, RadioGroup, Typography } from '@mui/material';
+import { Box, Button, Collapse, IconButton, Typography } from '@mui/material';
 import Checkbox from '@mui/material/Checkbox';
 import { grey } from '@mui/material/colors';
 import Paper from '@mui/material/Paper';
@@ -16,7 +16,6 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import { useRouter } from 'next/navigation';
 import * as React from 'react';
-import { useState } from 'react';
 
 import { JUCHU_KIZAI_HEAD_KBN } from '@/app/_lib/constants';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
@@ -43,26 +42,28 @@ export type Row = {
 type OrderEqTableProps = {
   orderEqRows: EqTableValues[] | undefined;
   edit: boolean;
-  selectEq: number | null;
-  onEqSelectionChange: (selectedId: number) => void;
+  selectedEqs: number[];
+  onEqSelectionChange: (selectedIds: number[]) => void;
   handleClickEqOrderName: (row: EqTableValues) => void;
 };
 
 export const OrderEqTable: React.FC<OrderEqTableProps> = ({
   orderEqRows,
   edit,
-  selectEq,
+  selectedEqs,
   onEqSelectionChange,
   handleClickEqOrderName,
 }) => {
   const router = useRouter();
 
-  const [rows, setRows] = useState(orderEqRows);
+  const rows = orderEqRows;
 
   const mode = edit ? 'edit' : 'view';
 
-  const handleSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    onEqSelectionChange(Number(event.target.value));
+  const handleSelect = (id: number) => {
+    const newSelected = selectedEqs.includes(id) ? selectedEqs.filter((item) => item !== id) : [...selectedEqs, id];
+
+    onEqSelectionChange(newSelected);
   };
 
   // const moveRow = (index: number, direction: number) => {
@@ -80,7 +81,22 @@ export const OrderEqTable: React.FC<OrderEqTableProps> = ({
         <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle" size="small">
           <TableHead sx={{ bgcolor: 'primary.light' }}>
             <TableRow sx={{ whiteSpace: 'nowrap' }}>
-              <TableCell padding="none" />
+              <TableCell padding="checkbox">
+                <Checkbox
+                  indeterminate={rows && selectedEqs.length > 0 && selectedEqs.length < rows.length}
+                  checked={!!rows && rows.length > 0 && selectedEqs.length === rows.length}
+                  onChange={(e) => {
+                    onEqSelectionChange(e.target.checked && rows ? rows.map((row) => row.juchuKizaiHeadId) : []);
+                  }}
+                  sx={{
+                    '& .MuiSvgIcon-root': {
+                      backgroundColor: '#fff',
+                      borderRadius: '4px',
+                      transition: 'background-color 0.3s',
+                    },
+                  }}
+                />
+              </TableCell>
               <TableCell padding="none" />
               <TableCell align="left">受注明細名</TableCell>
               <TableCell align="left">出庫</TableCell>
@@ -98,11 +114,10 @@ export const OrderEqTable: React.FC<OrderEqTableProps> = ({
             {rows!.map((row, index) => (
               <TableRow hover key={row.juchuKizaiHeadId}>
                 <TableCell padding="checkbox">
-                  <Radio
-                    name="table-radio"
-                    checked={selectEq === row.juchuKizaiHeadId}
-                    value={row.juchuKizaiHeadId}
-                    onChange={handleSelect}
+                  <Checkbox
+                    color="primary"
+                    checked={selectedEqs.includes(row.juchuKizaiHeadId)}
+                    onChange={() => handleSelect(row.juchuKizaiHeadId)}
                   />
                 </TableCell>
                 <TableCell padding="none">{index + 1}</TableCell>

@@ -13,7 +13,6 @@ import {
 } from '@/app/_lib/db/tables/t-juchu-ctn-meisai';
 import {
   insertReturnJuchuKizaiHead,
-  selectJuchuHonbanbiQty,
   selectReturnJuchuKizaiHead,
   updateReturnJuchuKizaiHead,
 } from '@/app/_lib/db/tables/t-juchu-kizai-head';
@@ -451,36 +450,6 @@ export const saveReturnJuchuKizai = async (
     throw e;
   } finally {
     connection.release();
-  }
-};
-
-/**
- * 親受注機材本番日数取得
- * @param juchuHeadId 受注ヘッダーid
- * @param juchuKizaiHeadId 受注機材ヘッダーid
- * @returns
- */
-export const getJuchuHonbanbiQty = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
-  try {
-    const { data, error } = await selectJuchuHonbanbiQty(juchuHeadId, juchuKizaiHeadId);
-    if (error) {
-      if (error.code === 'PGRST116') {
-        return null;
-      }
-      throw new Error('[selectJuchuHonbanbiQty] DBエラー:', { cause: error });
-    }
-
-    return data.juchu_honbanbi_qty;
-  } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
-    throw e;
   }
 };
 

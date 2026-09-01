@@ -66,9 +66,11 @@ export const HeadDeleteConfirmDialog = ({ open, onClick }: { open: boolean; onCl
 
 export const KizaiHeadDeleteConfirmDialog = ({
   open,
+  count,
   onClick,
 }: {
   open: boolean;
+  count: number;
   onClick: (result: boolean) => void;
 }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -91,7 +93,7 @@ export const KizaiHeadDeleteConfirmDialog = ({
         <Box>受注明細を削除します</Box>
       </DialogTitle>
       <DialogContentText m={2} p={2}>
-        受注明細を削除してもよろしいでしょうか？
+        {count}件の受注明細を削除してもよろしいでしょうか？
       </DialogContentText>
       <DialogActions>
         <Button onClick={() => handleClick(true)} loading={isLoading} color="error">

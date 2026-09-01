@@ -111,33 +111,28 @@ export type LocsDialogValues = {
   tel: string | null;
 };
 
-export const BaseCopyDialogSchema = z.object({
-  juchuHeadid: z.string().optional(),
-  headNam: z.string().max(50, { message: validationMessages.maxStringLength(50) }).nullable(),
-  kicsShukoDat: z.date().nullable(),
-  kicsNyukoDat: z.date().nullable(),
-  yardShukoDat: z.date().nullable(),
-  yardNyukoDat: z.date().nullable(),
-});
-
-export type CopyDialogValue = z.infer<typeof BaseCopyDialogSchema>;
-
-export const CopyDialogSchema = (origin: EqTableValues | null) =>
-  z.object({
+/**
+ * コピーダイアログ
+ * 出庫日・入庫日は年月日のみ（時刻は0:00固定）で1つずつ。コピー先はYARDで作成する
+ */
+export const CopyDialogSchema = z
+  .object({
     juchuHeadid: z.string().optional(),
     headNam: z
       .string()
       .max(50, { message: validationMessages.maxStringLength(50) })
       .nullable(),
-    kicsShukoDat:
-      origin && origin.kicsShukoDat ? z.date({ message: validationMessages.required() }) : z.date().nullable(),
-    kicsNyukoDat:
-      origin && origin.kicsNyukoDat ? z.date({ message: validationMessages.required() }) : z.date().nullable(),
-    yardShukoDat:
-      origin && origin.yardShukoDat ? z.date({ message: validationMessages.required() }) : z.date().nullable(),
-    yardNyukoDat:
-      origin && origin.yardNyukoDat ? z.date({ message: validationMessages.required() }) : z.date().nullable(),
+    shukoDat: z.date().nullable(),
+    nyukoDat: z.date().nullable(),
+  })
+  .refine((d) => d.shukoDat !== null, { path: ['shukoDat'], message: validationMessages.required() })
+  .refine((d) => d.nyukoDat !== null, { path: ['nyukoDat'], message: validationMessages.required() })
+  .refine((d) => !d.shukoDat || !d.nyukoDat || d.shukoDat <= d.nyukoDat, {
+    path: ['nyukoDat'],
+    message: '入庫日は出庫日以降の日付を入力してください',
   });
+
+export type CopyDialogValue = z.infer<typeof CopyDialogSchema>;
 
 export type CopyJuchuKizaiHeadValue = {
   juchuHeadId: number;

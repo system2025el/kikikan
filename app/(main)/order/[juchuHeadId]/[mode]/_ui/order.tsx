@@ -34,24 +34,25 @@ import {
   Typography,
 } from '@mui/material';
 import { redirect, useRouter } from 'next/navigation';
-import { use, useEffect, useState } from 'react';
+import { use, useEffect, useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 import { set } from 'zod';
 
 import { JUCHU_KIZAI_HEAD_KBN, LOCK_SHUBETU } from '@/app/_lib/constants';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
-import { getNyukoDate, getRange, getShukoDate } from '@/app/(main)/_lib/date-funcs';
 import { addLock, getLock } from '@/app/(main)/_lib/funcs';
 import { lockCheck, lockRelease } from '@/app/(main)/_lib/lock';
 import { permission } from '@/app/(main)/_lib/permission';
 import { openOrFocusTab } from '@/app/(main)/_lib/tab-focus';
-import { LockValues, User } from '@/app/(main)/_lib/types';
+import { HonbanbiValues, LockValues, User } from '@/app/(main)/_lib/types';
 import { BackButton } from '@/app/(main)/_ui/buttons';
 import { FormDateX, RSuiteDateRangePicker } from '@/app/(main)/_ui/date';
 import { IsDirtyAlertDialog, useDirty } from '@/app/(main)/_ui/dirty-context';
+import { HonbanbiCalendar } from '@/app/(main)/_ui/honbanbi-calendar';
 import { Loading, LoadingOverlay } from '@/app/(main)/_ui/loading';
 import { SelectTable } from '@/app/(main)/_ui/table';
+import { HonbanbiColorValues } from '@/app/(main)/(eq-order-detail)/eq-keep-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[oyaJuchuKizaiHeadId]/[mode]/_lib/types';
 import { WillDeleteAlertDialog } from '@/app/(main)/(masters)/_ui/dialogs';
 import { equipmentRows, users, vehicleHeaders, vehicleRows } from '@/app/(main)/order/[juchuHeadId]/[mode]/_lib/data';
 import { delJuchuSharyoMeisais } from '@/app/(main)/vehicle-order-detail/[jhid]/[jshid]/[mode]/_lib/funcs';
@@ -63,9 +64,11 @@ import {
   delJuchuHead,
   delJuchuMeisai,
   getJuchuHead,
+  getJuchuHonbanbi,
   getJuchuKizaiHeadList,
   getJuchuSharyoHeadList,
   getMaxId,
+  saveJuchuHonbanbi,
   updJuchuHead,
 } from '../_lib/funcs';
 import {
@@ -92,6 +95,8 @@ export const Order = (props: {
   juchusharyoHeadDatas: VehicleTableValues[] | undefined;
   userList: UsersValue[];
   juchuTempuDatas: TempuValues[];
+  juchuHonbanbiDatas: HonbanbiValues[];
+  honbanbiColor: HonbanbiColorValues[];
   edit: boolean;
   //lockData: LockValues | null;
 }) => {
@@ -153,10 +158,15 @@ export const Order = (props: {
   // 添付ファイルデータ（フォームのdirtyとは無関係なのでsetIsDirtyは触らない）
   const [tempuList, setTempuList] = useState<TempuValues[]>(props.juchuTempuDatas);
 
-  // 機材テーブル選択行
-  const [selectEq, setSelectEq] = useState<number | null>(null);
-  // 機材選択データ
-  const [selectEqHeader, setSelectEqHeader] = useState<EqTableValues | null>(null);
+  // 受注本番日元データ
+  const [originHonbanbiList, setOriginHonbanbiList] = useState<HonbanbiValues[]>(props.juchuHonbanbiDatas);
+  // 受注本番日リスト
+  const [honbanbiList, setHonbanbiList] = useState<HonbanbiValues[]>(props.juchuHonbanbiDatas);
+  // 本番日アコーディオン制御
+  const [honbanbiExpanded, setHonbanbiExpanded] = useState(true);
+
+  // 機材テーブル選択ID配列
+  const [selectedEqs, setSelectedEqs] = useState<number[]>([]);
   // 車両テーブル選択ID配列
   const [selectedVehs, setSelectedVehs] = useState<number[]>([]);
   // 遷移先path
@@ -166,6 +176,29 @@ export const Order = (props: {
   const { setIsDirty, requestNavigation } = useDirty();
   // 合計金額
   const priceTotal = eqHeaderList!.reduce((sum, row) => sum + (row.shokei ?? 0), 0);
+
+  // 選択されている受注機材ヘッダーデータ
+  const selectedEqHeaders = useMemo(
+    () => eqHeaderList?.filter((d) => selectedEqs.includes(d.juchuKizaiHeadId)) ?? [],
+    [eqHeaderList, selectedEqs]
+  );
+  // 単一選択時の受注機材ヘッダーデータ（複数選択・未選択の場合はnull）
+  const selectEqHeader = selectedEqHeaders.length === 1 ? selectedEqHeaders[0] : null;
+
+  // 本番日種別Map
+  const shubetuColorMap = useMemo(() => {
+    const map = new Map<number, string>();
+    props.honbanbiColor.forEach((d) => {
+      map.set(d.colorId, d.colorNam);
+    });
+    return map;
+  }, [props.honbanbiColor]);
+
+  // 本番日が変更されているか（react-hook-formの管理外なので自前で判定する）
+  const honbanbiDirty = useMemo(
+    () => JSON.stringify(originHonbanbiList) !== JSON.stringify(honbanbiList),
+    [originHonbanbiList, honbanbiList]
+  );
 
   /* useForm ------------------------- */
   const {
@@ -203,8 +236,11 @@ export const Order = (props: {
     resolver: zodResolver(OrderSchema),
   });
 
+  // フォームと本番日を合わせた変更有無
+  const dirty = isDirty || honbanbiDirty;
+
   // ブラウザバック、F5、×ボタンでページを離れた際のhook
-  useUnsavedChangesWarning(isDirty);
+  useUnsavedChangesWarning(dirty);
 
   // ロック制御
   const lock = async () => {
@@ -232,11 +268,12 @@ export const Order = (props: {
       setAlertTitle('編集中');
       setAlertMessage(`${lockData.addUser}が編集中です`);
       setAlertOpen(true);
-      // 受注ヘッダーデータ、受注機材ヘッダーデータ、受注車両ヘッダーデータ
-      const [juchuHeadData, juchuKizaiHeadDatas, juchuSharyoHeadDatas] = await Promise.all([
+      // 受注ヘッダーデータ、受注機材ヘッダーデータ、受注車両ヘッダーデータ、受注本番日データ
+      const [juchuHeadData, juchuKizaiHeadDatas, juchuSharyoHeadDatas, juchuHonbanbiDatas] = await Promise.all([
         getJuchuHead(getValues('juchuHeadId')),
         getJuchuKizaiHeadList(getValues('juchuHeadId')),
         getJuchuSharyoHeadList(getValues('juchuHeadId')),
+        getJuchuHonbanbi(getValues('juchuHeadId')),
       ]);
       if (!juchuHeadData) {
         return <div>受注情報が見つかりません。</div>;
@@ -244,6 +281,8 @@ export const Order = (props: {
       reset(juchuHeadData);
       setEqHeaderList(juchuKizaiHeadDatas);
       setVehicleHeaderList(juchuSharyoHeadDatas);
+      setOriginHonbanbiList(juchuHonbanbiDatas);
+      setHonbanbiList(juchuHonbanbiDatas);
       return false;
     } catch (e) {
       throw e;
@@ -284,8 +323,16 @@ export const Order = (props: {
       // 更新
     } else {
       const updateResult = await updJuchuHead(data, user.name);
-      if (updateResult) {
+
+      // 本番日はフォーム外で管理しているため、受注ヘッダーの保存が通ってから別途保存する
+      const honbanbiResult = updateResult ? await saveJuchuHonbanbi(data.juchuHeadId, honbanbiList, user.name) : false;
+
+      if (updateResult && honbanbiResult) {
         reset(data);
+        setOriginHonbanbiList(honbanbiList);
+        // 本番日の展開で各ヘッダーの本番日数・金額が変わるため一覧を取り直す
+        const juchuKizaiHeadDatas = await getJuchuKizaiHeadList(data.juchuHeadId);
+        setEqHeaderList(juchuKizaiHeadDatas);
         setIsLoading(false);
         setSnackBarMessage('保存しました');
         setSnackBarOpen(true);
@@ -304,7 +351,7 @@ export const Order = (props: {
     if (!user) return;
     // 編集→閲覧
     if (edit) {
-      if (isDirty) {
+      if (dirty) {
         setDirtyOpen(true);
         return;
       }
@@ -387,13 +434,7 @@ export const Order = (props: {
 
       if (lockResult) {
         const path = `/eq-main-order-detail/${props.juchuHeadData.juchuHeadId}/0/edit`;
-        // if (!isDirty) {
-        //   setIsLoading(true);
-        //   router.push(path);
-        // } else {
-        //   setPath(path);
-        //   setDirtyOpen(true);
-        // }
+
         if (!isDirty) setIsLoading(true);
         requestNavigation(path);
       }
@@ -421,23 +462,17 @@ export const Order = (props: {
             (selectEqHeader.yardShukoDat ? selectEqHeader.yardShukoFixFlg === 1 : true)
           ) {
             const path = `/eq-return-order-detail/${props.juchuHeadData.juchuHeadId}/0/${selectEqHeader.juchuKizaiHeadId}/edit`;
-            // if (!isDirty) {
-            //   setIsLoading(true);
-            //   router.push(path);
-            // } else {
-            //   setPath(path);
-            //   setDirtyOpen(true);
-            // }
+
             if (!isDirty) setIsLoading(true);
             requestNavigation(path);
           } else {
             setAlertTitle('選択項目を確認してください');
-            setAlertMessage('出発済のメイン明細を選択してください');
+            setAlertMessage('出発済のメイン明細を1つだけ選択してください');
             setAlertOpen(true);
           }
         } else {
           setAlertTitle('選択項目を確認してください');
-          setAlertMessage('出発済のメイン明細を選択してください');
+          setAlertMessage('出発済のメイン明細を1つだけ選択してください');
           setAlertOpen(true);
         }
       }
@@ -465,23 +500,17 @@ export const Order = (props: {
             (selectEqHeader.yardShukoDat ? selectEqHeader.yardShukoFixFlg === 1 : true)
           ) {
             const path = `/eq-keep-order-detail/${props.juchuHeadData.juchuHeadId}/0/${selectEqHeader.juchuKizaiHeadId}/edit`;
-            // if (!isDirty) {
-            //   setIsLoading(true);
-            //   router.push(path);
-            // } else {
-            //   setPath(path);
-            //   setDirtyOpen(true);
-            // }
+
             if (!isDirty) setIsLoading(true);
             requestNavigation(path);
           } else {
             setAlertTitle('選択項目を確認してください');
-            setAlertMessage('出発済のメイン明細を選択してください');
+            setAlertMessage('出発済のメイン明細を1つだけ選択してください');
             setAlertOpen(true);
           }
         } else {
           setAlertTitle('選択項目を確認してください');
-          setAlertMessage('出発済のメイン明細を選択してください');
+          setAlertMessage('出発済のメイン明細を1つだけ選択してください');
           setAlertOpen(true);
         }
       }
@@ -501,12 +530,14 @@ export const Order = (props: {
       const lockResult = await lock();
 
       if (lockResult) {
-        if (selectEqHeader && selectEqHeader.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.normal) {
-          setCopyOpen(true);
-        } else {
+        const copyError = validateCopySelection();
+
+        if (copyError) {
           setAlertTitle('選択項目を確認してください');
-          setAlertMessage('メイン明細を選択してください');
+          setAlertMessage(copyError);
           setAlertOpen(true);
+        } else {
+          setCopyOpen(true);
         }
       }
     } catch (e) {
@@ -515,15 +546,38 @@ export const Order = (props: {
     }
     setIsProcessing(false);
   };
+
+  /**
+   * コピー可能な選択状態かを判定する
+   * @returns エラーメッセージ（問題なければnull）
+   */
+  const validateCopySelection = () => {
+    if (selectedEqHeaders.length === 0) {
+      return 'コピーする受注明細を選択してください';
+    }
+
+    if (selectedEqHeaders.some((d) => d.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.keep)) {
+      return 'キープ明細はコピーできません';
+    }
+
+    // 返却明細は数量を引くだけなので、引く相手のメイン明細も選択されている必要がある
+    const hasOrphanReturn = selectedEqHeaders.some(
+      (d) =>
+        d.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.return &&
+        (d.oyaJuchuKizaiHeadId === null || !selectedEqs.includes(d.oyaJuchuKizaiHeadId))
+    );
+
+    if (hasOrphanReturn) {
+      return '返却明細をコピーする場合は、紐づくメイン明細も選択してください';
+    }
+
+    return null;
+  };
+
   const handleCloseCopyDialog = async () => {
     if (isProcessing) return;
     setIsProcessing(true);
 
-    // const lockResult = await lock();
-
-    // if (lockResult) {
-    //   setCopyOpen(false);
-    // }
     setCopyOpen(false);
     setIsProcessing(false);
   };
@@ -533,7 +587,7 @@ export const Order = (props: {
    * @param result ボタン押下結果
    */
   const handleCopyConfirmed = async (data: CopyDialogValue) => {
-    if (!user || !selectEqHeader || isProcessing) return;
+    if (!user || selectedEqHeaders.length === 0 || isProcessing) return;
     setIsProcessing(true);
 
     try {
@@ -553,33 +607,7 @@ export const Order = (props: {
           return false;
         }
 
-        // 出庫日
-        const shukoDate = getShukoDate(
-          data.kicsShukoDat && new Date(data.kicsShukoDat),
-          data.yardShukoDat && new Date(data.yardShukoDat)
-        );
-        // 入庫日
-        const nyukoDate = getNyukoDate(
-          data.kicsNyukoDat && new Date(data.kicsNyukoDat),
-          data.yardNyukoDat && new Date(data.yardNyukoDat)
-        );
-        // 出庫日から入庫日
-        const dateRange = getRange(shukoDate, nyukoDate);
-
-        if (!shukoDate || !nyukoDate) {
-          setIsProcessing(false);
-          return;
-        }
-
-        const copyResult = await copyJuchuKizaiHeadMeisai(
-          selectEqHeader,
-          newJuchuHeadId,
-          data,
-          shukoDate,
-          nyukoDate,
-          dateRange,
-          userNam
-        );
+        const copyResult = await copyJuchuKizaiHeadMeisai(selectedEqHeaders, newJuchuHeadId, data, userNam);
 
         if (copyResult) {
           setCopyOpen(false);
@@ -616,30 +644,33 @@ export const Order = (props: {
       const lockResult = await lock();
 
       if (lockResult) {
-        if (!selectEqHeader || !eqHeaderList) {
+        if (selectedEqHeaders.length === 0 || !eqHeaderList) {
           setAlertTitle('選択項目を確認してください');
-          setAlertMessage('受注明細を1つ選択してください');
+          setAlertMessage('受注明細を選択してください');
           setAlertOpen(true);
           setIsProcessing(false);
           return;
         }
 
-        // 選択されたデータの子データ
-        const childData = eqHeaderList.find((d) => d.oyaJuchuKizaiHeadId === selectEqHeader.juchuKizaiHeadId);
+        // 子データ(返却・キープ)を持つ親データは、その子データがすべて選択されている必要がある
+        const hasUnselectedChild = selectedEqHeaders.some((parent) =>
+          eqHeaderList.some(
+            (d) => d.oyaJuchuKizaiHeadId === parent.juchuKizaiHeadId && !selectedEqs.includes(d.juchuKizaiHeadId)
+          )
+        );
 
-        if (childData) {
+        if (hasUnselectedChild) {
           setAlertTitle('選択項目を確認してください');
-          setAlertMessage('返却、キープが紐づいている場合は削除できません');
+          setAlertMessage('返却、キープが紐づく明細をすべて選択してください');
           setAlertOpen(true);
           setIsProcessing(false);
           return;
         }
 
         if (
-          selectEqHeader.kicsShukoFixFlg ||
-          selectEqHeader.yardShukoFixFlg ||
-          selectEqHeader.kicsNyukoFixFlg ||
-          selectEqHeader.yardNyukoFixFlg
+          selectedEqHeaders.some(
+            (d) => d.kicsShukoFixFlg || d.yardShukoFixFlg || d.kicsNyukoFixFlg || d.yardNyukoFixFlg
+          )
         ) {
           setAlertTitle('選択項目を確認してください');
           setAlertMessage('出発済、到着済の受注明細は削除できません');
@@ -670,23 +701,38 @@ export const Order = (props: {
 
       if (lockResult) {
         setKizaiHeadDeleteOpen(false);
-        if (result && selectEqHeader) {
+        if (result && selectedEqHeaders.length > 0) {
           setIsJuchuKizaiLoading(true);
 
-          const deleteResult = await delJuchuMeisai(selectEqHeader.juchuHeadId, selectEqHeader.juchuKizaiHeadId);
+          // 親を先に消すと子が孤児になるため、子データ(返却・キープ)から削除する
+          const deleteTargets = [...selectedEqHeaders].sort(
+            (a, b) => (a.oyaJuchuKizaiHeadId === null ? 1 : 0) - (b.oyaJuchuKizaiHeadId === null ? 1 : 0)
+          );
 
-          if (deleteResult) {
-            setEqHeaderList((prev) =>
-              prev?.filter((data) => data.juchuKizaiHeadId !== selectEqHeader.juchuKizaiHeadId)
-            );
-            setSelectEq(null);
-            setSelectEqHeader(null);
-            setSnackBarMessage('削除しました');
-            setSnackBarOpen(true);
-          } else {
-            setSnackBarMessage('削除に失敗しました');
-            setSnackBarOpen(true);
+          const deletedIds: number[] = [];
+          let deleteFailed = false;
+
+          for (const target of deleteTargets) {
+            const deleteResult = await delJuchuMeisai(target.juchuHeadId, target.juchuKizaiHeadId);
+
+            if (!deleteResult) {
+              deleteFailed = true;
+              break;
+            }
+            deletedIds.push(target.juchuKizaiHeadId);
           }
+
+          if (deletedIds.length > 0) {
+            setEqHeaderList((prev) => prev?.filter((data) => !deletedIds.includes(data.juchuKizaiHeadId)));
+            setSelectedEqs((prev) => prev.filter((id) => !deletedIds.includes(id)));
+          }
+
+          if (deleteFailed) {
+            setSnackBarMessage('削除に失敗しました');
+          } else {
+            setSnackBarMessage('削除しました');
+          }
+          setSnackBarOpen(true);
           setIsJuchuKizaiLoading(false);
         }
       }
@@ -711,14 +757,7 @@ export const Order = (props: {
           : row.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.keep
             ? `/eq-keep-order-detail/${row.juchuHeadId}/${row.juchuKizaiHeadId}/${row.oyaJuchuKizaiHeadId}/${mode}`
             : `/eq-main-order-detail/${row.juchuHeadId}/${row.juchuKizaiHeadId}/${mode}`;
-    // if (!isDirty) {
-    //   if (isLoading) return;
-    //   setIsLoading(true);
-    //   router.push(path);
-    // } else {
-    //   setPath(path);
-    //   setDirtyOpen(true);
-    // }
+
     if (!isDirty) setIsLoading(true);
     requestNavigation(path);
   };
@@ -803,17 +842,7 @@ export const Order = (props: {
     if (!user || isProcessing) return;
     setIsProcessing(true);
 
-    // if (result && path) {
-    //   const lockResult = await lock();
-    //   if (lockResult) {
-    //     if (isLoading) return;
-    //     setIsLoading(true);
-    //     setLockData(null);
-    //     setIsDirty(false);
-    //     router.push(path);
-    //     setPath(null);
-    //   }
-    /*} else*/ if (result /*&& !path*/) {
+    if (result) {
       try {
         await lockRelease(LOCK_SHUBETU.juchuHead, props.juchuHeadData.juchuHeadId, user.name, user.email);
       } catch (e) {
@@ -831,11 +860,9 @@ export const Order = (props: {
     setIsProcessing(false);
   };
 
-  // 受注機材ヘッダー一覧ラジオボタンクリック
-  const handleEqSelectionChange = (selectedId: number) => {
-    const selectData = eqHeaderList?.find((d) => d.juchuKizaiHeadId === selectedId);
-    setSelectEq(selectedId);
-    setSelectEqHeader(selectData!);
+  // 受注機材ヘッダー一覧チェックボックスクリック
+  const handleEqSelectionChange = (selectedIds: number[]) => {
+    setSelectedEqs(selectedIds);
   };
 
   // 公演場所検索ボタン押下
@@ -859,11 +886,6 @@ export const Order = (props: {
     if (isProcessing) return;
     setIsProcessing(true);
 
-    // const lockResult = await lock();
-
-    // if (lockResult) {
-    //   setLocationDialogOpen(false);
-    // }
     setLocationDialogOpen(false);
     setIsProcessing(false);
   };
@@ -908,11 +930,6 @@ export const Order = (props: {
     if (isProcessing) return;
     setIsProcessing(true);
 
-    // const lockResult = await lock();
-
-    // if (lockResult) {
-    //   setCustomerDialogOpen(false);
-    // }
     setCustomerDialogOpen(false);
     setIsProcessing(false);
   };
@@ -974,8 +991,8 @@ export const Order = (props: {
   }, [user]);
 
   useEffect(() => {
-    setIsDirty(isDirty);
-  }, [isDirty, setIsDirty]);
+    setIsDirty(dirty);
+  }, [dirty, setIsDirty]);
 
   if (isLoading) return <LoadingOverlay />;
 
@@ -1019,7 +1036,7 @@ export const Order = (props: {
                 onClick={() => {
                   openOrFocusTab(`/quotation-list/create?juchuId=${getValues('juchuHeadId')}`);
                 }}
-                disabled={isDirty || !(user && user?.permission.juchu & permission.juchu_upd)}
+                disabled={dirty || !(user && user?.permission.juchu & permission.juchu_upd)}
               >
                 <CreateIcon fontSize="small" />
                 見積作成
@@ -1243,6 +1260,40 @@ export const Order = (props: {
           />
         </Dialog>
       </Paper>
+      {/* --------------------------------本番日------------------------------------- */}
+      {save && (
+        <Accordion
+          expanded={honbanbiExpanded}
+          onChange={() => setHonbanbiExpanded(!honbanbiExpanded)}
+          sx={{ marginTop: 2, borderRadius: 1, overflow: 'hidden' }}
+          variant="outlined"
+        >
+          <AccordionSummary
+            expandIcon={<ExpandMoreIcon />}
+            component="div"
+            sx={{
+              minHeight: '30px',
+              maxHeight: '30px',
+              '&.Mui-expanded': {
+                minHeight: '30px',
+                maxHeight: '30px',
+              },
+            }}
+          >
+            <Typography>本番日</Typography>
+          </AccordionSummary>
+          <AccordionDetails sx={{ padding: 0 }}>
+            <Divider />
+            <HonbanbiCalendar
+              honbanbiList={honbanbiList}
+              shubetuColorMap={shubetuColorMap}
+              readOnly={!edit}
+              onChange={setHonbanbiList}
+              onBeforeEdit={async () => !!(await lock())}
+            />
+          </AccordionDetails>
+        </Accordion>
+      )}
       {/* --------------------------------受注明細（機材）------------------------------------- */}
       {save && (
         <Accordion sx={{ marginTop: 2, borderRadius: 1, overflow: 'hidden' }} defaultExpanded variant="outlined">
@@ -1332,7 +1383,7 @@ export const Order = (props: {
           </AccordionSummary>
           <Dialog open={copyOpen} sx={{ zIndex: 1201 }}>
             <CopyDialog
-              selectEqHeader={selectEqHeader}
+              selectedCount={selectedEqHeaders.length}
               handleCopyConfirmed={handleCopyConfirmed}
               handleCloseCopyDialog={handleCloseCopyDialog}
             />
@@ -1346,7 +1397,7 @@ export const Order = (props: {
                 <OrderEqTable
                   orderEqRows={eqHeaderList}
                   edit={edit}
-                  selectEq={selectEq}
+                  selectedEqs={selectedEqs}
                   onEqSelectionChange={handleEqSelectionChange}
                   handleClickEqOrderName={handleClickEqOrderName}
                 />
@@ -1418,7 +1469,11 @@ export const Order = (props: {
       <IsDirtyAlertDialog open={dirtyOpen} onClick={handleResultDialog} />
       <AlertDialog open={alertOpen} title={alertTitle} message={alertMessage} onClick={() => setAlertOpen(false)} />
       <HeadDeleteConfirmDialog open={headDeleteOpen} onClick={handleHeadDelete} />
-      <KizaiHeadDeleteConfirmDialog open={kizaiHeadDeleteOpen} onClick={handleKizaiHeadDelete} />
+      <KizaiHeadDeleteConfirmDialog
+        open={kizaiHeadDeleteOpen}
+        count={selectedEqHeaders.length}
+        onClick={handleKizaiHeadDelete}
+      />
       <WillDeleteAlertDialog
         open={sharyoHeadDeleteOpen}
         data={`${selectedVehs.length}件の車両明細`}
