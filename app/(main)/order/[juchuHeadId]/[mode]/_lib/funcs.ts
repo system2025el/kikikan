@@ -65,7 +65,7 @@ import { JuchuKizaiNyushuko } from '@/app/_lib/db/types/t-juchu-kizai-nyushuko-t
 import { NyushukoDen } from '@/app/_lib/db/types/t-nyushuko-den-type';
 import { toJapanStartOfDay, toJapanTimeString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { getRange } from '@/app/(main)/_lib/date-funcs';
-import { expandHonbanbiTemplate } from '@/app/(main)/_lib/honbanbi-funcs';
+import { expandHonbanbiTemplate, getHonbanbiTemplate } from '@/app/(main)/_lib/honbanbi-funcs';
 import { permission } from '@/app/(main)/_lib/permission';
 import { HonbanbiValues } from '@/app/(main)/_lib/types';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
@@ -1072,6 +1072,18 @@ export const copyJuchuKizaiHeadMeisai = async (
     ];
     const mergeHonbanbiData: CopyJuchuKizaiHonbanbiValues[] = [...addJuchuSiyouHonbanbiData, ...addJuchuHonbanbiData];
     await addAllHonbanbi(juchuHeadId, newJuchuKizaiHeadId, mergeHonbanbiData, userNam, connection);
+
+    // 受注本番日(仕込・RH・GP・本番)を受注本番日テンプレートから展開
+    const honbanbiTemplate = await getHonbanbiTemplate(juchuHeadId);
+    await expandHonbanbiTemplate(
+      juchuHeadId,
+      newJuchuKizaiHeadId,
+      shukoDate,
+      nyukoDate,
+      honbanbiTemplate,
+      userNam,
+      connection
+    );
 
     // 受注機材明細（選択された明細をセット単位で合算し、返却分を引いたもの）
     const mergedKizaiMeisai = await mergeJuchuKizaiMeisai(normalHeads, returnHeads);
