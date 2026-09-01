@@ -46,57 +46,65 @@ export const getHonbanbiTemplate = async (juchuHeadId: number) => {
 
 /**
  * 受注本番日テンプレートを受注機材ヘッダー1本へ展開する。
- * そのヘッダーの仕込・RH・GP・本番を一旦削除し、出庫日〜入庫日に重なるテンプレートの日付だけを作り直す。
+ * そのヘッダーの仕込・RH・GP・本番を一旦削除し、適用期間に重なるテンプレートの日付だけを作り直す。
  * 金額算出に使う本番日数（本番の件数＋全種別の追加日数）も合わせて更新する。
+ *
+ * qtyOnly を指定した場合は t_juchu_kizai_honbanbi を一切変更せず、本番日数だけを更新する。
+ * 返却ヘッダー向け。返却ヘッダーは使用日（種別1）だけを持ち、金額も
+ * v_juchu_kizai_head_lst で juchu_honbanbi_qty の直値を参照するため、行を作る必要がない。
  *
  * 呼び出し元のトランザクションに参加するため、必ず connection を渡すこと。
  * @param juchuHeadId 受注ヘッダーid
  * @param juchuKizaiHeadId 受注機材ヘッダーid
- * @param shukoDate 出庫日
- * @param nyukoDate 入庫日
+ * @param startDate 適用期間の開始日（通常ヘッダーは出庫日、返却ヘッダーは返却日）
+ * @param endDate 適用期間の終了日（通常ヘッダーは入庫日、返却ヘッダーは親の入庫日）
  * @param template 受注本番日テンプレート
  * @param userNam ユーザー名
  * @param connection コネクション
+ * @param qtyOnly 本番日数のみ更新する場合はtrue
  */
 export const expandHonbanbiTemplate = async (
   juchuHeadId: number,
   juchuKizaiHeadId: number,
-  shukoDate: Date | null,
-  nyukoDate: Date | null,
+  startDate: Date | string | null,
+  endDate: Date | string | null,
   template: HonbanbiValues[],
   userNam: string,
-  connection: PoolClient
+  connection: PoolClient,
+  qtyOnly: boolean = false
 ) => {
   const now = new Date().toISOString();
 
-  // 展開し直すため、対象ヘッダーの仕込・RH・GP・本番を一旦消す
-  await deleteEventHonbanbi(juchuHeadId, juchuKizaiHeadId, connection);
-
-  // 出庫日・入庫日が揃っていないヘッダーには展開しない
+  // 適用期間が揃っていないヘッダーには展開しない
   const inRange =
-    shukoDate && nyukoDate
+    startDate && endDate
       ? template.filter((d) => {
           const dat = toJapanYMDString(d.juchuHonbanbiDat);
-          return dat >= toJapanYMDString(shukoDate) && dat <= toJapanYMDString(nyukoDate);
+          return dat >= toJapanYMDString(startDate) && dat <= toJapanYMDString(endDate);
         })
       : [];
 
-  if (inRange.length > 0) {
-    await insertAllHonbanbi(
-      inRange.map((d) => ({
-        juchu_head_id: juchuHeadId,
-        juchu_kizai_head_id: juchuKizaiHeadId,
-        juchu_honbanbi_shubetu_id: d.juchuHonbanbiShubetuId,
-        juchu_honbanbi_dat: toJapanYMDString(d.juchuHonbanbiDat, '-'),
-        mem: d.mem ? d.mem : null,
-        juchu_honbanbi_add_qty: d.juchuHonbanbiAddQty,
-        add_dat: now,
-        add_user: userNam,
-        upd_dat: now,
-        upd_user: userNam,
-      })),
-      connection
-    );
+  if (!qtyOnly) {
+    // 展開し直すため、対象ヘッダーの仕込・RH・GP・本番を一旦消す
+    await deleteEventHonbanbi(juchuHeadId, juchuKizaiHeadId, connection);
+
+    if (inRange.length > 0) {
+      await insertAllHonbanbi(
+        inRange.map((d) => ({
+          juchu_head_id: juchuHeadId,
+          juchu_kizai_head_id: juchuKizaiHeadId,
+          juchu_honbanbi_shubetu_id: d.juchuHonbanbiShubetuId,
+          juchu_honbanbi_dat: toJapanYMDString(d.juchuHonbanbiDat, '-'),
+          mem: d.mem ? d.mem : null,
+          juchu_honbanbi_add_qty: d.juchuHonbanbiAddQty,
+          add_dat: now,
+          add_user: userNam,
+          upd_dat: now,
+          upd_user: userNam,
+        })),
+        connection
+      );
+    }
   }
 
   const honbanbiQty = inRange.filter((d) => d.juchuHonbanbiShubetuId === HONBANBI_SHUBETU_ID.honban).length;

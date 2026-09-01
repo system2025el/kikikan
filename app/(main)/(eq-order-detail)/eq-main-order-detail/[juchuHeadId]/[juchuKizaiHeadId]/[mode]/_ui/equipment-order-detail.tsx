@@ -3402,7 +3402,7 @@ const EquipmentOrderDetail = (props: {
                   },
                 }}
               >
-                <Typography>本番日（伝票画面で編集）</Typography>
+                <Typography>本番日</Typography>
               </AccordionSummary>
               <AccordionDetails sx={{ padding: 0 }}>
                 <Divider />

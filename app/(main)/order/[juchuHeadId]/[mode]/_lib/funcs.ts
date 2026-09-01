@@ -33,7 +33,7 @@ import {
   insertJuchuKizaiHead,
   selectJuchuKizaiHead,
   selectJuchuKizaiHeadMaxId,
-  selectNormalKizaiHeadRanges,
+  selectKizaiHeadRangesForHonbanbi,
 } from '@/app/_lib/db/tables/t-juchu-kizai-head';
 import { deleteJuchuKizaiHonbanbiFromOrder, insertAllHonbanbi } from '@/app/_lib/db/tables/t-juchu-kizai-honbanbi';
 import {
@@ -2139,18 +2139,20 @@ export const saveJuchuHonbanbi = async (juchuHeadId: number, honbanbiList: Honba
       );
     }
 
-    // 通常の受注機材ヘッダーへ展開する（返却・キープは対象外）
-    const { rows: heads } = await selectNormalKizaiHeadRanges(juchuHeadId, connection);
+    // 通常・返却の受注機材ヘッダーへ展開する（キープは対象外）
+    // 返却ヘッダーは本番日の行を持たせず、金額算出用の本番日数だけを更新する
+    const { rows: heads } = await selectKizaiHeadRangesForHonbanbi(juchuHeadId, connection);
 
     for (const head of heads) {
       await expandHonbanbiTemplate(
         juchuHeadId,
         head.juchuKizaiHeadId,
-        head.shukoDat,
-        head.nyukoDat,
+        head.startDat,
+        head.endDat,
         honbanbiList,
         userNam,
-        connection
+        connection,
+        head.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.return
       );
     }
 

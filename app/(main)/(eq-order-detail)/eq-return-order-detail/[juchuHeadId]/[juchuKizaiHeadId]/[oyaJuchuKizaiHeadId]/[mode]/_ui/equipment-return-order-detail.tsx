@@ -79,7 +79,6 @@ import {
 import { getJuchuKizaiMeisaiList } from '@/app/(main)/quotation-list/_lib/funcs';
 
 import {
-  getJuchuHonbanbiQty,
   getReturnJuchuContainerMeisai,
   getReturnJuchuKizaiHead,
   getReturnJuchuKizaiMeisai,
@@ -303,17 +302,13 @@ export const EquipmentReturnOrderDetail = (props: {
       setStockTableHeaderDateRange(stockTableHeaderDateRange);
 
       if (getValues('juchuKizaiHeadId') === 0) {
-        // 親本番日数
-        const oyaJuchuHonbanbiQty = await getJuchuHonbanbiQty(
-          getValues('juchuHeadId'),
-          getValues('oyaJuchuKizaiHeadId')
-        );
         // 返却受注機材ヘッダーデータ(初期値)
+        // 本番日数は伝票画面の保存時に受注本番日テンプレートから算出されるため、ここでは0から始める
         const newReturnJuchuKizaiHeadData: ReturnJuchuKizaiHeadValues = {
           juchuHeadId: juchuHeadData.juchuHeadId,
           juchuKizaiHeadId: 0,
           juchuKizaiHeadKbn: JUCHU_KIZAI_HEAD_KBN.return,
-          juchuHonbanbiQty: oyaJuchuHonbanbiQty ?? 0,
+          juchuHonbanbiQty: 0,
           //nebikiAmt: null,
           mem: null,
           headNam: juchuHeadData.koenNam,
