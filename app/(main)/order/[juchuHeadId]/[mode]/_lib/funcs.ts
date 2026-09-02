@@ -982,9 +982,19 @@ export const copyJuchuKizaiHeadMeisai = async (
 ) => {
   const normalHeads = originJuchuKizaiHeads.filter((d) => d.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.normal);
   const returnHeads = originJuchuKizaiHeads.filter((d) => d.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.return);
+  const normalHeadIds = normalHeads.map((d) => d.juchuKizaiHeadId);
 
+  // 画面側と同じ選択条件をサーバー側でも確認する
   if (normalHeads.length === 0 || !data.shukoDat || !data.nyukoDat) {
     console.error('[copyJuchuKizaiHeadMeisai] メイン明細または出庫日・入庫日が指定されていません');
+    return false;
+  }
+  if (normalHeads.length + returnHeads.length !== originJuchuKizaiHeads.length) {
+    console.error('[copyJuchuKizaiHeadMeisai] メイン・返却以外の明細が含まれています');
+    return false;
+  }
+  if (returnHeads.some((d) => d.oyaJuchuKizaiHeadId === null || !normalHeadIds.includes(d.oyaJuchuKizaiHeadId))) {
+    console.error('[copyJuchuKizaiHeadMeisai] 親メイン明細が選択されていない返却明細が含まれています');
     return false;
   }
 
@@ -996,8 +1006,15 @@ export const copyJuchuKizaiHeadMeisai = async (
   const connection = await pool.connect();
 
   try {
+    // 参照系はトランザクションを開始する前に済ませる
     // 割引率はコピー先受注の顧客マスタの値を初期値にする
     const nebikiRat = await getKokyakuNebikiRat(juchuHeadId);
+    // 受注機材明細（選択された明細をセット単位で合算し、返却分を引いたもの）
+    const mergedKizaiMeisai = await mergeJuchuKizaiMeisai(normalHeads, returnHeads);
+    // 単価はコピー元の値ではなく機材マスタの現在の定価を入れ直す
+    const regAmtByKizaiId = await getKizaiRegAmts([...new Set(mergedKizaiMeisai.map((d) => d.kizaiId))]);
+    // 受注コンテナ明細（機材idごとに合算。数量はYARDに寄せ、KICSは0で作成する）
+    const mergedCtnMeisai = await mergeJuchuContainerMeisai(originJuchuKizaiHeads);
 
     await connection.query('BEGIN');
 
@@ -1085,10 +1102,6 @@ export const copyJuchuKizaiHeadMeisai = async (
       connection
     );
 
-    // 受注機材明細（選択された明細をセット単位で合算し、返却分を引いたもの）
-    const mergedKizaiMeisai = await mergeJuchuKizaiMeisai(normalHeads, returnHeads);
-    // 単価はコピー元の値ではなく機材マスタの現在の定価を入れ直す
-    const regAmtByKizaiId = await getKizaiRegAmts([...new Set(mergedKizaiMeisai.map((d) => d.kizaiId))]);
     // 表示順。受注機材明細に1から振り、続けて受注コンテナ明細に振る
     let dspOrdNum = 1;
 
@@ -1120,9 +1133,6 @@ export const copyJuchuKizaiHeadMeisai = async (
       // 機材入出庫伝票追加
       await addNyushukoDen(newJuchuKizaiHeadData, newJuchuKizaiMeisai, userNam, connection);
     }
-
-    // 受注コンテナ明細（機材idごとに合算。数量はYARDに寄せ、KICSは0で作成する）
-    const mergedCtnMeisai = await mergeJuchuContainerMeisai(originJuchuKizaiHeads);
 
     const newJuchuCtnMeisai: CopyJuchuContainerMeisaiValues[] = [...mergedCtnMeisai.entries()].map(
       ([kizaiId, d], index) => ({
