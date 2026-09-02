@@ -484,8 +484,9 @@ export const saveIdoDen = async (
     if (updIdoDenData.length > 0) {
       await updIdoDen(updIdoDenData, userNam, connection);
     }
-    // 移動メモ
-    await upsertIdoMem(sagyoDenDat, sagyoSijiId, idoMem, userNam, connection);
+    // 移動メモ。改行だけ入力された場合に「見た目は空なのに行がある」状態になるので、
+    // 前後の空白・改行を落としてから渡す（JSのtrimは \n や全角スペースも落とす）
+    await upsertIdoMem(sagyoDenDat, sagyoSijiId, idoMem.trim(), userNam, connection);
 
     await connection.query('COMMIT');
 

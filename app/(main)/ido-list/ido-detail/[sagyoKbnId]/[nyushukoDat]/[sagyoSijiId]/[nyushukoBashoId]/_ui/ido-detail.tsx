@@ -228,9 +228,12 @@ export const IdoDetail = (props: {
 
     setIsProcessing(true);
 
+    // 保存されるのは前後の空白・改行を落とした値なので、画面の表示もそれに合わせる
+    const memToSave = idoMem.trim();
+
     const updateData = await saveIdoDen(
       idoDetailList,
-      idoMem,
+      memToSave,
       idoDetailData.nyushukoDat,
       idoDetailData.sagyoSijiId,
       user.name
@@ -239,7 +242,8 @@ export const IdoDetail = (props: {
     if (updateData) {
       setOriginIdoDetailList(updateData);
       setIdoDetailList(updateData);
-      setOriginIdoMem(idoMem);
+      setIdoMem(memToSave);
+      setOriginIdoMem(memToSave);
       setEditFlag(false);
       setIsDirty(false);
       setSaveFlag(true);
@@ -333,8 +337,9 @@ export const IdoDetail = (props: {
     isProcessing ||
     user?.permission.nyushuko === permission.nyushuko_ref;
 
-  // 移動メモの文字数超過。超えた分を切り捨てず、入力欄をエラー表示にして保存を止める
-  const memError = idoMem.length > IDO_MEM_MAX_LENGTH;
+  // 移動メモの文字数超過。超えた分を切り捨てず、入力欄をエラー表示にして保存を止める。
+  // 保存時に前後の空白・改行は落とされるので、判定も落とした後の文字数で行う
+  const memError = idoMem.trim().length > IDO_MEM_MAX_LENGTH;
 
   // 移動検索ボタン押下
   const handleBack = () => {
