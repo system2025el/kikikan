@@ -420,6 +420,42 @@ export const delIdoFix = async (sagyoKbnId: number, sagyoSijiId: number, sagyoDe
 };
 
 /**
+ * 移動メモのみ保存
+ *
+ * 出発後は移動明細を編集できないが、メモは編集できる。saveIdoDen をそのまま使うと
+ * 変更していない t_ido_den まで再UPDATEしてしまうため、メモだけの保存経路を分けている。
+ * @param sagyoDenDat 移動予定日
+ * @param sagyoSijiId 作業指示id
+ * @param idoMem 移動メモ
+ * @param userNam ユーザー名
+ * @returns 成否
+ */
+export const saveIdoMem = async (sagyoDenDat: string, sagyoSijiId: number, idoMem: string, userNam: string) => {
+  const connection = await pool.connect();
+  try {
+    await upsertIdoMem(sagyoDenDat, sagyoSijiId, idoMem.trim(), userNam, connection);
+    await connection.query('COMMIT');
+
+    revalidatePath('ido-list');
+
+    return true;
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
+    await connection.query('ROLLBACK');
+    return false;
+  } finally {
+    connection.release();
+  }
+};
+
+/**
  * 移動伝票保存
  *
  * 移動メモも同じ接続でまとめて保存する。メモだけを変更して保存することもあるため、

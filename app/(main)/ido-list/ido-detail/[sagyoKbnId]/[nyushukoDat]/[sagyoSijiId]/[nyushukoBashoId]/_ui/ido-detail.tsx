@@ -35,7 +35,7 @@ import { FormDateX } from '@/app/(main)/_ui/date';
 import { useDirty } from '@/app/(main)/_ui/dirty-context';
 import { LoadingOverlay } from '@/app/(main)/_ui/loading';
 
-import { addIdoFix, delIdoFix, getIdoDenMaxId, saveIdoDen } from '../_lib/funcs';
+import { addIdoFix, delIdoFix, getIdoDenMaxId, saveIdoDen, saveIdoMem } from '../_lib/funcs';
 import { IdoDetailTableValues, IdoDetailValues, SelectedIdoEqptsValues } from '../_lib/types';
 import { NyukoIdoDenTable, ShukoIdoDenTable } from './ido-detail-table';
 import { IdoEqptSelectionDialog } from './ido-equipment-selection-dialog';
@@ -231,6 +231,22 @@ export const IdoDetail = (props: {
     // 保存されるのは前後の空白・改行を落とした値なので、画面の表示もそれに合わせる
     const memToSave = idoMem.trim();
 
+    // 出発後は移動明細を編集できないので、メモだけを保存する
+    if (fixFlag) {
+      const result = await saveIdoMem(idoDetailData.nyushukoDat, idoDetailData.sagyoSijiId, memToSave, user.name);
+
+      if (result) {
+        setIdoMem(memToSave);
+        setOriginIdoMem(memToSave);
+        setSnackBarMessage('保存しました');
+      } else {
+        setSnackBarMessage('保存に失敗しました');
+      }
+      setSnackBarOpen(true);
+      setIsProcessing(false);
+      return;
+    }
+
     const updateData = await saveIdoDen(
       idoDetailList,
       memToSave,
@@ -330,10 +346,10 @@ export const IdoDetail = (props: {
   };
 
   // 移動メモの編集可否。保存ボタンがあるのは移動出庫の画面だけなので、移動入庫では表示専用にする。
+  // 移動明細と違い、出発後（fixFlag）でも編集できる。
   // 保存中はローディングで覆うが、フォーカスが残っているとキー入力だけは通ってしまうので disabled にもする
   const memDisabled =
     idoDetailData.sagyoKbnId !== SAGYO_KBN_ID.idoShuko ||
-    fixFlag ||
     isProcessing ||
     user?.permission.nyushuko === permission.nyushuko_ref;
 
@@ -508,7 +524,13 @@ export const IdoDetail = (props: {
           variant="extended"
           color="primary"
           onClick={handleSave}
-          disabled={fixFlag || isProcessing || memError || user?.permission.nyushuko === permission.nyushuko_ref}
+          // 出発後はメモだけ保存できるので、メモに変更があるときだけ押せるようにする
+          disabled={
+            isProcessing ||
+            memError ||
+            user?.permission.nyushuko === permission.nyushuko_ref ||
+            (fixFlag && originIdoMem === idoMem.trim())
+          }
           sx={{ display: idoDetailData.sagyoKbnId === SAGYO_KBN_ID.idoShuko ? 'inline-flex' : 'none', mr: 2 }}
         >
           <SaveAsIcon sx={{ mr: 1 }} />
