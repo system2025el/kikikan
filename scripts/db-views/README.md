@@ -62,8 +62,13 @@
 | `v_nyushuko_den_head`    | 末尾に `nyuryoku_user`（入力者、`varchar(100)`）の1列を追加（17→18列）                             | 2026-08-21           | 未適用 | 未コミット             |
 | `v_nyushuko_den2_head`   | 末尾に `nyuryoku_user` の1列を追加（20→21列）。`v_nyushuko_den_head` から素通し                     | 2026-08-21           | 未適用 | 未コミット             |
 | `v_rfid_sts`             | ORDER BYの異なる窓関数3つを `GROUP BY` の集約1パスに置き換え（`v_rfid` のリフレッシュ高速化・第2弾）。列構成は不変 | 2026-08-25           | 未適用 | 未コミット             |
+| `v_ido_den3_lst`         | 末尾に `juchu_meisai`（jsonb）の1列を追加（31→32列）。あわせて `juchu_flg` の算出を相関EXISTS×2からLEFT JOINに変更（同値） | 2026-09-01           | 未適用 | 未コミット             |
 
 `v_rfid_sts` は `applied/` にも同名ファイルがあります（2026-08-19に本番適用済みの窓関数版）。**同じビューへの2回目の変更**なので、`applied/` 側は履歴としてそのまま残し、今回の変更は `staging-only/` に置いています。`staging-only/v_rfid_sts.rollback.sql` の中身は `applied/v_rfid_sts.sql`（＝本番の現在の定義）と同一です。本番適用時は `applied/` 側の2ファイルを削除し、`staging-only/` 側を `applied/` へ移動してください。
+
+`v_ido_den3_lst` は移動明細画面で「どの公演のどの明細が何個の移動を予定しているか」を出すための変更です。1行（作業区分・作業指示・日付・場所・機材IDの5キー）に複数の受注明細が紐づくため、行を増やさずに済むよう jsonb 配列で返しています。開発環境・本番の両方で既存31列の `EXCEPT ALL` 双方向の差分0・行数不変を確認済み（開発環境10,593行／本番11,299行、本番は読み取りのみ）。**ロールバックは列削除を伴うため `CREATE OR REPLACE` では戻せず `DROP` → `CREATE` になります**（`.rollback.sql` にその形で書いてあります。GRANTの再付与も含む）。`v_ido_den3_lst` に依存する他のビューは無く、アプリからの参照のみです。
+
+★ `juchu_kizai_head_id` は単独ではユニークではありません。`t_juchu_kizai_head` の主キーは `(juchu_head_id, juchu_kizai_head_id)` の複合キーで、後者は受注内の連番でしかありません（本番実データで2,332行 / distinct 28）。このビューに限らず、明細名を引くJOINは必ず2キー両方で書いてください。
 
 **適用順序**: 親→子の順に適用してください。逆順だと子が存在しない列を参照してエラーになります。
 

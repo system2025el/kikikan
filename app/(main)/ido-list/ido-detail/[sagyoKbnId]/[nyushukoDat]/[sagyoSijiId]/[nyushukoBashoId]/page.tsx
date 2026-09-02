@@ -6,7 +6,7 @@ import { BASHO_ID, SAGYO_KBN_ID, SAGYO_SIJI_ID } from '@/app/_lib/constants';
 import { getCurrentUser } from '@/app/(main)/_lib/funcs';
 import { permission } from '@/app/(main)/_lib/permission';
 
-import { getIdoDen, getIdoFix } from './_lib/funcs';
+import { getIdoDen, getIdoFix, getIdoMem } from './_lib/funcs';
 import { IdoDetailTableValues, IdoDetailValues } from './_lib/types';
 import { IdoDetail } from './_ui/ido-detail';
 
@@ -63,12 +63,21 @@ const Page = async (props: {
 
   const fixKbn = sagyoKbnId === SAGYO_KBN_ID.idoShuko ? SAGYO_KBN_ID.shukoConfirmed : SAGYO_KBN_ID.nyukoConfirmed;
 
-  // 移動伝票データ、完了フラグ
-  const [idoDenData, fixFlag] = await Promise.all([
+  // 移動伝票データ、完了フラグ、移動メモ
+  const [idoDenData, fixFlag, idoMem] = await Promise.all([
     getIdoDen(sagyoKbnId, sagyoSijiId, nyushukoDat, nyushukoBashoId),
     getIdoFix(fixKbn, sagyoSijiId, nyushukoDat, nyushukoBashoId),
+    getIdoMem(nyushukoDat, sagyoSijiId),
   ]);
 
-  return <IdoDetail user={user} idoDetailData={idoDetailData} idoDetailTableData={idoDenData} fixFlag={fixFlag} />;
+  return (
+    <IdoDetail
+      user={user}
+      idoDetailData={idoDetailData}
+      idoDetailTableData={idoDenData}
+      idoMem={idoMem}
+      fixFlag={fixFlag}
+    />
+  );
 };
 export default Page;

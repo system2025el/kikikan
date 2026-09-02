@@ -21,7 +21,7 @@ import {
   Typography,
 } from '@mui/material';
 import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { BASHO_ID, SAGYO_KBN_ID, SAGYO_SIJI_ID } from '@/app/_lib/constants';
 import { statusColors } from '@/app/(main)/_lib/colors';
@@ -29,6 +29,7 @@ import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
 import { permission } from '@/app/(main)/_lib/permission';
 import { User } from '@/app/(main)/_lib/types';
+import { validationMessages } from '@/app/(main)/_lib/validation-messages';
 import { BackButton } from '@/app/(main)/_ui/buttons';
 import { FormDateX } from '@/app/(main)/_ui/date';
 import { useDirty } from '@/app/(main)/_ui/dirty-context';
@@ -39,10 +40,28 @@ import { IdoDetailTableValues, IdoDetailValues, SelectedIdoEqptsValues } from '.
 import { NyukoIdoDenTable, ShukoIdoDenTable } from './ido-detail-table';
 import { IdoEqptSelectionDialog } from './ido-equipment-selection-dialog';
 
+/** 移動メモの最大文字数。t_ido_mem.mem が varchar(200) なのに合わせている */
+const IDO_MEM_MAX_LENGTH = 200;
+
+/**
+ * 明細リストの変更検知用の署名を作る
+ *
+ * 削除済みを除いた行の「機材id・移動数・保存済みかどうか」だけを並べる。
+ * 機材の追加・削除は行数が変わるので、これで検知できる。
+ * @param list 明細リスト
+ * @returns 署名文字列
+ */
+const toListSignature = (list: IdoDetailTableValues[]): string =>
+  list
+    .filter((d) => !d.delFlag)
+    .map((d) => `${d.kizaiId}:${d.planQty}:${d.saveFlag ? 1 : 0}`)
+    .join(',');
+
 export const IdoDetail = (props: {
   user: User;
   idoDetailData: IdoDetailValues;
   idoDetailTableData: IdoDetailTableValues[];
+  idoMem: string;
   fixFlag: boolean;
 }) => {
   const { idoDetailData } = props;
@@ -67,6 +86,10 @@ export const IdoDetail = (props: {
   const [idoDetailList, setIdoDetailList] = useState<IdoDetailTableValues[]>(props.idoDetailTableData);
   // 削除対象ID
   const [deleteId, setDeleteId] = useState<number | null>(null);
+
+  // 移動メモ（キーは移動予定日と移動指示のみなので、移動出庫と移動入庫で同じメモを共有する）
+  const [originIdoMem, setOriginIdoMem] = useState(props.idoMem);
+  const [idoMem, setIdoMem] = useState(props.idoMem);
 
   // 機材追加ダイアログ制御
   const [idoEqSelectionDialogOpen, setIdoEqSelectionDialogOpen] = useState(false);
@@ -200,15 +223,23 @@ export const IdoDetail = (props: {
    * @returns
    */
   const handleSave = async () => {
-    if (!user || idoDetailList.length === 0) return;
+    // 機材が0件でもメモだけ保存することがあるので、リストの件数では抜けない
+    if (!user) return;
 
     setIsProcessing(true);
 
-    const updateData = await saveIdoDen(idoDetailList, user.name);
+    const updateData = await saveIdoDen(
+      idoDetailList,
+      idoMem,
+      idoDetailData.nyushukoDat,
+      idoDetailData.sagyoSijiId,
+      user.name
+    );
 
     if (updateData) {
       setOriginIdoDetailList(updateData);
       setIdoDetailList(updateData);
+      setOriginIdoMem(idoMem);
       setEditFlag(false);
       setIsDirty(false);
       setSaveFlag(true);
@@ -224,22 +255,25 @@ export const IdoDetail = (props: {
 
   /**
    * 移動数変更時
+   *
+   * ShukoIdoDenTable は memo 化しているので、参照が変わらないよう useCallback で固定する。
+   * setState は関数形式なので依存配列は空でよい。
    * @param kizaiId 機材id
    * @param planQty 移動数
    */
-  const handleCellChange = (kizaiId: number, planQty: number) => {
+  const handleCellChange = useCallback((kizaiId: number, planQty: number) => {
     setIdoDetailList((prev) =>
       prev.map((d) =>
         d.kizaiId === kizaiId ? { ...d, planQty: planQty, diffQty: d.resultQty + d.resultAdjQty - planQty } : d
       )
     );
-  };
+  }, []);
 
   // 移動明細削除ボタン押下時
-  const handleIdoDenDelete = (kizaiId: number) => {
+  const handleIdoDenDelete = useCallback((kizaiId: number) => {
     setDeleteOpen(true);
     setDeleteId(kizaiId);
-  };
+  }, []);
 
   // 移動明細削除ダイアログの押下ボタンによる処理
   const handleDeleteResult = (result: boolean) => {
@@ -271,6 +305,7 @@ export const IdoDetail = (props: {
       sagyosijiId: idoDetailData.sagyoSijiId,
       nyushukoBashoId: idoDetailData.nyushukoBashoId,
       juchuFlg: 0,
+      juchuMeisai: [],
       kizaiId: d.kizaiId,
       kizaiNam: d.kizaiNam,
       shozokuId: d.shozokuId,
@@ -290,6 +325,17 @@ export const IdoDetail = (props: {
     setIdoDetailList((prev) => [...prev, ...selectIdoEqpt]);
   };
 
+  // 移動メモの編集可否。保存ボタンがあるのは移動出庫の画面だけなので、移動入庫では表示専用にする。
+  // 保存中はローディングで覆うが、フォーカスが残っているとキー入力だけは通ってしまうので disabled にもする
+  const memDisabled =
+    idoDetailData.sagyoKbnId !== SAGYO_KBN_ID.idoShuko ||
+    fixFlag ||
+    isProcessing ||
+    user?.permission.nyushuko === permission.nyushuko_ref;
+
+  // 移動メモの文字数超過。超えた分を切り捨てず、入力欄をエラー表示にして保存を止める
+  const memError = idoMem.length > IDO_MEM_MAX_LENGTH;
+
   // 移動検索ボタン押下
   const handleBack = () => {
     if (isPending) return;
@@ -305,9 +351,14 @@ export const IdoDetail = (props: {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // 明細リストの変更検知用の署名。画面上で変化し得るのは行の増減・移動数・削除だけなので、
+  // その3点に絞る。リスト全体を JSON.stringify すると、絶対に変化しない juchuMeisai まで
+  // 毎回文字列化することになり、メモ入力のたびに無駄なコストがかかる
+  const originListSignature = useMemo(() => toListSignature(originIdoDetailList), [originIdoDetailList]);
+  const currentListSignature = useMemo(() => toListSignature(idoDetailList), [idoDetailList]);
+
   useEffect(() => {
-    const filterIdoDetailList = idoDetailList.filter((d) => !d.delFlag);
-    if (JSON.stringify(originIdoDetailList) !== JSON.stringify(filterIdoDetailList)) {
+    if (originListSignature !== currentListSignature || originIdoMem !== idoMem) {
       setEditFlag(true);
       setIsDirty(true);
     } else {
@@ -315,10 +366,12 @@ export const IdoDetail = (props: {
       setIsDirty(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [idoDetailList]);
+  }, [originListSignature, currentListSignature, originIdoMem, idoMem]);
 
   return (
     <Box>
+      {/* 保存・出発・到着などの通信中は画面全体を覆って操作させない */}
+      {isProcessing && <LoadingOverlay />}
       <Box display={'flex'} justifyContent={'end'} mb={1}>
         <Button onClick={handleBack} disabled={isPending}>
           <Box display={'flex'} alignItems={'center'}>
@@ -371,6 +424,21 @@ export const IdoDetail = (props: {
             <TextField value={idoDetailData.nyushukoBashoId === BASHO_ID.kics ? 'KICS' : 'YARD'} disabled />
           </Box>
         </Grid2>
+        {/* 移動メモ。移動出庫の画面でのみ編集でき、移動入庫の画面は表示専用（保存ボタンが無いため）。
+            メモは移動予定日と移動指示で一意なので、どちらの画面でも同じ内容が出る */}
+        <Box display={'flex'} alignItems={'center'} px={2} pb={2}>
+          <Typography mr={5}>移動メモ</Typography>
+          <TextField
+            multiline
+            rows={3}
+            fullWidth
+            value={idoMem}
+            onChange={(e) => setIdoMem(e.target.value)}
+            disabled={memDisabled}
+            error={memError}
+            helperText={memError ? validationMessages.maxStringLength(IDO_MEM_MAX_LENGTH) : undefined}
+          />
+        </Box>
         <Divider />
         {idoDetailData.sagyoKbnId === SAGYO_KBN_ID.idoShuko ? (
           <Box width={'100%'}>
@@ -406,6 +474,7 @@ export const IdoDetail = (props: {
                 handleCellChange={handleCellChange}
                 handleIdoDenDelete={handleIdoDenDelete}
                 fixFlag={fixFlag}
+                isSaving={isProcessing}
               />
             )}
           </Box>
@@ -434,7 +503,7 @@ export const IdoDetail = (props: {
           variant="extended"
           color="primary"
           onClick={handleSave}
-          disabled={fixFlag || isProcessing || user?.permission.nyushuko === permission.nyushuko_ref}
+          disabled={fixFlag || isProcessing || memError || user?.permission.nyushuko === permission.nyushuko_ref}
           sx={{ display: idoDetailData.sagyoKbnId === SAGYO_KBN_ID.idoShuko ? 'inline-flex' : 'none', mr: 2 }}
         >
           <SaveAsIcon sx={{ mr: 1 }} />

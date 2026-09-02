@@ -1285,6 +1285,36 @@ export type Database = {
         };
         Relationships: [];
       };
+      t_ido_mem: {
+        Row: {
+          add_dat: string | null;
+          add_user: string | null;
+          mem: string | null;
+          sagyo_den_dat: string;
+          sagyo_siji_id: number;
+          upd_dat: string | null;
+          upd_user: string | null;
+        };
+        Insert: {
+          add_dat?: string | null;
+          add_user?: string | null;
+          mem?: string | null;
+          sagyo_den_dat: string;
+          sagyo_siji_id: number;
+          upd_dat?: string | null;
+          upd_user?: string | null;
+        };
+        Update: {
+          add_dat?: string | null;
+          add_user?: string | null;
+          mem?: string | null;
+          sagyo_den_dat?: string;
+          sagyo_siji_id?: number;
+          upd_dat?: string | null;
+          upd_user?: string | null;
+        };
+        Relationships: [];
+      };
       t_ido_result: {
         Row: {
           ido_den_id: number;
@@ -2895,6 +2925,7 @@ export type Database = {
           eda_cod: string | null;
           ido_flg: number | null;
           juchu_flg: number | null;
+          juchu_meisai: Json | null;
           kizai_id: number | null;
           kizai_mem: string | null;
           kizai_nam: string | null;
