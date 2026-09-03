@@ -1,19 +1,13 @@
--- 適用状況: 開発環境(preview/public) 2026-08-21 / 本番 未適用
+-- 適用状況: 開発環境(preview/public) 2026-08-21 / 本番 2026-09-03
 -- =====================================================================
--- v_nyushuko_den_head  末尾に nyuryoku_user（入力者）を追加
+-- v_nyushuko_den_head 変更前定義（ロールバック用バックアップ）
 --
--- 変更内容: t_juchu_head.nyuryoku_user を末尾に1列追加し、GROUP BY にも同列を追加。
---           t_juchu_head は元々このビューで JOIN 済み（del_flg = 0 の INNER JOIN）
---           なので、JOIN の追加は不要。
---
--- 行が増えない根拠: t_juchu_head の主キーは juchu_head_id 単独であり、
---           既存の GROUP BY には t_nyushuko_den.juchu_head_id が含まれている。
---           よって nyuryoku_user は既存キーに関数従属し、GROUP BY に足しても
---           グループは分裂しない。
---           検証: 開発環境で既存17列・全3,611行が新旧で差分0、行数も不変。
---
--- 型: character varying(100)（NULL可）
--- reloptions: security_invoker = on（開発環境・本番とも同じ）
+-- 取得元 : 本番 exekmmbmletvrzpavmzg / public スキーマ
+--          （取得時点で開発環境の変更前定義と完全に同一だったため、開発環境を
+--            戻す場合にもこのファイルを使える）
+-- 取得日 : 2026-08-21
+-- 取得方法: SELECT pg_get_viewdef('public.v_nyushuko_den_head', true)
+-- reloptions: ["security_invoker=on"]
 -- =====================================================================
 
 CREATE OR REPLACE VIEW public.v_nyushuko_den_head
@@ -56,8 +50,7 @@ WITH (security_invoker = on) AS
         CASE
             WHEN t_nyushuko_den.sagyo_kbn_id = 30 THEN t_nyushuko_den.plan_qty::bigint
             ELSE NULL::bigint
-        END, 0::bigint))::bigint AS nchk_plan_qty,
-    t_juchu_head.nyuryoku_user
+        END, 0::bigint))::bigint AS nchk_plan_qty
    FROM t_nyushuko_den
      JOIN t_juchu_head ON t_nyushuko_den.juchu_head_id = t_juchu_head.juchu_head_id AND t_juchu_head.del_flg = 0
      LEFT JOIN t_juchu_kizai_head ON t_juchu_head.juchu_head_id = t_juchu_kizai_head.juchu_head_id AND t_nyushuko_den.juchu_head_id = t_juchu_kizai_head.juchu_head_id AND t_nyushuko_den.juchu_kizai_head_id = t_juchu_kizai_head.juchu_kizai_head_id
@@ -71,6 +64,6 @@ WITH (security_invoker = on) AS
             WHEN t_nyushuko_den.sagyo_kbn_id = 10 OR t_nyushuko_den.sagyo_kbn_id = 20 THEN 1
             WHEN t_nyushuko_den.sagyo_kbn_id = 30 THEN 2
             ELSE NULL::integer
-        END), t_juchu_kizai_head.mem, t_juchu_head.juchu_dat, t_juchu_head.nyuryoku_user
+        END), t_juchu_kizai_head.mem, t_juchu_head.juchu_dat
   ORDER BY t_nyushuko_den.sagyo_den_dat, t_nyushuko_den.sagyo_id, m_shozoku.shozoku_nam, t_nyushuko_den.juchu_head_id, t_juchu_head.koen_nam, m_kokyaku.kokyaku_nam
 ;

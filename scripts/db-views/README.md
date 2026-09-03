@@ -43,33 +43,37 @@
 
 | ビュー                       | 変更内容                                                                      | ステージング        | 本番       | 関連                              |
 | ---------------------------- | ----------------------------------------------------------------------------- | ------------------- | ---------- | --------------------------------- |
-| `v_rfid_sts`                 | 5つの相関サブクエリを窓関数1回スキャンに統合（`v_rfid` のリフレッシュ高速化） | 2026-08-18          | 2026-08-19 | `refreshVRfid()`                  |
+| `v_rfid_sts`                 | **第1弾** 5つの相関サブクエリを窓関数1回スキャンに統合／**第2弾** 窓関数3つを `GROUP BY` の集約1パスに統合。`v_rfid` のリフレッシュは 16.8〜25秒 → 3.8秒 → **1.43秒** | ① 08-18 ② 08-25 | ① 08-19 ② 09-03 | `refreshVRfid()`                  |
 | `v_nyushuko_total_time_sts`  | 4回自己JOINを `count(*) FILTER` に統合                                        | 2026-08-17          | 2026-08-19 | `shuko-list` / `nyuko-list`       |
 | `v_ido_total_time_sts_union` | 4回自己JOINを `count(*) FILTER` に統合                                        | 2026-08-19          | 2026-08-19 | `ido-list`                        |
 | `v_juchu_kizai_dat_qty`      | 末尾に所属別数量6列（`kics_*` / `yard_*`）を追加                              | 日付不明（08-19前） | 2026-08-19 | `stock` ブランチ（**未マージ**）  |
 | `v_zaiko_qty`                | 末尾に所属別数量6列＋`kics_zaiko_qty` / `yard_zaiko_qty` の計8列を追加        | 日付不明（08-19前） | 2026-08-19 | `stock` ブランチ（**未マージ**）  |
 | `v_ido_den2`                 | 末尾に `mem` 列（移動メモ）を追加。`t_ido_mem` を LEFT JOIN                   | 日付不明（08-19前） | 2026-08-19 | 参照コードなし・`t_ido_mem` は0行 |
+| `v_juchu_kizai_head_lst`     | 末尾に `nyuryoku_user`（入力者）と `add_dat`（作成日）の2列を追加。既存列の値は不変 | 2026-08-20 | 2026-09-03 | `4a335287` / `be8a69c2` |
+| `v_nyushuko_den_lst`         | **①** `mem2` を `COALESCE(機材明細.mem2, コンテナ明細.mem)` に変更＋コンテナ明細をJOIN／**②** `add_user`・`upd_user` を追加（34→36列） | ① 08-20 ② 08-21 | 2026-09-03 | `51905975` |
+| `v_nyushuko_den2_lst`        | 末尾に `add_user`・`upd_user` の2列を追加（29→31列）。`v_nyushuko_den_lst` から素通し | 2026-08-21 | 2026-09-03 | 同上 |
+| `v_nyushuko_den_head`        | 末尾に `nyuryoku_user`（`varchar(100)`）の1列を追加（17→18列）               | 2026-08-21 | 2026-09-03 | 入出庫伝票 |
+| `v_nyushuko_den2_head`       | 末尾に `nyuryoku_user` の1列を追加（20→21列）。`v_nyushuko_den_head` から素通し | 2026-08-21 | 2026-09-03 | 同上 |
+| `v_ido_den3_lst`             | 末尾に `juchu_meisai`（jsonb）を追加（31→32列）。`juchu_flg` の算出を相関EXISTS×2からLEFT JOINに変更 | 2026-09-01 | 2026-09-03 | `dc99e9a2` 移動明細 |
+| `v_honbanbi_calc`            | 本番日テンプレート（`juchu_kizai_head_id = 0`）の行を除外。列構成は不変      | 2026-09-03 | 2026-09-03 | `8c5dc552` 伝票画面 |
 
 適用時の検証結果は上3件が新旧で全列差分0、下3件が既存列の差分0（いずれも本番データで `EXCEPT ALL` 双方向）。適用直前の本番バックアップは `~/db-backup/prod_20260819_1804/`（全69ビューの定義を含む `prod_all_viewdefs.sql` もある）。
 
+2026-09-03 に追加した8件（`v_juchu_kizai_head_lst` 以降＋`v_rfid_sts` 第2弾）も、すべて本番データで事前検証しています。バックアップは `~/db-backup/prod_20260903_1900/`。特筆すべき検証結果は次のとおりです。
+
+- `v_nyushuko_den_lst` の `mem2` 変更は、**8,023行すべてが NULL → 値の穴埋め**で、既存の非NULL値の書き換えは0件。行数144,103も不変（コンテナ明細のfanoutは起きていない）
+- `v_ido_den3_lst`・`v_rfid_sts`・`v_honbanbi_calc` は既存列・行数とも差分0
+- 在庫（`v_juchu_kizai_dat_qty` の `sum(plan_qty)` = 13,389,328）は適用前後で完全に不変
+
 ### staging-only/ — 本番未適用
 
-| ビュー                   | 変更内容                                                                                                                                                             | 開発環境                 | 本番   | 関連コミット              |
-| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ | ------ | ------------------------- |
-| `v_juchu_kizai_head_lst` | 末尾に `nyuryoku_user`（入力者）と `add_dat`（作成日）の2列を追加。既存列の値は不変                                                                                  | 適用済み（08-20確認）    | 未適用 | `4a335287` / `be8a69c2`   |
-| `v_nyushuko_den_lst`     | **①** `mem2` を `COALESCE(t_juchu_kizai_meisai.mem2, t_juchu_ctn_meisai.mem)` に変更＋コンテナ明細をJOIN／**②** 末尾に `add_user`・`upd_user` の2列を追加（34→36列） | ① 08-20確認 ② 2026-08-21 | 未適用 | ① `51905975` ② 未コミット |
-| `v_nyushuko_den2_lst`    | 末尾に `add_user`・`upd_user` の2列を追加（29→31列）。`v_nyushuko_den_lst` から素通し                                                                                | 2026-08-21               | 未適用 | 未コミット                |
-| `v_nyushuko_den_head`    | 末尾に `nyuryoku_user`（入力者、`varchar(100)`）の1列を追加（17→18列）                                                                                               | 2026-08-21               | 未適用 | 未コミット                |
-| `v_nyushuko_den2_head`   | 末尾に `nyuryoku_user` の1列を追加（20→21列）。`v_nyushuko_den_head` から素通し                                                                                      | 2026-08-21               | 未適用 | 未コミット                |
-| `v_rfid_sts`             | ORDER BYの異なる窓関数3つを `GROUP BY` の集約1パスに置き換え（`v_rfid` のリフレッシュ高速化・第2弾）。列構成は不変                                                   | 2026-08-25               | 未適用 | 未コミット                |
-| `v_ido_den3_lst`         | 末尾に `juchu_meisai`（jsonb）の1列を追加（31→32列）。あわせて `juchu_flg` の算出を相関EXISTS×2からLEFT JOINに変更（同値）                                           | 2026-09-01               | 未適用 | 未コミット                |
-| `v_honbanbi_calc`        | 本番日テンプレート（`juchu_kizai_head_id = 0`）の行を除外。`juchu_kizai_head_id <> 0` を2箇所に追加。列構成は不変                                                    | 2026-09-03               | 未適用 | 未コミット                |
+**現在なし**。2026-09-03 に上記8件をすべて本番へ適用し `applied/` へ移動しました。
 
-`v_rfid_sts` は `applied/` にも同名ファイルがあります（2026-08-19に本番適用済みの窓関数版）。**同じビューへの2回目の変更**なので、`applied/` 側は履歴としてそのまま残し、今回の変更は `staging-only/` に置いています。`staging-only/v_rfid_sts.rollback.sql` の中身は `applied/v_rfid_sts.sql`（＝本番の現在の定義）と同一です。本番適用時は `applied/` 側の2ファイルを削除し、`staging-only/` 側を `applied/` へ移動してください。
+`v_rfid_sts` は同じビューへの2回目の変更でした。2026-09-03 の本番適用時に、予定どおり第1弾の2ファイルを削除して第2弾を `applied/` へ移動しています（**1ビュー1ファイル＝本番の現在の定義**の原則）。`applied/v_rfid_sts.rollback.sql` は第1弾の窓関数版に戻すもので、第1弾より前（相関サブクエリ版）へ戻す必要が生じた場合は git履歴から取得してください。
 
 `v_ido_den3_lst` は移動明細画面で「どの公演のどの明細が何個の移動を予定しているか」を出すための変更です。1行（作業区分・作業指示・日付・場所・機材IDの5キー）に複数の受注明細が紐づくため、行を増やさずに済むよう jsonb 配列で返しています。開発環境・本番の両方で既存31列の `EXCEPT ALL` 双方向の差分0・行数不変を確認済み（開発環境10,593行／本番11,299行、本番は読み取りのみ）。**ロールバックは列削除を伴うため `CREATE OR REPLACE` では戻せず `DROP` → `CREATE` になります**（`.rollback.sql` にその形で書いてあります。GRANTの再付与も含む）。`v_ido_den3_lst` に依存する他のビューは無く、アプリからの参照のみです。
 
-`v_honbanbi_calc` は本番日（種別10/20/30/40）の入力を受注ヘッダー単位へ移した変更に対応するものです。`t_juchu_kizai_honbanbi` に `juchu_kizai_head_id = 0` の「テンプレート」行を持たせたところ、このビューだけが `t_juchu_kizai_head` と結合せず honbanbi テーブルを直接 `GROUP BY` しているため、テンプレートが `juchu_kizai_head_id = 0` の行として現れていました（開発環境で501行）。参照している5本（`v_juchu_kizai_head_lst`・見積4本）はいずれも実在の受注機材ヘッダーと結合しており実害は出ていませんでしたが、このビューを直接 SELECT すると誤った行を拾うため塞いでいます。開発環境で適用前後の全行md5を比較し、**依存5ビューは行数・内容とも完全一致**、`v_honbanbi_calc` 自身は 1,096→595行（減った501行がテンプレートを持つ受注数と一致）を確認済みです。**このビューは db-views の管理外だったため、`.rollback.sql` は開発環境から採取した定義です。本番へ適用する前に、本番の `pg_get_viewdef` がこれと一致することを確認してください。**
+`v_honbanbi_calc` は本番日（種別10/20/30/40）の入力を受注ヘッダー単位へ移した変更に対応するものです。`t_juchu_kizai_honbanbi` に `juchu_kizai_head_id = 0` の「テンプレート」行を持たせたところ、このビューだけが `t_juchu_kizai_head` と結合せず honbanbi テーブルを直接 `GROUP BY` しているため、テンプレートが `juchu_kizai_head_id = 0` の行として現れていました（開発環境で501行）。参照している5本（`v_juchu_kizai_head_lst`・見積4本）はいずれも実在の受注機材ヘッダーと結合しており実害は出ていませんでしたが、このビューを直接 SELECT すると誤った行を拾うため塞いでいます。開発環境で適用前後の全行md5を比較し、**依存5ビューは行数・内容とも完全一致**、`v_honbanbi_calc` 自身は 1,096→595行（減った501行がテンプレートを持つ受注数と一致）を確認済みです。`.rollback.sql` は開発環境から採取した定義でしたが、2026-09-03 の本番適用前に**本番の `pg_get_viewdef` と一致すること、および新定義が本番データで既存662行と差分0であること**を確認済みです。本番では `v_honbanbi_calc` を先に適用してからテンプレート行をINSERTしたため、適用後も662行のまま（テンプレートが正しく除外されている）です。
 
 ★ `juchu_kizai_head_id` は単独ではユニークではありません。`t_juchu_kizai_head` の主キーは `(juchu_head_id, juchu_kizai_head_id)` の複合キーで、後者は受注内の連番でしかありません（本番実データで2,332行 / distinct 28）。このビューに限らず、明細名を引くJOINは必ず2キー両方で書いてください。
 
@@ -79,6 +83,9 @@
 | ------------------------------------------------------ | ---------------------------------------------- |
 | `v_nyushuko_den_lst.sql` → `v_nyushuko_den2_lst.sql`   | `v_nyushuko_den2_lst` → `v_nyushuko_den_lst`   |
 | `v_nyushuko_den_head.sql` → `v_nyushuko_den2_head.sql` | `v_nyushuko_den2_head` → `v_nyushuko_den_head` |
+| `v_honbanbi_calc.sql` → `db-data` の `t_juchu_kizai_honbanbi_template.sql` | テンプレート行のDELETE → `v_honbanbi_calc` |
+
+最後の1組はビューとデータをまたぐ順序制約です。`v_honbanbi_calc` はテンプレート行（`juchu_kizai_head_id = 0`）を除外する変更なので、**先にビューを適用してからテンプレートをINSERT**しないと、その間このビューの行数が倍近くに膨らみます（本番実測で 662 → 1,228 行）。
 
 `v_nyushuko_den_lst` の変更①は**列追加ではなく既存列 `mem2` の値が変わる変更**です。コンテナ明細は同一キーに `shozoku_id` 別で複数行あり、JOIN条件を誤ると `sum(plan_qty)` 等がfanoutして二重集計になります。本番適用前に行数と `mem2` の差分検証を必ず行ってください（ファイル冒頭のコメントに詳細あり）。
 
