@@ -195,6 +195,21 @@ export const selectMeisaiEqts = async (ids: number[]) => {
 };
 
 /**
+ * 機材の現在の定価を取得する関数
+ * 明細に単価を入れ直す用途なので、削除済み・非表示の機材も除外しない
+ * @param ids 機材idの配列
+ * @returns 機材idと定価
+ */
+export const selectKizaiRegAmts = async (ids: number[]) => {
+  const supabase = await createClient();
+  try {
+    return await supabase.schema(SCHEMA).from('m_kizai').select('kizai_id, reg_amt').in('kizai_id', ids);
+  } catch (e) {
+    throw new Error('[selectKizaiRegAmts] DBエラー:', { cause: e });
+  }
+};
+
+/**
  * 有効な機材を取得する関数
  * @param query kizai_nam
  * @returns 有効な機材の配列（機材選択用）

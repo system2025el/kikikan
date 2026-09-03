@@ -34,7 +34,6 @@ import {
   Typography,
 } from '@mui/material';
 import { addDays, addMonths, set, setDate, subDays, subMonths } from 'date-fns';
-import dayjs, { Dayjs } from 'dayjs';
 import { redirect, useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import React from 'react';
@@ -55,12 +54,14 @@ import { getNyukoDate, getRange, getShukoDate } from '@/app/(main)/_lib/date-fun
 import { addLock, getDic, getLock } from '@/app/(main)/_lib/funcs';
 import { useStableCallback, useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
 import { lockCheck, lockRelease } from '@/app/(main)/_lib/lock';
+import { useNyushukoFixChanged } from '@/app/(main)/_lib/nyushuko-fix-notify';
 import { permission } from '@/app/(main)/_lib/permission';
 import { openOrFocusTab } from '@/app/(main)/_lib/tab-focus';
 import { LockValues, User } from '@/app/(main)/_lib/types';
 import { BackButton } from '@/app/(main)/_ui/buttons';
-import { Calendar, DateTime, TestDate } from '@/app/(main)/_ui/date';
+import { Calendar, CalendarView, DateTime, FormDateX } from '@/app/(main)/_ui/date';
 import { IsDirtyAlertDialog, useDirty } from '@/app/(main)/_ui/dirty-context';
+import { HonbanbiCalendar } from '@/app/(main)/_ui/honbanbi-calendar';
 import { Loading, LoadingOverlay } from '@/app/(main)/_ui/loading';
 import {
   checkShukoStatus,
@@ -99,7 +100,6 @@ import {
   StockTableValues,
 } from '../_lib/types';
 import { CopyDialog } from './copy-dialog';
-import { DateSelectDialog } from './date-selection-dialog';
 import { ContainerTable, EqTable, IdoEqTable, StockTable } from './equipment-order-detail-table';
 import { EqptSelectionDialog } from './equipment-selection-dailog';
 import { SeparationDialog } from './separation-dialog';
@@ -136,7 +136,6 @@ const EquipmentOrderDetail = (props: {
 }) => {
   const router = useRouter();
   /** ダイアログ上部に戻るためのref */
-  const scrollRef = useRef<HTMLDivElement>(null);
   // user情報
   const user = props.user;
   // 受注機材ヘッダー保存フラグ
@@ -194,14 +193,8 @@ const EquipmentOrderDetail = (props: {
   const [originEqStockList, setOriginEqStockList] = useState<StockTableValues[][]>(/*props.eqStockData ??*/ []);
   // 機材在庫リスト
   const [eqStockList, setEqStockList] = useState<StockTableValues[][]>(/*props.eqStockData ??*/ []);
-  // 受注本番日元データ
-  const [originJuchuHonbanbiList, setOriginJuchuHonbanbiList] = useState<JuchuKizaiHonbanbiValues[]>(
-    props.juchuHonbanbiData ?? []
-  );
-  // 受注本番日リスト
+  // 受注本番日リスト（この画面では閲覧のみ。編集は伝票画面）
   const [juchuHonbanbiList, setJuchuHonbanbiList] = useState<JuchuKizaiHonbanbiValues[]>(props.juchuHonbanbiData ?? []);
-  // 受注本番日削除リスト
-  const [juchuHonbanbiDeleteList, setJuchuHonbanbiDeleteList] = useState<JuchuKizaiHonbanbiValues[]>([]);
 
   // 出庫日
   const [shukoDate, setShukoDate] = useState<Date | null>(/*props.shukoDate*/ null);
@@ -232,8 +225,6 @@ const EquipmentOrderDetail = (props: {
   const [separationDialogOpen, setSeparationDialogOpen] = useState(false);
   // 並び替えダイアログ制御
   const [sortDialogOpen, setSortDialogOpen] = useState(false);
-  // 日付選択カレンダーダイアログ制御
-  const [dateSelectionDialogOpne, setDateSelectionDialogOpne] = useState(false);
   // 削除ダイアログ制御
   const [deleteOpen, setDeleteOpen] = useState(false);
   // 出庫作業中警告ダイアログ制御
@@ -253,6 +244,8 @@ const EquipmentOrderDetail = (props: {
   const [juchuKizaiHeadExpanded, setJuchuKizaiHeadExpanded] = useState(!saveKizaiHead);
   // 移動機材アコーディオン制御
   const [idoEqTableExpanded, setIdoEqTableExpanded] = useState(false);
+  // 本番日アコーディオン制御
+  const [honbanbiExpanded, setHonbanbiExpanded] = useState(true);
   // ポッパー制御
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -354,6 +347,13 @@ const EquipmentOrderDetail = (props: {
   const nebikiRat = watch('nebikiRat');
   /** 割引金額の監視 */
   const nebikiAmt = watch('nebikiAmt');
+  /** KICS出庫日時の監視（出庫明細ボタンの表示制御用） */
+  const kicsShukoDat = watch('kicsShukoDat');
+  /** YARD出庫日時の監視（出庫明細ボタンの表示制御用） */
+  const yardShukoDat = watch('yardShukoDat');
+
+  // 出庫明細の閲覧権限
+  const canRefNyushuko = !!(user && user.permission.nyushuko & permission.nyushuko_ref);
 
   // 金額算出の元になる単価×受注数の合計（現在値・保存済み）。削除された明細は除く。
   // メモ等の金額に無関係な項目は含まれないため、それらを編集してもこの値は変化しない
@@ -371,6 +371,26 @@ const EquipmentOrderDetail = (props: {
 
   // ブラウザバック、F5、×ボタンでページを離れた際のhook
   useUnsavedChangesWarning(isDirty || otherDirty ? true : false);
+
+  // 別タブの出庫明細画面で出発・出発解除が行われた際に、出発・到着フラグだけを取り直す。
+  // これらの処理はt_nyushuko_fixの追加・削除しか行わないため、明細やフォームの再読込は不要で、
+  // 編集中の内容にも影響しない。
+  useNyushukoFixChanged(async ({ juchuHeadId, juchuKizaiHeadIds }) => {
+    const currentJuchuKizaiHeadId = getValues('juchuKizaiHeadId');
+    if (juchuHeadId !== getValues('juchuHeadId') || !juchuKizaiHeadIds.includes(currentJuchuKizaiHeadId)) return;
+
+    try {
+      const [shukoFixFlag, nyukoFixFlag] = await Promise.all([
+        getNyushukoFixFlag(juchuHeadId, currentJuchuKizaiHeadId, SAGYO_KBN_ID.shukoConfirmed),
+        getNyushukoFixFlag(juchuHeadId, currentJuchuKizaiHeadId, SAGYO_KBN_ID.nyukoConfirmed),
+      ]);
+      setShukoFixFlag(shukoFixFlag);
+      setNyukoFixFlag(nyukoFixFlag);
+    } catch (e) {
+      setSnackBarMessage('出発状況の再取得に失敗しました');
+      setSnackBarOpen(true);
+    }
+  });
 
   // ロック制御
   const lock = async () => {
@@ -390,7 +410,6 @@ const EquipmentOrderDetail = (props: {
       setEqSelectionDialogOpen(false);
       setSeparationDialogOpen(false);
       setSortDialogOpen(false);
-      setDateSelectionDialogOpne(false);
       setDeleteOpen(false);
 
       setAlertTitle('編集中');
@@ -487,7 +506,6 @@ const EquipmentOrderDetail = (props: {
         setDateRange(dateRange);
         setOriginEqStockList(updatedEqStockData);
         setEqStockList(updatedEqStockData);
-        setOriginJuchuHonbanbiList(juchuHonbanbiData ?? []);
         setJuchuHonbanbiList(juchuHonbanbiData ?? []);
         setIsDetailLoading(false);
       }
@@ -507,7 +525,6 @@ const EquipmentOrderDetail = (props: {
       const filterJuchuKizaiMeisaiList = juchuKizaiMeisaiList.filter((data) => !data.delFlag);
       if (
         isDirty ||
-        JSON.stringify(originJuchuHonbanbiList) !== JSON.stringify(juchuHonbanbiList) ||
         JSON.stringify(originJuchuContainerMeisaiList) !== JSON.stringify(juchuContainerMeisaiList) ||
         JSON.stringify(originJuchuKizaiMeisaiList) !== JSON.stringify(filterJuchuKizaiMeisaiList)
       ) {
@@ -535,6 +552,25 @@ const EquipmentOrderDetail = (props: {
         setSnackBarOpen(true);
       }
     }
+  };
+
+  /**
+   * 出庫明細（最終確認）を別タブで開く
+   * @param nyushukoBashoId 出庫場所id
+   * @param shukoDat 出庫日時
+   */
+  const openShukoDetail = (nyushukoBashoId: number, shukoDat: Date) => {
+    // 未保存の出庫日時にはDBに該当する出庫伝票が無く画面を開けないため、コピーと同様に保存を促す
+    if (otherDirty || isDirty) {
+      setAlertTitle('保存されていません');
+      setAlertMessage('1度保存をしてください');
+      setAlertOpen(true);
+      return;
+    }
+
+    openOrFocusTab(
+      `/shuko-list/shuko-detail/${juchuHeadData.juchuHeadId}/${JUCHU_KIZAI_HEAD_KBN.normal}/${nyushukoBashoId}/${shukoDat.toISOString()}/${SAGYO_KBN_ID.shukoConfirmation}`
+    );
   };
 
   /**
@@ -703,7 +739,6 @@ const EquipmentOrderDetail = (props: {
       const checkKicsNyukoDat = dirtyFields.kicsNyukoDat ? true : false;
       const checkYardShukoDat = dirtyFields.yardShukoDat ? true : false;
       const checkYardNyukoDat = dirtyFields.yardNyukoDat ? true : false;
-      const checkJuchuHonbanbi = JSON.stringify(originJuchuHonbanbiList) !== JSON.stringify(juchuHonbanbiList);
       const checkJuchuKizaiMeisai =
         JSON.stringify(originJuchuKizaiMeisaiList) !==
         JSON.stringify(juchuKizaiMeisaiList.filter((data) => !data.delFlag));
@@ -745,7 +780,6 @@ const EquipmentOrderDetail = (props: {
           checkKicsNyukoDat,
           checkYardShukoDat,
           checkYardNyukoDat,
-          checkJuchuHonbanbi,
           checkJuchuKizaiMeisai,
           checkIdoJuchuKizaiMeisai,
           checkJuchuContainerMeisai,
@@ -753,8 +787,6 @@ const EquipmentOrderDetail = (props: {
           updateShukoDate,
           updateNyukoDate,
           updateDateRange,
-          juchuHonbanbiList,
-          juchuHonbanbiDeleteList,
           originJuchuKizaiMeisaiList,
           juchuKizaiMeisaiList,
           idoJuchuKizaiMeisaiList,
@@ -767,10 +799,19 @@ const EquipmentOrderDetail = (props: {
 
         // 画面情報更新
         try {
-          if (checkJuchuHonbanbi) {
-            // 受注機材本番日データ更新
-            setOriginJuchuHonbanbiList(juchuHonbanbiList);
-            setJuchuHonbanbiDeleteList([]);
+          if (checkKicsShukoDat || checkKicsNyukoDat || checkYardShukoDat || checkYardNyukoDat) {
+            // 入出庫日の変更で本番日の適用範囲が変わるため取り直す
+            const juchuHonbanbiData = (await getHonbanbi(data.juchuHeadId, data.juchuKizaiHeadId)) ?? [];
+            setJuchuHonbanbiList(juchuHonbanbiData);
+
+            // 本番日数もサーバー側で更新されているため画面とフォームに反映する
+            // （この後の reset(data) で戻らないよう data 自体にも入れておく）
+            const honbanbiQty = juchuHonbanbiData.filter(
+              (d) => d.juchuHonbanbiShubetuId === HONBANBI_SHUBETU_ID.honban
+            ).length;
+            const addHonbanbiQty = juchuHonbanbiData.reduce((sum, d) => sum + (d.juchuHonbanbiAddQty ?? 0), 0);
+            data.juchuHonbanbiQty = honbanbiQty + addHonbanbiQty;
+            setValue('juchuHonbanbiQty', data.juchuHonbanbiQty);
           }
           if (checkJuchuKizaiHead && (checkJuchuKizaiMeisai || checkJuchuContainerMeisai)) {
             // 受注機材ヘッダー状態管理更新
@@ -934,9 +975,9 @@ const EquipmentOrderDetail = (props: {
    * 日付選択カレンダー選択時
    * @param date カレンダー選択日付
    */
-  const handleDateChange = async (date: Dayjs | null, view: string) => {
+  const handleDateChange = async (date: Date | null, view: CalendarView) => {
     if (!date) return;
-    setSelectDate(date.toDate());
+    setSelectDate(date);
 
     if (view === 'day') {
       setIsDetailLoading(true);
@@ -946,7 +987,7 @@ const EquipmentOrderDetail = (props: {
         const updatedEqStockData = await updateEqStock(
           getValues('juchuHeadId'),
           getValues('juchuKizaiHeadId'),
-          date.toDate(),
+          date,
           filterJuchuKizaiMeisaiList
         );
 
@@ -987,12 +1028,12 @@ const EquipmentOrderDetail = (props: {
   // 3か月前
   const handleBackDateChange = () => {
     const date = subDays(new Date(selectDate), 91);
-    handleDateChange(dayjs(date), 'day');
+    handleDateChange(date, 'day');
   };
   // 3か月後
   const handleForwardDateChange = () => {
     const date = addDays(new Date(selectDate), 91);
-    handleDateChange(dayjs(date), 'day');
+    handleDateChange(date, 'day');
   };
 
   /**
@@ -1254,16 +1295,15 @@ const EquipmentOrderDetail = (props: {
    * @param kizaiId 機材id
    * @param date 日付
    */
-  const handleCellDateChange = (kizaiId: number, date: Dayjs | null) => {
+  const handleCellDateChange = (kizaiId: number, date: Date | null) => {
     if (date !== null) {
-      const newDate = date.toDate();
       // 移動機材明細、所属変更
       setIdoJuchuKizaiMeisaiList((prev) =>
         prev.map((row) =>
           row.kizaiId === kizaiId && !row.delFlag
             ? {
                 ...row,
-                sagyoDenDat: newDate,
+                sagyoDenDat: date,
                 sagyoSijiId: row.mShozokuId === BASHO_ID.kics ? SAGYO_SIJI_ID.ky : SAGYO_SIJI_ID.yk,
                 shozokuId: row.mShozokuId === BASHO_ID.kics ? BASHO_ID.yard : BASHO_ID.kics,
               }
@@ -1372,9 +1412,9 @@ const EquipmentOrderDetail = (props: {
    * KICS出庫日変更時
    * @param newDate KICS出庫日
    */
-  const handleKicsShukoChange = (newDate: Dayjs | null) => {
+  const handleKicsShukoChange = (newDate: Date | null) => {
     if (newDate === null) return;
-    setValue('kicsShukoDat', newDate.toDate(), { shouldDirty: true });
+    setValue('kicsShukoDat', newDate, { shouldDirty: true });
   };
 
   /**
@@ -1382,7 +1422,7 @@ const EquipmentOrderDetail = (props: {
    * @param newDate KICS出庫日
    * @returns
    */
-  const handleKicsShukoAccept = async (newDate: Dayjs | null) => {
+  const handleKicsShukoAccept = async (newDate: Date | null) => {
     if (isProcessing) return;
     setIsProcessing(true);
 
@@ -1397,17 +1437,17 @@ const EquipmentOrderDetail = (props: {
 
         const yardShukoDat = getValues('yardShukoDat');
 
-        const hours = newDate.hour();
-        const minutes = newDate.minute();
+        const hours = newDate.getHours();
+        const minutes = newDate.getMinutes();
 
         const totalMinutes = hours * 60 + minutes;
 
         if (yardShukoDat === null) {
           if (totalMinutes === 0) {
-            setIdoDat(newDate.toDate());
+            setIdoDat(newDate);
             setMoveOpen(true);
           } else {
-            setIdoDat(subDays(newDate.toDate(), 1));
+            setIdoDat(subDays(newDate, 1));
             setMoveOpen(true);
           }
         } else {
@@ -1427,16 +1467,16 @@ const EquipmentOrderDetail = (props: {
    * YARD出庫日変更時
    * @param newDate YARD出庫日
    */
-  const handleYardShukoChange = async (newDate: Dayjs | null) => {
+  const handleYardShukoChange = async (newDate: Date | null) => {
     if (newDate === null) return;
-    setValue('yardShukoDat', newDate.toDate(), { shouldDirty: true });
+    setValue('yardShukoDat', newDate, { shouldDirty: true });
   };
 
   /**
    * YARD出庫日確定時
    * @param newDate YARD出庫日
    */
-  const handleYardShukoAccept = async (newDate: Dayjs | null) => {
+  const handleYardShukoAccept = async (newDate: Date | null) => {
     if (isProcessing) return;
     setIsProcessing(true);
 
@@ -1451,16 +1491,16 @@ const EquipmentOrderDetail = (props: {
 
         const kicsShukoDat = getValues('kicsShukoDat');
 
-        const hours = newDate.hour();
-        const minutes = newDate.minute();
+        const hours = newDate.getHours();
+        const minutes = newDate.getMinutes();
 
         const totalMinutes = hours * 60 + minutes;
 
         if (kicsShukoDat === null && hours < 12 && totalMinutes !== 0) {
-          setIdoDat(subDays(newDate.toDate(), 1));
+          setIdoDat(subDays(newDate, 1));
           setMoveOpen(true);
         } else if (kicsShukoDat === null && (hours >= 12 || totalMinutes === 0)) {
-          setIdoDat(newDate.toDate());
+          setIdoDat(newDate);
           setMoveOpen(true);
         } else if (kicsShukoDat !== null) {
           setIdoDat(null);
@@ -1479,16 +1519,16 @@ const EquipmentOrderDetail = (props: {
    * KICS入庫日変更時
    * @param newDate KICS入庫日
    */
-  const handleKicsNyukoChange = async (newDate: Dayjs | null) => {
+  const handleKicsNyukoChange = async (newDate: Date | null) => {
     if (newDate === null) return;
-    setValue('kicsNyukoDat', newDate.toDate(), { shouldDirty: true });
+    setValue('kicsNyukoDat', newDate, { shouldDirty: true });
   };
 
   /**
    * KICS入庫日確定時
    * @param newDate KICS入庫日
    */
-  const handleKicsNyukoAccept = async (newDate: Dayjs | null) => {
+  const handleKicsNyukoAccept = async (newDate: Date | null) => {
     if (isProcessing) return;
     setIsProcessing(true);
 
@@ -1517,16 +1557,16 @@ const EquipmentOrderDetail = (props: {
    * YARD入庫日時変更時
    * @param newDate YARD入庫日
    */
-  const handleYardNyukoChange = (newDate: Dayjs | null) => {
+  const handleYardNyukoChange = (newDate: Date | null) => {
     if (newDate === null) return;
-    setValue('yardNyukoDat', newDate.toDate(), { shouldDirty: true });
+    setValue('yardNyukoDat', newDate, { shouldDirty: true });
   };
 
   /**
    * YARD入庫日時確定時
    * @param newDate YARD入庫日
    */
-  const handleYardNyukoAccept = async (newDate: Dayjs | null) => {
+  const handleYardNyukoAccept = async (newDate: Date | null) => {
     if (isProcessing) return;
     setIsProcessing(true);
 
@@ -1705,8 +1745,6 @@ const EquipmentOrderDetail = (props: {
       nebikiSyncedRef.current = false;
       reset();
       setSelectDate(shukoDate ? shukoDate : new Date());
-      setJuchuHonbanbiList(originJuchuHonbanbiList);
-      setJuchuHonbanbiDeleteList([]);
       setJuchuKizaiMeisaiList(originJuchuKizaiMeisaiList);
       setIdoJuchuKizaiMeisaiList(originIdoJuchuKizaiMeisaiList);
       setJuchuContainerMeisaiList(originJuchuContainerMeisaiList);
@@ -2344,69 +2382,6 @@ const EquipmentOrderDetail = (props: {
   };
 
   // 本番日入力ダイアログ開
-  const handleOpenDateDialog = async () => {
-    if (isProcessing) return;
-    setIsProcessing(true);
-
-    try {
-      const lockResult = await lock();
-
-      if (lockResult) {
-        setDateSelectionDialogOpne(true);
-      }
-    } catch (e) {
-      setSnackBarMessage('サーバー接続エラー');
-      setSnackBarOpen(true);
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  // 本番日入力ダイアログ閉
-  const handleCloseDateDialog = async () => {
-    if (isProcessing) return;
-    setIsProcessing(true);
-
-    setDateSelectionDialogOpne(false);
-    setIsProcessing(false);
-  };
-
-  /**
-   * 本番日入力ダイアログでの入力値反映
-   */
-  const handleSave = async (
-    updatedHonbanbiList: JuchuKizaiHonbanbiValues[],
-    updatedHonbanbiDeleteList: JuchuKizaiHonbanbiValues[]
-  ) => {
-    if (isProcessing) return;
-    setIsProcessing(true);
-
-    try {
-      const lockResult = await lock();
-
-      if (lockResult) {
-        const honbanbiQty = updatedHonbanbiList.filter(
-          (data) => data.juchuHonbanbiShubetuId === HONBANBI_SHUBETU_ID.honban
-        ).length;
-        const addHonbanbiQty = updatedHonbanbiList.reduce((sum, data) => sum + (data.juchuHonbanbiAddQty ?? 0), 0);
-        const updatedJuchuHonbanbiQty = honbanbiQty + addHonbanbiQty;
-
-        if (getValues('juchuHonbanbiQty') !== updatedJuchuHonbanbiQty) {
-          setValue('juchuHonbanbiQty', updatedJuchuHonbanbiQty, { shouldDirty: true });
-        }
-        setJuchuHonbanbiList(updatedHonbanbiList);
-        setJuchuHonbanbiDeleteList(updatedHonbanbiDeleteList);
-
-        setDateSelectionDialogOpne(false);
-      }
-    } catch (e) {
-      setSnackBarMessage('サーバー接続エラー');
-      setSnackBarOpen(true);
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
   /**
    * useEffect
    */
@@ -2547,15 +2522,14 @@ const EquipmentOrderDetail = (props: {
     const filterJuchuContainerMeisaiList = juchuContainerMeisaiList.filter((data) => !data.delFlag);
     if (
       JSON.stringify(originJuchuKizaiMeisaiList) === JSON.stringify(filterJuchuKizaiMeisaiList) &&
-      JSON.stringify(originJuchuContainerMeisaiList) === JSON.stringify(filterJuchuContainerMeisaiList) &&
-      JSON.stringify(originJuchuHonbanbiList) === JSON.stringify(juchuHonbanbiList)
+      JSON.stringify(originJuchuContainerMeisaiList) === JSON.stringify(filterJuchuContainerMeisaiList)
     ) {
       setOtherDirty(false);
     } else {
       setOtherDirty(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [juchuKizaiMeisaiList, juchuContainerMeisaiList, juchuHonbanbiList]);
+  }, [juchuKizaiMeisaiList, juchuContainerMeisaiList]);
 
   useEffect(() => {
     eqStockListRef.current = eqStockList;
@@ -2645,6 +2619,20 @@ const EquipmentOrderDetail = (props: {
                 ) : (
                   <></>
                 )}
+                {saveKizaiHead && (kicsShukoDat || yardShukoDat) && (
+                  <Grid2 container alignItems={'center'} spacing={1}>
+                    {kicsShukoDat && (
+                      <Button onClick={() => openShukoDetail(BASHO_ID.kics, kicsShukoDat)} disabled={!canRefNyushuko}>
+                        出庫明細K
+                      </Button>
+                    )}
+                    {yardShukoDat && (
+                      <Button onClick={() => openShukoDetail(BASHO_ID.yard, yardShukoDat)} disabled={!canRefNyushuko}>
+                        出庫明細Y
+                      </Button>
+                    )}
+                  </Grid2>
+                )}
                 <Grid2 container display={saveKizaiHead ? 'flex' : 'none'} alignItems={'center'} spacing={1}>
                   {!edit ? <Typography>閲覧モード</Typography> : <Typography>編集モード</Typography>}
                   <Button disabled={!!lockData || user?.permission.juchu === permission.juchu_ref} onClick={handleEdit}>
@@ -2720,7 +2708,7 @@ const EquipmentOrderDetail = (props: {
                       <Typography marginRight={10} whiteSpace="nowrap">
                         受注日
                       </Typography>
-                      <TestDate date={juchuHeadData.juchuDat} onChange={() => {}} disabled />
+                      <FormDateX sx={{ width: 160 }} value={juchuHeadData.juchuDat} disabled notClearable />
                     </Box>
                     <Box sx={styles.container}>
                       <Typography marginRight={10} whiteSpace="nowrap">
@@ -3003,17 +2991,14 @@ const EquipmentOrderDetail = (props: {
                         render={({ field, fieldState }) => (
                           <Box sx={styles.grid2Row}>
                             <DateTime
-                              date={field.value}
-                              maxDate={
-                                juchuHonbanbiList.length > 0
-                                  ? new Date(juchuHonbanbiList[0].juchuHonbanbiDat)
-                                  : undefined
+                              value={field.value}
+                              onChange={(newDate) =>
+                                newDate === null ? handleKicsClear() : handleKicsShukoChange(newDate)
                               }
-                              onChange={handleKicsShukoChange}
                               onAccept={handleKicsShukoAccept}
-                              fieldstate={fieldState}
+                              error={!!fieldState.error}
+                              helperText={fieldState.error?.message}
                               disabled={!edit || shukoFixFlag}
-                              onClear={handleKicsClear}
                             />
                             <Button
                               onClick={() =>
@@ -3037,17 +3022,14 @@ const EquipmentOrderDetail = (props: {
                         render={({ field, fieldState }) => (
                           <Box sx={styles.grid2Row}>
                             <DateTime
-                              date={field.value}
-                              maxDate={
-                                juchuHonbanbiList.length > 0
-                                  ? new Date(juchuHonbanbiList[0].juchuHonbanbiDat)
-                                  : undefined
+                              value={field.value}
+                              onChange={(newDate) =>
+                                newDate === null ? handleYardClear() : handleYardShukoChange(newDate)
                               }
-                              onChange={handleYardShukoChange}
                               onAccept={handleYardShukoAccept}
-                              fieldstate={fieldState}
+                              error={!!fieldState.error}
+                              helperText={fieldState.error?.message}
                               disabled={!edit || shukoFixFlag}
-                              onClear={handleYardClear}
                             />
                             <Button
                               onClick={() =>
@@ -3074,20 +3056,19 @@ const EquipmentOrderDetail = (props: {
                         render={({ field, fieldState }) => (
                           <Box sx={styles.grid2Row}>
                             <DateTime
-                              date={field.value}
-                              minDate={
-                                juchuHonbanbiList.length > 0
-                                  ? new Date(juchuHonbanbiList[juchuHonbanbiList.length - 1].juchuHonbanbiDat)
-                                  : undefined
-                              }
-                              onChange={handleKicsNyukoChange}
-                              onAccept={handleKicsNyukoAccept}
-                              fieldstate={fieldState}
-                              disabled={!edit || nyukoFixFlag}
-                              onClear={() => {
-                                field.onChange(null);
-                                trigger(['kicsNyukoDat', 'yardNyukoDat']);
+                              value={field.value}
+                              onChange={(newDate) => {
+                                if (newDate === null) {
+                                  field.onChange(null);
+                                  trigger(['kicsNyukoDat', 'yardNyukoDat']);
+                                  return;
+                                }
+                                handleKicsNyukoChange(newDate);
                               }}
+                              onAccept={handleKicsNyukoAccept}
+                              error={!!fieldState.error}
+                              helperText={fieldState.error?.message}
+                              disabled={!edit || nyukoFixFlag}
                             />
                             <Button
                               onClick={() =>
@@ -3111,20 +3092,19 @@ const EquipmentOrderDetail = (props: {
                         render={({ field, fieldState }) => (
                           <Box sx={styles.grid2Row}>
                             <DateTime
-                              date={field.value}
-                              minDate={
-                                juchuHonbanbiList.length > 0
-                                  ? new Date(juchuHonbanbiList[juchuHonbanbiList.length - 1].juchuHonbanbiDat)
-                                  : undefined
-                              }
-                              onChange={handleYardNyukoChange}
-                              onAccept={handleYardNyukoAccept}
-                              fieldstate={fieldState}
-                              disabled={!edit || nyukoFixFlag}
-                              onClear={() => {
-                                field.onChange(null);
-                                trigger(['kicsNyukoDat', 'yardNyukoDat']);
+                              value={field.value}
+                              onChange={(newDate) => {
+                                if (newDate === null) {
+                                  field.onChange(null);
+                                  trigger(['kicsNyukoDat', 'yardNyukoDat']);
+                                  return;
+                                }
+                                handleYardNyukoChange(newDate);
                               }}
+                              onAccept={handleYardNyukoAccept}
+                              error={!!fieldState.error}
+                              helperText={fieldState.error?.message}
+                              disabled={!edit || nyukoFixFlag}
                             />
                             <Button
                               onClick={() =>
@@ -3383,7 +3363,7 @@ const EquipmentOrderDetail = (props: {
                         <Popper open={open} anchorEl={anchorEl} placement="bottom-start" sx={{ zIndex: 1000 }}>
                           <ClickAwayListener onClickAway={handleClickAway}>
                             <Paper elevation={3} sx={{ mt: 1 }}>
-                              <Calendar date={selectDate} onChange={handleDateChange} />
+                              <Calendar value={selectDate} onChange={handleDateChange} />
                             </Paper>
                           </ClickAwayListener>
                         </Popper>
@@ -3461,253 +3441,40 @@ const EquipmentOrderDetail = (props: {
           )}
           {/*-------本番日-------*/}
           {saveKizaiHead && (
-            <Paper variant="outlined" sx={{ mt: 2 }}>
-              <Box>
-                <Box sx={styles.container}>
-                  <Typography marginRight={{ xs: 2, sm: 9, md: 9, lg: 9 }} whiteSpace="nowrap">
-                    本番日
-                  </Typography>
-                  <Button disabled={!edit} onClick={handleOpenDateDialog}>
-                    編集
-                  </Button>
-                  <Dialog open={dateSelectionDialogOpne} fullScreen sx={{ zIndex: 1201 }}>
-                    <DateSelectDialog
-                      juchuHeadId={getValues('juchuHeadId')}
-                      juchuKizaiHeadId={getValues('juchuKizaiHeadId')}
-                      shukoDate={shukoDate}
-                      nyukoDate={nyukoDate}
-                      juchuHonbanbiList={juchuHonbanbiList}
-                      juchuHonbanbiDeleteList={juchuHonbanbiDeleteList}
-                      shubetuColorMap={shubetuColorMap}
-                      scrollRef={scrollRef}
-                      onClose={handleCloseDateDialog}
-                      onSave={handleSave}
-                      lock={lock}
-                    />
-                  </Dialog>
-                </Box>
-                <Box
-                  display={'flex'}
-                  justifyContent={'center'}
-                  ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
-                  width={75}
-                  bgcolor={shubetuColorMap.get(HONBANBI_SHUBETU_ID.shikomi)}
-                >
-                  <Typography fontSize={'small'} py={1} px={3}>
-                    仕込
-                  </Typography>
-                </Box>
-                <Grid2 container spacing={1} ml={{ xs: 10, sm: 17, md: 17, lg: 17 }} py={2} width={{ md: '50%' }}>
-                  <Grid2 size={3} maxWidth={200}>
-                    <Typography>日付</Typography>
-                  </Grid2>
-                  <Grid2 size={3} maxWidth={200}>
-                    <Typography>追加日数</Typography>
-                  </Grid2>
-                  <Grid2 size={6}>
-                    <Typography>メモ</Typography>
-                  </Grid2>
-                </Grid2>
-                <Grid2
-                  container
-                  display="flex"
-                  flexDirection="column"
-                  spacing={1}
-                  ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
-                  width={{ md: '50%' }}
-                >
-                  {juchuHonbanbiList &&
-                    juchuHonbanbiList.map(
-                      (data, index) =>
-                        data.juchuHonbanbiShubetuId === HONBANBI_SHUBETU_ID.shikomi && (
-                          <Grid2 key={index} container display="flex" flexDirection="row">
-                            <Grid2 size={3} maxWidth={200}>
-                              <Typography>{toJapanYMDString(data.juchuHonbanbiDat)}</Typography>
-                            </Grid2>
-                            <Grid2 size={3} maxWidth={200}>
-                              <Typography>{data.juchuHonbanbiAddQty}</Typography>
-                            </Grid2>
-                            <Grid2 size={6}>
-                              <Typography sx={{ wordBreak: 'break-word', whiteSpace: 'wrap' }}>{data.mem}</Typography>
-                            </Grid2>
-                          </Grid2>
-                        )
-                    )}
-                </Grid2>
-                <Box
-                  display={'flex'}
-                  justifyContent={'center'}
-                  ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
-                  mt={4}
-                  width={75}
-                  bgcolor={shubetuColorMap.get(HONBANBI_SHUBETU_ID.rh)}
-                >
-                  <Typography fontSize={'small'} py={1} px={3}>
-                    RH
-                  </Typography>
-                </Box>
-                <Grid2
-                  container
-                  display="flex"
-                  flexDirection="row"
-                  spacing={1}
-                  ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
-                  py={2}
-                  width={{ md: '50%' }}
-                >
-                  <Grid2 size={3} maxWidth={200}>
-                    <Typography>日付</Typography>
-                  </Grid2>
-                  <Grid2 size={3} maxWidth={200}>
-                    <Typography>追加日数</Typography>
-                  </Grid2>
-                  <Grid2 size={6}>
-                    <Typography>メモ</Typography>
-                  </Grid2>
-                </Grid2>
-                <Grid2
-                  container
-                  display="flex"
-                  flexDirection="column"
-                  spacing={1}
-                  ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
-                  width={{ md: '50%' }}
-                >
-                  {juchuHonbanbiList &&
-                    juchuHonbanbiList.map(
-                      (data, index) =>
-                        data.juchuHonbanbiShubetuId === HONBANBI_SHUBETU_ID.rh && (
-                          <Grid2 key={index} container display="flex" flexDirection="row">
-                            <Grid2 size={3} maxWidth={200}>
-                              <Typography>{toJapanYMDString(data.juchuHonbanbiDat)}</Typography>
-                            </Grid2>
-                            <Grid2 size={3} maxWidth={200}>
-                              <Typography>{data.juchuHonbanbiAddQty}</Typography>
-                            </Grid2>
-                            <Grid2 size={6}>
-                              <Typography sx={{ wordBreak: 'break-word', whiteSpace: 'wrap' }}>{data.mem}</Typography>
-                            </Grid2>
-                          </Grid2>
-                        )
-                    )}
-                </Grid2>
-                <Box
-                  display={'flex'}
-                  justifyContent={'center'}
-                  ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
-                  mt={4}
-                  width={75}
-                  bgcolor={shubetuColorMap.get(HONBANBI_SHUBETU_ID.gp)}
-                >
-                  <Typography fontSize={'small'} py={1} px={3}>
-                    GP
-                  </Typography>
-                </Box>
-                <Grid2
-                  container
-                  display="flex"
-                  flexDirection="row"
-                  spacing={1}
-                  ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
-                  py={2}
-                  width={{ md: '50%' }}
-                >
-                  <Grid2 size={3} maxWidth={200}>
-                    <Typography>日付</Typography>
-                  </Grid2>
-                  <Grid2 size={3} maxWidth={200}>
-                    <Typography>追加日数</Typography>
-                  </Grid2>
-                  <Grid2 size={6}>
-                    <Typography>メモ</Typography>
-                  </Grid2>
-                </Grid2>
-                <Grid2
-                  container
-                  display="flex"
-                  flexDirection="column"
-                  spacing={1}
-                  ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
-                  width={{ md: '50%' }}
-                >
-                  {juchuHonbanbiList &&
-                    juchuHonbanbiList.map(
-                      (data, index) =>
-                        data.juchuHonbanbiShubetuId === HONBANBI_SHUBETU_ID.gp && (
-                          <Grid2 key={index} container display="flex" flexDirection="row">
-                            <Grid2 size={3} maxWidth={200}>
-                              <Typography>{toJapanYMDString(data.juchuHonbanbiDat)}</Typography>
-                            </Grid2>
-                            <Grid2 size={3} maxWidth={200}>
-                              <Typography>{data.juchuHonbanbiAddQty}</Typography>
-                            </Grid2>
-                            <Grid2 size={6}>
-                              <Typography sx={{ wordBreak: 'break-word', whiteSpace: 'wrap' }}>{data.mem}</Typography>
-                            </Grid2>
-                          </Grid2>
-                        )
-                    )}
-                </Grid2>
-                <Box
-                  display={'flex'}
-                  justifyContent={'center'}
-                  ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
-                  mt={4}
-                  width={75}
-                  bgcolor={shubetuColorMap.get(HONBANBI_SHUBETU_ID.honban)}
-                >
-                  <Typography fontSize={'small'} py={1} px={3}>
-                    本番
-                  </Typography>
-                </Box>
-                <Grid2
-                  container
-                  display="flex"
-                  flexDirection="row"
-                  spacing={1}
-                  ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
-                  py={2}
-                  width={{ md: '50%' }}
-                >
-                  <Grid2 size={3} maxWidth={200}>
-                    <Typography>日付</Typography>
-                  </Grid2>
-                  <Grid2 size={3} maxWidth={200}>
-                    <Typography>追加日数</Typography>
-                  </Grid2>
-                  <Grid2 size={6}>
-                    <Typography>メモ</Typography>
-                  </Grid2>
-                </Grid2>
-                <Grid2
-                  container
-                  display="flex"
-                  flexDirection="column"
-                  spacing={1}
-                  ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
-                  pb={2}
-                  width={{ md: '50%' }}
-                >
-                  {juchuHonbanbiList &&
-                    juchuHonbanbiList.map(
-                      (data, index) =>
-                        data.juchuHonbanbiShubetuId === HONBANBI_SHUBETU_ID.honban && (
-                          <Grid2 key={index} container display="flex" flexDirection="row">
-                            <Grid2 size={3} maxWidth={200}>
-                              <Typography>{toJapanYMDString(data.juchuHonbanbiDat)}</Typography>
-                            </Grid2>
-                            <Grid2 size={3} maxWidth={200}>
-                              <Typography>{data.juchuHonbanbiAddQty}</Typography>
-                            </Grid2>
-                            <Grid2 size={6}>
-                              <Typography sx={{ wordBreak: 'break-word', whiteSpace: 'wrap' }}>{data.mem}</Typography>
-                            </Grid2>
-                          </Grid2>
-                        )
-                    )}
-                </Grid2>
-              </Box>
-            </Paper>
+            <Accordion
+              expanded={honbanbiExpanded}
+              onChange={() => setHonbanbiExpanded(!honbanbiExpanded)}
+              sx={{
+                marginTop: 2,
+                borderRadius: 1,
+                overflow: 'hidden',
+              }}
+              variant="outlined"
+            >
+              <AccordionSummary
+                expandIcon={<ExpandMoreIcon />}
+                component="div"
+                sx={{
+                  minHeight: '30px',
+                  maxHeight: '30px',
+                  '&.Mui-expanded': {
+                    minHeight: '30px',
+                    maxHeight: '30px',
+                  },
+                }}
+              >
+                <Typography>本番日</Typography>
+              </AccordionSummary>
+              <AccordionDetails sx={{ padding: 0 }}>
+                <Divider />
+                <HonbanbiCalendar
+                  honbanbiList={juchuHonbanbiList}
+                  shubetuColorMap={shubetuColorMap}
+                  readOnly
+                  referenceDate={shukoDate}
+                />
+              </AccordionDetails>
+            </Accordion>
           )}
         </Container>
       )}

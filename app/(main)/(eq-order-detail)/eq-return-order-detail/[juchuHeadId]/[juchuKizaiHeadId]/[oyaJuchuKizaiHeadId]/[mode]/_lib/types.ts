@@ -1,5 +1,6 @@
 import z from 'zod';
 
+import { MEMO_MAX_LENGTH } from '@/app/_lib/constants';
 import { validationMessages } from '@/app/(main)/_lib/validation-messages';
 
 export const ReturnJuchuKizaiHeadSchema = z
@@ -12,7 +13,10 @@ export const ReturnJuchuKizaiHeadSchema = z
     //   .number()
     //   .max(99999999, { message: validationMessages.maxNumberLength(8) })
     //   .nullable(),
-    mem: z.string().nullable(),
+    mem: z
+      .string()
+      .max(MEMO_MAX_LENGTH, { message: validationMessages.maxStringLength(MEMO_MAX_LENGTH) })
+      .nullable(),
     headNam: z
       .string()
       .max(50, { message: validationMessages.maxStringLength(50) })
@@ -40,6 +44,7 @@ export type ReturnJuchuKizaiMeisaiValues = {
   shozokuId: number;
   shozokuNam: string;
   mem: string | null;
+  mem2: string | null;
   kizaiId: number;
   kizaiTankaAmt: number;
   kizaiNam: string;

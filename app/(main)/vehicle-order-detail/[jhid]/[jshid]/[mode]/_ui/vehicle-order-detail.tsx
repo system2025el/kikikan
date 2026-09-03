@@ -36,7 +36,6 @@ import {
   Typography,
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
-import { Dayjs } from 'dayjs';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
@@ -50,7 +49,7 @@ import { lockCheck, lockRelease } from '@/app/(main)/_lib/lock';
 import { permission } from '@/app/(main)/_lib/permission';
 import { LockValues, User } from '@/app/(main)/_lib/types';
 import { BackButton, CloseMasterDialogButton } from '@/app/(main)/_ui/buttons';
-import { DateTime, TestDate } from '@/app/(main)/_ui/date';
+import { DateTime } from '@/app/(main)/_ui/date';
 import { IsDirtyAlertDialog, useDirty } from '@/app/(main)/_ui/dirty-context';
 import { selectNone, SelectTypes } from '@/app/(main)/_ui/form-box';
 import { LoadingOverlay } from '@/app/(main)/_ui/loading';
@@ -298,15 +297,20 @@ const VehicleOrderDetail = ({
 
     try {
       if (sharyoHeadId <= 0) {
-        // 新規登録
+        // 新規登録。画面遷移するのでローディングは解除しない
         const newId = await addNewJuchuSharyoHead(data, user?.name ?? '');
         setSnackBarMessage('保存しました');
         setSnackBarOpen(true);
         router.replace(`/vehicle-order-detail/${data.juchuHeadId}/${Number(newId)}/edit`);
       } else {
         // 更新処理
-        if (!currentMeisai) return;
-        updateJuchuSharyoHead(data, currentMeisai!, user?.name ?? '');
+        if (!currentMeisai) {
+          setIsLoading(false);
+          setSnackBarMessage('保存に失敗しました');
+          setSnackBarOpen(true);
+          return;
+        }
+        await updateJuchuSharyoHead(data, currentMeisai, user?.name ?? '');
         const newData = getValues();
         reset(newData);
         setCurrentMeisai(newData);
@@ -320,6 +324,7 @@ const VehicleOrderDetail = ({
         setSnackBarOpen(true);
       }
     } catch (e) {
+      setIsLoading(false);
       setSnackBarMessage('保存に失敗しました');
       setSnackBarOpen(true);
     }
@@ -380,6 +385,8 @@ const VehicleOrderDetail = ({
     } else {
       setDirtyOpen(false);
     }
+
+    setIsProcessing(false);
   };
 
   /* useEffect ------------------------------------------------------- */
@@ -668,18 +675,19 @@ const VehicleOrderDetail = ({
                     control={control}
                     render={({ field, fieldState }) => (
                       <DateTime
-                        date={field.value}
-                        onChange={(newDate: Dayjs | null) => {
+                        value={field.value}
+                        onChange={(newDate) => {
                           if (newDate === null) return;
-                          setValue('nyushukoDat', newDate.toDate(), { shouldDirty: true, shouldValidate: true });
+                          setValue('nyushukoDat', newDate, { shouldDirty: true, shouldValidate: true });
                         }}
-                        onAccept={(newDate: Dayjs | null) => {
+                        onAccept={(newDate) => {
                           if (newDate === null) return;
-                          setValue('nyushukoDat', newDate.toDate(), { shouldDirty: true, shouldValidate: true });
+                          setValue('nyushukoDat', newDate, { shouldDirty: true, shouldValidate: true });
                         }}
-                        fieldstate={fieldState}
+                        error={!!fieldState.error}
+                        helperText={fieldState.error?.message}
                         disabled={!editable}
-                        disableClearable
+                        notClearable
                       />
                     )}
                   />

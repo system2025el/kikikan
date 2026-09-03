@@ -1,3 +1,4 @@
+-- 適用状況: 開発環境(preview/public) 2026-08-19 / 本番 2026-08-19
 -- v_ido_total_time_sts_union 高速化版
 --
 -- 変更内容: v_ido_sts_union を4回自己JOINしていた構造（count_all / count_sts2 /

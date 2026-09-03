@@ -106,7 +106,7 @@ export const selectNyushukoDetailOne = async (
       .schema(SCHEMA)
       .from('v_nyushuko_den2_lst')
       .select(
-        'kizai_nam, kizai_mem, plan_qty, result_adj_qty, result_qty, ctn_flg, bld_cod, tana_cod, eda_cod, dsp_ord_num_meisai, indent_num'
+        'kizai_nam, kizai_mem, plan_qty, result_adj_qty, result_qty, ctn_flg, bld_cod, tana_cod, eda_cod, dsp_ord_num_meisai, indent_num, add_user, upd_user'
       )
       .eq('juchu_head_id', juchuHeadId)
       .eq('juchu_kizai_head_id', juchuKizaiHeadId)

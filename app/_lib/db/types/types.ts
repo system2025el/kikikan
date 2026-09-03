@@ -1285,6 +1285,36 @@ export type Database = {
         };
         Relationships: [];
       };
+      t_ido_mem: {
+        Row: {
+          add_dat: string | null;
+          add_user: string | null;
+          mem: string | null;
+          sagyo_den_dat: string;
+          sagyo_siji_id: number;
+          upd_dat: string | null;
+          upd_user: string | null;
+        };
+        Insert: {
+          add_dat?: string | null;
+          add_user?: string | null;
+          mem?: string | null;
+          sagyo_den_dat: string;
+          sagyo_siji_id: number;
+          upd_dat?: string | null;
+          upd_user?: string | null;
+        };
+        Update: {
+          add_dat?: string | null;
+          add_user?: string | null;
+          mem?: string | null;
+          sagyo_den_dat?: string;
+          sagyo_siji_id?: number;
+          upd_dat?: string | null;
+          upd_user?: string | null;
+        };
+        Relationships: [];
+      };
       t_ido_result: {
         Row: {
           ido_den_id: number;
@@ -1772,6 +1802,51 @@ export type Database = {
           nyushuko_dat?: string;
           nyushuko_shubetu_id?: number | null;
           sharyo_id?: number | null;
+          upd_dat?: string | null;
+          upd_user?: string | null;
+        };
+        Relationships: [];
+      };
+      t_juchu_tempu: {
+        Row: {
+          add_dat: string | null;
+          add_user: string | null;
+          del_flg: number | null;
+          file_nam: string;
+          file_pat: string;
+          file_siz: number | null;
+          juchu_head_id: number;
+          juchu_tempu_id: number;
+          mem: string | null;
+          mime_typ: string | null;
+          upd_dat: string | null;
+          upd_user: string | null;
+        };
+        Insert: {
+          add_dat?: string | null;
+          add_user?: string | null;
+          del_flg?: number | null;
+          file_nam: string;
+          file_pat: string;
+          file_siz?: number | null;
+          juchu_head_id: number;
+          juchu_tempu_id?: number;
+          mem?: string | null;
+          mime_typ?: string | null;
+          upd_dat?: string | null;
+          upd_user?: string | null;
+        };
+        Update: {
+          add_dat?: string | null;
+          add_user?: string | null;
+          del_flg?: number | null;
+          file_nam?: string;
+          file_pat?: string;
+          file_siz?: number | null;
+          juchu_head_id?: number;
+          juchu_tempu_id?: number;
+          mem?: string | null;
+          mime_typ?: string | null;
           upd_dat?: string | null;
           upd_user?: string | null;
         };
@@ -2850,6 +2925,7 @@ export type Database = {
           eda_cod: string | null;
           ido_flg: number | null;
           juchu_flg: number | null;
+          juchu_meisai: Json | null;
           kizai_id: number | null;
           kizai_mem: string | null;
           kizai_nam: string | null;
@@ -3111,6 +3187,7 @@ export type Database = {
       };
       v_juchu_kizai_head_lst: {
         Row: {
+          add_dat: string | null;
           dsp_ord_num: number | null;
           genebi: number | null;
           head_nam: string;
@@ -3134,6 +3211,7 @@ export type Database = {
           nebiki_amt: number | null;
           nebiki_rat: number | null;
           nyuko_dat: string | null;
+          nyuryoku_user: string | null;
           oya_juchu_kizai_head_id: number | null;
           rihabi: number | null;
           sagyo_sts_nam: string | null;
@@ -3548,6 +3626,7 @@ export type Database = {
           memv: string | null;
           nchk_plan_qty: number | null;
           nyuko_fix_flg: number | null;
+          nyuryoku_user: string | null;
           nyushuko_basho_id: number | null;
           nyushuko_dat: string | null;
           nyushuko_shubetu_id: number | null;
@@ -3562,6 +3641,7 @@ export type Database = {
       };
       v_nyushuko_den2_lst: {
         Row: {
+          add_user: string | null;
           bld_cod: string | null;
           ctn_flg: number | null;
           dsp_ord_num_meisai: number | null;
@@ -3591,6 +3671,7 @@ export type Database = {
           sagyo_kbn_nam_short: string | null;
           shozoku_nam: string | null;
           tana_cod: string | null;
+          upd_user: string | null;
         };
         Relationships: [];
       };

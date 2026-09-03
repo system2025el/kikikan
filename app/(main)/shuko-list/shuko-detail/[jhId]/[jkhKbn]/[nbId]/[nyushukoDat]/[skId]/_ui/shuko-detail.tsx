@@ -23,10 +23,11 @@ import { set } from 'zod';
 
 import { BASHO_ID, JUCHU_KIZAI_HEAD_KBN, SAGYO_KBN_ID } from '@/app/_lib/constants';
 import { dispColors, statusColors } from '@/app/(main)/_lib/colors';
+import { notifyNyushukoFixChanged } from '@/app/(main)/_lib/nyushuko-fix-notify';
 import { permission } from '@/app/(main)/_lib/permission';
 import { User } from '@/app/(main)/_lib/types';
 import { BackButton } from '@/app/(main)/_ui/buttons';
-import { DateTime, TestDate } from '@/app/(main)/_ui/date';
+import { DateTime, FormDateX } from '@/app/(main)/_ui/date';
 import { LoadingOverlay } from '@/app/(main)/_ui/loading';
 
 import {
@@ -117,6 +118,10 @@ export const ShukoDetail = (props: {
       setSnackBarMessage('出発しました');
       setSnackBarOpen(true);
       setIsProcessing(false);
+      // このタブは閉じるため、同じ受注機材ヘッダーを開いている他のタブに出発フラグの変化を伝える
+      notifyNyushukoFixChanged(shukoDetailData.juchuHeadId, [
+        ...new Set(shukoDetailList.map((d) => d.juchuKizaiHeadId).filter((id) => id !== null)),
+      ]);
       window.close();
     } else {
       setDepartureOpen(false);
@@ -166,6 +171,8 @@ export const ShukoDetail = (props: {
       setSnackBarMessage('出発解除しました');
       setSnackBarOpen(true);
       setIsProcessing(false);
+      // このタブは閉じるため、同じ受注機材ヘッダーを開いている他のタブに出発フラグの変化を伝える
+      notifyNyushukoFixChanged(shukoDetailData.juchuHeadId, juchuKizaiHeadIds);
       window.close();
     } else {
       setReleaseOpen(false);
@@ -257,21 +264,19 @@ export const ShukoDetail = (props: {
             <Box display={'flex'} alignItems={'center'}>
               <Typography mr={4}>受注番号</Typography>
               <TextField value={shukoDetailData.juchuHeadId} sx={{ width: 100 }} disabled />
-              <Typography mx={2}>受注日</Typography>
-              <TestDate
-                date={shukoDetailData.juchuDat ? new Date(shukoDetailData.juchuDat) : null}
-                onChange={() => {}}
+            </Box>
+            <Box display={'flex'} alignItems={'center'}>
+              <Typography mr={6}>受注日</Typography>
+              <FormDateX
+                sx={{ width: 160 }}
+                value={shukoDetailData.juchuDat ? new Date(shukoDetailData.juchuDat) : null}
                 disabled
+                notClearable
               />
             </Box>
             <Box display={'flex'} alignItems={'center'}>
               <Typography mr={4}>出庫日時</Typography>
-              <DateTime
-                date={shukoDetailData.nyushukoDat ? new Date(shukoDetailData.nyushukoDat) : null}
-                onChange={() => {}}
-                onAccept={() => {}}
-                disabled
-              />
+              <DateTime value={shukoDetailData.nyushukoDat ? new Date(shukoDetailData.nyushukoDat) : null} disabled />
             </Box>
             <Box display={'flex'} alignItems={'center'}>
               <Typography mr={4}>出庫場所</Typography>
@@ -294,6 +299,10 @@ export const ShukoDetail = (props: {
             <Box display={'flex'} alignItems={'center'}>
               <Typography mr={6}>顧客名</Typography>
               <TextField value={shukoDetailData.kokyakuNam ?? ''} fullWidth disabled />
+            </Box>
+            <Box display={'flex'} alignItems={'center'}>
+              <Typography mr={2}>受注担当者</Typography>
+              <TextField value={shukoDetailData.nyuryokuUser ?? ''} disabled sx={{ width: 160 }} />
             </Box>
           </Grid2>
         </Grid2>

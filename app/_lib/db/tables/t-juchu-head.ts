@@ -1,5 +1,7 @@
 'use server';
 
+import { PoolClient } from 'pg';
+
 import { SCHEMA } from '../schema';
 import { createClient } from '../supabase-server';
 import { JuchuHead } from '../types/t-juchu-head-type';
@@ -71,5 +73,47 @@ export const updateJuchuHead = async (data: JuchuHead) => {
     return await supabase.schema(SCHEMA).from('t_juchu_head').update(data).eq('juchu_head_id', data.juchu_head_id);
   } catch (e) {
     throw new Error('[updateJuchuHead] DBエラー:', { cause: e });
+  }
+};
+
+/**
+ * 受注ヘッダー情報更新（トランザクション用）
+ * 呼び出し元のトランザクションに参加させたい場合はこちらを使う。
+ * Supabase版と同じく、dataに含まれるキーだけを更新する。
+ * @param data 受注ヘッダーデータ
+ * @param connection コネクション
+ */
+export const updateJuchuHeadWithTran = async (data: JuchuHead, connection: PoolClient) => {
+  const updateKeys = (Object.keys(data) as (keyof JuchuHead)[]).filter((key) => key !== 'juchu_head_id');
+
+  if (updateKeys.length === 0) {
+    throw new Error('No columns to update.');
+  }
+
+  const values: (string | number | null | undefined)[] = [];
+  let placeholderIndex = 1;
+
+  const setClause = updateKeys
+    .map((key) => {
+      values.push(data[key]);
+      return `${key} = $${placeholderIndex++}`;
+    })
+    .join(', ');
+
+  values.push(data.juchu_head_id);
+
+  const query = `
+    UPDATE
+      ${SCHEMA}.t_juchu_head
+    SET
+      ${setClause}
+    WHERE
+      juchu_head_id = $${placeholderIndex}
+  `;
+
+  try {
+    await connection.query(query, values);
+  } catch (e) {
+    throw new Error('[updateJuchuHeadWithTran] DBエラー:', { cause: e });
   }
 };

@@ -10,12 +10,7 @@ import { permission } from '@/app/(main)/_lib/permission';
 import { StockTableValues } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';
 
 import { getDetailJuchuHead, getJuchuKizaiNyushuko, getNyushukoFixFlag } from '../../../../../_lib/funcs';
-import {
-  getJuchuHonbanbiQty,
-  getReturnJuchuContainerMeisai,
-  getReturnJuchuKizaiHead,
-  getReturnJuchuKizaiMeisai,
-} from './_lib/funcs';
+import { getReturnJuchuContainerMeisai, getReturnJuchuKizaiHead, getReturnJuchuKizaiMeisai } from './_lib/funcs';
 import {
   ReturnJuchuContainerMeisaiValues,
   ReturnJuchuKizaiHeadValues,
@@ -91,14 +86,13 @@ const Page = async (props: {
 
   // 新規
   if (juchuKizaiHeadId === 0) {
-    // 親本番日数
-    const oyaJuchuHonbanbiQty = await getJuchuHonbanbiQty(juchuHeadId, oyaJuchuKizaiHeadId);
     // 返却受注機材ヘッダーデータ(初期値)
+    // 本番日数は伝票画面の保存時に受注本番日テンプレートから算出されるため、ここでは0から始める
     const newReturnJuchuKizaiHeadData: ReturnJuchuKizaiHeadValues = {
       juchuHeadId: juchuHeadId,
       juchuKizaiHeadId: juchuKizaiHeadId,
       juchuKizaiHeadKbn: JUCHU_KIZAI_HEAD_KBN.return,
-      juchuHonbanbiQty: oyaJuchuHonbanbiQty ?? 0,
+      juchuHonbanbiQty: 0,
       //nebikiAmt: null,
       mem: null,
       headNam: '',

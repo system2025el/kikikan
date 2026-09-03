@@ -4,9 +4,11 @@ import { redirect } from 'next/navigation';
 
 import { getCurrentUser } from '@/app/(main)/_lib/funcs';
 import { permission } from '@/app/(main)/_lib/permission';
+import { getColor } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
 import { Order } from '@/app/(main)/order/[juchuHeadId]/[mode]/_ui/order';
 
 import { getJuchuHead, getJuchuKizaiHeadList, getJuchuSharyoHeadList, getUsers } from './_lib/funcs';
+import { getJuchuTempuList } from './_lib/tempu-funcs';
 import { EqTableValues, OrderValues, VehicleTableValues } from './_lib/types';
 
 export const metadata: Metadata = {
@@ -34,7 +36,7 @@ const Page = async (props: { params: Promise<{ juchuHeadId: string; mode: string
     return <Typography>このページを閲覧する権限がありません。</Typography>;
   }
 
-  const userList = await getUsers();
+  const [userList, honbanbiColor] = await Promise.all([getUsers(), getColor()]);
 
   // 新規
   if (juchuHeadId === 0) {
@@ -53,6 +55,7 @@ const Page = async (props: { params: Promise<{ juchuHeadId: string; mode: string
       mem: null,
       // nebikiAmt: null,
       zeiKbn: 2,
+      honbanbiList: [],
     };
 
     // 受注機材ヘッダーデータ(初期値)
@@ -67,16 +70,19 @@ const Page = async (props: { params: Promise<{ juchuHeadId: string; mode: string
         juchuKizaiHeadDatas={newJuchuKizaiHeadData}
         juchusharyoHeadDatas={newJuchuSharyoHeadData}
         userList={userList}
+        juchuTempuDatas={[]}
+        honbanbiColor={honbanbiColor}
         edit={edit}
       />
     );
     // 既存
   } else {
-    // 受注ヘッダーデータ、受注機材ヘッダーデータ、受注車両ヘッダーデータ
-    const [juchuHeadData, juchuKizaiHeadDatas, juchuSharyoHeadDatas] = await Promise.all([
+    // 受注ヘッダーデータ（本番日を含む）、受注機材ヘッダーデータ、受注車両ヘッダーデータ、添付ファイルデータ
+    const [juchuHeadData, juchuKizaiHeadDatas, juchuSharyoHeadDatas, juchuTempuDatas] = await Promise.all([
       getJuchuHead(juchuHeadId),
       getJuchuKizaiHeadList(juchuHeadId),
       getJuchuSharyoHeadList(juchuHeadId),
+      getJuchuTempuList(juchuHeadId),
     ]);
 
     if (!juchuHeadData) {
@@ -89,6 +95,8 @@ const Page = async (props: { params: Promise<{ juchuHeadId: string; mode: string
         juchuKizaiHeadDatas={juchuKizaiHeadDatas}
         juchusharyoHeadDatas={juchuSharyoHeadDatas}
         userList={userList}
+        juchuTempuDatas={juchuTempuDatas}
+        honbanbiColor={honbanbiColor}
         edit={edit}
       />
     );

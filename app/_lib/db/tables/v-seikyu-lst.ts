@@ -8,8 +8,16 @@ import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 import pool from '../postgres';
 import { SCHEMA } from '../schema';
 
+// 生SQL文字列に値を直接連結せず $n プレースホルダで渡すためのヘルパー
+const createParamPusher = (values: unknown[]) => (value: unknown) => {
+  values.push(value);
+  return `$${values.length}`;
+};
+
 export const selectFilteredBills = async (queries: BillSearchValues) => {
   const { billId, billingSts, range, kokyaku, seikyuHeadNam } = queries;
+  const values: unknown[] = [];
+  const p = createParamPusher(values);
 
   // 基本の検索
   let query = `
@@ -23,30 +31,30 @@ export const selectFilteredBills = async (queries: BillSearchValues) => {
     WHERE seikyu_head_id IS NOT NULL`;
   // 請求番号
   if (billId) {
-    query += ` AND seikyu_head_id = ${billId}`;
+    query += ` AND seikyu_head_id = ${p(billId)}`;
   }
   // 請求ステータス
   if (billingSts !== null && billingSts !== FAKE_NEW_ID) {
-    query += ` AND seikyu_sts = ${billingSts}`;
+    query += ` AND seikyu_sts = ${p(billingSts)}`;
   }
   // 発行日
   if (range) {
     if (range.str) {
-      query += ` AND seikyu_dat >= '${toJapanYMDString(range.str)}'`;
+      query += ` AND seikyu_dat >= ${p(toJapanYMDString(range.str))}`;
     }
     if (range.end) {
-      query += ` AND seikyu_dat <= '${toJapanYMDString(range.end)}'`;
+      query += ` AND seikyu_dat <= ${p(toJapanYMDString(range.end))}`;
     }
   }
   // 顧客名
   if (kokyaku && kokyaku.trim() !== '' /*&& kokyaku !== '未選択'*/) {
     const escapedKokyaku = escapeLikeString(kokyaku);
-    query += ` AND kokyaku_nam ILIKE '%${escapedKokyaku}%'`;
+    query += ` AND kokyaku_nam ILIKE ${p(`%${escapedKokyaku}%`)}`;
   }
   // 請求書名
   if (seikyuHeadNam && seikyuHeadNam.trim() !== '') {
     const escapedSeikyuHeadNam = escapeLikeString(seikyuHeadNam);
-    query += ` AND seikyu_head_nam ILIKE '%${escapedSeikyuHeadNam}%'`;
+    query += ` AND seikyu_head_nam ILIKE ${p(`%${escapedSeikyuHeadNam}%`)}`;
   }
 
   // group by
@@ -62,7 +70,7 @@ export const selectFilteredBills = async (queries: BillSearchValues) => {
   `;
 
   try {
-    return await pool.query(query);
+    return await pool.query(query, values);
   } catch (e) {
     throw new Error('[selectFilteredBills] DBエラー:', { cause: e });
   }

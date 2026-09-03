@@ -22,14 +22,13 @@ import {
   Typography,
 } from '@mui/material';
 import { addDays, addMonths, set, subDays, subMonths } from 'date-fns';
-import dayjs, { Dayjs } from 'dayjs';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { toJapanMDString } from '@/app/(main)/_lib/date-conversion';
 import { permission } from '@/app/(main)/_lib/permission';
 import { User } from '@/app/(main)/_lib/types';
 import { BackButton } from '@/app/(main)/_ui/buttons';
-import { Calendar } from '@/app/(main)/_ui/date';
+import { Calendar, CalendarView } from '@/app/(main)/_ui/date';
 import { Loading } from '@/app/(main)/_ui/loading';
 
 import {
@@ -317,14 +316,14 @@ export const LoanSituation = (props: {
    * 日付選択カレンダー選択時
    * @param date カレンダー選択日付
    */
-  const handleDateChange = async (date: Dayjs | null, view: string) => {
+  const handleDateChange = async (date: Date | null, view: CalendarView) => {
     if (!date) return;
-    setSelectDate(date.toDate());
+    setSelectDate(date);
 
     if (view === 'day') {
       setIsLoading(true);
       // ヘッダー開始日
-      const strDat = subDays(date.toDate(), 1);
+      const strDat = subDays(date, 1);
 
       try {
         await getData(strDat);
@@ -340,12 +339,12 @@ export const LoanSituation = (props: {
   // 3か月前
   const handleBackDateChange = () => {
     const date = subMonths(new Date(selectDate), 3);
-    handleDateChange(dayjs(date), 'day');
+    handleDateChange(date, 'day');
   };
   // 3か月後
   const handleForwardDateChange = () => {
     const date = addMonths(new Date(selectDate), 3);
-    handleDateChange(dayjs(date), 'day');
+    handleDateChange(date, 'day');
   };
 
   /**
@@ -423,6 +422,9 @@ export const LoanSituation = (props: {
 
   return (
     <Box>
+      <Box display={'flex'} justifyContent={'end'} mb={0.5}>
+        <Button onClick={() => window.close()}>閉じる</Button>
+      </Box>
       <Paper variant="outlined">
         <Box display="flex" justifyContent="space-between" alignItems="center" px={2} width="100%">
           <Typography>貸出状況</Typography>
@@ -519,7 +521,7 @@ export const LoanSituation = (props: {
                 <Popper open={open} anchorEl={anchorEl} placement="bottom-start" sx={{ zIndex: 1202 }}>
                   <ClickAwayListener onClickAway={handleClickAway}>
                     <Paper elevation={3} sx={{ mt: 1 }}>
-                      <Calendar date={selectDate} onChange={handleDateChange} />
+                      <Calendar value={selectDate} onChange={handleDateChange} />
                     </Paper>
                   </ClickAwayListener>
                 </Popper>

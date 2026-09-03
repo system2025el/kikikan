@@ -15,6 +15,8 @@ export type EqptOrderListTableValues = {
   kShukoDat: string | null;
   kNyukoDat: string | null;
   juchuDat: string | null;
+  nyuryokuUser: string;
+  addDat: string | null;
 };
 
 /**
@@ -28,7 +30,7 @@ export type EqptOrderSearchValues = {
       to: Date | null;
     };
   };
-  radio: 'shuko' | 'nyuko' | 'juchu';
+  radio: 'shuko' | 'nyuko' | 'juchu' | 'add';
   juchuId?: number | null;
   headNam?: string | null;
   //kokyaku?: number | null;
@@ -36,4 +38,5 @@ export type EqptOrderSearchValues = {
   koenNam?: string | null;
   koenbashoNam?: string | null;
   listSort: { sort: string; order: string };
+  nyuryokuUser: string | null;
 };

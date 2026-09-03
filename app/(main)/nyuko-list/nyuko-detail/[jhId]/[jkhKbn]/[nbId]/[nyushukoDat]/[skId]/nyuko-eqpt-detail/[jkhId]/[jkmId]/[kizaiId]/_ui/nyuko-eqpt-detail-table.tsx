@@ -40,7 +40,6 @@ export const NyukoEqptDetailTable = (props: {
             <TableCell align="left">RFIDタグID</TableCell>
             <TableCell align="left">ステータス</TableCell>
             <TableCell align="left">メモ</TableCell>
-            <TableCell align="left">作業場所</TableCell>
             <TableCell align="left">作業日時</TableCell>
             <TableCell align="left">担当者</TableCell>
             <TableCell align="left">無効</TableCell>
@@ -59,7 +58,6 @@ export const NyukoEqptDetailTable = (props: {
               <TableCell align="left">{row.rfidTagId}</TableCell>
               <TableCell align="left">{row.rfidStsNam}</TableCell>
               <TableCell align="left">{row.rfidMem}</TableCell>
-              <TableCell align="left">{row.nyushukoBashoId === BASHO_ID.kics ? 'K' : 'Y'}</TableCell>
               <TableCell align="left">{row.rfidDat && toJapanTimeString(row.rfidDat)}</TableCell>
               <TableCell align="left">{row.rfidUser}</TableCell>
               <TableCell align="left">{row.rfidDelFlg === 1 && '無効'}</TableCell>

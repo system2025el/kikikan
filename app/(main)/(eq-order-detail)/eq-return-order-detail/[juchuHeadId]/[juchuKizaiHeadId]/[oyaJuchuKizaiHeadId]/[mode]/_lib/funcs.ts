@@ -13,7 +13,6 @@ import {
 } from '@/app/_lib/db/tables/t-juchu-ctn-meisai';
 import {
   insertReturnJuchuKizaiHead,
-  selectJuchuHonbanbiQty,
   selectReturnJuchuKizaiHead,
   updateReturnJuchuKizaiHead,
 } from '@/app/_lib/db/tables/t-juchu-kizai-head';
@@ -46,6 +45,7 @@ import { JuchuCtnMeisai } from '@/app/_lib/db/types/t_juchu_ctn_meisai-type';
 import { JuchuKizaiHead } from '@/app/_lib/db/types/t-juchu-kizai-head-type';
 import { JuchuKizaiMeisai } from '@/app/_lib/db/types/t-juchu-kizai-meisai-type';
 import { NyushukoDen } from '@/app/_lib/db/types/t-nyushuko-den-type';
+import { expandHonbanbiTemplate, getHonbanbiTemplate } from '@/app/(main)/_lib/honbanbi-funcs';
 import {
   addAllHonbanbi,
   addDummyNyushukoDen,
@@ -109,6 +109,20 @@ export const saveNewReturnJuchuKizaiHead = async (
       juchuHonbanbiAddQty: 0,
     }));
     await addAllHonbanbi(data.juchuHeadId, newJuchuKizaiHeadId, addReturnJuchuSiyouHonbanbiData, userNam, connection);
+
+    // 受注本番日テンプレートから本番日数を算出する。
+    // 返却ヘッダーは本番日の行を持たないため、更新するのは本番日数だけ。
+    const honbanbiTemplate = await getHonbanbiTemplate(data.juchuHeadId);
+    await expandHonbanbiTemplate(
+      data.juchuHeadId,
+      newJuchuKizaiHeadId,
+      updateDateRange[0] ?? null,
+      updateDateRange[updateDateRange.length - 1] ?? null,
+      honbanbiTemplate,
+      userNam,
+      connection,
+      true
+    );
 
     // ダミー入庫伝票追加
     if (data.kicsNyukoDat) {
@@ -219,6 +233,20 @@ export const saveReturnJuchuKizai = async (
         addReturnJuchuSiyouHonbanbiData,
         userNam,
         connection
+      );
+
+      // 返却日が変わると適用期間（返却日〜親の入庫日）が変わるため本番日数を計算し直す。
+      // 返却ヘッダーは本番日の行を持たないため、更新するのは本番日数だけ。
+      const honbanbiTemplate = await getHonbanbiTemplate(data.juchuHeadId);
+      await expandHonbanbiTemplate(
+        data.juchuHeadId,
+        data.juchuKizaiHeadId,
+        updateDateRange[0] ?? null,
+        updateDateRange[updateDateRange.length - 1] ?? null,
+        honbanbiTemplate,
+        userNam,
+        connection,
+        true
       );
     }
 
@@ -455,36 +483,6 @@ export const saveReturnJuchuKizai = async (
 };
 
 /**
- * 親受注機材本番日数取得
- * @param juchuHeadId 受注ヘッダーid
- * @param juchuKizaiHeadId 受注機材ヘッダーid
- * @returns
- */
-export const getJuchuHonbanbiQty = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
-  try {
-    const { data, error } = await selectJuchuHonbanbiQty(juchuHeadId, juchuKizaiHeadId);
-    if (error) {
-      if (error.code === 'PGRST116') {
-        return null;
-      }
-      throw new Error('[selectJuchuHonbanbiQty] DBエラー:', { cause: error });
-    }
-
-    return data.juchu_honbanbi_qty;
-  } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
-    throw e;
-  }
-};
-
-/**
  * 返却受注機材ヘッダー取得
  * @param juchuHeadId 受注ヘッダーid
  * @param juchuKizaiHeadId 受注機材ヘッダーid
@@ -664,6 +662,7 @@ export const getReturnJuchuKizaiMeisai = async (
       shozokuId: d.shozoku_id,
       shozokuNam: d.shozoku_nam ?? '',
       mem: d.mem,
+      mem2: d.mem2,
       kizaiId: d.kizai_id,
       kizaiTankaAmt: eqTanka.find((t) => t.kizai_id === d.kizai_id)?.kizai_tanka_amt || 0,
       kizaiNam: d.kizai_nam ?? '',
@@ -709,6 +708,7 @@ export const addReturnJuchuKizaiMeisai = async (
     kizai_tanka_amt: d.kizaiTankaAmt,
     plan_kizai_qty: d.planQty ? -1 * d.planQty : d.planQty,
     mem: d.mem,
+    mem2: d.mem2,
     dsp_ord_num: d.dspOrdNum,
     indent_num: d.indentNum,
     add_dat: new Date().toISOString(),
@@ -749,6 +749,7 @@ export const updReturnJuchuKizaiMeisai = async (
     kizai_tanka_amt: d.kizaiTankaAmt,
     plan_kizai_qty: d.planQty ? -1 * d.planQty : d.planQty,
     mem: d.mem,
+    mem2: d.mem2,
     dsp_ord_num: d.dspOrdNum,
     indent_num: d.indentNum,
     upd_dat: new Date().toISOString(),

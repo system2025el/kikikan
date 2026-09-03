@@ -71,11 +71,42 @@ export const LOCK_SHUBETU = {
 } as const;
 
 /**
+ * メモの最大文字数
+ * t_juchu_kizai_head.mem / t_juchu_kizai_meisai.mem・mem2 / t_juchu_ctn_meisai.mem のカラム定義に合わせる
+ */
+export const MEMO_MAX_LENGTH = 200;
+
+/**
+ * 本番日の追加日数の桁数上限
+ * t_juchu_kizai_honbanbi.juchu_honbanbi_add_qty が numeric(6,3) のため整数部は3桁
+ */
+export const HONBANBI_ADD_QTY_MAX_DIGITS = 3;
+
+/**
+ * 本番日の追加日数の上限値
+ */
+export const HONBANBI_ADD_QTY_MAX = 10 ** HONBANBI_ADD_QTY_MAX_DIGITS - 1;
+
+/**
  * 辞書ID（dic_id）
  */
 export const DIC_ID = {
   /** インデント文字 */
   indentChara: 1,
+} as const;
+
+/**
+ * 受注添付ファイル（t_juchu_tempu / Storageバケット juchu-tempu）
+ */
+export const JUCHU_TEMPU = {
+  /** バケット名。本番・ステージング共通 */
+  bucket: 'juchu-tempu',
+  /** 1ファイルの上限（20MB）。バケット側の file_size_limit と一致させること */
+  maxSize: 20 * 1024 * 1024,
+  /** 1受注あたりの添付件数の上限 */
+  maxCount: 20,
+  /** 署名付きURLの有効期限（秒）。PDFビューアの再読込に耐えるため長めにしている */
+  signedUrlSec: 600,
 } as const;
 
 /**

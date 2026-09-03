@@ -15,6 +15,16 @@ npm run fix             # prettier --write + eslint --fix（コミット前に�
 
 このリポジトリにテストランナーは導入されていません（jest/vitest/playwright等なし）。存在しないテストコマンドを作り出さないこと。
 
+**Windowsでは `npm run lint` / `npm run fix` をリポジトリ全体にかけないこと**（2026-08-27 確認）。`core.autocrlf = true` で作業ツリーがCRLFなのに対しprettierは `endOfLine: lf` を期待するため、**未変更の状態でも462ファイルがチェックに落ちる**。この状態で `npm run fix` を実行すると全ファイルが書き換わり、レビュー不能な差分になる。自分が触ったファイルだけを対象にすること。
+
+```bash
+npx prettier --check <触ったファイル...>
+npx next lint --file <触ったファイル> --file ...
+npx tsc --noEmit          # 型チェックは全体で問題なく通る
+```
+
+`npm run build` は**開発サーバーを止めてから**実行する（起動したままだと `.next/trace` の EPERM で失敗し、複数のビルドが `.next` を奪い合うと進行しなくなる）。
+
 ## ブランチ運用・デプロイ
 
 - `main` → 本番環境、`v0.0.0` → ステージング環境。Vercelが実際にビルドするのはこの2つのみ：`vercel-ignored-build-step.sh` が `VERCEL_GIT_COMMIT_REF` を見て、`main` または `v#.#.#` 形式（例: v0.0.0）に一致しない場合はビルドをキャンセルする。
@@ -35,8 +45,19 @@ npm run fix             # prettier --write + eslint --fix（コミット前に�
 - `app/_lib/db/schema.ts` — `SCHEMA` 定数（現在は `'public'`）。各所で `.schema(SCHEMA)` や生SQLの `${SCHEMA}.テーブル名` として利用している。スキーマ名を直書きせずこの定数を切り替えることで、アプリ全体を別のPostgresスキーマ（例：開発用スキーマ）に向けられる。
 - `app/_lib/db/supabase-admin.ts` — service-role クライアント。サーバー専用。クライアントコンポーネントに絶対にimportしないこと。
 - `app/_lib/db/tables/*.ts` — テーブル/ビューごとにクエリ関数をまとめたファイル（`'use server'`）。ファイル名の接頭辞が種別を表す：`m-*` はマスタテーブル、`t-*` はトランザクションテーブル、`v-*` はビュー。
-- `app/_lib/db/types/*.ts` — テーブルごとに手動管理している行の型定義、および Supabase の `Database` 型を自動生成した `types.ts`。`types.ts` は手動編集せず、スキーマ変更時は Supabase CLI で再生成すること。
+- `app/_lib/db/types/*.ts` — テーブルごとに手動管理している行の型定義、および Supabase の `Database` 型を自動生成した `types.ts`。`types.ts` は手動編集せず、スキーマ変更時は Supabase CLI で再生成すること（`npx supabase login` が必要。未ログインだと再生成できない）。
+  - **`types.ts` の `t_juchu_tempu` ブロックだけは手書きで追加されている**（2026-08-27、CLI未ログインのため）。生成物と同じ形式に揃えてあり型チェック・ビルドは通るが、**次に誰かがCLIで再生成できる状況になったら、まずこのファイルを再生成して差分が出ないことを確認してほしい**。なお冒頭の `public /*dev7*/ :` も手作業で入ったマーカーなので、素朴に再生成すると消える点に注意。
+- `app/_lib/db/storage/*.ts` — Supabase Storage へのアクセス層。**このファイル群には `'use server'` を付けない**（付けるとexportが外部から直接叩けるServer Actionsになり、任意のパスに対しservice_role権限の署名付きURLを発行できてしまう）。呼び出しは必ず権限チェックを行う feature 側の `_lib/*-funcs.ts` を経由させる。
 - DBのカラムはsnake_case、アプリコードはcamelCase。変換は自動レイヤーがなく、クエリごと（SQLのエイリアス指定や手動マッピング）に行っている。
+
+**Supabase Storage（受注添付ファイル）**: バケット `juchu-tempu` に受注ヘッダー単位でPDFを置く（`t_juchu_tempu`、UIは受注画面）。Storageを使っているのは現状ここだけ。
+
+- **バケットはprivate、`storage.objects` のRLSポリシーは1本も作らない**。anon/authenticated からの直アクセスは全拒否されるのが正しい状態で、ポリシーを足すとむしろ穴になる。読み書きはどちらも service_role が発行する署名付きURL経由で行う。
+- **アップロードはServer Actionで `createSignedUploadUrl()` を発行し、ブラウザから直接PUTする**（`uploadToSignedUrl`）。Server Actionにファイル本体を載せるとVercelのリクエストボディ上限4.5MBに引っかかるため。この経路のためだけに `supabase-client.ts` のブラウザクライアントを使っている（`middleware.ts` が認証cookieを `httpOnly` で書いているのでブラウザ側はanonだが、署名トークンで認可されるので問題ない）。
+- **表示用の署名付きURLに `download` オプションを付けないこと**。Storage側がファイル名を二重にURLエンコードし、日本語ファイル名が壊れる。付けなければ `Content-Disposition` が付かずブラウザ内でinline表示される。ダウンロードは画面側で `fetch` → blob → `a[download]` で行う。
+- オブジェクトキーは `{juchu_head_id}/{uuid}.pdf`。**Storageのオブジェクト名に日本語は使えない**ため、原本ファイル名は `t_juchu_tempu.file_nam` に持つ。
+- 削除は `del_flg = 1` に更新してから実体を消す。順序を逆にすると「一覧に行があるが実体が無い」状態が残る。DB登録前の失敗で生じる孤児オブジェクトの棚卸しSQLは `scripts/db-migration/ddl/README.md` にある。
+- **サイズ上限は3段構え**で、実際の天井は一番小さいもの。① プロジェクト全体の Global file size limit（Storage設定。既定50MB、Freeプランは50MBが天井、Pro以上は最大500GB）② バケットの `file_size_limit`（現在20MB。①を超える値は設定できない）③ アップロード方式（標準アップロードは5GBまでだが、**6MB超は resumable/TUS が推奨**）。上限を上げるならバケット設定と `JUCHU_TEMPU.maxSize` の両方を変える。6MB超のPDFが日常的に上がるようになったら、進捗表示とリトライのために `tus-js-client` への切り替えを検討する（標準アップロードは進捗が出せず、失敗時は最初からやり直しになる）。
 
 **DB層のエラーハンドリング（2層構造）**: `tables/*.ts`（DB直接アクセス）と `_lib/funcs.ts`（呼び出し元のビジネスロジック）は役割が分かれている。
 
@@ -75,6 +96,14 @@ npm run fix             # prettier --write + eslint --fix（コミット前に�
 ## 本番データのステージング移行
 
 本番のデータでステージングを洗い替える手順とスクリプトは `scripts/db-migration/` にある（`README.md` に前提・手順・トラブルシュートをまとめてある）。本番とステージングでPostgreSQLのメジャーバージョンが異なる（本番17系／ステージング15系）、接続はSession pooler（5432）でなければならない、`m_user` は移行せず担当者名を自分のアカウントに書き換える、マスタだけでは`v_rfid`の所属が復元できない、といった罠があるため、手作業で流さずこのスクリプトを使うこと。
+
+**テーブルを追加したら、この移行の除外リストに入れるかを必ず判断すること**。`02-truncate-staging.sql` の `skip_tbl` と `03-migrate.sh` の `EXCLUDES` の**両方**にあり（どちらもテーブルを動的に列挙するため）、片方だけ直しても機能しない。
+
+## スキーマ変更（DDL）
+
+テーブル・Storageバケットの追加変更は `scripts/db-migration/ddl/` に適用SQLとロールバックSQLを残す（[`README.md`](scripts/db-migration/ddl/README.md) に一覧・手順・注意点）。**`GRANT` を必ず書くこと**（ステージングには `public` スキーマの default privileges が無く `CREATE TABLE` だけでは 42501 になる。本番には default privileges があるが anon には SELECT しか付かない）。**新テーブルでRLSを有効化しないこと**（既存テーブルはすべて `relrowsecurity = false`）。適用は「DB → 型再生成 → コードデプロイ」の順。
+
+ビュー定義の変更は `scripts/db-views/` が担当で、`applied/`（本番適用済み）と `staging-only/`（本番未適用）のフォルダで適用状況を表す運用になっている（詳細はそちらの `README.md`）。
 
 ## コーディング規約
 

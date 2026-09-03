@@ -1,5 +1,6 @@
 import z from 'zod';
 
+import { MEMO_MAX_LENGTH } from '@/app/_lib/constants';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 
 import { validationMessages } from '../../../../../_lib/validation-messages';
@@ -25,7 +26,10 @@ export const JuchuSharyoHeadSchema = z
     nyushukoBashoId: z
       .number({ message: validationMessages.required() })
       .min(0, { message: validationMessages.required() }),
-    headMem: z.string().nullable(),
+    headMem: z
+      .string()
+      .max(MEMO_MAX_LENGTH, { message: validationMessages.maxStringLength(MEMO_MAX_LENGTH) })
+      .nullable(),
     meisai: z.array(
       z
         .object({
@@ -34,7 +38,10 @@ export const JuchuSharyoHeadSchema = z
             .number({ message: validationMessages.number() })
             .int({ message: validationMessages.int() })
             .nullable(),
-          sharyoMem: z.string().nullable(),
+          sharyoMem: z
+            .string()
+            .max(MEMO_MAX_LENGTH, { message: validationMessages.maxStringLength(MEMO_MAX_LENGTH) })
+            .nullable(),
         })
         .superRefine((data, ctx) => {
           if (data.sharyoQty && data.sharyoQty > 0 && (!data.sharyoId || data.sharyoId < 0)) {

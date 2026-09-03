@@ -20,7 +20,7 @@ import { CheckboxButtonGroup, Controller, RadioButtonGroup, TextFieldElement, us
 
 import { toJapanTimeStampString } from '../../_lib/date-conversion';
 import { User } from '../../_lib/types';
-import { TestDate } from '../../_ui/date';
+import { FormDateX } from '../../_ui/date';
 import { SelectTypes } from '../../_ui/form-box';
 import { Loading } from '../../_ui/loading';
 import { getCustomerSelection } from '../../(masters)/_lib/funcs';
@@ -64,6 +64,7 @@ export const NyukoList = (props: { user: User }) => {
       juchuHeadId: null,
       nyukoBasho: 0,
       kokyaku: '',
+      koenNam: '',
       section: [],
     },
   });
@@ -190,12 +191,12 @@ export const NyukoList = (props: { user: User }) => {
                   name="selectedDate.range.from"
                   control={control}
                   render={({ field, fieldState }) => (
-                    <TestDate
+                    <FormDateX
                       onBlur={field.onBlur}
-                      date={field.value}
-                      onChange={(newDate) => field.onChange(newDate?.toDate())}
-                      fieldstate={fieldState}
-                      onClear={() => field.onChange(null)}
+                      value={field.value}
+                      onChange={field.onChange}
+                      error={!!fieldState.error}
+                      helperText={fieldState.error?.message}
                     />
                   )}
                 />
@@ -204,12 +205,12 @@ export const NyukoList = (props: { user: User }) => {
                   name="selectedDate.range.to"
                   control={control}
                   render={({ field, fieldState }) => (
-                    <TestDate
+                    <FormDateX
                       onBlur={field.onBlur}
-                      date={field.value}
-                      onChange={(newDate) => field.onChange(newDate?.toDate())}
-                      fieldstate={fieldState}
-                      onClear={() => field.onChange(null)}
+                      value={field.value}
+                      onChange={field.onChange}
+                      error={!!fieldState.error}
+                      helperText={fieldState.error?.message}
                     />
                   )}
                 />
@@ -274,6 +275,10 @@ export const NyukoList = (props: { user: User }) => {
                   />
                 )}
               />
+            </Grid2>
+            <Grid2 display={'flex'} alignItems={'center'}>
+              <Typography mr={1}>公演名</Typography>
+              <TextFieldElement name="koenNam" control={control} sx={{ width: 300 }} />
             </Grid2>
             <Grid2 display={'flex'} alignItems={'center'}>
               <Typography noWrap mr={1}>

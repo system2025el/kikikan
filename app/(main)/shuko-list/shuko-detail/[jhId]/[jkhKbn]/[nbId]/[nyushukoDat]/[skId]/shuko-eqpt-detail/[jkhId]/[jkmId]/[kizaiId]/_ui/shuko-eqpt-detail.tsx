@@ -265,6 +265,12 @@ export const ShukoEqptDetail = (props: {
                 )}
               />
             </Box>
+            <Box display={'flex'} alignItems={'center'}>
+              <Typography mr={2}>最終作業者</Typography>
+              <Typography>
+                {shukoEqptDetailData.updUser ? shukoEqptDetailData.updUser : shukoEqptDetailData.addUser}
+              </Typography>
+            </Box>
           </Grid2>
           {/** 固定ボタン 保存＆ページトップ */}
           <Box position={'fixed'} zIndex={1050} bottom={25} right={25} alignItems={'center'}>

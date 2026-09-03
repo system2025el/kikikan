@@ -17,6 +17,8 @@ export type NyukoEqptDetailValues = {
   edaCod: string | null;
   ctnFlg: boolean | null;
   indentNum: number;
+  addUser: string | null;
+  updUser: string | null;
 };
 
 export type NyukoEqptDetailTableValues = {

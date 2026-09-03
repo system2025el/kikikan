@@ -4,6 +4,7 @@ export type ShukoDetailValues = {
   nyushukoBashoId: number;
   nyushukoDat: string;
   sagyoKbnId: number;
+  nyuryokuUser: string | null;
   juchuKizaiHeadIds: number[];
   nyushukoShubetuId: number;
   headNamv: string | null;

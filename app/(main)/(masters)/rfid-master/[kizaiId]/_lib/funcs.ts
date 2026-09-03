@@ -6,7 +6,13 @@ import pool, { refreshVRfid } from '@/app/_lib/db/postgres';
 import { SCHEMA } from '@/app/_lib/db/schema';
 import { selectOneEqpt } from '@/app/_lib/db/tables/m-kizai';
 import { updateMasterUpdates } from '@/app/_lib/db/tables/m-master-update';
-import { insertNewRfid, upDateRfidDB, updateRfidTagDelFlgs, updRfidDelFlgDB } from '@/app/_lib/db/tables/m-rfid';
+import {
+  deleteRfids,
+  insertNewRfid,
+  upDateRfidDB,
+  updateRfidTagDelFlgs,
+  updRfidDelFlgDB,
+} from '@/app/_lib/db/tables/m-rfid';
 import { insertNewRfidSts, updateRfidTagStsDB } from '@/app/_lib/db/tables/t-rfid-status-result';
 import { selectOneRfid, selectRfidsOfTheKizai } from '@/app/_lib/db/tables/v-rfid';
 import { MRfidDBValues } from '@/app/_lib/db/types/m-rfid-type';
@@ -337,5 +343,40 @@ export const updRfidDelFlg = async (tagId: string, flg: boolean, user: string) =
     refreshVRfid().catch((err) => {
       console.error('バックグラウンドでのマテビュー更新に失敗:', err);
     });
+  }
+};
+
+/**
+ * RFIDタグを物理削除する関数
+ * @param {string[]} tagIds 削除するRFIDタグIDの配列
+ * @param {number} kizaiId 機材ID
+ */
+export const deleteRfidTags = async (tagIds: string[], kizaiId: number) => {
+  if (tagIds.length === 0) return;
+  const connection = await pool.connect();
+  try {
+    await connection.query('BEGIN');
+    await deleteRfids(tagIds, connection);
+    await updateMasterUpdates('m_rfid', connection);
+    await connection.query('COMMIT');
+    await revalidatePath(`/rfid-master/${kizaiId}`);
+    await revalidatePath('/eqpt-master');
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
+    await connection.query('ROLLBACK');
+    throw e;
+  } finally {
+    // コミット確定後の状態でリフレッシュする
+    refreshVRfid().catch((err) => {
+      console.error('バックグラウンドでのマテビュー更新に失敗:', err);
+    });
+    connection.release();
   }
 };

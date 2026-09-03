@@ -40,7 +40,6 @@ import {
   Typography,
 } from '@mui/material';
 import { addDays, addMonths, endOfMonth, set, subDays, subMonths } from 'date-fns';
-import dayjs, { Dayjs } from 'dayjs';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
@@ -55,7 +54,7 @@ import { lockCheck, lockRelease } from '@/app/(main)/_lib/lock';
 import { permission } from '@/app/(main)/_lib/permission';
 import { LockValues, User } from '@/app/(main)/_lib/types';
 import { BackButton } from '@/app/(main)/_ui/buttons';
-import { Calendar, DateTime, TestDate } from '@/app/(main)/_ui/date';
+import { Calendar, CalendarView, DateTime, FormDateX } from '@/app/(main)/_ui/date';
 import { IsDirtyAlertDialog, useDirty } from '@/app/(main)/_ui/dirty-context';
 import { Loading, LoadingOverlay } from '@/app/(main)/_ui/loading';
 import {
@@ -80,7 +79,6 @@ import {
 import { getJuchuKizaiMeisaiList } from '@/app/(main)/quotation-list/_lib/funcs';
 
 import {
-  getJuchuHonbanbiQty,
   getReturnJuchuContainerMeisai,
   getReturnJuchuKizaiHead,
   getReturnJuchuKizaiMeisai,
@@ -304,17 +302,13 @@ export const EquipmentReturnOrderDetail = (props: {
       setStockTableHeaderDateRange(stockTableHeaderDateRange);
 
       if (getValues('juchuKizaiHeadId') === 0) {
-        // 親本番日数
-        const oyaJuchuHonbanbiQty = await getJuchuHonbanbiQty(
-          getValues('juchuHeadId'),
-          getValues('oyaJuchuKizaiHeadId')
-        );
         // 返却受注機材ヘッダーデータ(初期値)
+        // 本番日数は伝票画面の保存時に受注本番日テンプレートから算出されるため、ここでは0から始める
         const newReturnJuchuKizaiHeadData: ReturnJuchuKizaiHeadValues = {
           juchuHeadId: juchuHeadData.juchuHeadId,
           juchuKizaiHeadId: 0,
           juchuKizaiHeadKbn: JUCHU_KIZAI_HEAD_KBN.return,
-          juchuHonbanbiQty: oyaJuchuHonbanbiQty ?? 0,
+          juchuHonbanbiQty: 0,
           //nebikiAmt: null,
           mem: null,
           headNam: juchuHeadData.koenNam,
@@ -724,9 +718,9 @@ export const EquipmentReturnOrderDetail = (props: {
    * 日付選択カレンダー選択時
    * @param date カレンダー選択日付
    */
-  const handleDateChange = async (date: Dayjs | null, view: string) => {
+  const handleDateChange = async (date: Date | null, view: CalendarView) => {
     if (!date) return;
-    setSelectDate(date.toDate());
+    setSelectDate(date);
 
     if (view === 'day') {
       setIsDetailLoading(true);
@@ -736,7 +730,7 @@ export const EquipmentReturnOrderDetail = (props: {
         const updatedEqStockData = await updateEqStock(
           getValues('juchuHeadId'),
           getValues('juchuKizaiHeadId'),
-          date.toDate(),
+          date,
           filterJuchuKizaiMeisaiList
         );
 
@@ -790,12 +784,12 @@ export const EquipmentReturnOrderDetail = (props: {
   // 3か月前
   const handleBackDateChange = () => {
     const date = subDays(new Date(selectDate), 91);
-    handleDateChange(dayjs(date), 'day');
+    handleDateChange(date, 'day');
   };
   // 3か月後
   const handleForwardDateChange = () => {
     const date = addDays(new Date(selectDate), 91);
-    handleDateChange(dayjs(date), 'day');
+    handleDateChange(date, 'day');
   };
 
   /**
@@ -923,6 +917,38 @@ export const EquipmentReturnOrderDetail = (props: {
           if (index === undefined) return prev;
 
           return prev.map((data, i) => (i === index ? { ...data, mem: memo } : data));
+        });
+      }
+    } catch (e) {
+      setSnackBarMessage('サーバー接続エラー');
+      setSnackBarOpen(true);
+    } finally {
+      setIsProcessing(false);
+    }
+  });
+
+  /**
+   * 機材返却連絡メモ入力時
+   * @param kizaiId 機材id
+   * @param memo メモ内容
+   */
+  const handleMemo2Change = useStableCallback(async (rowIndex: number, memo: string) => {
+    if (isProcessing) return;
+    setIsProcessing(true);
+
+    try {
+      const lockResult = await lock();
+
+      if (lockResult) {
+        setReturnJuchuKizaiMeisaiList((prev) => {
+          const visibleIndex = prev
+            .map((data, index) => (!data.delFlag ? index : null))
+            .filter((index) => index !== null) as number[];
+
+          const index = visibleIndex[rowIndex];
+          if (index === undefined) return prev;
+
+          return prev.map((data, i) => (i === index ? { ...data, mem2: memo } : data));
         });
       }
     } catch (e) {
@@ -1087,16 +1113,16 @@ export const EquipmentReturnOrderDetail = (props: {
    * KICS入庫日変更時
    * @param newDate KICS入庫日
    */
-  const handleKicsNyukoChange = async (newDate: Dayjs | null) => {
+  const handleKicsNyukoChange = async (newDate: Date | null) => {
     if (newDate === null) return;
-    setValue('kicsNyukoDat', newDate.toDate(), { shouldDirty: true });
+    setValue('kicsNyukoDat', newDate, { shouldDirty: true });
   };
 
   /**
    * KICS入庫日確定時
    * @param newDate KICS入庫日
    */
-  const handleKicsNyukoAccept = async (newDate: Dayjs | null) => {
+  const handleKicsNyukoAccept = async (newDate: Date | null) => {
     if (isProcessing) return;
     setIsProcessing(true);
 
@@ -1135,16 +1161,16 @@ export const EquipmentReturnOrderDetail = (props: {
    * YARD入庫日変更時
    * @param newDate YARD入庫日
    */
-  const handleYardNyukoChange = (newDate: Dayjs | null) => {
+  const handleYardNyukoChange = (newDate: Date | null) => {
     if (newDate === null) return;
-    setValue('yardNyukoDat', newDate.toDate(), { shouldDirty: true });
+    setValue('yardNyukoDat', newDate, { shouldDirty: true });
   };
 
   /**
    * YARD入庫日確定時
    * @param newDate YARD入庫日
    */
-  const handleYardNyukoAccept = async (newDate: Dayjs | null) => {
+  const handleYardNyukoAccept = async (newDate: Date | null) => {
     if (isProcessing) return;
     setIsProcessing(true);
 
@@ -1239,7 +1265,8 @@ export const EquipmentReturnOrderDetail = (props: {
           mShozokuId: d.mShozokuId,
           shozokuId: kicsDat && !yardDat ? BASHO_ID.kics : !kicsDat && yardDat ? BASHO_ID.yard : d.mShozokuId,
           shozokuNam: d.shozokuNam,
-          mem: '',
+          mem: d.mem,
+          mem2: d.mem2,
           kizaiId: d.kizaiId,
           kizaiTankaAmt: d.kizaiTankaAmt,
           kizaiNam: d.kizaiNam,
@@ -1303,7 +1330,7 @@ export const EquipmentReturnOrderDetail = (props: {
           juchuHeadId: getValues('juchuHeadId'),
           juchuKizaiHeadId: getValues('juchuKizaiHeadId'),
           juchuKizaiMeisaiId: 0,
-          mem: '',
+          mem: d.mem,
           kizaiId: d.kizaiId,
           kizaiNam: d.kizaiNam,
           oyaPlanKicsKizaiQty: d.planKicsKizaiQty,
@@ -1596,7 +1623,7 @@ export const EquipmentReturnOrderDetail = (props: {
                       <Typography marginRight={5} whiteSpace="nowrap">
                         受注日
                       </Typography>
-                      <TestDate date={juchuHeadData.juchuDat} onChange={() => {}} disabled />
+                      <FormDateX sx={{ width: 160 }} value={juchuHeadData.juchuDat} disabled notClearable />
                     </Box>
                     <Box sx={styles.container}>
                       <Typography marginRight={5} whiteSpace="nowrap">
@@ -1756,42 +1783,22 @@ export const EquipmentReturnOrderDetail = (props: {
                       <Typography>親伝票出庫日時</Typography>
                       <Grid2>
                         <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
-                        <DateTime
-                          date={oyaJuchuKizaiHeadData.kicsShukoDat}
-                          onChange={() => {}}
-                          disabled
-                          onAccept={() => {}}
-                        />
+                        <DateTime value={oyaJuchuKizaiHeadData.kicsShukoDat} disabled />
                       </Grid2>
                       <Grid2>
                         <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
-                        <DateTime
-                          date={oyaJuchuKizaiHeadData.yardShukoDat}
-                          onChange={() => {}}
-                          disabled
-                          onAccept={() => {}}
-                        />
+                        <DateTime value={oyaJuchuKizaiHeadData.yardShukoDat} disabled />
                       </Grid2>
                     </Grid2>
                     <Grid2 width={300} order={{ xl: 3 }}>
                       <Typography>親伝票入庫日時</Typography>
                       <Grid2>
                         <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
-                        <DateTime
-                          date={oyaJuchuKizaiHeadData.kicsNyukoDat}
-                          onChange={() => {}}
-                          onAccept={() => {}}
-                          disabled
-                        />
+                        <DateTime value={oyaJuchuKizaiHeadData.kicsNyukoDat} disabled />
                       </Grid2>
                       <Grid2>
                         <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
-                        <DateTime
-                          date={oyaJuchuKizaiHeadData.yardNyukoDat}
-                          onChange={() => {}}
-                          onAccept={() => {}}
-                          disabled
-                        />
+                        <DateTime value={oyaJuchuKizaiHeadData.yardNyukoDat} disabled />
                       </Grid2>
                     </Grid2>
                     <Grid2 width={300} order={{ xl: 2 }}>
@@ -1803,7 +1810,7 @@ export const EquipmentReturnOrderDetail = (props: {
                           control={control}
                           render={({ field, fieldState }) => (
                             <DateTime
-                              date={field.value}
+                              value={field.value}
                               minDate={
                                 oyaJuchuKizaiHeadData.kicsShukoDat
                                   ? oyaJuchuKizaiHeadData.kicsShukoDat
@@ -1818,22 +1825,26 @@ export const EquipmentReturnOrderDetail = (props: {
                                     ? oyaJuchuKizaiHeadData.yardNyukoDat
                                     : undefined
                               }
-                              onChange={handleKicsNyukoChange}
-                              onAccept={handleKicsNyukoAccept}
-                              fieldstate={fieldState}
-                              disabled={!edit || nyukoFixFlag}
-                              onClear={() => {
-                                field.onChange(null);
-                                trigger(['kicsNyukoDat', 'yardNyukoDat']);
-                                const yardNyukoDat = getValues('yardNyukoDat');
-                                setReturnJuchuKizaiMeisaiList((prev) =>
-                                  prev.map((d) =>
-                                    yardNyukoDat
-                                      ? { ...d, shozokuId: BASHO_ID.yard }
-                                      : { ...d, shozokuId: d.mShozokuId }
-                                  )
-                                );
+                              onChange={(newDate) => {
+                                if (newDate === null) {
+                                  field.onChange(null);
+                                  trigger(['kicsNyukoDat', 'yardNyukoDat']);
+                                  const yardNyukoDat = getValues('yardNyukoDat');
+                                  setReturnJuchuKizaiMeisaiList((prev) =>
+                                    prev.map((d) =>
+                                      yardNyukoDat
+                                        ? { ...d, shozokuId: BASHO_ID.yard }
+                                        : { ...d, shozokuId: d.mShozokuId }
+                                    )
+                                  );
+                                  return;
+                                }
+                                handleKicsNyukoChange(newDate);
                               }}
+                              onAccept={handleKicsNyukoAccept}
+                              error={!!fieldState.error}
+                              helperText={fieldState.error?.message}
+                              disabled={!edit || nyukoFixFlag}
                             />
                           )}
                         />
@@ -1845,7 +1856,7 @@ export const EquipmentReturnOrderDetail = (props: {
                           control={control}
                           render={({ field, fieldState }) => (
                             <DateTime
-                              date={field.value}
+                              value={field.value}
                               minDate={
                                 oyaJuchuKizaiHeadData.yardShukoDat
                                   ? oyaJuchuKizaiHeadData.yardShukoDat
@@ -1860,22 +1871,26 @@ export const EquipmentReturnOrderDetail = (props: {
                                     ? oyaJuchuKizaiHeadData.kicsNyukoDat
                                     : undefined
                               }
-                              onChange={handleYardNyukoChange}
-                              onAccept={handleYardNyukoAccept}
-                              fieldstate={fieldState}
-                              disabled={!edit || nyukoFixFlag}
-                              onClear={() => {
-                                field.onChange(null);
-                                trigger(['kicsNyukoDat', 'yardNyukoDat']);
-                                const kicsNyukoDat = getValues('kicsNyukoDat');
-                                setReturnJuchuKizaiMeisaiList((prev) =>
-                                  prev.map((d) =>
-                                    kicsNyukoDat
-                                      ? { ...d, shozokuId: BASHO_ID.kics }
-                                      : { ...d, shozokuId: d.mShozokuId }
-                                  )
-                                );
+                              onChange={(newDate) => {
+                                if (newDate === null) {
+                                  field.onChange(null);
+                                  trigger(['kicsNyukoDat', 'yardNyukoDat']);
+                                  const kicsNyukoDat = getValues('kicsNyukoDat');
+                                  setReturnJuchuKizaiMeisaiList((prev) =>
+                                    prev.map((d) =>
+                                      kicsNyukoDat
+                                        ? { ...d, shozokuId: BASHO_ID.kics }
+                                        : { ...d, shozokuId: d.mShozokuId }
+                                    )
+                                  );
+                                  return;
+                                }
+                                handleYardNyukoChange(newDate);
                               }}
+                              onAccept={handleYardNyukoAccept}
+                              error={!!fieldState.error}
+                              helperText={fieldState.error?.message}
+                              disabled={!edit || nyukoFixFlag}
                             />
                           )}
                         />
@@ -2010,6 +2025,7 @@ export const EquipmentReturnOrderDetail = (props: {
                           handleEqSelect={handleEqSelect}
                           handleEqAllSelect={handleEqAllSelect}
                           handleMemoChange={handleMemoChange}
+                          handleMemo2Change={handleMemo2Change}
                           ref={leftRef}
                         />
                       </Box>
@@ -2032,7 +2048,7 @@ export const EquipmentReturnOrderDetail = (props: {
                         <Popper open={open} anchorEl={anchorEl} placement="bottom-start" sx={{ zIndex: 1000 }}>
                           <ClickAwayListener onClickAway={handleClickAway}>
                             <Paper elevation={3} sx={{ mt: 1 }}>
-                              <Calendar date={selectDate} onChange={handleDateChange} />
+                              <Calendar value={selectDate} onChange={handleDateChange} />
                             </Paper>
                           </ClickAwayListener>
                         </Popper>

@@ -9,6 +9,7 @@ import { selectBundledEqpts } from '@/app/_lib/db/tables/m-kizai';
 import { selectBundledEqptIds } from '@/app/_lib/db/tables/m-kizai-set';
 import { deleteIdoDen, insertIdoDen, selectIdoDenMaxId, updateIdoDen } from '@/app/_lib/db/tables/t-ido-den';
 import { deleteIdoFix, insertIdoFix, selectIdoFix, selectIdoFixMaxId } from '@/app/_lib/db/tables/t-ido-fix';
+import { selectIdoMem, upsertIdoMem } from '@/app/_lib/db/tables/t-ido-mem';
 import { selectActiveBumons } from '@/app/_lib/db/tables/v_bumon_lst';
 import { selectConfirmIdoDen, selectIdoDen } from '@/app/_lib/db/tables/v-ido-den3-lst';
 import { selectChosenIdoEqptsDetails } from '@/app/_lib/db/tables/v-kizai-list';
@@ -16,7 +17,26 @@ import { selectActiveEqpts } from '@/app/_lib/db/tables/v-kizai-lst-sel';
 import { IdoDen } from '@/app/_lib/db/types/t-ido-den-type';
 import { IdoFix } from '@/app/_lib/db/types/t-ido-fix-type';
 
-import { IdoDetailTableValues, IdoEqptSelection, SelectedIdoEqptsValues } from './types';
+import { IdoDetailTableValues, IdoEqptSelection, IdoJuchuMeisaiValues, SelectedIdoEqptsValues } from './types';
+
+/**
+ * v_ido_den3_lst.juchu_meisai（jsonb配列）を画面用の型に変換する
+ * @param json ビューが返すjsonb。受注が紐づかない行では空配列
+ * @returns 受注明細の配列
+ */
+const toJuchuMeisai = (json: unknown): IdoJuchuMeisaiValues[] => {
+  if (!Array.isArray(json)) return [];
+  return json.map((m) => {
+    const d = m as Record<string, unknown>;
+    return {
+      juchuHeadId: Number(d.juchu_head_id ?? 0),
+      juchuKizaiHeadId: Number(d.juchu_kizai_head_id ?? 0),
+      koenNam: typeof d.koen_nam === 'string' ? d.koen_nam : '',
+      headNam: typeof d.head_nam === 'string' ? d.head_nam : '',
+      planQty: Number(d.plan_qty ?? 0),
+    };
+  });
+};
 
 /**
  * 移動伝票id最大値取得
@@ -67,6 +87,7 @@ export const getIdoDen = async (sagyoKbnId: number, sagyoSijiId: number, sagyoDe
       sagyosijiId: sagyoSijiId,
       nyushukoBashoId: sagyoId,
       juchuFlg: d.juchu_flg ?? 0,
+      juchuMeisai: toJuchuMeisai(d.juchu_meisai),
       kizaiId: d.kizai_id ?? 0,
       kizaiNam: d.kizai_nam ?? '',
       shozokuId: sagyoId,
@@ -84,6 +105,34 @@ export const getIdoDen = async (sagyoKbnId: number, sagyoSijiId: number, sagyoDe
     }));
 
     return idoDetailTableList;
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
+    throw e;
+  }
+};
+
+/**
+ * 移動メモ取得
+ *
+ * メモのキーは (移動予定日, 作業指示id) のみ。移動出庫と移動入庫で同じメモを共有する。
+ * @param sagyoDenDat 移動予定日
+ * @param sagyoSijiId 作業指示id
+ * @returns メモ文字列。未登録なら空文字
+ */
+export const getIdoMem = async (sagyoDenDat: string, sagyoSijiId: number) => {
+  try {
+    const { data, error } = await selectIdoMem(sagyoDenDat, sagyoSijiId);
+    if (error) {
+      throw new Error('[selectIdoMem] DBエラー:', { cause: error });
+    }
+    return data?.mem ?? '';
   } catch (e) {
     if (e instanceof Error) {
       console.error(`[ERROR] ${e.message}`);
@@ -371,12 +420,60 @@ export const delIdoFix = async (sagyoKbnId: number, sagyoSijiId: number, sagyoDe
 };
 
 /**
+ * 移動メモのみ保存
+ *
+ * 出発後は移動明細を編集できないが、メモは編集できる。saveIdoDen をそのまま使うと
+ * 変更していない t_ido_den まで再UPDATEしてしまうため、メモだけの保存経路を分けている。
+ * @param sagyoDenDat 移動予定日
+ * @param sagyoSijiId 作業指示id
+ * @param idoMem 移動メモ
+ * @param userNam ユーザー名
+ * @returns 成否
+ */
+export const saveIdoMem = async (sagyoDenDat: string, sagyoSijiId: number, idoMem: string, userNam: string) => {
+  const connection = await pool.connect();
+  try {
+    await upsertIdoMem(sagyoDenDat, sagyoSijiId, idoMem.trim(), userNam, connection);
+    await connection.query('COMMIT');
+
+    revalidatePath('ido-list');
+
+    return true;
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
+    await connection.query('ROLLBACK');
+    return false;
+  } finally {
+    connection.release();
+  }
+};
+
+/**
  * 移動伝票保存
+ *
+ * 移動メモも同じ接続でまとめて保存する。メモだけを変更して保存することもあるため、
+ * idoDenData が空でもメモの保存は行う。
  * @param idoDenData 移動伝票データ
+ * @param idoMem 移動メモ
+ * @param sagyoDenDat 移動予定日（メモのキー）
+ * @param sagyoSijiId 作業指示id（メモのキー）
  * @param userNam ユーザー名
  * @returns
  */
-export const saveIdoDen = async (idoDenData: IdoDetailTableValues[], userNam: string) => {
+export const saveIdoDen = async (
+  idoDenData: IdoDetailTableValues[],
+  idoMem: string,
+  sagyoDenDat: string,
+  sagyoSijiId: number,
+  userNam: string
+) => {
   const connection = await pool.connect();
   try {
     let newIdoDenId = await getIdoDenMaxId();
@@ -423,6 +520,10 @@ export const saveIdoDen = async (idoDenData: IdoDetailTableValues[], userNam: st
     if (updIdoDenData.length > 0) {
       await updIdoDen(updIdoDenData, userNam, connection);
     }
+    // 移動メモ。改行だけ入力された場合に「見た目は空なのに行がある」状態になるので、
+    // 前後の空白・改行を落としてから渡す（JSのtrimは \n や全角スペースも落とす）
+    await upsertIdoMem(sagyoDenDat, sagyoSijiId, idoMem.trim(), userNam, connection);
+
     await connection.query('COMMIT');
 
     revalidatePath('ido-list');

@@ -70,6 +70,8 @@ export const getNyukoEqptDetail = async (
       kizaiMem: data.kizai_mem,
       ctnFlg: data.ctn_flg === 1 ? true : false,
       indentNum: data.indent_num ?? 0,
+      addUser: data.add_user,
+      updUser: data.upd_user,
     };
 
     return nyukoEqptDetailData;

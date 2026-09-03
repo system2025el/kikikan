@@ -163,3 +163,17 @@ export const updRfidDelFlgDB = async (tagId: string, data: { del_flg: number; up
     throw new Error('[updRfidDelFlgDB] DBエラー:', { cause: e });
   }
 };
+
+/**
+ * RFIDタグを物理削除する関数
+ * @param {string[]} tagIds 削除するRFIDタグIDの配列
+ * @param connection トランザクション
+ */
+export const deleteRfids = async (tagIds: string[], connection: PoolClient) => {
+  const query = `DELETE FROM ${SCHEMA}.m_rfid WHERE rfid_tag_id = ANY($1::text[])`;
+  try {
+    await connection.query(query, [tagIds]);
+  } catch (e) {
+    throw new Error('[deleteRfids] DBエラー:', { cause: e });
+  }
+};

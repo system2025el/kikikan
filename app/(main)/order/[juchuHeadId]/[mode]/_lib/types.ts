@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { HONBANBI_ADD_QTY_MAX, HONBANBI_ADD_QTY_MAX_DIGITS, MEMO_MAX_LENGTH } from '@/app/_lib/constants';
 import { validationMessages } from '@/app/(main)/_lib/validation-messages';
 
 export const KokyakuSchema = z.object({
@@ -12,6 +13,24 @@ export const KokyakuSchema = z.object({
 });
 
 export type KokyakuValues = z.infer<typeof KokyakuSchema>;
+
+/**
+ * 受注本番日1件分。
+ * 追加日数の上限は t_juchu_kizai_honbanbi.juchu_honbanbi_add_qty が numeric(6,3) のため3桁まで。
+ */
+export const HonbanbiSchema = z.object({
+  juchuHonbanbiShubetuId: z.number(),
+  juchuHonbanbiDat: z.date(),
+  mem: z
+    .string()
+    .max(MEMO_MAX_LENGTH, { message: validationMessages.maxStringLength(MEMO_MAX_LENGTH) })
+    .nullable(),
+  juchuHonbanbiAddQty: z
+    .number({ message: validationMessages.number() })
+    .min(0, { message: validationMessages.number() })
+    .max(HONBANBI_ADD_QTY_MAX, { message: validationMessages.maxNumberLength(HONBANBI_ADD_QTY_MAX_DIGITS) })
+    .nullable(),
+});
 
 export const OrderSchema = z.object({
   juchuHeadId: z.number(),
@@ -33,7 +52,10 @@ export const OrderSchema = z.object({
     .string()
     .max(16, { message: validationMessages.maxStringLength(16) })
     .nullable(),
-  mem: z.string().nullable(),
+  mem: z
+    .string()
+    .max(MEMO_MAX_LENGTH, { message: validationMessages.maxStringLength(MEMO_MAX_LENGTH) })
+    .nullable(),
   // nebikiAmt: z
   //   .number()
   //   .max(9999999999, { message: validationMessages.maxNumberLength(10) })
@@ -41,6 +63,8 @@ export const OrderSchema = z.object({
 
   //   .nullable(),
   zeiKbn: z.number(),
+  // 本番日。受注ヘッダー単位のテンプレートとして保存し、各受注機材ヘッダーへ展開する
+  honbanbiList: z.array(HonbanbiSchema),
 });
 
 export type OrderValues = z.infer<typeof OrderSchema>;
@@ -111,33 +135,28 @@ export type LocsDialogValues = {
   tel: string | null;
 };
 
-export const BaseCopyDialogSchema = z.object({
-  juchuHeadid: z.string().optional(),
-  headNam: z.string().max(50, { message: validationMessages.maxStringLength(50) }).nullable(),
-  kicsShukoDat: z.date().nullable(),
-  kicsNyukoDat: z.date().nullable(),
-  yardShukoDat: z.date().nullable(),
-  yardNyukoDat: z.date().nullable(),
-});
-
-export type CopyDialogValue = z.infer<typeof BaseCopyDialogSchema>;
-
-export const CopyDialogSchema = (origin: EqTableValues | null) =>
-  z.object({
+/**
+ * コピーダイアログ
+ * 出庫日・入庫日は年月日のみ（時刻は0:00固定）で1つずつ。コピー先はYARDで作成する
+ */
+export const CopyDialogSchema = z
+  .object({
     juchuHeadid: z.string().optional(),
     headNam: z
       .string()
       .max(50, { message: validationMessages.maxStringLength(50) })
       .nullable(),
-    kicsShukoDat:
-      origin && origin.kicsShukoDat ? z.date({ message: validationMessages.required() }) : z.date().nullable(),
-    kicsNyukoDat:
-      origin && origin.kicsNyukoDat ? z.date({ message: validationMessages.required() }) : z.date().nullable(),
-    yardShukoDat:
-      origin && origin.yardShukoDat ? z.date({ message: validationMessages.required() }) : z.date().nullable(),
-    yardNyukoDat:
-      origin && origin.yardNyukoDat ? z.date({ message: validationMessages.required() }) : z.date().nullable(),
+    shukoDat: z.date().nullable(),
+    nyukoDat: z.date().nullable(),
+  })
+  .refine((d) => d.shukoDat !== null, { path: ['shukoDat'], message: validationMessages.required() })
+  .refine((d) => d.nyukoDat !== null, { path: ['nyukoDat'], message: validationMessages.required() })
+  .refine((d) => !d.shukoDat || !d.nyukoDat || d.shukoDat <= d.nyukoDat, {
+    path: ['nyukoDat'],
+    message: '入庫日は出庫日以降の日付を入力してください',
   });
+
+export type CopyDialogValue = z.infer<typeof CopyDialogSchema>;
 
 export type CopyJuchuKizaiHeadValue = {
   juchuHeadId: number;
@@ -221,4 +240,15 @@ export type CopyJuchuContainerMeisaiValues = {
 export type UsersValue = {
   tantouNam: string;
   mailAdr: string;
+};
+
+/** 受注添付ファイル（PDF）の1件 */
+export type TempuValues = {
+  juchuTempuId: number;
+  /** 原本ファイル名。Storage上のキーとは別 */
+  fileNam: string;
+  /** バイト数 */
+  fileSiz: number;
+  addDat: string | null;
+  addUser: string;
 };

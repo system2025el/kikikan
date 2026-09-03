@@ -179,7 +179,7 @@ export const QuotHeadSchema = z.object({
     .nullish(),
   comment: z
     .string()
-    .max(100, { message: validationMessages.maxStringLength(100) })
+    .max(200, { message: validationMessages.maxStringLength(200) })
     .nullish(),
   kizaiChukeiMei: z
     .string()

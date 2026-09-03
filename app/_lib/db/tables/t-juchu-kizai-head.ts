@@ -161,6 +161,118 @@ export const selectMaxJuchuHonbanbiQty = async (juchuId: number) => {
 };
 
 /**
+ * 本番日テンプレートの展開対象となる受注機材ヘッダーと、その適用期間を取得
+ *
+ * 通常ヘッダーは出庫日〜入庫日（KICS/YARDのうち出庫は最も早い日、入庫は最も遅い日。
+ * getShukoDate/getNyukoDateと同じ考え方）。
+ * 返却ヘッダーは出庫日を持たないため、使用日（種別1。返却日〜親の入庫日）の範囲を使う。
+ * キープヘッダーは対象外。
+ * @param juchuHeadId 受注ヘッダーid
+ * @param connection コネクション
+ * @returns 受注機材ヘッダーid・区分と適用期間
+ */
+export const selectKizaiHeadRangesForHonbanbi = async (juchuHeadId: number, connection: PoolClient) => {
+  const query = `
+    SELECT
+      k.juchu_kizai_head_id AS "juchuKizaiHeadId",
+      k.juchu_kizai_head_kbn AS "juchuKizaiHeadKbn",
+      to_char(
+        CASE
+          WHEN k.juchu_kizai_head_kbn = $2 THEN min(s.nyushuko_dat)::date
+          ELSE (
+            SELECT min(b.juchu_honbanbi_dat)
+            FROM ${SCHEMA}.t_juchu_kizai_honbanbi b
+            WHERE b.juchu_head_id = k.juchu_head_id
+              AND b.juchu_kizai_head_id = k.juchu_kizai_head_id
+              AND b.juchu_honbanbi_shubetu_id = 1
+          )
+        END, 'YYYY/MM/DD'
+      ) AS "startDat",
+      to_char(
+        CASE
+          WHEN k.juchu_kizai_head_kbn = $2 THEN max(n.nyushuko_dat)::date
+          ELSE (
+            SELECT max(b.juchu_honbanbi_dat)
+            FROM ${SCHEMA}.t_juchu_kizai_honbanbi b
+            WHERE b.juchu_head_id = k.juchu_head_id
+              AND b.juchu_kizai_head_id = k.juchu_kizai_head_id
+              AND b.juchu_honbanbi_shubetu_id = 1
+          )
+        END, 'YYYY/MM/DD'
+      ) AS "endDat"
+    FROM
+      ${SCHEMA}.t_juchu_kizai_head k
+    LEFT JOIN
+      ${SCHEMA}.t_juchu_kizai_nyushuko s
+      ON s.juchu_head_id = k.juchu_head_id AND s.juchu_kizai_head_id = k.juchu_kizai_head_id
+      AND s.nyushuko_shubetu_id = 1
+    LEFT JOIN
+      ${SCHEMA}.t_juchu_kizai_nyushuko n
+      ON n.juchu_head_id = k.juchu_head_id AND n.juchu_kizai_head_id = k.juchu_kizai_head_id
+      AND n.nyushuko_shubetu_id = 2
+    WHERE
+      k.juchu_head_id = $1
+      AND k.juchu_kizai_head_kbn IN ($2, $3)
+    GROUP BY
+      k.juchu_head_id,
+      k.juchu_kizai_head_id,
+      k.juchu_kizai_head_kbn
+    ORDER BY
+      k.juchu_kizai_head_id
+  `;
+
+  const values = [juchuHeadId, JUCHU_KIZAI_HEAD_KBN.normal, JUCHU_KIZAI_HEAD_KBN.return];
+
+  try {
+    return await connection.query<{
+      juchuKizaiHeadId: number;
+      juchuKizaiHeadKbn: number;
+      startDat: string | null;
+      endDat: string | null;
+    }>(query, values);
+  } catch (e) {
+    throw new Error('[selectKizaiHeadRangesForHonbanbi] DBエラー:', { cause: e });
+  }
+};
+
+/**
+ * 受注機材ヘッダーの本番日数のみ更新
+ * 受注本番日テンプレートを展開し直した際に、金額算出用の本番日数を合わせるために使う。
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param juchuHonbanbiQty 本番日数
+ * @param userNam ユーザー名
+ * @param connection コネクション
+ */
+export const updateJuchuHonbanbiQty = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  juchuHonbanbiQty: number,
+  userNam: string,
+  connection: PoolClient
+) => {
+  const query = `
+    UPDATE
+      ${SCHEMA}.t_juchu_kizai_head
+    SET
+      juchu_honbanbi_qty = $3,
+      upd_dat = $4,
+      upd_user = $5
+    WHERE
+      juchu_head_id = $1
+      AND juchu_kizai_head_id = $2
+  `;
+
+  const values = [juchuHeadId, juchuKizaiHeadId, juchuHonbanbiQty, new Date().toISOString(), userNam];
+
+  try {
+    await connection.query(query, values);
+  } catch (e) {
+    throw new Error('[updateJuchuHonbanbiQty] DBエラー:', { cause: e });
+  }
+};
+
+/**
  * 受注機材ヘッダー新規追加
  * @param juchuKizaiHeadId 受注機材ヘッダーid
  * @param juchuKizaiHeadData 受注機材ヘッダーデータ

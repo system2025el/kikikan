@@ -24,10 +24,12 @@ PG_ZIP_VER="17.6-1"
 PGBIN="${PGBIN:-${SCRIPT_DIR}/pgclient/pgsql/bin}"
 
 # 移行対象外のテーブル
-#   m_user … ステージングのアカウントを維持する（Supabase Authと紐づくため置換しない）
-#   t_lock … 編集ロックの残骸
-#   t_log  … 移行不要
-EXCLUDES=(-T public.m_user -T public.t_lock -T public.t_log)
+#   m_user        … ステージングのアカウントを維持する（Supabase Authと紐づくため置換しない）
+#   t_lock        … 編集ロックの残骸
+#   t_log         … 移行不要
+#   t_juchu_tempu … 受注添付ファイル。PDFの実体はStorage側にあり移行されないため、
+#                   行だけ入れるとファイルを開けない添付が並ぶ
+EXCLUDES=(-T public.m_user -T public.t_lock -T public.t_log -T public.t_juchu_tempu)
 
 psql_bin()    { echo "${PGBIN}/psql.exe"; }
 pgdump_bin()  { echo "${PGBIN}/pg_dump.exe"; }
@@ -134,11 +136,11 @@ do_dump() {
   fi
 
   echo "==> 除外テーブルの混入チェック"
-  if grep -nE '^COPY public\.(m_user|t_lock|t_log) ' "$DUMP_FILE"; then
+  if grep -nE '^COPY public\.(m_user|t_lock|t_log|t_juchu_tempu) ' "$DUMP_FILE"; then
     echo "ERROR: 除外対象のテーブルがダンプに含まれています" >&2
     exit 1
   fi
-  echo "    OK（m_user / t_lock / t_log なし）"
+  echo "    OK（m_user / t_lock / t_log / t_juchu_tempu なし）"
   echo "==> ダンプ内のテーブル数: $(grep -c '^COPY public\.' "$DUMP_FILE")"
 }
 
@@ -188,11 +190,11 @@ EOF
 
   echo "--- 差分（移行対象テーブルのみ）---"
   join -t'|' "${SCRIPT_DIR}/cnt_prod.txt" "${SCRIPT_DIR}/cnt_stg.txt" \
-    | awk -F'|' '$1!="m_user" && $1!="t_lock" && $1!="t_log" && $2!=$3 {printf "%-26s prod=%-8s stg=%-8s diff=%s\n",$1,$2,$3,$3-$2}'
+    | awk -F'|' '$1!="m_user" && $1!="t_lock" && $1!="t_log" && $1!="t_juchu_tempu" && $2!=$3 {printf "%-26s prod=%-8s stg=%-8s diff=%s\n",$1,$2,$3,$3-$2}'
   echo "    （差分はダンプ取得後の本番の稼働分。0件なら完全一致）"
   echo "--- 除外テーブル（意図的に不一致）---"
   join -t'|' "${SCRIPT_DIR}/cnt_prod.txt" "${SCRIPT_DIR}/cnt_stg.txt" \
-    | awk -F'|' '$1=="m_user"||$1=="t_lock"||$1=="t_log" {printf "%-10s prod=%-8s stg=%s\n",$1,$2,$3}'
+    | awk -F'|' '$1=="m_user"||$1=="t_lock"||$1=="t_log"||$1=="t_juchu_tempu" {printf "%-14s prod=%-8s stg=%s\n",$1,$2,$3}'
 }
 
 case "${1:-}" in
