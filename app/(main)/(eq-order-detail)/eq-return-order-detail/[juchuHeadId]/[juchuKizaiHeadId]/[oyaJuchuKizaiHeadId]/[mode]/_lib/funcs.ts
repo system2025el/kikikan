@@ -45,6 +45,7 @@ import { JuchuCtnMeisai } from '@/app/_lib/db/types/t_juchu_ctn_meisai-type';
 import { JuchuKizaiHead } from '@/app/_lib/db/types/t-juchu-kizai-head-type';
 import { JuchuKizaiMeisai } from '@/app/_lib/db/types/t-juchu-kizai-meisai-type';
 import { NyushukoDen } from '@/app/_lib/db/types/t-nyushuko-den-type';
+import { expandHonbanbiTemplate, getHonbanbiTemplate } from '@/app/(main)/_lib/honbanbi-funcs';
 import {
   addAllHonbanbi,
   addDummyNyushukoDen,
@@ -108,6 +109,20 @@ export const saveNewReturnJuchuKizaiHead = async (
       juchuHonbanbiAddQty: 0,
     }));
     await addAllHonbanbi(data.juchuHeadId, newJuchuKizaiHeadId, addReturnJuchuSiyouHonbanbiData, userNam, connection);
+
+    // 受注本番日テンプレートから本番日数を算出する。
+    // 返却ヘッダーは本番日の行を持たないため、更新するのは本番日数だけ。
+    const honbanbiTemplate = await getHonbanbiTemplate(data.juchuHeadId);
+    await expandHonbanbiTemplate(
+      data.juchuHeadId,
+      newJuchuKizaiHeadId,
+      updateDateRange[0] ?? null,
+      updateDateRange[updateDateRange.length - 1] ?? null,
+      honbanbiTemplate,
+      userNam,
+      connection,
+      true
+    );
 
     // ダミー入庫伝票追加
     if (data.kicsNyukoDat) {
@@ -218,6 +233,20 @@ export const saveReturnJuchuKizai = async (
         addReturnJuchuSiyouHonbanbiData,
         userNam,
         connection
+      );
+
+      // 返却日が変わると適用期間（返却日〜親の入庫日）が変わるため本番日数を計算し直す。
+      // 返却ヘッダーは本番日の行を持たないため、更新するのは本番日数だけ。
+      const honbanbiTemplate = await getHonbanbiTemplate(data.juchuHeadId);
+      await expandHonbanbiTemplate(
+        data.juchuHeadId,
+        data.juchuKizaiHeadId,
+        updateDateRange[0] ?? null,
+        updateDateRange[updateDateRange.length - 1] ?? null,
+        honbanbiTemplate,
+        userNam,
+        connection,
+        true
       );
     }
 

@@ -71,6 +71,23 @@ export const LOCK_SHUBETU = {
 } as const;
 
 /**
+ * メモの最大文字数
+ * t_juchu_kizai_head.mem / t_juchu_kizai_meisai.mem・mem2 / t_juchu_ctn_meisai.mem のカラム定義に合わせる
+ */
+export const MEMO_MAX_LENGTH = 200;
+
+/**
+ * 本番日の追加日数の桁数上限
+ * t_juchu_kizai_honbanbi.juchu_honbanbi_add_qty が numeric(6,3) のため整数部は3桁
+ */
+export const HONBANBI_ADD_QTY_MAX_DIGITS = 3;
+
+/**
+ * 本番日の追加日数の上限値
+ */
+export const HONBANBI_ADD_QTY_MAX = 10 ** HONBANBI_ADD_QTY_MAX_DIGITS - 1;
+
+/**
  * 辞書ID（dic_id）
  */
 export const DIC_ID = {

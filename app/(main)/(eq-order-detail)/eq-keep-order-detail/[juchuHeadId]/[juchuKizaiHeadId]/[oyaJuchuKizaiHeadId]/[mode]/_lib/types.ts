@@ -1,5 +1,6 @@
 import z from 'zod';
 
+import { MEMO_MAX_LENGTH } from '@/app/_lib/constants';
 import { validationMessages } from '@/app/(main)/_lib/validation-messages';
 
 export const KeepJuchuKizaiHeadSchema = z
@@ -7,7 +8,10 @@ export const KeepJuchuKizaiHeadSchema = z
     juchuHeadId: z.number(),
     juchuKizaiHeadId: z.number(),
     juchuKizaiHeadKbn: z.number(),
-    mem: z.string().nullable(),
+    mem: z
+      .string()
+      .max(MEMO_MAX_LENGTH, { message: validationMessages.maxStringLength(MEMO_MAX_LENGTH) })
+      .nullable(),
     headNam: z
       .string()
       .max(50, { message: validationMessages.maxStringLength(50) })

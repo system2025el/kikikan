@@ -3400,6 +3400,18 @@ export const saveNewJuchuKizaiHead = async (
     const mergeHonbanbiData: JuchuKizaiHonbanbiValues[] = [...addJuchuSiyouHonbanbiData, ...addJuchuHonbanbiData];
     await addAllHonbanbi(data.juchuHeadId, newJuchuKizaiHeadId, mergeHonbanbiData, userNam, connection);
 
+    // 受注本番日(仕込・RH・GP・本番)を受注本番日テンプレートから展開
+    const honbanbiTemplate = await getHonbanbiTemplate(data.juchuHeadId);
+    await expandHonbanbiTemplate(
+      data.juchuHeadId,
+      newJuchuKizaiHeadId,
+      updateShukoDate,
+      updateNyukoDate,
+      honbanbiTemplate,
+      userNam,
+      connection
+    );
+
     await connection.query('COMMIT');
 
     await revalidatePath('/eqpt-order-list');
@@ -3495,6 +3507,9 @@ export const saveJuchuKizai = async (
         // 返却伝票チェック
         const returnJuchuKizaiHeads = await getChildJuchuKizaiHead(data.juchuHeadId, data.juchuKizaiHeadId);
         if (returnJuchuKizaiHeads.length > 0) {
+          // 返却ヘッダーの適用期間（返却日〜親の入庫日）も変わるため、本番日数を計算し直す
+          const returnHonbanbiTemplate = await getHonbanbiTemplate(data.juchuHeadId);
+
           for (const returnHead of returnJuchuKizaiHeads) {
             const returnDateRange = getRange(
               returnHead.nyuko_dat ? new Date(returnHead.nyuko_dat) : null,
@@ -3515,6 +3530,18 @@ export const saveJuchuKizai = async (
               returnJuchuSiyouHonbanbiData,
               userNam,
               connection
+            );
+
+            // 返却ヘッダーは本番日の行を持たないため、本番日数だけを更新する
+            await expandHonbanbiTemplate(
+              returnHead.juchu_head_id,
+              returnHead.juchu_kizai_head_id,
+              returnDateRange[0] ?? null,
+              returnDateRange[returnDateRange.length - 1] ?? null,
+              returnHonbanbiTemplate,
+              userNam,
+              connection,
+              true
             );
           }
         }

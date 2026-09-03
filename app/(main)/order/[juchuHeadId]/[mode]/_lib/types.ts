@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { HONBANBI_ADD_QTY_MAX, HONBANBI_ADD_QTY_MAX_DIGITS, MEMO_MAX_LENGTH } from '@/app/_lib/constants';
 import { validationMessages } from '@/app/(main)/_lib/validation-messages';
 
 export const KokyakuSchema = z.object({
@@ -12,6 +13,24 @@ export const KokyakuSchema = z.object({
 });
 
 export type KokyakuValues = z.infer<typeof KokyakuSchema>;
+
+/**
+ * 受注本番日1件分。
+ * 追加日数の上限は t_juchu_kizai_honbanbi.juchu_honbanbi_add_qty が numeric(6,3) のため3桁まで。
+ */
+export const HonbanbiSchema = z.object({
+  juchuHonbanbiShubetuId: z.number(),
+  juchuHonbanbiDat: z.date(),
+  mem: z
+    .string()
+    .max(MEMO_MAX_LENGTH, { message: validationMessages.maxStringLength(MEMO_MAX_LENGTH) })
+    .nullable(),
+  juchuHonbanbiAddQty: z
+    .number({ message: validationMessages.number() })
+    .min(0, { message: validationMessages.number() })
+    .max(HONBANBI_ADD_QTY_MAX, { message: validationMessages.maxNumberLength(HONBANBI_ADD_QTY_MAX_DIGITS) })
+    .nullable(),
+});
 
 export const OrderSchema = z.object({
   juchuHeadId: z.number(),
@@ -33,7 +52,10 @@ export const OrderSchema = z.object({
     .string()
     .max(16, { message: validationMessages.maxStringLength(16) })
     .nullable(),
-  mem: z.string().nullable(),
+  mem: z
+    .string()
+    .max(MEMO_MAX_LENGTH, { message: validationMessages.maxStringLength(MEMO_MAX_LENGTH) })
+    .nullable(),
   // nebikiAmt: z
   //   .number()
   //   .max(9999999999, { message: validationMessages.maxNumberLength(10) })
@@ -41,6 +63,8 @@ export const OrderSchema = z.object({
 
   //   .nullable(),
   zeiKbn: z.number(),
+  // 本番日。受注ヘッダー単位のテンプレートとして保存し、各受注機材ヘッダーへ展開する
+  honbanbiList: z.array(HonbanbiSchema),
 });
 
 export type OrderValues = z.infer<typeof OrderSchema>;

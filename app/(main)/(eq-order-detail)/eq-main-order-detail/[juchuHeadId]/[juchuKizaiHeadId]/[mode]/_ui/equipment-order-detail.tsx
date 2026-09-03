@@ -54,6 +54,7 @@ import { getNyukoDate, getRange, getShukoDate } from '@/app/(main)/_lib/date-fun
 import { addLock, getDic, getLock } from '@/app/(main)/_lib/funcs';
 import { useStableCallback, useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
 import { lockCheck, lockRelease } from '@/app/(main)/_lib/lock';
+import { useNyushukoFixChanged } from '@/app/(main)/_lib/nyushuko-fix-notify';
 import { permission } from '@/app/(main)/_lib/permission';
 import { openOrFocusTab } from '@/app/(main)/_lib/tab-focus';
 import { LockValues, User } from '@/app/(main)/_lib/types';
@@ -346,6 +347,13 @@ const EquipmentOrderDetail = (props: {
   const nebikiRat = watch('nebikiRat');
   /** 割引金額の監視 */
   const nebikiAmt = watch('nebikiAmt');
+  /** KICS出庫日時の監視（出庫明細ボタンの表示制御用） */
+  const kicsShukoDat = watch('kicsShukoDat');
+  /** YARD出庫日時の監視（出庫明細ボタンの表示制御用） */
+  const yardShukoDat = watch('yardShukoDat');
+
+  // 出庫明細の閲覧権限
+  const canRefNyushuko = !!(user && user.permission.nyushuko & permission.nyushuko_ref);
 
   // 金額算出の元になる単価×受注数の合計（現在値・保存済み）。削除された明細は除く。
   // メモ等の金額に無関係な項目は含まれないため、それらを編集してもこの値は変化しない
@@ -363,6 +371,26 @@ const EquipmentOrderDetail = (props: {
 
   // ブラウザバック、F5、×ボタンでページを離れた際のhook
   useUnsavedChangesWarning(isDirty || otherDirty ? true : false);
+
+  // 別タブの出庫明細画面で出発・出発解除が行われた際に、出発・到着フラグだけを取り直す。
+  // これらの処理はt_nyushuko_fixの追加・削除しか行わないため、明細やフォームの再読込は不要で、
+  // 編集中の内容にも影響しない。
+  useNyushukoFixChanged(async ({ juchuHeadId, juchuKizaiHeadIds }) => {
+    const currentJuchuKizaiHeadId = getValues('juchuKizaiHeadId');
+    if (juchuHeadId !== getValues('juchuHeadId') || !juchuKizaiHeadIds.includes(currentJuchuKizaiHeadId)) return;
+
+    try {
+      const [shukoFixFlag, nyukoFixFlag] = await Promise.all([
+        getNyushukoFixFlag(juchuHeadId, currentJuchuKizaiHeadId, SAGYO_KBN_ID.shukoConfirmed),
+        getNyushukoFixFlag(juchuHeadId, currentJuchuKizaiHeadId, SAGYO_KBN_ID.nyukoConfirmed),
+      ]);
+      setShukoFixFlag(shukoFixFlag);
+      setNyukoFixFlag(nyukoFixFlag);
+    } catch (e) {
+      setSnackBarMessage('出発状況の再取得に失敗しました');
+      setSnackBarOpen(true);
+    }
+  });
 
   // ロック制御
   const lock = async () => {
@@ -524,6 +552,25 @@ const EquipmentOrderDetail = (props: {
         setSnackBarOpen(true);
       }
     }
+  };
+
+  /**
+   * 出庫明細（最終確認）を別タブで開く
+   * @param nyushukoBashoId 出庫場所id
+   * @param shukoDat 出庫日時
+   */
+  const openShukoDetail = (nyushukoBashoId: number, shukoDat: Date) => {
+    // 未保存の出庫日時にはDBに該当する出庫伝票が無く画面を開けないため、コピーと同様に保存を促す
+    if (otherDirty || isDirty) {
+      setAlertTitle('保存されていません');
+      setAlertMessage('1度保存をしてください');
+      setAlertOpen(true);
+      return;
+    }
+
+    openOrFocusTab(
+      `/shuko-list/shuko-detail/${juchuHeadData.juchuHeadId}/${JUCHU_KIZAI_HEAD_KBN.normal}/${nyushukoBashoId}/${shukoDat.toISOString()}/${SAGYO_KBN_ID.shukoConfirmation}`
+    );
   };
 
   /**
@@ -2571,6 +2618,20 @@ const EquipmentOrderDetail = (props: {
                   </Box>
                 ) : (
                   <></>
+                )}
+                {saveKizaiHead && (kicsShukoDat || yardShukoDat) && (
+                  <Grid2 container alignItems={'center'} spacing={1}>
+                    {kicsShukoDat && (
+                      <Button onClick={() => openShukoDetail(BASHO_ID.kics, kicsShukoDat)} disabled={!canRefNyushuko}>
+                        出庫明細K
+                      </Button>
+                    )}
+                    {yardShukoDat && (
+                      <Button onClick={() => openShukoDetail(BASHO_ID.yard, yardShukoDat)} disabled={!canRefNyushuko}>
+                        出庫明細Y
+                      </Button>
+                    )}
+                  </Grid2>
                 )}
                 <Grid2 container display={saveKizaiHead ? 'flex' : 'none'} alignItems={'center'} spacing={1}>
                   {!edit ? <Typography>閲覧モード</Typography> : <Typography>編集モード</Typography>}

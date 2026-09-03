@@ -6,10 +6,16 @@ import { PickersDay, PickersDayProps } from '@mui/x-date-pickers/PickersDay';
 import dayjs from 'dayjs';
 import { useCallback, useMemo, useRef, useState } from 'react';
 
-import { HONBANBI_SHUBETU_ID } from '@/app/_lib/constants';
+import {
+  HONBANBI_ADD_QTY_MAX,
+  HONBANBI_ADD_QTY_MAX_DIGITS,
+  HONBANBI_SHUBETU_ID,
+  MEMO_MAX_LENGTH,
+} from '@/app/_lib/constants';
 
 import { toJapanYMDAndDayString, toJapanYMDString } from '../_lib/date-conversion';
 import { HonbanbiValues } from '../_lib/types';
+import { validationMessages } from '../_lib/validation-messages';
 
 /** ブラシで塗り分ける本番日種別（種別1〜3は入出庫日から自動生成されるためここでは扱わない） */
 const SHUBETU_LIST = [
@@ -199,17 +205,42 @@ export const HonbanbiCalendar = ({
   }, [onBeforeEdit]);
 
   /**
-   * 編集前処理を確認してから変更を適用する
+   * 変更を適用する。
+   *
+   * 追加日数・メモの変更で使う。常に同期的に反映する。
+   * await を挟むと状態の更新が入力イベントより後になり、
+   * 日本語入力の変換中に文字が確定してしまうため。
    * @param apply 変更後のリストを返す関数
    */
   const applyChange = useCallback(
-    async (apply: () => HonbanbiValues[]) => {
+    (apply: () => HonbanbiValues[]) => {
       if (readOnly || !onChange) return;
-      if (!(await ensureBeforeEdit())) return;
 
       onChange(apply());
     },
-    [readOnly, onChange, ensureBeforeEdit]
+    [readOnly, onChange]
+  );
+
+  /**
+   * 編集前処理を確認してから変更を適用する。
+   *
+   * 日付の追加・削除のときだけ使う。追加日数・メモの変更では確認しない。
+   * @param apply 変更後のリストを返す関数
+   */
+  const applyDateChange = useCallback(
+    (apply: () => HonbanbiValues[]) => {
+      if (readOnly || !onChange) return;
+
+      if (!onBeforeEdit || beforeEditDoneRef.current) {
+        onChange(apply());
+        return;
+      }
+
+      void ensureBeforeEdit().then((result) => {
+        if (result) onChange(apply());
+      });
+    },
+    [readOnly, onChange, onBeforeEdit, ensureBeforeEdit]
   );
 
   /**
@@ -221,7 +252,7 @@ export const HonbanbiCalendar = ({
     const isSameCell = (d: HonbanbiValues) =>
       d.juchuHonbanbiShubetuId === shubetuId && toJapanYMDString(d.juchuHonbanbiDat) === key;
 
-    void applyChange(() => {
+    applyDateChange(() => {
       if (honbanbiList.some(isSameCell)) {
         return honbanbiList.filter((d) => !isSameCell(d));
       }
@@ -243,7 +274,7 @@ export const HonbanbiCalendar = ({
    * @param values 更新する値
    */
   const handleRowChange = (targetShubetuId: number, key: string, values: Partial<HonbanbiValues>) => {
-    void applyChange(() =>
+    applyChange(() =>
       honbanbiList.map((d) =>
         d.juchuHonbanbiShubetuId === targetShubetuId && toJapanYMDString(d.juchuHonbanbiDat) === key
           ? { ...d, ...values }
@@ -326,6 +357,8 @@ export const HonbanbiCalendar = ({
               {rows.map((row) => {
                 const key = toJapanYMDString(row.juchuHonbanbiDat);
                 const shubetu = SHUBETU_LIST.find((s) => s.id === row.juchuHonbanbiShubetuId);
+                const isMemOverMaxLength = (row.mem?.length ?? 0) > MEMO_MAX_LENGTH;
+                const isAddQtyOverMax = (row.juchuHonbanbiAddQty ?? 0) > HONBANBI_ADD_QTY_MAX;
                 return (
                   <Grid2
                     key={`${row.juchuHonbanbiShubetuId}-${key}`}
@@ -353,21 +386,26 @@ export const HonbanbiCalendar = ({
                     <Grid2 size={2} maxWidth={80}>
                       <TextField
                         value={row.juchuHonbanbiAddQty ?? 0}
-                        onChange={(e) =>
+                        // 入力欄が狭くエラーメッセージを置く余地がないため、
+                        // 上限を超える値はそもそも受け付けない
+                        onChange={(e) => {
+                          const input = e.target.value;
+                          if (!/^\d*$/.test(input)) return;
+                          if (input !== '' && Number(input) > HONBANBI_ADD_QTY_MAX) return;
+
                           handleRowChange(row.juchuHonbanbiShubetuId, key, {
-                            juchuHonbanbiAddQty: Number(e.target.value),
-                          })
-                        }
-                        type="number"
+                            juchuHonbanbiAddQty: input === '' ? 0 : Number(input),
+                          });
+                        }}
+                        type="tel"
                         disabled={readOnly}
                         onFocus={(e) => e.target.select()}
+                        // 上限超えは入力できないため、DBの既存データが超えている場合のみ枠が赤くなる
+                        error={isAddQtyOverMax}
+                        slotProps={{ input: { inputMode: 'numeric' } }}
                         sx={{
                           width: '60px',
                           '& .MuiInputBase-input': { textAlign: 'right' },
-                          '& input[type=number]::-webkit-inner-spin-button': {
-                            WebkitAppearance: 'none',
-                            margin: 0,
-                          },
                         }}
                       />
                     </Grid2>
@@ -377,6 +415,8 @@ export const HonbanbiCalendar = ({
                         onChange={(e) => handleRowChange(row.juchuHonbanbiShubetuId, key, { mem: e.target.value })}
                         disabled={readOnly}
                         fullWidth
+                        error={isMemOverMaxLength}
+                        helperText={isMemOverMaxLength ? validationMessages.maxStringLength(MEMO_MAX_LENGTH) : ''}
                       />
                     </Grid2>
                   </Grid2>

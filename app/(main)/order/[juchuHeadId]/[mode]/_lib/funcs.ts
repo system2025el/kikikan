@@ -7,6 +7,7 @@ import {
   BASHO_ID,
   HONBANBI_SHUBETU_ID,
   JUCHU_KIZAI_HEAD_KBN,
+  MEMO_MAX_LENGTH,
   NYUSHUKO_SHUBETU_ID,
   SAGYO_KBN_ID,
   SAGYO_SIJI_ID,
@@ -22,12 +23,14 @@ import {
   selectIdoDenJuchuMaxId,
 } from '@/app/_lib/db/tables/t-ido-den-juchu';
 import { deleteJuchuCtnMeisaiFromOrder, insertJuchuContainerMeisai } from '@/app/_lib/db/tables/t-juchu-ctn-meisai';
-import { insertJuchuHead, selectJuchuHead, selectMaxId, updateJuchuHead } from '@/app/_lib/db/tables/t-juchu-head';
 import {
-  deleteJuchuHonbanbi,
-  insertAllJuchuHonbanbi,
-  selectJuchuHonbanbi,
-} from '@/app/_lib/db/tables/t-juchu-honbanbi';
+  insertJuchuHead,
+  selectJuchuHead,
+  selectMaxId,
+  updateJuchuHead,
+  updateJuchuHeadWithTran,
+} from '@/app/_lib/db/tables/t-juchu-head';
+import { deleteJuchuHonbanbi, insertAllJuchuHonbanbi } from '@/app/_lib/db/tables/t-juchu-honbanbi';
 import {
   deleteJuchuKizaiHead,
   insertJuchuKizaiHead,
@@ -134,6 +137,7 @@ export const getJuchuHead = async (juchuHeadId: number) => {
       mem: juchuData.data.mem,
       // nebikiAmt: juchuData.data.nebiki_amt,
       zeiKbn: juchuData.data.zei_kbn ?? 2,
+      honbanbiList: await getHonbanbiTemplate(juchuHeadId),
     };
     return order;
   } catch (e) {
@@ -226,8 +230,68 @@ export const addJuchuHead = async (juchuHeadData: OrderValues, userNam: string) 
 };
 
 /**
- * 受注ヘッダー情報更新
+ * 受注本番日をテンプレートとして作り直し、受注機材ヘッダーへ展開する。
+ * 呼び出し元のトランザクションに参加するため、必ず connection を渡すこと。
+ *
+ * 注意: テンプレートはここで書き込んだ内容をそのまま展開に使っている。
+ * getHonbanbiTemplate はコミット済みの状態を読むため、書き込み直後に読み直してはいけない。
+ * @param juchuHeadId 受注ヘッダーid
+ * @param honbanbiList 受注本番日リスト
+ * @param userNam ユーザー名
+ * @param connection コネクション
+ */
+const saveHonbanbiWithTran = async (
+  juchuHeadId: number,
+  honbanbiList: HonbanbiValues[],
+  userNam: string,
+  connection: PoolClient
+) => {
+  const now = new Date().toISOString();
+
+  // 受注本番日テンプレートを作り直す
+  await deleteJuchuHonbanbi(juchuHeadId, connection);
+
+  if (honbanbiList.length > 0) {
+    await insertAllJuchuHonbanbi(
+      honbanbiList.map((d) => ({
+        juchu_head_id: juchuHeadId,
+        juchu_honbanbi_shubetu_id: d.juchuHonbanbiShubetuId,
+        juchu_honbanbi_dat: toJapanYMDString(d.juchuHonbanbiDat, '-'),
+        mem: d.mem ? d.mem : null,
+        juchu_honbanbi_add_qty: d.juchuHonbanbiAddQty,
+        add_dat: now,
+        add_user: userNam,
+        upd_dat: now,
+        upd_user: userNam,
+      })),
+      connection
+    );
+  }
+
+  // 通常・返却の受注機材ヘッダーへ展開する（キープは対象外）
+  // 返却ヘッダーは本番日の行を持たせず、金額算出用の本番日数だけを更新する
+  const { rows: heads } = await selectKizaiHeadRangesForHonbanbi(juchuHeadId, connection);
+
+  for (const head of heads) {
+    await expandHonbanbiTemplate(
+      juchuHeadId,
+      head.juchuKizaiHeadId,
+      head.startDat,
+      head.endDat,
+      honbanbiList,
+      userNam,
+      connection,
+      head.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.return
+    );
+  }
+};
+
+/**
+ * 受注ヘッダー情報と受注本番日を更新する。
+ * 受注ヘッダーと本番日は同じトランザクションで保存し、片方だけ保存された状態を作らない。
  * @param data 受注ヘッダーデータ
+ * @param honbanbiList 受注本番日リスト
+ * @param userNam ユーザー名
  * @returns 正誤
  */
 export const updJuchuHead = async (data: OrderValues, userNam: string) => {
@@ -250,15 +314,24 @@ export const updJuchuHead = async (data: OrderValues, userNam: string) => {
     upd_user: userNam,
   };
 
-  try {
-    const { error } = await updateJuchuHead(updateData);
+  const connection = await pool.connect();
 
-    if (error) {
-      throw new Error('[updateJuchuHead] DBエラー:', { cause: error });
-    }
+  try {
+    await connection.query('BEGIN');
+
+    // 受注ヘッダー更新
+    await updateJuchuHeadWithTran(updateData, connection);
+
+    // 受注本番日更新
+    await saveHonbanbiWithTran(data.juchuHeadId, data.honbanbiList, userNam, connection);
+
+    await connection.query('COMMIT');
+
     await revalidatePath('/eqpt-order-list');
     return true;
   } catch (e) {
+    await connection.query('ROLLBACK');
+
     if (e instanceof Error) {
       console.error(`[ERROR] ${e.message}`);
       if (e.cause) {
@@ -268,6 +341,8 @@ export const updJuchuHead = async (data: OrderValues, userNam: string) => {
       console.error(e);
     }
     return false;
+  } finally {
+    connection.release();
   }
 };
 
@@ -803,10 +878,13 @@ type MergedKizaiMeisai = {
   mem2s: (string | null)[];
 };
 
-/** メモの合算。空を除き、重複を1つにまとめて改行で連結する */
+/**
+ * メモの合算。空を除き、重複を1つにまとめて改行で連結する
+ * 連結結果がカラムの上限を超えるとINSERTに失敗しコピー全体がロールバックされるため、上限で切り詰める
+ */
 const mergeMem = (mems: (string | null)[]) => {
   const uniqueMems = [...new Set(mems.filter((m): m is string => !!m && m.trim() !== ''))];
-  return uniqueMems.length > 0 ? uniqueMems.join('\n') : null;
+  return uniqueMems.length > 0 ? uniqueMems.join('\n').slice(0, MEMO_MAX_LENGTH) : null;
 };
 
 /**
@@ -982,9 +1060,19 @@ export const copyJuchuKizaiHeadMeisai = async (
 ) => {
   const normalHeads = originJuchuKizaiHeads.filter((d) => d.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.normal);
   const returnHeads = originJuchuKizaiHeads.filter((d) => d.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.return);
+  const normalHeadIds = normalHeads.map((d) => d.juchuKizaiHeadId);
 
+  // 画面側と同じ選択条件をサーバー側でも確認する
   if (normalHeads.length === 0 || !data.shukoDat || !data.nyukoDat) {
     console.error('[copyJuchuKizaiHeadMeisai] メイン明細または出庫日・入庫日が指定されていません');
+    return false;
+  }
+  if (normalHeads.length + returnHeads.length !== originJuchuKizaiHeads.length) {
+    console.error('[copyJuchuKizaiHeadMeisai] メイン・返却以外の明細が含まれています');
+    return false;
+  }
+  if (returnHeads.some((d) => d.oyaJuchuKizaiHeadId === null || !normalHeadIds.includes(d.oyaJuchuKizaiHeadId))) {
+    console.error('[copyJuchuKizaiHeadMeisai] 親メイン明細が選択されていない返却明細が含まれています');
     return false;
   }
 
@@ -996,8 +1084,15 @@ export const copyJuchuKizaiHeadMeisai = async (
   const connection = await pool.connect();
 
   try {
+    // 参照系はトランザクションを開始する前に済ませる
     // 割引率はコピー先受注の顧客マスタの値を初期値にする
     const nebikiRat = await getKokyakuNebikiRat(juchuHeadId);
+    // 受注機材明細（選択された明細をセット単位で合算し、返却分を引いたもの）
+    const mergedKizaiMeisai = await mergeJuchuKizaiMeisai(normalHeads, returnHeads);
+    // 単価はコピー元の値ではなく機材マスタの現在の定価を入れ直す
+    const regAmtByKizaiId = await getKizaiRegAmts([...new Set(mergedKizaiMeisai.map((d) => d.kizaiId))]);
+    // 受注コンテナ明細（機材idごとに合算。数量はYARDに寄せ、KICSは0で作成する）
+    const mergedCtnMeisai = await mergeJuchuContainerMeisai(originJuchuKizaiHeads);
 
     await connection.query('BEGIN');
 
@@ -1085,10 +1180,6 @@ export const copyJuchuKizaiHeadMeisai = async (
       connection
     );
 
-    // 受注機材明細（選択された明細をセット単位で合算し、返却分を引いたもの）
-    const mergedKizaiMeisai = await mergeJuchuKizaiMeisai(normalHeads, returnHeads);
-    // 単価はコピー元の値ではなく機材マスタの現在の定価を入れ直す
-    const regAmtByKizaiId = await getKizaiRegAmts([...new Set(mergedKizaiMeisai.map((d) => d.kizaiId))]);
     // 表示順。受注機材明細に1から振り、続けて受注コンテナ明細に振る
     let dspOrdNum = 1;
 
@@ -1120,9 +1211,6 @@ export const copyJuchuKizaiHeadMeisai = async (
       // 機材入出庫伝票追加
       await addNyushukoDen(newJuchuKizaiHeadData, newJuchuKizaiMeisai, userNam, connection);
     }
-
-    // 受注コンテナ明細（機材idごとに合算。数量はYARDに寄せ、KICSは0で作成する）
-    const mergedCtnMeisai = await mergeJuchuContainerMeisai(originJuchuKizaiHeads);
 
     const newJuchuCtnMeisai: CopyJuchuContainerMeisaiValues[] = [...mergedCtnMeisai.entries()].map(
       ([kizaiId, d], index) => ({
@@ -2078,112 +2166,5 @@ export const getUsers = async () => {
       console.error(e);
     }
     throw e;
-  }
-};
-
-/**
- * 受注本番日テンプレート取得
- * @param juchuHeadId 受注ヘッダーid
- * @returns 受注本番日テンプレート
- */
-export const getJuchuHonbanbi = async (juchuHeadId: number) => {
-  try {
-    const { data, error } = await selectJuchuHonbanbi(juchuHeadId);
-
-    if (error) {
-      throw new Error('[getJuchuHonbanbi] DBエラー:', { cause: error });
-    }
-
-    const honbanbiList: HonbanbiValues[] = data.map((d) => ({
-      juchuHonbanbiShubetuId: d.juchu_honbanbi_shubetu_id,
-      juchuHonbanbiDat: new Date(d.juchu_honbanbi_dat),
-      mem: d.mem,
-      juchuHonbanbiAddQty: d.juchu_honbanbi_add_qty,
-    }));
-
-    return honbanbiList;
-  } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
-    throw e;
-  }
-};
-
-/**
- * 受注本番日を保存する。
- * 入力内容を受注ヘッダー単位のテンプレートとして作り直し、
- * 通常の受注機材ヘッダーそれぞれの出庫日〜入庫日に重なる日付を、そのヘッダーの本番日として展開する。
- * @param juchuHeadId 受注ヘッダーid
- * @param honbanbiList 受注本番日リスト
- * @param userNam ユーザー名
- * @returns 成功：true　失敗：false
- */
-export const saveJuchuHonbanbi = async (juchuHeadId: number, honbanbiList: HonbanbiValues[], userNam: string) => {
-  const connection = await pool.connect();
-  const now = new Date().toISOString();
-
-  try {
-    await connection.query('BEGIN');
-
-    // 受注本番日テンプレートを作り直す
-    await deleteJuchuHonbanbi(juchuHeadId, connection);
-
-    if (honbanbiList.length > 0) {
-      await insertAllJuchuHonbanbi(
-        honbanbiList.map((d) => ({
-          juchu_head_id: juchuHeadId,
-          juchu_honbanbi_shubetu_id: d.juchuHonbanbiShubetuId,
-          juchu_honbanbi_dat: toJapanYMDString(d.juchuHonbanbiDat, '-'),
-          mem: d.mem ? d.mem : null,
-          juchu_honbanbi_add_qty: d.juchuHonbanbiAddQty,
-          add_dat: now,
-          add_user: userNam,
-          upd_dat: now,
-          upd_user: userNam,
-        })),
-        connection
-      );
-    }
-
-    // 通常・返却の受注機材ヘッダーへ展開する（キープは対象外）
-    // 返却ヘッダーは本番日の行を持たせず、金額算出用の本番日数だけを更新する
-    const { rows: heads } = await selectKizaiHeadRangesForHonbanbi(juchuHeadId, connection);
-
-    for (const head of heads) {
-      await expandHonbanbiTemplate(
-        juchuHeadId,
-        head.juchuKizaiHeadId,
-        head.startDat,
-        head.endDat,
-        honbanbiList,
-        userNam,
-        connection,
-        head.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.return
-      );
-    }
-
-    await connection.query('COMMIT');
-
-    return true;
-  } catch (e) {
-    await connection.query('ROLLBACK');
-
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
-    return false;
-  } finally {
-    connection.release();
   }
 };

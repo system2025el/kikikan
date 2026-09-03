@@ -47,6 +47,10 @@ export const getShukoDetail = async (
       NYUSHUKO_SHUBETU_ID.shuko
     );
 
+    // 出庫日時が設定されていてもその場所に出庫伝票が無い場合（例：KICS出庫日時だけあり明細は全てYARD所属）は
+    // 該当行が無い。呼び出し元で「見つかりません」を表示させるためnullを返す。
+    if (data.length === 0) return null;
+
     const nyukoDetailData: ShukoDetailValues = {
       juchuHeadId: juchuHeadId,
       juchuKizaiHeadKbn: juchuKizaiHeadKbn,
