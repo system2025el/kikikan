@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { MEMO_MAX_LENGTH } from '@/app/_lib/constants';
 import { validationMessages } from '@/app/(main)/_lib/validation-messages';
 
 export const KokyakuSchema = z.object({
@@ -33,7 +34,10 @@ export const OrderSchema = z.object({
     .string()
     .max(16, { message: validationMessages.maxStringLength(16) })
     .nullable(),
-  mem: z.string().nullable(),
+  mem: z
+    .string()
+    .max(MEMO_MAX_LENGTH, { message: validationMessages.maxStringLength(MEMO_MAX_LENGTH) })
+    .nullable(),
   // nebikiAmt: z
   //   .number()
   //   .max(9999999999, { message: validationMessages.maxNumberLength(10) })

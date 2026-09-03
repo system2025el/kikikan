@@ -13,6 +13,9 @@ import {
 } from '@mui/material';
 import { useEffect, useState } from 'react';
 
+import { MEMO_MAX_LENGTH } from '@/app/_lib/constants';
+import { validationMessages } from '@/app/(main)/_lib/validation-messages';
+
 export const MemoTooltip = (props: {
   name: string;
   memo: string;
@@ -24,6 +27,7 @@ export const MemoTooltip = (props: {
   const [open, setOpen] = useState(false);
   const [isSave, setIsSave] = useState(false);
   const [equipmentMemo, setEquipmentMemo] = useState('');
+  const isOverMaxLength = equipmentMemo.length > MEMO_MAX_LENGTH;
 
   const handleOpen = () => {
     setOpen(true);
@@ -35,6 +39,7 @@ export const MemoTooltip = (props: {
   };
 
   const handleSave = () => {
+    if (isOverMaxLength) return;
     setIsSave(true);
     handleMemoChange(rowIndex, equipmentMemo);
     setOpen(false);
@@ -62,10 +67,12 @@ export const MemoTooltip = (props: {
             multiline
             minRows={3}
             disabled={disabled}
+            error={isOverMaxLength}
+            helperText={isOverMaxLength ? validationMessages.maxStringLength(MEMO_MAX_LENGTH) : ''}
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleSave} variant="contained" disabled={disabled} loading={isSave}>
+          <Button onClick={handleSave} variant="contained" disabled={disabled || isOverMaxLength} loading={isSave}>
             保存
           </Button>
           <Button onClick={handleClose}>キャンセル</Button>

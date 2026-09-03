@@ -2,6 +2,7 @@
 
 import { redirect } from 'next/navigation';
 
+import { MEMO_MAX_LENGTH } from '@/app/_lib/constants';
 import pool from '@/app/_lib/db/postgres';
 import { SCHEMA } from '@/app/_lib/db/schema';
 import { selectActiveVehs } from '@/app/_lib/db/tables/m-sharyou';
@@ -130,7 +131,11 @@ export const addNewJuchuSharyoHead = async (data: JuchuSharyoHeadValues, user: s
           {
             sharyoId: correctMeisai[0].sharyoId,
             sharyoQty: Number(correctMeisai[0].sharyoQty) + Number(correctMeisai[1].sharyoQty),
-            sharyoMem: `${correctMeisai[0].sharyoMem ?? ''} ${correctMeisai[1].sharyoMem ?? ''}`,
+            // 連結するとカラムの上限を超えることがあるため切り詰める
+            sharyoMem: `${correctMeisai[0].sharyoMem ?? ''} ${correctMeisai[1].sharyoMem ?? ''}`.slice(
+              0,
+              MEMO_MAX_LENGTH
+            ),
           },
         ]
       : correctMeisai;
@@ -203,7 +208,11 @@ export const updateJuchuSharyoHead = async (
           {
             sharyoId: correctMeisai[0].sharyoId,
             sharyoQty: Number(correctMeisai[0].sharyoQty) + Number(correctMeisai[1].sharyoQty),
-            sharyoMem: `${correctMeisai[0].sharyoMem ?? ''} ${correctMeisai[1].sharyoMem ?? ''}`,
+            // 連結するとカラムの上限を超えることがあるため切り詰める
+            sharyoMem: `${correctMeisai[0].sharyoMem ?? ''} ${correctMeisai[1].sharyoMem ?? ''}`.slice(
+              0,
+              MEMO_MAX_LENGTH
+            ),
           },
         ]
       : correctMeisai;

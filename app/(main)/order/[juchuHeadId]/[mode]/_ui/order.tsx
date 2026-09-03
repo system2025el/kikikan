@@ -39,13 +39,14 @@ import { Controller, useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 import { set } from 'zod';
 
-import { JUCHU_KIZAI_HEAD_KBN, LOCK_SHUBETU } from '@/app/_lib/constants';
+import { JUCHU_KIZAI_HEAD_KBN, LOCK_SHUBETU, MEMO_MAX_LENGTH } from '@/app/_lib/constants';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { addLock, getLock } from '@/app/(main)/_lib/funcs';
 import { lockCheck, lockRelease } from '@/app/(main)/_lib/lock';
 import { permission } from '@/app/(main)/_lib/permission';
 import { openOrFocusTab } from '@/app/(main)/_lib/tab-focus';
 import { HonbanbiValues, LockValues, User } from '@/app/(main)/_lib/types';
+import { validationMessages } from '@/app/(main)/_lib/validation-messages';
 import { BackButton } from '@/app/(main)/_ui/buttons';
 import { FormDateX, RSuiteDateRangePicker } from '@/app/(main)/_ui/date';
 import { IsDirtyAlertDialog, useDirty } from '@/app/(main)/_ui/dirty-context';
@@ -200,6 +201,12 @@ export const Order = (props: {
     [originHonbanbiList, honbanbiList]
   );
 
+  // 本番日のメモが上限を超えているか（同上）
+  const honbanbiMemError = useMemo(
+    () => honbanbiList.some((d) => (d.mem?.length ?? 0) > MEMO_MAX_LENGTH),
+    [honbanbiList]
+  );
+
   /* useForm ------------------------- */
   const {
     control,
@@ -292,6 +299,14 @@ export const Order = (props: {
   // 保存ボタン押下
   const onSubmit = async (data: OrderValues) => {
     if (!user || isProcessing) return;
+
+    // 本番日はフォーム外で管理しているためzodのバリデーションが効かない
+    if (honbanbiMemError) {
+      setSnackBarMessage(`本番日のメモは${validationMessages.maxStringLength(MEMO_MAX_LENGTH)}`);
+      setSnackBarOpen(true);
+      return;
+    }
+
     setIsProcessing(true);
     setIsLoading(true);
 
@@ -1234,7 +1249,13 @@ export const Order = (props: {
           </Box>
           {/** 固定ボタン 保存＆ページトップ */}
           <Box position={'fixed'} zIndex={1050} bottom={25} right={25} alignItems={'center'}>
-            <Fab variant="extended" color="primary" type="submit" sx={{ mr: 2 }} disabled={!edit || isLoading}>
+            <Fab
+              variant="extended"
+              color="primary"
+              type="submit"
+              sx={{ mr: 2 }}
+              disabled={!edit || isLoading || honbanbiMemError}
+            >
               <SaveAsIcon sx={{ mr: 1 }} />
               保存
             </Fab>

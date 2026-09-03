@@ -297,15 +297,20 @@ const VehicleOrderDetail = ({
 
     try {
       if (sharyoHeadId <= 0) {
-        // 新規登録
+        // 新規登録。画面遷移するのでローディングは解除しない
         const newId = await addNewJuchuSharyoHead(data, user?.name ?? '');
         setSnackBarMessage('保存しました');
         setSnackBarOpen(true);
         router.replace(`/vehicle-order-detail/${data.juchuHeadId}/${Number(newId)}/edit`);
       } else {
         // 更新処理
-        if (!currentMeisai) return;
-        updateJuchuSharyoHead(data, currentMeisai!, user?.name ?? '');
+        if (!currentMeisai) {
+          setIsLoading(false);
+          setSnackBarMessage('保存に失敗しました');
+          setSnackBarOpen(true);
+          return;
+        }
+        await updateJuchuSharyoHead(data, currentMeisai, user?.name ?? '');
         const newData = getValues();
         reset(newData);
         setCurrentMeisai(newData);
@@ -319,6 +324,7 @@ const VehicleOrderDetail = ({
         setSnackBarOpen(true);
       }
     } catch (e) {
+      setIsLoading(false);
       setSnackBarMessage('保存に失敗しました');
       setSnackBarOpen(true);
     }
@@ -379,6 +385,8 @@ const VehicleOrderDetail = ({
     } else {
       setDirtyOpen(false);
     }
+
+    setIsProcessing(false);
   };
 
   /* useEffect ------------------------------------------------------- */

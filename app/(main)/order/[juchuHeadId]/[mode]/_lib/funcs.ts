@@ -7,6 +7,7 @@ import {
   BASHO_ID,
   HONBANBI_SHUBETU_ID,
   JUCHU_KIZAI_HEAD_KBN,
+  MEMO_MAX_LENGTH,
   NYUSHUKO_SHUBETU_ID,
   SAGYO_KBN_ID,
   SAGYO_SIJI_ID,
@@ -803,10 +804,13 @@ type MergedKizaiMeisai = {
   mem2s: (string | null)[];
 };
 
-/** メモの合算。空を除き、重複を1つにまとめて改行で連結する */
+/**
+ * メモの合算。空を除き、重複を1つにまとめて改行で連結する
+ * 連結結果がカラムの上限を超えるとINSERTに失敗しコピー全体がロールバックされるため、上限で切り詰める
+ */
 const mergeMem = (mems: (string | null)[]) => {
   const uniqueMems = [...new Set(mems.filter((m): m is string => !!m && m.trim() !== ''))];
-  return uniqueMems.length > 0 ? uniqueMems.join('\n') : null;
+  return uniqueMems.length > 0 ? uniqueMems.join('\n').slice(0, MEMO_MAX_LENGTH) : null;
 };
 
 /**

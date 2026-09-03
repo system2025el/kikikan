@@ -71,6 +71,12 @@ export const LOCK_SHUBETU = {
 } as const;
 
 /**
+ * メモの最大文字数
+ * t_juchu_kizai_head.mem / t_juchu_kizai_meisai.mem・mem2 / t_juchu_ctn_meisai.mem のカラム定義に合わせる
+ */
+export const MEMO_MAX_LENGTH = 200;
+
+/**
  * 辞書ID（dic_id）
  */
 export const DIC_ID = {

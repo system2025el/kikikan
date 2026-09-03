@@ -6,10 +6,11 @@ import { PickersDay, PickersDayProps } from '@mui/x-date-pickers/PickersDay';
 import dayjs from 'dayjs';
 import { useCallback, useMemo, useRef, useState } from 'react';
 
-import { HONBANBI_SHUBETU_ID } from '@/app/_lib/constants';
+import { HONBANBI_SHUBETU_ID, MEMO_MAX_LENGTH } from '@/app/_lib/constants';
 
 import { toJapanYMDAndDayString, toJapanYMDString } from '../_lib/date-conversion';
 import { HonbanbiValues } from '../_lib/types';
+import { validationMessages } from '../_lib/validation-messages';
 
 /** ブラシで塗り分ける本番日種別（種別1〜3は入出庫日から自動生成されるためここでは扱わない） */
 const SHUBETU_LIST = [
@@ -326,6 +327,7 @@ export const HonbanbiCalendar = ({
               {rows.map((row) => {
                 const key = toJapanYMDString(row.juchuHonbanbiDat);
                 const shubetu = SHUBETU_LIST.find((s) => s.id === row.juchuHonbanbiShubetuId);
+                const isMemOverMaxLength = (row.mem?.length ?? 0) > MEMO_MAX_LENGTH;
                 return (
                   <Grid2
                     key={`${row.juchuHonbanbiShubetuId}-${key}`}
@@ -377,6 +379,8 @@ export const HonbanbiCalendar = ({
                         onChange={(e) => handleRowChange(row.juchuHonbanbiShubetuId, key, { mem: e.target.value })}
                         disabled={readOnly}
                         fullWidth
+                        error={isMemOverMaxLength}
+                        helperText={isMemOverMaxLength ? validationMessages.maxStringLength(MEMO_MAX_LENGTH) : ''}
                       />
                     </Grid2>
                   </Grid2>
