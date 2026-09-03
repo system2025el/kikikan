@@ -23,12 +23,14 @@ import {
   selectIdoDenJuchuMaxId,
 } from '@/app/_lib/db/tables/t-ido-den-juchu';
 import { deleteJuchuCtnMeisaiFromOrder, insertJuchuContainerMeisai } from '@/app/_lib/db/tables/t-juchu-ctn-meisai';
-import { insertJuchuHead, selectJuchuHead, selectMaxId, updateJuchuHead } from '@/app/_lib/db/tables/t-juchu-head';
 import {
-  deleteJuchuHonbanbi,
-  insertAllJuchuHonbanbi,
-  selectJuchuHonbanbi,
-} from '@/app/_lib/db/tables/t-juchu-honbanbi';
+  insertJuchuHead,
+  selectJuchuHead,
+  selectMaxId,
+  updateJuchuHead,
+  updateJuchuHeadWithTran,
+} from '@/app/_lib/db/tables/t-juchu-head';
+import { deleteJuchuHonbanbi, insertAllJuchuHonbanbi } from '@/app/_lib/db/tables/t-juchu-honbanbi';
 import {
   deleteJuchuKizaiHead,
   insertJuchuKizaiHead,
@@ -135,6 +137,7 @@ export const getJuchuHead = async (juchuHeadId: number) => {
       mem: juchuData.data.mem,
       // nebikiAmt: juchuData.data.nebiki_amt,
       zeiKbn: juchuData.data.zei_kbn ?? 2,
+      honbanbiList: await getHonbanbiTemplate(juchuHeadId),
     };
     return order;
   } catch (e) {
@@ -227,8 +230,68 @@ export const addJuchuHead = async (juchuHeadData: OrderValues, userNam: string) 
 };
 
 /**
- * 受注ヘッダー情報更新
+ * 受注本番日をテンプレートとして作り直し、受注機材ヘッダーへ展開する。
+ * 呼び出し元のトランザクションに参加するため、必ず connection を渡すこと。
+ *
+ * 注意: テンプレートはここで書き込んだ内容をそのまま展開に使っている。
+ * getHonbanbiTemplate はコミット済みの状態を読むため、書き込み直後に読み直してはいけない。
+ * @param juchuHeadId 受注ヘッダーid
+ * @param honbanbiList 受注本番日リスト
+ * @param userNam ユーザー名
+ * @param connection コネクション
+ */
+const saveHonbanbiWithTran = async (
+  juchuHeadId: number,
+  honbanbiList: HonbanbiValues[],
+  userNam: string,
+  connection: PoolClient
+) => {
+  const now = new Date().toISOString();
+
+  // 受注本番日テンプレートを作り直す
+  await deleteJuchuHonbanbi(juchuHeadId, connection);
+
+  if (honbanbiList.length > 0) {
+    await insertAllJuchuHonbanbi(
+      honbanbiList.map((d) => ({
+        juchu_head_id: juchuHeadId,
+        juchu_honbanbi_shubetu_id: d.juchuHonbanbiShubetuId,
+        juchu_honbanbi_dat: toJapanYMDString(d.juchuHonbanbiDat, '-'),
+        mem: d.mem ? d.mem : null,
+        juchu_honbanbi_add_qty: d.juchuHonbanbiAddQty,
+        add_dat: now,
+        add_user: userNam,
+        upd_dat: now,
+        upd_user: userNam,
+      })),
+      connection
+    );
+  }
+
+  // 通常・返却の受注機材ヘッダーへ展開する（キープは対象外）
+  // 返却ヘッダーは本番日の行を持たせず、金額算出用の本番日数だけを更新する
+  const { rows: heads } = await selectKizaiHeadRangesForHonbanbi(juchuHeadId, connection);
+
+  for (const head of heads) {
+    await expandHonbanbiTemplate(
+      juchuHeadId,
+      head.juchuKizaiHeadId,
+      head.startDat,
+      head.endDat,
+      honbanbiList,
+      userNam,
+      connection,
+      head.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.return
+    );
+  }
+};
+
+/**
+ * 受注ヘッダー情報と受注本番日を更新する。
+ * 受注ヘッダーと本番日は同じトランザクションで保存し、片方だけ保存された状態を作らない。
  * @param data 受注ヘッダーデータ
+ * @param honbanbiList 受注本番日リスト
+ * @param userNam ユーザー名
  * @returns 正誤
  */
 export const updJuchuHead = async (data: OrderValues, userNam: string) => {
@@ -251,15 +314,24 @@ export const updJuchuHead = async (data: OrderValues, userNam: string) => {
     upd_user: userNam,
   };
 
-  try {
-    const { error } = await updateJuchuHead(updateData);
+  const connection = await pool.connect();
 
-    if (error) {
-      throw new Error('[updateJuchuHead] DBエラー:', { cause: error });
-    }
+  try {
+    await connection.query('BEGIN');
+
+    // 受注ヘッダー更新
+    await updateJuchuHeadWithTran(updateData, connection);
+
+    // 受注本番日更新
+    await saveHonbanbiWithTran(data.juchuHeadId, data.honbanbiList, userNam, connection);
+
+    await connection.query('COMMIT');
+
     await revalidatePath('/eqpt-order-list');
     return true;
   } catch (e) {
+    await connection.query('ROLLBACK');
+
     if (e instanceof Error) {
       console.error(`[ERROR] ${e.message}`);
       if (e.cause) {
@@ -269,6 +341,8 @@ export const updJuchuHead = async (data: OrderValues, userNam: string) => {
       console.error(e);
     }
     return false;
+  } finally {
+    connection.release();
   }
 };
 
@@ -2092,112 +2166,5 @@ export const getUsers = async () => {
       console.error(e);
     }
     throw e;
-  }
-};
-
-/**
- * 受注本番日テンプレート取得
- * @param juchuHeadId 受注ヘッダーid
- * @returns 受注本番日テンプレート
- */
-export const getJuchuHonbanbi = async (juchuHeadId: number) => {
-  try {
-    const { data, error } = await selectJuchuHonbanbi(juchuHeadId);
-
-    if (error) {
-      throw new Error('[getJuchuHonbanbi] DBエラー:', { cause: error });
-    }
-
-    const honbanbiList: HonbanbiValues[] = data.map((d) => ({
-      juchuHonbanbiShubetuId: d.juchu_honbanbi_shubetu_id,
-      juchuHonbanbiDat: new Date(d.juchu_honbanbi_dat),
-      mem: d.mem,
-      juchuHonbanbiAddQty: d.juchu_honbanbi_add_qty,
-    }));
-
-    return honbanbiList;
-  } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
-    throw e;
-  }
-};
-
-/**
- * 受注本番日を保存する。
- * 入力内容を受注ヘッダー単位のテンプレートとして作り直し、
- * 通常の受注機材ヘッダーそれぞれの出庫日〜入庫日に重なる日付を、そのヘッダーの本番日として展開する。
- * @param juchuHeadId 受注ヘッダーid
- * @param honbanbiList 受注本番日リスト
- * @param userNam ユーザー名
- * @returns 成功：true　失敗：false
- */
-export const saveJuchuHonbanbi = async (juchuHeadId: number, honbanbiList: HonbanbiValues[], userNam: string) => {
-  const connection = await pool.connect();
-  const now = new Date().toISOString();
-
-  try {
-    await connection.query('BEGIN');
-
-    // 受注本番日テンプレートを作り直す
-    await deleteJuchuHonbanbi(juchuHeadId, connection);
-
-    if (honbanbiList.length > 0) {
-      await insertAllJuchuHonbanbi(
-        honbanbiList.map((d) => ({
-          juchu_head_id: juchuHeadId,
-          juchu_honbanbi_shubetu_id: d.juchuHonbanbiShubetuId,
-          juchu_honbanbi_dat: toJapanYMDString(d.juchuHonbanbiDat, '-'),
-          mem: d.mem ? d.mem : null,
-          juchu_honbanbi_add_qty: d.juchuHonbanbiAddQty,
-          add_dat: now,
-          add_user: userNam,
-          upd_dat: now,
-          upd_user: userNam,
-        })),
-        connection
-      );
-    }
-
-    // 通常・返却の受注機材ヘッダーへ展開する（キープは対象外）
-    // 返却ヘッダーは本番日の行を持たせず、金額算出用の本番日数だけを更新する
-    const { rows: heads } = await selectKizaiHeadRangesForHonbanbi(juchuHeadId, connection);
-
-    for (const head of heads) {
-      await expandHonbanbiTemplate(
-        juchuHeadId,
-        head.juchuKizaiHeadId,
-        head.startDat,
-        head.endDat,
-        honbanbiList,
-        userNam,
-        connection,
-        head.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.return
-      );
-    }
-
-    await connection.query('COMMIT');
-
-    return true;
-  } catch (e) {
-    await connection.query('ROLLBACK');
-
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
-    return false;
-  } finally {
-    connection.release();
   }
 };
