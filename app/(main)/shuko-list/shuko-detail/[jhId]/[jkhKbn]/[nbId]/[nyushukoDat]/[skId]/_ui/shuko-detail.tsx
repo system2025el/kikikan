@@ -23,6 +23,7 @@ import { set } from 'zod';
 
 import { BASHO_ID, JUCHU_KIZAI_HEAD_KBN, SAGYO_KBN_ID } from '@/app/_lib/constants';
 import { dispColors, statusColors } from '@/app/(main)/_lib/colors';
+import { notifyNyushukoFixChanged } from '@/app/(main)/_lib/nyushuko-fix-notify';
 import { permission } from '@/app/(main)/_lib/permission';
 import { User } from '@/app/(main)/_lib/types';
 import { BackButton } from '@/app/(main)/_ui/buttons';
@@ -117,6 +118,10 @@ export const ShukoDetail = (props: {
       setSnackBarMessage('出発しました');
       setSnackBarOpen(true);
       setIsProcessing(false);
+      // このタブは閉じるため、同じ受注機材ヘッダーを開いている他のタブに出発フラグの変化を伝える
+      notifyNyushukoFixChanged(shukoDetailData.juchuHeadId, [
+        ...new Set(shukoDetailList.map((d) => d.juchuKizaiHeadId).filter((id) => id !== null)),
+      ]);
       window.close();
     } else {
       setDepartureOpen(false);
@@ -166,6 +171,8 @@ export const ShukoDetail = (props: {
       setSnackBarMessage('出発解除しました');
       setSnackBarOpen(true);
       setIsProcessing(false);
+      // このタブは閉じるため、同じ受注機材ヘッダーを開いている他のタブに出発フラグの変化を伝える
+      notifyNyushukoFixChanged(shukoDetailData.juchuHeadId, juchuKizaiHeadIds);
       window.close();
     } else {
       setReleaseOpen(false);
