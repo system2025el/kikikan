@@ -1,6 +1,11 @@
 import { z } from 'zod';
 
-import { HONBANBI_ADD_QTY_MAX, HONBANBI_ADD_QTY_MAX_DIGITS, MEMO_MAX_LENGTH } from '@/app/_lib/constants';
+import {
+  HONBANBI_ADD_QTY_MAX,
+  HONBANBI_ADD_QTY_MAX_DIGITS,
+  HONBANBI_SHUBETU_ID,
+  MEMO_MAX_LENGTH,
+} from '@/app/_lib/constants';
 import { validationMessages } from '@/app/(main)/_lib/validation-messages';
 
 export const KokyakuSchema = z.object({
@@ -16,7 +21,8 @@ export type KokyakuValues = z.infer<typeof KokyakuSchema>;
 
 /**
  * 受注本番日1件分。
- * 追加日数の上限は t_juchu_kizai_honbanbi.juchu_honbanbi_add_qty が numeric(6,3) のため3桁まで。
+ * 追加日数は t_juchu_kizai_honbanbi.juchu_honbanbi_add_qty が numeric(6,3) のため
+ * 0〜999.999（0.5日のような小数も可）。
  */
 export const HonbanbiSchema = z.object({
   juchuHonbanbiShubetuId: z.number(),
@@ -32,40 +38,58 @@ export const HonbanbiSchema = z.object({
     .nullable(),
 });
 
-export const OrderSchema = z.object({
-  juchuHeadId: z.number(),
-  delFlg: z.number(),
-  juchuSts: z.number(),
-  juchuDat: z.date({ message: validationMessages.required() }),
-  juchuRange: z.tuple([z.date(), z.date()]).nullable(),
-  nyuryokuUser: z.string({ message: validationMessages.required() }).min(1, { message: validationMessages.required() }),
-  koenNam: z
-    .string({ message: validationMessages.required() })
-    .min(1, { message: validationMessages.required() })
-    .max(40, { message: validationMessages.maxStringLength(40) }),
-  koenbashoNam: z
-    .string()
-    .max(40, { message: validationMessages.maxStringLength(40) })
-    .nullable(),
-  kokyaku: KokyakuSchema,
-  kokyakuTantoNam: z
-    .string()
-    .max(16, { message: validationMessages.maxStringLength(16) })
-    .nullable(),
-  mem: z
-    .string()
-    .max(MEMO_MAX_LENGTH, { message: validationMessages.maxStringLength(MEMO_MAX_LENGTH) })
-    .nullable(),
-  // nebikiAmt: z
-  //   .number()
-  //   .max(9999999999, { message: validationMessages.maxNumberLength(10) })
-  //   .int({ message: validationMessages.int() })
+export const OrderSchema = z
+  .object({
+    juchuHeadId: z.number(),
+    delFlg: z.number(),
+    juchuSts: z.number(),
+    juchuDat: z.date({ message: validationMessages.required() }),
+    juchuRange: z.tuple([z.date(), z.date()]).nullable(),
+    nyuryokuUser: z
+      .string({ message: validationMessages.required() })
+      .min(1, { message: validationMessages.required() }),
+    koenNam: z
+      .string({ message: validationMessages.required() })
+      .min(1, { message: validationMessages.required() })
+      .max(40, { message: validationMessages.maxStringLength(40) }),
+    koenbashoNam: z
+      .string()
+      .max(40, { message: validationMessages.maxStringLength(40) })
+      .nullable(),
+    kokyaku: KokyakuSchema,
+    kokyakuTantoNam: z
+      .string()
+      .max(16, { message: validationMessages.maxStringLength(16) })
+      .nullable(),
+    mem: z
+      .string()
+      .max(MEMO_MAX_LENGTH, { message: validationMessages.maxStringLength(MEMO_MAX_LENGTH) })
+      .nullable(),
+    // nebikiAmt: z
+    //   .number()
+    //   .max(9999999999, { message: validationMessages.maxNumberLength(10) })
+    //   .int({ message: validationMessages.int() })
 
-  //   .nullable(),
-  zeiKbn: z.number(),
-  // 本番日。受注ヘッダー単位のテンプレートとして保存し、各受注機材ヘッダーへ展開する
-  honbanbiList: z.array(HonbanbiSchema),
-});
+    //   .nullable(),
+    zeiKbn: z.number(),
+    // 本番日。受注ヘッダー単位のテンプレートとして保存し、各受注機材ヘッダーへ展開する
+    honbanbiList: z.array(HonbanbiSchema),
+  })
+  .superRefine((data, ctx) => {
+    // 本番の件数＋追加日数の合計が t_juchu_kizai_head.juchu_honbanbi_qty（numeric(6,3)）に入るため、
+    // 上限を超えるとINSERT時に numeric field overflow になる。
+    // 画面側でも入力できないようにしているが、既存データが超えている場合の保険としてここでも止める。
+    const honbanCount = data.honbanbiList.filter((d) => d.juchuHonbanbiShubetuId === HONBANBI_SHUBETU_ID.honban).length;
+    const totalAddQty = data.honbanbiList.reduce((sum, d) => sum + (d.juchuHonbanbiAddQty ?? 0), 0);
+
+    if (honbanCount + totalAddQty > HONBANBI_ADD_QTY_MAX) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['honbanbiList'],
+        message: `本番日数は${HONBANBI_ADD_QTY_MAX}以内で入力してください`,
+      });
+    }
+  });
 
 export type OrderValues = z.infer<typeof OrderSchema>;
 
