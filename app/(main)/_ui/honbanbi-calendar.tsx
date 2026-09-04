@@ -7,6 +7,7 @@ import dayjs from 'dayjs';
 import { useCallback, useMemo, useRef, useState } from 'react';
 
 import {
+  HONBANBI_ADD_QTY_DECIMALS,
   HONBANBI_ADD_QTY_MAX,
   HONBANBI_ADD_QTY_MAX_DIGITS,
   HONBANBI_SHUBETU_ID,
@@ -110,6 +111,60 @@ const HonbanbiDay = (props: HonbanbiDayProps) => {
   );
 };
 
+/** 追加日数として受け付ける文字列（整数部3桁・小数部3桁まで。入力途中の "0." も許す） */
+const ADD_QTY_PATTERN = new RegExp(`^\\d{0,${HONBANBI_ADD_QTY_MAX_DIGITS}}(\\.\\d{0,${HONBANBI_ADD_QTY_DECIMALS}})?$`);
+
+/** 小数の加算で生じる誤差を落とす（追加日数は小数3桁まで） */
+const roundAddQty = (value: number) =>
+  Math.round(value * 10 ** HONBANBI_ADD_QTY_DECIMALS) / 10 ** HONBANBI_ADD_QTY_DECIMALS;
+
+type AddQtyFieldProps = {
+  value: number | null;
+  /** この欄に入れられる上限。本番日数の合計が numeric(6,3) を超えないよう行ごとに決まる */
+  max: number;
+  disabled?: boolean;
+  error?: boolean;
+  onChange: (value: number) => void;
+};
+
+/**
+ * 追加日数の入力欄。
+ *
+ * 0.5 のような小数を入力できるよう、入力途中の文字列を自前で保持する。
+ * 親が持つのは数値なので、"0." の時点で数値に変換すると "0" に戻ってしまい小数点が打てない。
+ * フォーカスを外した時点で親の値の表示に戻す。
+ *
+ * 入力欄が狭くエラーメッセージを置く余地がないため、上限を超える値はそもそも受け付けない。
+ */
+const AddQtyField = ({ value, max, disabled, error, onChange }: AddQtyFieldProps) => {
+  const [draft, setDraft] = useState<string | null>(null);
+
+  return (
+    <TextField
+      value={draft ?? String(value ?? 0)}
+      type="tel"
+      disabled={disabled}
+      error={error}
+      onFocus={(e) => e.target.select()}
+      onBlur={() => setDraft(null)}
+      onChange={(e) => {
+        const input = e.target.value;
+        if (!ADD_QTY_PATTERN.test(input)) return;
+        if (Number(input) > max) return;
+
+        setDraft(input);
+        // "" や "0." など数値にできない入力の間は0として扱う
+        onChange(Number.isNaN(Number(input)) || input === '' ? 0 : Number(input));
+      }}
+      slotProps={{ input: { inputMode: 'decimal' } }}
+      sx={{
+        width: '60px',
+        '& .MuiInputBase-input': { textAlign: 'right' },
+      }}
+    />
+  );
+};
+
 type HonbanbiCalendarProps = {
   /** 表示・編集する本番日リスト */
   honbanbiList: HonbanbiValues[];
@@ -186,6 +241,20 @@ export const HonbanbiCalendar = ({
 
   // 全種別の一覧（追加日数・メモの入力欄）。ブラシの種別に関わらず日付順に並べる
   const rows = useMemo(() => sortHonbanbi(honbanbiList), [honbanbiList]);
+
+  // 本番の件数と追加日数の合計。
+  // この2つの和が t_juchu_kizai_head.juchu_honbanbi_qty（numeric(6,3)）に入るため、
+  // 合計が上限を超えないよう追加日数の入力上限を行ごとに決める。
+  const honbanCount = useMemo(
+    () => honbanbiList.filter((d) => d.juchuHonbanbiShubetuId === HONBANBI_SHUBETU_ID.honban).length,
+    [honbanbiList]
+  );
+  const totalAddQty = useMemo(
+    () => roundAddQty(honbanbiList.reduce((sum, d) => sum + (d.juchuHonbanbiAddQty ?? 0), 0)),
+    [honbanbiList]
+  );
+  // 本番日数が上限を超えている（既存データが超えている場合のみ起こりうる）
+  const isTotalOverMax = honbanCount + totalAddQty > HONBANBI_ADD_QTY_MAX;
 
   /**
    * 最初の編集時だけ onBeforeEdit を実行する
@@ -340,6 +409,11 @@ export const HonbanbiCalendar = ({
             </Typography>
           ) : (
             <>
+              {isTotalOverMax && (
+                <Typography color="error" pb={1}>
+                  本番日数（本番の日数＋追加日数）が {HONBANBI_ADD_QTY_MAX} を超えているため保存できません
+                </Typography>
+              )}
               <Grid2 container spacing={2} alignItems="center">
                 <Grid2 size={2} maxWidth={70}>
                   <Typography>種別</Typography>
@@ -359,6 +433,11 @@ export const HonbanbiCalendar = ({
                 const shubetu = SHUBETU_LIST.find((s) => s.id === row.juchuHonbanbiShubetuId);
                 const isMemOverMaxLength = (row.mem?.length ?? 0) > MEMO_MAX_LENGTH;
                 const isAddQtyOverMax = (row.juchuHonbanbiAddQty ?? 0) > HONBANBI_ADD_QTY_MAX;
+                // この行に入れられる上限。他の行の追加日数と本番の件数を差し引いた残り
+                const addQtyMax = Math.max(
+                  0,
+                  roundAddQty(HONBANBI_ADD_QTY_MAX - honbanCount - (totalAddQty - (row.juchuHonbanbiAddQty ?? 0)))
+                );
                 return (
                   <Grid2
                     key={`${row.juchuHonbanbiShubetuId}-${key}`}
@@ -384,29 +463,14 @@ export const HonbanbiCalendar = ({
                       <Typography>{toJapanYMDAndDayString(row.juchuHonbanbiDat)}</Typography>
                     </Grid2>
                     <Grid2 size={2} maxWidth={80}>
-                      <TextField
-                        value={row.juchuHonbanbiAddQty ?? 0}
-                        // 入力欄が狭くエラーメッセージを置く余地がないため、
-                        // 上限を超える値はそもそも受け付けない
-                        onChange={(e) => {
-                          const input = e.target.value;
-                          if (!/^\d*$/.test(input)) return;
-                          if (input !== '' && Number(input) > HONBANBI_ADD_QTY_MAX) return;
-
-                          handleRowChange(row.juchuHonbanbiShubetuId, key, {
-                            juchuHonbanbiAddQty: input === '' ? 0 : Number(input),
-                          });
-                        }}
-                        type="tel"
+                      <AddQtyField
+                        value={row.juchuHonbanbiAddQty}
+                        max={addQtyMax}
                         disabled={readOnly}
-                        onFocus={(e) => e.target.select()}
-                        // 上限超えは入力できないため、DBの既存データが超えている場合のみ枠が赤くなる
-                        error={isAddQtyOverMax}
-                        slotProps={{ input: { inputMode: 'numeric' } }}
-                        sx={{
-                          width: '60px',
-                          '& .MuiInputBase-input': { textAlign: 'right' },
-                        }}
+                        error={isAddQtyOverMax || isTotalOverMax}
+                        onChange={(value) =>
+                          handleRowChange(row.juchuHonbanbiShubetuId, key, { juchuHonbanbiAddQty: value })
+                        }
                       />
                     </Grid2>
                     <Grid2 size={5} maxWidth={250}>

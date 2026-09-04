@@ -1240,46 +1240,6 @@ export const Order = (props: {
           />
         </Dialog>
       </Paper>
-      {/* --------------------------------本番日------------------------------------- */}
-      {save && (
-        <Accordion
-          expanded={honbanbiExpanded}
-          onChange={() => setHonbanbiExpanded(!honbanbiExpanded)}
-          sx={{ marginTop: 2, borderRadius: 1, overflow: 'hidden' }}
-          variant="outlined"
-        >
-          <AccordionSummary
-            expandIcon={<ExpandMoreIcon />}
-            component="div"
-            sx={{
-              minHeight: '30px',
-              maxHeight: '30px',
-              '&.Mui-expanded': {
-                minHeight: '30px',
-                maxHeight: '30px',
-              },
-            }}
-          >
-            <Typography>本番日</Typography>
-          </AccordionSummary>
-          <AccordionDetails sx={{ padding: 0 }}>
-            <Divider />
-            <Controller
-              name="honbanbiList"
-              control={control}
-              render={({ field }) => (
-                <HonbanbiCalendar
-                  honbanbiList={field.value}
-                  shubetuColorMap={shubetuColorMap}
-                  readOnly={!edit}
-                  onChange={field.onChange}
-                  onBeforeEdit={async () => !!(await lock())}
-                />
-              )}
-            />
-          </AccordionDetails>
-        </Accordion>
-      )}
       {/* --------------------------------受注明細（機材）------------------------------------- */}
       {save && (
         <Accordion sx={{ marginTop: 2, borderRadius: 1, overflow: 'hidden' }} defaultExpanded variant="outlined">
@@ -1389,6 +1349,46 @@ export const Order = (props: {
                 />
               )
             )}
+          </AccordionDetails>
+        </Accordion>
+      )}
+      {/* --------------------------------本番日------------------------------------- */}
+      {save && (
+        <Accordion
+          expanded={honbanbiExpanded}
+          onChange={() => setHonbanbiExpanded(!honbanbiExpanded)}
+          sx={{ marginTop: 2, borderRadius: 1, overflow: 'hidden' }}
+          variant="outlined"
+        >
+          <AccordionSummary
+            expandIcon={<ExpandMoreIcon />}
+            component="div"
+            sx={{
+              minHeight: '30px',
+              maxHeight: '30px',
+              '&.Mui-expanded': {
+                minHeight: '30px',
+                maxHeight: '30px',
+              },
+            }}
+          >
+            <Typography>本番日</Typography>
+          </AccordionSummary>
+          <AccordionDetails sx={{ padding: 0 }}>
+            <Divider />
+            <Controller
+              name="honbanbiList"
+              control={control}
+              render={({ field }) => (
+                <HonbanbiCalendar
+                  honbanbiList={field.value}
+                  shubetuColorMap={shubetuColorMap}
+                  readOnly={!edit}
+                  onChange={field.onChange}
+                  onBeforeEdit={async () => !!(await lock())}
+                />
+              )}
+            />
           </AccordionDetails>
         </Accordion>
       )}
