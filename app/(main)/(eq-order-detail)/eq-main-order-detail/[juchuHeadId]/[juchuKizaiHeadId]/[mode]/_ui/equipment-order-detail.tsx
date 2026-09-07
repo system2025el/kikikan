@@ -347,10 +347,15 @@ const EquipmentOrderDetail = (props: {
   const nebikiRat = watch('nebikiRat');
   /** 割引金額の監視 */
   const nebikiAmt = watch('nebikiAmt');
-  /** KICS出庫日時の監視（出庫明細ボタンの表示制御用） */
-  const kicsShukoDat = watch('kicsShukoDat');
-  /** YARD出庫日時の監視（出庫明細ボタンの表示制御用） */
-  const yardShukoDat = watch('yardShukoDat');
+  // KICS出庫日時（出庫明細ボタンの表示制御用。編集中のリアルタイム変化を反映したくないため、
+  // watchではなく初期表示時・保存時のみ更新するstateにしている）
+  const [kicsShukoDat, setKicsShukoDat] = useState(
+    props.juchuKizaiHeadData.kicsShukoDat ? new Date(props.juchuKizaiHeadData.kicsShukoDat) : null
+  );
+  // YARD出庫日時（出庫明細ボタンの表示制御用。kicsShukoDatと同様の理由でstate管理）
+  const [yardShukoDat, setYardShukoDat] = useState(
+    props.juchuKizaiHeadData.yardShukoDat ? new Date(props.juchuKizaiHeadData.yardShukoDat) : null
+  );
 
   // 出庫明細の閲覧権限
   const canRefNyushuko = !!(user && user.permission.nyushuko & permission.nyushuko_ref);
@@ -824,6 +829,9 @@ const EquipmentOrderDetail = (props: {
             setSelectDate(updateShukoDate ? updateShukoDate : new Date());
             // 出庫日から入庫日更新
             setDateRange(updateDateRange);
+            // 出庫明細ボタンの表示制御用の値を保存内容に更新
+            setKicsShukoDat(data.kicsShukoDat ? new Date(data.kicsShukoDat) : null);
+            setYardShukoDat(data.yardShukoDat ? new Date(data.yardShukoDat) : null);
 
             // 受注機材明細データ、移動受注機材明細データ、受注コンテナ明細データ
             const [juchuKizaiMeisaiData, idoJuchuKizaiMeisaiData, juchuCtnMeisaiData] = await Promise.all([
@@ -862,6 +870,9 @@ const EquipmentOrderDetail = (props: {
             setSelectDate(updateShukoDate ? updateShukoDate : new Date());
             // 出庫日から入庫日更新
             setDateRange(updateDateRange);
+            // 出庫明細ボタンの表示制御用の値を保存内容に更新
+            setKicsShukoDat(data.kicsShukoDat ? new Date(data.kicsShukoDat) : null);
+            setYardShukoDat(data.yardShukoDat ? new Date(data.yardShukoDat) : null);
 
             // 機材在庫テーブル更新
             const updatedEqStockData = await updateEqStock(
