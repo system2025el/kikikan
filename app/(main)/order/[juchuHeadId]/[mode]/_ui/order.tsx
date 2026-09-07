@@ -195,6 +195,7 @@ export const Order = (props: {
     getValues,
     setValue,
     clearErrors,
+    watch,
     formState: { isDirty, errors, defaultValues },
   } = useForm({
     mode: 'onChange',
@@ -223,6 +224,9 @@ export const Order = (props: {
     },
     resolver: zodResolver(OrderSchema),
   });
+
+  // 出庫日/入庫日。本番日カレンダーの初期表示月に使う
+  const juchuRange = watch('juchuRange');
 
   // ブラウザバック、F5、×ボタンでページを離れた際のhook
   useUnsavedChangesWarning(isDirty);
@@ -1384,6 +1388,8 @@ export const Order = (props: {
                   honbanbiList={field.value}
                   shubetuColorMap={shubetuColorMap}
                   readOnly={!edit}
+                  // 本番日が未入力のときは受注ヘッダーの出庫日の月を開く
+                  referenceDate={juchuRange?.[0] ?? null}
                   onChange={field.onChange}
                   onBeforeEdit={async () => !!(await lock())}
                 />
