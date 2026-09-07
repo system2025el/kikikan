@@ -192,7 +192,11 @@ export const IdoEqptSelectionDialog = ({
           >
             確定
           </Button>
-          <Dialog open={bundleDialogOpen} onClose={() => setBundleDialogOpen(false)}>
+          <Dialog
+            open={bundleDialogOpen}
+            onClose={() => setBundleDialogOpen(false)}
+            slotProps={{ paper: { sx: { height: 330 } } }}
+          >
             <IdoBundleDialog
               handleClose={handleCloseBundle}
               bundles={bundles}
@@ -294,8 +298,8 @@ const IdoBundleDialog = ({
           <Button onClick={() => handleClickConfirm()}>確定</Button>
         </Box>
       </DialogTitle>
-      <DialogContent>
-        <TableContainer component={Paper} sx={{ width: 500 }}>
+      <DialogContent sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <TableContainer component={Paper} sx={{ width: 500, flex: 1, minHeight: 0, overflowY: 'auto' }}>
           {isLoading ? (
             <Loading />
           ) : (
