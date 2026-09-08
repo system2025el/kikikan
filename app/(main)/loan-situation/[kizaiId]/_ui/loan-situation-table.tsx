@@ -35,12 +35,23 @@ export const LoanSituationTable = (props: LoanSituationTableProps) => {
     <TableContainer
       ref={ref}
       component={Paper}
-      style={{ overflowX: 'scroll' }}
+      style={{ overflowX: 'scroll', overflowY: 'scroll' }}
       square
       variant="outlined"
       sx={{ maxHeight: '80vh' }}
     >
-      <Table stickyHeader padding="none" sx={{ borderCollapse: 'separate', borderSpacing: 0 }}>
+      <Table
+        stickyHeader
+        padding="none"
+        sx={{ borderCollapse: 'separate', borderSpacing: 0, tableLayout: 'fixed', width: 447 }}
+      >
+        <colgroup>
+          <col style={{ width: 65 }} />
+          <col style={{ width: 139 }} />
+          <col style={{ width: 141 }} />
+          <col style={{ width: 51 }} />
+          <col style={{ width: 51 }} />
+        </colgroup>
         <TableHead>
           <TableRow>
             <TableCell
@@ -94,7 +105,6 @@ export const LoanSituationTable = (props: LoanSituationTableProps) => {
                 style={{
                   borderRight: '1px solid rgba(0, 0, 0, 0.12)',
                   whiteSpace: 'nowrap',
-                  width: 1,
                   height: 25,
                   paddingTop: 0,
                   paddingBottom: 0,
@@ -363,7 +373,6 @@ const styles: { [key: string]: React.CSSProperties } = {
     lineHeight: '1rem',
     whiteSpace: 'nowrap',
     padding: 4,
-    width: 1,
     minWidth: 0,
   },
   // 行
@@ -371,7 +380,6 @@ const styles: { [key: string]: React.CSSProperties } = {
     borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
     borderRight: '1px solid rgba(0, 0, 0, 0.12)',
     whiteSpace: 'nowrap',
-    width: 1,
     height: 25,
     paddingTop: 0,
     paddingBottom: 0,

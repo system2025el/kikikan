@@ -195,6 +195,7 @@ export const Order = (props: {
     getValues,
     setValue,
     clearErrors,
+    watch,
     formState: { isDirty, errors, defaultValues },
   } = useForm({
     mode: 'onChange',
@@ -223,6 +224,9 @@ export const Order = (props: {
     },
     resolver: zodResolver(OrderSchema),
   });
+
+  // 出庫日/入庫日。本番日カレンダーの初期表示月に使う
+  const juchuRange = watch('juchuRange');
 
   // ブラウザバック、F5、×ボタンでページを離れた際のhook
   useUnsavedChangesWarning(isDirty);
@@ -989,15 +993,6 @@ export const Order = (props: {
           </Grid2>
         )}
         <Grid2 container alignItems={'center'} spacing={2}>
-          <Badge badgeContent={tempuList.length} color="primary">
-            <Button
-              onClick={() => setTempuOpen(true)}
-              disabled={!(user && user.permission.juchu & permission.juchu_ref)}
-            >
-              <AttachFileIcon fontSize="small" />
-              添付ファイル
-            </Button>
-          </Badge>
           {!edit ? <Typography>閲覧モード</Typography> : <Typography>編集モード</Typography>}
           <Button disabled={!!lockData || user?.permission.juchu === permission.juchu_ref} onClick={handleEdit}>
             変更
@@ -1011,7 +1006,7 @@ export const Order = (props: {
             <Grid2>
               <Typography>受注ヘッダー</Typography>
             </Grid2>
-            <Grid2 container spacing={1} sx={{ display: save ? 'inline-flex' : 'none' }}>
+            <Grid2 container spacing={4} sx={{ display: save ? 'inline-flex' : 'none' }}>
               <Button
                 onClick={() => {
                   openOrFocusTab(`/quotation-list/create?juchuId=${getValues('juchuHeadId')}`);
@@ -1270,7 +1265,7 @@ export const Order = (props: {
                   ¥{priceTotal.toLocaleString()}
                 </Typography>
               </Grid2>
-              <Grid2 container spacing={1}>
+              <Grid2 container spacing={2} mr={2}>
                 <Button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -1314,12 +1309,12 @@ export const Order = (props: {
                   コピー
                 </Button>
                 <Button
-                  color="error"
                   onClick={(e) => {
                     e.stopPropagation();
                     handleKizaiHeadDeleteCheck();
                   }}
                   disabled={!edit}
+                  sx={{ bgcolor: 'hotpink' }}
                 >
                   <Delete fontSize="small" />
                   受注明細削除
@@ -1372,7 +1367,25 @@ export const Order = (props: {
               },
             }}
           >
-            <Typography>本番日</Typography>
+            <Grid2 container alignItems="center" justifyContent="space-between" sx={{ width: '100%' }}>
+              <Grid2>
+                <Typography>本番日</Typography>
+              </Grid2>
+              <Grid2 mr={2}>
+                <Badge badgeContent={tempuList.length} color="primary">
+                  <Button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setTempuOpen(true);
+                    }}
+                    disabled={!(user && user.permission.juchu & permission.juchu_ref)}
+                  >
+                    <AttachFileIcon fontSize="small" />
+                    添付ファイル
+                  </Button>
+                </Badge>
+              </Grid2>
+            </Grid2>
           </AccordionSummary>
           <AccordionDetails sx={{ padding: 0 }}>
             <Divider />
@@ -1384,6 +1397,8 @@ export const Order = (props: {
                   honbanbiList={field.value}
                   shubetuColorMap={shubetuColorMap}
                   readOnly={!edit}
+                  // 本番日が未入力のときは受注ヘッダーの出庫日の月を開く
+                  referenceDate={juchuRange?.[0] ?? null}
                   onChange={field.onChange}
                   onBeforeEdit={async () => !!(await lock())}
                 />
@@ -1411,7 +1426,7 @@ export const Order = (props: {
               <Grid2>
                 <Typography>受注車両ヘッダー一覧</Typography>
               </Grid2>
-              <Grid2 container spacing={1}>
+              <Grid2 container spacing={2} mr={2}>
                 <Button
                   onClick={(e) => {
                     e.stopPropagation();

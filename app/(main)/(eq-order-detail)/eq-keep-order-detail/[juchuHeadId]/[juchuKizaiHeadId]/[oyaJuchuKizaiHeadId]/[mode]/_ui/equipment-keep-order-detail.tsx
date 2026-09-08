@@ -1240,15 +1240,8 @@ export const EquipmentKeepOrderDetail = (props: {
       ) : (
         <Container disableGutters sx={{ minWidth: '100%', pb: 10 }} maxWidth={'xl'}>
           <form onSubmit={handleSubmit(onSubmit)}>
-            <Box display={'flex'} justifyContent={'end'} mb={1}>
-              <Grid2 container spacing={4}>
-                {lockData && (
-                  <Grid2 container alignItems={'center'} spacing={2}>
-                    <Typography>{lockData.addDat && toJapanTimeString(new Date(lockData.addDat))}</Typography>
-                    <Typography>{lockData.addUser}</Typography>
-                    <Typography>編集中</Typography>
-                  </Grid2>
-                )}
+            <Box display={'flex'} justifyContent={'space-between'} mb={1}>
+              <Grid2 container alignItems={'center'} spacing={2}>
                 {shukoFixFlag && nyukoFixFlag ? (
                   <Box display={'flex'} alignItems={'center'}>
                     <Typography>出発、到着済</Typography>
@@ -1259,6 +1252,15 @@ export const EquipmentKeepOrderDetail = (props: {
                   </Box>
                 ) : (
                   <></>
+                )}
+              </Grid2>
+              <Grid2 container spacing={4}>
+                {lockData && (
+                  <Grid2 container alignItems={'center'} spacing={2}>
+                    <Typography>{lockData.addDat && toJapanTimeString(new Date(lockData.addDat))}</Typography>
+                    <Typography>{lockData.addUser}</Typography>
+                    <Typography>編集中</Typography>
+                  </Grid2>
                 )}
                 <Grid2 container display={saveKizaiHead ? 'flex' : 'none'} alignItems={'center'} spacing={1}>
                   {!edit || shukoFixFlag ? <Typography>閲覧モード</Typography> : <Typography>編集モード</Typography>}

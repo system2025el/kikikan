@@ -510,26 +510,33 @@ const BundleDialog = ({
   }, [eqptsWSet, currentIndex]);
 
   return (
-    <Dialog open={open} onClose={() => handleCloseDialog()}>
-      <DialogTitle justifyContent={'space-between'} display={'flex'}>
-        セットオプション
-        <br />
-        {isLoading ? <></> : oyaKizaiNam}
-        <Stack spacing={2}>
-          <Box>
-            <Button sx={{ bgcolor: green[500] }} onClick={() => handleClickAnother()} loading={isLoading}>
-              別セット選択
-            </Button>
-          </Box>
-          <Box>
-            <Button onClick={() => handleClickConfirm()} loading={isLoading}>
-              確定
-            </Button>
-          </Box>
-        </Stack>
+    <Dialog open={open} onClose={() => handleCloseDialog()} slotProps={{ paper: { sx: { height: 330 } } }}>
+      <DialogTitle>
+        <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} width={'100%'} py={1}>
+          <Typography variant="h6">セットオプション</Typography>
+          <Stack spacing={2} direction={'row'} justifyContent={'end'} alignItems={'center'}>
+            <Box>
+              <Button sx={{ bgcolor: green[500] }} onClick={() => handleClickAnother()} loading={isLoading}>
+                別セット選択
+              </Button>
+            </Box>
+            <Box>
+              <Button onClick={() => handleClickConfirm()} loading={isLoading}>
+                確定
+              </Button>
+            </Box>
+          </Stack>
+        </Box>
+        {isLoading ? (
+          <></>
+        ) : (
+          <Typography variant="h6" sx={{ wordBreak: 'break-all' }}>
+            {oyaKizaiNam}
+          </Typography>
+        )}
       </DialogTitle>
-      <DialogContent>
-        <TableContainer component={Paper} sx={{ width: 500 }}>
+      <DialogContent sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <TableContainer component={Paper} sx={{ width: 500, flex: 1, minHeight: 0, overflowY: 'auto' }}>
           {isLoading ? (
             <Loading />
           ) : (
