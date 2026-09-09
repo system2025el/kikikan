@@ -17,7 +17,7 @@ import { grey } from '@mui/material/colors';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-import { dispColors, statusColors } from '@/app/(main)/_lib/colors';
+import { dispColors, sagyoKbnColors, statusColors } from '@/app/(main)/_lib/colors';
 
 import { NyukoDetailTableValues } from '../_lib/types';
 
@@ -40,7 +40,11 @@ export const NyukoDetailTable = (props: { datas: NyukoDetailTableValues[] }) => 
   return (
     <TableContainer sx={{ overflow: 'auto', maxHeight: '80vh', maxWidth: '65vw' }}>
       <Table stickyHeader size="small">
-        <TableHead sx={{ bgcolor: 'primary.light' }}>
+        <TableHead
+          sx={{
+            '& .MuiTableCell-stickyHeader': { backgroundColor: sagyoKbnColors.nyukoCount, color: 'inherit' },
+          }}
+        >
           <TableRow sx={{ whiteSpace: 'nowrap' }}>
             <TableCell align="center" />
             <TableCell align="left">機材名</TableCell>

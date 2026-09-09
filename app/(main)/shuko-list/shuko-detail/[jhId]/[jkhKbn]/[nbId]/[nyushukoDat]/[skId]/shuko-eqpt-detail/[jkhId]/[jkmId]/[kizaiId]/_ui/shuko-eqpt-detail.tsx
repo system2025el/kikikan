@@ -24,6 +24,8 @@ import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 
+import { SAGYO_KBN_ID } from '@/app/_lib/constants';
+import { sagyoKbnColors } from '@/app/(main)/_lib/colors';
 import { useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
 import { permission } from '@/app/(main)/_lib/permission';
 import { User } from '@/app/(main)/_lib/types';
@@ -196,7 +198,19 @@ export const ShukoEqptDetail = (props: {
       <Paper variant="outlined">
         <form onSubmit={handleSubmit(onSubmit)}>
           <Box display={'flex'} justifyContent={'space-between'} alignItems="center" px={2}>
-            <Typography fontSize={'large'}>出庫詳細</Typography>
+            <Typography
+              fontSize={'large'}
+              px={1}
+              sx={{
+                backgroundColor:
+                  shukoEqptDetailData.sagyoKbnId === SAGYO_KBN_ID.shukoConfirmation
+                    ? sagyoKbnColors.shukoConfirmation
+                    : sagyoKbnColors.shukoPicking,
+                color: shukoEqptDetailData.sagyoKbnId === SAGYO_KBN_ID.shukoConfirmation ? 'white' : 'inherit',
+              }}
+            >
+              出庫詳細({shukoEqptDetailData.sagyoKbnId === SAGYO_KBN_ID.shukoConfirmation ? '最終確認' : 'ピッキング'})
+            </Typography>
             {/* <Button type="submit">保存</Button> */}
           </Box>
           <Divider />
@@ -292,7 +306,12 @@ export const ShukoEqptDetail = (props: {
         {isLoading ? (
           <Loading />
         ) : (
-          <ShukoEqptDetailTable datas={shukoEqptDetailList} selected={selected} handleSelect={handleSelect} />
+          <ShukoEqptDetailTable
+            datas={shukoEqptDetailList}
+            selected={selected}
+            handleSelect={handleSelect}
+            sagyoKbnId={shukoEqptDetailData.sagyoKbnId}
+          />
         )}
       </Paper>
       <Dialog open={deleteOpen}>
