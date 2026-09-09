@@ -167,9 +167,6 @@ export const Order = (props: {
 
   // context
   const { setIsDirty, requestNavigation } = useDirty();
-  // 合計金額
-  const priceTotal = eqHeaderList!.reduce((sum, row) => sum + (row.shokei ?? 0), 0);
-
   // 選択されている受注機材ヘッダーデータ
   const selectedEqHeaders = useMemo(
     () => eqHeaderList?.filter((d) => selectedEqs.includes(d.juchuKizaiHeadId)) ?? [],
@@ -1253,17 +1250,6 @@ export const Order = (props: {
             <Grid2 container alignItems="center" justifyContent="space-between" sx={{ width: '100%' }} spacing={1}>
               <Grid2>
                 <Typography>受注機材ヘッダー一覧</Typography>
-              </Grid2>
-              <Grid2 container display="flex" alignItems="center" spacing={1}>
-                <Typography>合計金額</Typography>
-                <Typography
-                  sx={{
-                    width: '40%',
-                    minWidth: '90px',
-                  }}
-                >
-                  ¥{priceTotal.toLocaleString()}
-                </Typography>
               </Grid2>
               <Grid2 container spacing={2} mr={2}>
                 <Button

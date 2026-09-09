@@ -5,6 +5,7 @@ import { grey } from '@mui/material/colors';
 import { Dispatch, SetStateAction } from 'react';
 
 import { BASHO_ID } from '@/app/_lib/constants';
+import { sagyoKbnColors } from '@/app/(main)/_lib/colors';
 import { toJapanTimeString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 
 import { NyukoEqptDetailTableValues } from '../_lib/types';
@@ -23,7 +24,11 @@ export const NyukoEqptDetailTable = (props: {
   return (
     <TableContainer sx={{ overflow: 'auto', maxHeight: '80vh' }}>
       <Table stickyHeader size="small">
-        <TableHead sx={{ bgcolor: 'primary.light' }}>
+        <TableHead
+          sx={{
+            '& .MuiTableCell-stickyHeader': { backgroundColor: sagyoKbnColors.nyukoCount, color: 'inherit' },
+          }}
+        >
           <TableRow sx={{ whiteSpace: 'nowrap' }}>
             <TableCell padding="none" />
             <TableCell padding="checkbox">

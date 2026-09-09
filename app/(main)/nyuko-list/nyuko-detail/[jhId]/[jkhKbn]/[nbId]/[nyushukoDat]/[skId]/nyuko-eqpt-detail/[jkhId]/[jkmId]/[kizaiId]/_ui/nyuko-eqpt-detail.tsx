@@ -24,6 +24,7 @@ import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 
+import { sagyoKbnColors } from '@/app/(main)/_lib/colors';
 import { useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
 import { permission } from '@/app/(main)/_lib/permission';
 import { User } from '@/app/(main)/_lib/types';
@@ -180,7 +181,9 @@ export const NyukoEqptDetail = (props: {
       <Paper variant="outlined">
         <form onSubmit={handleSubmit(onSubmit)}>
           <Box display={'flex'} justifyContent={'space-between'} alignItems="center" px={2}>
-            <Typography fontSize={'large'}>入庫詳細</Typography>
+            <Typography fontSize={'large'} px={1} sx={{ backgroundColor: sagyoKbnColors.nyukoCount }}>
+              入庫詳細
+            </Typography>
             {/* <Button type="submit">保存</Button> */}
           </Box>
           <Divider />
@@ -243,7 +246,7 @@ export const NyukoEqptDetail = (props: {
               />
             </Box>
             <Box display={'flex'} alignItems={'center'}>
-              <Typography mr={2}>最終作業者</Typography>
+              <Typography mr={2}>最終作業(補正)者</Typography>
               <Typography>
                 {nyukoEqptDetailData.updUser ? nyukoEqptDetailData.updUser : nyukoEqptDetailData.addUser}
               </Typography>

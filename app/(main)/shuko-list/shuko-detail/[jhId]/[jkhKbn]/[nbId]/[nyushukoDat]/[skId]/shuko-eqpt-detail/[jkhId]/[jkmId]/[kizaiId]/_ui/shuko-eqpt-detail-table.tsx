@@ -4,7 +4,8 @@ import { Checkbox, Table, TableBody, TableCell, TableContainer, TableHead, Table
 import { grey } from '@mui/material/colors';
 import { Dispatch, SetStateAction } from 'react';
 
-import { BASHO_ID } from '@/app/_lib/constants';
+import { BASHO_ID, SAGYO_KBN_ID } from '@/app/_lib/constants';
+import { sagyoKbnColors } from '@/app/(main)/_lib/colors';
 import { toJapanTimeString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 
 import { ShukoEqptDetailTableValues } from '../_lib/types';
@@ -13,8 +14,9 @@ export const ShukoEqptDetailTable = (props: {
   datas: ShukoEqptDetailTableValues[];
   selected: number[];
   handleSelect: (selected: number[]) => void;
+  sagyoKbnId: number;
 }) => {
-  const { datas, selected, handleSelect } = props;
+  const { datas, selected, handleSelect, sagyoKbnId } = props;
 
   const handleCheck = (index: number) => {
     const newSelected = selected.includes(index) ? selected.filter((item) => item !== index) : [...selected, index];
@@ -23,7 +25,17 @@ export const ShukoEqptDetailTable = (props: {
   return (
     <TableContainer sx={{ overflow: 'auto', maxHeight: '80vh' }}>
       <Table stickyHeader size="small">
-        <TableHead sx={{ bgcolor: 'primary.light' }}>
+        <TableHead
+          sx={{
+            '& .MuiTableCell-stickyHeader': {
+              backgroundColor:
+                sagyoKbnId === SAGYO_KBN_ID.shukoConfirmation
+                  ? sagyoKbnColors.shukoConfirmation
+                  : sagyoKbnColors.shukoPicking,
+              color: sagyoKbnId === SAGYO_KBN_ID.shukoConfirmation ? 'white' : 'inherit',
+            },
+          }}
+        >
           <TableRow sx={{ whiteSpace: 'nowrap' }}>
             <TableCell padding="none" />
             <TableCell padding="checkbox">
