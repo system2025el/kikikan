@@ -266,7 +266,7 @@ export const ShukoEqptDetail = (props: {
               />
             </Box>
             <Box display={'flex'} alignItems={'center'}>
-              <Typography mr={2}>最終作業者</Typography>
+              <Typography mr={2}>最終作業(補正)者</Typography>
               <Typography>
                 {shukoEqptDetailData.updUser ? shukoEqptDetailData.updUser : shukoEqptDetailData.addUser}
               </Typography>
