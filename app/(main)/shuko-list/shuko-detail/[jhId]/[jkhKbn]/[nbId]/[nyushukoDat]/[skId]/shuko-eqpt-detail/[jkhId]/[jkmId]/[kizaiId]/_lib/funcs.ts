@@ -6,7 +6,7 @@ import { QueryResult } from 'pg';
 
 import pool from '@/app/_lib/db/postgres';
 import { deleteNyushukoCtnResult } from '@/app/_lib/db/tables/t-nyushuko-ctn-result';
-import { updateNyushukoDen, updateResultAdjQty } from '@/app/_lib/db/tables/t-nyushuko-den';
+import { deleteEmptyNyushukoDen, updateNyushukoDen, updateResultAdjQty } from '@/app/_lib/db/tables/t-nyushuko-den';
 import { selectSagyoIdFilterNyushukoFixFlag } from '@/app/_lib/db/tables/t-nyushuko-fix';
 import { deleteNyushukoResult } from '@/app/_lib/db/tables/t-nyushuko-result';
 import { selectNyushukoDetailOne } from '@/app/_lib/db/tables/v-nyushuko-den2-lst';
@@ -208,6 +208,21 @@ export const delshukoResult = async (
 
     await updateNyushukoDen(updateNyushukoDenData, connection);
 
+    // 受注から削除されて予定数0で残っている伝票は、現物を戻して実績・補正が0になった時点で不要になる
+    // 予定数0を条件に含めているため、受注明細が存在する正当な数量0の行は削除されない
+    await deleteEmptyNyushukoDen(
+      {
+        juchu_head_id: shukoEqptDetailData.juchuHeadId,
+        juchu_kizai_head_id: shukoEqptDetailData.juchuKizaiHeadId,
+        juchu_kizai_meisai_id: shukoEqptDetailData.juchuKizaiMeisaiId,
+        sagyo_kbn_id: shukoEqptDetailData.sagyoKbnId,
+        sagyo_den_dat: shukoEqptDetailData.nyushukoDat,
+        sagyo_id: shukoEqptDetailData.nyushukoBashoId,
+        kizai_id: shukoEqptDetailData.kizaiId,
+      },
+      connection
+    );
+
     await await connection.query('COMMIT');
     revalidatePath(
       `shuko-list/shuko-detail/${shukoEqptDetailData.juchuHeadId}/${shukoEqptDetailData.nyushukoBashoId}/${shukoEqptDetailData.nyushukoDat}/${shukoEqptDetailData.sagyoKbnId}`
@@ -257,6 +272,20 @@ export const updShukoResultAdjQty = async (
     if (error) {
       throw new Error('[updateResultAdjQty] DBエラー:', { cause: error });
     }
+
+    // 補正数を0に戻したことで、受注から削除されて残っていた伝票が空になる場合は消す
+    await deleteEmptyNyushukoDen(
+      {
+        juchu_head_id: shukoEqptDetailData.juchuHeadId,
+        juchu_kizai_head_id: shukoEqptDetailData.juchuKizaiHeadId,
+        juchu_kizai_meisai_id: shukoEqptDetailData.juchuKizaiMeisaiId,
+        sagyo_kbn_id: shukoEqptDetailData.sagyoKbnId,
+        sagyo_den_dat: shukoEqptDetailData.nyushukoDat,
+        sagyo_id: shukoEqptDetailData.nyushukoBashoId,
+        kizai_id: shukoEqptDetailData.kizaiId,
+      },
+      pool
+    );
 
     revalidatePath(
       `shuko-list/shuko-detail/${shukoEqptDetailData.juchuHeadId}/${shukoEqptDetailData.juchuKizaiHeadKbnId}/${shukoEqptDetailData.nyushukoBashoId}/${shukoEqptDetailData.nyushukoDat}/${shukoEqptDetailData.sagyoKbnId}`

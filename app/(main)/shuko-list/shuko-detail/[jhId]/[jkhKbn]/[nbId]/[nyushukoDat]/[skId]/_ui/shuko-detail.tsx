@@ -341,6 +341,9 @@ export const ShukoDetail = (props: {
               <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.ctn }}>
                 コンテナ
               </Typography>
+              <Typography minWidth={70} textAlign={'center'} sx={{ backgroundColor: statusColors.deleted }}>
+                受注削除
+              </Typography>
               <Button
                 onClick={() => setAdjustOpen(true)}
                 disabled={

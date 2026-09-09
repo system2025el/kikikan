@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 
 import { getCurrentUser } from '@/app/(main)/_lib/funcs';
 import { permission } from '@/app/(main)/_lib/permission';
+import { NyushukoDetailNotFound } from '@/app/(main)/_ui/nyushuko-not-found';
 
 import { getNyukoDetail, getNyukoDetailTable, getNyukoFixFlag } from './_lib/funcs';
 import { NyukoDetailValues } from './_lib/types';
@@ -75,7 +76,7 @@ const Page = async (props: {
   ]);
 
   if (!nyukoDetailData || !nyukoDetailTableData) {
-    return <div>入庫明細が見つかりません。</div>;
+    return <NyushukoDetailNotFound message="入庫明細が見つかりません。" />;
   }
 
   const fixFlag = await getNyukoFixFlag(

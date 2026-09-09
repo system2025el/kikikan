@@ -125,6 +125,7 @@ export const getShukoDetailTable = async (
       dspOrdNumMeisai: d.dsp_ord_num_meisai,
       indentNum: d.indent_num ?? 0,
       mem2: d.mem2 ?? '',
+      juchuMeisaiDelFlg: d.juchu_meisai_del_flg ?? 0,
     }));
 
     return shukoDetailTableData;

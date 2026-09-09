@@ -24,10 +24,12 @@ import {
   updateJuchuKizaiNyushuko,
 } from '@/app/_lib/db/tables/t-juchu-kizai-nyushuko';
 import {
+  deleteAllKicsOrYardShukoCtnResult,
   deleteAllNyukoCtnResult,
   deleteAllNyushukoCtnResult,
   deleteAllShukoCtnResult,
   deleteKizaiIdNyushukoCtnResult,
+  deleteKizaiIdNyushukoCtnResultKeepDen,
 } from '@/app/_lib/db/tables/t-nyushuko-ctn-result';
 import {
   deleteAllKicsOrYardNyukoDen,
@@ -922,6 +924,39 @@ export const delNyushukoCtnResult = async (
 };
 
 /**
+ * コンテナ入出庫実績削除（伝票行が残っているものは残す）
+ *
+ * どのRFIDタグを確保していたかを出庫画面に出すため、予定数0で残した出庫伝票行の
+ * 実績は残す。伝票の削除より後に呼ぶこと。通常受注の機材明細画面でのみ使う。
+ *
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param kizaiIds 機材id
+ * @param connection
+ * @returns
+ */
+export const delNyushukoCtnResultKeepDen = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  kizaiIds: number[],
+  connection: PoolClient
+) => {
+  try {
+    await deleteKizaiIdNyushukoCtnResultKeepDen(juchuHeadId, juchuKizaiHeadId, kizaiIds, connection);
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
+    throw e;
+  }
+};
+
+/**
  * 出庫実績全削除
  * @param juchuHeadId 受注ヘッダーid
  * @param juchuKizaiHeadId 受注機材ヘッダーid
@@ -959,6 +994,41 @@ export const delAllKicsOrYardShukoCtnResult = async (
 ) => {
   try {
     await deleteAllShukoCtnResult(juchuHeadId, juchuKizaiHeadId, sagyoId, connection);
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
+    throw e;
+  }
+};
+
+/**
+ * コンテナ出庫実績を場所・機材id単位で削除
+ *
+ * 伝票を消す delAllKicsOrYardShukoCtnDen と同じ機材idでスコープする。場所単位で全件
+ * 消すと、予定数0で残した「受注削除」の伝票行だけが実績を失い、出庫画面から解消できなく
+ * なるため。通常受注の機材明細画面でのみ使う。
+ *
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param kizaiIds 機材idの配列
+ * @param sagyoId 作業id（出庫場所）
+ * @param connection
+ */
+export const delAllKicsOrYardShukoCtnResultByKizai = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  kizaiIds: number[],
+  sagyoId: number,
+  connection: PoolClient
+) => {
+  try {
+    await deleteAllKicsOrYardShukoCtnResult(juchuHeadId, juchuKizaiHeadId, kizaiIds, sagyoId, connection);
   } catch (e) {
     if (e instanceof Error) {
       console.error(`[ERROR] ${e.message}`);

@@ -66,10 +66,13 @@ export const MoveAlertDialog = ({ open, onClick }: { open: boolean; onClick: (re
 
 export const DeleteAlertDialog = ({
   selectedLength,
+  shukoResultCount = 0,
   open,
   onClick,
 }: {
   selectedLength: number;
+  /** 削除対象のうち出庫実績・補正数がある機材の件数（ピッキング・最終確認の両方を含む） */
+  shukoResultCount?: number;
   open: boolean;
   onClick: (result: boolean) => void;
 }) => {
@@ -93,6 +96,13 @@ export const DeleteAlertDialog = ({
       </DialogTitle>
       <DialogContentText m={2} p={2}>
         {selectedLength}件の機材を削除してもよろしいでしょうか？
+        {shukoResultCount > 0 && (
+          <Box component="span" display="block" mt={2} color="error.main">
+            うち{shukoResultCount}件は既に実績があります。
+            <br />
+            出庫明細に「受注削除」として残るので、現物を取り除いてください。
+          </Box>
+        )}
       </DialogContentText>
       <DialogActions>
         <Button onClick={() => handleClick(true)} loading={isLoading} color="error">

@@ -40,6 +40,8 @@ export type ShukoDetailTableValues = {
   dspOrdNumMeisai: number | null;
   indentNum: number;
   mem2: string | null;
+  /** 受注から削除されたのに実績が残っている行（1のとき受注明細が存在しない） */
+  juchuMeisaiDelFlg: number;
 };
 
 export type NyukoValues = {

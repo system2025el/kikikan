@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 
 import { getCurrentUser } from '@/app/(main)/_lib/funcs';
 import { permission } from '@/app/(main)/_lib/permission';
+import { NyushukoDetailNotFound } from '@/app/(main)/_ui/nyushuko-not-found';
 
 import { getShukoDetail, getShukoDetailTable, getShukoFixFlag } from './_lib/funcs';
 import { ShukoDetailValues } from './_lib/types';
@@ -75,7 +76,7 @@ const Page = async (props: {
   ]);
 
   if (!shukoDetailData || !shukoDetailTableData) {
-    return <div>出庫明細が見つかりません。</div>;
+    return <NyushukoDetailNotFound message="出庫明細が見つかりません。" />;
   }
 
   const fixFlag = await getShukoFixFlag(

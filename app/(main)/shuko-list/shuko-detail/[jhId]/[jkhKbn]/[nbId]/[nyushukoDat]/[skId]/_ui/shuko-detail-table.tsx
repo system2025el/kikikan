@@ -98,11 +98,14 @@ export const ShukoDetailTable = (props: {
               sx={{
                 whiteSpace: 'nowrap',
                 backgroundColor:
-                  row.diff === 0 /*&& row.planQty !== 0 && row.ctnFlg !== 1*/
-                    ? statusColors.completed
-                    : row.ctnFlg === 1
-                      ? statusColors.ctn
-                      : 'white',
+                  // 受注から削除された行は通常の過剰と区別して最優先で強調する
+                  row.juchuMeisaiDelFlg === 1
+                    ? statusColors.deleted
+                    : row.diff === 0 /*&& row.planQty !== 0 && row.ctnFlg !== 1*/
+                      ? statusColors.completed
+                      : row.ctnFlg === 1
+                        ? statusColors.ctn
+                        : 'white',
               }}
             >
               <TableCell padding="checkbox">{index + 1}</TableCell>
@@ -112,6 +115,14 @@ export const ShukoDetailTable = (props: {
                 sx={{ cursor: 'pointer', '&:hover': { backgroundColor: dispColors.hover } }}
               >
                 {row.kizaiNam}
+                {row.juchuMeisaiDelFlg === 1 && (
+                  <Typography
+                    component="span"
+                    sx={{ ml: 1, color: dispColors.return, fontWeight: 'bold', fontSize: 'inherit' }}
+                  >
+                    受注削除
+                  </Typography>
+                )}
               </TableCell>
               <TableCell
                 align="right"
