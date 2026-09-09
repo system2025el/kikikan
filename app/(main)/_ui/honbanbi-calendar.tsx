@@ -172,7 +172,10 @@ type HonbanbiCalendarProps = {
   shubetuColorMap: Map<number, string>;
   /** 閲覧のみ（明細画面など）。trueなら日付・追加日数・メモを変更できない */
   readOnly?: boolean;
-  /** カレンダーの初期表示月。未指定なら最初の本番日、それも無ければ当月 */
+  /**
+   * 本番日が1件も無いときにカレンダーを開く月。
+   * 本番日があればその最初の日を優先し、これも未指定なら当月を開く。
+   */
   referenceDate?: Date | null;
   /** 変更時。readOnly のときは呼ばれない */
   onChange?: (list: HonbanbiValues[]) => void;
@@ -200,12 +203,13 @@ export const HonbanbiCalendar = ({
   // 編集前処理中のPromise（連続操作で多重に走らせないよう共有する）
   const beforeEditPromiseRef = useRef<Promise<boolean> | null>(null);
 
-  // カレンダーの初期表示月
+  // カレンダーの初期表示月。本番日 → referenceDate（出庫日など） → 当月 の順に採る
   const calendarStart = useMemo(() => {
-    if (referenceDate) return dayjs(referenceDate);
     const sorted = sortHonbanbi(honbanbiList);
-    return sorted.length > 0 ? dayjs(sorted[0].juchuHonbanbiDat) : dayjs();
-    // 初期表示月は最初の描画時にだけ決めたいので honbanbiList の変化では追従させない
+    if (sorted.length > 0) return dayjs(sorted[0].juchuHonbanbiDat);
+
+    return referenceDate ? dayjs(referenceDate) : dayjs();
+    // 日付を足すたびに表示月が動くと使いづらいので honbanbiList の変化では追従させない
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [referenceDate]);
 

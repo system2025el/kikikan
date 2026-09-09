@@ -115,6 +115,9 @@ export const NyukoList = (props: { user: User }) => {
 
     if (selectList.length === 0) return;
 
+    // awaitのあとにwindow.openを呼ぶとポップアップブロックの対象になるため、先に空タブを確保する
+    const target = window.open('', '_blank');
+
     // NyukoPdfModelの配列
     const pdfModels: NyukoPdfModel[] = [];
 
@@ -139,8 +142,13 @@ export const NyukoList = (props: { user: User }) => {
 
       // ブラウザ表示
       const url = URL.createObjectURL(blob);
-      window.open(url);
+      if (target) {
+        target.location.href = url;
+      } else {
+        window.open(url, '_blank', 'noopener');
+      }
     } catch (e) {
+      target?.close();
       setSnackBarMessage('納品書の出力に失敗しました');
       setSnackBarOpen(true);
     } finally {

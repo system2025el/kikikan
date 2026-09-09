@@ -106,7 +106,6 @@ export const OrderEqTable: React.FC<OrderEqTableProps> = ({
               <TableCell align="right">GP</TableCell>
               <TableCell align="right">本番</TableCell>
               <TableCell align="right">日数</TableCell>
-              <TableCell align="right">小計金額</TableCell>
               {/* <TableCell /> */}
             </TableRow>
           </TableHead>
@@ -158,7 +157,6 @@ export const OrderEqTable: React.FC<OrderEqTableProps> = ({
                 <TableCell align="right">{row.genebi}</TableCell>
                 <TableCell align="right">{row.honbanbi}</TableCell>
                 <TableCell align="right">{row.juchuHonbanbiCalcQty}</TableCell>
-                <TableCell align="right">{row.shokei && `¥${row.shokei.toLocaleString()}`}</TableCell>
                 {/* <TableCell>
                   <Box display={'flex'}>
                     <IconButton onClick={() => moveRow(index, -1)} disabled={index === 0}>

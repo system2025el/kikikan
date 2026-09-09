@@ -22,7 +22,7 @@ import { useState } from 'react';
 import { set } from 'zod';
 
 import { BASHO_ID, JUCHU_KIZAI_HEAD_KBN, SAGYO_KBN_ID } from '@/app/_lib/constants';
-import { dispColors, statusColors } from '@/app/(main)/_lib/colors';
+import { dispColors, sagyoKbnColors, statusColors } from '@/app/(main)/_lib/colors';
 import { notifyNyushukoFixChanged } from '@/app/(main)/_lib/nyushuko-fix-notify';
 import { permission } from '@/app/(main)/_lib/permission';
 import { User } from '@/app/(main)/_lib/types';
@@ -234,7 +234,17 @@ export const ShukoDetail = (props: {
       </Box>
       <Paper variant="outlined">
         <Box display={'flex'} justifyContent={'space-between'} alignItems="center" px={2}>
-          <Typography fontSize={'large'}>
+          <Typography
+            fontSize={'large'}
+            px={1}
+            sx={{
+              backgroundColor:
+                shukoDetailData.sagyoKbnId === SAGYO_KBN_ID.shukoConfirmation
+                  ? sagyoKbnColors.shukoConfirmation
+                  : sagyoKbnColors.shukoPicking,
+              color: shukoDetailData.sagyoKbnId === SAGYO_KBN_ID.shukoConfirmation ? 'white' : 'inherit',
+            }}
+          >
             出庫明細({shukoDetailData.sagyoKbnId === SAGYO_KBN_ID.shukoConfirmation ? '最終確認' : 'ピッキング'})
           </Typography>
           <Grid2 container alignItems={'center'} spacing={2}>
@@ -356,7 +366,13 @@ export const ShukoDetail = (props: {
           </Box>
         </Box>
         {shukoDetailList.length > 0 && (
-          <ShukoDetailTable datas={shukoDetailList} fixFlag={fixFlag} user={user} setAdjustOpen={setAdjustOpen} />
+          <ShukoDetailTable
+            datas={shukoDetailList}
+            fixFlag={fixFlag}
+            user={user}
+            setAdjustOpen={setAdjustOpen}
+            sagyoKbnId={shukoDetailData.sagyoKbnId}
+          />
         )}
       </Paper>
       <Dialog open={alertOpen}>

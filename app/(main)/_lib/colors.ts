@@ -42,6 +42,24 @@ export const dispColors = {
   main: 'primary',
 };
 
+/**
+ * 出庫作業区分色（ハンディアプリと統一）
+ */
+export const sagyoKbnColors = {
+  /**
+   * 出庫ピッキング
+   */
+  shukoPicking: 'rgba(255, 211, 207, 1)',
+  /**
+   * 出庫最終確認
+   */
+  shukoConfirmation: 'rgba(33, 150, 243, 1)',
+  /**
+   * 入庫カウント
+   */
+  nyukoCount: 'rgba(255, 235, 59, 1)',
+};
+
 export const weeklyColors = {
   /**
    * 積み

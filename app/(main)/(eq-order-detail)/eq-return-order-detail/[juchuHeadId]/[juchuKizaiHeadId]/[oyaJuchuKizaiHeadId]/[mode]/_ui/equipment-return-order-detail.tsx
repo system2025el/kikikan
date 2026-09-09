@@ -1530,7 +1530,14 @@ export const EquipmentReturnOrderDetail = (props: {
       ) : (
         <Container disableGutters sx={{ minWidth: '100%', pb: 10 }} maxWidth={'xl'}>
           <form onSubmit={handleSubmit(onSubmit)}>
-            <Box display={'flex'} justifyContent={'end'} mb={1}>
+            <Box display={'flex'} justifyContent={'space-between'} mb={1}>
+              <Grid2 container alignItems={'center'} spacing={2}>
+                {nyukoFixFlag && (
+                  <Box display={'flex'} alignItems={'center'}>
+                    <Typography>到着済</Typography>
+                  </Box>
+                )}
+              </Grid2>
               <Grid2 container spacing={4}>
                 {lockData && (
                   <Grid2 container alignItems={'center'} spacing={2}>
@@ -1538,11 +1545,6 @@ export const EquipmentReturnOrderDetail = (props: {
                     <Typography>{lockData.addUser}</Typography>
                     <Typography>編集中</Typography>
                   </Grid2>
-                )}
-                {nyukoFixFlag && (
-                  <Box display={'flex'} alignItems={'center'}>
-                    <Typography>到着済</Typography>
-                  </Box>
                 )}
                 <Grid2 container display={saveKizaiHead ? 'flex' : 'none'} alignItems={'center'} spacing={1}>
                   {!edit ? <Typography>閲覧モード</Typography> : <Typography>編集モード</Typography>}

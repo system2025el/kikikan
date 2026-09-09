@@ -21,7 +21,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 import { BASHO_ID, JUCHU_KIZAI_HEAD_KBN } from '@/app/_lib/constants';
-import { dispColors, statusColors } from '@/app/(main)/_lib/colors';
+import { dispColors, sagyoKbnColors, statusColors } from '@/app/(main)/_lib/colors';
 import { permission } from '@/app/(main)/_lib/permission';
 import { User } from '@/app/(main)/_lib/types';
 import { BackButton } from '@/app/(main)/_ui/buttons';
@@ -141,7 +141,9 @@ export const NyukoDetail = (props: {
       </Box>
       <Paper variant="outlined">
         <Box display={'flex'} justifyContent={'space-between'} alignItems="center" px={2}>
-          <Typography fontSize={'large'}>入庫明細(カウント)</Typography>
+          <Typography fontSize={'large'} px={1} sx={{ backgroundColor: sagyoKbnColors.nyukoCount }}>
+            入庫明細(カウント)
+          </Typography>
           <Grid2 container alignItems={'center'} spacing={2}>
             {nyukoDetailData.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.return && (
               <Typography color="red">※返却時は到着ボタンで親の入庫明細の数量に反映されます。</Typography>

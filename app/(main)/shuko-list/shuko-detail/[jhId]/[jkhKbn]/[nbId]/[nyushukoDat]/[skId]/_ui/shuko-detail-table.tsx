@@ -17,8 +17,8 @@ import { grey, lightBlue } from '@mui/material/colors';
 import { usePathname, useRouter } from 'next/navigation';
 import { Dispatch, SetStateAction, useState } from 'react';
 
-import { JUCHU_KIZAI_HEAD_KBN } from '@/app/_lib/constants';
-import { dispColors, statusColors } from '@/app/(main)/_lib/colors';
+import { JUCHU_KIZAI_HEAD_KBN, SAGYO_KBN_ID } from '@/app/_lib/constants';
+import { dispColors, sagyoKbnColors, statusColors } from '@/app/(main)/_lib/colors';
 import { permission } from '@/app/(main)/_lib/permission';
 import { User } from '@/app/(main)/_lib/types';
 
@@ -29,8 +29,9 @@ export const ShukoDetailTable = (props: {
   fixFlag: boolean;
   user: User | null;
   setAdjustOpen: Dispatch<SetStateAction<boolean>>;
+  sagyoKbnId: number;
 }) => {
-  const { datas, fixFlag, user, setAdjustOpen } = props;
+  const { datas, fixFlag, user, setAdjustOpen, sagyoKbnId } = props;
 
   const router = useRouter();
   const path = usePathname();
@@ -48,7 +49,17 @@ export const ShukoDetailTable = (props: {
   return (
     <TableContainer sx={{ overflow: 'auto', maxHeight: '80vh', maxWidth: '70vw' }}>
       <Table stickyHeader size="small">
-        <TableHead sx={{ bgcolor: 'primary.light' }}>
+        <TableHead
+          sx={{
+            '& .MuiTableCell-stickyHeader': {
+              backgroundColor:
+                sagyoKbnId === SAGYO_KBN_ID.shukoConfirmation
+                  ? sagyoKbnColors.shukoConfirmation
+                  : sagyoKbnColors.shukoPicking,
+              color: sagyoKbnId === SAGYO_KBN_ID.shukoConfirmation ? 'white' : 'inherit',
+            },
+          }}
+        >
           <TableRow sx={{ whiteSpace: 'nowrap' }}>
             <TableCell align="center" />
             <TableCell align="left">機材名</TableCell>

@@ -509,7 +509,7 @@ export const LoanSituation = (props: {
           <Grid2 overflow="auto" size={{ xs: 'grow', sm: 'grow', md: 'grow' }}>
             <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'} height={31} mt={1} mb={0.5}>
               <Box display={'flex'} alignItems={'center'}>
-                <Box display={loanJuchuList.length > 0 ? 'flex' : 'none'} alignItems={'end'} mr={2}>
+                <Box display={'flex'} alignItems={'end'} mr={2}>
                   <Typography fontSize={'small'}>使用数</Typography>
                 </Box>
                 <Button onClick={handleBackDateChange}>
