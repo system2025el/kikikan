@@ -36,10 +36,13 @@ export const selectNyushukoDetail = async (
       n.dsp_ord_num_meisai,
       n.indent_num,
       n.mem2,
-      -- 受注明細が存在しない＝受注から削除されたのに実績が残っている行
+      -- 受注から削除されたのに実績が残っている行（受注明細が存在せず、予定数0）
+      -- ハンディが予定外に読み取った行も受注明細を持たないが、そちらは予定数に読取数が
+      -- 入るため、予定数0を条件に加えて区別する
       -- コンテナは t_juchu_kizai_meisai ではなく t_juchu_ctn_meisai 側に明細を持つため、
       -- ctn_flg で参照先を切り替えないと全コンテナ行が削除済みと誤判定される
       CASE
+        WHEN COALESCE(n.plan_qty, 0) <> 0 THEN 0
         WHEN COALESCE(n.ctn_flg, 0) = 1 THEN (c.juchu_kizai_meisai_id IS NULL)::integer
         ELSE (m.juchu_kizai_meisai_id IS NULL)::integer
       END AS juchu_meisai_del_flg

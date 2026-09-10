@@ -643,11 +643,19 @@ export const selectShukoResultDenKizaiCount = async (
 };
 
 /**
- * 予定数・実績数・補正数がすべて0になった入出庫伝票を削除
+ * 受注明細が存在せず、実績数・補正数が0になった入出庫伝票を削除
  *
- * deleteNyushukoDenKeepResulted で残した「受注から削除された」行は、現場が現物を
- * 取り除いて実績・補正を0にした時点で不要になる。予定数0を条件に含めているため、
- * 受注明細が存在する正当な数量0の行は削除されない。
+ * 受注明細が無く実績も補正も0の伝票行は、どこからも参照されず表示する意味も無いので削除する。
+ * 対象は2種類ある。
+ * - deleteNyushukoDenKeepResulted で残した「受注から削除された」行（予定数0）。現場が現物を
+ *   取り除いた時点で不要になる。
+ * - ハンディが予定外に読み取って作った行（予定数に読取数が入る）。誤送信した場合に、出発して
+ *   受注明細を作ってから消すのではなく、実績を消すだけで伝票ごと消せるようにする。
+ * 予定数は種類によって0だったり読取数だったりするため、条件に含めない。
+ *
+ * 1つの明細は機材（t_juchu_kizai_meisai）とコンテナ（t_juchu_ctn_meisai）のどちらか
+ * 一方にしか存在しないため、両方に無いことを確認すればコンテナも正しく判定できる。
+ * 受注明細がある行（コンテナ片側0や数量0保存などの正当な数量0の行を含む）は削除されない。
  *
  * @param data 入出庫伝票データ
  * @param connection トランザクション中の PoolClient、または Pool
@@ -667,18 +675,40 @@ export const deleteEmptyNyushukoDen = async (
 ) => {
   const query = `
     DELETE FROM
-      ${SCHEMA}.t_nyushuko_den
+      ${SCHEMA}.t_nyushuko_den AS d
     WHERE
-      juchu_head_id = $1
-      AND juchu_kizai_head_id = $2
-      AND juchu_kizai_meisai_id = $3
-      AND sagyo_kbn_id = $4
-      AND sagyo_den_dat = $5
-      AND sagyo_id = $6
-      AND kizai_id = $7
-      AND COALESCE(plan_qty, 0) = 0
-      AND COALESCE(result_qty, 0) = 0
-      AND COALESCE(result_adj_qty, 0) = 0
+      d.juchu_head_id = $1
+      AND d.juchu_kizai_head_id = $2
+      AND d.juchu_kizai_meisai_id = $3
+      AND d.sagyo_kbn_id = $4
+      AND d.sagyo_den_dat = $5
+      AND d.sagyo_id = $6
+      AND d.kizai_id = $7
+      AND COALESCE(d.result_qty, 0) = 0
+      AND COALESCE(d.result_adj_qty, 0) = 0
+      AND NOT EXISTS (
+        SELECT
+          1
+        FROM
+          ${SCHEMA}.t_juchu_kizai_meisai AS m
+        WHERE
+          m.juchu_head_id = d.juchu_head_id
+          AND m.juchu_kizai_head_id = d.juchu_kizai_head_id
+          AND m.juchu_kizai_meisai_id = d.juchu_kizai_meisai_id
+          AND m.kizai_id = d.kizai_id
+      )
+      AND NOT EXISTS (
+        SELECT
+          1
+        FROM
+          ${SCHEMA}.t_juchu_ctn_meisai AS c
+        WHERE
+          c.juchu_head_id = d.juchu_head_id
+          AND c.juchu_kizai_head_id = d.juchu_kizai_head_id
+          AND c.juchu_kizai_meisai_id = d.juchu_kizai_meisai_id
+          AND c.kizai_id = d.kizai_id
+          AND c.shozoku_id = d.sagyo_id
+      )
   `;
 
   const values = [

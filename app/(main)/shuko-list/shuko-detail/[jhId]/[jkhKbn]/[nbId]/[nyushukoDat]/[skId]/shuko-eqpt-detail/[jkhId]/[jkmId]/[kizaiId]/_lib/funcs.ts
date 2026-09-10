@@ -208,8 +208,9 @@ export const delshukoResult = async (
 
     await updateNyushukoDen(updateNyushukoDenData, connection);
 
-    // 受注から削除されて予定数0で残っている伝票は、現物を戻して実績・補正が0になった時点で不要になる
-    // 予定数0を条件に含めているため、受注明細が存在する正当な数量0の行は削除されない
+    // 受注明細が無い伝票（受注から削除された行・ハンディが予定外に読み取った行）は、
+    // 実績・補正が0になった時点で不要になるので消す
+    // 受注明細がある行は対象外なので、コンテナ片側0のような正当な数量0の行は残る
     await deleteEmptyNyushukoDen(
       {
         juchu_head_id: shukoEqptDetailData.juchuHeadId,
@@ -273,7 +274,7 @@ export const updShukoResultAdjQty = async (
       throw new Error('[updateResultAdjQty] DBエラー:', { cause: error });
     }
 
-    // 補正数を0に戻したことで、受注から削除されて残っていた伝票が空になる場合は消す
+    // 補正数を0に戻したことで、受注明細が無い伝票が空になる場合は消す
     await deleteEmptyNyushukoDen(
       {
         juchu_head_id: shukoEqptDetailData.juchuHeadId,
