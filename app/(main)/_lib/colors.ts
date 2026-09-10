@@ -49,11 +49,11 @@ export const sagyoKbnColors = {
   /**
    * 出庫ピッキング
    */
-  shukoPicking: 'rgba(255, 211, 207, 1)',
+  shukoPicking: 'rgba(33, 150, 243, 1)',
   /**
    * 出庫最終確認
    */
-  shukoConfirmation: 'rgba(33, 150, 243, 1)',
+  shukoConfirmation: 'rgba(255, 211, 207, 1)',
   /**
    * 入庫カウント
    */
