@@ -242,7 +242,7 @@ export const ShukoDetail = (props: {
                 shukoDetailData.sagyoKbnId === SAGYO_KBN_ID.shukoConfirmation
                   ? sagyoKbnColors.shukoConfirmation
                   : sagyoKbnColors.shukoPicking,
-              color: shukoDetailData.sagyoKbnId === SAGYO_KBN_ID.shukoConfirmation ? 'white' : 'inherit',
+              color: shukoDetailData.sagyoKbnId === SAGYO_KBN_ID.shukoConfirmation ? 'black' : 'white',
             }}
           >
             出庫明細({shukoDetailData.sagyoKbnId === SAGYO_KBN_ID.shukoConfirmation ? '最終確認' : 'ピッキング'})
