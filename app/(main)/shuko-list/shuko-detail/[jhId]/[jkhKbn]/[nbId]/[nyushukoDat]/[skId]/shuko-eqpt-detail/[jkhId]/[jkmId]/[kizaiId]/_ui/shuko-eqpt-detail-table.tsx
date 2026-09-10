@@ -32,7 +32,7 @@ export const ShukoEqptDetailTable = (props: {
                 sagyoKbnId === SAGYO_KBN_ID.shukoConfirmation
                   ? sagyoKbnColors.shukoConfirmation
                   : sagyoKbnColors.shukoPicking,
-              color: sagyoKbnId === SAGYO_KBN_ID.shukoConfirmation ? 'white' : 'inherit',
+              color: sagyoKbnId === SAGYO_KBN_ID.shukoConfirmation ? 'black' : 'white',
             },
           }}
         >
