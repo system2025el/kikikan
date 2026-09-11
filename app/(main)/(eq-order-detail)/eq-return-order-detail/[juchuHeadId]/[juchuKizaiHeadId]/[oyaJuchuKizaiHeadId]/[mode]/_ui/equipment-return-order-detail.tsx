@@ -211,6 +211,8 @@ export const EquipmentReturnOrderDetail = (props: {
 
   // ref
   const eqStockListRef = useRef(eqStockList);
+  // 在庫テーブルを取得した基準日（テーブルの左端はこの前日）。カレンダー選択日と異なり、実際に表示中の日付軸を表す
+  const tableAnchorDateRef = useRef<Date | null>(null);
   const leftRef = useRef<HTMLDivElement>(null);
   const rightRef = useRef<HTMLDivElement>(null);
   const isSyncing = useRef(false);
@@ -635,6 +637,8 @@ export const EquipmentReturnOrderDetail = (props: {
               );
               setOriginEqStockList(updatedEqStockData);
               setEqStockList(updatedEqStockData);
+              // カレンダー選択日更新（在庫テーブルの起点と揃える）
+              setSelectDate(updateNyukoDate);
             }
           }
           if (checkJuchuContainerMeisai) {
@@ -691,6 +695,7 @@ export const EquipmentReturnOrderDetail = (props: {
           uniqueIds,
           subDays(nyukoDate, 1)
         );
+        tableAnchorDateRef.current = nyukoDate;
 
         const idToStockMap = new Map<number, StockTableValues[]>();
         for (const row of allStockData) {
@@ -783,12 +788,12 @@ export const EquipmentReturnOrderDetail = (props: {
   };
   // 3か月前
   const handleBackDateChange = () => {
-    const date = subDays(new Date(selectDate), 91);
+    const date = subDays(new Date(tableAnchorDateRef.current ?? selectDate), 91);
     handleDateChange(date, 'day');
   };
   // 3か月後
   const handleForwardDateChange = () => {
-    const date = addDays(new Date(selectDate), 91);
+    const date = addDays(new Date(tableAnchorDateRef.current ?? selectDate), 91);
     handleDateChange(date, 'day');
   };
 
@@ -1226,7 +1231,7 @@ export const EquipmentReturnOrderDetail = (props: {
       }
       setEdit(false);
       reset();
-      setSelectDate(oyaShukoDate ?? new Date());
+      setSelectDate(returnNyukoDate ?? oyaShukoDate ?? new Date());
       setReturnJuchuKizaiMeisaiList(originReturnJuchuKizaiMeisaiList);
       setReturnJuchuContainerMeisaiList(originReturnJuchuContainerMeisaiList);
       setEqStockList(originEqStockList);
@@ -1286,11 +1291,12 @@ export const EquipmentReturnOrderDetail = (props: {
 
         let bulkStockData: StockTableValues[] = [];
         if (fetchTargetIds.length > 0) {
+          // 既存行と日付軸を揃える必要があるため、表示中の在庫テーブルと同じ基準日で取得する
           bulkStockData = await getALLStockList(
             getValues('juchuHeadId'),
             getValues('juchuKizaiHeadId'),
             fetchTargetIds,
-            subDays(selectDate, 1)
+            subDays(tableAnchorDateRef.current ?? selectDate, 1)
           );
         }
 
