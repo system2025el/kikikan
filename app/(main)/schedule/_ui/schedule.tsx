@@ -38,6 +38,8 @@ import { User } from '../../_lib/types';
 import { FormDateX } from '../../_ui/date';
 import { LoadingOverlay } from '../../_ui/loading';
 import { LightTooltipWithText } from '../../(masters)/_ui/tables';
+import { buildNyukoListPath } from '../../nyuko-list/_lib/search-params';
+import { buildShukoListPath } from '../../shuko-list/_lib/search-params';
 import { getWeeklyScheduleList } from '../_lib/funcs';
 import { WeeklyScheduleValues, WeeklySearchSchema, WeeklySearchValues, WeeklyValues } from '../_lib/types';
 import { TantoDialog } from './tanto-dialog';
@@ -127,7 +129,8 @@ export const Schedule = ({ user }: { user: User }) => {
   /**
    * 積み/降ろし・車両の列をクリックしたときの処理。
    * 積み(出庫)なら出庫一覧、降ろし(入庫)なら入庫一覧を、受注番号と入出庫日で絞り込んだ状態で別タブに開く。
-   * 一覧側は sessionStorage の検索条件を読んで初期表示するため、遷移前に書き込む。
+   * 検索条件はURLのクエリで渡す（openOrFocusTabがURLで同一タブかを判定するため、
+   * 条件が違えば別タブ・同じなら既存タブの通知になる）。
    */
   const handleClickNyushuko = (juchuHeadId: number, nyushukoShubetuId: number | null, nyushukoDat: string | null) => {
     if (!canRefNyushuko) return;
@@ -136,18 +139,11 @@ export const Schedule = ({ user }: { user: User }) => {
     // 入出庫日はその明細の1日だけに絞る（指定期間のfrom/toに同じ日を入れる）。
     // 一覧側はDatePickerで手入力されたDateを想定しているため、同じ「ローカル0時のDate」の形にそろえる
     const nyushukoDate = nyushukoDat ? dayjs(toJapanYMDString(nyushukoDat, '-')).toDate() : null;
-    sessionStorage.setItem(
-      isShuko ? 'shukoListSearchParams' : 'nyukoListSearchParams',
-      JSON.stringify({
-        selectedDate: { value: '4', range: { from: nyushukoDate, to: nyushukoDate } },
-        juchuHeadId: juchuHeadId,
-        [isShuko ? 'shukoBasho' : 'nyukoBasho']: 0,
-        kokyaku: '',
-        koenNam: '',
-        section: [],
-      })
-    );
-    openOrFocusTab(isShuko ? '/shuko-list' : '/nyuko-list');
+    const searchValues = {
+      selectedDate: { value: '4', range: { from: nyushukoDate, to: nyushukoDate } },
+      juchuHeadId: juchuHeadId,
+    };
+    openOrFocusTab(isShuko ? buildShukoListPath(searchValues) : buildNyukoListPath(searchValues));
   };
 
   /** 顧客名・公演名・車両ヘッダー名の列をクリックしたときの処理。受注(伝票)画面を別タブに開く */

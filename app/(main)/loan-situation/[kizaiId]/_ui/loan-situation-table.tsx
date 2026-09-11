@@ -19,6 +19,8 @@ import { permission } from '@/app/(main)/_lib/permission';
 import { openOrFocusTab } from '@/app/(main)/_lib/tab-focus';
 import { User } from '@/app/(main)/_lib/types';
 import { LightTooltipWithText } from '@/app/(main)/(masters)/_ui/tables';
+import { buildNyukoListPath } from '@/app/(main)/nyuko-list/_lib/search-params';
+import { buildShukoListPath } from '@/app/(main)/shuko-list/_lib/search-params';
 
 import { LoanJuchu, LoanStockTableValues, LoanUseTableValues } from '../_lib/types';
 
@@ -149,25 +151,14 @@ export const LoanSituationTable = (props: LoanSituationTableProps) => {
                 {row.shukoDat ? (
                   <Button
                     variant="text"
-                    onClick={() => {
-                      sessionStorage.setItem(
-                        'shukoListSearchParams',
-                        JSON.stringify({
-                          selectedDate: {
-                            value: '4',
-                            range: {
-                              from: null,
-                              to: null,
-                            },
-                          },
+                    onClick={() =>
+                      openOrFocusTab(
+                        buildShukoListPath({
+                          selectedDate: { value: '4', range: { from: null, to: null } },
                           juchuHeadId: row.juchuHeadId,
-                          shukoBasho: 0,
-                          kokyaku: '',
-                          section: [],
                         })
-                      );
-                      openOrFocusTab('/shuko-list');
-                    }}
+                      )
+                    }
                     sx={{ p: 0, height: '15px', m: 0, minWidth: 0, width: 1 }}
                   >
                     {toJapanMDString(row.shukoDat)}
@@ -180,25 +171,14 @@ export const LoanSituationTable = (props: LoanSituationTableProps) => {
                 {row.nyukoDat ? (
                   <Button
                     variant="text"
-                    onClick={() => {
-                      sessionStorage.setItem(
-                        'nyukoListSearchParams',
-                        JSON.stringify({
-                          selectedDate: {
-                            value: '4',
-                            range: {
-                              from: null,
-                              to: null,
-                            },
-                          },
+                    onClick={() =>
+                      openOrFocusTab(
+                        buildNyukoListPath({
+                          selectedDate: { value: '4', range: { from: null, to: null } },
                           juchuHeadId: row.juchuHeadId,
-                          nyukoBasho: 0,
-                          kokyaku: '',
-                          section: [],
                         })
-                      );
-                      openOrFocusTab('/nyuko-list');
-                    }}
+                      )
+                    }
                     sx={{ p: 0, height: '15px', m: 0, minWidth: 0, width: 1 }}
                   >
                     {toJapanMDString(row.nyukoDat)}
