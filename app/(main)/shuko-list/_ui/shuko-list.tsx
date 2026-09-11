@@ -30,6 +30,7 @@ import { getCustomerSelection } from '../../(masters)/_lib/funcs';
 import { getSectionShortSelections } from '../../(masters)/sections-master/_lib/funcs';
 import { radioData } from '../_lib/datas';
 import { getPdfData, getShukoList } from '../_lib/funcs';
+import { buildShukoListQuery, parseShukoListQuery } from '../_lib/search-params';
 import { ShukoKizai, ShukoListSearchValues, ShukoTableValues } from '../_lib/types';
 import { ShukoPdfModel, usePdf } from '../shuko/_lib/hooks/usePdf';
 import { ShukoListTable } from './shuko-list-table';
@@ -84,6 +85,9 @@ export const ShukoList = (props: { user: User }) => {
   const onSubmit = async (data: ShukoListSearchValues) => {
     setIsLoading(true);
     sessionStorage.setItem('shukoListSearchParams', JSON.stringify(getValues()));
+    // 他画面からのopenOrFocusTabはURLで同一タブかを判定するため、画面内で検索したときもURLを現在の条件に追随させる
+    // (router.replaceだとRSCの再取得が走るのでhistory APIを直接使う)
+    window.history.replaceState(null, '', `${window.location.pathname}?${buildShukoListQuery(data)}`);
     try {
       const newShukoList = await getShukoList(data);
       setShukoList(newShukoList);
@@ -163,8 +167,11 @@ export const ShukoList = (props: { user: User }) => {
 
   /* useEffect --------------------------------- */
   useEffect(() => {
+    // 他画面から条件付きで開かれたときはURLのクエリを優先し、無ければ(メニューからの遷移など)前回の検索条件を復元する
+    const queryParams = parseShukoListQuery(new URLSearchParams(window.location.search));
     const searchPramsString = sessionStorage.getItem('shukoListSearchParams');
-    const searchParams: ShukoListSearchValues = searchPramsString ? JSON.parse(searchPramsString) : null;
+    const searchParams: ShukoListSearchValues =
+      queryParams ?? (searchPramsString ? JSON.parse(searchPramsString) : null);
 
     getOptions();
 

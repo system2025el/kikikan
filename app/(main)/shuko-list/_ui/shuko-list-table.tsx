@@ -24,6 +24,7 @@ import { permission } from '../../_lib/permission';
 import { openOrFocusTab } from '../../_lib/tab-focus';
 import { User } from '../../_lib/types';
 import { LoadingOverlay } from '../../_ui/loading';
+import { buildNyukoListPath } from '../../nyuko-list/_lib/search-params';
 import { ShukoTableValues } from '../_lib/types';
 
 export const ShukoListTable = (props: {
@@ -137,25 +138,14 @@ export const ShukoListTable = (props: {
                 <Button
                   variant="text"
                   size="small"
-                  onClick={() => {
-                    sessionStorage.setItem(
-                      'nyukoListSearchParams',
-                      JSON.stringify({
-                        selectedDate: {
-                          value: '4',
-                          range: {
-                            from: null,
-                            to: null,
-                          },
-                        },
+                  onClick={() =>
+                    router.push(
+                      buildNyukoListPath({
+                        selectedDate: { value: '4', range: { from: null, to: null } },
                         juchuHeadId: row.juchuHeadId,
-                        nyukoBasho: 0,
-                        kokyaku: '',
-                        section: [],
                       })
-                    );
-                    router.push('nyuko-list');
-                  }}
+                    )
+                  }
                   sx={{ py: 0, px: 1 }}
                 >
                   <LocalShippingIcon fontSize="small" sx={{ transform: 'scaleX(-1)' }} />

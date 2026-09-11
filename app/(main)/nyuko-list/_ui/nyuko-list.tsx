@@ -27,6 +27,7 @@ import { getCustomerSelection } from '../../(masters)/_lib/funcs';
 import { getSectionShortSelections } from '../../(masters)/sections-master/_lib/funcs';
 import { radioData } from '../_lib/datas';
 import { getNyukoList, getPdfData } from '../_lib/funcs';
+import { buildNyukoListQuery, parseNyukoListQuery } from '../_lib/search-params';
 import { NyukoListSearchValues, NyukoTableValues } from '../_lib/types';
 import { NyukoPdfModel, usePdf } from '../nyuko/_lib/hooks/usePdf';
 import { NyukoListTable } from './nyuko-list-table';
@@ -79,6 +80,9 @@ export const NyukoList = (props: { user: User }) => {
   const onSubmit = async (data: NyukoListSearchValues) => {
     setIsLoading(true);
     sessionStorage.setItem('nyukoListSearchParams', JSON.stringify(getValues()));
+    // 他画面からのopenOrFocusTabはURLで同一タブかを判定するため、画面内で検索したときもURLを現在の条件に追随させる
+    // (router.replaceだとRSCの再取得が走るのでhistory APIを直接使う)
+    window.history.replaceState(null, '', `${window.location.pathname}?${buildNyukoListQuery(data)}`);
     try {
       const newNyukoList = await getNyukoList(data);
       setNyukoList(newNyukoList);
@@ -158,8 +162,11 @@ export const NyukoList = (props: { user: User }) => {
 
   /* useEffect --------------------------------- */
   useEffect(() => {
+    // 他画面から条件付きで開かれたときはURLのクエリを優先し、無ければ(メニューからの遷移など)前回の検索条件を復元する
+    const queryParams = parseNyukoListQuery(new URLSearchParams(window.location.search));
     const searchPramsString = sessionStorage.getItem('nyukoListSearchParams');
-    const searchParams: NyukoListSearchValues = searchPramsString ? JSON.parse(searchPramsString) : null;
+    const searchParams: NyukoListSearchValues =
+      queryParams ?? (searchPramsString ? JSON.parse(searchPramsString) : null);
     getOptions();
 
     const getList = async (searchParams: NyukoListSearchValues) => {
