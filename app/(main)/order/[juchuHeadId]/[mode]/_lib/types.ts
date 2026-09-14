@@ -177,7 +177,8 @@ export const CopyDialogSchema = z
   .refine((d) => d.nyukoDat !== null, { path: ['nyukoDat'], message: validationMessages.required() })
   .refine((d) => !d.shukoDat || !d.nyukoDat || d.shukoDat <= d.nyukoDat, {
     path: ['nyukoDat'],
-    message: '入庫日は出庫日以降の日付を入力してください',
+    // 入力欄の幅（190px）に収めて折り返さないよう、受注機材明細側と同じ短い文体に揃えている
+    message: '出庫日以降にしてください',
   });
 
 export type CopyDialogValue = z.infer<typeof CopyDialogSchema>;
