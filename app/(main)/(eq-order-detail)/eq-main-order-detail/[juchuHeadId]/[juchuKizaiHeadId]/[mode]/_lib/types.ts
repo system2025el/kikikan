@@ -3,6 +3,11 @@ import { nullable, z } from 'zod';
 import { MEMO_MAX_LENGTH } from '@/app/_lib/constants';
 import { validationMessages } from '@/app/(main)/_lib/validation-messages';
 
+/** 入庫日時が出庫日時より前になっている場合のメッセージ（入庫日時側に出す） */
+const NYUKO_ORDER_MESSAGE = '出庫日時以降にしてください';
+/** 出庫日時が入庫日時より後になっている場合のメッセージ（出庫日時側に出す） */
+const SHUKO_ORDER_MESSAGE = '入庫日時以前にしてください';
+
 export const JuchuKizaiHeadSchema = z
   .object({
     juchuHeadId: z.number(),
@@ -46,6 +51,56 @@ export const JuchuKizaiHeadSchema = z
   .refine((data) => data.kicsNyukoDat || data.yardNyukoDat, {
     message: validationMessages.required(),
     path: ['yardNyukoDat'],
+  })
+  // 入庫日時は出庫日時以降でなければならない。所属（KICS/YARD）ごとの組で比較する。
+  // KICS出庫→YARD入庫のように所属をまたぐ運用があるため、片方しか入力されていない組は比較しない。
+  .refine((data) => !data.kicsShukoDat || !data.kicsNyukoDat || data.kicsShukoDat <= data.kicsNyukoDat, {
+    message: '',
+    path: ['kicsShukoDat'],
+  })
+  .refine((data) => !data.kicsShukoDat || !data.kicsNyukoDat || data.kicsShukoDat <= data.kicsNyukoDat, {
+    message: NYUKO_ORDER_MESSAGE,
+    path: ['kicsNyukoDat'],
+  })
+  .refine((data) => !data.yardShukoDat || !data.yardNyukoDat || data.yardShukoDat <= data.yardNyukoDat, {
+    message: '',
+    path: ['yardShukoDat'],
+  })
+  .refine((data) => !data.yardShukoDat || !data.yardNyukoDat || data.yardShukoDat <= data.yardNyukoDat, {
+    message: NYUKO_ORDER_MESSAGE,
+    path: ['yardNyukoDat'],
+  })
+  // 組が噛み合わない入力（KICS出庫のみ・YARD入庫のみ等）は上の組比較をすり抜けるため、
+  // 所属をまたいでも「すべての出庫日時 <= すべての入庫日時」が成り立つことを確認する。
+  // 両方の組が揃っている場合は組比較に吸収されるので、実際に効くのは片方の組が欠けているとき。
+  // 逆転を許すと、出庫前に入庫する伝票が作られたり、getRange() が空配列になって
+  // 使用日カレンダー（t_juchu_kizai_honbanbi の種別1）が1件も作られず在庫を消費しないデータになる。
+  .superRefine((data, ctx) => {
+    const shukoList: { key: 'kicsShukoDat' | 'yardShukoDat'; dat: Date }[] = [];
+    if (data.kicsShukoDat) shukoList.push({ key: 'kicsShukoDat', dat: data.kicsShukoDat });
+    if (data.yardShukoDat) shukoList.push({ key: 'yardShukoDat', dat: data.yardShukoDat });
+
+    const nyukoList: { key: 'kicsNyukoDat' | 'yardNyukoDat'; dat: Date }[] = [];
+    if (data.kicsNyukoDat) nyukoList.push({ key: 'kicsNyukoDat', dat: data.kicsNyukoDat });
+    if (data.yardNyukoDat) nyukoList.push({ key: 'yardNyukoDat', dat: data.yardNyukoDat });
+
+    if (shukoList.length === 0 || nyukoList.length === 0) return;
+
+    // 最早の出庫日時・最遅の入庫日時（date-funcs.ts の getShukoDate/getNyukoDate と同じ採り方）
+    const firstShuko = shukoList.reduce((a, b) => (a.dat <= b.dat ? a : b));
+    const lastNyuko = nyukoList.reduce((a, b) => (a.dat >= b.dat ? a : b));
+
+    // 最早の出庫日時より前の入庫日時は、出庫する前に戻ってくることになる
+    for (const nyuko of nyukoList.filter((d) => d.dat < firstShuko.dat)) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: '', path: [firstShuko.key] });
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: NYUKO_ORDER_MESSAGE, path: [nyuko.key] });
+    }
+
+    // 最遅の入庫日時より後の出庫日時は、すべて戻ってきた後に出ていくことになる
+    for (const shuko of shukoList.filter((d) => d.dat > lastNyuko.dat)) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: '', path: [lastNyuko.key] });
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: SHUKO_ORDER_MESSAGE, path: [shuko.key] });
+    }
   });
 
 export type JuchuKizaiHeadValues = z.infer<typeof JuchuKizaiHeadSchema>;
