@@ -95,6 +95,13 @@ export const insertHonbanbi = async (data: JuchuKizaiHonbanbi, connection: PoolC
  * @returns
  */
 export const insertAllHonbanbi = async (data: JuchuKizaiHonbanbi[], connection: PoolClient) => {
+  // 空配列は「日付範囲が空になっている」データ異常を意味する（呼び出し元は必ず1件以上渡す）。
+  // 黙って何もしないと、使用日カレンダーを1件も持たない＝在庫を消費しないヘッダーが
+  // そのままCOMMITされてしまうため、明示的に失敗させて呼び出し元のトランザクションを巻き戻す。
+  if (data.length === 0) {
+    throw new Error('[insertAllHonbanbi] 登録対象が空です');
+  }
+
   const cols = Object.keys(data[0]) as (keyof (typeof data)[0])[];
   const values = data.flatMap((obj) => cols.map((col) => obj[col] ?? null));
   let placeholderIndex = 1;

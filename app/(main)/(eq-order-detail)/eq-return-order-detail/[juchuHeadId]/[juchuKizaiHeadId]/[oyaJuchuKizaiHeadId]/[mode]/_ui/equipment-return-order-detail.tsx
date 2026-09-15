@@ -42,7 +42,7 @@ import {
 import { addDays, addMonths, endOfMonth, set, subDays, subMonths } from 'date-fns';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
-import { Controller, useForm, useWatch } from 'react-hook-form';
+import { Controller, SubmitErrorHandler, useForm, useWatch } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 
 import { BASHO_ID, JUCHU_KIZAI_HEAD_KBN, LOCK_SHUBETU, SAGYO_KBN_ID } from '@/app/_lib/constants';
@@ -211,6 +211,8 @@ export const EquipmentReturnOrderDetail = (props: {
 
   // ref
   const eqStockListRef = useRef(eqStockList);
+  // 在庫テーブルを取得した基準日（テーブルの左端はこの前日）。カレンダー選択日と異なり、実際に表示中の日付軸を表す
+  const tableAnchorDateRef = useRef<Date | null>(null);
   const leftRef = useRef<HTMLDivElement>(null);
   const rightRef = useRef<HTMLDivElement>(null);
   const isSyncing = useRef(false);
@@ -460,6 +462,19 @@ export const EquipmentReturnOrderDetail = (props: {
   };
 
   /**
+   * バリデーションエラーで保存が中断された時
+   * このフォームの入力項目（入庫日時・受注明細名・割引金額・メモ）はすべて受注機材ヘッダーの
+   * アコーディオン内にあり、保存済みヘッダーでは既定で閉じている。
+   * 閉じたまま保存を押すとエラーの赤枠が見えず無反応に見えるため、開いて見せる
+   * @param formErrors 入力エラー
+   */
+  const onInvalid: SubmitErrorHandler<ReturnJuchuKizaiHeadValues> = (formErrors) => {
+    if (Object.keys(formErrors).length > 0) {
+      setJuchuKizaiHeadExpanded(true);
+    }
+  };
+
+  /**
    * 保存ボタン押下時
    * @param data 受注機材ヘッダーデータ
    * @returns
@@ -530,6 +545,8 @@ export const EquipmentReturnOrderDetail = (props: {
             message: '',
           });
         }
+        // どの所属の入庫日時が問題かは上の赤枠でしか伝わらないため、閉じていたら開いて見せる
+        setJuchuKizaiHeadExpanded(true);
         setAlertTitle('入庫日時が入力されていません');
         setAlertMessage('入庫日時を入力してください');
         setAlertOpen(true);
@@ -635,6 +652,8 @@ export const EquipmentReturnOrderDetail = (props: {
               );
               setOriginEqStockList(updatedEqStockData);
               setEqStockList(updatedEqStockData);
+              // カレンダー選択日更新（在庫テーブルの起点と揃える）
+              setSelectDate(updateNyukoDate);
             }
           }
           if (checkJuchuContainerMeisai) {
@@ -691,6 +710,7 @@ export const EquipmentReturnOrderDetail = (props: {
           uniqueIds,
           subDays(nyukoDate, 1)
         );
+        tableAnchorDateRef.current = nyukoDate;
 
         const idToStockMap = new Map<number, StockTableValues[]>();
         for (const row of allStockData) {
@@ -783,12 +803,12 @@ export const EquipmentReturnOrderDetail = (props: {
   };
   // 3か月前
   const handleBackDateChange = () => {
-    const date = subDays(new Date(selectDate), 91);
+    const date = subDays(new Date(tableAnchorDateRef.current ?? selectDate), 91);
     handleDateChange(date, 'day');
   };
   // 3か月後
   const handleForwardDateChange = () => {
-    const date = addDays(new Date(selectDate), 91);
+    const date = addDays(new Date(tableAnchorDateRef.current ?? selectDate), 91);
     handleDateChange(date, 'day');
   };
 
@@ -1122,39 +1142,25 @@ export const EquipmentReturnOrderDetail = (props: {
    * KICS入庫日確定時
    * @param newDate KICS入庫日
    */
-  const handleKicsNyukoAccept = async (newDate: Date | null) => {
-    if (isProcessing) return;
-    setIsProcessing(true);
+  const handleKicsNyukoCommit = (newDate: Date | null) => {
+    if (newDate === null) return;
+    trigger(['kicsNyukoDat', 'yardNyukoDat']);
 
-    try {
-      const lockResult = await lock();
+    const yardNyukoDat = getValues('yardNyukoDat');
 
-      if (lockResult) {
-        if (newDate === null) return;
-        trigger(['kicsNyukoDat', 'yardNyukoDat']);
-
-        const yardNyukoDat = getValues('yardNyukoDat');
-
-        if (yardNyukoDat === null) {
-          clearErrors('yardNyukoDat');
-        }
-
-        setReturnJuchuKizaiMeisaiList((prev) =>
-          prev.map((d) =>
-            newDate && !yardNyukoDat
-              ? { ...d, shozokuId: BASHO_ID.kics }
-              : !newDate && yardNyukoDat
-                ? { ...d, shozokuId: BASHO_ID.yard }
-                : { ...d, shozokuId: d.mShozokuId }
-          )
-        );
-      }
-    } catch (e) {
-      setSnackBarMessage('サーバー接続エラー');
-      setSnackBarOpen(true);
-    } finally {
-      setIsProcessing(false);
+    if (yardNyukoDat === null) {
+      clearErrors('yardNyukoDat');
     }
+
+    setReturnJuchuKizaiMeisaiList((prev) =>
+      prev.map((d) =>
+        newDate && !yardNyukoDat
+          ? { ...d, shozokuId: BASHO_ID.kics }
+          : !newDate && yardNyukoDat
+            ? { ...d, shozokuId: BASHO_ID.yard }
+            : { ...d, shozokuId: d.mShozokuId }
+      )
+    );
   };
 
   /**
@@ -1167,42 +1173,28 @@ export const EquipmentReturnOrderDetail = (props: {
   };
 
   /**
-   * YARD入庫日確定時
+   * YARD入庫日の入力完了時
    * @param newDate YARD入庫日
    */
-  const handleYardNyukoAccept = async (newDate: Date | null) => {
-    if (isProcessing) return;
-    setIsProcessing(true);
+  const handleYardNyukoCommit = (newDate: Date | null) => {
+    if (newDate === null) return;
+    trigger(['kicsNyukoDat', 'yardNyukoDat']);
 
-    try {
-      const lockResult = await lock();
+    const kicsNyukoDat = getValues('kicsNyukoDat');
 
-      if (lockResult) {
-        if (newDate === null) return;
-        trigger(['kicsNyukoDat', 'yardNyukoDat']);
-
-        const kicsNyukoDat = getValues('kicsNyukoDat');
-
-        if (kicsNyukoDat === null) {
-          clearErrors('kicsNyukoDat');
-        }
-
-        setReturnJuchuKizaiMeisaiList((prev) =>
-          prev.map((d) =>
-            kicsNyukoDat && !newDate
-              ? { ...d, shozokuId: BASHO_ID.kics }
-              : !kicsNyukoDat && newDate
-                ? { ...d, shozokuId: BASHO_ID.yard }
-                : { ...d, shozokuId: d.mShozokuId }
-          )
-        );
-      }
-    } catch (e) {
-      setSnackBarMessage('サーバー接続エラー');
-      setSnackBarOpen(true);
-    } finally {
-      setIsProcessing(false);
+    if (kicsNyukoDat === null) {
+      clearErrors('kicsNyukoDat');
     }
+
+    setReturnJuchuKizaiMeisaiList((prev) =>
+      prev.map((d) =>
+        kicsNyukoDat && !newDate
+          ? { ...d, shozokuId: BASHO_ID.kics }
+          : !kicsNyukoDat && newDate
+            ? { ...d, shozokuId: BASHO_ID.yard }
+            : { ...d, shozokuId: d.mShozokuId }
+      )
+    );
   };
 
   /**
@@ -1226,7 +1218,7 @@ export const EquipmentReturnOrderDetail = (props: {
       }
       setEdit(false);
       reset();
-      setSelectDate(oyaShukoDate ?? new Date());
+      setSelectDate(returnNyukoDate ?? oyaShukoDate ?? new Date());
       setReturnJuchuKizaiMeisaiList(originReturnJuchuKizaiMeisaiList);
       setReturnJuchuContainerMeisaiList(originReturnJuchuContainerMeisaiList);
       setEqStockList(originEqStockList);
@@ -1286,11 +1278,12 @@ export const EquipmentReturnOrderDetail = (props: {
 
         let bulkStockData: StockTableValues[] = [];
         if (fetchTargetIds.length > 0) {
+          // 既存行と日付軸を揃える必要があるため、表示中の在庫テーブルと同じ基準日で取得する
           bulkStockData = await getALLStockList(
             getValues('juchuHeadId'),
             getValues('juchuKizaiHeadId'),
             fetchTargetIds,
-            subDays(selectDate, 1)
+            subDays(tableAnchorDateRef.current ?? selectDate, 1)
           );
         }
 
@@ -1529,7 +1522,7 @@ export const EquipmentReturnOrderDetail = (props: {
         <LoadingOverlay />
       ) : (
         <Container disableGutters sx={{ minWidth: '100%', pb: 10 }} maxWidth={'xl'}>
-          <form onSubmit={handleSubmit(onSubmit)}>
+          <form onSubmit={handleSubmit(onSubmit, onInvalid)}>
             <Box display={'flex'} justifyContent={'space-between'} mb={1}>
               <Grid2 container alignItems={'center'} spacing={2}>
                 {nyukoFixFlag && (
@@ -1843,7 +1836,7 @@ export const EquipmentReturnOrderDetail = (props: {
                                 }
                                 handleKicsNyukoChange(newDate);
                               }}
-                              onAccept={handleKicsNyukoAccept}
+                              onCommit={handleKicsNyukoCommit}
                               error={!!fieldState.error}
                               helperText={fieldState.error?.message}
                               disabled={!edit || nyukoFixFlag}
@@ -1889,7 +1882,7 @@ export const EquipmentReturnOrderDetail = (props: {
                                 }
                                 handleYardNyukoChange(newDate);
                               }}
-                              onAccept={handleYardNyukoAccept}
+                              onCommit={handleYardNyukoCommit}
                               error={!!fieldState.error}
                               helperText={fieldState.error?.message}
                               disabled={!edit || nyukoFixFlag}
