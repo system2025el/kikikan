@@ -14,6 +14,12 @@ export const metadata: Metadata = {
   description: '移動詳細ページです',
 };
 
+/**
+ * 移動機材詳細
+ *
+ * 1画面 = 1受注機材ヘッダー。同じ機材でも公演が違えば別の画面になるので、
+ * ルートには機材idに加えて受注2列が要る。手動追加の機材は 0/0。
+ */
 const Page = async (props: {
   params: Promise<{
     sagyoKbnId: string;
@@ -21,6 +27,8 @@ const Page = async (props: {
     sagyoSijiId: string;
     nyushukoBashoId: string;
     kizaiId: string;
+    juchuHeadId: string;
+    juchuKizaiHeadId: string;
   }>;
 }) => {
   const params = await props.params;
@@ -41,6 +49,9 @@ const Page = async (props: {
   const fixKbn =
     Number(params.sagyoKbnId) === SAGYO_KBN_ID.idoShuko ? SAGYO_KBN_ID.shukoConfirmed : SAGYO_KBN_ID.nyukoConfirmed;
 
+  const juchuHeadId = Number(params.juchuHeadId);
+  const juchuKizaiHeadId = Number(params.juchuKizaiHeadId);
+
   // 移動伝票データ、移動機材詳細データ、完了フラグ
   const [idoDenDetailData, idoEqptDetailData, fixFlag] = await Promise.all([
     getIdoDenDetail(
@@ -48,14 +59,18 @@ const Page = async (props: {
       Number(params.sagyoSijiId),
       params.nyushukoDat,
       Number(params.nyushukoBashoId),
-      Number(params.kizaiId)
+      Number(params.kizaiId),
+      juchuHeadId,
+      juchuKizaiHeadId
     ),
     getIdoEqptDetail(
       Number(params.sagyoKbnId),
       Number(params.sagyoSijiId),
       params.nyushukoDat,
       Number(params.nyushukoBashoId),
-      Number(params.kizaiId)
+      Number(params.kizaiId),
+      juchuHeadId,
+      juchuKizaiHeadId
     ),
     getIdoFix(fixKbn, Number(params.sagyoSijiId), params.nyushukoDat, Number(params.nyushukoBashoId)),
   ]);

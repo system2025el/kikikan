@@ -1,18 +1,7 @@
 'use client';
 import Delete from '@mui/icons-material/Delete';
 import EventNoteIcon from '@mui/icons-material/EventNote';
-import {
-  Box,
-  Button,
-  IconButton,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TextField,
-} from '@mui/material';
+import { IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField } from '@mui/material';
 import { purple } from '@mui/material/colors';
 import { usePathname, useRouter } from 'next/navigation';
 import { memo, useState } from 'react';
@@ -25,20 +14,23 @@ import { User } from '@/app/(main)/_lib/types';
 import { useDirty } from '@/app/(main)/_ui/dirty-context';
 import { LightTooltipWithText } from '@/app/(main)/(masters)/_ui/tables';
 
-import { IdoDetailTableValues } from '../_lib/types';
+import { IdoDetailRowKey, IdoDetailTableValues, toIdoRowKey } from '../_lib/types';
 
 /**
  * 移動出庫の明細テーブル
  *
- * 最大130行 × 1行あたり18個のMUIコンポーネントを持つため、親（移動メモの入力など）の
+ * 1行 = 1受注機材ヘッダー。同じ機材が複数の公演に紐づく場合は行が分かれる。
+ *
+ * 行数 × 1行あたり18個のMUIコンポーネントを持つため、親（移動メモの入力など）の
  * 再レンダリングを拾うと目に見えて重くなる。memo で包んでいるので、
  * 呼び出し側は handleCellChange / handleIdoDenDelete を useCallback で固定すること。
+ * 明細単位になって行数が増えたぶん、この memo はより効くようになっている。
  */
 export const ShukoIdoDenTable = memo(function ShukoIdoDenTable(props: {
   user: User;
   datas: IdoDetailTableValues[];
-  handleCellChange: (kizaiId: number, planQty: number) => void;
-  handleIdoDenDelete: (kizaiId: number) => void;
+  handleCellChange: (row: IdoDetailRowKey, planQty: number) => void;
+  handleIdoDenDelete: (row: IdoDetailRowKey) => void;
   fixFlag: boolean;
   /** 保存などの通信中。ローディングで覆っていてもフォーカス中の入力欄はキー入力を拾うため disabled にする */
   isSaving: boolean;
@@ -48,7 +40,6 @@ export const ShukoIdoDenTable = memo(function ShukoIdoDenTable(props: {
   // 移動数の入力・行削除の可否
   const inputDisabled = fixFlag || isSaving || user.permission.nyushuko === permission.nyushuko_ref;
 
-  const router = useRouter();
   const path = usePathname();
 
   // 処理中制御
@@ -59,13 +50,16 @@ export const ShukoIdoDenTable = memo(function ShukoIdoDenTable(props: {
 
   /**
    * 機材名押下時
-   * @param kizaiId 機材id
+   *
+   * 機材詳細は明細単位なので、遷移先には受注2列まで載せる。
+   * 手動追加行は 0/0 になる。
+   * @param row 明細行のキー
    */
-  const handleClick = (kizaiId: number) => {
+  const handleClick = (row: IdoDetailRowKey) => {
     if (isProcessing) return;
 
     setIsProcessing(true);
-    requestNavigation(`${path}/ido-eqpt-detail/${kizaiId}`);
+    requestNavigation(`${path}/ido-eqpt-detail/${row.kizaiId}/${row.juchuHeadId}/${row.juchuKizaiHeadId}`);
   };
 
   return (
@@ -83,9 +77,6 @@ export const ShukoIdoDenTable = memo(function ShukoIdoDenTable(props: {
             </TableCell>
             <TableCell align="left" style={styles.header}>
               明細名
-            </TableCell>
-            <TableCell align="right" style={styles.header}>
-              予定内訳
             </TableCell>
             <TableCell align="center" style={styles.header}>
               貸出状況
@@ -124,11 +115,14 @@ export const ShukoIdoDenTable = memo(function ShukoIdoDenTable(props: {
             .filter((d) => !d.delFlag)
             .map((row, index) => (
               <TableRow
-                key={index}
+                key={toIdoRowKey(row)}
                 sx={{
                   whiteSpace: 'nowrap',
-                  backgroundColor:
-                    row.diffQty === 0 /*&& row.planQty !== 0*/
+                  // 未保存を「済」より先に判定すること。未保存行は移動数0・読取0だと
+                  // 差異0になり、そのままでは「済」として緑になってしまう
+                  backgroundColor: !row.saveFlag
+                    ? statusColors.unsaved
+                    : row.diffQty === 0 /*&& row.planQty !== 0*/
                       ? statusColors.completed
                       : row.ctnFlg
                         ? statusColors.ctn
@@ -137,10 +131,10 @@ export const ShukoIdoDenTable = memo(function ShukoIdoDenTable(props: {
               >
                 <TableCell padding="checkbox">
                   <IconButton
-                    onClick={(e) => {
-                      handleIdoDenDelete(row.kizaiId);
-                    }}
+                    onClick={() => handleIdoDenDelete(row)}
                     sx={{
+                      // 生きている受注に紐づかない行だけ消せる。
+                      // 手動追加行と、受注側で削除されて紐づきが外れた行がこれに当たる
                       display: row.juchuFlg === 0 ? 'inline-block' : 'none',
                       color: 'red',
                     }}
@@ -152,7 +146,7 @@ export const ShukoIdoDenTable = memo(function ShukoIdoDenTable(props: {
                 <TableCell padding="checkbox">{index + 1}</TableCell>
                 <TableCell
                   align="left"
-                  onClick={row.saveFlag ? () => handleClick(row.kizaiId) : undefined}
+                  onClick={row.saveFlag ? () => handleClick(row) : undefined}
                   sx={{
                     cursor: row.saveFlag ? 'pointer' : 'text',
                     '&:hover': { backgroundColor: row.saveFlag ? dispColors.hover : dispColors.main },
@@ -160,33 +154,17 @@ export const ShukoIdoDenTable = memo(function ShukoIdoDenTable(props: {
                 >
                   {row.kizaiNam}
                 </TableCell>
-                {/* 受注内訳。1機材に複数の受注明細が紐づく場合は縦に積む。
-                    公演名・明細名・予定内訳の3列は1行ずつ対応するので、行の高さを揃えて横に読めるようにしている。
-                    並びは移動予定数の降順（ビュー側でソート済み）。予定内訳の合計は移動予定数と一致する */}
+                {/* 公演名・明細名。1行 = 1受注機材ヘッダーなので1つずつ。
+                    受注に紐づかない手動追加行は空欄になる */}
                 <TableCell align="left">
-                  {row.juchuMeisai.map((meisai) => (
-                    <Box key={`${meisai.juchuHeadId}-${meisai.juchuKizaiHeadId}`} sx={styles.meisaiLine}>
-                      <LightTooltipWithText variant="body2" maxWidth={220}>
-                        {meisai.koenNam}
-                      </LightTooltipWithText>
-                    </Box>
-                  ))}
+                  <LightTooltipWithText variant="body2" maxWidth={220}>
+                    {row.koenNam}
+                  </LightTooltipWithText>
                 </TableCell>
                 <TableCell align="left">
-                  {row.juchuMeisai.map((meisai) => (
-                    <Box key={`${meisai.juchuHeadId}-${meisai.juchuKizaiHeadId}`} sx={styles.meisaiLine}>
-                      <LightTooltipWithText variant="body2" maxWidth={220}>
-                        {meisai.headNam}
-                      </LightTooltipWithText>
-                    </Box>
-                  ))}
-                </TableCell>
-                <TableCell align="right">
-                  {row.juchuMeisai.map((meisai) => (
-                    <Box key={`${meisai.juchuHeadId}-${meisai.juchuKizaiHeadId}`} sx={styles.meisaiLine}>
-                      {meisai.planQty}
-                    </Box>
-                  ))}
+                  <LightTooltipWithText variant="body2" maxWidth={220}>
+                    {row.headNam}
+                  </LightTooltipWithText>
                 </TableCell>
                 <TableCell padding="checkbox" align="center">
                   <IconButton
@@ -208,7 +186,7 @@ export const ShukoIdoDenTable = memo(function ShukoIdoDenTable(props: {
                     value={row.planQty}
                     onChange={(e) => {
                       if (/^\d*$/.test(e.target.value)) {
-                        handleCellChange(row.kizaiId, Number(e.target.value));
+                        handleCellChange(row, Number(e.target.value));
                       }
                     }}
                     disabled={inputDisabled}
@@ -265,17 +243,23 @@ export const NyukoIdoDenTable = (props: { datas: IdoDetailTableValues[] }) => {
   const router = useRouter();
   const path = usePathname();
 
-  const handleClick = (kizaiId: number) => {
-    router.push(`${path}/ido-eqpt-detail/${kizaiId}`);
+  const handleClick = (row: IdoDetailRowKey) => {
+    router.push(`${path}/ido-eqpt-detail/${row.kizaiId}/${row.juchuHeadId}/${row.juchuKizaiHeadId}`);
   };
   return (
-    <TableContainer sx={{ overflow: 'auto', maxHeight: '80vh', maxWidth: '60vw' }}>
+    <TableContainer sx={{ overflow: 'auto', maxHeight: '80vh' }}>
       <Table stickyHeader size="small">
         <TableHead>
           <TableRow sx={{ whiteSpace: 'nowrap' }}>
             <TableCell align="center" style={styles.header} />
             <TableCell align="left" style={styles.header}>
               機材名
+            </TableCell>
+            <TableCell align="left" style={styles.header}>
+              公演名
+            </TableCell>
+            <TableCell align="left" style={styles.header}>
+              明細名
             </TableCell>
             <TableCell align="right" style={styles.header}>
               入庫予定数
@@ -294,11 +278,13 @@ export const NyukoIdoDenTable = (props: { datas: IdoDetailTableValues[] }) => {
         <TableBody>
           {datas.map((row, index) => (
             <TableRow
-              key={index}
+              key={toIdoRowKey(row)}
               sx={{
                 whiteSpace: 'nowrap',
-                backgroundColor:
-                  row.diffQty === 0 && row.planQty !== 0 //&& row.ctnFlg !== 1
+                // 出庫側と同じく未保存を最優先にする
+                backgroundColor: !row.saveFlag
+                  ? statusColors.unsaved
+                  : row.diffQty === 0 && row.planQty !== 0 //&& row.ctnFlg !== 1
                     ? statusColors.completed
                     : row.diffQty === 1
                       ? statusColors.ctn
@@ -308,13 +294,23 @@ export const NyukoIdoDenTable = (props: { datas: IdoDetailTableValues[] }) => {
               <TableCell padding="checkbox">{index + 1}</TableCell>
               <TableCell
                 align="left"
-                onClick={row.saveFlag ? () => handleClick(row.kizaiId) : undefined}
+                onClick={row.saveFlag ? () => handleClick(row) : undefined}
                 sx={{
                   cursor: row.saveFlag ? 'pointer' : 'text',
                   '&:hover': { backgroundColor: row.saveFlag ? dispColors.hover : dispColors.main },
                 }}
               >
                 {row.kizaiNam}
+              </TableCell>
+              <TableCell align="left">
+                <LightTooltipWithText variant="body2" maxWidth={220}>
+                  {row.koenNam}
+                </LightTooltipWithText>
+              </TableCell>
+              <TableCell align="left">
+                <LightTooltipWithText variant="body2" maxWidth={220}>
+                  {row.headNam}
+                </LightTooltipWithText>
               </TableCell>
               <TableCell align="right">{row.planQty}</TableCell>
               <TableCell align="right">{row.resultQty}</TableCell>
@@ -351,12 +347,6 @@ const styles: { [key: string]: React.CSSProperties } = {
   // ヘッダー
   header: {
     backgroundColor: purple[400],
-  },
-  // 受注内訳の1行。公演名・明細名・予定内訳の3列で高さを揃えて横に読めるようにする
-  meisaiLine: {
-    height: '20px',
-    lineHeight: '20px',
-    fontSize: '0.875rem',
   },
   // 行
   row: {

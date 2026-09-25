@@ -18,10 +18,20 @@ export const getIdoDenDetail = async (
   sagyoSijiId: number,
   sagyoDenDat: string,
   sagyoId: number,
-  kizaiId: number
+  kizaiId: number,
+  juchuHeadId: number,
+  juchuKizaiHeadId: number
 ) => {
   try {
-    const { data, error } = await selectIdoDenOne(sagyoKbnId, sagyoSijiId, sagyoDenDat, sagyoId, kizaiId);
+    const { data, error } = await selectIdoDenOne(
+      sagyoKbnId,
+      sagyoSijiId,
+      sagyoDenDat,
+      sagyoId,
+      kizaiId,
+      juchuHeadId,
+      juchuKizaiHeadId
+    );
 
     if (error) {
       throw new Error('[selectIdoDenOne] DBエラー:', { cause: error });
@@ -33,6 +43,10 @@ export const getIdoDenDetail = async (
       sagyoSijiId: sagyoSijiId,
       sagyoDenDat: sagyoDenDat,
       sagyoId: sagyoId,
+      juchuHeadId: data.juchu_head_id ?? juchuHeadId,
+      juchuKizaiHeadId: data.juchu_kizai_head_id ?? juchuKizaiHeadId,
+      koenNam: data.koen_nam,
+      headNam: data.head_nam,
       planQty: data.plan_qty,
       resultQty: data.result_qty,
       resultAdjQty: data.result_adj_qty,
@@ -64,10 +78,20 @@ export const getIdoEqptDetail = async (
   sagyoSijiId: number,
   sagyoDenDat: string,
   sagyoId: number,
-  kizaiId: number
+  kizaiId: number,
+  juchuHeadId: number,
+  juchuKizaiHeadId: number
 ) => {
   try {
-    const { data, error } = await selectIdoEqptDetail(sagyoKbnId, sagyoSijiId, sagyoDenDat, sagyoId, kizaiId);
+    const { data, error } = await selectIdoEqptDetail(
+      sagyoKbnId,
+      sagyoSijiId,
+      sagyoDenDat,
+      sagyoId,
+      kizaiId,
+      juchuHeadId,
+      juchuKizaiHeadId
+    );
 
     if (error) {
       throw new Error('[selectIdoEqptDetail] DBエラー:', { cause: error });
@@ -111,6 +135,8 @@ export const delIdoResult = async (idoDenDetailData: IdoEqptDetailValues, delete
         idoDenDetailData.sagyoDenDat,
         idoDenDetailData.sagyoId,
         idoDenDetailData.kizaiId,
+        idoDenDetailData.juchuHeadId,
+        idoDenDetailData.juchuKizaiHeadId,
         deleteTagIds,
         connection
       );
@@ -121,6 +147,8 @@ export const delIdoResult = async (idoDenDetailData: IdoEqptDetailValues, delete
         idoDenDetailData.sagyoDenDat,
         idoDenDetailData.sagyoId,
         idoDenDetailData.kizaiId,
+        idoDenDetailData.juchuHeadId,
+        idoDenDetailData.juchuKizaiHeadId,
         deleteTagIds,
         connection
       );
@@ -129,6 +157,8 @@ export const delIdoResult = async (idoDenDetailData: IdoEqptDetailValues, delete
     const updateIdoDenData: IdoDen = {
       ido_den_id: /*idoDenDetailData.idoDenId*/ 0,
       kizai_id: idoDenDetailData.kizaiId,
+      juchu_head_id: idoDenDetailData.juchuHeadId,
+      juchu_kizai_head_id: idoDenDetailData.juchuKizaiHeadId,
       result_qty: idoDenDetailData.resultQty && idoDenDetailData.resultQty - deleteTagIds.length,
       sagyo_den_dat: idoDenDetailData.sagyoDenDat,
       sagyo_id: idoDenDetailData.sagyoId,
@@ -171,6 +201,8 @@ export const updIdoResultAdjQty = async (
   const updateData: IdoDen = {
     ido_den_id: /*idoDenDetailData.idoDenId*/ 0,
     kizai_id: idoDenDetailData.kizaiId,
+    juchu_head_id: idoDenDetailData.juchuHeadId,
+    juchu_kizai_head_id: idoDenDetailData.juchuKizaiHeadId,
     result_adj_qty: resultAdjQty,
     sagyo_den_dat: idoDenDetailData.sagyoDenDat,
     sagyo_id: idoDenDetailData.sagyoId,
