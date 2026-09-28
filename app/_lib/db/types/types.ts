@@ -1111,6 +1111,8 @@ export type Database = {
       t_ido_ctn_result: {
         Row: {
           ido_den_id: number;
+          juchu_head_id: number;
+          juchu_kizai_head_id: number;
           kizai_id: number;
           rfid_kizai_sts: number | null;
           rfid_tag_id: string;
@@ -1124,6 +1126,8 @@ export type Database = {
         };
         Insert: {
           ido_den_id: number;
+          juchu_head_id?: number;
+          juchu_kizai_head_id?: number;
           kizai_id: number;
           rfid_kizai_sts?: number | null;
           rfid_tag_id: string;
@@ -1137,6 +1141,8 @@ export type Database = {
         };
         Update: {
           ido_den_id?: number;
+          juchu_head_id?: number;
+          juchu_kizai_head_id?: number;
           kizai_id?: number;
           rfid_kizai_sts?: number | null;
           rfid_tag_id?: string;
@@ -1155,6 +1161,8 @@ export type Database = {
           add_dat: string | null;
           add_user: string | null;
           ido_den_id: number;
+          juchu_head_id: number;
+          juchu_kizai_head_id: number;
           kizai_id: number;
           plan_qty: number | null;
           result_adj_qty: number | null;
@@ -1170,6 +1178,8 @@ export type Database = {
           add_dat?: string | null;
           add_user?: string | null;
           ido_den_id: number;
+          juchu_head_id?: number;
+          juchu_kizai_head_id?: number;
           kizai_id: number;
           plan_qty?: number | null;
           result_adj_qty?: number | null;
@@ -1185,6 +1195,8 @@ export type Database = {
           add_dat?: string | null;
           add_user?: string | null;
           ido_den_id?: number;
+          juchu_head_id?: number;
+          juchu_kizai_head_id?: number;
           kizai_id?: number;
           plan_qty?: number | null;
           result_adj_qty?: number | null;
@@ -1318,6 +1330,8 @@ export type Database = {
       t_ido_result: {
         Row: {
           ido_den_id: number;
+          juchu_head_id: number;
+          juchu_kizai_head_id: number;
           kizai_id: number;
           rfid_kizai_sts: number | null;
           rfid_tag_id: string;
@@ -1331,6 +1345,8 @@ export type Database = {
         };
         Insert: {
           ido_den_id: number;
+          juchu_head_id?: number;
+          juchu_kizai_head_id?: number;
           kizai_id: number;
           rfid_kizai_sts?: number | null;
           rfid_tag_id: string;
@@ -1344,6 +1360,8 @@ export type Database = {
         };
         Update: {
           ido_den_id?: number;
+          juchu_head_id?: number;
+          juchu_kizai_head_id?: number;
           kizai_id?: number;
           rfid_kizai_sts?: number | null;
           rfid_tag_id?: string;
@@ -2917,21 +2935,61 @@ export type Database = {
         };
         Relationships: [];
       };
+      v_ido_den2_meisai_lst: {
+        Row: {
+          bld_cod: string | null;
+          ctn_flg: number | null;
+          diff_qty: number | null;
+          dsp_ord_num: number | null;
+          eda_cod: string | null;
+          head_nam: string | null;
+          ido_den_id: number | null;
+          juchu_flg: number | null;
+          juchu_head_id: number | null;
+          juchu_kizai_head_id: number | null;
+          kizai_grp_cod: string | null;
+          kizai_id: number | null;
+          kizai_mem: string | null;
+          kizai_nam: string | null;
+          koen_nam: string | null;
+          nyushuko_basho_id: number | null;
+          nyushuko_dat: string | null;
+          nyushuko_shubetu_id: number | null;
+          plan_qty: number | null;
+          result_adj_qty: number | null;
+          result_qty: number | null;
+          sagyo_kbn_id: number | null;
+          sagyo_kbn_nam: string | null;
+          sagyo_kbn_nam_short: string | null;
+          sagyo_siji_id: number | null;
+          sagyo_siji_nam: string | null;
+          sagyo_siji_nam_short: string | null;
+          shozoku_nam: string | null;
+          tana_cod: string | null;
+        };
+        Relationships: [];
+      };
       v_ido_den3_lst: {
         Row: {
           bld_cod: string | null;
           ctn_flg: number | null;
           diff_qty: number | null;
+          dsp_ord_num: number | null;
           eda_cod: string | null;
+          head_nam: string | null;
+          ido_den_id: number | null;
           ido_flg: number | null;
           juchu_flg: number | null;
-          juchu_meisai: Json | null;
+          juchu_head_id: number | null;
+          juchu_kizai_head_id: number | null;
+          kizai_grp_cod: string | null;
           kizai_id: number | null;
           kizai_mem: string | null;
           kizai_nam: string | null;
           kizai_shozoku_id: number | null;
           kizai_shozoku_nam: string | null;
           kizai_shozoku_nam_short: string | null;
+          koen_nam: string | null;
           nyushuko_basho_id: number | null;
           nyushuko_dat: string | null;
           nyushuko_shubetu_id: number | null;
@@ -2961,11 +3019,15 @@ export type Database = {
           def_dat_qty: number | null;
           dsp_ord_num: number | null;
           eda_cod: string | null;
+          head_nam: string | null;
           ido_den_id: number | null;
+          juchu_head_id: number | null;
+          juchu_kizai_head_id: number | null;
           kizai_grp_cod: string | null;
           kizai_id: number | null;
           kizai_mem: string | null;
           kizai_nam: string | null;
+          koen_nam: string | null;
           nyushuko_basho_id: number | null;
           nyushuko_dat: string | null;
           nyushuko_shubetu_id: number | null;
