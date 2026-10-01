@@ -21,8 +21,13 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { set } from 'zod';
 
-import { BASHO_ID, JUCHU_KIZAI_HEAD_KBN, SAGYO_KBN_ID } from '@/app/_lib/constants';
-import { dispColors, sagyoKbnColors, statusColors } from '@/app/(main)/_lib/colors';
+import { BASHO_ID, FIX_STS, FixSts, JUCHU_KIZAI_HEAD_KBN, SAGYO_KBN_ID } from '@/app/_lib/constants';
+import { dispColors, fixStsColors, sagyoKbnColors, statusColors } from '@/app/(main)/_lib/colors';
+import {
+  getNyushukoFixErrorMessage,
+  NyushukoFixAction,
+  NyushukoFixErrorReason,
+} from '@/app/(main)/_lib/nyushuko-fix-error';
 import { notifyNyushukoFixChanged } from '@/app/(main)/_lib/nyushuko-fix-notify';
 import { permission } from '@/app/(main)/_lib/permission';
 import { User } from '@/app/(main)/_lib/types';
@@ -38,6 +43,7 @@ import {
   updShukoAdjust,
   updShukoDetail,
 } from '../_lib/funcs';
+import { hasShukoDiff } from '../_lib/shuko-diff';
 import { ShukoDetailTableValues, ShukoDetailValues } from '../_lib/types';
 import { ShukoDetailTable } from './shuko-detail-table';
 
@@ -45,17 +51,22 @@ export const ShukoDetail = (props: {
   user: User;
   shukoDetailData: ShukoDetailValues;
   shukoDetailTableData: ShukoDetailTableValues[];
-  fixFlag: boolean;
+  /** 合体している受注機材ヘッダーの出発状況（なし／一部／全部） */
+  fixSts: FixSts;
+  /** 出発済みの受注機材ヘッダーid */
+  fixedJuchuKizaiHeadIds: number[];
 }) => {
-  const { shukoDetailData } = props;
+  const { shukoDetailData, fixedJuchuKizaiHeadIds } = props;
 
   // user情報
   const user = props.user;
 
   const router = useRouter();
 
-  // 出発済フラグ
-  const [fixFlag, setFixFlag] = useState(props.fixFlag);
+  // 出発状況
+  const [fixSts, setFixSts] = useState<FixSts>(props.fixSts);
+  // 全部出発済み（一部出発済みのときは、未出発の明細を操作できる）
+  const fixFlag = fixSts === FIX_STS.all;
   // ローディング
   const [isLoading, setIsLoading] = useState(false);
   // 処理中制御
@@ -95,10 +106,10 @@ export const ShukoDetail = (props: {
       return;
     }
 
+    // 出発するのは未出発のヘッダーだけなので、不足・過剰の確認も未出発のヘッダーの行だけで行う
+    // ※サーバー（updShukoDetail）でも DB から取り直して同じ確認をする。ここはすぐに知らせるための確認
     const diffCheck = shukoDetailList.find(
-      (data) =>
-        (data.juchuKizaiHeadKbn !== JUCHU_KIZAI_HEAD_KBN.keep && !data.ctnFlg && data.diff !== 0) ||
-        (data.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.keep && data.diff !== 0)
+      (data) => !fixedJuchuKizaiHeadIds.includes(data.juchuKizaiHeadId) && hasShukoDiff(data)
     );
 
     if (diffCheck) {
@@ -112,8 +123,8 @@ export const ShukoDetail = (props: {
 
     const updateResult = await updShukoDetail(shukoDetailData, shukoDetailList, user.name);
 
-    if (updateResult) {
-      setFixFlag(true);
+    if (updateResult.ok) {
+      setFixSts(FIX_STS.all);
       setDepartureOpen(false);
       setSnackBarMessage('出発しました');
       setSnackBarOpen(true);
@@ -125,9 +136,26 @@ export const ShukoDetail = (props: {
       window.close();
     } else {
       setDepartureOpen(false);
-      setSnackBarMessage('出発に失敗しました');
-      setSnackBarOpen(true);
+      showFailure('departure', updateResult.reason, '出発に失敗しました');
       setIsProcessing(false);
+    }
+  };
+
+  /**
+   * 失敗の表示（理由があるときは警告ダイアログ、それ以外はスナックバー）
+   * @param action 操作
+   * @param reason 理由
+   * @param defaultMessage 理由がないときの文言
+   */
+  const showFailure = (action: NyushukoFixAction, reason: NyushukoFixErrorReason, defaultMessage: string) => {
+    const message = getNyushukoFixErrorMessage(action, reason);
+    if (message) {
+      setAlertTitle(message.title);
+      setAlertMessage(message.message);
+      setAlertOpen(true);
+    } else {
+      setSnackBarMessage(defaultMessage);
+      setSnackBarOpen(true);
     }
   };
 
@@ -158,15 +186,18 @@ export const ShukoDetail = (props: {
         return;
       }
     } catch (e) {
+      // 子の確認に失敗したときは解除しない（子があるかどうか分からないため）
+      setReleaseOpen(false);
       setSnackBarMessage('出発解除に失敗しました');
       setSnackBarOpen(true);
       setIsProcessing(false);
+      return;
     }
 
     const updateResult = await delShukoFix(shukoDetailData, shukoDetailList);
 
-    if (updateResult) {
-      setFixFlag(false);
+    if (updateResult.ok) {
+      setFixSts(FIX_STS.none);
       setReleaseOpen(false);
       setSnackBarMessage('出発解除しました');
       setSnackBarOpen(true);
@@ -176,8 +207,7 @@ export const ShukoDetail = (props: {
       window.close();
     } else {
       setReleaseOpen(false);
-      setSnackBarMessage('出発解除に失敗しました');
-      setSnackBarOpen(true);
+      showFailure('departureRelease', updateResult.reason, '出発解除に失敗しました');
       setIsProcessing(false);
     }
   };
@@ -248,7 +278,16 @@ export const ShukoDetail = (props: {
             出庫明細({shukoDetailData.sagyoKbnId === SAGYO_KBN_ID.shukoConfirmation ? '最終確認' : 'ピッキング'})
           </Typography>
           <Grid2 container alignItems={'center'} spacing={2}>
-            {fixFlag && <Typography>出発済</Typography>}
+            {fixSts === FIX_STS.all && (
+              <Typography px={1} sx={{ backgroundColor: fixStsColors.all }}>
+                出発済
+              </Typography>
+            )}
+            {fixSts === FIX_STS.partial && (
+              <Typography px={1} sx={{ backgroundColor: fixStsColors.partial }}>
+                一部出発済
+              </Typography>
+            )}
             <Button
               onClick={() => setDepartureOpen(true)}
               disabled={
@@ -261,7 +300,7 @@ export const ShukoDetail = (props: {
             <Button
               color="error"
               onClick={() => setReleaseOpen(true)}
-              disabled={!fixFlag || user?.permission.nyushuko === permission.nyushuko_ref}
+              disabled={fixSts === FIX_STS.none || user?.permission.nyushuko === permission.nyushuko_ref}
               sx={{ display: shukoDetailData.sagyoKbnId === SAGYO_KBN_ID.shukoConfirmation ? 'block' : 'none' }}
             >
               出発解除
@@ -392,8 +431,10 @@ export const ShukoDetail = (props: {
           <WarningIcon color="warning" />
           <Box>出発確認</Box>
         </DialogTitle>
-        <DialogContentText m={2} p={2}>
-          出発済みにしてよろしいですか？
+        <DialogContentText m={2} p={2} sx={{ whiteSpace: 'pre-line' }}>
+          {fixSts === FIX_STS.partial
+            ? '出発済みの明細があります。未出発の明細を出発にします。\n出発済みにしてよろしいですか？'
+            : '出発済みにしてよろしいですか？'}
         </DialogContentText>
         <DialogActions>
           <Button onClick={executeDeparture} loading={isProcessing}>

@@ -72,8 +72,28 @@
 | `v_ido_den3_lst`                    | 機材単位 → **受注機材ヘッダー単位**に作り替え。`juchu_meisai`（jsonb）を廃止し `juchu_head_id` / `juchu_kizai_head_id` / `koen_nam` / `head_nam` と並び順用の `kizai_grp_cod` / `dsp_ord_num` を追加（32→37列） | 2026-09-24   | 未適用 | 移動明細画面（Web専用） |
 | `v_ido_den3_result`                 | 末尾に `juchu_head_id` / `juchu_kizai_head_id` / `koen_nam` / `head_nam` の4列を追加（41→45列）。既存41列は不変                                                                                                 | 2026-09-24   | 未適用 | 移動機材詳細・ゲート    |
 | **`v_ido_den2_meisai_lst`**（新規） | HT・ゲート向けの明細単位リスト。`v_ido_den2_lst` は機材単位のまま残す                                                                                                                                           | 2026-09-24   | 未適用 | 段階2（HT・ゲート改修） |
+| `v_nyushuko_den`                    | 末尾に `nyuko_fix_sts` / `shuko_fix_sts`（到着・出発の 0=なし / 1=一部 / 2=全部）を追加。`nyuko_fix_flg` / `shuko_fix_flg` を「全部確定済みのときだけ1」に変更（2026-10-01）                                    | 2026-09-30   | 未適用 | 入出庫一覧の3段階表示   |
+| `v_nyushuko_den2`                   | `v_nyushuko_den` の上記2列を末尾に通す（GROUP BY にも追加）                                                                                                                                                     | 2026-09-30   | 未適用 | 入出庫一覧の3段階表示   |
 
-いずれも「移動を受注機材ヘッダー単位にする」改修の一部です。**テーブル変更 [`scripts/db-migration/ddl/20260924-ido-juchu-meisai.sql`](../db-migration/ddl/20260924-ido-juchu-meisai.sql) と RPC修理 `20260924-ido-send-rpc-fix.sql` が先に適用されていないと動きません。**
+`v_ido_*` の3本は「移動を受注機材ヘッダー単位にする」改修の一部です。**テーブル変更 [`scripts/db-migration/ddl/20260924-ido-juchu-meisai.sql`](../db-migration/ddl/20260924-ido-juchu-meisai.sql) と RPC修理 `20260924-ido-send-rpc-fix.sql` が先に適用されていないと動きません。**
+
+#### v_nyushuko_den / v_nyushuko_den2（到着・出発の3段階）
+
+入出庫一覧の1行（入出庫日時・場所・受注・区分）には、同じ日時・場所の受注機材ヘッダーが複数合体していることがあります。
+既存の `nyuko_fix_flg` / `shuko_fix_flg` は「どれか1つでも確定済みなら1」なので、後から同じ日時のヘッダーを足すと「済」に見えてしまいます。
+そこで、確定済みのヘッダー数と対象のヘッダー数から 0=なし / 1=一部 / 2=全部 を出す列を末尾に足しました。
+
+**既存の2列は2026-10-01に「全部確定済みのときだけ1」に変えました**（列名・型・順番は同じ）。Web は一部確定済みでも到着・出発できるようにしたので、
+HT・ゲートも一部確定済みなら送信できるようにそろえるためです。この2列を使っているのは次のとおりです（移動の `v_ido_den2` は別のビューで影響なし）。
+
+- HT 入出庫検索（`v_nyushuko_den2`）：送信ボタンの無効化、済の色、「到着済」「出発済」の絞り込み
+- ゲート入出庫検索（`v_nyushuko_den2`）：済の色、「出発済」の絞り込み。読取画面は開いた時点のこの値で送信不可にする（ゲート側の改修）
+- Web `selectShukoStateConfirm`（受注明細の出庫作業中チェック）は「一部でも出発済み」を見たいので `shuko_fix_sts > 0` に変えた
+- 依存するビューは `v_nyushuko_den2` だけ、関数からの参照なし（ステージング・本番とも確認）
+
+- 開発環境で既存列の `EXCEPT ALL` 双方向の差分0・行数不変（3,537行）、一覧相当のクエリ時間も変わらないこと（約0.8秒）を確認済み（2026-09-30）
+- 適用順は `v_nyushuko_den.sql` → `v_nyushuko_den2.sql`。ロールバックは列削除を伴うため `DROP` → `CREATE`（`v_nyushuko_den.rollback.sql` は `v_nyushuko_den2` も作り直す。GRANT の再付与も含む）
+- 同じ改修のテーブル変更：[`scripts/db-migration/ddl/20260930-t-nyushuko-den-nyuko-fix-qty.sql`](../db-migration/ddl/20260930-t-nyushuko-den-nyuko-fix-qty.sql)（入庫明細の差分到着用。ビューとは独立）
 
 #### v_ido_den3_lst（明細単位への作り替え）
 

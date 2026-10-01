@@ -2186,6 +2186,7 @@ export type Database = {
           juchu_kizai_head_id: number;
           juchu_kizai_meisai_id: number;
           kizai_id: number;
+          nyuko_fix_qty: number | null;
           plan_qty: number | null;
           result_adj_qty: number | null;
           result_qty: number | null;
@@ -2204,6 +2205,7 @@ export type Database = {
           juchu_kizai_head_id: number;
           juchu_kizai_meisai_id: number;
           kizai_id: number;
+          nyuko_fix_qty?: number | null;
           plan_qty?: number | null;
           result_adj_qty?: number | null;
           result_qty?: number | null;
@@ -2222,6 +2224,7 @@ export type Database = {
           juchu_kizai_head_id?: number;
           juchu_kizai_meisai_id?: number;
           kizai_id?: number;
+          nyuko_fix_qty?: number | null;
           plan_qty?: number | null;
           result_adj_qty?: number | null;
           result_qty?: number | null;
@@ -3585,6 +3588,7 @@ export type Database = {
           nchk_sagyo_sts_nam: string | null;
           nchk_sagyo_sts_nam_short: string | null;
           nyuko_fix_flg: number | null;
+          nyuko_fix_sts: number | null;
           nyushuko_basho_id: number | null;
           nyushuko_dat: string | null;
           nyushuko_shubetu_id: number | null;
@@ -3593,6 +3597,7 @@ export type Database = {
           schk_sagyo_sts_nam_short: string | null;
           shozoku_nam: string | null;
           shuko_fix_flg: number | null;
+          shuko_fix_sts: number | null;
           sstb_sagyo_sts_id: number | null;
           sstb_sagyo_sts_nam: string | null;
           sstb_sagyo_sts_nam_short: string | null;
@@ -3654,6 +3659,7 @@ export type Database = {
           nchk_sagyo_sts_nam: string | null;
           nchk_sagyo_sts_nam_short: string | null;
           nyuko_fix_flg: number | null;
+          nyuko_fix_sts: number | null;
           nyuryoku_user: string | null;
           nyushuko_basho_id: number | null;
           nyushuko_dat: string | null;
@@ -3666,6 +3672,7 @@ export type Database = {
           shozoku_nam: string | null;
           shozoku_nam_short: string | null;
           shuko_fix_flg: number | null;
+          shuko_fix_sts: number | null;
           sstb_plan_qty: number | null;
           sstb_sagyo_sts_id: number | null;
           sstb_sagyo_sts_nam: string | null;

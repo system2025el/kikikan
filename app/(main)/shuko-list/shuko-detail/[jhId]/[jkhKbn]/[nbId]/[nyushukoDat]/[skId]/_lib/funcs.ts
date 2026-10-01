@@ -12,14 +12,21 @@ import { updateNyushukoDen, upsertNyushukoDen } from '@/app/_lib/db/tables/t-nyu
 import {
   deleteNyushukoFix,
   insertNyushukoFix,
-  selectSagyoIdFilterNyushukoFixFlag,
+  selectFixedJuchuKizaiHeadIdsTx,
 } from '@/app/_lib/db/tables/t-nyushuko-fix';
 import { selectNyushukoOne } from '@/app/_lib/db/tables/v-nyushuko-den2-head';
 import { selectCtnNyushukoDetail, selectNyushukoDetail } from '@/app/_lib/db/tables/v-nyushuko-den2-lst';
 import { JuchuCtnMeisai } from '@/app/_lib/db/types/t_juchu_ctn_meisai-type';
 import { NyushukoDen } from '@/app/_lib/db/types/t-nyushuko-den-type';
 import { NyushukoFix } from '@/app/_lib/db/types/t-nyushuko-fix-type';
+import {
+  NYUSHUKO_FIX_ERROR,
+  NyushukoFixError,
+  NyushukoFixResult,
+  toNyushukoFixErrorReason,
+} from '@/app/(main)/_lib/nyushuko-fix-error';
 
+import { calcShukoDiff, hasShukoDiff } from './shuko-diff';
 import { NyukoValues, ShukoDetailTableValues, ShukoDetailValues } from './types';
 
 /**
@@ -100,7 +107,28 @@ export const getShukoDetailTable = async (
   try {
     const data = await selectNyushukoDetail(juchuHeadId, juchuKizaiHeadKbn, nyushukoBashoId, nyushukoDat, sagyoKbnId);
 
-    const shukoDetailTableData: ShukoDetailTableValues[] = data.map((d) => ({
+    return toShukoDetailTableValues(data);
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
+    throw e;
+  }
+};
+
+/**
+ * 出庫明細の行（DB）を画面の形にする
+ * @param data selectNyushukoDetail の結果
+ * @returns
+ */
+const toShukoDetailTableValues = (data: Awaited<ReturnType<typeof selectNyushukoDetail>>) =>
+  data.map(
+    (d): ShukoDetailTableValues => ({
       juchuHeadId: d.juchu_head_id ?? 0,
       juchuKizaiHeadId: d.juchu_kizai_head_id ?? 0,
       juchuKizaiMeisaiId: d.juchu_kizai_meisai_id ?? 0,
@@ -120,103 +148,99 @@ export const getShukoDetailTable = async (
       resultAdjQty: d.result_adj_qty,
       resultQty: d.result_qty,
       sagyoKbnId: d.sagyo_kbn_id,
-      diff: (d.result_qty ?? 0) + (d.result_adj_qty ?? 0) - (d.plan_qty ?? 0),
+      diff: calcShukoDiff(d.plan_qty, d.result_qty, d.result_adj_qty),
       ctnFlg: d.ctn_flg,
       dspOrdNumMeisai: d.dsp_ord_num_meisai,
       indentNum: d.indent_num ?? 0,
       mem2: d.mem2 ?? '',
-    }));
-
-    return shukoDetailTableData;
-  } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
-    throw e;
-  }
-};
+    })
+  );
 
 /**
- * 出庫作業確定フラグ取得
- * @param juchuHeadId 受注ヘッダーid
- * @param juchuKizaiHeadId 受注機材ヘッダーid
- * @param sagyoKbnId 作業区分id
- * @param sagyoDenDat 作業日時
- * @param sagyoId 作業id
+ * 出庫明細画面に合体している受注機材ヘッダーid（画面のヘッダー一覧と明細行の両方から集める）
+ * @param shukoDetailData 出庫データ
+ * @param shukoDetailTableData 出庫テーブルデータ
  * @returns
  */
-export const getShukoFixFlag = async (
-  juchuHeadId: number,
-  juchuKizaiHeadId: number,
-  sagyoKbnId: number,
-  sagyoDenDat: string,
-  sagyoId: number
-) => {
-  try {
-    const { data, error } = await selectSagyoIdFilterNyushukoFixFlag(
-      juchuHeadId,
-      juchuKizaiHeadId,
-      sagyoKbnId,
-      sagyoDenDat,
-      sagyoId
-    );
-
-    if (error) {
-      if (error.code === 'PGRST116') {
-        return false;
-      }
-      throw error;
-    }
-
-    return data.sagyo_fix_flg === 0 ? false : true;
-  } catch (e) {
-    throw e;
-  }
-};
+const collectJuchuKizaiHeadIds = (
+  shukoDetailData: ShukoDetailValues,
+  shukoDetailTableData: ShukoDetailTableValues[]
+) => [
+  ...new Set(
+    [...shukoDetailData.juchuKizaiHeadIds, ...shukoDetailTableData.map((d) => d.juchuKizaiHeadId)].filter(
+      (id) => id !== null && id !== undefined && !Number.isNaN(id)
+    )
+  ),
+];
 
 /**
  * 出発
+ * 合体している受注機材ヘッダーの一部が出発済みでも出発できる。未出発のヘッダーの分だけ処理し、
+ * 出発済みのヘッダーのコンテナ明細・伝票・確定には触らない
  * @param shukoDetailData 出庫データ
- * @param sagyoFixFlg 作業確定フラグ
+ * @param shukoDetailTableData 出庫テーブルデータ
  * @param userNam ユーザー名
- * @returns
+ * @returns 失敗したときは理由（画面で文言を出し分ける）
  */
 export const updShukoDetail = async (
   shukoDetailData: ShukoDetailValues,
   shukoDetailTableData: ShukoDetailTableValues[],
   userNam: string
-) => {
+): Promise<NyushukoFixResult> => {
   if (shukoDetailTableData.length === 0) {
-    return;
+    return { ok: false, reason: NYUSHUKO_FIX_ERROR.other };
   }
 
   const connection = await pool.connect();
 
-  // コンテナデータ
-  const ctnData = shukoDetailTableData.filter((data) => data.ctnFlg);
-
   try {
     await connection.query('BEGIN');
 
+    // 画面を開いた後に出発・出発解除された場合に備えて、確定済みのヘッダーをトランザクション内で取り直す
+    const allJuchuKizaiHeadIds = collectJuchuKizaiHeadIds(shukoDetailData, shukoDetailTableData);
+    const fixedJuchuKizaiHeadIds = await selectFixedJuchuKizaiHeadIdsTx(
+      shukoDetailData.juchuHeadId,
+      allJuchuKizaiHeadIds,
+      SAGYO_KBN_ID.shukoConfirmed,
+      shukoDetailData.nyushukoDat,
+      shukoDetailData.nyushukoBashoId,
+      connection
+    );
+    const unfixedJuchuKizaiHeadIds = allJuchuKizaiHeadIds.filter((id) => !fixedJuchuKizaiHeadIds.includes(id));
+    if (unfixedJuchuKizaiHeadIds.length === 0) {
+      throw new NyushukoFixError(NYUSHUKO_FIX_ERROR.allFixed, '[updShukoDetail] すでにすべて出発済みです');
+    }
+
+    // 不足・過剰の確認を DB から取り直した明細でやり直す（画面を開いた後に HT・ゲートから送信された分も含める）
+    // 出発するのは未出発のヘッダーだけなので、確認も未出発のヘッダーの行だけで行う（条件は画面と同じ hasShukoDiff）
+    const currentTableData = toShukoDetailTableValues(
+      await selectNyushukoDetail(
+        shukoDetailData.juchuHeadId,
+        shukoDetailData.juchuKizaiHeadKbn,
+        shukoDetailData.nyushukoBashoId,
+        shukoDetailData.nyushukoDat,
+        shukoDetailData.sagyoKbnId,
+        connection
+      )
+    );
+    if (currentTableData.some((d) => unfixedJuchuKizaiHeadIds.includes(d.juchuKizaiHeadId) && hasShukoDiff(d))) {
+      throw new NyushukoFixError(NYUSHUKO_FIX_ERROR.diff, '[updShukoDetail] 不足・過剰があります');
+    }
+
+    // 未出発のヘッダーの行だけを対象にする
+    const targetTableData = shukoDetailTableData.filter((d) => unfixedJuchuKizaiHeadIds.includes(d.juchuKizaiHeadId));
+    // コンテナデータ
+    const ctnData = targetTableData.filter((data) => data.ctnFlg);
+
     // キープ以外は明細、伝票を更新
-    if (shukoDetailTableData[0].juchuKizaiHeadKbn !== JUCHU_KIZAI_HEAD_KBN.keep && ctnData && ctnData.length > 0) {
+    if (shukoDetailData.juchuKizaiHeadKbn !== JUCHU_KIZAI_HEAD_KBN.keep && ctnData && ctnData.length > 0) {
       // コンテナ明細追加更新
       const upsertJuchuMeisaiResult = await upsJuchuCtnMeisai(ctnData, userNam, connection);
 
       // コンテナ出庫伝票追加更新
       const upsertShukoDenResult = await upsShukoDen(ctnData, userNam, connection);
 
-      // 受注機材ヘッダーid
-      const juchuKizaiHeadIds = [
-        ...new Set(shukoDetailTableData.map((d) => d.juchuKizaiHeadId).filter((id) => id !== null)),
-      ];
-
-      for (const juchuKizaiHeadId of juchuKizaiHeadIds) {
+      for (const juchuKizaiHeadId of unfixedJuchuKizaiHeadIds) {
         // 対象のコンテナデータ
         const targetCtnData = ctnData.filter((d) => d.juchuKizaiHeadId === juchuKizaiHeadId);
         if (targetCtnData.length === 0) {
@@ -255,7 +279,10 @@ export const updShukoDetail = async (
           }
         } else if (nyukoDat.length === 1 && shukoDat.length === 2) {
           const otherShukoDat = shukoDat.find((d) => d.nyushuko_basho_id !== shukoDetailData.nyushukoBashoId);
-          if (!otherShukoDat) return;
+          // ここで return するとトランザクションを開いたまま接続を返してしまうため、例外にして ROLLBACK させる
+          if (!otherShukoDat) {
+            throw new Error('[updShukoDetail] もう一方の出庫場所の出庫日が見つかりません');
+          }
 
           const { data: otherShukoData, error: otherShukoDataError } = await selectCtnNyushukoDetail(
             shukoDetailData.juchuHeadId,
@@ -289,15 +316,15 @@ export const updShukoDetail = async (
       }
     }
 
-    // 入出庫確定追加
-    const addNyushukoFixResult = await addShukoFix(shukoDetailData, shukoDetailTableData, userNam, connection);
+    // 入出庫確定追加（未出発のヘッダーのみ）
+    const addNyushukoFixResult = await addShukoFix(shukoDetailData, unfixedJuchuKizaiHeadIds, userNam, connection);
 
     await connection.query('COMMIT');
 
     await revalidatePath('/shuko-list');
     await revalidatePath('/nyuko-list');
 
-    return true;
+    return { ok: true };
   } catch (e) {
     if (e instanceof Error) {
       console.error(`[ERROR] ${e.message}`);
@@ -308,7 +335,7 @@ export const updShukoDetail = async (
       console.error(e);
     }
     await connection.query('ROLLBACK');
-    return false;
+    return { ok: false, reason: toNyushukoFixErrorReason(e) };
   } finally {
     refreshVRfid().catch((err) => {
       console.error('バックグラウンドでのマテビュー更新に失敗:', err);
@@ -510,22 +537,25 @@ export const upsNyukoDen = async (
 
 /**
  * 出庫確定新規追加
+ * 確定は受注機材ヘッダー単位。合体した明細で出発済みのヘッダーまで追加すると主キー違反になるため、
+ * 呼び出し元で未出発のヘッダーに絞って渡す
  * @param shukoDetailData 出庫データ
- * @param shukoDetailTableData 出庫テーブルデータ
+ * @param juchuKizaiHeadIds 確定を追加する受注機材ヘッダーid（未出発のもの）
  * @param userNam ユーザー名
  * @param connection
  */
 export const addShukoFix = async (
   shukoDetailData: ShukoDetailValues,
-  shukoDetailTableData: ShukoDetailTableValues[],
+  juchuKizaiHeadIds: number[],
   userNam: string,
   connection: PoolClient
 ) => {
-  const juchuKizaiHeadIds = [
-    ...new Set(shukoDetailTableData.map((d) => d.juchuKizaiHeadId).filter((id) => id !== null)),
-  ];
+  const targetIds = [...new Set(juchuKizaiHeadIds.filter((id) => id !== null))];
+  if (targetIds.length === 0) {
+    return true;
+  }
 
-  const newFixData: NyushukoFix[] = juchuKizaiHeadIds.map((id) => ({
+  const newFixData: NyushukoFix[] = targetIds.map((id) => ({
     juchu_head_id: shukoDetailData.juchuHeadId,
     juchu_kizai_head_id: id,
     sagyo_kbn_id: SAGYO_KBN_ID.shukoConfirmed,
@@ -549,21 +579,20 @@ export const addShukoFix = async (
  * @param shukoDetailData 出庫データ
  * @param shukoDetailTableData 出庫テーブルデータ
  * @param userNam ユーザー名
- * @param connection
+ * @returns 失敗したときは理由（画面で文言を出し分ける）
  */
 export const delShukoFix = async (
   shukoDetailData: ShukoDetailValues,
   shukoDetailTableData: ShukoDetailTableValues[]
-) => {
-  const connection = await pool.connect();
-
+): Promise<NyushukoFixResult> => {
+  // 接続を取る前に判定する（取った後に return すると接続が返らない）
   if (shukoDetailTableData.length === 0) {
-    return;
+    return { ok: false, reason: NYUSHUKO_FIX_ERROR.other };
   }
 
-  const juchuKizaiHeadIds = [
-    ...new Set(shukoDetailTableData.map((d) => d.juchuKizaiHeadId).filter((id) => id !== null)),
-  ];
+  const connection = await pool.connect();
+
+  const juchuKizaiHeadIds = collectJuchuKizaiHeadIds(shukoDetailData, shukoDetailTableData);
 
   const deleteFixData = juchuKizaiHeadIds.map((d) => ({
     juchu_head_id: shukoDetailData.juchuHeadId,
@@ -575,6 +604,19 @@ export const delShukoFix = async (
   try {
     await connection.query('BEGIN');
 
+    // ほかの人が先に出発解除していないか、トランザクション内で確定済みのヘッダーを取り直す
+    const fixedJuchuKizaiHeadIds = await selectFixedJuchuKizaiHeadIdsTx(
+      shukoDetailData.juchuHeadId,
+      juchuKizaiHeadIds,
+      SAGYO_KBN_ID.shukoConfirmed,
+      shukoDetailData.nyushukoDat,
+      shukoDetailData.nyushukoBashoId,
+      connection
+    );
+    if (fixedJuchuKizaiHeadIds.length === 0) {
+      throw new NyushukoFixError(NYUSHUKO_FIX_ERROR.noneFixed, '[delShukoFix] すでに出発解除されています');
+    }
+
     for (const data of deleteFixData) {
       await deleteNyushukoFix(data, connection);
     }
@@ -583,7 +625,7 @@ export const delShukoFix = async (
 
     await revalidatePath('/shuko-list');
 
-    return true;
+    return { ok: true };
   } catch (e) {
     if (e instanceof Error) {
       console.error(`[ERROR] ${e.message}`);
@@ -594,7 +636,7 @@ export const delShukoFix = async (
       console.error(e);
     }
     await connection.query('ROLLBACK');
-    return false;
+    return { ok: false, reason: toNyushukoFixErrorReason(e) };
   } finally {
     connection.release();
   }

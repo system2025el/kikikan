@@ -1,15 +1,28 @@
 'use server';
 
+import { PoolClient } from 'pg';
+
 import pool from '../postgres';
 import { SCHEMA } from '../schema';
 import { createClient } from '../supabase-server';
 
+/**
+ * 入出庫明細取得
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadKbn 受注機材ヘッダー区分
+ * @param nyushukoBashoId 入出庫場所id
+ * @param nyushukoDat 入出庫日時
+ * @param sagyoKbnId 作業区分id
+ * @param connection 渡したときはその接続（トランザクション内）で実行する
+ * @returns
+ */
 export const selectNyushukoDetail = async (
   juchuHeadId: number,
   juchuKizaiHeadKbn: number,
   nyushukoBashoId: number,
   nyushukoDat: string,
-  sagyoKbnId: number
+  sagyoKbnId: number,
+  connection?: PoolClient
 ) => {
   const query = `
     SELECT
@@ -57,7 +70,7 @@ export const selectNyushukoDetail = async (
   const values = [juchuHeadId, juchuKizaiHeadKbn.toString(), nyushukoBashoId, nyushukoDat, sagyoKbnId];
 
   try {
-    return (await pool.query(query, values)).rows;
+    return (await (connection ?? pool).query(query, values)).rows;
   } catch (e) {
     throw new Error('[selectNyushukoDetail] DBエラー:', { cause: e });
   }

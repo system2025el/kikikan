@@ -2,10 +2,12 @@ import { Typography } from '@mui/material';
 import { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
+import { SAGYO_KBN_ID } from '@/app/_lib/constants';
 import { getCurrentUser } from '@/app/(main)/_lib/funcs';
+import { getNyushukoFixState } from '@/app/(main)/_lib/nyushuko-fix-state';
 import { permission } from '@/app/(main)/_lib/permission';
 
-import { getShukoDetail, getShukoDetailTable, getShukoFixFlag } from './_lib/funcs';
+import { getShukoDetail, getShukoDetailTable } from './_lib/funcs';
 import { ShukoDetailValues } from './_lib/types';
 import { ShukoDetail } from './_ui/shuko-detail';
 
@@ -78,10 +80,11 @@ const Page = async (props: {
     return <div>出庫明細が見つかりません。</div>;
   }
 
-  const fixFlag = await getShukoFixFlag(
+  // 合体している全ヘッダーの出発状況（なし／一部／全部）
+  const fixState = await getNyushukoFixState(
     Number(params.jhId),
-    shukoDetailData.juchuKizaiHeadIds[0],
-    60,
+    shukoDetailData.juchuKizaiHeadIds,
+    SAGYO_KBN_ID.shukoConfirmed,
     shukoDetailData.nyushukoDat,
     Number(params.nbId)
   );
@@ -90,7 +93,8 @@ const Page = async (props: {
       user={user}
       shukoDetailData={shukoDetailData}
       shukoDetailTableData={shukoDetailTableData}
-      fixFlag={fixFlag}
+      fixSts={fixState.fixSts}
+      fixedJuchuKizaiHeadIds={fixState.fixedJuchuKizaiHeadIds}
     />
   );
 };
