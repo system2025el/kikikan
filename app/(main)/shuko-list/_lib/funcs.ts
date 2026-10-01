@@ -1,6 +1,6 @@
 'use server';
 
-import { JUCHU_KIZAI_HEAD_KBN } from '@/app/_lib/constants';
+import { JUCHU_KIZAI_HEAD_KBN, toFixSts } from '@/app/_lib/constants';
 import { selectOneCustomer } from '@/app/_lib/db/tables/m-kokyaku';
 import { selectPdfJuchuKizaiMeisai } from '@/app/_lib/db/tables/nyushuko-pdf';
 import { selectPdfJuchuKizaiHead } from '@/app/_lib/db/tables/v-juchu-kizai-head-lst';
@@ -39,7 +39,7 @@ export const getShukoList = async (queries: ShukoListSearchValues) => {
       sstbSagyoStsNamShort: d.sstb_sagyo_sts_nam_short,
       schkSagyoStsId: d.schk_sagyo_sts_id,
       schkSagyoStsNamShort: d.schk_sagyo_sts_nam_short,
-      shukoFixFlg: d.shuko_fix_flg === 1 ? true : false,
+      shukoFixSts: toFixSts(d.shuko_fix_sts),
       nyuryokuUser: d.nyuryoku_user,
       sstbPlanQty: d.sstb_plan_qty ?? 0,
       schkPlanQty: d.schk_plan_qty ?? 0,

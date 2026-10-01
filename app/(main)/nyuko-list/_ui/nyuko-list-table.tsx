@@ -15,9 +15,9 @@ import {
 import { useRouter } from 'next/navigation';
 import { Dispatch, SetStateAction, useState } from 'react';
 
-import { BASHO_ID, JUCHU_KIZAI_HEAD_KBN, SAGYO_KBN_ID } from '@/app/_lib/constants';
+import { BASHO_ID, FIX_STS, JUCHU_KIZAI_HEAD_KBN, SAGYO_KBN_ID } from '@/app/_lib/constants';
 
-import { dispColors } from '../../_lib/colors';
+import { dispColors, fixStsColors } from '../../_lib/colors';
 import { toJapanTimeString } from '../../_lib/date-conversion';
 import { permission } from '../../_lib/permission';
 import { openOrFocusTab } from '../../_lib/tab-focus';
@@ -96,7 +96,18 @@ export const NyukoListTable = (props: {
         </TableHead>
         <TableBody>
           {datas.map((row, index) => (
-            <TableRow key={index} sx={{ whiteSpace: 'nowrap', backgroundColor: row.nyukoFixFlg ? '#808080' : 'white' }}>
+            <TableRow
+              key={index}
+              sx={{
+                whiteSpace: 'nowrap',
+                backgroundColor:
+                  row.nyukoFixSts === FIX_STS.all
+                    ? fixStsColors.all
+                    : row.nyukoFixSts === FIX_STS.partial
+                      ? fixStsColors.partial
+                      : 'white',
+              }}
+            >
               <TableCell padding="checkbox">
                 <Checkbox checked={selected.includes(index)} onChange={() => handleSelect(index)} />
               </TableCell>

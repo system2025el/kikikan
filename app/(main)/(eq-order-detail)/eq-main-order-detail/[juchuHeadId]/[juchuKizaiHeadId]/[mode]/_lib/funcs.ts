@@ -1048,11 +1048,12 @@ export const updNyukoDen = async (
     sagyo_den_dat: nyukoDat.toISOString(),
     sagyo_id: sagyoId,
     kizai_id: d.kizaiId,
+    // 到着済みの返却で親から引いた量を、同じ機材・dsp の行（複数の返却・親機材として読んだ行）すべて合計して引く
     plan_qty:
-      returnData.length > 0
-        ? d.planQty -
-          (returnData.find((r) => r.kizaiId === d.kizaiId && r.dspOrdNumMeisai === d.dspOrdNum)?.planQty ?? 0)
-        : d.planQty,
+      d.planQty -
+      returnData
+        .filter((r) => r.kizaiId === d.kizaiId && r.dspOrdNumMeisai === d.dspOrdNum)
+        .reduce((sum, r) => sum + r.planQty, 0),
     dsp_ord_num: d.dspOrdNum,
     indent_num: d.indentNum,
     add_dat: new Date().toISOString(),
@@ -1161,11 +1162,12 @@ export const upsNyukoDen = async (
     sagyo_den_dat: nyukoDat.toISOString(),
     sagyo_id: sagyoId,
     kizai_id: d.kizaiId,
+    // 到着済みの返却で親から引いた量を、同じ機材・dsp の行（複数の返却・親機材として読んだ行）すべて合計して引く
     plan_qty:
-      returnData.length > 0
-        ? d.planQty -
-          (returnData.find((r) => r.kizaiId === d.kizaiId && r.dspOrdNumMeisai === d.dspOrdNum)?.planQty ?? 0)
-        : d.planQty,
+      d.planQty -
+      returnData
+        .filter((r) => r.kizaiId === d.kizaiId && r.dspOrdNumMeisai === d.dspOrdNum)
+        .reduce((sum, r) => sum + r.planQty, 0),
     dsp_ord_num: d.dspOrdNum,
     indent_num: d.indentNum,
     add_dat: new Date().toISOString(),
@@ -1761,20 +1763,21 @@ export const upsCtnNyukoDen = async (
   const upsertCtnNyukoData: NyushukoDen[] = juchuContainerMeisaiData.map((d) => {
     let planQty =
       planQtyId === BASHO_ID.kics ? d.planKicsKizaiQty : planQtyId === BASHO_ID.yard ? d.planYardKizaiQty : d.planQty;
-    if (returnData.length > 0) {
-      const childData = returnData.find((r) => r.kizaiId === d.kizaiId && r.dspOrdNumMeisai === d.dspOrdNum);
-      const oyaPlanQty = childData?.nyushukoBashoId === BASHO_ID.kics ? d.planKicsKizaiQty : d.planYardKizaiQty;
+    // 到着済みの返却で親から引いた量を、同じ機材・dsp の行ごとに場所へ振り分けて合計して引く
+    const childDatas = returnData.filter((r) => r.kizaiId === d.kizaiId && r.dspOrdNumMeisai === d.dspOrdNum);
+    for (const childData of childDatas) {
+      const oyaPlanQty = childData.nyushukoBashoId === BASHO_ID.kics ? d.planKicsKizaiQty : d.planYardKizaiQty;
 
       planQty -=
-        sagyoId === childData?.nyushukoBashoId && planQtyId !== 3 && oyaPlanQty < childData.planQty
+        sagyoId === childData.nyushukoBashoId && planQtyId !== 3 && oyaPlanQty < childData.planQty
           ? oyaPlanQty
-          : sagyoId === childData?.nyushukoBashoId && planQtyId !== 3 && oyaPlanQty >= childData?.planQty
-            ? childData?.planQty
-            : sagyoId !== childData?.nyushukoBashoId && planQtyId !== 3 && oyaPlanQty < (childData?.planQty ?? 0)
-              ? (childData?.planQty ?? 0) - oyaPlanQty
-              : sagyoId !== childData?.nyushukoBashoId && planQtyId !== 3 && oyaPlanQty >= (childData?.planQty ?? 0)
+          : sagyoId === childData.nyushukoBashoId && planQtyId !== 3 && oyaPlanQty >= childData.planQty
+            ? childData.planQty
+            : sagyoId !== childData.nyushukoBashoId && planQtyId !== 3 && oyaPlanQty < childData.planQty
+              ? childData.planQty - oyaPlanQty
+              : sagyoId !== childData.nyushukoBashoId && planQtyId !== 3 && oyaPlanQty >= childData.planQty
                 ? 0
-                : (childData?.planQty ?? 0);
+                : childData.planQty;
     }
     return {
       juchu_head_id: d.juchuHeadId,

@@ -63,6 +63,87 @@ export const selectSagyoIdFilterNyushukoFixFlag = async (
 };
 
 /**
+ * 確定済みの受注機材ヘッダーid取得（複数ヘッダー分をまとめて）
+ * 入出庫明細画面は同じ日時・場所の複数ヘッダーを合体して表示するため、どのヘッダーが確定済みかをまとめて取る
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadIds 受注機材ヘッダーid
+ * @param sagyoKbnId 作業区分id（出庫確定 60 / 入庫確定 70）
+ * @param sagyoDenDat 作業日時
+ * @param sagyoId 作業id
+ * @returns
+ */
+export const selectFixedJuchuKizaiHeadIds = async (
+  juchuHeadId: number,
+  juchuKizaiHeadIds: number[],
+  sagyoKbnId: number,
+  sagyoDenDat: string,
+  sagyoId: number
+) => {
+  const supabase = await createClient();
+  try {
+    return await supabase
+      .schema(SCHEMA)
+      .from('t_nyushuko_fix')
+      .select('juchu_kizai_head_id')
+      .eq('juchu_head_id', juchuHeadId)
+      .in('juchu_kizai_head_id', juchuKizaiHeadIds)
+      .eq('sagyo_kbn_id', sagyoKbnId)
+      .eq('sagyo_den_dat', sagyoDenDat)
+      .eq('sagyo_id', sagyoId)
+      .eq('sagyo_fix_flg', 1);
+  } catch (e) {
+    throw new Error('[selectFixedJuchuKizaiHeadIds] DBエラー:', { cause: e });
+  }
+};
+
+/**
+ * 確定済みの受注機材ヘッダーid取得（トランザクション内）
+ * 確定・確定解除の処理で、画面を開いた後の変化も含めて確定済みのヘッダーを取り直すために使う
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadIds 受注機材ヘッダーid
+ * @param sagyoKbnId 作業区分id（出庫確定 60 / 入庫確定 70）
+ * @param sagyoDenDat 作業日時
+ * @param sagyoId 作業id
+ * @param connection
+ * @returns 確定済みの受注機材ヘッダーid
+ */
+export const selectFixedJuchuKizaiHeadIdsTx = async (
+  juchuHeadId: number,
+  juchuKizaiHeadIds: number[],
+  sagyoKbnId: number,
+  sagyoDenDat: string,
+  sagyoId: number,
+  connection: PoolClient
+) => {
+  const query = `
+    SELECT
+      juchu_kizai_head_id
+    FROM
+      ${SCHEMA}.t_nyushuko_fix
+    WHERE
+      juchu_head_id = $1
+      AND juchu_kizai_head_id = ANY($2::int[])
+      AND sagyo_kbn_id = $3
+      AND sagyo_den_dat = $4::timestamptz
+      AND sagyo_id = $5
+      AND sagyo_fix_flg = 1
+  `;
+
+  try {
+    const result = await connection.query<{ juchu_kizai_head_id: number }>(query, [
+      juchuHeadId,
+      juchuKizaiHeadIds,
+      sagyoKbnId,
+      sagyoDenDat,
+      sagyoId,
+    ]);
+    return result.rows.map((r) => r.juchu_kizai_head_id);
+  } catch (e) {
+    throw new Error('[selectFixedJuchuKizaiHeadIdsTx] DBエラー:', { cause: e });
+  }
+};
+
+/**
  * 入出庫確定確認
  * @param data 入出庫確定確認データ
  * @returns

@@ -16,9 +16,9 @@ import { grey } from '@mui/material/colors';
 import { useRouter } from 'next/navigation';
 import { Dispatch, SetStateAction, use, useState } from 'react';
 
-import { BASHO_ID, JUCHU_KIZAI_HEAD_KBN, SAGYO_KBN_ID } from '@/app/_lib/constants';
+import { BASHO_ID, FIX_STS, JUCHU_KIZAI_HEAD_KBN, SAGYO_KBN_ID } from '@/app/_lib/constants';
 
-import { dispColors } from '../../_lib/colors';
+import { dispColors, fixStsColors } from '../../_lib/colors';
 import { toJapanTimeString } from '../../_lib/date-conversion';
 import { permission } from '../../_lib/permission';
 import { openOrFocusTab } from '../../_lib/tab-focus';
@@ -102,19 +102,22 @@ export const ShukoListTable = (props: {
               key={index}
               sx={{
                 whiteSpace: 'nowrap',
-                backgroundColor: row.shukoFixFlg
-                  ? '#808080'
-                  : row.sstbSagyoStsId === 11 && row.schkSagyoStsId === 0
-                    ? '#fff0f5' // ピッキング△・最終確認未 lavenderblush
-                    : row.sstbSagyoStsId === 12 && row.schkSagyoStsId === 0
-                      ? '#f0ffff' // ピッキング〇・最終確認未 azure
-                      : row.sstbSagyoStsId === 12 && row.schkSagyoStsId === 21
-                        ? '#87cefa' // ピッキング〇・最終確認△ lightskyblue
-                        : row.sstbSagyoStsId === 12 && row.schkSagyoStsId === 22
-                          ? '#66cdaa' // ピッキング〇・最終確認〇 mediumaquamarine
-                          : row.sstbSagyoStsId < 12 && row.schkSagyoStsId > 20
-                            ? '#ffff00' // ピッキングが未or△の時に、最終確認が△or〇 黄色
-                            : 'white',
+                backgroundColor:
+                  row.shukoFixSts === FIX_STS.all
+                    ? fixStsColors.all
+                    : row.shukoFixSts === FIX_STS.partial
+                      ? fixStsColors.partial
+                      : row.sstbSagyoStsId === 11 && row.schkSagyoStsId === 0
+                        ? '#fff0f5' // ピッキング△・最終確認未 lavenderblush
+                        : row.sstbSagyoStsId === 12 && row.schkSagyoStsId === 0
+                          ? '#f0ffff' // ピッキング〇・最終確認未 azure
+                          : row.sstbSagyoStsId === 12 && row.schkSagyoStsId === 21
+                            ? '#87cefa' // ピッキング〇・最終確認△ lightskyblue
+                            : row.sstbSagyoStsId === 12 && row.schkSagyoStsId === 22
+                              ? '#66cdaa' // ピッキング〇・最終確認〇 mediumaquamarine
+                              : row.sstbSagyoStsId < 12 && row.schkSagyoStsId > 20
+                                ? '#ffff00' // ピッキングが未or△の時に、最終確認が△or〇 黄色
+                                : 'white',
               }}
             >
               <TableCell padding="checkbox">

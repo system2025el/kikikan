@@ -1,4 +1,4 @@
--- 適用状況: ステージング 2026-09-30 / 本番 未適用
+-- 適用状況: ステージング 2026-09-30（2026-10-01 作業場所の照合を外して再適用） / 本番 未適用
 --
 -- HT の入出庫送信RPC nyushuko_send_20260626_1 を、ゲート（20260930-rf-nyushuko-send-dsp.sql）と同じ
 -- 「親の dsp_ord_num 単位で採番・集約する」形にそろえる。関数名・引数（juchu_kizai_head_kbn を含む）は変えない。
@@ -28,6 +28,15 @@
 --   到着時に dsp_ord_num が NULL だった行は、親伝票から数量が引かれていない。後から紐づけると、
 --   到着解除のときに引いていない数量が親に戻され、親の入庫予定が増えてしまう。
 --   （t_nyushuko_fix に入庫確定 sagyo_kbn_id = 70 がある受注機材ヘッダー・作業場所は対象外）
+--
+-- ★ 親の伝票を探すとき、作業場所（sagyo_id）では照合しない（2026-10-01 追加）
+--   HT は対応表の親の伝票に「親の明細ID・機材・作業区分 30・作業場所＝返却の入庫場所」を入れて送ってくる
+--   （kizai_list_grid_row_provider.dart の denModel。sagyoId: target.nyushukoBashoId）。
+--   親の入庫が KICS・YARD に分かれた受注で返却を片方にまとめて戻すと、親のその機材の伝票は別の場所にあるので
+--   見つからず、dsp_ord_num が取れない → 親と紐づかない（本番で機材 57 行・コンテナ 7 行。2026-10-01 確認）。
+--   親の伝票は受注・親ヘッダー・親の明細ID・作業区分・機材で決まる（親で同じ機材が KICS・YARD の両方に入る
+--   ことはない前提。コンテナは両方の場所に行があっても dsp_ord_num は同じ）ので、作業場所の条件を外す。
+--   ゲートは親の実際の伝票行をそのまま送るので、ゲートの RPC は変えない。
 --
 -- ロールバック: 20260930-ht-nyushuko-send-dsp.rollback.sql（本番の適用前の定義そのもの）
 
@@ -249,7 +258,7 @@ begin
           and d.juchu_kizai_head_id   = (row_to_json(link.nyushuko_den)::jsonb ->> 'juchu_kizai_head_id')::int
           and d.juchu_kizai_meisai_id = (row_to_json(link.nyushuko_den)::jsonb ->> 'juchu_kizai_meisai_id')::int
           and d.sagyo_kbn_id          = (row_to_json(link.nyushuko_den)::jsonb ->> 'sagyo_kbn_id')::int
-          and d.sagyo_id              = (row_to_json(link.nyushuko_den)::jsonb ->> 'sagyo_id')::int
+          -- 作業場所では照合しない（HT は対応表の作業場所に返却の入庫場所を入れてくるため。冒頭の★）
           and d.kizai_id              = (row_to_json(link.nyushuko_den)::jsonb ->> 'kizai_id')::int
         where
           result_rec.juchu_head_id    = (row_to_json(link.nyushuko_result)::jsonb ->> 'juchu_head_id')::int
@@ -427,7 +436,7 @@ begin
           and d.juchu_kizai_head_id   = (row_to_json(link.nyushuko_den)::jsonb ->> 'juchu_kizai_head_id')::int
           and d.juchu_kizai_meisai_id = (row_to_json(link.nyushuko_den)::jsonb ->> 'juchu_kizai_meisai_id')::int
           and d.sagyo_kbn_id          = (row_to_json(link.nyushuko_den)::jsonb ->> 'sagyo_kbn_id')::int
-          and d.sagyo_id              = (row_to_json(link.nyushuko_den)::jsonb ->> 'sagyo_id')::int
+          -- 作業場所では照合しない（HT は対応表の作業場所に返却の入庫場所を入れてくるため。冒頭の★）
           and d.kizai_id              = (row_to_json(link.nyushuko_den)::jsonb ->> 'kizai_id')::int
         where
           ctn_result_rec.juchu_head_id    = (row_to_json(link.nyushuko_ctn_result)::jsonb ->> 'juchu_head_id')::int
@@ -739,7 +748,7 @@ begin
             and d.juchu_kizai_head_id   = (row_to_json(link.nyushuko_den)::jsonb ->> 'juchu_kizai_head_id')::int
             and d.juchu_kizai_meisai_id = (row_to_json(link.nyushuko_den)::jsonb ->> 'juchu_kizai_meisai_id')::int
             and d.sagyo_kbn_id          = (row_to_json(link.nyushuko_den)::jsonb ->> 'sagyo_kbn_id')::int
-            and d.sagyo_id              = (row_to_json(link.nyushuko_den)::jsonb ->> 'sagyo_id')::int
+            -- 作業場所では照合しない（冒頭の★）
             and d.kizai_id              = (row_to_json(link.nyushuko_den)::jsonb ->> 'kizai_id')::int
           where
             r.juchu_head_id     = (row_to_json(link.nyushuko_result)::jsonb ->> 'juchu_head_id')::int
@@ -989,7 +998,7 @@ begin
             and d.juchu_kizai_head_id   = (row_to_json(link.nyushuko_den)::jsonb ->> 'juchu_kizai_head_id')::int
             and d.juchu_kizai_meisai_id = (row_to_json(link.nyushuko_den)::jsonb ->> 'juchu_kizai_meisai_id')::int
             and d.sagyo_kbn_id          = (row_to_json(link.nyushuko_den)::jsonb ->> 'sagyo_kbn_id')::int
-            and d.sagyo_id              = (row_to_json(link.nyushuko_den)::jsonb ->> 'sagyo_id')::int
+            -- 作業場所では照合しない（冒頭の★）
             and d.kizai_id              = (row_to_json(link.nyushuko_den)::jsonb ->> 'kizai_id')::int
           where
             r.juchu_head_id     = (row_to_json(link.nyushuko_ctn_result)::jsonb ->> 'juchu_head_id')::int

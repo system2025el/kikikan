@@ -1,6 +1,6 @@
 'use server';
 
-import { DIC_ID, JUCHU_KIZAI_HEAD_KBN } from '@/app/_lib/constants';
+import { DIC_ID, JUCHU_KIZAI_HEAD_KBN, toFixSts } from '@/app/_lib/constants';
 import { selectOneCustomer } from '@/app/_lib/db/tables/m-kokyaku';
 import { selectNyukoPdfJuchuKizaiMeisai } from '@/app/_lib/db/tables/nyushuko-pdf';
 import { selectSagyoIdFilterNyushukoFixFlag } from '@/app/_lib/db/tables/t-nyushuko-fix';
@@ -39,7 +39,7 @@ export const getNyukoList = async (queries: NyukoListSearchValues) => {
       kokyakuNam: d.kokyaku_nam,
       nchkSagyoStsId: d.nchk_sagyo_sts_id,
       nchkSagyoStsNamShort: d.nchk_sagyo_sts_nam_short,
-      nyukoFixFlg: d.nyuko_fix_flg === 1 ? true : false,
+      nyukoFixSts: toFixSts(d.nyuko_fix_sts),
       nyuryokuUser: d.nyuryoku_user,
       nchkPlanQty: d.nchk_plan_qty ?? 0,
     }));
