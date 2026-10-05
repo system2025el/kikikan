@@ -11,6 +11,7 @@ import {
   TableHead,
   TableRow,
   TextField,
+  Typography,
 } from '@mui/material';
 import { grey, lightBlue } from '@mui/material/colors';
 import { usePathname, useRouter } from 'next/navigation';
@@ -137,13 +138,16 @@ export const ShukoDetailTable = (props: {
                 sx={{
                   whiteSpace: 'nowrap',
                   // 未保存を最優先（予定数0・読取0だと差異0で「済」になってしまうため。移動明細と同じ順番）
+                  // 次に受注から削除された行を、通常の過剰と区別して強調する
                   backgroundColor: !row.saveFlag
                     ? statusColors.unsaved
-                    : row.diff === 0 /*&& row.planQty !== 0 && row.ctnFlg !== 1*/
-                      ? statusColors.completed
-                      : isCtn
-                        ? statusColors.ctn
-                        : 'white',
+                    : row.juchuMeisaiDelFlg === 1
+                      ? statusColors.deleted
+                      : row.diff === 0 /*&& row.planQty !== 0 && row.ctnFlg !== 1*/
+                        ? statusColors.completed
+                        : isCtn
+                          ? statusColors.ctn
+                          : 'white',
                 }}
               >
                 {ctnEditable && (
@@ -165,6 +169,14 @@ export const ShukoDetailTable = (props: {
                   }}
                 >
                   {row.kizaiNam}
+                  {row.juchuMeisaiDelFlg === 1 && (
+                    <Typography
+                      component="span"
+                      sx={{ ml: 1, color: dispColors.return, fontWeight: 'bold', fontSize: 'inherit' }}
+                    >
+                      受注削除
+                    </Typography>
+                  )}
                 </TableCell>
                 <TableCell
                   align="right"

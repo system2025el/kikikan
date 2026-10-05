@@ -356,6 +356,7 @@ export const ShukoDetail = (props: {
           dspOrdNumMeisai: null,
           indentNum: 0,
           mem2: '',
+          juchuMeisaiDelFlg: 0,
           saveFlag: false,
           delFlag: false,
         }));
@@ -621,6 +622,9 @@ export const ShukoDetail = (props: {
               </Typography>
               <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.ctn }}>
                 コンテナ
+              </Typography>
+              <Typography minWidth={70} textAlign={'center'} sx={{ backgroundColor: statusColors.deleted }}>
+                受注削除
               </Typography>
               {ctnEditable && (
                 <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.unsaved }}>

@@ -85,6 +85,7 @@ import {
   getIdoJuchuKizaiMeisai,
   getJuchuKizaiHead,
   getJuchuKizaiMeisai,
+  getShukoResultKizaiCount,
   juchuMeisaiCopy,
   juchuMeisaiSeparation,
   saveJuchuKizai,
@@ -235,6 +236,8 @@ const EquipmentOrderDetail = (props: {
   const [sortDialogOpen, setSortDialogOpen] = useState(false);
   // 削除ダイアログ制御
   const [deleteOpen, setDeleteOpen] = useState(false);
+  // 削除対象のうちピッキング済みの機材件数
+  const [deleteShukoResultCount, setDeleteShukoResultCount] = useState(0);
   // 出庫作業中警告ダイアログ制御
   const [workingConfirmState, setWorkingConfirmState] = useState<{
     isOpen: boolean;
@@ -1100,6 +1103,11 @@ const EquipmentOrderDetail = (props: {
       const lockResult = await lock();
 
       if (lockResult) {
+        // 既に出庫実績・補正数がある機材が含まれていれば、削除確認ダイアログで警告する
+        // （コンテナは出庫明細で管理するため、この画面では削除しない）
+        const deleteEqTargets = juchuKizaiMeisaiList.filter((data) => !data.delFlag && data.selected && data.saveFlag);
+        setDeleteShukoResultCount(await getShukoResultKizaiCount(deleteEqTargets));
+
         setDeleteOpen(true);
       }
     } catch (e) {
@@ -3346,6 +3354,7 @@ const EquipmentOrderDetail = (props: {
           juchuKizaiMeisaiList.filter((data) => !data.delFlag && data.selected).length +
           juchuContainerMeisaiList.filter((data) => !data.delFlag && data.selected).length
         }
+        shukoResultCount={deleteShukoResultCount}
         open={deleteOpen}
         onClick={handleDeleteExecute}
       />

@@ -48,7 +48,17 @@ export const selectNyushukoDetail = async (
       n.ctn_flg,
       n.dsp_ord_num_meisai,
       n.indent_num,
-      n.mem2
+      n.mem2,
+      -- 受注から削除されたのに実績が残っている行（受注明細が存在せず、予定数0）
+      -- ハンディが予定外に読み取った行も受注明細を持たないが、そちらは予定数に読取数が
+      -- 入るため、予定数0を条件に加えて区別する
+      -- コンテナは t_juchu_kizai_meisai ではなく t_juchu_ctn_meisai 側に明細を持つため、
+      -- ctn_flg で参照先を切り替えないと全コンテナ行が削除済みと誤判定される
+      CASE
+        WHEN COALESCE(n.plan_qty, 0) <> 0 THEN 0
+        WHEN COALESCE(n.ctn_flg, 0) = 1 THEN (c.juchu_kizai_meisai_id IS NULL)::integer
+        ELSE (m.juchu_kizai_meisai_id IS NULL)::integer
+      END AS juchu_meisai_del_flg
     FROM
       ${SCHEMA}.v_nyushuko_den2_lst as n
       LEFT JOIN ${SCHEMA}.t_juchu_kizai_meisai as m
@@ -56,6 +66,12 @@ export const selectNyushukoDetail = async (
       AND n.juchu_kizai_head_id = m.juchu_kizai_head_id
       AND n.juchu_kizai_meisai_id = m.juchu_kizai_meisai_id
       AND n.kizai_id = m.kizai_id
+      LEFT JOIN ${SCHEMA}.t_juchu_ctn_meisai as c
+      ON n.juchu_head_id = c.juchu_head_id
+      AND n.juchu_kizai_head_id = c.juchu_kizai_head_id
+      AND n.juchu_kizai_meisai_id = c.juchu_kizai_meisai_id
+      AND n.kizai_id = c.kizai_id
+      AND n.nyushuko_basho_id = c.shozoku_id
     WHERE
       n.juchu_head_id = $1
       AND n.juchu_kizai_head_kbnv = $2
@@ -63,8 +79,8 @@ export const selectNyushukoDetail = async (
       AND n.nyushuko_dat = $4
       AND n.sagyo_kbn_id = $5
     ORDER BY
-      juchu_kizai_head_id,
-      dsp_ord_num_meisai
+      n.juchu_kizai_head_id,
+      n.dsp_ord_num_meisai
   `;
 
   const values = [juchuHeadId, juchuKizaiHeadKbn.toString(), nyushukoBashoId, nyushukoDat, sagyoKbnId];

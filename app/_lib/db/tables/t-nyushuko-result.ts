@@ -101,6 +101,59 @@ export const deleteKizaiIdNyushukoResult = async (
   }
 };
 
+/**
+ * 入出庫実績削除（伝票行が残っているものは残す）
+ *
+ * deleteNyushukoDenKeepResulted が予定数0で残した出庫伝票行の実績は、どのRFIDタグを
+ * 確保していたかを出庫画面に出すために残す必要がある。伝票行が消えた実績だけを削除する。
+ * 判定に伝票の現在の状態を使うため、必ず伝票の削除より後に呼ぶこと。
+ *
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param juchuKizaiMeisaiId 受注機材明細id
+ * @param kizaiId 機材id
+ * @param connection
+ */
+export const deleteKizaiIdNyushukoResultKeepDen = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  juchuKizaiMeisaiId: number,
+  kizaiId: number,
+  connection: PoolClient
+) => {
+  const query = `
+      DELETE FROM
+        ${SCHEMA}.t_nyushuko_result AS r
+      WHERE
+        r.juchu_head_id = $1
+        AND r.juchu_kizai_head_id = $2
+        AND r.juchu_kizai_meisai_id = $3
+        AND r.kizai_id = $4
+        AND NOT EXISTS (
+          SELECT
+            1
+          FROM
+            ${SCHEMA}.t_nyushuko_den AS d
+          WHERE
+            d.juchu_head_id = r.juchu_head_id
+            AND d.juchu_kizai_head_id = r.juchu_kizai_head_id
+            AND d.juchu_kizai_meisai_id = r.juchu_kizai_meisai_id
+            AND d.kizai_id = r.kizai_id
+            AND d.sagyo_kbn_id = r.sagyo_kbn_id
+            AND d.sagyo_den_dat = r.sagyo_den_dat
+            AND d.sagyo_id = r.sagyo_id
+        )
+    `;
+
+  const values = [juchuHeadId, juchuKizaiHeadId, juchuKizaiMeisaiId, kizaiId];
+
+  try {
+    await connection.query(query, values);
+  } catch (e) {
+    throw new Error('[deleteKizaiIdNyushukoResultKeepDen] DBエラー:', { cause: e });
+  }
+};
+
 export const deleteAllNyushukoResult = async (
   juchuHeadId: number,
   juchuKizaiHeadId: number,
