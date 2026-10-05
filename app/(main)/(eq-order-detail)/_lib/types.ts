@@ -54,3 +54,11 @@ export type OyaJuchuContainerMeisaiValues = {
   dspOrdNum: number;
   indentNum: number;
 };
+
+/**
+ * 返却・キープの受注機材ヘッダー新規保存の結果（Server Action の戻り値）
+ * oyaNotFixed：親の受注機材ヘッダーが全場所出発済みではない（画面を開いた後に出発解除された）
+ */
+export type SaveNewChildJuchuKizaiHeadResult =
+  | { ok: true; juchuKizaiHeadId: number }
+  | { ok: false; reason: 'oyaNotFixed' };

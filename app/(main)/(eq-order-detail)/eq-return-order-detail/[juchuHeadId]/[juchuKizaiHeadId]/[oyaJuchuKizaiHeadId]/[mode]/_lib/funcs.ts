@@ -59,8 +59,10 @@ import {
   getJuchuKizaiHeadMaxId,
   getJuchuKizaiMeisaiMaxId,
   getJuchuKizaiNyushuko,
+  isOyaShukoFixedTx,
   updJuchuKizaiNyushuko,
 } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
+import { SaveNewChildJuchuKizaiHeadResult } from '@/app/(main)/(eq-order-detail)/_lib/types';
 import { JuchuKizaiHonbanbiValues } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';
 
 import { ReturnJuchuContainerMeisaiValues, ReturnJuchuKizaiHeadValues, ReturnJuchuKizaiMeisaiValues } from './types';
@@ -76,7 +78,7 @@ export const saveNewReturnJuchuKizaiHead = async (
   data: ReturnJuchuKizaiHeadValues,
   updateDateRange: string[],
   userNam: string
-) => {
+): Promise<SaveNewChildJuchuKizaiHeadResult> => {
   const connection = await pool.connect();
 
   const maxId = await getJuchuKizaiHeadMaxId(data.juchuHeadId);
@@ -84,6 +86,12 @@ export const saveNewReturnJuchuKizaiHead = async (
 
   try {
     await connection.query('BEGIN');
+
+    // 親が全場所出発済みかを確かめ直す（受注画面を開いた後に出発解除されていたら作らない）
+    if (!(await isOyaShukoFixedTx(data.juchuHeadId, data.oyaJuchuKizaiHeadId, connection))) {
+      await connection.query('ROLLBACK');
+      return { ok: false, reason: 'oyaNotFixed' };
+    }
 
     // 受注機材ヘッダー追加
     await addReturnJuchuKizaiHead(newJuchuKizaiHeadId, data, userNam, connection);
@@ -150,7 +158,7 @@ export const saveNewReturnJuchuKizaiHead = async (
 
     await revalidatePath('/eqpt-order-list');
 
-    return newJuchuKizaiHeadId;
+    return { ok: true, juchuKizaiHeadId: newJuchuKizaiHeadId };
   } catch (e) {
     if (e instanceof Error) {
       console.error(`[ERROR] ${e.message}`);

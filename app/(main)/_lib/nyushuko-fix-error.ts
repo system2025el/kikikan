@@ -9,6 +9,8 @@ export const NYUSHUKO_FIX_ERROR = {
   noneFixed: 'noneFixed',
   /** 不足・過剰がある（出発時に DB から取り直して確認した結果） */
   diff: 'diff',
+  /** 子伝票（返却・キープ）がある（出発解除時に DB から取り直して確認した結果） */
+  hasChild: 'hasChild',
   /** それ以外（DB エラーなど） */
   other: 'other',
 } as const;
@@ -65,6 +67,9 @@ export const getNyushukoFixErrorMessage = (
       title: '不足・過剰があります',
       message: '不足・過剰があるため、出発できません。画面を開き直してください',
     };
+  }
+  if (action === 'departureRelease' && reason === NYUSHUKO_FIX_ERROR.hasChild) {
+    return { title: '子伝票が存在します', message: '子伝票があるため、出発解除できません' };
   }
   if (action === 'departureRelease' && reason === NYUSHUKO_FIX_ERROR.noneFixed) {
     return { title: '出発解除済みです', message: 'すでに出発解除されています。画面を開き直してください' };

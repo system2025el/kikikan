@@ -52,6 +52,7 @@ import { IsDirtyAlertDialog, useDirty } from '@/app/(main)/_ui/dirty-context';
 import { HonbanbiCalendar } from '@/app/(main)/_ui/honbanbi-calendar';
 import { Loading, LoadingOverlay } from '@/app/(main)/_ui/loading';
 import { SelectTable } from '@/app/(main)/_ui/table';
+import { getOyaShukoFixed } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
 import { HonbanbiColorValues } from '@/app/(main)/(eq-order-detail)/eq-keep-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[oyaJuchuKizaiHeadId]/[mode]/_lib/types';
 import { WillDeleteAlertDialog } from '@/app/(main)/(masters)/_ui/dialogs';
 import { equipmentRows, users, vehicleHeaders, vehicleRows } from '@/app/(main)/order/[juchuHeadId]/[mode]/_lib/data';
@@ -439,8 +440,8 @@ export const Order = (props: {
           if (
             selectEqHeader &&
             selectEqHeader.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.normal &&
-            (selectEqHeader.kicsShukoDat ? selectEqHeader.kicsShukoFixFlg === 1 : true) &&
-            (selectEqHeader.yardShukoDat ? selectEqHeader.yardShukoFixFlg === 1 : true)
+            // 出発状況は画面を開いた後に変わる（別タブでの出発・出発解除）ため、画面の値ではなく DB の最新の値で確かめる
+            (await getOyaShukoFixed(props.juchuHeadData.juchuHeadId, selectEqHeader.juchuKizaiHeadId))
           ) {
             const path = `/eq-return-order-detail/${props.juchuHeadData.juchuHeadId}/0/${selectEqHeader.juchuKizaiHeadId}/edit`;
 
@@ -477,8 +478,8 @@ export const Order = (props: {
           if (
             selectEqHeader &&
             selectEqHeader.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.normal &&
-            (selectEqHeader.kicsShukoDat ? selectEqHeader.kicsShukoFixFlg === 1 : true) &&
-            (selectEqHeader.yardShukoDat ? selectEqHeader.yardShukoFixFlg === 1 : true)
+            // 出発状況は画面を開いた後に変わる（別タブでの出発・出発解除）ため、画面の値ではなく DB の最新の値で確かめる
+            (await getOyaShukoFixed(props.juchuHeadData.juchuHeadId, selectEqHeader.juchuKizaiHeadId))
           ) {
             const path = `/eq-keep-order-detail/${props.juchuHeadData.juchuHeadId}/0/${selectEqHeader.juchuKizaiHeadId}/edit`;
 

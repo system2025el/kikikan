@@ -995,28 +995,6 @@ const mergeJuchuKizaiMeisai = async (normalHeads: EqTableValues[], returnHeads: 
   return mergedSets.flatMap((m) => m.rows);
 };
 
-/**
- * 選択された受注機材ヘッダーのコンテナ明細を機材idごとに合算する
- * 返却明細はマイナス値で入っているため、そのまま加算すると減算になる
- */
-const mergeJuchuContainerMeisai = async (originJuchuKizaiHeads: EqTableValues[]) => {
-  const merged = new Map<number, { kizaiNam: string; qty: number; mems: (string | null)[] }>();
-
-  for (const head of originJuchuKizaiHeads) {
-    const isReturn = head.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.return;
-    const ctnList = await getJuchuContainerMeisai(head.juchuHeadId, head.juchuKizaiHeadId);
-
-    for (const d of ctnList) {
-      const current = merged.get(d.kizaiId) ?? { kizaiNam: d.kizaiNam, qty: 0, mems: [] };
-      current.qty += d.planKicsKizaiQty + d.planYardKizaiQty;
-      if (!isReturn) current.mems.push(d.mem);
-      merged.set(d.kizaiId, current);
-    }
-  }
-
-  return merged;
-};
-
 /** 機材マスタの現在の定価（reg_amt）を機材idごとに引けるMapで取得する */
 const getKizaiRegAmts = async (kizaiIds: number[]) => {
   if (kizaiIds.length === 0) return new Map<number, number>();
@@ -1091,8 +1069,6 @@ export const copyJuchuKizaiHeadMeisai = async (
     const mergedKizaiMeisai = await mergeJuchuKizaiMeisai(normalHeads, returnHeads);
     // 単価はコピー元の値ではなく機材マスタの現在の定価を入れ直す
     const regAmtByKizaiId = await getKizaiRegAmts([...new Set(mergedKizaiMeisai.map((d) => d.kizaiId))]);
-    // 受注コンテナ明細（機材idごとに合算。数量はYARDに寄せ、KICSは0で作成する）
-    const mergedCtnMeisai = await mergeJuchuContainerMeisai(originJuchuKizaiHeads);
 
     await connection.query('BEGIN');
 
@@ -1180,7 +1156,7 @@ export const copyJuchuKizaiHeadMeisai = async (
       connection
     );
 
-    // 表示順。受注機材明細に1から振り、続けて受注コンテナ明細に振る
+    // 表示順。受注機材明細に1から振る（コンテナはコピーしない）
     let dspOrdNum = 1;
 
     const newJuchuKizaiMeisai: CopyJuchuKizaiMeisaiValues[] = mergedKizaiMeisai.map((d, index) => ({
@@ -1212,32 +1188,7 @@ export const copyJuchuKizaiHeadMeisai = async (
       await addNyushukoDen(newJuchuKizaiHeadData, newJuchuKizaiMeisai, userNam, connection);
     }
 
-    const newJuchuCtnMeisai: CopyJuchuContainerMeisaiValues[] = [...mergedCtnMeisai.entries()].map(
-      ([kizaiId, d], index) => ({
-        juchuHeadId: juchuHeadId,
-        juchuKizaiHeadId: newJuchuKizaiHeadId,
-        juchuKizaiMeisaiId: index + 1,
-        kizaiId: kizaiId,
-        kizaiNam: d.kizaiNam,
-        planKicsKizaiQty: 0,
-        planYardKizaiQty: Math.max(0, d.qty),
-        planQty: Math.max(0, d.qty),
-        mem: mergeMem(d.mems),
-        dspOrdNum: dspOrdNum++,
-        indentNum: 0,
-        delFlag: false,
-        saveFlag: true,
-      })
-    );
-
-    if (newJuchuCtnMeisai.length > 0) {
-      // 受注コンテナ明細追加
-      await addJuchuContainerMeisai(newJuchuCtnMeisai, userNam, connection);
-
-      // コンテナ入出庫伝票追加(YARDのみ)
-      await addCtnShukoDen(newJuchuCtnMeisai, shukoDate, BASHO_ID.yard, userNam, connection);
-      await addCtnNyukoDen(newJuchuCtnMeisai, nyukoDate, BASHO_ID.yard, BASHO_ID.yard, userNam, connection);
-    }
+    // コンテナは出庫明細（最終確認）で管理するため、コピーの対象にしない（受注機材明細のコピー・分離と同じ）
 
     // 移動受注機材明細
     // 明細はYARDで作成するため、機材マスタの所属がKICSの機材は出庫日に移動させる

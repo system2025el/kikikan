@@ -74,6 +74,15 @@
 | **`v_ido_den2_meisai_lst`**（新規） | HT・ゲート向けの明細単位リスト。`v_ido_den2_lst` は機材単位のまま残す                                                                                                                                           | 2026-09-24   | 未適用 | 段階2（HT・ゲート改修） |
 | `v_nyushuko_den`                    | 末尾に `nyuko_fix_sts` / `shuko_fix_sts`（到着・出発の 0=なし / 1=一部 / 2=全部）を追加。`nyuko_fix_flg` / `shuko_fix_flg` を「全部確定済みのときだけ1」に変更（2026-10-01）                                    | 2026-09-30   | 未適用 | 入出庫一覧の3段階表示   |
 | `v_nyushuko_den2`                   | `v_nyushuko_den` の上記2列を末尾に通す（GROUP BY にも追加）                                                                                                                                                     | 2026-09-30   | 未適用 | 入出庫一覧の3段階表示   |
+| `v_juchu_ctn_meisai`                | K / Y の片方だけのコンテナ明細に対応。無い側の数量を 0、`mem` は K と Y が違えば改行でつなぐ、`dsp_ord_num` は `COALESCE(K, Y)`。同じコンテナが2行に分かれなくなる（列構成は不変）                             | 未適用       | 未適用 | コンテナ管理を出庫側へ  |
+
+#### v_juchu_ctn_meisai（コンテナ管理を出庫側へ）
+
+受注コンテナ明細は、これまでメイン明細から KICS・YARD の2行を必ず作っていましたが、出庫明細の保存時・HT/ゲートの送信時に
+その作業場所の1行だけを作るように変わります（RPC は `scripts/db-migration/ddl/20261005-nyushuko-send-ctn.sql`）。結合は変えず、出力列の式だけを変えています。
+
+- 2026-10-05 にステージングでトランザクション内で差し替えて比較（ROLLBACK 済み）：2,452行 → 2,374行。K と Y で `mem`・`dsp_ord_num` が違うために2行に分かれていた78件が1行になり、それ以外は NULL→0 を除いて差分0
+- `mem` の型は元の `character varying(200)` に合わせている（`CREATE OR REPLACE VIEW` は列の型を変えられないため）。K と Y を改行でつないで200文字を超えると、明示キャストにより末尾が切り捨てられる（エラーにはならない）
 
 `v_ido_*` の3本は「移動を受注機材ヘッダー単位にする」改修の一部です。**テーブル変更 [`scripts/db-migration/ddl/20260924-ido-juchu-meisai.sql`](../db-migration/ddl/20260924-ido-juchu-meisai.sql) と RPC修理 `20260924-ido-send-rpc-fix.sql` が先に適用されていないと動きません。**
 

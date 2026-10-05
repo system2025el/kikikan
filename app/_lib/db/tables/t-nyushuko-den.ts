@@ -567,6 +567,293 @@ export const deleteAllKicsOrYardNyukoDen = async (
   }
 };
 
+/**
+ * コンテナの出庫伝票（ピッキング・最終確認）の作業日時を更新（作業場所単位）
+ * 出庫日時を変えたときに、伝票を削除せず日時だけ変えるために使う
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param sagyoId 作業id（作業場所）
+ * @param sagyoDenDat 新しい作業日時
+ * @param connection
+ */
+export const updateShukoCtnDenDat = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  sagyoId: number,
+  sagyoDenDat: string,
+  connection: PoolClient
+) => {
+  const query = `
+    UPDATE
+      ${SCHEMA}.t_nyushuko_den AS d
+    SET
+      sagyo_den_dat = $4
+    FROM
+      ${SCHEMA}.m_kizai AS k
+    WHERE
+      k.kizai_id = d.kizai_id
+      AND k.ctn_flg = 1
+      AND d.juchu_head_id = $1
+      AND d.juchu_kizai_head_id = $2
+      AND d.sagyo_id = $3
+      AND d.sagyo_kbn_id = ANY($5)
+  `;
+
+  const values = [juchuHeadId, juchuKizaiHeadId, sagyoId, sagyoDenDat, [10, 20]];
+
+  try {
+    await connection.query(query, values);
+  } catch (e) {
+    throw new Error('[updateShukoCtnDenDat] DBエラー:', { cause: e });
+  }
+};
+
+/**
+ * コンテナの出庫伝票（ピッキング・最終確認）を作業場所単位で全削除
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param sagyoId 作業id（作業場所）
+ * @param connection
+ */
+export const deleteAllShukoCtnDenBasho = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  sagyoId: number,
+  connection: PoolClient
+) => {
+  const query = `
+    DELETE FROM
+      ${SCHEMA}.t_nyushuko_den AS d
+    USING
+      ${SCHEMA}.m_kizai AS k
+    WHERE
+      k.kizai_id = d.kizai_id
+      AND k.ctn_flg = 1
+      AND d.juchu_head_id = $1
+      AND d.juchu_kizai_head_id = $2
+      AND d.sagyo_id = $3
+      AND d.sagyo_kbn_id = ANY($4)
+  `;
+
+  const values = [juchuHeadId, juchuKizaiHeadId, sagyoId, [10, 20]];
+
+  try {
+    await connection.query(query, values);
+  } catch (e) {
+    throw new Error('[deleteAllShukoCtnDenBasho] DBエラー:', { cause: e });
+  }
+};
+
+/**
+ * コンテナ1件の出庫伝票（ピッキング・最終確認）を削除（作業場所単位）
+ * @param data 受注ヘッダーid、受注機材ヘッダーid、受注機材明細id、機材id
+ * @param sagyoId 作業id（作業場所）
+ * @param connection
+ */
+export const deleteShukoCtnDen = async (
+  data: { juchuHeadId: number; juchuKizaiHeadId: number; juchuKizaiMeisaiId: number; kizaiId: number },
+  sagyoId: number,
+  connection: PoolClient
+) => {
+  const query = `
+    DELETE FROM
+      ${SCHEMA}.t_nyushuko_den
+    WHERE
+      juchu_head_id = $1
+      AND juchu_kizai_head_id = $2
+      AND juchu_kizai_meisai_id = $3
+      AND kizai_id = $4
+      AND sagyo_id = $5
+      AND sagyo_kbn_id = ANY($6)
+  `;
+
+  const values = [data.juchuHeadId, data.juchuKizaiHeadId, data.juchuKizaiMeisaiId, data.kizaiId, sagyoId, [10, 20]];
+
+  try {
+    await connection.query(query, values);
+  } catch (e) {
+    throw new Error('[deleteShukoCtnDen] DBエラー:', { cause: e });
+  }
+};
+
+/**
+ * コンテナの出庫チェック伝票（sagyo_kbn_id = 20）取得（トランザクション内。採番用）
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param connection
+ * @returns 受注機材明細id、機材id、作業id、作業日時、表示順
+ */
+export const selectShukoCtnDenRowsTx = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  connection: PoolClient
+) => {
+  const query = `
+    SELECT
+      d.juchu_kizai_meisai_id,
+      d.kizai_id,
+      d.sagyo_id,
+      d.sagyo_den_dat,
+      d.dsp_ord_num
+    FROM
+      ${SCHEMA}.t_nyushuko_den AS d
+      INNER JOIN ${SCHEMA}.m_kizai AS k
+        ON k.kizai_id = d.kizai_id
+        AND k.ctn_flg = 1
+    WHERE
+      d.juchu_head_id = $1
+      AND d.juchu_kizai_head_id = $2
+      AND d.sagyo_kbn_id = 20
+  `;
+
+  try {
+    return (
+      await connection.query<{
+        juchu_kizai_meisai_id: number;
+        kizai_id: number;
+        sagyo_id: number;
+        sagyo_den_dat: Date;
+        dsp_ord_num: number | null;
+      }>(query, [juchuHeadId, juchuKizaiHeadId])
+    ).rows;
+  } catch (e) {
+    throw new Error('[selectShukoCtnDenRowsTx] DBエラー:', { cause: e });
+  }
+};
+
+/**
+ * 出庫チェック伝票（sagyo_kbn_id = 20）の受注機材明細idの最大値取得（作業場所・作業日時単位。機材の行も含む）
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param sagyoId 作業id（作業場所）
+ * @param sagyoDenDat 作業日時
+ * @param connection
+ * @returns 最大値（伝票が無ければ null）
+ */
+export const selectShukoDenMaxMeisaiIdTx = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  sagyoId: number,
+  sagyoDenDat: string,
+  connection: PoolClient
+) => {
+  const query = `
+    SELECT
+      MAX(juchu_kizai_meisai_id)::integer AS max_meisai_id
+    FROM
+      ${SCHEMA}.t_nyushuko_den
+    WHERE
+      juchu_head_id = $1
+      AND juchu_kizai_head_id = $2
+      AND sagyo_kbn_id = 20
+      AND sagyo_id = $3
+      AND sagyo_den_dat = $4
+  `;
+
+  try {
+    const { rows } = await connection.query<{ max_meisai_id: number | null }>(query, [
+      juchuHeadId,
+      juchuKizaiHeadId,
+      sagyoId,
+      sagyoDenDat,
+    ]);
+    return rows[0]?.max_meisai_id ?? null;
+  } catch (e) {
+    throw new Error('[selectShukoDenMaxMeisaiIdTx] DBエラー:', { cause: e });
+  }
+};
+
+/**
+ * コンテナの入庫伝票（sagyo_kbn_id = 30）を削除（コンテナ・入庫場所を指定）
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param targets 削除するコンテナ（受注機材明細id、機材id、作業id＝入庫場所）
+ * @param connection
+ */
+export const deleteNyukoCtnDen = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  targets: { juchuKizaiMeisaiId: number; kizaiId: number; sagyoId: number }[],
+  connection: PoolClient
+) => {
+  if (targets.length === 0) return;
+
+  const query = `
+    DELETE FROM
+      ${SCHEMA}.t_nyushuko_den
+    WHERE
+      juchu_head_id = $1
+      AND juchu_kizai_head_id = $2
+      AND sagyo_kbn_id = 30
+      AND (juchu_kizai_meisai_id, kizai_id, sagyo_id) IN (SELECT * FROM UNNEST($3::int[], $4::int[], $5::int[]))
+  `;
+
+  try {
+    await connection.query(query, [
+      juchuHeadId,
+      juchuKizaiHeadId,
+      targets.map((t) => t.juchuKizaiMeisaiId),
+      targets.map((t) => t.kizaiId),
+      targets.map((t) => t.sagyoId),
+    ]);
+  } catch (e) {
+    throw new Error('[deleteNyukoCtnDen] DBエラー:', { cause: e });
+  }
+};
+
+/**
+ * コンテナの入庫伝票（sagyo_kbn_id = 30）の予定数を更新（コンテナ・入庫場所を指定）
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param juchuKizaiMeisaiId 受注機材明細id
+ * @param kizaiId 機材id
+ * @param sagyoId 作業id（入庫場所）
+ * @param planQty 予定数
+ * @param userNam ユーザー名
+ * @param connection
+ */
+export const updateNyukoCtnDenPlanQty = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  juchuKizaiMeisaiId: number,
+  kizaiId: number,
+  sagyoId: number,
+  planQty: number,
+  userNam: string,
+  connection: PoolClient
+) => {
+  const query = `
+    UPDATE
+      ${SCHEMA}.t_nyushuko_den
+    SET
+      plan_qty = $6,
+      upd_dat = $7,
+      upd_user = $8
+    WHERE
+      juchu_head_id = $1
+      AND juchu_kizai_head_id = $2
+      AND juchu_kizai_meisai_id = $3
+      AND kizai_id = $4
+      AND sagyo_id = $5
+      AND sagyo_kbn_id = 30
+  `;
+
+  try {
+    await connection.query(query, [
+      juchuHeadId,
+      juchuKizaiHeadId,
+      juchuKizaiMeisaiId,
+      kizaiId,
+      sagyoId,
+      planQty,
+      new Date().toISOString(),
+      userNam,
+    ]);
+  } catch (e) {
+    throw new Error('[updateNyukoCtnDenPlanQty] DBエラー:', { cause: e });
+  }
+};
+
 export const deleteAllKicsOrYardShukoCtnDen = async (
   juchuHeadId: number,
   juchuKizaiHeadId: number,

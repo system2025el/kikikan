@@ -208,6 +208,244 @@ export const deleteJuchuContainerMeisai = async (
   }
 };
 
+/**
+ * 受注コンテナ明細の一部の列だけを UPSERT（無ければ追加、あれば指定した列だけ更新）
+ * @param data 受注コンテナ明細データ（追加するときの全列）
+ * @param updateColumns 既にある行で更新する列
+ * @param connection
+ */
+export const upsertJuchuContainerMeisaiColumns = async (
+  data: JuchuCtnMeisai[],
+  updateColumns: (keyof JuchuCtnMeisai)[],
+  connection: PoolClient
+) => {
+  const cols = Object.keys(data[0]) as (keyof (typeof data)[0])[];
+  const insertValues = data.flatMap((obj) => cols.map((col) => obj[col] ?? null));
+
+  let placeholderIndex = 1;
+  const placeholders = data
+    .map(() => {
+      const rowPlaceholders = cols.map(() => `$${placeholderIndex++}`);
+      return `(${rowPlaceholders.join(', ')})`;
+    })
+    .join(', ');
+
+  const updateTimestampPlaceholder = `$${placeholderIndex++}`;
+  const updateUserPlaceholder = `$${placeholderIndex++}`;
+  const values = [...insertValues, data[0].add_dat, data[0].add_user];
+
+  const conflictKeys = ['juchu_head_id', 'juchu_kizai_head_id', 'juchu_kizai_meisai_id', 'kizai_id', 'shozoku_id'];
+  const updateSet = [
+    ...updateColumns.map((col) => `${col as string} = EXCLUDED.${col as string}`),
+    `upd_dat = ${updateTimestampPlaceholder}`,
+    `upd_user = ${updateUserPlaceholder}`,
+  ].join(',\n    ');
+
+  const query = `
+    INSERT INTO
+      ${SCHEMA}.t_juchu_ctn_meisai (${cols.join(',')})
+    VALUES
+      ${placeholders}
+    ON CONFLICT (${conflictKeys.join(', ')})
+    DO UPDATE SET
+      ${updateSet}
+  `;
+
+  try {
+    await connection.query(query, values);
+  } catch (e) {
+    throw new Error('[upsertJuchuContainerMeisaiColumns] DBエラー:', { cause: e });
+  }
+};
+
+/**
+ * 受注コンテナ明細のメモ更新（1つの場所の行）
+ * @param data 受注ヘッダーid、受注機材ヘッダーid、受注機材明細id、機材id、所属id、メモ
+ * @param userNam ユーザー名
+ * @param connection
+ */
+export const updateJuchuContainerMeisaiMem = async (
+  data: {
+    juchuHeadId: number;
+    juchuKizaiHeadId: number;
+    juchuKizaiMeisaiId: number;
+    kizaiId: number;
+    shozokuId: number;
+    mem: string | null;
+  },
+  userNam: string,
+  connection: PoolClient
+) => {
+  const query = `
+    UPDATE
+      ${SCHEMA}.t_juchu_ctn_meisai
+    SET
+      mem = $1,
+      upd_dat = $2,
+      upd_user = $3
+    WHERE
+      juchu_head_id = $4
+      AND juchu_kizai_head_id = $5
+      AND juchu_kizai_meisai_id = $6
+      AND kizai_id = $7
+      AND shozoku_id = $8
+  `;
+
+  const values = [
+    data.mem,
+    new Date().toISOString(),
+    userNam,
+    data.juchuHeadId,
+    data.juchuKizaiHeadId,
+    data.juchuKizaiMeisaiId,
+    data.kizaiId,
+    data.shozokuId,
+  ];
+
+  try {
+    await connection.query(query, values);
+  } catch (e) {
+    throw new Error('[updateJuchuContainerMeisaiMem] DBエラー:', { cause: e });
+  }
+};
+
+/**
+ * 受注コンテナ明細削除（1つの場所の行）
+ * @param data 受注ヘッダーid、受注機材ヘッダーid、受注機材明細id、機材id
+ * @param shozokuId 所属id（作業場所）
+ * @param connection
+ */
+export const deleteJuchuContainerMeisaiShozoku = async (
+  data: { juchuHeadId: number; juchuKizaiHeadId: number; juchuKizaiMeisaiId: number; kizaiId: number },
+  shozokuId: number,
+  connection: PoolClient
+) => {
+  const query = `
+    DELETE FROM
+      ${SCHEMA}.t_juchu_ctn_meisai
+    WHERE
+      juchu_head_id = $1
+      AND juchu_kizai_head_id = $2
+      AND juchu_kizai_meisai_id = $3
+      AND kizai_id = $4
+      AND shozoku_id = $5
+  `;
+
+  const values = [data.juchuHeadId, data.juchuKizaiHeadId, data.juchuKizaiMeisaiId, data.kizaiId, shozokuId];
+
+  try {
+    await connection.query(query, values);
+  } catch (e) {
+    throw new Error('[deleteJuchuContainerMeisaiShozoku] DBエラー:', { cause: e });
+  }
+};
+
+/**
+ * 受注コンテナ明細を所属（作業場所）単位で全削除
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param shozokuId 所属id（作業場所）
+ * @param connection
+ */
+export const deleteAllJuchuContainerMeisaiShozoku = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  shozokuId: number,
+  connection: PoolClient
+) => {
+  const query = `
+    DELETE FROM
+      ${SCHEMA}.t_juchu_ctn_meisai
+    WHERE
+      juchu_head_id = $1
+      AND juchu_kizai_head_id = $2
+      AND shozoku_id = $3
+  `;
+
+  const values = [juchuHeadId, juchuKizaiHeadId, shozokuId];
+
+  try {
+    await connection.query(query, values);
+  } catch (e) {
+    throw new Error('[deleteAllJuchuContainerMeisaiShozoku] DBエラー:', { cause: e });
+  }
+};
+
+/**
+ * 受注コンテナ明細取得（トランザクション内。採番・出発用）
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param connection
+ * @returns 受注機材明細id、機材id、所属id、表示順
+ */
+export const selectJuchuContainerMeisaiRowsTx = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  connection: PoolClient
+) => {
+  const query = `
+    SELECT
+      juchu_kizai_meisai_id,
+      kizai_id,
+      shozoku_id,
+      dsp_ord_num,
+      plan_kizai_qty
+    FROM
+      ${SCHEMA}.t_juchu_ctn_meisai
+    WHERE
+      juchu_head_id = $1
+      AND juchu_kizai_head_id = $2
+  `;
+
+  try {
+    return (
+      await connection.query<{
+        juchu_kizai_meisai_id: number;
+        kizai_id: number;
+        shozoku_id: number;
+        dsp_ord_num: number | null;
+        plan_kizai_qty: number | null;
+      }>(query, [juchuHeadId, juchuKizaiHeadId])
+    ).rows;
+  } catch (e) {
+    throw new Error('[selectJuchuContainerMeisaiRowsTx] DBエラー:', { cause: e });
+  }
+};
+
+/**
+ * 受注機材明細・受注コンテナ明細の表示順の最大値取得（トランザクション内）
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param connection
+ * @returns 表示順の最大値（無ければ 0）
+ */
+export const selectMeisaiMaxDspOrdNumTx = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  connection: PoolClient
+) => {
+  const query = `
+    SELECT
+      GREATEST(
+        COALESCE((
+          SELECT MAX(dsp_ord_num) FROM ${SCHEMA}.t_juchu_kizai_meisai
+          WHERE juchu_head_id = $1 AND juchu_kizai_head_id = $2
+        ), 0),
+        COALESCE((
+          SELECT MAX(dsp_ord_num) FROM ${SCHEMA}.t_juchu_ctn_meisai
+          WHERE juchu_head_id = $1 AND juchu_kizai_head_id = $2
+        ), 0)
+      )::integer AS max_dsp_ord_num
+  `;
+
+  try {
+    const { rows } = await connection.query<{ max_dsp_ord_num: number }>(query, [juchuHeadId, juchuKizaiHeadId]);
+    return rows[0]?.max_dsp_ord_num ?? 0;
+  } catch (e) {
+    throw new Error('[selectMeisaiMaxDspOrdNumTx] DBエラー:', { cause: e });
+  }
+};
+
 export const deleteJuchuCtnMeisaiFromOrder = async (
   juchuHeadId: number,
   juchuKizaiHeadId: number,
