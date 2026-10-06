@@ -78,7 +78,6 @@ export const getIdoDen = async (sagyoKbnId: number, sagyoSijiId: number, sagyoDe
       rfidYardQty: d.rfid_yard_qty ?? 0,
       rfidKicsQty: d.rfid_kics_qty ?? 0,
       planJuchuQty: d.plan_juchu_qty ?? 0,
-      planLowQty: d.plan_low_qty ?? 0,
       planQty: d.plan_qty ?? 0,
       resultAdjQty: d.result_adj_qty ?? 0,
       resultQty: d.result_qty ?? 0,

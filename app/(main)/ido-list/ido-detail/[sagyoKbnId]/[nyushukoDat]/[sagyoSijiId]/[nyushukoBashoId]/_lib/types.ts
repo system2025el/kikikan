@@ -30,13 +30,14 @@ export type IdoDetailTableValues = {
   kizaiId: number;
   kizaiNam: string;
   shozokuId: number;
-  /** 機材単位の所属数（明細に配分していないので同じ機材の行には同じ値が並ぶ） */
+  /**
+   * 機材単位の保有数（所属別のタグ本数）。明細に配分していないので同じ機材の行には同じ値が並ぶ。
+   * 引き当てを差し引いた在庫数ではなく、現場に出ている分も含まれる点に注意
+   */
   rfidYardQty: number;
   rfidKicsQty: number;
   /** この明細の受注予定数 */
   planJuchuQty: number;
-  /** 機材単位の最低数（在庫と同じく明細には配分していない） */
-  planLowQty: number;
   planQty: number;
   resultAdjQty: number;
   resultQty: number;

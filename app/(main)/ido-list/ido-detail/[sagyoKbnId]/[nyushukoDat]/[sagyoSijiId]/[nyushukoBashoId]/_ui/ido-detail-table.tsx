@@ -2,12 +2,11 @@
 import Delete from '@mui/icons-material/Delete';
 import EventNoteIcon from '@mui/icons-material/EventNote';
 import { IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField } from '@mui/material';
-import { purple } from '@mui/material/colors';
 import { usePathname, useRouter } from 'next/navigation';
 import { memo, useState } from 'react';
 
 import { BASHO_ID } from '@/app/_lib/constants';
-import { dispColors, statusColors } from '@/app/(main)/_lib/colors';
+import { dispColors, sagyoKbnColors, statusColors } from '@/app/(main)/_lib/colors';
 import { permission } from '@/app/(main)/_lib/permission';
 import { openOrFocusTab } from '@/app/(main)/_lib/tab-focus';
 import { User } from '@/app/(main)/_lib/types';
@@ -65,49 +64,28 @@ export const ShukoIdoDenTable = memo(function ShukoIdoDenTable(props: {
   return (
     <TableContainer sx={{ overflow: 'auto', maxHeight: '80vh' }}>
       <Table stickyHeader size="small">
-        <TableHead>
+        <TableHead
+          sx={{
+            '& .MuiTableCell-stickyHeader': { backgroundColor: sagyoKbnColors.ido, color: 'white' },
+          }}
+        >
           <TableRow sx={{ whiteSpace: 'nowrap' }}>
-            <TableCell align="center" style={styles.header} />
-            <TableCell align="center" style={styles.header} />
-            <TableCell align="left" style={styles.header}>
-              機材名
-            </TableCell>
-            <TableCell align="left" style={styles.header}>
-              公演名
-            </TableCell>
-            <TableCell align="left" style={styles.header}>
-              明細名
-            </TableCell>
-            <TableCell align="center" style={styles.header}>
-              貸出状況
-            </TableCell>
-            <TableCell align="left" style={styles.header}>
-              在庫場所
-            </TableCell>
-            <TableCell align="right" style={styles.header}>
-              Y在庫数
-            </TableCell>
-            <TableCell align="right" style={styles.header}>
-              K在庫数
-            </TableCell>
-            <TableCell align="right" style={styles.header}>
-              移動予定数
-            </TableCell>
-            <TableCell align="right" style={styles.header}>
-              最低数
-            </TableCell>
-            <TableCell align="right" style={styles.header}>
-              移動数
-            </TableCell>
-            <TableCell align="right" style={styles.header}>
-              読取数
-            </TableCell>
-            <TableCell align="right" style={styles.header}>
-              補正数
-            </TableCell>
-            <TableCell align="right" style={styles.header}>
-              差異
-            </TableCell>
+            <TableCell align="center" />
+            <TableCell align="center" />
+            <TableCell align="left">機材名</TableCell>
+            <TableCell align="left">公演名</TableCell>
+            <TableCell align="left">明細名</TableCell>
+            <TableCell align="center">貸出状況</TableCell>
+            <TableCell align="left">在庫場所</TableCell>
+            {/* 「在庫数」ではなく「保有数」。v_kizai_qty の所属別のタグ本数で、
+                現場に出ている分も含まれる（引き当てを差し引いた在庫数ではない） */}
+            <TableCell align="right">Y保有数</TableCell>
+            <TableCell align="right">K保有数</TableCell>
+            <TableCell align="right">移動予定数</TableCell>
+            <TableCell align="right">移動数</TableCell>
+            <TableCell align="right">読取数</TableCell>
+            <TableCell align="right">補正数</TableCell>
+            <TableCell align="right">差異</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -179,7 +157,6 @@ export const ShukoIdoDenTable = memo(function ShukoIdoDenTable(props: {
                 <TableCell align="right">{row.rfidYardQty}</TableCell>
                 <TableCell align="right">{row.rfidKicsQty}</TableCell>
                 <TableCell align="right">{row.planJuchuQty}</TableCell>
-                <TableCell align="right">{row.planLowQty}</TableCell>
                 <TableCell align="right" size="small">
                   <TextField
                     type="text"
@@ -249,30 +226,20 @@ export const NyukoIdoDenTable = (props: { datas: IdoDetailTableValues[] }) => {
   return (
     <TableContainer sx={{ overflow: 'auto', maxHeight: '80vh' }}>
       <Table stickyHeader size="small">
-        <TableHead>
+        <TableHead
+          sx={{
+            '& .MuiTableCell-stickyHeader': { backgroundColor: sagyoKbnColors.ido, color: 'white' },
+          }}
+        >
           <TableRow sx={{ whiteSpace: 'nowrap' }}>
-            <TableCell align="center" style={styles.header} />
-            <TableCell align="left" style={styles.header}>
-              機材名
-            </TableCell>
-            <TableCell align="left" style={styles.header}>
-              公演名
-            </TableCell>
-            <TableCell align="left" style={styles.header}>
-              明細名
-            </TableCell>
-            <TableCell align="right" style={styles.header}>
-              入庫予定数
-            </TableCell>
-            <TableCell align="right" style={styles.header}>
-              読取数
-            </TableCell>
-            <TableCell align="right" style={styles.header}>
-              補正数
-            </TableCell>
-            <TableCell align="right" style={styles.header}>
-              差異
-            </TableCell>
+            <TableCell align="center" />
+            <TableCell align="left">機材名</TableCell>
+            <TableCell align="left">公演名</TableCell>
+            <TableCell align="left">明細名</TableCell>
+            <TableCell align="right">入庫予定数</TableCell>
+            <TableCell align="right">読取数</TableCell>
+            <TableCell align="right">補正数</TableCell>
+            <TableCell align="right">差異</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -344,10 +311,6 @@ export const NyukoIdoDenTable = (props: { datas: IdoDetailTableValues[] }) => {
 ---------------------------------------------------------------------------------------------------- */
 /** @type {{ [key: string]: React.CSSProperties }} style */
 const styles: { [key: string]: React.CSSProperties } = {
-  // ヘッダー
-  header: {
-    backgroundColor: purple[400],
-  },
   // 行
   row: {
     border: '1px solid black',
