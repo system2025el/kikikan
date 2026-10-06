@@ -24,7 +24,7 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { BASHO_ID, SAGYO_KBN_ID, SAGYO_SIJI_ID } from '@/app/_lib/constants';
-import { statusColors } from '@/app/(main)/_lib/colors';
+import { sagyoKbnColors, statusColors } from '@/app/(main)/_lib/colors';
 import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
 import { permission } from '@/app/(main)/_lib/permission';
@@ -348,7 +348,6 @@ export const IdoDetail = (props: {
       rfidYardQty: d.rfidYardQty,
       rfidKicsQty: d.rfidKicsQty,
       planJuchuQty: 0,
-      planLowQty: 0,
       planQty: 0,
       resultAdjQty: 0,
       resultQty: 0,
@@ -419,7 +418,8 @@ export const IdoDetail = (props: {
       </Box>
       <Paper variant="outlined">
         <Box display={'flex'} justifyContent={'space-between'} alignItems="center" px={2}>
-          <Typography fontSize={'large'}>
+          {/* 出庫・入庫の明細画面と同じく、タイトルにも作業区分色を敷く */}
+          <Typography fontSize={'large'} px={1} sx={{ backgroundColor: sagyoKbnColors.ido, color: 'white' }}>
             移動明細({idoDetailData.sagyoKbnId === SAGYO_KBN_ID.idoShuko ? '移動出庫' : '移動入庫'})
           </Typography>
           <Grid2 container alignItems={'center'} spacing={2}>
