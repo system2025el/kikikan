@@ -13,7 +13,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { grey, lightBlue } from '@mui/material/colors';
+import { grey, lightBlue, red } from '@mui/material/colors';
 import { usePathname, useRouter } from 'next/navigation';
 import { Dispatch, SetStateAction, useState } from 'react';
 
@@ -25,6 +25,9 @@ import { ShukoDetailTableValues } from '../_lib/types';
 
 /** コンテナのメモの最大文字数（K と Y のメモを改行でつないでも受注コンテナ明細の表示列 200 文字に収まるように） */
 export const CTN_MEMO_MAX_LENGTH = 99;
+
+/** 削除列の幅（アイコンボタンの余白を詰めた幅 28px + セルの左右の余白 2px ずつ） */
+const DELETE_COL_SX = { width: 32, minWidth: 32, px: 0.25 } as const;
 
 /** 出庫予定数の入力欄の、枠から中の数値までの幅（枠線 1px + 入力の余白 4px） */
 const PLAN_QTY_INPUT_INSET = 5;
@@ -83,7 +86,7 @@ export const ShukoDetailTable = (props: {
           }}
         >
           <TableRow sx={{ whiteSpace: 'nowrap' }}>
-            {ctnEditable && <TableCell align="center" padding="checkbox" />}
+            {ctnEditable && <TableCell align="center" padding="none" sx={DELETE_COL_SX} />}
             <TableCell align="center" />
             <TableCell align="left">機材名</TableCell>
             <TableCell
@@ -140,7 +143,7 @@ export const ShukoDetailTable = (props: {
                   // 未保存を最優先（予定数0・読取0だと差異0で「済」になってしまうため。移動明細と同じ順番）
                   // 次に受注から削除された行を、通常の過剰と区別して強調する
                   backgroundColor: !row.saveFlag
-                    ? statusColors.unsaved
+                    ? statusColors.shukoUnsaved
                     : row.juchuMeisaiDelFlg === 1
                       ? statusColors.deleted
                       : row.diff === 0 /*&& row.planQty !== 0 && row.ctnFlg !== 1*/
@@ -151,9 +154,9 @@ export const ShukoDetailTable = (props: {
                 }}
               >
                 {ctnEditable && (
-                  <TableCell align="center" padding="checkbox">
+                  <TableCell align="center" padding="none" sx={DELETE_COL_SX}>
                     {ctnQtyEditable && (
-                      <IconButton size="small" color="error" onClick={() => onDelete(row)}>
+                      <IconButton size="small" color="error" onClick={() => onDelete(row)} sx={{ p: 0.5 }}>
                         <DeleteIcon fontSize="small" />
                       </IconButton>
                     )}
@@ -172,7 +175,8 @@ export const ShukoDetailTable = (props: {
                   {row.juchuMeisaiDelFlg === 1 && (
                     <Typography
                       component="span"
-                      sx={{ ml: 1, color: dispColors.return, fontWeight: 'bold', fontSize: 'inherit' }}
+                      // 行の背景（赤）の上でも読めるよう、濃い赤にする
+                      sx={{ ml: 1, color: red[900], fontWeight: 'bold', fontSize: 'inherit' }}
                     >
                       受注削除
                     </Typography>
@@ -181,8 +185,9 @@ export const ShukoDetailTable = (props: {
                 <TableCell
                   align="right"
                   sx={{
-                    // 未保存の行は差異の色を付けない（未保存の色とほぼ同じ水色で見分けがつかないため）
-                    backgroundColor: row.diff !== 0 && row.saveFlag ? lightBlue[100] : 'inherit',
+                    // 未保存の行・受注削除の行は差異の色を付けない（行の背景色と重なって見分けにくいため）
+                    backgroundColor:
+                      row.diff !== 0 && row.saveFlag && row.juchuMeisaiDelFlg !== 1 ? lightBlue[100] : 'inherit',
                     borderLeft: '1px solid',
                     borderLeftColor: grey[500],
                   }}

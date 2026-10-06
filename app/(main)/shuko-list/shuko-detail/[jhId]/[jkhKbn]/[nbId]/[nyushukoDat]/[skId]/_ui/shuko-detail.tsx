@@ -627,7 +627,7 @@ export const ShukoDetail = (props: {
                 受注削除
               </Typography>
               {ctnEditable && (
-                <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.unsaved }}>
+                <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.shukoUnsaved }}>
                   未保存
                 </Typography>
               )}
