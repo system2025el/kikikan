@@ -37,6 +37,7 @@ import {
   deleteJuchuKizaiMeisai,
   insertJuchuKizaiMeisai,
   selectJuchuKizaiMeisaiKizaiTanka,
+  selectJuchuKizaiMeisaiMaxIdWithDenTx,
   updateJuchuKizaiMeisai,
 } from '@/app/_lib/db/tables/t-juchu-kizai-meisai';
 import { updateShukoCtnResultDat } from '@/app/_lib/db/tables/t-nyushuko-ctn-result';
@@ -106,7 +107,6 @@ import {
   getChildJuchuKizaiHead,
   getJuchuContainerMeisaiTx,
   getJuchuKizaiHeadMaxId,
-  getJuchuKizaiMeisaiMaxId,
   getJuchuKizaiNyushuko,
   updJuchuKizaiNyushuko,
 } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
@@ -3723,9 +3723,13 @@ export const saveJuchuKizai = async (
     let dspOrdNum = 1;
     // 受注明細、入出庫伝票、入出庫実績
     if (checkKicsShukoDat || checkKicsNyukoDat || checkYardShukoDat || checkYardNyukoDat || checkJuchuKizaiMeisai) {
-      // 受注機材明細id最大値
-      const juchuKizaiMeisaiMaxId = await getJuchuKizaiMeisaiMaxId(data.juchuHeadId, data.juchuKizaiHeadId);
-      let newJuchuKizaiMeisaiId = juchuKizaiMeisaiMaxId ? juchuKizaiMeisaiMaxId.juchu_kizai_meisai_id + 1 : 1;
+      // 受注機材明細id最大値（受注削除で残した入出庫伝票の明細idも含める。使い回すと残した伝票と主キーが重なるため）
+      const juchuKizaiMeisaiMaxId = await selectJuchuKizaiMeisaiMaxIdWithDenTx(
+        data.juchuHeadId,
+        data.juchuKizaiHeadId,
+        connection
+      );
+      let newJuchuKizaiMeisaiId = juchuKizaiMeisaiMaxId + 1;
       // 機材の並び順設定
       const updKizaiDspOrdNum = juchuKizaiMeisaiList.map((data) =>
         !data.delFlag ? { ...data, dspOrdNum: dspOrdNum++ } : data

@@ -922,6 +922,10 @@ export const deleteNyushukoDen = async (
  * 「受注から削除された＝現物をカートから取り除くべきもの」として表示できる。
  * 実績のない出庫行と入庫行は従来どおり物理削除する。
  *
+ * ピッキング（10）の行は、同じ日時・場所の最終確認（20）に実績・補正があれば残さず削除する。
+ * 現物は最終確認まで進んでいるので、最終確認の段階で取り除けば足りる（ピッキングと最終確認の
+ * 両方に残すと、それぞれで実績をクリアする二度手間になり、出発後もピッキングの△が残るため）。
+ *
  * @param data 入出庫伝票削除データ
  * @param updDat 更新日時
  * @param updUser 更新者
@@ -934,43 +938,64 @@ export const deleteNyushukoDenKeepResulted = async (
   connection: PoolClient
 ) => {
   const keys = [data.juchu_head_id, data.juchu_kizai_head_id, data.juchu_kizai_meisai_id, data.kizai_id];
-  const shukoKbnIds = [SAGYO_KBN_ID.shukoPicking, SAGYO_KBN_ID.shukoConfirmation];
 
-  // 実績・補正が残っている出庫行は予定数0にして残す
+  // 予定数0にして残す行の条件（d は対象の伝票行）
+  // ・出庫（ピッキング・最終確認）で実績・補正がある
+  // ・ピッキングの行は、同じ日時・場所の最終確認に実績・補正が無いときだけ
+  const keepCondition = `
+    d.sagyo_kbn_id IN (${SAGYO_KBN_ID.shukoPicking}, ${SAGYO_KBN_ID.shukoConfirmation})
+    AND COALESCE(d.result_qty, 0) + COALESCE(d.result_adj_qty, 0) > 0
+    AND NOT (
+      d.sagyo_kbn_id = ${SAGYO_KBN_ID.shukoPicking}
+      AND EXISTS (
+        SELECT
+          1
+        FROM
+          ${SCHEMA}.t_nyushuko_den AS c
+        WHERE
+          c.juchu_head_id = d.juchu_head_id
+          AND c.juchu_kizai_head_id = d.juchu_kizai_head_id
+          AND c.juchu_kizai_meisai_id = d.juchu_kizai_meisai_id
+          AND c.kizai_id = d.kizai_id
+          AND c.sagyo_kbn_id = ${SAGYO_KBN_ID.shukoConfirmation}
+          AND c.sagyo_den_dat = d.sagyo_den_dat
+          AND c.sagyo_id = d.sagyo_id
+          AND COALESCE(c.result_qty, 0) + COALESCE(c.result_adj_qty, 0) > 0
+      )
+    )
+  `;
+
+  // 残す行は予定数0にする
   const updateQuery = `
     UPDATE
-      ${SCHEMA}.t_nyushuko_den
+      ${SCHEMA}.t_nyushuko_den AS d
     SET
       plan_qty = 0
       ,upd_dat = $5
       ,upd_user = $6
     WHERE
-      juchu_head_id = $1
-      AND juchu_kizai_head_id = $2
-      AND juchu_kizai_meisai_id = $3
-      AND kizai_id = $4
-      AND sagyo_kbn_id = ANY($7)
-      AND COALESCE(result_qty, 0) + COALESCE(result_adj_qty, 0) > 0
+      d.juchu_head_id = $1
+      AND d.juchu_kizai_head_id = $2
+      AND d.juchu_kizai_meisai_id = $3
+      AND d.kizai_id = $4
+      AND ${keepCondition}
   `;
 
-  // それ以外（入庫行・実績のない出庫行）は従来どおり削除
+  // それ以外（入庫行・実績のない出庫行・最終確認に実績があるピッキング行）は削除
   const deleteQuery = `
     DELETE FROM
-      ${SCHEMA}.t_nyushuko_den
+      ${SCHEMA}.t_nyushuko_den AS d
     WHERE
-      juchu_head_id = $1
-      AND juchu_kizai_head_id = $2
-      AND juchu_kizai_meisai_id = $3
-      AND kizai_id = $4
-      AND NOT (
-        sagyo_kbn_id = ANY($5)
-        AND COALESCE(result_qty, 0) + COALESCE(result_adj_qty, 0) > 0
-      )
+      d.juchu_head_id = $1
+      AND d.juchu_kizai_head_id = $2
+      AND d.juchu_kizai_meisai_id = $3
+      AND d.kizai_id = $4
+      AND NOT (${keepCondition})
   `;
 
   try {
-    await connection.query(updateQuery, [...keys, updDat, updUser, shukoKbnIds]);
-    await connection.query(deleteQuery, [...keys, shukoKbnIds]);
+    await connection.query(updateQuery, [...keys, updDat, updUser]);
+    await connection.query(deleteQuery, keys);
   } catch (e) {
     throw new Error('[deleteNyushukoDenKeepResulted] DBエラー:', { cause: e });
   }

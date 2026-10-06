@@ -32,6 +32,43 @@ export const selectJuchuKizaiMeisaiMaxId = async (juchuHeadId: number, juchuKiza
 };
 
 /**
+ * 受注機材明細の採番に使う明細idの最大値取得（トランザクション内）
+ * 受注機材明細に加えて入出庫伝票の明細idも見る。メイン受注機材明細で実績のある機材を削除すると、
+ * 出庫伝票を予定数0（受注削除）で残すため、受注機材明細だけで採番すると同じ明細idを使い回して
+ * 残した伝票と主キーが重なることがある
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param connection
+ * @returns 明細idの最大値（無ければ 0）
+ */
+export const selectJuchuKizaiMeisaiMaxIdWithDenTx = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  connection: PoolClient
+) => {
+  const query = `
+    SELECT
+      GREATEST(
+        COALESCE((
+          SELECT MAX(juchu_kizai_meisai_id) FROM ${SCHEMA}.t_juchu_kizai_meisai
+          WHERE juchu_head_id = $1 AND juchu_kizai_head_id = $2
+        ), 0),
+        COALESCE((
+          SELECT MAX(juchu_kizai_meisai_id) FROM ${SCHEMA}.t_nyushuko_den
+          WHERE juchu_head_id = $1 AND juchu_kizai_head_id = $2
+        ), 0)
+      )::integer AS max_meisai_id
+  `;
+
+  try {
+    const { rows } = await connection.query<{ max_meisai_id: number }>(query, [juchuHeadId, juchuKizaiHeadId]);
+    return rows[0]?.max_meisai_id ?? 0;
+  } catch (e) {
+    throw new Error('[selectJuchuKizaiMeisaiMaxIdWithDenTx] DBエラー:', { cause: e });
+  }
+};
+
+/**
  * 機材単価取得
  * @param juchuHeadId 受注ヘッダーid
  * @param juchuKizaiHeadId 受注機材ヘッダーid
