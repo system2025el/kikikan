@@ -143,7 +143,7 @@ export const ShukoDetailTable = (props: {
                   // 未保存を最優先（予定数0・読取0だと差異0で「済」になってしまうため。移動明細と同じ順番）
                   // 次に受注から削除された行を、通常の過剰と区別して強調する
                   backgroundColor: !row.saveFlag
-                    ? statusColors.shukoUnsaved
+                    ? statusColors.unsaved
                     : row.juchuMeisaiDelFlg === 1
                       ? statusColors.deleted
                       : row.diff === 0 /*&& row.planQty !== 0 && row.ctnFlg !== 1*/

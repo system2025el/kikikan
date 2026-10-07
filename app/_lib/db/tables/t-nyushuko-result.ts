@@ -32,6 +32,54 @@ export const updateShukoResult = async (
   }
 };
 
+/**
+ * 受注削除で残した機材の出庫実績（ピッキング・最終確認）の作業日時を更新（作業場所単位）
+ * updateDeletedShukoDenDat と組で使い、伝票と同じ新しい日時に移す（受注明細の無い実績が対象）
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param sagyoId 作業id（作業場所）
+ * @param sagyoDenDat 新しい作業日時
+ * @param connection
+ */
+export const updateDeletedShukoResultDat = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  sagyoId: number,
+  sagyoDenDat: string,
+  connection: PoolClient
+) => {
+  const query = `
+    UPDATE
+      ${SCHEMA}.t_nyushuko_result AS r
+    SET
+      sagyo_den_dat = $4
+    WHERE
+      r.juchu_head_id = $1
+      AND r.juchu_kizai_head_id = $2
+      AND r.sagyo_id = $3
+      AND r.sagyo_kbn_id = ANY($5)
+      AND NOT EXISTS (
+        SELECT
+          1
+        FROM
+          ${SCHEMA}.t_juchu_kizai_meisai AS m
+        WHERE
+          m.juchu_head_id = r.juchu_head_id
+          AND m.juchu_kizai_head_id = r.juchu_kizai_head_id
+          AND m.juchu_kizai_meisai_id = r.juchu_kizai_meisai_id
+          AND m.kizai_id = r.kizai_id
+      )
+  `;
+
+  const values = [juchuHeadId, juchuKizaiHeadId, sagyoId, sagyoDenDat, [10, 20]];
+
+  try {
+    await connection.query(query, values);
+  } catch (e) {
+    throw new Error('[updateDeletedShukoResultDat] DBエラー:', { cause: e });
+  }
+};
+
 export const deleteNyushukoResult = async (
   juchuHeadId: number,
   juchuKizaiHeadId: number,

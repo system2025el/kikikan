@@ -612,6 +612,60 @@ export const updateShukoCtnDenDat = async (
 };
 
 /**
+ * 受注削除で残した機材の出庫伝票（ピッキング・最終確認）の作業日時を更新（作業場所単位）
+ * 出庫日時を変えたときに、受注明細の無い伝票も新しい日時に移して、新しい日時の出庫明細に「受注削除」として出す。
+ * 通常の機材の伝票は画面の明細ごとに日時を更新しているため、受注明細が無いこの行は別に更新する必要がある。
+ * コンテナ（受注コンテナ明細を持つ）は updateShukoCtnDenDat で更新するので対象外
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param sagyoId 作業id（作業場所）
+ * @param sagyoDenDat 新しい作業日時
+ * @param connection
+ */
+export const updateDeletedShukoDenDat = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  sagyoId: number,
+  sagyoDenDat: string,
+  connection: PoolClient
+) => {
+  const query = `
+    UPDATE
+      ${SCHEMA}.t_nyushuko_den AS d
+    SET
+      sagyo_den_dat = $4
+    FROM
+      ${SCHEMA}.m_kizai AS k
+    WHERE
+      k.kizai_id = d.kizai_id
+      AND COALESCE(k.ctn_flg, 0) <> 1
+      AND d.juchu_head_id = $1
+      AND d.juchu_kizai_head_id = $2
+      AND d.sagyo_id = $3
+      AND d.sagyo_kbn_id = ANY($5)
+      AND NOT EXISTS (
+        SELECT
+          1
+        FROM
+          ${SCHEMA}.t_juchu_kizai_meisai AS m
+        WHERE
+          m.juchu_head_id = d.juchu_head_id
+          AND m.juchu_kizai_head_id = d.juchu_kizai_head_id
+          AND m.juchu_kizai_meisai_id = d.juchu_kizai_meisai_id
+          AND m.kizai_id = d.kizai_id
+      )
+  `;
+
+  const values = [juchuHeadId, juchuKizaiHeadId, sagyoId, sagyoDenDat, [10, 20]];
+
+  try {
+    await connection.query(query, values);
+  } catch (e) {
+    throw new Error('[updateDeletedShukoDenDat] DBエラー:', { cause: e });
+  }
+};
+
+/**
  * コンテナの出庫伝票（ピッキング・最終確認）を作業場所単位で全削除
  * @param juchuHeadId 受注ヘッダーid
  * @param juchuKizaiHeadId 受注機材ヘッダーid

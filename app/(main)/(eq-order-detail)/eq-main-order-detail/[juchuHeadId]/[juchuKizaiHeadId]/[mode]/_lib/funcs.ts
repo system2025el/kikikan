@@ -54,6 +54,7 @@ import {
   insertNyushukoDen,
   selectContainerNyushukoDenConfirm,
   selectShukoResultDenKizaiCount,
+  updateDeletedShukoDenDat,
   updateNyushukoDen,
   updateNyushukoDenFromKizaiMeisai,
   updateShukoCtnDenDat,
@@ -71,6 +72,7 @@ import {
   deleteKizaiIdNyushukoResultKeepDen,
   deleteNyukoResult,
   deleteShukoResult,
+  updateDeletedShukoResultDat,
   updateShukoResult,
 } from '@/app/_lib/db/tables/t-nyushuko-result';
 import { selectActiveBumons } from '@/app/_lib/db/tables/v_bumon_lst';
@@ -3867,6 +3869,10 @@ export const saveJuchuKizai = async (
           const newShukoDat = new Date(shukoDat).toISOString();
           await updateShukoCtnDenDat(data.juchuHeadId, data.juchuKizaiHeadId, bashoId, newShukoDat, connection);
           await updateShukoCtnResultDat(data.juchuHeadId, data.juchuKizaiHeadId, bashoId, newShukoDat, connection);
+          // 受注削除で残した機材の伝票・実績も新しい日時に移す（通常の機材は画面の明細ごとに更新しているが、
+          // 受注明細が無いこの行は対象に入らず、古い日時のまま取り残されるため）
+          await updateDeletedShukoDenDat(data.juchuHeadId, data.juchuKizaiHeadId, bashoId, newShukoDat, connection);
+          await updateDeletedShukoResultDat(data.juchuHeadId, data.juchuKizaiHeadId, bashoId, newShukoDat, connection);
         } else {
           await deleteAllShukoCtnDenBasho(data.juchuHeadId, data.juchuKizaiHeadId, bashoId, connection);
           await delAllKicsOrYardShukoCtnResult(data.juchuHeadId, data.juchuKizaiHeadId, bashoId, connection);
