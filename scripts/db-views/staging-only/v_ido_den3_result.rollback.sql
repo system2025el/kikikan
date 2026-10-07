@@ -1,7 +1,20 @@
 -- v_ido_den3_result のロールバック。適用直前の本番／ステージングの定義そのもの。
--- 列を末尾に足しただけの変更なので、CREATE OR REPLACE で戻せる（DROP しないので GRANT も残る）。
+--
+-- ★ CREATE OR REPLACE では戻せない（2026-10-07 実機で確認）
+--   列を末尾に4本足した変更なので一見 CREATE OR REPLACE で戻せそうだが、
+--   PostgreSQL は既存ビューから列を減らす REPLACE を許さず
+--   「cannot drop columns from view」で失敗する。DROP → CREATE にする必要がある。
+--   DROP すると権限が落ちるので、末尾で GRANT を付け直している。
+--
+-- ★ 子ビューは無い（pg_depend で確認済み）。読んでいるのは Web とゲートのアプリだけ。
 
-CREATE OR REPLACE VIEW public.v_ido_den3_result WITH (security_invoker = on) AS
+\set ON_ERROR_STOP on
+
+BEGIN;
+
+DROP VIEW IF EXISTS public.v_ido_den3_result;
+
+CREATE VIEW public.v_ido_den3_result WITH (security_invoker = on) AS
  SELECT DISTINCT t_ido_result.rfid_tag_id,
     v_rfid.shozoku_id AS rfid_shozoku_id,
     m_shozoku.shozoku_nam AS rfid_shozoku_nam,
@@ -104,3 +117,9 @@ UNION ALL
      LEFT JOIN m_sagyo_sts ON t_ido_ctn_result.rfid_kizai_sts = m_sagyo_sts.sts_id
      LEFT JOIN m_shozoku ON v_rfid.shozoku_id = m_shozoku.shozoku_id
   ORDER BY 9, 1;
+
+GRANT SELECT, INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER ON TABLE public.v_ido_den3_result TO postgres;
+GRANT SELECT, INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER ON TABLE public.v_ido_den3_result TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.v_ido_den3_result TO anon;
+
+COMMIT;
