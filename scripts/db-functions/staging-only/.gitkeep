@@ -1,0 +1,1 @@
+-- 本番未適用のSQLをここに置く。本番適用したら git mv で applied/ へ移す（README.md 参照）

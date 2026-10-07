@@ -2,7 +2,7 @@
 
 `public` スキーマのビュー定義を手で変更したときの、適用SQLとロールバックSQLを置く場所です。**フォルダで本番への適用状況を表します。**
 
-同じ構成の姉妹フォルダが2つあります。テーブル定義（DDL）の変更は [`../db-tables/`](../db-tables/README.md)、マスタデータなどのデータ変更（INSERT/UPDATE/DELETE）は [`../db-data/`](../db-data/README.md) に置いてください。
+同じ構成の姉妹フォルダが3つあります。テーブル定義（DDL）の変更は [`../db-tables/`](../db-tables/README.md)、関数（RPC）の変更は [`../db-functions/`](../db-functions/README.md)、マスタデータなどのデータ変更（INSERT/UPDATE/DELETE）は [`../db-data/`](../db-data/README.md) に置いてください。**共通の運用ルール・適用手順・フォルダをまたぐ適用順序は [`../README.md`](../README.md) にまとめてあります。**
 
 | フォルダ        | 意味                                     |
 | --------------- | ---------------------------------------- |
@@ -81,7 +81,7 @@ DB全体の `prod_alldb_20261007_1831.dump` を含む）。
 
 適用順は親→子で `v_nyushuko_den` → `v_nyushuko_den2` → `v_ido_den3_lst` → `v_ido_den3_result` → `v_ido_den2_meisai_lst`。
 `v_ido_*` の3本は「移動を受注機材ヘッダー単位にする」改修の一部で、
-**テーブル変更 [`scripts/db-migration/ddl/20260924-ido-juchu-meisai.sql`](../db-migration/ddl/20260924-ido-juchu-meisai.sql) と RPC修理 `20260924-ido-send-rpc-fix.sql` が先に適用されていないと動きません**（同日、ビューより先に適用済み）。
+**テーブル変更 [`scripts/db-tables/applied/20260924-ido-juchu-meisai.sql`](../db-tables/applied/20260924-ido-juchu-meisai.sql) と RPC修理 `20260924-ido-send-rpc-fix.sql` が先に適用されていないと動きません**（同日、ビューより先に適用済み）。
 
 検証結果:
 
@@ -106,7 +106,7 @@ HT・ゲートも一部確定済みなら送信できるようにそろえるた
 
 - 開発環境で既存列の `EXCEPT ALL` 双方向の差分0・行数不変（3,537行）、一覧相当のクエリ時間も変わらないこと（約0.8秒）を確認済み（2026-09-30）
 - 適用順は `v_nyushuko_den.sql` → `v_nyushuko_den2.sql`。ロールバックは列削除を伴うため `DROP` → `CREATE`（`v_nyushuko_den.rollback.sql` は `v_nyushuko_den2` も作り直す。GRANT の再付与も含む）
-- 同じ改修のテーブル変更：[`scripts/db-migration/ddl/20260930-t-nyushuko-den-nyuko-fix-qty.sql`](../db-migration/ddl/20260930-t-nyushuko-den-nyuko-fix-qty.sql)（入庫明細の差分到着用。ビューとは独立）
+- 同じ改修のテーブル変更：[`scripts/db-tables/applied/20260930-t-nyushuko-den-nyuko-fix-qty.sql`](../db-tables/applied/20260930-t-nyushuko-den-nyuko-fix-qty.sql)（入庫明細の差分到着用。ビューとは独立）
 
 #### v_ido_den3_lst（明細単位への作り替え）
 
@@ -141,13 +141,13 @@ v_ido_den2_meisai_lst → 明細単位（新規。移行先）
 
 **適用順序**: 親→子の順に適用してください。逆順だと子が存在しない列を参照してエラーになります。
 
-| 適用順序                                                                   | ロールバック順序（逆）                         |
-| -------------------------------------------------------------------------- | ---------------------------------------------- |
-| `v_nyushuko_den_lst.sql` → `v_nyushuko_den2_lst.sql`                       | `v_nyushuko_den2_lst` → `v_nyushuko_den_lst`   |
-| `v_nyushuko_den_head.sql` → `v_nyushuko_den2_head.sql`                     | `v_nyushuko_den2_head` → `v_nyushuko_den_head` |
-| `v_honbanbi_calc.sql` → `db-data` の `t_juchu_kizai_honbanbi_template.sql` | テンプレート行のDELETE → `v_honbanbi_calc`     |
+| 適用順序                                               | ロールバック順序（逆）                         |
+| ------------------------------------------------------ | ---------------------------------------------- |
+| `v_nyushuko_den_lst.sql` → `v_nyushuko_den2_lst.sql`   | `v_nyushuko_den2_lst` → `v_nyushuko_den_lst`   |
+| `v_nyushuko_den_head.sql` → `v_nyushuko_den2_head.sql` | `v_nyushuko_den2_head` → `v_nyushuko_den_head` |
+| `v_nyushuko_den.sql` → `v_nyushuko_den2.sql`           | `v_nyushuko_den2` → `v_nyushuko_den`           |
 
-最後の1組はビューとデータをまたぐ順序制約です。`v_honbanbi_calc` はテンプレート行（`juchu_kizai_head_id = 0`）を除外する変更なので、**先にビューを適用してからテンプレートをINSERT**しないと、その間このビューの行数が倍近くに膨らみます（本番実測で 662 → 1,228 行）。
+**フォルダをまたぐ順序制約は [`../README.md`](../README.md) に集約しています。** ビューが関わるものだけ挙げると、テーブルへの列追加（`db-tables/20260924-ido-juchu-meisai`・`20260930-t-nyushuko-den-nyuko-fix-qty`）は対応するビューより先、`v_honbanbi_calc` は `db-data` のテンプレートINSERTより先です。
 
 `v_nyushuko_den_lst` の変更①は**列追加ではなく既存列 `mem2` の値が変わる変更**です。コンテナ明細は同一キーに `shozoku_id` 別で複数行あり、JOIN条件を誤ると `sum(plan_qty)` 等がfanoutして二重集計になります。本番適用前に行数と `mem2` の差分検証を必ず行ってください（ファイル冒頭のコメントに詳細あり）。
 
