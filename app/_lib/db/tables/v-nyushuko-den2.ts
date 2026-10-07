@@ -2,7 +2,7 @@ import dayjs from 'dayjs';
 import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
 
-import { NYUSHUKO_SHUBETU_ID } from '@/app/_lib/constants';
+import { FIX_STS, NYUSHUKO_SHUBETU_ID } from '@/app/_lib/constants';
 import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { escapeLikeString } from '@/app/(main)/_lib/escape-string';
 import { NyukoListSearchValues } from '@/app/(main)/nyuko-list/_lib/types';
@@ -42,6 +42,7 @@ export const selectFilteredShukoList = async (queries: ShukoListSearchValues) =>
       d2.schk_sagyo_sts_id,
       d2.schk_sagyo_sts_nam_short,
       d2.shuko_fix_flg,
+      d2.shuko_fix_sts,
       d2.nyuryoku_user,
       d2.sstb_plan_qty,
       d2.schk_plan_qty
@@ -160,6 +161,7 @@ export const selectFilteredNyukoList = async (queries: NyukoListSearchValues) =>
       d2.nchk_sagyo_sts_id,
       d2.nchk_sagyo_sts_nam_short,
       d2.nyuko_fix_flg,
+      d2.nyuko_fix_sts,
       d2.nyuryoku_user,
       d2.nchk_plan_qty
     FROM
@@ -274,10 +276,10 @@ export const selectShukoStateConfirm = async (juchuHeadId: number, juchuKizaiHea
       juchu_head_id = $1
       and ('[' || replace(v_nyushuko_den2.juchu_kizai_head_idv ,',' , '][')  || ']') like '%[' || $2 || ']%' --1で検索したときに10などが引っ掛からないよう[]をつけて検索
       and nyushuko_shubetu_id = $3
-      and (sstb_sagyo_sts_id > 0 or schk_sagyo_sts_id > 0 or shuko_fix_flg = $4)
+      and (sstb_sagyo_sts_id > 0 or schk_sagyo_sts_id > 0 or shuko_fix_sts > $4) --shuko_fix_flgは全部出発済みのときだけ1なので、一部でも出発済みならを見るためstsを使う
   `;
 
-  const values = [juchuHeadId, juchuKizaiHeadId, 1, 1];
+  const values = [juchuHeadId, juchuKizaiHeadId, 1, FIX_STS.none];
 
   try {
     return (await pool.query(query, values)).rows;

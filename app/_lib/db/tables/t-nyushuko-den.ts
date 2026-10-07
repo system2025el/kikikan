@@ -246,6 +246,106 @@ export const updateOyaCtnNyukoDen = async (data: NyushukoDen, connection: PoolCl
 };
 
 /**
+ * 入庫伝票の「到着で親から引いた読取数」取得（入庫明細画面の到着・到着解除用）
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadIds 受注機材ヘッダーid
+ * @param sagyoDenDat 作業日時（入庫日時）
+ * @param sagyoId 作業id（入庫場所）
+ * 行をロック（FOR UPDATE）してから読むので、同時に到着・到着解除されても後の処理は先の COMMIT 後の値を読む
+ * （2人がほぼ同時に解除しても、親に二重に戻さない）
+ * @param connection
+ * @returns 入庫チェック（作業区分30）の行ごとの nyuko_fix_qty と、親の更新に使う列
+ */
+export const selectNyukoFixQty = async (
+  juchuHeadId: number,
+  juchuKizaiHeadIds: number[],
+  sagyoDenDat: string,
+  sagyoId: number,
+  connection: PoolClient
+) => {
+  const query = `
+    SELECT
+      d.juchu_head_id
+      ,d.juchu_kizai_head_id
+      ,d.juchu_kizai_meisai_id
+      ,d.kizai_id
+      ,d.nyuko_fix_qty
+      ,d.dsp_ord_num
+      ,d.indent_num
+      ,d.sagyo_den_dat
+      ,d.sagyo_id
+      ,COALESCE(k.ctn_flg, 0) AS ctn_flg
+    FROM
+      ${SCHEMA}.t_nyushuko_den AS d
+    LEFT JOIN
+      ${SCHEMA}.m_kizai AS k
+    ON
+      k.kizai_id = d.kizai_id
+    WHERE
+      d.juchu_head_id = $1
+      AND d.juchu_kizai_head_id = ANY($2::int[])
+      AND d.sagyo_kbn_id = 30
+      AND d.sagyo_den_dat = $3::timestamptz
+      AND d.sagyo_id = $4
+    FOR UPDATE OF d
+  `;
+
+  try {
+    const result = await connection.query<{
+      juchu_head_id: number;
+      juchu_kizai_head_id: number;
+      juchu_kizai_meisai_id: number;
+      kizai_id: number;
+      nyuko_fix_qty: number | null;
+      dsp_ord_num: number | null;
+      indent_num: number | null;
+      sagyo_den_dat: Date;
+      sagyo_id: number;
+      ctn_flg: number;
+    }>(query, [juchuHeadId, juchuKizaiHeadIds, sagyoDenDat, sagyoId]);
+    return result.rows;
+  } catch (e) {
+    throw new Error('[selectNyukoFixQty] DBエラー:', { cause: e });
+  }
+};
+
+/**
+ * 入庫伝票の「到着で親から引いた読取数」を消す（到着解除用）
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadIds 受注機材ヘッダーid
+ * @param sagyoDenDat 作業日時（入庫日時）
+ * @param sagyoId 作業id（入庫場所）
+ * @param connection
+ */
+export const clearNyukoFixQty = async (
+  juchuHeadId: number,
+  juchuKizaiHeadIds: number[],
+  sagyoDenDat: string,
+  sagyoId: number,
+  connection: PoolClient
+) => {
+  const query = `
+    UPDATE
+      ${SCHEMA}.t_nyushuko_den
+    SET
+      nyuko_fix_qty = NULL
+    WHERE
+      juchu_head_id = $1
+      AND juchu_kizai_head_id = ANY($2::int[])
+      AND sagyo_kbn_id = 30
+      AND sagyo_den_dat = $3::timestamptz
+      AND sagyo_id = $4
+      AND nyuko_fix_qty IS NOT NULL
+  `;
+
+  try {
+    await connection.query(query, [juchuHeadId, juchuKizaiHeadIds, sagyoDenDat, sagyoId]);
+  } catch (e) {
+    throw new Error('[clearNyukoFixQty] DBエラー:', { cause: e });
+  }
+};
+
+/**
  * 入出庫伝票UPSERT
  * @param data 入出庫伝票データ
  * @param connection

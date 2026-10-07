@@ -24,7 +24,7 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { BASHO_ID, SAGYO_KBN_ID, SAGYO_SIJI_ID } from '@/app/_lib/constants';
-import { statusColors } from '@/app/(main)/_lib/colors';
+import { sagyoKbnColors, statusColors } from '@/app/(main)/_lib/colors';
 import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
 import { permission } from '@/app/(main)/_lib/permission';
@@ -35,8 +35,15 @@ import { FormDateX } from '@/app/(main)/_ui/date';
 import { useDirty } from '@/app/(main)/_ui/dirty-context';
 import { LoadingOverlay } from '@/app/(main)/_ui/loading';
 
-import { addIdoFix, delIdoFix, getIdoDenMaxId, saveIdoDen, saveIdoMem } from '../_lib/funcs';
-import { IdoDetailTableValues, IdoDetailValues, SelectedIdoEqptsValues } from '../_lib/types';
+import { addIdoFix, delIdoFix, saveIdoDen, saveIdoMem } from '../_lib/funcs';
+import {
+  IdoDetailRowKey,
+  IdoDetailTableValues,
+  IdoDetailValues,
+  isSameIdoRow,
+  SelectedIdoEqptsValues,
+  toIdoRowKey,
+} from '../_lib/types';
 import { NyukoIdoDenTable, ShukoIdoDenTable } from './ido-detail-table';
 import { IdoEqptSelectionDialog } from './ido-equipment-selection-dialog';
 
@@ -46,15 +53,18 @@ const IDO_MEM_MAX_LENGTH = 200;
 /**
  * 明細リストの変更検知用の署名を作る
  *
- * 削除済みを除いた行の「機材id・移動数・保存済みかどうか」だけを並べる。
+ * 削除済みを除いた行の「明細キー・移動数・保存済みかどうか」だけを並べる。
  * 機材の追加・削除は行数が変わるので、これで検知できる。
+ *
+ * ★ 機材idだけでは足りない。同じ機材が複数の公演に紐づくと行が分かれるので、
+ *   片方の移動数を変えたときにもう片方と署名が衝突して変更を見落とす。
  * @param list 明細リスト
  * @returns 署名文字列
  */
 const toListSignature = (list: IdoDetailTableValues[]): string =>
   list
     .filter((d) => !d.delFlag)
-    .map((d) => `${d.kizaiId}:${d.planQty}:${d.saveFlag ? 1 : 0}`)
+    .map((d) => `${toIdoRowKey(d)}:${d.planQty}:${d.saveFlag ? 1 : 0}`)
     .join(',');
 
 export const IdoDetail = (props: {
@@ -84,8 +94,8 @@ export const IdoDetail = (props: {
   const [originIdoDetailList, setOriginIdoDetailList] = useState<IdoDetailTableValues[]>(props.idoDetailTableData);
   // 移動明細リスト
   const [idoDetailList, setIdoDetailList] = useState<IdoDetailTableValues[]>(props.idoDetailTableData);
-  // 削除対象ID
-  const [deleteId, setDeleteId] = useState<number | null>(null);
+  // 削除対象の明細（機材idだけでは同じ機材の別公演の行まで消えてしまう）
+  const [deleteRow, setDeleteRow] = useState<IdoDetailRowKey | null>(null);
 
   // 移動メモ（キーは移動予定日と移動指示のみなので、移動出庫と移動入庫で同じメモを共有する）
   const [originIdoMem, setOriginIdoMem] = useState(props.idoMem);
@@ -278,46 +288,49 @@ export const IdoDetail = (props: {
    *
    * ShukoIdoDenTable は memo 化しているので、参照が変わらないよう useCallback で固定する。
    * setState は関数形式なので依存配列は空でよい。
-   * @param kizaiId 機材id
+   * @param row 明細行のキー（機材id + 受注2列）
    * @param planQty 移動数
    */
-  const handleCellChange = useCallback((kizaiId: number, planQty: number) => {
+  const handleCellChange = useCallback((row: IdoDetailRowKey, planQty: number) => {
     setIdoDetailList((prev) =>
       prev.map((d) =>
-        d.kizaiId === kizaiId ? { ...d, planQty: planQty, diffQty: d.resultQty + d.resultAdjQty - planQty } : d
+        isSameIdoRow(d, row) ? { ...d, planQty: planQty, diffQty: d.resultQty + d.resultAdjQty - planQty } : d
       )
     );
   }, []);
 
   // 移動明細削除ボタン押下時
-  const handleIdoDenDelete = useCallback((kizaiId: number) => {
+  const handleIdoDenDelete = useCallback((row: IdoDetailRowKey) => {
     setDeleteOpen(true);
-    setDeleteId(kizaiId);
+    setDeleteRow(row);
   }, []);
 
   // 移動明細削除ダイアログの押下ボタンによる処理
   const handleDeleteResult = (result: boolean) => {
-    if (!deleteId) return;
+    if (!deleteRow) return;
 
     if (result) {
       setIdoDetailList((prev) =>
-        prev.map((data) => (data.kizaiId === deleteId && !data.delFlag ? { ...data, delFlag: true } : data))
+        prev.map((data) => (isSameIdoRow(data, deleteRow) && !data.delFlag ? { ...data, delFlag: true } : data))
       );
-      setDeleteOpen(false);
-      setDeleteId(null);
-    } else {
-      setDeleteOpen(false);
-      setDeleteId(null);
     }
+    setDeleteOpen(false);
+    setDeleteRow(null);
   };
 
   /**
    * 機材追加時
+   *
+   * 手動追加は受注に紐づかないので juchuHeadId / juchuKizaiHeadId は 0。
+   * 既に同じ機材の手動追加行があれば足さない（受注に紐づく行とは別枠なので、
+   * 受注側で同じ機材が入っていても手動で1行足せる）。
    * @param data 選択された機材データ
    */
   const setEqpts = async (data: SelectedIdoEqptsValues[]) => {
-    const kizaiIds = new Set(idoDetailList.filter((data) => !data.delFlag).map((data) => data.kizaiId));
-    const filterKizaiData = data.filter((d) => !kizaiIds.has(d.kizaiId));
+    const manualKizaiIds = new Set(
+      idoDetailList.filter((d) => !d.delFlag && d.juchuHeadId === 0).map((d) => d.kizaiId)
+    );
+    const filterKizaiData = data.filter((d) => !manualKizaiIds.has(d.kizaiId));
     const selectIdoEqpt: IdoDetailTableValues[] = filterKizaiData.map((d) => ({
       idoDenId: 0,
       sagyoKbnId: idoDetailData.sagyoKbnId,
@@ -325,14 +338,16 @@ export const IdoDetail = (props: {
       sagyosijiId: idoDetailData.sagyoSijiId,
       nyushukoBashoId: idoDetailData.nyushukoBashoId,
       juchuFlg: 0,
-      juchuMeisai: [],
+      juchuHeadId: 0,
+      juchuKizaiHeadId: 0,
+      koenNam: '',
+      headNam: '',
       kizaiId: d.kizaiId,
       kizaiNam: d.kizaiNam,
       shozokuId: d.shozokuId,
       rfidYardQty: d.rfidYardQty,
       rfidKicsQty: d.rfidKicsQty,
       planJuchuQty: 0,
-      planLowQty: 0,
       planQty: 0,
       resultAdjQty: 0,
       resultQty: 0,
@@ -373,7 +388,7 @@ export const IdoDetail = (props: {
   }, []);
 
   // 明細リストの変更検知用の署名。画面上で変化し得るのは行の増減・移動数・削除だけなので、
-  // その3点に絞る。リスト全体を JSON.stringify すると、絶対に変化しない juchuMeisai まで
+  // その3点に絞る。リスト全体を JSON.stringify すると、絶対に変化しない公演名・明細名まで
   // 毎回文字列化することになり、メモ入力のたびに無駄なコストがかかる
   const originListSignature = useMemo(() => toListSignature(originIdoDetailList), [originIdoDetailList]);
   const currentListSignature = useMemo(() => toListSignature(idoDetailList), [idoDetailList]);
@@ -403,7 +418,8 @@ export const IdoDetail = (props: {
       </Box>
       <Paper variant="outlined">
         <Box display={'flex'} justifyContent={'space-between'} alignItems="center" px={2}>
-          <Typography fontSize={'large'}>
+          {/* 出庫・入庫の明細画面と同じく、タイトルにも作業区分色を敷く */}
+          <Typography fontSize={'large'} px={1} sx={{ backgroundColor: sagyoKbnColors.ido, color: 'white' }}>
             移動明細({idoDetailData.sagyoKbnId === SAGYO_KBN_ID.idoShuko ? '移動出庫' : '移動入庫'})
           </Typography>
           <Grid2 container alignItems={'center'} spacing={2}>
@@ -476,6 +492,8 @@ export const IdoDetail = (props: {
                   </Button>
                 </Box>
               </Box>
+              {/* 凡例。出庫明細画面（shuko-detail.tsx）に揃えて 済／不足／過剰／コンテナ の4つに、
+                  移動固有の「未保存」を足した5つ。過剰は差異セルで使われているのに凡例から漏れていた */}
               <Box display={'flex'} alignItems={'center'}>
                 <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.completed }}>
                   済
@@ -483,8 +501,14 @@ export const IdoDetail = (props: {
                 <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.lack }}>
                   不足
                 </Typography>
+                <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.excess }}>
+                  過剰
+                </Typography>
                 <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.ctn }}>
                   コンテナ
+                </Typography>
+                <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.unsaved }}>
+                  未保存
                 </Typography>
               </Box>
             </Box>
@@ -501,7 +525,8 @@ export const IdoDetail = (props: {
           </Box>
         ) : (
           <Box width={'100%'} pb={3}>
-            <Box display={'flex'} justifyContent={'end'} alignItems={'center'} width={'60vw'} p={2}>
+            <Box display={'flex'} justifyContent={'end'} alignItems={'center'} p={2}>
+              {/* 凡例は移動出庫側と同じ5つ。片方だけ直すとズレるので両方いじること */}
               <Box display={'flex'} alignItems={'center'}>
                 <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.completed }}>
                   済
@@ -509,8 +534,14 @@ export const IdoDetail = (props: {
                 <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.lack }}>
                   不足
                 </Typography>
+                <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.excess }}>
+                  過剰
+                </Typography>
                 <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.ctn }}>
                   コンテナ
+                </Typography>
+                <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.unsaved }}>
+                  未保存
                 </Typography>
               </Box>
             </Box>

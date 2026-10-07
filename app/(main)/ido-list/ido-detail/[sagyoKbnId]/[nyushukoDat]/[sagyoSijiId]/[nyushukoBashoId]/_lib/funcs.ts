@@ -11,32 +11,13 @@ import { deleteIdoDen, insertIdoDen, selectIdoDenMaxId, updateIdoDen } from '@/a
 import { deleteIdoFix, insertIdoFix, selectIdoFix, selectIdoFixMaxId } from '@/app/_lib/db/tables/t-ido-fix';
 import { selectIdoMem, upsertIdoMem } from '@/app/_lib/db/tables/t-ido-mem';
 import { selectActiveBumons } from '@/app/_lib/db/tables/v_bumon_lst';
-import { selectConfirmIdoDen, selectIdoDen } from '@/app/_lib/db/tables/v-ido-den3-lst';
+import { selectConfirmIdoDen, selectIdoDen, selectIdoDenIdByKizai } from '@/app/_lib/db/tables/v-ido-den3-lst';
 import { selectChosenIdoEqptsDetails } from '@/app/_lib/db/tables/v-kizai-list';
 import { selectActiveEqpts } from '@/app/_lib/db/tables/v-kizai-lst-sel';
 import { IdoDen } from '@/app/_lib/db/types/t-ido-den-type';
 import { IdoFix } from '@/app/_lib/db/types/t-ido-fix-type';
 
-import { IdoDetailTableValues, IdoEqptSelection, IdoJuchuMeisaiValues, SelectedIdoEqptsValues } from './types';
-
-/**
- * v_ido_den3_lst.juchu_meisai（jsonb配列）を画面用の型に変換する
- * @param json ビューが返すjsonb。受注が紐づかない行では空配列
- * @returns 受注明細の配列
- */
-const toJuchuMeisai = (json: unknown): IdoJuchuMeisaiValues[] => {
-  if (!Array.isArray(json)) return [];
-  return json.map((m) => {
-    const d = m as Record<string, unknown>;
-    return {
-      juchuHeadId: Number(d.juchu_head_id ?? 0),
-      juchuKizaiHeadId: Number(d.juchu_kizai_head_id ?? 0),
-      koenNam: typeof d.koen_nam === 'string' ? d.koen_nam : '',
-      headNam: typeof d.head_nam === 'string' ? d.head_nam : '',
-      planQty: Number(d.plan_qty ?? 0),
-    };
-  });
-};
+import { IdoDetailTableValues, IdoEqptSelection, SelectedIdoEqptsValues } from './types';
 
 /**
  * 移動伝票id最大値取得
@@ -87,14 +68,16 @@ export const getIdoDen = async (sagyoKbnId: number, sagyoSijiId: number, sagyoDe
       sagyosijiId: sagyoSijiId,
       nyushukoBashoId: sagyoId,
       juchuFlg: d.juchu_flg ?? 0,
-      juchuMeisai: toJuchuMeisai(d.juchu_meisai),
+      juchuHeadId: d.juchu_head_id ?? 0,
+      juchuKizaiHeadId: d.juchu_kizai_head_id ?? 0,
+      koenNam: d.koen_nam ?? '',
+      headNam: d.head_nam ?? '',
       kizaiId: d.kizai_id ?? 0,
       kizaiNam: d.kizai_nam ?? '',
       shozokuId: sagyoId,
       rfidYardQty: d.rfid_yard_qty ?? 0,
       rfidKicsQty: d.rfid_kics_qty ?? 0,
       planJuchuQty: d.plan_juchu_qty ?? 0,
-      planLowQty: d.plan_low_qty ?? 0,
       planQty: d.plan_qty ?? 0,
       resultAdjQty: d.result_adj_qty ?? 0,
       resultQty: d.result_qty ?? 0,
@@ -148,11 +131,16 @@ export const getIdoMem = async (sagyoDenDat: string, sagyoSijiId: number) => {
 
 /**
  * 移動伝票確認
+ *
+ * 受注2列まで含めて「この明細の伝票が既にあるか」を見る。機材idだけで判定すると、
+ * 同じ機材の別の公演の行を自分の行と誤認して、新規のはずが更新に回ってしまう。
  * @param sagyoKbnId
  * @param sagyoSijiId
  * @param sagyoDenDat
  * @param sagyoId
  * @param kizaiId
+ * @param juchuHeadId
+ * @param juchuKizaiHeadId
  * @param connection
  * @returns
  */
@@ -162,10 +150,21 @@ export const getConfirmIdoDen = async (
   sagyoDenDat: string,
   sagyoId: number,
   kizaiId: number,
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
   connection: PoolClient
 ) => {
   try {
-    const data = await selectConfirmIdoDen(sagyoKbnId, sagyoSijiId, sagyoDenDat, sagyoId, kizaiId, connection);
+    const data = await selectConfirmIdoDen(
+      sagyoKbnId,
+      sagyoSijiId,
+      sagyoDenDat,
+      sagyoId,
+      kizaiId,
+      juchuHeadId,
+      juchuKizaiHeadId,
+      connection
+    );
     return data;
   } catch (e) {
     if (e instanceof Error) {
@@ -190,6 +189,8 @@ export const addIdoDen = async (addIdoDenData: IdoDetailTableValues[], userNam: 
   const newIdoShukoData: IdoDen[] = addIdoDenData.map((d) => ({
     ido_den_id: d.idoDenId,
     kizai_id: d.kizaiId,
+    juchu_head_id: d.juchuHeadId,
+    juchu_kizai_head_id: d.juchuKizaiHeadId,
     plan_qty: d.planQty,
     sagyo_den_dat: d.nyushukoDat,
     sagyo_id: d.nyushukoBashoId,
@@ -202,6 +203,8 @@ export const addIdoDen = async (addIdoDenData: IdoDetailTableValues[], userNam: 
   const newIdoNyukoData: IdoDen[] = addIdoDenData.map((d) => ({
     ido_den_id: d.idoDenId,
     kizai_id: d.kizaiId,
+    juchu_head_id: d.juchuHeadId,
+    juchu_kizai_head_id: d.juchuKizaiHeadId,
     plan_qty: d.planQty,
     sagyo_den_dat: d.nyushukoDat,
     sagyo_id: d.sagyosijiId === SAGYO_SIJI_ID.ky ? BASHO_ID.yard : BASHO_ID.kics,
@@ -230,6 +233,8 @@ export const updIdoDen = async (updIdoDenData: IdoDetailTableValues[], userNam: 
   const updateIdoShukoData: IdoDen[] = updIdoDenData.map((d) => ({
     ido_den_id: d.idoDenId,
     kizai_id: d.kizaiId,
+    juchu_head_id: d.juchuHeadId,
+    juchu_kizai_head_id: d.juchuKizaiHeadId,
     plan_qty: d.planQty,
     sagyo_den_dat: d.nyushukoDat,
     sagyo_id: d.nyushukoBashoId,
@@ -242,6 +247,8 @@ export const updIdoDen = async (updIdoDenData: IdoDetailTableValues[], userNam: 
   const updateIdoNyukoData: IdoDen[] = updIdoDenData.map((d) => ({
     ido_den_id: d.idoDenId,
     kizai_id: d.kizaiId,
+    juchu_head_id: d.juchuHeadId,
+    juchu_kizai_head_id: d.juchuKizaiHeadId,
     plan_qty: d.planQty,
     sagyo_den_dat: d.nyushukoDat,
     sagyo_id: d.sagyosijiId === SAGYO_SIJI_ID.ky ? BASHO_ID.yard : BASHO_ID.kics,
@@ -268,7 +275,13 @@ export const updIdoDen = async (updIdoDenData: IdoDetailTableValues[], userNam: 
  * @param connection
  */
 export const delIdoDen = async (
-  deleteData: { sagyo_siji_id: number; sagyo_den_dat: string; kizai_id: number }[],
+  deleteData: {
+    sagyo_siji_id: number;
+    sagyo_den_dat: string;
+    kizai_id: number;
+    juchu_head_id: number;
+    juchu_kizai_head_id: number;
+  }[],
   connection: PoolClient
 ) => {
   try {
@@ -476,10 +489,27 @@ export const saveIdoDen = async (
 ) => {
   const connection = await pool.connect();
   try {
+    // 移動伝票idは機材単位で1つ。同じ機材の明細行はすべて同じidを共有する。
+    // ゲートが v_ido_den2_lst から読んだ ido_den_id を実績送信で送り返してくるので、
+    // 1機材に複数のidができると読取が伝票に紐づかなくなる。
     let newIdoDenId = await getIdoDenMaxId();
-    const saveIdoDenData = idoDenData.map((data) =>
-      !data.saveFlag && !data.delFlag ? { ...data, idoDenId: ++newIdoDenId } : data
-    );
+    const idoDenIdByKizai = new Map<number, number>();
+
+    const saveIdoDenData: IdoDetailTableValues[] = [];
+    for (const data of idoDenData) {
+      if (data.saveFlag || data.delFlag) {
+        saveIdoDenData.push(data);
+        continue;
+      }
+      let idoDenId = idoDenIdByKizai.get(data.kizaiId);
+      if (idoDenId === undefined) {
+        // 同じ機材の別明細が既に保存済みならそのidを使い回す
+        const existingId = await selectIdoDenIdByKizai(data.sagyosijiId, data.nyushukoDat, data.kizaiId, connection);
+        idoDenId = existingId ?? ++newIdoDenId;
+        idoDenIdByKizai.set(data.kizaiId, idoDenId);
+      }
+      saveIdoDenData.push({ ...data, idoDenId });
+    }
 
     const upsIdoDenData = saveIdoDenData.filter((d) => !d.delFlag);
     const delIdoDenData = saveIdoDenData.filter((d) => d.saveFlag && d.delFlag);
@@ -494,6 +524,8 @@ export const saveIdoDen = async (
         data.nyushukoDat,
         data.nyushukoBashoId,
         data.kizaiId,
+        data.juchuHeadId,
+        data.juchuKizaiHeadId,
         connection
       );
       if (checkData.length > 0) {
@@ -503,12 +535,14 @@ export const saveIdoDen = async (
       }
     }
 
-    // 削除
+    // 削除。受注2列まで指定しないと同じ機材の他の公演の明細まで消える
     if (delIdoDenData.length > 0) {
       const deleteData = delIdoDenData.map((d) => ({
         sagyo_siji_id: d.sagyosijiId,
         sagyo_den_dat: d.nyushukoDat,
         kizai_id: d.kizaiId,
+        juchu_head_id: d.juchuHeadId,
+        juchu_kizai_head_id: d.juchuKizaiHeadId,
       }));
       await delIdoDen(deleteData, connection);
     }

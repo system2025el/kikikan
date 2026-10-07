@@ -19,6 +19,29 @@ export const SAGYO_KBN_ID = {
 } as const;
 
 /**
+ * 入出庫の確定状況（v_nyushuko_den2 の nyuko_fix_sts / shuko_fix_sts）
+ * 同じ日時・場所に合体している受注機材ヘッダーのうち、確定済みがいくつあるか
+ */
+export const FIX_STS = {
+  /** 確定なし */
+  none: 0,
+  /** 一部確定済み */
+  partial: 1,
+  /** 全部確定済み */
+  all: 2,
+} as const;
+
+export type FixSts = (typeof FIX_STS)[keyof typeof FIX_STS];
+
+/** DB の値（0 / 1 / 2 / null）を FixSts に変換する */
+export const toFixSts = (value: unknown): FixSts =>
+  Number(value) === FIX_STS.all ? FIX_STS.all : Number(value) === FIX_STS.partial ? FIX_STS.partial : FIX_STS.none;
+
+/** 確定済みのヘッダー数と全体のヘッダー数から FixSts を求める */
+export const calcFixSts = (fixedCount: number, totalCount: number): FixSts =>
+  fixedCount <= 0 ? FIX_STS.none : fixedCount >= totalCount ? FIX_STS.all : FIX_STS.partial;
+
+/**
  * 受注機材ヘッダー区分ID（juchu_kizai_head_kbn）
  */
 export const JUCHU_KIZAI_HEAD_KBN = {

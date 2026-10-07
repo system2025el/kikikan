@@ -1,3 +1,5 @@
+import { FixSts } from '@/app/_lib/constants';
+
 export type ShukoListSearchValues = {
   selectedDate: {
     value: string;
@@ -28,7 +30,8 @@ export type ShukoTableValues = {
   sstbSagyoStsNamShort: string;
   schkSagyoStsId: number;
   schkSagyoStsNamShort: string;
-  shukoFixFlg: boolean;
+  /** 出発の確定状況（合体している受注機材ヘッダーのうち、なし／一部／全部） */
+  shukoFixSts: FixSts;
   nyuryokuUser: string;
   sstbPlanQty: number;
   schkPlanQty: number;

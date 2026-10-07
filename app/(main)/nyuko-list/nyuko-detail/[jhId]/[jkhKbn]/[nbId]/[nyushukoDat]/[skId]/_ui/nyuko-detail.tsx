@@ -20,8 +20,13 @@ import { grey } from '@mui/material/colors';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-import { BASHO_ID, JUCHU_KIZAI_HEAD_KBN } from '@/app/_lib/constants';
-import { dispColors, sagyoKbnColors, statusColors } from '@/app/(main)/_lib/colors';
+import { BASHO_ID, FIX_STS, FixSts, JUCHU_KIZAI_HEAD_KBN } from '@/app/_lib/constants';
+import { dispColors, fixStsColors, sagyoKbnColors, statusColors } from '@/app/(main)/_lib/colors';
+import {
+  getNyushukoFixErrorMessage,
+  NyushukoFixAction,
+  NyushukoFixErrorReason,
+} from '@/app/(main)/_lib/nyushuko-fix-error';
 import { permission } from '@/app/(main)/_lib/permission';
 import { User } from '@/app/(main)/_lib/types';
 import { BackButton } from '@/app/(main)/_ui/buttons';
@@ -35,7 +40,8 @@ export const NyukoDetail = (props: {
   user: User;
   nyukoDetailData: NyukoDetailValues;
   nyukoDetailTableData: NyukoDetailTableValues[];
-  fixFlag: boolean;
+  /** 合体している受注機材ヘッダーの到着状況（なし／一部／全部） */
+  fixSts: FixSts;
 }) => {
   const { nyukoDetailData, nyukoDetailTableData } = props;
 
@@ -44,7 +50,7 @@ export const NyukoDetail = (props: {
 
   const router = useRouter();
 
-  const [fixFlag, setFixFlag] = useState(props.fixFlag);
+  const [fixSts, setFixSts] = useState<FixSts>(props.fixSts);
   // 処理中制御
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -58,6 +64,12 @@ export const NyukoDetail = (props: {
   const [snackBarOpen, setSnackBarOpen] = useState(false);
   // スナックバーメッセージ
   const [snackBarMessage, setSnackBarMessage] = useState('');
+  // 警告ダイアログ制御
+  const [alertOpen, setAlertOpen] = useState(false);
+  // 警告ダイアログタイトル
+  const [alertTitle, setAlertTitle] = useState('');
+  // 警告ダイアログ用メッセージ
+  const [alertMessage, setAlertMessage] = useState('');
 
   /**
    * 到着処理
@@ -75,18 +87,35 @@ export const NyukoDetail = (props: {
 
     const updateResult = await updNyukoDetail(nyukoDetailData, nyukoDetailTableData, user.name);
 
-    if (updateResult) {
+    if (updateResult.ok) {
       setArrivalOpen(false);
-      setFixFlag(true);
+      setFixSts(FIX_STS.all);
       setSnackBarMessage('到着しました');
       setSnackBarOpen(true);
       setIsProcessing(false);
       window.close();
     } else {
       setArrivalOpen(false);
-      setSnackBarMessage('到着に失敗しました');
-      setSnackBarOpen(true);
+      showFailure('arrival', updateResult.reason, '到着に失敗しました');
       setIsProcessing(false);
+    }
+  };
+
+  /**
+   * 失敗の表示（理由があるときは警告ダイアログ、それ以外はスナックバー）
+   * @param action 操作
+   * @param reason 理由
+   * @param defaultMessage 理由がないときの文言
+   */
+  const showFailure = (action: NyushukoFixAction, reason: NyushukoFixErrorReason, defaultMessage: string) => {
+    const message = getNyushukoFixErrorMessage(action, reason);
+    if (message) {
+      setAlertTitle(message.title);
+      setAlertMessage(message.message);
+      setAlertOpen(true);
+    } else {
+      setSnackBarMessage(defaultMessage);
+      setSnackBarOpen(true);
     }
   };
 
@@ -104,32 +133,35 @@ export const NyukoDetail = (props: {
       return;
     }
 
-    try {
-      await delNyukoFix(nyukoDetailData, nyukoDetailTableData, user.name);
+    const releaseResult = await delNyukoFix(nyukoDetailData, nyukoDetailTableData, user.name);
 
-      setFixFlag(false);
+    if (releaseResult.ok) {
+      setFixSts(FIX_STS.none);
       setReleaseOpen(false);
       setSnackBarMessage('到着解除しました');
       setSnackBarOpen(true);
       setIsProcessing(false);
       window.close();
-    } catch (e) {
+    } else {
       setReleaseOpen(false);
-      setSnackBarMessage('到着解除に失敗しました');
-      setSnackBarOpen(true);
+      showFailure('arrivalRelease', releaseResult.reason, '到着解除に失敗しました');
       setIsProcessing(false);
     }
   };
 
   const handleArrivalOpen = () => {
+    // 一部到着済みのときは、未到着の明細だけを到着にする
+    const partialMessage = fixSts === FIX_STS.partial ? '到着済みの明細があります。未到着の明細を到着にします。\n' : '';
     if (
       nyukoDetailData.juchuKizaiHeadKbn !== JUCHU_KIZAI_HEAD_KBN.normal &&
       nyukoDetailTableData.filter((d) => d.resultQty === 0 && d.resultAdjQty === 0).length > 0
     ) {
-      setArrivalMessage(`読み取りも補正もない状態で到着すると\n入庫予定から削除されますがよろしいですか？`);
+      setArrivalMessage(
+        `${partialMessage}読み取りも補正もない状態で到着すると\n入庫予定から削除されますがよろしいですか？`
+      );
       setArrivalOpen(true);
     } else {
-      setArrivalMessage('到着済みにしてよろしいですか？');
+      setArrivalMessage(`${partialMessage}到着済みにしてよろしいですか？`);
       setArrivalOpen(true);
     }
   };
@@ -148,11 +180,22 @@ export const NyukoDetail = (props: {
             {nyukoDetailData.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.return && (
               <Typography color="red">※返却時は到着ボタンで親の入庫明細の数量に反映されます。</Typography>
             )}
-            {fixFlag && <Typography>到着済</Typography>}
+            {fixSts === FIX_STS.all && (
+              <Typography px={1} sx={{ backgroundColor: fixStsColors.all }}>
+                到着済
+              </Typography>
+            )}
+            {fixSts === FIX_STS.partial && (
+              <Typography px={1} sx={{ backgroundColor: fixStsColors.partial }}>
+                一部到着済
+              </Typography>
+            )}
             <Button
               onClick={handleArrivalOpen}
               disabled={
-                fixFlag || user?.permission.nyushuko === permission.nyushuko_ref || nyukoDetailTableData.length === 0
+                fixSts === FIX_STS.all ||
+                user?.permission.nyushuko === permission.nyushuko_ref ||
+                nyukoDetailTableData.length === 0
               }
               sx={{ backgroundColor: 'yellow', color: 'black' }}
             >
@@ -161,7 +204,7 @@ export const NyukoDetail = (props: {
             <Button
               color="error"
               onClick={() => setReleaseOpen(true)}
-              disabled={!fixFlag || user?.permission.nyushuko === permission.nyushuko_ref}
+              disabled={fixSts === FIX_STS.none || user?.permission.nyushuko === permission.nyushuko_ref}
             >
               到着解除
             </Button>
@@ -293,6 +336,18 @@ export const NyukoDetail = (props: {
           <Button onClick={() => setReleaseOpen(false)} loading={isProcessing}>
             戻る
           </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog open={alertOpen}>
+        <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
+          <WarningIcon color="error" />
+          <Box>{alertTitle}</Box>
+        </DialogTitle>
+        <DialogContentText m={2} p={2}>
+          {alertMessage}
+        </DialogContentText>
+        <DialogActions>
+          <Button onClick={() => setAlertOpen(false)}>確認</Button>
         </DialogActions>
       </Dialog>
       <Snackbar

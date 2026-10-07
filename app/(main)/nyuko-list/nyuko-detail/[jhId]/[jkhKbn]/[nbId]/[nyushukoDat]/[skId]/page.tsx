@@ -2,10 +2,12 @@ import { Typography } from '@mui/material';
 import { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
+import { SAGYO_KBN_ID } from '@/app/_lib/constants';
 import { getCurrentUser } from '@/app/(main)/_lib/funcs';
+import { getNyushukoFixState } from '@/app/(main)/_lib/nyushuko-fix-state';
 import { permission } from '@/app/(main)/_lib/permission';
 
-import { getNyukoDetail, getNyukoDetailTable, getNyukoFixFlag } from './_lib/funcs';
+import { getNyukoDetail, getNyukoDetailTable } from './_lib/funcs';
 import { NyukoDetailValues } from './_lib/types';
 import { NyukoDetail } from './_ui/nyuko-detail';
 
@@ -78,10 +80,11 @@ const Page = async (props: {
     return <div>入庫明細が見つかりません。</div>;
   }
 
-  const fixFlag = await getNyukoFixFlag(
+  // 合体している全ヘッダーの到着状況（なし／一部／全部）
+  const fixState = await getNyushukoFixState(
     Number(params.jhId),
-    nyukoDetailData.juchuKizaiHeadIds[0],
-    70,
+    nyukoDetailData.juchuKizaiHeadIds,
+    SAGYO_KBN_ID.nyukoConfirmed,
     nyukoDetailData.nyushukoDat,
     Number(params.nbId)
   );
@@ -90,7 +93,7 @@ const Page = async (props: {
       user={user}
       nyukoDetailData={nyukoDetailData}
       nyukoDetailTableData={nyukoDetailTableData}
-      fixFlag={fixFlag}
+      fixSts={fixState.fixSts}
     />
   );
 };

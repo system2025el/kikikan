@@ -1,3 +1,5 @@
+import { FixSts } from '@/app/_lib/constants';
+
 export type NyukoListSearchValues = {
   selectedDate: {
     value: string;
@@ -26,7 +28,8 @@ export type NyukoTableValues = {
   kokyakuNam: string;
   nchkSagyoStsId: number;
   nchkSagyoStsNamShort: string;
-  nyukoFixFlg: boolean;
+  /** 到着の確定状況（合体している受注機材ヘッダーのうち、なし／一部／全部） */
+  nyukoFixSts: FixSts;
   nyuryokuUser: string;
   nchkPlanQty: number;
 };
