@@ -74,7 +74,10 @@ export const dispColors = {
 };
 
 /**
- * 出庫作業区分色（ハンディアプリと統一）
+ * 作業区分色（出庫・入庫はハンディアプリと統一）
+ *
+ * 明細画面・詳細画面のタイトルとテーブルヘッダーの背景に使う。
+ * 画面を開いた人が「いまどの作業の画面か」を色で判別できるようにするためのもの。
  */
 export const sagyoKbnColors = {
   /**
@@ -89,6 +92,10 @@ export const sagyoKbnColors = {
    * 入庫カウント
    */
   nyukoCount: 'rgba(255, 235, 59, 1)',
+  /**
+   * 移動（出庫・入庫とも共通。MUI の purple[400] と同値）
+   */
+  ido: 'rgba(171, 71, 188, 1)',
 };
 
 export const weeklyColors = {

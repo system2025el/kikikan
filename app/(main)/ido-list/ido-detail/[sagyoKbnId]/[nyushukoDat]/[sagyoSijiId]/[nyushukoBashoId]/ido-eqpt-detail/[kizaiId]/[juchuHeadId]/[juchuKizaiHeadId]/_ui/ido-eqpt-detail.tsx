@@ -24,6 +24,7 @@ import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
 import { SAGYO_KBN_ID } from '@/app/_lib/constants';
+import { sagyoKbnColors } from '@/app/(main)/_lib/colors';
 import { useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
 import { permission } from '@/app/(main)/_lib/permission';
 import { User } from '@/app/(main)/_lib/types';
@@ -183,7 +184,10 @@ export const IdoEqptDetail = (props: {
       <Paper variant="outlined">
         <form onSubmit={handleSubmit(onSubmit)}>
           <Box display={'flex'} justifyContent={'space-between'} alignItems="center" px={2}>
-            <Typography fontSize={'large'}>移動詳細</Typography>
+            {/* 出庫・入庫の詳細画面と同じく、タイトルにも作業区分色を敷く */}
+            <Typography fontSize={'large'} px={1} sx={{ backgroundColor: sagyoKbnColors.ido, color: 'white' }}>
+              移動詳細
+            </Typography>
             {/* <Button type="submit">保存</Button> */}
           </Box>
           <Divider />

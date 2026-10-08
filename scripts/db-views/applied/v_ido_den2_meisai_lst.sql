@@ -1,4 +1,4 @@
--- 適用状況: ステージング 2026-09-24 / 本番 未適用
+-- 適用状況: ステージング 2026-09-24 / 本番 2026-10-07
 --
 -- 【新規】HT・ゲート向けの明細単位の移動機材リスト。
 --
@@ -38,7 +38,7 @@
 -- ★ juchu_kizai_head_id は受注内の連番で単独ではユニークではない。
 --   t_juchu_kizai_head への JOIN は必ず juchu_head_id とのペアで行うこと。
 --
--- 関連: scripts/db-migration/ddl/20260924-ido-juchu-meisai.sql
+-- 関連: scripts/db-tables/applied/20260924-ido-juchu-meisai.sql
 --       段階2（HT・ゲート側の改修）の移行先
 
 DROP VIEW IF EXISTS public.v_ido_den2_meisai_lst;

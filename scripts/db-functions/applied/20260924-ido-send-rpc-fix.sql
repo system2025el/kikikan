@@ -1,4 +1,4 @@
--- 適用状況: ステージング 2026-09-24 / 本番 YYYY-MM-DD
+-- 適用状況: ステージング 2026-09-24 / 本番 2026-10-07
 --
 -- 送信RPC 3本の composite 型の要素数合わせ（20260924-ido-juchu-meisai.sql に必ずセットで適用する）
 --
@@ -35,7 +35,7 @@
 --   （バッチ先頭の固定値）になっており、他2本の tmp_ctn_result.upd_user とずれている。
 --   今回は修理に徹するため、この差もそのまま残してある。直すなら3本まとめて別途。
 --
--- 関連: scripts/db-migration/ddl/20260924-ido-juchu-meisai.sql
+-- 関連: scripts/db-tables/applied/20260924-ido-juchu-meisai.sql
 
 \set ON_ERROR_STOP on
 

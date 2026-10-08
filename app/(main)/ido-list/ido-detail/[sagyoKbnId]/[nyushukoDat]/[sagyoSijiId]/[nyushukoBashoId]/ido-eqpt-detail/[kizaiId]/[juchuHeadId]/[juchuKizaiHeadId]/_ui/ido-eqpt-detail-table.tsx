@@ -4,6 +4,7 @@ import { Checkbox, Table, TableBody, TableCell, TableContainer, TableHead, Table
 import { grey } from '@mui/material/colors';
 import { Dispatch, SetStateAction } from 'react';
 
+import { sagyoKbnColors } from '@/app/(main)/_lib/colors';
 import { toJapanTimeString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 
 import { IdoEqptDetailTableValues } from '../_lib/types';
@@ -22,7 +23,7 @@ export const IdoEqptDetailTable = (props: {
   return (
     <TableContainer sx={{ overflow: 'auto', maxHeight: '80vh' }}>
       <Table stickyHeader size="small">
-        <TableHead sx={{ bgcolor: 'primary.light' }}>
+        <TableHead sx={{ '& .MuiTableCell-stickyHeader': { backgroundColor: sagyoKbnColors.ido, color: 'white' } }}>
           <TableRow sx={{ whiteSpace: 'nowrap' }}>
             <TableCell padding="none" />
             <TableCell padding="checkbox">

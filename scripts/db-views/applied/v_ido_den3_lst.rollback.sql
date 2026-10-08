@@ -1,66 +1,93 @@
--- 適用状況: 開発環境(preview/public) 2026-09-01 / 本番 2026-09-03
---
--- v_ido_den3_lst のロールバック。本番の現在の定義（2026-09-01 時点、PG17 の
--- pg_get_viewdef から採取）。ステージングの変更前定義とも修飾子を除いて一致を確認済み。
---
--- ★ 列の削除を伴うので CREATE OR REPLACE VIEW では戻せない。DROP → CREATE が必要。
---   v_ido_den3_lst に依存する他のビューは無い（アプリからの参照のみ）ため DROP 可。
---   依存が増えていないかは実行前に下記で確認すること。
---     SELECT dependent_ns.nspname, dependent_view.relname
---     FROM pg_depend d
---       JOIN pg_rewrite r ON r.oid = d.objid
---       JOIN pg_class dependent_view ON dependent_view.oid = r.ev_class
---       JOIN pg_namespace dependent_ns ON dependent_ns.oid = dependent_view.relnamespace
---       JOIN pg_class source_table ON source_table.oid = d.refobjid
---     WHERE source_table.relname = 'v_ido_den3_lst' AND dependent_view.relname <> 'v_ido_den3_lst';
+-- v_ido_den3_lst のロールバック。
+-- 明細単位にする前の定義（= scripts/db-views/applied/v_ido_den3_lst.sql と同じ内容。
+-- 本番適用済みの juchu_meisai 版）に戻す。
+-- 列構成が変わる変更なので DROP → CREATE。権限が落ちるので末尾で付け直す。
 
 DROP VIEW IF EXISTS public.v_ido_den3_lst;
 
 CREATE VIEW public.v_ido_den3_lst WITH (security_invoker = on) AS
- SELECT ido_den_id,
-    ido_flg,
+SELECT base.ido_den_id,
+    base.ido_flg,
         CASE
-            WHEN NOT (EXISTS ( SELECT 1
-               FROM v_ido_den_juchu_lst jfl2
-              WHERE v_ido_den2_union_lst.sagyo_kbn_id = jfl2.sagyo_kbn_id AND v_ido_den2_union_lst.sagyo_siji_id = jfl2.sagyo_siji_id AND v_ido_den2_union_lst.nyushuko_dat = jfl2.nyushuko_dat AND v_ido_den2_union_lst.nyushuko_basho_id = jfl2.nyushuko_basho_id AND v_ido_den2_union_lst.kizai_id = jfl2.kizai_id)) THEN 0
+            WHEN jm.kizai_id IS NULL THEN 0
             ELSE 1
         END AS juchu_flg,
-    nyushuko_shubetu_id,
-    sagyo_kbn_id,
-    sagyo_kbn_nam,
-    sagyo_kbn_nam_short,
-    sagyo_siji_id,
-    sagyo_siji_nam,
-    sagyo_siji_nam_short,
-    nyushuko_dat,
-    nyushuko_basho_id,
-    shozoku_nam,
-    kizai_id,
-    kizai_nam,
-    bld_cod,
-    tana_cod,
-    eda_cod,
-    ctn_flg,
-    kizai_mem,
-    kizai_shozoku_id,
-    kizai_shozoku_nam,
-    kizai_shozoku_nam_short,
-    rfid_yard_qty,
-    rfid_kics_qty,
-    plan_juchu_qty,
-    plan_low_qty,
-    sum(plan_qty) AS plan_qty,
-    sum(result_qty) AS result_qty,
-    sum(result_adj_qty) AS result_adj_qty,
-    sum(diff_qty) AS diff_qty
-   FROM v_ido_den2_union_lst
-  WHERE NOT (sagyo_kbn_id = 50 AND plan_qty = 0::numeric)
-  GROUP BY ido_den_id, ido_flg, nyushuko_shubetu_id, sagyo_kbn_id, sagyo_kbn_nam, sagyo_kbn_nam_short, sagyo_siji_id, sagyo_siji_nam, sagyo_siji_nam_short, nyushuko_dat, nyushuko_basho_id, shozoku_nam, kizai_id, kizai_nam, bld_cod, tana_cod, eda_cod, ctn_flg, kizai_mem, kizai_shozoku_id, kizai_shozoku_nam, kizai_shozoku_nam_short, rfid_yard_qty, rfid_kics_qty, plan_juchu_qty, plan_low_qty
-  ORDER BY nyushuko_dat, sagyo_kbn_id, (
+    base.nyushuko_shubetu_id,
+    base.sagyo_kbn_id,
+    base.sagyo_kbn_nam,
+    base.sagyo_kbn_nam_short,
+    base.sagyo_siji_id,
+    base.sagyo_siji_nam,
+    base.sagyo_siji_nam_short,
+    base.nyushuko_dat,
+    base.nyushuko_basho_id,
+    base.shozoku_nam,
+    base.kizai_id,
+    base.kizai_nam,
+    base.bld_cod,
+    base.tana_cod,
+    base.eda_cod,
+    base.ctn_flg,
+    base.kizai_mem,
+    base.kizai_shozoku_id,
+    base.kizai_shozoku_nam,
+    base.kizai_shozoku_nam_short,
+    base.rfid_yard_qty,
+    base.rfid_kics_qty,
+    base.plan_juchu_qty,
+    base.plan_low_qty,
+    base.plan_qty,
+    base.result_qty,
+    base.result_adj_qty,
+    base.diff_qty,
+    COALESCE(jm.juchu_meisai, '[]'::jsonb) AS juchu_meisai
+   FROM ( SELECT v_ido_den2_union_lst.ido_den_id,
+            v_ido_den2_union_lst.ido_flg,
+            v_ido_den2_union_lst.nyushuko_shubetu_id,
+            v_ido_den2_union_lst.sagyo_kbn_id,
+            v_ido_den2_union_lst.sagyo_kbn_nam,
+            v_ido_den2_union_lst.sagyo_kbn_nam_short,
+            v_ido_den2_union_lst.sagyo_siji_id,
+            v_ido_den2_union_lst.sagyo_siji_nam,
+            v_ido_den2_union_lst.sagyo_siji_nam_short,
+            v_ido_den2_union_lst.nyushuko_dat,
+            v_ido_den2_union_lst.nyushuko_basho_id,
+            v_ido_den2_union_lst.shozoku_nam,
+            v_ido_den2_union_lst.kizai_id,
+            v_ido_den2_union_lst.kizai_nam,
+            v_ido_den2_union_lst.bld_cod,
+            v_ido_den2_union_lst.tana_cod,
+            v_ido_den2_union_lst.eda_cod,
+            v_ido_den2_union_lst.ctn_flg,
+            v_ido_den2_union_lst.kizai_mem,
+            v_ido_den2_union_lst.kizai_shozoku_id,
+            v_ido_den2_union_lst.kizai_shozoku_nam,
+            v_ido_den2_union_lst.kizai_shozoku_nam_short,
+            v_ido_den2_union_lst.rfid_yard_qty,
+            v_ido_den2_union_lst.rfid_kics_qty,
+            v_ido_den2_union_lst.plan_juchu_qty,
+            v_ido_den2_union_lst.plan_low_qty,
+            sum(v_ido_den2_union_lst.plan_qty) AS plan_qty,
+            sum(v_ido_den2_union_lst.result_qty) AS result_qty,
+            sum(v_ido_den2_union_lst.result_adj_qty) AS result_adj_qty,
+            sum(v_ido_den2_union_lst.diff_qty) AS diff_qty
+           FROM v_ido_den2_union_lst
+          WHERE NOT (v_ido_den2_union_lst.sagyo_kbn_id = 50 AND v_ido_den2_union_lst.plan_qty = 0::numeric)
+          GROUP BY v_ido_den2_union_lst.ido_den_id, v_ido_den2_union_lst.ido_flg, v_ido_den2_union_lst.nyushuko_shubetu_id, v_ido_den2_union_lst.sagyo_kbn_id, v_ido_den2_union_lst.sagyo_kbn_nam, v_ido_den2_union_lst.sagyo_kbn_nam_short, v_ido_den2_union_lst.sagyo_siji_id, v_ido_den2_union_lst.sagyo_siji_nam, v_ido_den2_union_lst.sagyo_siji_nam_short, v_ido_den2_union_lst.nyushuko_dat, v_ido_den2_union_lst.nyushuko_basho_id, v_ido_den2_union_lst.shozoku_nam, v_ido_den2_union_lst.kizai_id, v_ido_den2_union_lst.kizai_nam, v_ido_den2_union_lst.bld_cod, v_ido_den2_union_lst.tana_cod, v_ido_den2_union_lst.eda_cod, v_ido_den2_union_lst.ctn_flg, v_ido_den2_union_lst.kizai_mem, v_ido_den2_union_lst.kizai_shozoku_id, v_ido_den2_union_lst.kizai_shozoku_nam, v_ido_den2_union_lst.kizai_shozoku_nam_short, v_ido_den2_union_lst.rfid_yard_qty, v_ido_den2_union_lst.rfid_kics_qty, v_ido_den2_union_lst.plan_juchu_qty, v_ido_den2_union_lst.plan_low_qty) base
+     LEFT JOIN ( SELECT idj.sagyo_kbn_id,
+            idj.sagyo_siji_id,
+            idj.sagyo_den_dat AS nyushuko_dat,
+            idj.sagyo_id AS nyushuko_basho_id,
+            idj.kizai_id,
+            jsonb_agg(jsonb_build_object('juchu_head_id', idj.juchu_head_id, 'juchu_kizai_head_id', idj.juchu_kizai_head_id, 'koen_nam', jh.koen_nam, 'head_nam', jkh.head_nam, 'plan_qty', COALESCE(idj.plan_qty, 0)) ORDER BY (COALESCE(idj.plan_qty, 0)) DESC, jh.koen_nam, jkh.head_nam, idj.juchu_head_id, idj.juchu_kizai_head_id) AS juchu_meisai
+           FROM t_ido_den_juchu idj
+             JOIN t_juchu_head jh ON jh.juchu_head_id = idj.juchu_head_id AND jh.del_flg = 0
+             LEFT JOIN t_juchu_kizai_head jkh ON jkh.juchu_head_id = idj.juchu_head_id AND jkh.juchu_kizai_head_id = idj.juchu_kizai_head_id
+          GROUP BY idj.sagyo_kbn_id, idj.sagyo_siji_id, idj.sagyo_den_dat, idj.sagyo_id, idj.kizai_id) jm
+       ON jm.sagyo_kbn_id = base.sagyo_kbn_id AND jm.sagyo_siji_id = base.sagyo_siji_id AND jm.nyushuko_dat = base.nyushuko_dat AND jm.nyushuko_basho_id = base.nyushuko_basho_id AND jm.kizai_id = base.kizai_id
+  ORDER BY base.nyushuko_dat, base.sagyo_kbn_id, (
         CASE
-            WHEN NOT (EXISTS ( SELECT 1
-               FROM v_ido_den_juchu_lst jfl2
-              WHERE v_ido_den2_union_lst.sagyo_kbn_id = jfl2.sagyo_kbn_id AND v_ido_den2_union_lst.sagyo_siji_id = jfl2.sagyo_siji_id AND v_ido_den2_union_lst.nyushuko_dat = jfl2.nyushuko_dat AND v_ido_den2_union_lst.nyushuko_basho_id = jfl2.nyushuko_basho_id AND v_ido_den2_union_lst.kizai_id = jfl2.kizai_id)) THEN 0
+            WHEN jm.kizai_id IS NULL THEN 0
             ELSE 1
         END) DESC;
 
