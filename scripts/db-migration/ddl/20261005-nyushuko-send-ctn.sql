@@ -18,6 +18,16 @@
 --      （表示順・メモは変えない。未出発・キープ以外のみ）
 --   予定数は出発時に Web で 読取数 + 補正数 に確定する（入庫の「送信時は引き上げ、到着時に確定」と同じ形）。
 --
+-- 変更点（出庫 sagyo_kbn_id = 10/20 の機材。通常の受注機材ヘッダーのみ。2026-10-08 追加）
+--   5. 送られてきた明細ID・機材の受注機材明細が無い場合、新しく作る伝票の予定数を 0 にする（土台は読取数）。
+--      読取画面を開いた後にメイン明細で機材が削除され（実績が無かったので伝票も削除済み）、そのまま送信された
+--      ケースで、予定数＝読取数の「差異0で普通に見える伝票」ができて削除に気づけず出発できてしまうのを防ぐ。
+--      予定数0・実績あり・受注明細なし＝受注削除（v_nyushuko_den2_lst.juchu_meisai_del_flg）として出庫明細に出て、
+--      過剰になるので出発のチェックと出庫一覧の△も効く。
+--      通常の出庫では機材の予定外は送信できないので、受注明細の無い機材はこのケースだけ。入庫（30）・返却・キープ・
+--      コンテナは対象外（カット・キープの入庫は親機材として明細に無い機材を送れるため、今までどおり予定数＝読取数）。
+--      既に伝票がある場合（受注削除で予定数0で残した伝票など）は今までどおり読取数の更新だけ。
+--
 -- ★ 新しい関数なので GRANT を付ける（既存の送信RPCと同じく anon・authenticated に EXECUTE）
 -- ★ 適用順: この DDL（と v_juchu_ctn_meisai）→ Web → HT・ゲート（関数名の切り替え）
 --
@@ -917,7 +927,23 @@ begin
         ,r.sagyo_den_dat
         ,r.sagyo_id
         ,r.kizai_id
-        ,count(*) as plan_qty
+        -- 通常の受注で受注機材明細が無い（読取画面を開いた後に削除された）機材は予定数0で作る（受注削除として出すため。冒頭の変更点5）
+        ,case
+          when nyushuko_send_20261005_1.juchu_kizai_head_kbn = 1
+            and not exists (
+              select
+                1
+              from
+                public.t_juchu_kizai_meisai m
+              where
+                m.juchu_head_id           = r.juchu_head_id
+                and m.juchu_kizai_head_id = r.juchu_kizai_head_id
+                and m.juchu_kizai_meisai_id = r.juchu_kizai_meisai_id
+                and m.kizai_id            = r.kizai_id
+            )
+          then 0
+          else count(*)
+        end as plan_qty
         ,count(*) as result_qty
         ,now() as add_dat
         ,sender as add_user
