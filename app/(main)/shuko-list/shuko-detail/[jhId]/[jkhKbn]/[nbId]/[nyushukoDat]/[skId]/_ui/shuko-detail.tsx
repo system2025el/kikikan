@@ -90,6 +90,12 @@ export const ShukoDetail = (props: {
   const [isLoading, setIsLoading] = useState(false);
   // 処理中制御
   const [isProcessing, setIsProcessing] = useState(false);
+  // 一覧はブラウザ側で描画する（サーバー描画で出すと、コンテナのメモ欄（複数行の自動高さ調整）が
+  // 表示後に高さを測り直して、行が一瞬伸び縮みするため。ブラウザ側の描画なら測り直しは表示前に終わる）
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // 出庫データ（保存済みの状態）
   const [originShukoDetailList, setOriginShukoDetailList] = useState<ShukoDetailTableValues[]>(
@@ -646,7 +652,7 @@ export const ShukoDetail = (props: {
             </Box>
           </Box>
         </Box>
-        {visibleShukoDetailList.length > 0 && (
+        {isMounted && visibleShukoDetailList.length > 0 && (
           <ShukoDetailTable
             datas={visibleShukoDetailList}
             fixFlag={fixFlag}
