@@ -7,6 +7,7 @@ import { JUCHU_KIZAI_HEAD_KBN, NYUSHUKO_SHUBETU_ID, SAGYO_KBN_ID } from '@/app/_
 import pool, { refreshVRfid } from '@/app/_lib/db/postgres';
 import {
   deleteJuchuContainerMeisaiShozoku,
+  selectCtnMaxMeisaiIdTx,
   selectJuchuContainerMeisaiRowsTx,
   selectMeisaiMaxDspOrdNumTx,
   updateJuchuContainerMeisaiMem,
@@ -23,8 +24,8 @@ import {
 import { deleteShukoCtnResult } from '@/app/_lib/db/tables/t-nyushuko-ctn-result';
 import {
   deleteShukoCtnDen,
+  lockNyushukoDenForNumberingTx,
   selectShukoCtnDenRowsTx,
-  selectShukoDenMaxMeisaiIdTx,
   updateNyushukoDen,
   upsertNyushukoDen,
 } from '@/app/_lib/db/tables/t-nyushuko-den';
@@ -821,7 +822,8 @@ export const getShukoCtnSelection = async (): Promise<ShukoCtnSelectionValues[]>
  * 追加：出庫チェック伝票（sagyo_kbn_id = 20）とその場所の受注コンテナ明細を作る
  * 更新：予定数（伝票・受注コンテナ明細）とメモ（受注コンテナ明細）。出発済みのヘッダーはメモだけ
  * 削除：その場所の出庫伝票（ピッキング・最終確認）・コンテナ実績・受注コンテナ明細
- * 採番は HT・ゲートの送信RPC（nyushuko_send_20261009_1）と同じ規則（K と Y で明細ID・表示順をそろえる）
+ * 採番は HT・ゲートの送信RPC（nyushuko_send_20261009_1）と同じ規則（K と Y で明細ID・表示順をそろえる。
+ * 同じコンテナが無ければ受注機材ヘッダー内のコンテナの最大値 + 1）
  * @param shukoDetailData 出庫データ
  * @param ctnRows 保存するコンテナの行（追加・削除・変更があった行だけ）
  * @param userNam ユーザー名
@@ -856,6 +858,11 @@ export const saveShukoCtn = async (
 
   try {
     await connection.query('BEGIN');
+
+    // 追加があるときは、送信RPCと同時に明細idを採番しないよう、確認・採番の前に伝票テーブルをロックする
+    if (addRows.length > 0) {
+      await lockNyushukoDenForNumberingTx(connection);
+    }
 
     const juchuKizaiHeadIds = [...new Set(targets.map((d) => d.juchuKizaiHeadId))];
     if (juchuKizaiHeadIds.some((id) => !shukoDetailData.juchuKizaiHeadIds.includes(id))) {
@@ -901,8 +908,9 @@ export const saveShukoCtn = async (
         throw new ShukoCtnSaveError('既に追加されているコンテナがあります。開き直してください');
       }
 
-      let maxMeisaiId =
-        (await selectShukoDenMaxMeisaiIdTx(juchuHeadId, juchuKizaiHeadId, bashoId, nyushukoDat, connection)) ?? 0;
+      // 明細idは受注機材ヘッダー内のコンテナ（受注コンテナ明細・全場所のコンテナの伝票）の最大値 + 1
+      // （場所内の最大値だと、別の場所の別のコンテナと明細idが重なるため。機材とは重なってよい）
+      let maxMeisaiId = await selectCtnMaxMeisaiIdTx(juchuHeadId, juchuKizaiHeadId, connection);
       let maxDspOrdNum = await selectMeisaiMaxDspOrdNumTx(juchuHeadId, juchuKizaiHeadId, connection);
 
       const newDen: NyushukoDen[] = [];

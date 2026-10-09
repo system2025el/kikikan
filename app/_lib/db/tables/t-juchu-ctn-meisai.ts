@@ -413,6 +413,41 @@ export const selectJuchuContainerMeisaiRowsTx = async (
 };
 
 /**
+ * コンテナの明細idの最大値取得（トランザクション内）
+ * 受注機材ヘッダー内のコンテナ（受注コンテナ明細と、全作業区分・全作業場所のコンテナの入出庫伝票）の最大値を返す。
+ * コンテナは作業場所ごとに伝票・受注コンテナ明細を作るので、場所内の最大値で採番すると別の場所の別のコンテナと
+ * 明細idが重なる（ゲートの集中モードなど、明細idで行を探す処理で取り違える）。機材とは重なってよい（コンテナかどうかで区別できる）。
+ * 送信RPC（nyushuko_send_20261009_1）の予定外コンテナの採番も同じ範囲の最大値を使う
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param connection
+ * @returns 明細idの最大値（無ければ 0）
+ */
+export const selectCtnMaxMeisaiIdTx = async (juchuHeadId: number, juchuKizaiHeadId: number, connection: PoolClient) => {
+  const query = `
+    SELECT
+      GREATEST(
+        COALESCE((
+          SELECT MAX(juchu_kizai_meisai_id) FROM ${SCHEMA}.t_juchu_ctn_meisai
+          WHERE juchu_head_id = $1 AND juchu_kizai_head_id = $2
+        ), 0),
+        COALESCE((
+          SELECT MAX(d.juchu_kizai_meisai_id) FROM ${SCHEMA}.t_nyushuko_den d
+          JOIN ${SCHEMA}.m_kizai k ON k.kizai_id = d.kizai_id
+          WHERE d.juchu_head_id = $1 AND d.juchu_kizai_head_id = $2 AND k.ctn_flg = 1
+        ), 0)
+      )::integer AS max_meisai_id
+  `;
+
+  try {
+    const { rows } = await connection.query<{ max_meisai_id: number }>(query, [juchuHeadId, juchuKizaiHeadId]);
+    return rows[0]?.max_meisai_id ?? 0;
+  } catch (e) {
+    throw new Error('[selectCtnMaxMeisaiIdTx] DBエラー:', { cause: e });
+  }
+};
+
+/**
  * 受注機材明細・受注コンテナ明細の表示順の最大値取得（トランザクション内）
  * @param juchuHeadId 受注ヘッダーid
  * @param juchuKizaiHeadId 受注機材ヘッダーid

@@ -1,4 +1,4 @@
--- 適用状況: ステージング 2026-10-09 / 本番 未適用
+-- 適用状況: ステージング 2026-10-09（変更点6 も 2026-10-09 適用） / 本番 未適用
 --
 -- 入出庫の送信RPCを新しい関数 nyushuko_send_20261009_1 として作る（コンテナ管理を出庫側に移す改修）
 -- ※当初は nyushuko_send_20261005_1 の名前で用意していたが、2026-10-09 のステージング作成時に関数名・ファイル名を 20261009 に変えた
@@ -20,6 +20,12 @@
 --   4. 伝票と同時に受注コンテナ明細（その作業場所の行）を作る。既にある行は予定数を greatest で引き上げるだけ
 --      （表示順・メモは変えない。未出発・キープ以外のみ）
 --   予定数は出発時に Web で 読取数 + 補正数 に確定する（入庫の「送信時は引き上げ、到着時に確定」と同じ形）。
+--   6. （2026-10-09 追加）1 で同じ機材が見つからないとき（この作業場所の伝票にも別の作業場所にも無い）の明細IDを、
+--      「この作業場所の伝票の max + 1」から「受注機材ヘッダー内のコンテナの max + 1」に変える。max は受注コンテナ明細と
+--      コンテナの入出庫伝票（全作業区分・全作業場所）から取る。場所内の max だと、別の作業場所の別のコンテナと明細IDが重なり、
+--      ゲートの集中モード（明細IDで行を探す）で取り違えるため。機材とは明細IDが重なってよい（コンテナかどうかで区別できる）。
+--      Web の出庫明細のコンテナ追加（selectCtnMaxMeisaiIdTx）と同じ範囲。入庫（30）と出庫の機材の採番は変えない。
+--      Web は採番の前に t_nyushuko_den を SHARE ROW EXCLUSIVE でロックするので、この関数の SHARE ロックと順番に採番される。
 --
 -- 変更点（出庫 sagyo_kbn_id = 10/20 の機材。通常の受注機材ヘッダーのみ。2026-10-08 追加）
 --   5. 送られてきた明細ID・機材の受注機材明細が無い場合、新しく作る伝票の予定数を 0 にする（土台は読取数）。
@@ -112,6 +118,10 @@ declare
   -- 出庫チェック（最終確認）の予定外コンテナで、同じ受注機材ヘッダーの別の作業場所にある同じ機材の明細ID
   -- （K と Y で同じコンテナの明細IDをそろえるため）
   other_basho_meisai_id int;
+
+  -- 出庫の予定外コンテナの明細IDを受注機材ヘッダー単位で採番するときの、加算値マップのキー
+  -- ※juchu_head_id, juchu_kizai_head_id を「_」でつなげて先頭に head_ を付けたもの（meisai_key と重ならない）
+  head_meisai_key text;
 begin
   ---------------------------------------------------------------------------------------------------------------------
   -- 受注ヘッダーID、作業区分ID、作業場所ID、更新者を、引数で渡された実績データから抜き出して変数にセット
@@ -608,33 +618,37 @@ begin
               -- 別の作業場所に同じ機材がある場合 → その明細IDをセット（K と Y で明細IDをそろえる）
               tmp_juchu_kizai_meisai_id := other_basho_meisai_id;
 
-            elsif max_meisai_id is not null then
-              -- 伝票に対象機材がない場合 → 機材明細IDのMax値 + 加算値をセット
-              if increment_value_map ? meisai_key then
-                -- 機材明細IDのMax値 + 加算値（マップから取り出した値 + 1）
-                tmp_juchu_kizai_meisai_id := max_meisai_id + (increment_value_map ->> meisai_key)::int + 1;
-
-                -- mapを更新
-                increment_value_map := jsonb_set(
-                  increment_value_map
-                  ,array[meisai_key]
-                  ,to_jsonb((increment_value_map ->> meisai_key)::int + 1)
-                );
-              else
-                -- 機材明細IDのMax値 + 加算値（1）
-                tmp_juchu_kizai_meisai_id := max_meisai_id + 1;
-
-                -- mapに追加
-                increment_value_map := jsonb_set(
-                  increment_value_map
-                  ,array[meisai_key]
-                  ,to_jsonb(1)
-                );
-              end if;
-
             else
-              -- 伝票がない場合 → 1をセット
-              tmp_juchu_kizai_meisai_id := 1;
+              -- 受注機材ヘッダー内に対象機材がない場合 → ヘッダー内のコンテナの明細IDのMax値 + 加算値をセット
+              -- ※Max値は受注コンテナ明細と、コンテナの入出庫伝票（全作業区分・全作業場所）から取る（変更点6）。
+              --   この作業場所の伝票だけの Max値だと、別の作業場所の別のコンテナと明細IDが重なるため。
+              --   機材とは明細IDが重なってよい（コンテナかどうかで区別できる）ので、機材の明細IDは見ない
+              select
+                greatest(
+                  coalesce((
+                    select max(c.juchu_kizai_meisai_id) from public.t_juchu_ctn_meisai c
+                    where c.juchu_head_id = ctn_result_rec.juchu_head_id
+                      and c.juchu_kizai_head_id = ctn_result_rec.juchu_kizai_head_id
+                  ), 0)
+                  ,coalesce((
+                    select max(d.juchu_kizai_meisai_id) from public.t_nyushuko_den d
+                    join public.m_kizai k on k.kizai_id = d.kizai_id
+                    where d.juchu_head_id = ctn_result_rec.juchu_head_id
+                      and d.juchu_kizai_head_id = ctn_result_rec.juchu_kizai_head_id
+                      and k.ctn_flg = 1
+                  ), 0)
+                )
+              into
+                max_meisai_id;
+
+              -- 加算値はヘッダー単位で数える（この送信で採番した分を飛ばす）
+              head_meisai_key := format('head_%s_%s', ctn_result_rec.juchu_head_id, ctn_result_rec.juchu_kizai_head_id);
+              tmp_juchu_kizai_meisai_id := max_meisai_id + coalesce((increment_value_map ->> head_meisai_key)::int, 0) + 1;
+              increment_value_map := jsonb_set(
+                increment_value_map
+                ,array[head_meisai_key]
+                ,to_jsonb(coalesce((increment_value_map ->> head_meisai_key)::int, 0) + 1)
+              );
 
             end if;
           end if;

@@ -779,44 +779,17 @@ export const selectShukoCtnDenRowsTx = async (
 };
 
 /**
- * 出庫チェック伝票（sagyo_kbn_id = 20）の受注機材明細idの最大値取得（作業場所・作業日時単位。機材の行も含む）
- * @param juchuHeadId 受注ヘッダーid
- * @param juchuKizaiHeadId 受注機材ヘッダーid
- * @param sagyoId 作業id（作業場所）
- * @param sagyoDenDat 作業日時
+ * 入出庫伝票テーブルを、送信RPCと同時に採番しないようロックする（トランザクション内、COMMIT/ROLLBACK で解除）
+ * 送信RPC（nyushuko_send_*）は冒頭で SHARE モードのロックを取ってから明細idを採番する。
+ * SHARE ROW EXCLUSIVE はその SHARE とも、このモードどうしとも衝突するので、Web と RPC の採番が順番に行われる
+ * （RPC は Web の COMMIT まで待ってから最新の最大値を読む。デッドロックにはならない）
  * @param connection
- * @returns 最大値（伝票が無ければ null）
  */
-export const selectShukoDenMaxMeisaiIdTx = async (
-  juchuHeadId: number,
-  juchuKizaiHeadId: number,
-  sagyoId: number,
-  sagyoDenDat: string,
-  connection: PoolClient
-) => {
-  const query = `
-    SELECT
-      MAX(juchu_kizai_meisai_id)::integer AS max_meisai_id
-    FROM
-      ${SCHEMA}.t_nyushuko_den
-    WHERE
-      juchu_head_id = $1
-      AND juchu_kizai_head_id = $2
-      AND sagyo_kbn_id = 20
-      AND sagyo_id = $3
-      AND sagyo_den_dat = $4
-  `;
-
+export const lockNyushukoDenForNumberingTx = async (connection: PoolClient) => {
   try {
-    const { rows } = await connection.query<{ max_meisai_id: number | null }>(query, [
-      juchuHeadId,
-      juchuKizaiHeadId,
-      sagyoId,
-      sagyoDenDat,
-    ]);
-    return rows[0]?.max_meisai_id ?? null;
+    await connection.query(`LOCK TABLE ${SCHEMA}.t_nyushuko_den IN SHARE ROW EXCLUSIVE MODE`);
   } catch (e) {
-    throw new Error('[selectShukoDenMaxMeisaiIdTx] DBエラー:', { cause: e });
+    throw new Error('[lockNyushukoDenForNumberingTx] DBエラー:', { cause: e });
   }
 };
 
