@@ -951,7 +951,11 @@ export const delNyukoFix = async (
   nyukoDetailTableData: NyukoDetailTableValues[],
   userNam: string
 ): Promise<NyushukoFixResult> => {
-  if (nyukoDetailTableData.length === 0) {
+  // 対象のヘッダーは画面のヘッダー情報と明細行の両方から集める。明細行が空でも解除できるようにする
+  // （返却を読取・補正0で到着すると予定数が0になり一覧に出なくなるが、解除できないと返却明細を二度と編集できなくなるため）
+  // 接続を取る前に判定する（取った後に return すると接続が返らない）
+  const juchuKizaiHeadIds = collectJuchuKizaiHeadIds(nyukoDetailData, nyukoDetailTableData);
+  if (juchuKizaiHeadIds.length === 0) {
     return { ok: false, reason: NYUSHUKO_FIX_ERROR.other };
   }
 
@@ -959,8 +963,6 @@ export const delNyukoFix = async (
 
   try {
     await connection.query('BEGIN');
-
-    const juchuKizaiHeadIds = collectJuchuKizaiHeadIds(nyukoDetailData, nyukoDetailTableData);
 
     // ほかの人が先に到着解除していないか、トランザクション内で確定済みのヘッダーを取り直す
     const fixedJuchuKizaiHeadIds = await selectFixedJuchuKizaiHeadIdsTx(
