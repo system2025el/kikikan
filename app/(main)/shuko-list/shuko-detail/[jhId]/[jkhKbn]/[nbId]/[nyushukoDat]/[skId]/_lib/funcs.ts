@@ -821,7 +821,7 @@ export const getShukoCtnSelection = async (): Promise<ShukoCtnSelectionValues[]>
  * 追加：出庫チェック伝票（sagyo_kbn_id = 20）とその場所の受注コンテナ明細を作る
  * 更新：予定数（伝票・受注コンテナ明細）とメモ（受注コンテナ明細）。出発済みのヘッダーはメモだけ
  * 削除：その場所の出庫伝票（ピッキング・最終確認）・コンテナ実績・受注コンテナ明細
- * 採番は HT・ゲートの送信RPC（nyushuko_send_20261005_1）と同じ規則（K と Y で明細ID・表示順をそろえる）
+ * 採番は HT・ゲートの送信RPC（nyushuko_send_20261009_1）と同じ規則（K と Y で明細ID・表示順をそろえる）
  * @param shukoDetailData 出庫データ
  * @param ctnRows 保存するコンテナの行（追加・削除・変更があった行だけ）
  * @param userNam ユーザー名

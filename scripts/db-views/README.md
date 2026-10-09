@@ -89,7 +89,7 @@
 #### v_juchu_ctn_meisai（コンテナ管理を出庫側へ）
 
 受注コンテナ明細は、これまでメイン明細から KICS・YARD の2行を必ず作っていましたが、出庫明細の保存時・HT/ゲートの送信時に
-その作業場所の1行だけを作るように変わります（RPC は [`../db-functions/staging-only/20261005-nyushuko-send-ctn.sql`](../db-functions/staging-only/20261005-nyushuko-send-ctn.sql)）。結合は変えず、出力列の式だけを変えています。
+その作業場所の1行だけを作るように変わります（RPC は [`../db-functions/staging-only/20261009-nyushuko-send-ctn.sql`](../db-functions/staging-only/20261009-nyushuko-send-ctn.sql)）。結合は変えず、出力列の式だけを変えています。
 
 - 2026-10-05 にステージングでトランザクション内で差し替えて比較（ROLLBACK 済み）：2,452行 → 2,374行。K と Y で `mem`・`dsp_ord_num` が違うために2行に分かれていた78件が1行になり、それ以外は NULL→0 を除いて差分0
 - `mem` の型は元の `character varying(200)` に合わせている（`CREATE OR REPLACE VIEW` は列の型を変えられないため）。K と Y を改行でつないで200文字を超えると、明示キャストにより末尾が切り捨てられる（エラーにはならない）

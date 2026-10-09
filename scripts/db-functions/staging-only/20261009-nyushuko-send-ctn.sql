@@ -1,12 +1,15 @@
--- 適用状況: ステージング 未適用 / 本番 未適用
+-- 適用状況: ステージング 2026-10-09 / 本番 未適用
 --
--- 入出庫の送信RPCを新しい関数 nyushuko_send_20261005_1 として作る（コンテナ管理を出庫側に移す改修）
+-- 入出庫の送信RPCを新しい関数 nyushuko_send_20261009_1 として作る（コンテナ管理を出庫側に移す改修）
+-- ※当初は nyushuko_send_20261005_1 の名前で用意していたが、2026-10-09 のステージング作成時に関数名・ファイル名を 20261009 に変えた
 -- 既存の nyushuko_send_20260626_1（HT・ゲートが今使っている）は変更しない。HT・ゲートは関数名を切り替えるだけで使える
 -- （引数・戻り値は nyushuko_send_20260626_1 と同じ。送るデータも変えない）
 --
 -- 土台: ステージングの nyushuko_send_20260626_1（2026-10-04 時点 md5 ba6064784d32bc2bb152cc866999c9d9）
 --   20260930 の dsp_ord_num 対応、入庫の予定数引き上げ・到着済みガードが入った版をそのまま写している。
 --   そのため本番は、既存の関数の修正（20260930・20261002 など）を入れていなくても、この DDL だけで動く。
+--   2026-10-09 にステージングの nyushuko_send_20260626_1 を再確認（md5 c9cc93970dd058460ca6b1c1c8a76b24）。
+--   コメント・空白・public. 修飾を除いて比べると、この関数との差は下の変更点の箇所だけで、土台の処理は 10-04 から変わっていない。
 --
 -- 変更点（出庫チェック sagyo_kbn_id = 20 のコンテナだけ。機材と入庫は土台と同じ）
 --   1. 予定外コンテナの明細ID：この作業場所の伝票に同じ機材が無ければ、同じ受注機材ヘッダーの別の作業場所
@@ -31,12 +34,12 @@
 -- ★ 新しい関数なので GRANT を付ける（既存の送信RPCと同じく anon・authenticated に EXECUTE）
 -- ★ 適用順: この DDL（と v_juchu_ctn_meisai）→ Web → HT・ゲート（関数名の切り替え）
 --
--- ロールバック: 20261005-nyushuko-send-ctn.rollback.sql（この関数を DROP するだけ。既存の関数には影響しない）
+-- ロールバック: 20261009-nyushuko-send-ctn.rollback.sql（この関数を DROP するだけ。既存の関数には影響しない）
 
 \set ON_ERROR_STOP on
 
 BEGIN;
-CREATE OR REPLACE FUNCTION public.nyushuko_send_20261005_1(nyushuko_result_list public.t_nyushuko_result[], nyushuko_ctn_result_list public.t_nyushuko_ctn_result[], result_oya_den_link_list public.ty_result_oya_den_link[], ctn_result_oya_den_link_list public.ty_ctn_result_oya_den_link[], juchu_kizai_head_kbn integer)
+CREATE OR REPLACE FUNCTION public.nyushuko_send_20261009_1(nyushuko_result_list public.t_nyushuko_result[], nyushuko_ctn_result_list public.t_nyushuko_ctn_result[], result_oya_den_link_list public.ty_result_oya_den_link[], ctn_result_oya_den_link_list public.ty_ctn_result_oya_den_link[], juchu_kizai_head_kbn integer)
  RETURNS void
  LANGUAGE plpgsql
 AS $function$
@@ -929,7 +932,7 @@ begin
         ,r.kizai_id
         -- 通常の受注で受注機材明細が無い（読取画面を開いた後に削除された）機材は予定数0で作る（受注削除として出すため。冒頭の変更点5）
         ,case
-          when nyushuko_send_20261005_1.juchu_kizai_head_kbn = 1
+          when nyushuko_send_20261009_1.juchu_kizai_head_kbn = 1
             and not exists (
               select
                 1
@@ -1466,6 +1469,6 @@ end;
 $function$
 ;
 
-GRANT EXECUTE ON FUNCTION public.nyushuko_send_20261005_1(public.t_nyushuko_result[], public.t_nyushuko_ctn_result[], public.ty_result_oya_den_link[], public.ty_ctn_result_oya_den_link[], integer) TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.nyushuko_send_20261009_1(public.t_nyushuko_result[], public.t_nyushuko_ctn_result[], public.ty_result_oya_den_link[], public.ty_ctn_result_oya_den_link[], integer) TO anon, authenticated;
 
 COMMIT;
