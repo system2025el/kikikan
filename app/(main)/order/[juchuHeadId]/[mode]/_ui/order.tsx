@@ -62,6 +62,7 @@ import { useUnsavedChangesWarning } from '../../../../_lib/hook';
 import {
   addJuchuHead,
   copyJuchuKizaiHeadMeisai,
+  copyJuchuKizaiHeadMeisaiToNewJuchu,
   delJuchuHead,
   delJuchuMeisai,
   getJuchuHead,
@@ -71,6 +72,7 @@ import {
   updJuchuHead,
 } from '../_lib/funcs';
 import {
+  COPY_TARGET,
   CopyDialogValue,
   EqTableValues,
   KokyakuValues,
@@ -578,8 +580,27 @@ export const Order = (props: {
       if (lockResult) {
         // ユーザー名
         const userNam = user.name;
+
+        // 新規伝票を作成してコピー
+        if (data.copyTarget === COPY_TARGET.new) {
+          const newJuchuHeadId = await copyJuchuKizaiHeadMeisaiToNewJuchu(selectedEqHeaders, data, userNam);
+
+          if (newJuchuHeadId) {
+            setCopyOpen(false);
+            setSnackBarMessage(`コピーしました（受注番号: ${newJuchuHeadId}）`);
+            setSnackBarOpen(true);
+            openOrFocusTab(`/order/${newJuchuHeadId}/edit`);
+          } else {
+            setSnackBarMessage('コピーに失敗しました');
+            setSnackBarOpen(true);
+          }
+          setIsProcessing(false);
+          return true;
+        }
+
         // 受注ヘッダーid
-        const newJuchuHeadId = data.juchuHeadid ? Number(data.juchuHeadid) : getValues('juchuHeadId');
+        const newJuchuHeadId =
+          data.copyTarget === COPY_TARGET.other ? Number(data.juchuHeadid) : getValues('juchuHeadId');
 
         const checkJuchuHeadId = await getJuchuHead(newJuchuHeadId);
         if (!checkJuchuHeadId) {
@@ -595,13 +616,13 @@ export const Order = (props: {
           setCopyOpen(false);
           setSnackBarMessage('コピーしました');
           setSnackBarOpen(true);
-          if (!data.juchuHeadid || Number(data.juchuHeadid) === getValues('juchuHeadId')) {
+          if (newJuchuHeadId === getValues('juchuHeadId')) {
             setIsJuchuKizaiLoading(true);
             const juchuKizaiHeadDatas = await getJuchuKizaiHeadList(getValues('juchuHeadId'));
             setEqHeaderList(juchuKizaiHeadDatas);
             setIsJuchuKizaiLoading(false);
           } else {
-            openOrFocusTab(`/order/${data.juchuHeadid}/view`);
+            openOrFocusTab(`/order/${newJuchuHeadId}/view`);
           }
         } else {
           setSnackBarMessage('コピーに失敗しました');
@@ -1314,6 +1335,7 @@ export const Order = (props: {
               selectedCount={selectedEqHeaders.length}
               handleCopyConfirmed={handleCopyConfirmed}
               handleCloseCopyDialog={handleCloseCopyDialog}
+              lock={lock}
             />
           </Dialog>
           <AccordionDetails sx={{ padding: 0 }}>

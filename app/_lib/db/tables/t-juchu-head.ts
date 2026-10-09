@@ -63,6 +63,30 @@ export const insertJuchuHead = async (data: JuchuHead) => {
 };
 
 /**
+ * 受注ヘッダー情報新規追加（トランザクション用）
+ * 呼び出し元のトランザクションに参加させたい場合はこちらを使う。
+ * @param data 受注ヘッダーデータ
+ * @param connection コネクション
+ */
+export const insertJuchuHeadWithTran = async (data: JuchuHead, connection: PoolClient) => {
+  const cols = Object.keys(data);
+  const values = Object.values(data);
+  const placeholders = values.map((_, i) => `$${i + 1}`).join(', ');
+
+  const query = `
+      INSERT INTO
+        ${SCHEMA}.t_juchu_head (${cols.join(',')})
+      VALUES
+        (${placeholders})
+    `;
+  try {
+    await connection.query(query, values);
+  } catch (e) {
+    throw new Error('[insertJuchuHeadWithTran] DBエラー:', { cause: e });
+  }
+};
+
+/**
  * 受注ヘッダー情報更新
  * @param data 受注ヘッダーデータ
  * @returns 正誤

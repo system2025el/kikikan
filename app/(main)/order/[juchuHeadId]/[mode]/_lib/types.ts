@@ -160,18 +160,47 @@ export type LocsDialogValues = {
 };
 
 /**
+ * コピー先
+ * self: この伝票、new: 新規伝票を作成、other: 受注番号を指定
+ */
+export const COPY_TARGET = {
+  self: 'self',
+  new: 'new',
+  other: 'other',
+} as const;
+
+/**
  * コピーダイアログ
  * 出庫日・入庫日は年月日のみ（時刻は0:00固定）で1つずつ。コピー先はYARDで作成する
+ * 顧客・公演名は新規伝票を作成する場合のみ使う
  */
 export const CopyDialogSchema = z
   .object({
+    copyTarget: z.enum([COPY_TARGET.self, COPY_TARGET.new, COPY_TARGET.other]),
     juchuHeadid: z.string().optional(),
+    kokyaku: z.object({
+      kokyakuId: z.number().nullable(),
+      kokyakuNam: z.string(),
+    }),
+    koenNam: z.string().max(40, { message: validationMessages.maxStringLength(40) }),
     headNam: z
       .string()
       .max(50, { message: validationMessages.maxStringLength(50) })
       .nullable(),
     shukoDat: z.date().nullable(),
     nyukoDat: z.date().nullable(),
+  })
+  .refine((d) => d.copyTarget !== COPY_TARGET.other || !!d.juchuHeadid, {
+    path: ['juchuHeadid'],
+    message: validationMessages.required(),
+  })
+  .refine((d) => d.copyTarget !== COPY_TARGET.new || d.kokyaku.kokyakuId !== null, {
+    path: ['kokyaku.kokyakuNam'],
+    message: validationMessages.required(),
+  })
+  .refine((d) => d.copyTarget !== COPY_TARGET.new || d.koenNam.trim() !== '', {
+    path: ['koenNam'],
+    message: validationMessages.required(),
   })
   .refine((d) => d.shukoDat !== null, { path: ['shukoDat'], message: validationMessages.required() })
   .refine((d) => d.nyukoDat !== null, { path: ['nyukoDat'], message: validationMessages.required() })
