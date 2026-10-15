@@ -120,12 +120,9 @@ const WORKING_DELETE_ITEMS_DEFAULT = ['入庫実績', 'コンテナ実績', '出
 /**
  * 出庫作業中に日時を変えたとき、削除される実績の説明（メイン受注機材明細）
  * コンテナの出庫実績は出庫日時を変えても日時だけ更新し、出庫場所をなくした場合だけその場所の分を削除する
+ * 出庫場所が変わった機材の出庫実績は削除せず、元の場所に受注削除として残すので含めない
  */
-export const WORKING_DELETE_ITEMS_MAIN = [
-  '入庫実績',
-  '出庫場所が変更された機材の実績',
-  '出庫場所をなくした場合の、その場所のコンテナ実績',
-];
+export const WORKING_DELETE_ITEMS_MAIN = ['入庫実績', '出庫場所をなくした場合の、その場所のコンテナ実績'];
 
 export const WorkingConfirmDialog = ({
   open,

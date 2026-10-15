@@ -13,7 +13,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { grey, lightBlue, red } from '@mui/material/colors';
+import { grey, lightBlue } from '@mui/material/colors';
 import { usePathname, useRouter } from 'next/navigation';
 import { Dispatch, SetStateAction, useState } from 'react';
 
@@ -141,16 +141,14 @@ export const ShukoDetailTable = (props: {
                 sx={{
                   whiteSpace: 'nowrap',
                   // 未保存を最優先（予定数0・読取0だと差異0で「済」になってしまうため。移動明細と同じ順番）
-                  // 次に受注から削除された行を、通常の過剰と区別して強調する
+                  // 受注削除の行は背景を変えず、機材名を赤文字にする
                   backgroundColor: !row.saveFlag
                     ? statusColors.unsaved
-                    : row.juchuMeisaiDelFlg === 1
-                      ? statusColors.deleted
-                      : row.diff === 0 /*&& row.planQty !== 0 && row.ctnFlg !== 1*/
-                        ? statusColors.completed
-                        : isCtn
-                          ? statusColors.ctn
-                          : 'white',
+                    : row.diff === 0 /*&& row.planQty !== 0 && row.ctnFlg !== 1*/
+                      ? statusColors.completed
+                      : isCtn
+                        ? statusColors.ctn
+                        : 'white',
                 }}
               >
                 {ctnEditable && (
@@ -169,14 +167,16 @@ export const ShukoDetailTable = (props: {
                   sx={{
                     cursor: row.saveFlag ? 'pointer' : 'default',
                     '&:hover': { backgroundColor: dispColors.hover },
+                    // 受注削除の行は機材名を赤文字にする（HT・ゲートと同じ見せ方）
+                    color: row.juchuMeisaiDelFlg === 1 ? statusColors.deleted : undefined,
                   }}
                 >
                   {row.kizaiNam}
                   {row.juchuMeisaiDelFlg === 1 && (
                     <Typography
                       component="span"
-                      // 行の背景（赤）の上でも読めるよう、濃い赤にする
-                      sx={{ ml: 1, color: red[900], fontWeight: 'bold', fontSize: 'inherit' }}
+                      // 「受注削除」の文字は Web だけ（HT・ゲートは機材名の赤文字だけ）
+                      sx={{ ml: 1, color: statusColors.deleted, fontWeight: 'bold', fontSize: 'inherit' }}
                     >
                       受注削除
                     </Typography>
@@ -185,9 +185,8 @@ export const ShukoDetailTable = (props: {
                 <TableCell
                   align="right"
                   sx={{
-                    // 未保存の行・受注削除の行は差異の色を付けない（行の背景色と重なって見分けにくいため）
-                    backgroundColor:
-                      row.diff !== 0 && row.saveFlag && row.juchuMeisaiDelFlg !== 1 ? lightBlue[100] : 'inherit',
+                    // 未保存の行は差異の色を付けない（行の背景色と重なって見分けにくいため）
+                    backgroundColor: row.diff !== 0 && row.saveFlag ? lightBlue[100] : 'inherit',
                     borderLeft: '1px solid',
                     borderLeftColor: grey[500],
                   }}

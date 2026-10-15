@@ -615,6 +615,7 @@ export const updateShukoCtnDenDat = async (
  * 受注削除で残した機材の出庫伝票（ピッキング・最終確認）の作業日時を更新（作業場所単位）
  * 出庫日時を変えたときに、受注明細の無い伝票も新しい日時に移して、新しい日時の出庫明細に「受注削除」として出す。
  * 通常の機材の伝票は画面の明細ごとに日時を更新しているため、受注明細が無いこの行は別に更新する必要がある。
+ * 「その作業場所の受注明細が無い」で判定する（明細はあっても出庫場所が違う＝送信とのすれ違いで残った行も含む）。
  * コンテナ（受注コンテナ明細を持つ）は updateShukoCtnDenDat で更新するので対象外
  * @param juchuHeadId 受注ヘッダーid
  * @param juchuKizaiHeadId 受注機材ヘッダーid
@@ -653,6 +654,7 @@ export const updateDeletedShukoDenDat = async (
           AND m.juchu_kizai_head_id = d.juchu_kizai_head_id
           AND m.juchu_kizai_meisai_id = d.juchu_kizai_meisai_id
           AND m.kizai_id = d.kizai_id
+          AND m.shozoku_id = d.sagyo_id
       )
   `;
 
@@ -942,6 +944,95 @@ export const deleteNyushukoDen = async (
 };
 
 /**
+ * 受注削除として予定数0で残す出庫伝票行の条件（d は対象の伝票行）
+ * ・出庫（ピッキング・最終確認）で実績・補正がある
+ * ・ピッキングの行は、同じ日時・場所の最終確認に実績・補正が無いときだけ
+ * deleteNyushukoDenKeepResulted（明細の削除）と moveShukoDenToDeletedMeisai（出庫場所の変更）で共通
+ * @returns SQL の条件式
+ */
+const shukoKeepCondition = () => `
+    d.sagyo_kbn_id IN (${SAGYO_KBN_ID.shukoPicking}, ${SAGYO_KBN_ID.shukoConfirmation})
+    AND COALESCE(d.result_qty, 0) + COALESCE(d.result_adj_qty, 0) > 0
+    AND NOT (
+      d.sagyo_kbn_id = ${SAGYO_KBN_ID.shukoPicking}
+      AND EXISTS (
+        SELECT
+          1
+        FROM
+          ${SCHEMA}.t_nyushuko_den AS c
+        WHERE
+          c.juchu_head_id = d.juchu_head_id
+          AND c.juchu_kizai_head_id = d.juchu_kizai_head_id
+          AND c.juchu_kizai_meisai_id = d.juchu_kizai_meisai_id
+          AND c.kizai_id = d.kizai_id
+          AND c.sagyo_kbn_id = ${SAGYO_KBN_ID.shukoConfirmation}
+          AND c.sagyo_den_dat = d.sagyo_den_dat
+          AND c.sagyo_id = d.sagyo_id
+          AND COALESCE(c.result_qty, 0) + COALESCE(c.result_adj_qty, 0) > 0
+      )
+    )
+  `;
+
+/**
+ * 出庫場所が変わった機材の、元の場所の実績ある出庫伝票を受注削除として残す（新しい明細idに付け替えて予定数0にする）
+ *
+ * 出庫場所を変えても受注機材明細（明細id・機材）は残るため、そのまま予定数0にしても「受注明細が無い＝受注削除」の
+ * 判定（v_nyushuko_den2_lst・updateDeletedShukoDenDat など）に乗らず、明細id単位で場所を見ずに動く処理
+ * （delShukoDen・delShukoResult・updShukoResult）にも巻き込まれる。未使用の明細idに付け替えることで、
+ * 明細を削除したときの受注削除と同じ扱いにする。
+ * 残す条件は deleteNyushukoDenKeepResulted と同じ。付け替えなかった行は呼び出し元で今までどおり削除する。
+ * 実績は moveShukoResultToDeletedMeisai で付け替える（この関数の後に呼ぶ）。
+ *
+ * @param data 対象の明細（受注ヘッダーid・受注機材ヘッダーid・変更前の明細id・機材id）
+ * @param oldSagyoId 変更前の出庫場所
+ * @param newMeisaiId 付け替え先の明細id（未使用のもの）
+ * @param updDat 更新日時
+ * @param updUser 更新者
+ * @param connection
+ */
+export const moveShukoDenToDeletedMeisai = async (
+  data: { juchu_head_id: number; juchu_kizai_head_id: number; juchu_kizai_meisai_id: number; kizai_id: number },
+  oldSagyoId: number,
+  newMeisaiId: number,
+  updDat: string,
+  updUser: string,
+  connection: PoolClient
+) => {
+  const query = `
+    UPDATE
+      ${SCHEMA}.t_nyushuko_den AS d
+    SET
+      juchu_kizai_meisai_id = $6
+      ,plan_qty = 0
+      ,upd_dat = $7
+      ,upd_user = $8
+    WHERE
+      d.juchu_head_id = $1
+      AND d.juchu_kizai_head_id = $2
+      AND d.juchu_kizai_meisai_id = $3
+      AND d.kizai_id = $4
+      AND d.sagyo_id = $5
+      AND ${shukoKeepCondition()}
+  `;
+
+  try {
+    const { rowCount } = await connection.query(query, [
+      data.juchu_head_id,
+      data.juchu_kizai_head_id,
+      data.juchu_kizai_meisai_id,
+      data.kizai_id,
+      oldSagyoId,
+      newMeisaiId,
+      updDat,
+      updUser,
+    ]);
+    return rowCount ?? 0;
+  } catch (e) {
+    throw new Error('[moveShukoDenToDeletedMeisai] DBエラー:', { cause: e });
+  }
+};
+
+/**
  * 入出庫伝票削除（出庫実績が残っている行は予定数0にして残す）
  *
  * 受注機材明細を削除しても、既にピッキングで読み取られている出庫伝票行は消さずに
@@ -965,32 +1056,7 @@ export const deleteNyushukoDenKeepResulted = async (
   connection: PoolClient
 ) => {
   const keys = [data.juchu_head_id, data.juchu_kizai_head_id, data.juchu_kizai_meisai_id, data.kizai_id];
-
-  // 予定数0にして残す行の条件（d は対象の伝票行）
-  // ・出庫（ピッキング・最終確認）で実績・補正がある
-  // ・ピッキングの行は、同じ日時・場所の最終確認に実績・補正が無いときだけ
-  const keepCondition = `
-    d.sagyo_kbn_id IN (${SAGYO_KBN_ID.shukoPicking}, ${SAGYO_KBN_ID.shukoConfirmation})
-    AND COALESCE(d.result_qty, 0) + COALESCE(d.result_adj_qty, 0) > 0
-    AND NOT (
-      d.sagyo_kbn_id = ${SAGYO_KBN_ID.shukoPicking}
-      AND EXISTS (
-        SELECT
-          1
-        FROM
-          ${SCHEMA}.t_nyushuko_den AS c
-        WHERE
-          c.juchu_head_id = d.juchu_head_id
-          AND c.juchu_kizai_head_id = d.juchu_kizai_head_id
-          AND c.juchu_kizai_meisai_id = d.juchu_kizai_meisai_id
-          AND c.kizai_id = d.kizai_id
-          AND c.sagyo_kbn_id = ${SAGYO_KBN_ID.shukoConfirmation}
-          AND c.sagyo_den_dat = d.sagyo_den_dat
-          AND c.sagyo_id = d.sagyo_id
-          AND COALESCE(c.result_qty, 0) + COALESCE(c.result_adj_qty, 0) > 0
-      )
-    )
-  `;
+  const keepCondition = shukoKeepCondition();
 
   // 残す行は予定数0にする
   const updateQuery = `
