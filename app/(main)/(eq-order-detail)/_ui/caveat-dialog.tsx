@@ -21,7 +21,8 @@ export const AlertDialog = ({
         <WarningIcon color="error" />
         <Box>{title}</Box>
       </DialogTitle>
-      <DialogContentText m={2} p={2}>
+      {/* 複数のエラーを改行で区切って渡せるよう、改行をそのまま表示する */}
+      <DialogContentText m={2} p={2} sx={{ whiteSpace: 'pre-line' }}>
         {message}
       </DialogContentText>
       <DialogActions>

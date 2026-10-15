@@ -98,6 +98,17 @@ export const sagyoKbnColors = {
   ido: 'rgba(171, 71, 188, 1)',
 };
 
+/**
+ * 在庫テーブルの色
+ */
+export const stockColors = {
+  /**
+   * 事前準備の期間（準備日〜出庫日の前日）
+   * 本番日種別の色（m_honbanbi_color）と見分けがつくよう、それらに無い茶系にしている
+   */
+  jizen: '#E8D5B7',
+};
+
 export const weeklyColors = {
   /**
    * 積み
