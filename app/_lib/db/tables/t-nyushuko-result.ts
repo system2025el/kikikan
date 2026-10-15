@@ -33,8 +33,67 @@ export const updateShukoResult = async (
 };
 
 /**
+ * 出庫場所が変わった機材の、元の場所の出庫実績（ピッキング・最終確認）を新しい明細idに付け替える
+ * moveShukoDenToDeletedMeisai で付け替えた伝票（同じ作業区分・作業日時・作業場所・機材で、新しい明細idのもの）が
+ * ある実績だけが対象。付け替えなかった実績は呼び出し元で今までどおり削除する。必ず伝票の付け替えの後に呼ぶこと
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param oldMeisaiId 変更前の明細id
+ * @param kizaiId 機材id
+ * @param oldSagyoId 変更前の出庫場所
+ * @param newMeisaiId 付け替え先の明細id
+ * @param connection
+ */
+export const moveShukoResultToDeletedMeisai = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  oldMeisaiId: number,
+  kizaiId: number,
+  oldSagyoId: number,
+  newMeisaiId: number,
+  connection: PoolClient
+) => {
+  const query = `
+    UPDATE
+      ${SCHEMA}.t_nyushuko_result AS r
+    SET
+      juchu_kizai_meisai_id = $6
+    WHERE
+      r.juchu_head_id = $1
+      AND r.juchu_kizai_head_id = $2
+      AND r.juchu_kizai_meisai_id = $3
+      AND r.kizai_id = $4
+      AND r.sagyo_id = $5
+      AND r.sagyo_kbn_id = ANY($7)
+      AND EXISTS (
+        SELECT
+          1
+        FROM
+          ${SCHEMA}.t_nyushuko_den AS d
+        WHERE
+          d.juchu_head_id = r.juchu_head_id
+          AND d.juchu_kizai_head_id = r.juchu_kizai_head_id
+          AND d.juchu_kizai_meisai_id = $6
+          AND d.kizai_id = r.kizai_id
+          AND d.sagyo_kbn_id = r.sagyo_kbn_id
+          AND d.sagyo_den_dat = r.sagyo_den_dat
+          AND d.sagyo_id = r.sagyo_id
+      )
+  `;
+
+  const values = [juchuHeadId, juchuKizaiHeadId, oldMeisaiId, kizaiId, oldSagyoId, newMeisaiId, [10, 20]];
+
+  try {
+    await connection.query(query, values);
+  } catch (e) {
+    throw new Error('[moveShukoResultToDeletedMeisai] DBエラー:', { cause: e });
+  }
+};
+
+/**
  * 受注削除で残した機材の出庫実績（ピッキング・最終確認）の作業日時を更新（作業場所単位）
- * updateDeletedShukoDenDat と組で使い、伝票と同じ新しい日時に移す（受注明細の無い実績が対象）
+ * updateDeletedShukoDenDat と組で使い、伝票と同じ新しい日時に移す
+ * （その作業場所の受注明細が無い実績が対象。明細はあっても出庫場所が違う＝送信とのすれ違いで残ったものも含む）
  * @param juchuHeadId 受注ヘッダーid
  * @param juchuKizaiHeadId 受注機材ヘッダーid
  * @param sagyoId 作業id（作業場所）
@@ -68,6 +127,7 @@ export const updateDeletedShukoResultDat = async (
           AND m.juchu_kizai_head_id = r.juchu_kizai_head_id
           AND m.juchu_kizai_meisai_id = r.juchu_kizai_meisai_id
           AND m.kizai_id = r.kizai_id
+          AND m.shozoku_id = r.sagyo_id
       )
   `;
 

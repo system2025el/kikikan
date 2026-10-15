@@ -1,6 +1,13 @@
--- 適用状況: ステージング 2026-10-06 / 本番 未適用
+-- 適用状況: ステージング 2026-10-06（2026-10-15 の出庫場所の照合も 2026-10-15 適用） / 本番 未適用
 -- =====================================================================
 -- v_nyushuko_den2_lst  末尾に juchu_meisai_del_flg（受注削除）の1列を追加（31→32列）
+--
+-- 2026-10-15 追加: 機材の判定で、出庫（sagyo_kbn_id 10/20）のときは受注明細の出庫場所（shozoku_id）が伝票の場所
+--   （nyushuko_basho_id）と同じものだけを「受注明細あり」とする。Web で出庫場所が変わった機材は、元の場所の実績ある
+--   伝票を受注削除として残す（Web は新しい明細idに付け替えるのでこの照合が無くても判定に乗るが、HT・ゲートの読取画面を
+--   開いたまま場所が変わって送信された行は、元の明細idのまま元の場所にできるため）。送信RPC nyushuko_send_20261009_1 の
+--   変更点7と同じ照合。入庫（30）は入庫場所と明細の場所が違うので対象外。列構成は変えない（CREATE OR REPLACE で当てられる）。
+--   2026-10-15 時点のステージングで、場所が違う出庫伝票は 2026-05 の受注 90953 の18行だけ（古いデータ）。
 --
 -- 背景: メイン受注機材明細で、出庫の実績・補正がある機材を削除すると、出庫伝票を予定数0で残す
 --       （出庫明細に「受注削除」として表示し、現物を取り除いてもらうため）。これまで Web だけが自前の
@@ -59,7 +66,7 @@ CREATE OR REPLACE VIEW public.v_nyushuko_den2_lst WITH (security_invoker = on) A
               WHERE c.juchu_head_id = v_nyushuko_den_lst.juchu_head_id AND c.juchu_kizai_head_id = v_nyushuko_den_lst.juchu_kizai_head_id AND c.juchu_kizai_meisai_id = v_nyushuko_den_lst.juchu_kizai_meisai_id AND c.kizai_id = v_nyushuko_den_lst.kizai_id AND c.shozoku_id = v_nyushuko_den_lst.nyushuko_basho_id)))::integer
             ELSE (NOT (EXISTS ( SELECT 1
                FROM t_juchu_kizai_meisai m
-              WHERE m.juchu_head_id = v_nyushuko_den_lst.juchu_head_id AND m.juchu_kizai_head_id = v_nyushuko_den_lst.juchu_kizai_head_id AND m.juchu_kizai_meisai_id = v_nyushuko_den_lst.juchu_kizai_meisai_id AND m.kizai_id = v_nyushuko_den_lst.kizai_id)))::integer
+              WHERE m.juchu_head_id = v_nyushuko_den_lst.juchu_head_id AND m.juchu_kizai_head_id = v_nyushuko_den_lst.juchu_kizai_head_id AND m.juchu_kizai_meisai_id = v_nyushuko_den_lst.juchu_kizai_meisai_id AND m.kizai_id = v_nyushuko_den_lst.kizai_id AND (v_nyushuko_den_lst.sagyo_kbn_id <> ALL (ARRAY[10, 20]) OR m.shozoku_id = v_nyushuko_den_lst.nyushuko_basho_id))))::integer
         END AS juchu_meisai_del_flg
    FROM v_nyushuko_den_lst
      LEFT JOIN v_get_juchu_kizai_head ON v_nyushuko_den_lst.juchu_head_id = v_get_juchu_kizai_head.juchu_head_id AND v_nyushuko_den_lst.nyushuko_dat = v_get_juchu_kizai_head.sagyo_den_dat AND v_nyushuko_den_lst.nyushuko_basho_id = v_get_juchu_kizai_head.sagyo_id AND v_nyushuko_den_lst.nyushuko_shubetu_id = v_get_juchu_kizai_head.nyushuko_shubetu_id AND v_nyushuko_den_lst.juchu_kizai_head_kbn = v_get_juchu_kizai_head.juchu_kizai_head_kbnv::bigint
