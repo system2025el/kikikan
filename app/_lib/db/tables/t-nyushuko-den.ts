@@ -100,17 +100,24 @@ export const updateNyushukoDen = async (data: NyushukoDen, connection: PoolClien
 
 /**
  * 入出庫伝票更新(受注機材明細画面の機材明細からの更新)
+ * 出庫（ピッキング・最終確認）は作業場所（sagyo_id）も条件にする。同じ明細id・機材の受注削除の行が別の場所に
+ * あることがあり（読取画面を開いたまま出庫場所が変わり、元の明細idのまま元の場所に送信された行）、作業場所を
+ * 見ないとその行まで新しい日時・場所に書き換えて主キーが重なるため。出庫の呼び出し元は場所の変わらない明細だけを渡す。
+ * 入庫は明細の所属から作業場所を決め直して書き換えるので、作業場所を条件にしない。
  * @param data 入出庫伝票データ
  * @returns
  */
 export const updateNyushukoDenFromKizaiMeisai = async (data: NyushukoDen, connection: PoolClient) => {
-  const whereKeys = [
+  const isShuko =
+    data.sagyo_kbn_id === SAGYO_KBN_ID.shukoPicking || data.sagyo_kbn_id === SAGYO_KBN_ID.shukoConfirmation;
+  const whereKeys: (keyof NyushukoDen)[] = [
     'juchu_head_id',
     'juchu_kizai_head_id',
     'juchu_kizai_meisai_id',
     'sagyo_kbn_id',
     'kizai_id',
-  ] as const;
+    ...(isShuko ? (['sagyo_id'] as const) : []),
+  ];
 
   const allKeys = Object.keys(data) as (keyof typeof data)[];
 
@@ -1200,6 +1207,9 @@ export const deleteEmptyNyushukoDen = async (
           AND m.juchu_kizai_head_id = d.juchu_kizai_head_id
           AND m.juchu_kizai_meisai_id = d.juchu_kizai_meisai_id
           AND m.kizai_id = d.kizai_id
+          -- 出庫は明細の出庫場所も照合する（明細はあっても出庫場所が変わった＝元の場所に残った受注削除の行を消せるように。
+          -- v_nyushuko_den2_lst の受注削除の判定と同じ）
+          AND (d.sagyo_kbn_id NOT IN (${SAGYO_KBN_ID.shukoPicking}, ${SAGYO_KBN_ID.shukoConfirmation}) OR m.shozoku_id = d.sagyo_id)
       )
       AND NOT EXISTS (
         SELECT

@@ -1986,6 +1986,8 @@ export const updShukoResult = async (
     juchuHeadId: d.juchuHeadId,
     juchuKizaiHeadId: d.juchuKizaiHeadId,
     juchuKizaiMeisaiId: d.juchuKizaiMeisaiId,
+    kizaiId: d.kizaiId,
+    shozokuId: d.shozokuId,
   }));
 
   try {
@@ -1994,6 +1996,8 @@ export const updShukoResult = async (
         data.juchuHeadId,
         data.juchuKizaiHeadId,
         data.juchuKizaiMeisaiId,
+        data.kizaiId,
+        data.shozokuId,
         shukoDat.toISOString(),
         connection
       );
