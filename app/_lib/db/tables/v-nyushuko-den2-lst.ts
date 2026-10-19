@@ -48,7 +48,9 @@ export const selectNyushukoDetail = async (
       n.ctn_flg,
       n.dsp_ord_num_meisai,
       n.indent_num,
-      n.mem2
+      n.mem2,
+      -- 受注から削除されたのに実績が残っている行（判定はビュー側。HT・ゲートと同じ列を使う）
+      n.juchu_meisai_del_flg
     FROM
       ${SCHEMA}.v_nyushuko_den2_lst as n
       LEFT JOIN ${SCHEMA}.t_juchu_kizai_meisai as m
@@ -63,8 +65,8 @@ export const selectNyushukoDetail = async (
       AND n.nyushuko_dat = $4
       AND n.sagyo_kbn_id = $5
     ORDER BY
-      juchu_kizai_head_id,
-      dsp_ord_num_meisai
+      n.juchu_kizai_head_id,
+      n.dsp_ord_num_meisai
   `;
 
   const values = [juchuHeadId, juchuKizaiHeadKbn.toString(), nyushukoBashoId, nyushukoDat, sagyoKbnId];

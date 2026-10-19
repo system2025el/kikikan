@@ -476,10 +476,18 @@ export const EquipmentKeepOrderDetail = (props: {
     if (data.juchuKizaiHeadId === 0) {
       // 新規受注機材ヘッダー追加
       try {
-        const newJuchuKizaiHeadId = await saveNewKeepJuchuKizaiHead(data, userNam);
-        router.replace(
-          `/eq-keep-order-detail/${data.juchuHeadId}/${newJuchuKizaiHeadId}/${data.oyaJuchuKizaiHeadId}/edit`
-        );
+        const result = await saveNewKeepJuchuKizaiHead(data, userNam);
+        if (result.ok) {
+          router.replace(
+            `/eq-keep-order-detail/${data.juchuHeadId}/${result.juchuKizaiHeadId}/${data.oyaJuchuKizaiHeadId}/edit`
+          );
+        } else {
+          // 受注画面を開いた後に親が出発解除された
+          setIsLoading(false);
+          setAlertTitle('親の明細が出発済みではありません');
+          setAlertMessage('出発解除された可能性があります。受注画面を開き直してください');
+          setAlertOpen(true);
+        }
       } catch (e) {
         setIsLoading(false);
         setSnackBarMessage('保存に失敗しました');

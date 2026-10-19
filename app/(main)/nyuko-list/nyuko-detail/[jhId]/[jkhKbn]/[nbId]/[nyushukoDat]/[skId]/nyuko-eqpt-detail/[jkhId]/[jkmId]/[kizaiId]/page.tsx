@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 
 import { getCurrentUser } from '@/app/(main)/_lib/funcs';
 import { permission } from '@/app/(main)/_lib/permission';
+import { NyushukoEqptDetailNotFound } from '@/app/(main)/_ui/nyushuko-not-found';
 
 import { getNyukoEqptDetail, getNyukoEqptDetailTable, getNyukoFixFlag } from './_lib/funcs';
 import { NyukoEqptDetailTableValues, NyukoEqptDetailValues } from './_lib/types';
@@ -65,7 +66,13 @@ const Page = async (props: {
     ),
   ]);
   if (!nyukoEqptDetailData) {
-    return <div>データが見つかりません</div>;
+    return (
+      <NyushukoEqptDetailNotFound
+        message="データが見つかりません"
+        backLabel="入庫明細"
+        backPath={`/nyuko-list/nyuko-detail/${params.jhId}/${params.jkhKbn}/${params.nbId}/${date}/${params.skId}`}
+      />
+    );
   }
 
   const fixFlag = await getNyukoFixFlag(

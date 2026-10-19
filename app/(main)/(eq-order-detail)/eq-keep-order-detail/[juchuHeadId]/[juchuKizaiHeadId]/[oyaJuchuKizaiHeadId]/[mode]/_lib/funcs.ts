@@ -9,6 +9,7 @@ import { selectMeisaiEqts } from '@/app/_lib/db/tables/m-kizai';
 import {
   deleteJuchuContainerMeisai,
   insertJuchuContainerMeisai,
+  selectCtnMaxMeisaiIdTx,
   updateJuchuContainerMeisai,
 } from '@/app/_lib/db/tables/t-juchu-ctn-meisai';
 import {
@@ -19,6 +20,7 @@ import {
 import {
   deleteJuchuKizaiMeisai,
   insertJuchuKizaiMeisai,
+  selectJuchuKizaiMeisaiMaxIdWithDenTx,
   updateJuchuKizaiMeisai,
 } from '@/app/_lib/db/tables/t-juchu-kizai-meisai';
 import {
@@ -66,12 +68,12 @@ import {
   delAllNyushukoResult,
   delAllShukoResult,
   delNyushukoCtnResult,
-  getJuchuContainerMeisaiMaxId,
   getJuchuKizaiHeadMaxId,
-  getJuchuKizaiMeisaiMaxId,
   getJuchuKizaiNyushuko,
+  isOyaShukoFixedTx,
   updJuchuKizaiNyushuko,
 } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
+import { SaveNewChildJuchuKizaiHeadResult } from '@/app/(main)/(eq-order-detail)/_lib/types';
 
 import { KeepJuchuContainerMeisaiValues, KeepJuchuKizaiHeadValues, KeepJuchuKizaiMeisaiValues } from './types';
 
@@ -81,11 +83,20 @@ import { KeepJuchuContainerMeisaiValues, KeepJuchuKizaiHeadValues, KeepJuchuKiza
  * @param userNam
  * @returns
  */
-export const saveNewKeepJuchuKizaiHead = async (data: KeepJuchuKizaiHeadValues, userNam: string) => {
+export const saveNewKeepJuchuKizaiHead = async (
+  data: KeepJuchuKizaiHeadValues,
+  userNam: string
+): Promise<SaveNewChildJuchuKizaiHeadResult> => {
   const connection = await pool.connect();
 
   try {
     await connection.query('BEGIN');
+
+    // 親が全場所出発済みかを確かめ直す（受注画面を開いた後に出発解除されていたら作らない）
+    if (!(await isOyaShukoFixedTx(data.juchuHeadId, data.oyaJuchuKizaiHeadId, connection))) {
+      await connection.query('ROLLBACK');
+      return { ok: false, reason: 'oyaNotFixed' };
+    }
 
     const maxId = await getJuchuKizaiHeadMaxId(data.juchuHeadId);
     const newJuchuKizaiHeadId = maxId ? maxId.juchu_kizai_head_id + 1 : 1;
@@ -129,7 +140,7 @@ export const saveNewKeepJuchuKizaiHead = async (data: KeepJuchuKizaiHeadValues, 
 
     await revalidatePath('/eqpt-order-list');
 
-    return newJuchuKizaiHeadId;
+    return { ok: true, juchuKizaiHeadId: newJuchuKizaiHeadId };
   } catch (e) {
     if (e instanceof Error) {
       console.error(`[ERROR] ${e.message}`);
@@ -210,9 +221,9 @@ export const saveKeepJuchuKizai = async (
       checkJuchuKizaiMeisai ||
       checkJuchuContainerMeisai
     ) {
-      // 受注機材明細id最大値
-      const juchuKizaiMeisaiMaxId = await getJuchuKizaiMeisaiMaxId(data.juchuHeadId, data.juchuKizaiHeadId);
-      let newKeepJuchuKizaiMeisaiId = juchuKizaiMeisaiMaxId ? juchuKizaiMeisaiMaxId.juchu_kizai_meisai_id + 1 : 1;
+      // 受注機材明細id最大値（メイン明細と同じく入出庫伝票の明細idも含める。送信RPCが作った明細の無い伝票と重ならないように）
+      let newKeepJuchuKizaiMeisaiId =
+        (await selectJuchuKizaiMeisaiMaxIdWithDenTx(data.juchuHeadId, data.juchuKizaiHeadId, connection)) + 1;
       // 新規機材に明細id割り振り
       const newKeepJuchuKizaiMeisaiData = keepJuchuKizaiMeisaiList.map((data) =>
         data.juchuKizaiMeisaiId === 0 && !data.delFlag
@@ -244,11 +255,10 @@ export const saveKeepJuchuKizai = async (
         await updKeepJuchuKizaiMeisai(updateKeepJuchuKizaiMeisaiData, userNam, connection);
       }
 
-      // 受注コンテナ明細id最大値
-      const juchuContainerMeisaiMaxId = await getJuchuContainerMeisaiMaxId(data.juchuHeadId, data.juchuKizaiHeadId);
-      let newKeepJuchuContainerMeisaiId = juchuContainerMeisaiMaxId
-        ? juchuContainerMeisaiMaxId.juchu_kizai_meisai_id + 1
-        : 1;
+      // 受注コンテナ明細id最大値（出庫明細・送信RPCと同じく、受注コンテナ明細とコンテナの入出庫伝票の最大値。
+      // 送信RPCが作った明細の無いコンテナ伝票と重ならないように）
+      let newKeepJuchuContainerMeisaiId =
+        (await selectCtnMaxMeisaiIdTx(data.juchuHeadId, data.juchuKizaiHeadId, connection)) + 1;
       // 新規コンテナに明細id割り振り
       const newKeepJuchuContainerMeisaiData = keepJuchuContainerMeisaiList.map((data) =>
         data.juchuKizaiMeisaiId === 0 && !data.delFlag
@@ -2055,6 +2065,8 @@ export const updShukoResult = async (
     juchuHeadId: d.juchuHeadId,
     juchuKizaiHeadId: d.juchuKizaiHeadId,
     juchuKizaiMeisaiId: d.juchuKizaiMeisaiId,
+    kizaiId: d.kizaiId,
+    shozokuId: d.shozokuId,
   }));
 
   try {
@@ -2063,6 +2075,8 @@ export const updShukoResult = async (
         data.juchuHeadId,
         data.juchuKizaiHeadId,
         data.juchuKizaiMeisaiId,
+        data.kizaiId,
+        data.shozokuId,
         shukoDat.toISOString(),
         connection
       );

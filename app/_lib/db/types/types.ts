@@ -3722,6 +3722,7 @@ export type Database = {
           juchu_kizai_head_idv: string | null;
           juchu_kizai_head_kbnv: string | null;
           juchu_kizai_meisai_id: number | null;
+          juchu_meisai_del_flg: number | null;
           kizai_id: number | null;
           kizai_mem: string | null;
           kizai_nam: string | null;

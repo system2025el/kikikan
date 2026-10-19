@@ -40,7 +40,22 @@ export type ShukoDetailTableValues = {
   dspOrdNumMeisai: number | null;
   indentNum: number;
   mem2: string | null;
+  /** 受注から削除されたのに実績が残っている行（1のとき受注明細が存在しない） */
+  juchuMeisaiDelFlg: number;
+  /** 保存済み（false は画面で追加したまだ保存していないコンテナ） */
+  saveFlag: boolean;
+  /** 画面で削除したコンテナ（保存すると削除される） */
+  delFlag: boolean;
 };
+
+/** コンテナ選択ダイアログの選択肢 */
+export type ShukoCtnSelectionValues = {
+  kizaiId: number;
+  kizaiNam: string;
+};
+
+/** コンテナ保存の結果（失敗したときは画面に出す文言） */
+export type ShukoCtnSaveResult = { ok: true; data: ShukoDetailTableValues[] } | { ok: false; message: string };
 
 export type NyukoValues = {
   juchuKizaiHeadId: number;

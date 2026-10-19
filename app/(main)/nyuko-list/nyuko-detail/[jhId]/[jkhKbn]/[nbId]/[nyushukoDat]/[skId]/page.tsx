@@ -6,6 +6,7 @@ import { SAGYO_KBN_ID } from '@/app/_lib/constants';
 import { getCurrentUser } from '@/app/(main)/_lib/funcs';
 import { getNyushukoFixState } from '@/app/(main)/_lib/nyushuko-fix-state';
 import { permission } from '@/app/(main)/_lib/permission';
+import { NyushukoDetailNotFound } from '@/app/(main)/_ui/nyushuko-not-found';
 
 import { getNyukoDetail, getNyukoDetailTable } from './_lib/funcs';
 import { NyukoDetailValues } from './_lib/types';
@@ -77,7 +78,7 @@ const Page = async (props: {
   ]);
 
   if (!nyukoDetailData || !nyukoDetailTableData) {
-    return <div>入庫明細が見つかりません。</div>;
+    return <NyushukoDetailNotFound message="入庫明細が見つかりません。" />;
   }
 
   // 合体している全ヘッダーの到着状況（なし／一部／全部）

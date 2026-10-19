@@ -52,6 +52,7 @@ import { IsDirtyAlertDialog, useDirty } from '@/app/(main)/_ui/dirty-context';
 import { HonbanbiCalendar } from '@/app/(main)/_ui/honbanbi-calendar';
 import { Loading, LoadingOverlay } from '@/app/(main)/_ui/loading';
 import { SelectTable } from '@/app/(main)/_ui/table';
+import { getOyaShukoFixed } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
 import { HonbanbiColorValues } from '@/app/(main)/(eq-order-detail)/eq-keep-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[oyaJuchuKizaiHeadId]/[mode]/_lib/types';
 import { WillDeleteAlertDialog } from '@/app/(main)/(masters)/_ui/dialogs';
 import { equipmentRows, users, vehicleHeaders, vehicleRows } from '@/app/(main)/order/[juchuHeadId]/[mode]/_lib/data';
@@ -61,6 +62,7 @@ import { useUnsavedChangesWarning } from '../../../../_lib/hook';
 import {
   addJuchuHead,
   copyJuchuKizaiHeadMeisai,
+  copyJuchuKizaiHeadMeisaiToNewJuchu,
   delJuchuHead,
   delJuchuMeisai,
   getJuchuHead,
@@ -70,6 +72,7 @@ import {
   updJuchuHead,
 } from '../_lib/funcs';
 import {
+  COPY_TARGET,
   CopyDialogValue,
   EqTableValues,
   KokyakuValues,
@@ -439,8 +442,8 @@ export const Order = (props: {
           if (
             selectEqHeader &&
             selectEqHeader.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.normal &&
-            (selectEqHeader.kicsShukoDat ? selectEqHeader.kicsShukoFixFlg === 1 : true) &&
-            (selectEqHeader.yardShukoDat ? selectEqHeader.yardShukoFixFlg === 1 : true)
+            // 出発状況は画面を開いた後に変わる（別タブでの出発・出発解除）ため、画面の値ではなく DB の最新の値で確かめる
+            (await getOyaShukoFixed(props.juchuHeadData.juchuHeadId, selectEqHeader.juchuKizaiHeadId))
           ) {
             const path = `/eq-return-order-detail/${props.juchuHeadData.juchuHeadId}/0/${selectEqHeader.juchuKizaiHeadId}/edit`;
 
@@ -477,8 +480,8 @@ export const Order = (props: {
           if (
             selectEqHeader &&
             selectEqHeader.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.normal &&
-            (selectEqHeader.kicsShukoDat ? selectEqHeader.kicsShukoFixFlg === 1 : true) &&
-            (selectEqHeader.yardShukoDat ? selectEqHeader.yardShukoFixFlg === 1 : true)
+            // 出発状況は画面を開いた後に変わる（別タブでの出発・出発解除）ため、画面の値ではなく DB の最新の値で確かめる
+            (await getOyaShukoFixed(props.juchuHeadData.juchuHeadId, selectEqHeader.juchuKizaiHeadId))
           ) {
             const path = `/eq-keep-order-detail/${props.juchuHeadData.juchuHeadId}/0/${selectEqHeader.juchuKizaiHeadId}/edit`;
 
@@ -577,8 +580,27 @@ export const Order = (props: {
       if (lockResult) {
         // ユーザー名
         const userNam = user.name;
+
+        // 新規伝票を作成してコピー
+        if (data.copyTarget === COPY_TARGET.new) {
+          const newJuchuHeadId = await copyJuchuKizaiHeadMeisaiToNewJuchu(selectedEqHeaders, data, userNam);
+
+          if (newJuchuHeadId) {
+            setCopyOpen(false);
+            setSnackBarMessage(`コピーしました（受注番号: ${newJuchuHeadId}）`);
+            setSnackBarOpen(true);
+            openOrFocusTab(`/order/${newJuchuHeadId}/edit`);
+          } else {
+            setSnackBarMessage('コピーに失敗しました');
+            setSnackBarOpen(true);
+          }
+          setIsProcessing(false);
+          return true;
+        }
+
         // 受注ヘッダーid
-        const newJuchuHeadId = data.juchuHeadid ? Number(data.juchuHeadid) : getValues('juchuHeadId');
+        const newJuchuHeadId =
+          data.copyTarget === COPY_TARGET.other ? Number(data.juchuHeadid) : getValues('juchuHeadId');
 
         const checkJuchuHeadId = await getJuchuHead(newJuchuHeadId);
         if (!checkJuchuHeadId) {
@@ -594,13 +616,13 @@ export const Order = (props: {
           setCopyOpen(false);
           setSnackBarMessage('コピーしました');
           setSnackBarOpen(true);
-          if (!data.juchuHeadid || Number(data.juchuHeadid) === getValues('juchuHeadId')) {
+          if (newJuchuHeadId === getValues('juchuHeadId')) {
             setIsJuchuKizaiLoading(true);
             const juchuKizaiHeadDatas = await getJuchuKizaiHeadList(getValues('juchuHeadId'));
             setEqHeaderList(juchuKizaiHeadDatas);
             setIsJuchuKizaiLoading(false);
           } else {
-            openOrFocusTab(`/order/${data.juchuHeadid}/view`);
+            openOrFocusTab(`/order/${newJuchuHeadId}/view`);
           }
         } else {
           setSnackBarMessage('コピーに失敗しました');
@@ -1313,6 +1335,7 @@ export const Order = (props: {
               selectedCount={selectedEqHeaders.length}
               handleCopyConfirmed={handleCopyConfirmed}
               handleCloseCopyDialog={handleCloseCopyDialog}
+              lock={lock}
             />
           </Dialog>
           <AccordionDetails sx={{ padding: 0 }}>

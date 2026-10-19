@@ -121,6 +121,42 @@ export const selectChildJuchuKizaiHeadConfirm = async (juchuHeadId: number, juch
 };
 
 /**
+ * 子受注機材ヘッダー（返却・キープ）の件数取得（トランザクション内）
+ * 出発解除の処理で、画面で確認した後に作られた子伝票も含めて確かめ直すために使う
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadIds 親の受注機材ヘッダーid
+ * @param connection
+ * @returns 子受注機材ヘッダーの件数
+ */
+export const selectChildJuchuKizaiHeadCountTx = async (
+  juchuHeadId: number,
+  juchuKizaiHeadIds: number[],
+  connection: PoolClient
+) => {
+  const query = `
+    SELECT
+      COUNT(*)::integer AS cnt
+    FROM
+      ${SCHEMA}.t_juchu_kizai_head
+    WHERE
+      juchu_head_id = $1
+      AND oya_juchu_kizai_head_id = ANY($2::int[])
+      AND juchu_kizai_head_kbn <> $3
+  `;
+
+  try {
+    const { rows } = await connection.query<{ cnt: number }>(query, [
+      juchuHeadId,
+      juchuKizaiHeadIds,
+      JUCHU_KIZAI_HEAD_KBN.normal,
+    ]);
+    return rows[0]?.cnt ?? 0;
+  } catch (e) {
+    throw new Error('[selectChildJuchuKizaiHeadCountTx] DBエラー:', { cause: e });
+  }
+};
+
+/**
  * 受注本番日数取得
  * @param juchuHeadId 受注ヘッダーid
  * @param juchuKizaiHeadId 受注機材ヘッダーid

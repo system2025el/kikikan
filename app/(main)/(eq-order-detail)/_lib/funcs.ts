@@ -4,6 +4,7 @@ import dayjs from 'dayjs';
 import { PoolClient, QueryResult } from 'pg';
 
 import { BASHO_ID, NYUSHUKO_SHUBETU_ID, SAGYO_KBN_ID } from '@/app/_lib/constants';
+import pool from '@/app/_lib/db/postgres';
 import { selectColor } from '@/app/_lib/db/tables/m-honbanbi-color';
 import { selectMeisaiEqts } from '@/app/_lib/db/tables/m-kizai';
 import { selectKokyaku } from '@/app/_lib/db/tables/m-kokyaku';
@@ -20,6 +21,7 @@ import {
   deleteJuchuKizaiNyushuko,
   insertJuchuKizaiNyushuko,
   selectJuchuKizaiNyushuko,
+  selectJuchuKizaiNyushukoBashoIdsTx,
   selectJuchuKizaiNyushukoConfirmSingle,
   updateJuchuKizaiNyushuko,
 } from '@/app/_lib/db/tables/t-juchu-kizai-nyushuko';
@@ -36,13 +38,17 @@ import {
   deleteAllNyushukoDen,
   insertNyushukoDen,
 } from '@/app/_lib/db/tables/t-nyushuko-den';
-import { selectNyushukoFixFlag } from '@/app/_lib/db/tables/t-nyushuko-fix';
+import { selectFixedSagyoIdsTx, selectNyushukoFixFlag } from '@/app/_lib/db/tables/t-nyushuko-fix';
 import {
   deleteAllNyukoResult,
   deleteAllNyushukoResult,
   deleteAllShukoResult,
 } from '@/app/_lib/db/tables/t-nyushuko-result';
-import { selectJuchuContainerMeisai, selectOyaJuchuContainerMeisai } from '@/app/_lib/db/tables/v-juchu-ctn-meisai';
+import {
+  selectJuchuContainerMeisai,
+  selectJuchuContainerMeisaiTx,
+  selectOyaJuchuContainerMeisai,
+} from '@/app/_lib/db/tables/v-juchu-ctn-meisai';
 import { selectChildJuchuKizaiHead } from '@/app/_lib/db/tables/v-juchu-kizai-head-lst';
 import { selectOyaJuchuKizaiMeisai } from '@/app/_lib/db/tables/v-juchu-kizai-meisai';
 import { selectShukoStateConfirm } from '@/app/_lib/db/tables/v-nyushuko-den2';
@@ -153,6 +159,56 @@ export const getChildJuchuKizaiHead = async (juchuHeadId: number, juchuKizaiHead
  * 受注機材ヘッダーid最大値取得
  * @returns 受注機材ヘッダーid最大値
  */
+/**
+ * 親の受注機材ヘッダーが、設定されている出庫場所すべてで出発済みかを確認（トランザクション内）
+ * 返却・キープは親が出発済みでないと作れない。受注画面の判定は画面を開いたときの値なので、保存時にもう一度確かめる
+ * @param juchuHeadId 受注ヘッダーid
+ * @param oyaJuchuKizaiHeadId 親の受注機材ヘッダーid
+ * @param connection
+ * @returns 全場所出発済みなら true
+ */
+export const isOyaShukoFixedTx = async (juchuHeadId: number, oyaJuchuKizaiHeadId: number, connection: PoolClient) => {
+  const shukoBashoIds = await selectJuchuKizaiNyushukoBashoIdsTx(
+    juchuHeadId,
+    oyaJuchuKizaiHeadId,
+    NYUSHUKO_SHUBETU_ID.shuko,
+    connection
+  );
+  const departedBashoIds = await selectFixedSagyoIdsTx(
+    juchuHeadId,
+    oyaJuchuKizaiHeadId,
+    SAGYO_KBN_ID.shukoConfirmed,
+    connection
+  );
+  return shukoBashoIds.length > 0 && shukoBashoIds.every((id) => departedBashoIds.includes(id));
+};
+
+/**
+ * 親の受注機材ヘッダーが、設定されている出庫場所すべてで出発済みかを取得
+ * 受注画面の返却入力・キープ入力ボタンで、画面を開いた後の出発解除も含めて確かめ直すために使う
+ * @param juchuHeadId 受注ヘッダーid
+ * @param oyaJuchuKizaiHeadId 親の受注機材ヘッダーid
+ * @returns 全場所出発済みなら true
+ */
+export const getOyaShukoFixed = async (juchuHeadId: number, oyaJuchuKizaiHeadId: number) => {
+  const connection = await pool.connect();
+  try {
+    return await isOyaShukoFixedTx(juchuHeadId, oyaJuchuKizaiHeadId, connection);
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
+    throw e;
+  } finally {
+    connection.release();
+  }
+};
+
 export const getJuchuKizaiHeadMaxId = async (juchuHeadId: number) => {
   try {
     const { data, error } = await selectJuchuKizaiHeadMaxId(juchuHeadId);
@@ -452,6 +508,50 @@ export const getJuchuContainerMeisaiMaxId = async (juchuHeadId: number, juchuKiz
       throw error;
     }
     return data;
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
+    throw e;
+  }
+};
+
+/**
+ * 受注コンテナ明細リスト取得（トランザクション内。同じトランザクションで変更した内容を反映して読む）
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param connection
+ * @returns 受注コンテナ明細リスト
+ */
+export const getJuchuContainerMeisaiTx = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  connection: PoolClient
+): Promise<JuchuContainerMeisaiValues[]> => {
+  try {
+    const containerData = await selectJuchuContainerMeisaiTx(juchuHeadId, juchuKizaiHeadId, connection);
+
+    return containerData.map((d) => ({
+      juchuHeadId: d.juchu_head_id ?? 0,
+      juchuKizaiHeadId: d.juchu_kizai_head_id ?? 0,
+      juchuKizaiMeisaiId: d.juchu_kizai_meisai_id ?? 0,
+      kizaiId: d.kizai_id ?? 0,
+      kizaiNam: d.kizai_nam ?? '',
+      planKicsKizaiQty: d.kics_plan_kizai_qty ?? 0,
+      planYardKizaiQty: d.yard_plan_kizai_qty ?? 0,
+      planQty: (d.kics_plan_kizai_qty ?? 0) + (d.yard_plan_kizai_qty ?? 0),
+      mem: d.mem,
+      dspOrdNum: d.dsp_ord_num ?? 0,
+      indentNum: 0,
+      delFlag: false,
+      saveFlag: true,
+      selected: false,
+    }));
   } catch (e) {
     if (e instanceof Error) {
       console.error(`[ERROR] ${e.message}`);

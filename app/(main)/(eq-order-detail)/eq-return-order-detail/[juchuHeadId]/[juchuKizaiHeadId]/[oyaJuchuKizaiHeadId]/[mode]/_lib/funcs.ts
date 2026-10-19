@@ -9,6 +9,7 @@ import { selectMeisaiEqts } from '@/app/_lib/db/tables/m-kizai';
 import {
   deleteJuchuContainerMeisai,
   insertJuchuContainerMeisai,
+  selectCtnMaxMeisaiIdTx,
   updateJuchuContainerMeisai,
 } from '@/app/_lib/db/tables/t-juchu-ctn-meisai';
 import {
@@ -20,6 +21,7 @@ import {
   deleteJuchuKizaiMeisai,
   insertJuchuKizaiMeisai,
   selectJuchuKizaiMeisaiKizaiTanka,
+  selectJuchuKizaiMeisaiMaxIdWithDenTx,
   updateJuchuKizaiMeisai,
 } from '@/app/_lib/db/tables/t-juchu-kizai-meisai';
 import {
@@ -55,12 +57,12 @@ import {
   delAllNyushukoDen,
   delNyushukoCtnResult,
   delSiyouHonbanbi,
-  getJuchuContainerMeisaiMaxId,
   getJuchuKizaiHeadMaxId,
-  getJuchuKizaiMeisaiMaxId,
   getJuchuKizaiNyushuko,
+  isOyaShukoFixedTx,
   updJuchuKizaiNyushuko,
 } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
+import { SaveNewChildJuchuKizaiHeadResult } from '@/app/(main)/(eq-order-detail)/_lib/types';
 import { JuchuKizaiHonbanbiValues } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';
 
 import { ReturnJuchuContainerMeisaiValues, ReturnJuchuKizaiHeadValues, ReturnJuchuKizaiMeisaiValues } from './types';
@@ -76,7 +78,7 @@ export const saveNewReturnJuchuKizaiHead = async (
   data: ReturnJuchuKizaiHeadValues,
   updateDateRange: string[],
   userNam: string
-) => {
+): Promise<SaveNewChildJuchuKizaiHeadResult> => {
   const connection = await pool.connect();
 
   const maxId = await getJuchuKizaiHeadMaxId(data.juchuHeadId);
@@ -84,6 +86,12 @@ export const saveNewReturnJuchuKizaiHead = async (
 
   try {
     await connection.query('BEGIN');
+
+    // 親が全場所出発済みかを確かめ直す（受注画面を開いた後に出発解除されていたら作らない）
+    if (!(await isOyaShukoFixedTx(data.juchuHeadId, data.oyaJuchuKizaiHeadId, connection))) {
+      await connection.query('ROLLBACK');
+      return { ok: false, reason: 'oyaNotFixed' };
+    }
 
     // 受注機材ヘッダー追加
     await addReturnJuchuKizaiHead(newJuchuKizaiHeadId, data, userNam, connection);
@@ -150,7 +158,7 @@ export const saveNewReturnJuchuKizaiHead = async (
 
     await revalidatePath('/eqpt-order-list');
 
-    return newJuchuKizaiHeadId;
+    return { ok: true, juchuKizaiHeadId: newJuchuKizaiHeadId };
   } catch (e) {
     if (e instanceof Error) {
       console.error(`[ERROR] ${e.message}`);
@@ -252,9 +260,9 @@ export const saveReturnJuchuKizai = async (
 
     // 受注明細、入庫伝票、入庫実績
     if (checkKicsDat || checkYardDat || checkJuchuKizaiMeisai || checkJuchuContainerMeisai) {
-      // 受注機材明細id最大値
-      const juchuKizaiMeisaiMaxId = await getJuchuKizaiMeisaiMaxId(data.juchuHeadId, data.juchuKizaiHeadId);
-      let newReturnJuchuKizaiMeisaiId = juchuKizaiMeisaiMaxId ? juchuKizaiMeisaiMaxId.juchu_kizai_meisai_id + 1 : 1;
+      // 受注機材明細id最大値（メイン明細と同じく入出庫伝票の明細idも含める。送信RPCが作った明細の無い伝票と重ならないように）
+      let newReturnJuchuKizaiMeisaiId =
+        (await selectJuchuKizaiMeisaiMaxIdWithDenTx(data.juchuHeadId, data.juchuKizaiHeadId, connection)) + 1;
       // 新規機材に明細id割り振り
       const newReturnJuchuKizaiMeisaiData = returnJuchuKizaiMeisaiList.map((data) =>
         data.juchuKizaiMeisaiId === 0 && !data.delFlag
@@ -290,11 +298,10 @@ export const saveReturnJuchuKizai = async (
         }
       }
 
-      // 受注コンテナ明細id最大値
-      const juchuContainerMeisaiMaxId = await getJuchuContainerMeisaiMaxId(data.juchuHeadId, data.juchuKizaiHeadId);
-      let newReturnJuchuContainerMeisaiId = juchuContainerMeisaiMaxId
-        ? juchuContainerMeisaiMaxId.juchu_kizai_meisai_id + 1
-        : 1;
+      // 受注コンテナ明細id最大値（出庫明細・送信RPCと同じく、受注コンテナ明細とコンテナの入出庫伝票の最大値。
+      // 送信RPCが作った明細の無いコンテナ伝票と重ならないように）
+      let newReturnJuchuContainerMeisaiId =
+        (await selectCtnMaxMeisaiIdTx(data.juchuHeadId, data.juchuKizaiHeadId, connection)) + 1;
       // 新規コンテナに明細id割り振り
       const newReturnJuchuContainerMeisaiData = returnJuchuContainerMeisaiList.map((data) =>
         data.juchuKizaiMeisaiId === 0 && !data.delFlag
