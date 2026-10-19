@@ -721,7 +721,7 @@ export const ShukoDetail = (props: {
           <WarningIcon color="error" />
           <Box>{alertTitle}</Box>
         </DialogTitle>
-        <DialogContentText m={2} p={2}>
+        <DialogContentText m={2} p={2} sx={{ whiteSpace: 'pre-line' }}>
           {alertMessage}
         </DialogContentText>
         <DialogActions>

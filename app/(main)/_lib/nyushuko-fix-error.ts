@@ -11,6 +11,8 @@ export const NYUSHUKO_FIX_ERROR = {
   diff: 'diff',
   /** 子伝票（返却・キープ）がある（出発解除時に DB から取り直して確認した結果） */
   hasChild: 'hasChild',
+  /** ピッキングに受注削除の行（実績が残っている）がある（出発時に DB から取り直して確認した結果） */
+  pickingDeleted: 'pickingDeleted',
   /** それ以外（DB エラーなど） */
   other: 'other',
 } as const;
@@ -66,6 +68,12 @@ export const getNyushukoFixErrorMessage = (
     return {
       title: '不足・過剰があります',
       message: '不足・過剰があるため、出発できません。画面を開き直してください',
+    };
+  }
+  if (action === 'departure' && reason === NYUSHUKO_FIX_ERROR.pickingDeleted) {
+    return {
+      title: 'ピッキングに受注削除があります',
+      message: 'ピッキングに受注削除の行が残っているため、出発できません。\nピッキングの実績をクリアしてください',
     };
   }
   if (action === 'departureRelease' && reason === NYUSHUKO_FIX_ERROR.hasChild) {

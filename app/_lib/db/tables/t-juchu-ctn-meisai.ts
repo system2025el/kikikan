@@ -259,6 +259,61 @@ export const upsertJuchuContainerMeisaiColumns = async (
 };
 
 /**
+ * 受注コンテナ明細の予定数・メモ更新（1つの場所の行）
+ * 行が無い（ほかの人が削除済み）ときは何もしない（作り直さない）
+ * @param data 受注ヘッダーid、受注機材ヘッダーid、受注機材明細id、機材id、所属id、予定数、メモ
+ * @param userNam ユーザー名
+ * @param connection
+ */
+export const updateJuchuContainerMeisaiPlanMem = async (
+  data: {
+    juchuHeadId: number;
+    juchuKizaiHeadId: number;
+    juchuKizaiMeisaiId: number;
+    kizaiId: number;
+    shozokuId: number;
+    planKizaiQty: number;
+    mem: string | null;
+  },
+  userNam: string,
+  connection: PoolClient
+) => {
+  const query = `
+    UPDATE
+      ${SCHEMA}.t_juchu_ctn_meisai
+    SET
+      plan_kizai_qty = $1,
+      mem = $2,
+      upd_dat = $3,
+      upd_user = $4
+    WHERE
+      juchu_head_id = $5
+      AND juchu_kizai_head_id = $6
+      AND juchu_kizai_meisai_id = $7
+      AND kizai_id = $8
+      AND shozoku_id = $9
+  `;
+
+  const values = [
+    data.planKizaiQty,
+    data.mem,
+    new Date().toISOString(),
+    userNam,
+    data.juchuHeadId,
+    data.juchuKizaiHeadId,
+    data.juchuKizaiMeisaiId,
+    data.kizaiId,
+    data.shozokuId,
+  ];
+
+  try {
+    await connection.query(query, values);
+  } catch (e) {
+    throw new Error('[updateJuchuContainerMeisaiPlanMem] DBエラー:', { cause: e });
+  }
+};
+
+/**
  * 受注コンテナ明細のメモ更新（1つの場所の行）
  * @param data 受注ヘッダーid、受注機材ヘッダーid、受注機材明細id、機材id、所属id、メモ
  * @param userNam ユーザー名

@@ -91,7 +91,7 @@ HT の `nyushuko_send_20260626_1` は、ゲートの修正前と「入庫チェ�
 - 再利用の探索では、修正前に HT が作った行（`dsp_ord_num` NULL・明細ID＝親の明細ID）も対象にする（途中まで送った返却が分かれないように）
 - `on conflict` で `dsp_ord_num` の NULL を埋めるのは**未到着の受注機材ヘッダー・作業場所だけ**。到着時に親から引かれていない行を後から紐づけると、到着解除で引いていない数量が親に戻り、親の入庫予定が増えるため
 
-関連するデータ補正 [`../db-data/staging-only/20260930-nyushuko-den-dsp-backfill.sql`](../db-data/staging-only/20260930-nyushuko-den-dsp-backfill.sql) は**この関数の後**に流してください（補正前に RPC を入れておけば、途中の返却も既存行の再利用でまとまります）。
+修正前に作られた行（`dsp_ord_num` NULL）を親の値で埋めるデータ補正 `20260930-nyushuko-den-dsp-backfill` も用意していましたが、流さないことにして 2026-10-19 に削除しました（`db-data/README.md` 参照）。
 
 ## 20261009: 入出庫送信RPC `nyushuko_send_20261009_1`（コンテナ管理を出庫側へ・受注削除）
 

@@ -4,10 +4,23 @@ import { PoolClient } from 'pg';
 
 import { SCHEMA } from '../schema';
 
+/**
+ * 出庫実績（ピッキング・最終確認）の作業日時を更新（明細・機材・作業場所単位）
+ * 作業場所と機材も条件にする（同じ明細idで別の場所に受注削除の行が残っていることがあり、その実績まで移さないため）
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param juchuKizaiMeisaiId 受注機材明細id
+ * @param kizaiId 機材id
+ * @param sagyoId 作業id（作業場所）
+ * @param shukoDat 新しい作業日時
+ * @param connection
+ */
 export const updateShukoResult = async (
   juchuHeadId: number,
   juchuKizaiHeadId: number,
   juchuKizaiMeisaiId: number,
+  kizaiId: number,
+  sagyoId: number,
   shukoDat: string,
   connection: PoolClient
 ) => {
@@ -21,9 +34,11 @@ export const updateShukoResult = async (
         AND juchu_kizai_head_id = $3
         AND juchu_kizai_meisai_id = $4
         AND sagyo_kbn_id = ANY($5)
+        AND kizai_id = $6
+        AND sagyo_id = $7
     `;
 
-  const values = [shukoDat, juchuHeadId, juchuKizaiHeadId, juchuKizaiMeisaiId, [10, 20]];
+  const values = [shukoDat, juchuHeadId, juchuKizaiHeadId, juchuKizaiMeisaiId, [10, 20], kizaiId, sagyoId];
 
   try {
     await connection.query(query, values);

@@ -11,6 +11,7 @@ import {
   selectJuchuContainerMeisaiRowsTx,
   selectMeisaiMaxDspOrdNumTx,
   updateJuchuContainerMeisaiMem,
+  updateJuchuContainerMeisaiPlanMem,
   upsertJuchuContainerMeisaiColumns,
 } from '@/app/_lib/db/tables/t-juchu-ctn-meisai';
 import {
@@ -257,6 +258,35 @@ export const updShukoDetail = async (
     );
     if (currentTableData.some((d) => unfixedJuchuKizaiHeadIds.includes(d.juchuKizaiHeadId) && hasShukoDiff(d))) {
       throw new NyushukoFixError(NYUSHUKO_FIX_ERROR.diff, '[updShukoDetail] 不足・過剰があります');
+    }
+
+    // 最終確認から出発するときは、同じ出庫のピッキングに受注削除の行（実績が残っている）が無いかも確認する
+    // ピッキングだけに実績がある機材を削除すると、受注削除はピッキングの行にだけ残り、最終確認の差異チェックに掛からない
+    // （そのヘッダーは最終確認の行が無くても合体しているヘッダーとして出発済みになるため、取り除く前に出発させない）
+    if (shukoDetailData.sagyoKbnId === SAGYO_KBN_ID.shukoConfirmation) {
+      const pickingTableData = toShukoDetailTableValues(
+        await selectNyushukoDetail(
+          shukoDetailData.juchuHeadId,
+          shukoDetailData.juchuKizaiHeadKbn,
+          shukoDetailData.nyushukoBashoId,
+          shukoDetailData.nyushukoDat,
+          SAGYO_KBN_ID.shukoPicking,
+          connection
+        )
+      );
+      if (
+        pickingTableData.some(
+          (d) =>
+            unfixedJuchuKizaiHeadIds.includes(d.juchuKizaiHeadId) &&
+            d.juchuMeisaiDelFlg === 1 &&
+            (d.resultQty ?? 0) + (d.resultAdjQty ?? 0) > 0
+        )
+      ) {
+        throw new NyushukoFixError(
+          NYUSHUKO_FIX_ERROR.pickingDeleted,
+          '[updShukoDetail] ピッキングに受注削除の行があります'
+        );
+      }
     }
 
     // 未出発のヘッダーの行だけを対象にする
@@ -996,24 +1026,19 @@ export const saveShukoCtn = async (
         },
         connection
       );
-      // 受注コンテナ明細が無い行（改修前に HT・ゲートで送られた予定外コンテナ）は、ここで作る
-      await upsertJuchuContainerMeisaiColumns(
-        [
-          {
-            juchu_head_id: r.juchuHeadId,
-            juchu_kizai_head_id: r.juchuKizaiHeadId,
-            juchu_kizai_meisai_id: r.juchuKizaiMeisaiId,
-            kizai_id: r.kizaiId,
-            shozoku_id: bashoId,
-            plan_kizai_qty: r.planQty ?? 0,
-            mem: r.mem2 ? r.mem2 : null,
-            dsp_ord_num: r.dspOrdNumMeisai,
-            indent_num: r.indentNum,
-            add_dat: now,
-            add_user: userNam,
-          },
-        ],
-        ['plan_kizai_qty', 'mem'],
+      // 受注コンテナ明細は更新だけ（作らない）。画面を開いた後にほかの人が削除していれば0件で何もしない
+      // （upsert だと、伝票の無い受注コンテナ明細だけが作り直され、在庫を引き当ててしまうため）
+      await updateJuchuContainerMeisaiPlanMem(
+        {
+          juchuHeadId: r.juchuHeadId,
+          juchuKizaiHeadId: r.juchuKizaiHeadId,
+          juchuKizaiMeisaiId: r.juchuKizaiMeisaiId,
+          kizaiId: r.kizaiId,
+          shozokuId: bashoId,
+          planKizaiQty: r.planQty ?? 0,
+          mem: r.mem2 ? r.mem2 : null,
+        },
+        userNam,
         connection
       );
     }

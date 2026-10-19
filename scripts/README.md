@@ -25,7 +25,7 @@
 
 ### フォルダは2つしかないので表せない状態がある
 
-「ステージングにも本番にも未適用」のものは `staging-only/` に置いたうえで、1行目と各READMEの一覧表に `未適用 / 未適用` と明記してください。現在 [`db-data/staging-only/20260930-nyushuko-den-dsp-backfill.sql`](db-data/staging-only/20260930-nyushuko-den-dsp-backfill.sql) が該当します。
+「ステージングにも本番にも未適用」のものは `staging-only/` に置いたうえで、1行目と各READMEの一覧表に `未適用 / 未適用` と明記してください。現在該当するものはありません。
 
 ## ★ フォルダをまたぐ適用順序
 
