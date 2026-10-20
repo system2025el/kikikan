@@ -57,6 +57,29 @@ export const selectJuchuKizaiHead = async (juchuHeadId: number, juchuKizaiHeadId
 };
 
 /**
+ * 受注機材ヘッダーの明細名取得（複数）
+ * 合体している出庫で、受注機材ヘッダーごとの明細名を出すために使う
+ * （v_nyushuko_den2 系の head_namv は合体しているヘッダーの明細名を重複を除いてつないだもので、ヘッダーごとには分けられないため）
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadIds 受注機材ヘッダーid
+ * @returns 受注機材ヘッダーid・明細名
+ */
+export const selectJuchuKizaiHeadNams = async (juchuHeadId: number, juchuKizaiHeadIds: number[]) => {
+  const supabase = await createClient();
+  try {
+    return await supabase
+      .schema(SCHEMA)
+      .from('t_juchu_kizai_head')
+      .select('juchu_kizai_head_id, head_nam')
+      .eq('juchu_head_id', juchuHeadId)
+      .in('juchu_kizai_head_id', juchuKizaiHeadIds)
+      .order('juchu_kizai_head_id');
+  } catch (e) {
+    throw new Error('[selectJuchuKizaiHeadNams] DBエラー:', { cause: e });
+  }
+};
+
+/**
  * キープ受注機材ヘッダー取得
  * @param juchuHeadId 受注ヘッダーid
  * @param juchuKizaiHeadId 受注機材ヘッダーid

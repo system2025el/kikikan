@@ -111,16 +111,26 @@ export const ShukoDetail = (props: {
     shukoDetailData.sagyoKbnId === SAGYO_KBN_ID.shukoConfirmation &&
     shukoDetailData.juchuKizaiHeadKbn !== JUCHU_KIZAI_HEAD_KBN.keep &&
     !!(user.permission.nyushuko & permission.nyushuko_upd);
-  // コンテナを追加できる受注機材ヘッダー（未出発のもの）
+  // コンテナを追加できる受注機材ヘッダー（この画面＝最終確認に行があり、未出発のもの）
+  // 合体しているヘッダーの一覧（juchuKizaiHeadIds）はピッキングと最終確認を合わせたものなので、ピッキングにだけ
+  // 伝票がある（受注削除だけが残っている）ヘッダーも入っている。そこには最終確認する現物が無いので、追加先に出さない
+  // （ゲートの予定外コンテナの送り先と同じく、最終確認の行に出てくるヘッダーだけにする）
   const addableHeads = useMemo(
     () =>
       shukoDetailData.juchuKizaiHeadIds
+        .filter((id) => originShukoDetailList.some((d) => d.juchuKizaiHeadId === id))
         .filter((id) => !fixedJuchuKizaiHeadIds.includes(id))
         .map((id) => ({
           juchuKizaiHeadId: id,
-          headNam: originShukoDetailList.find((d) => d.juchuKizaiHeadId === id)?.headNamv ?? `受注明細 ${id}`,
+          // 受注機材ヘッダーごとの明細名（明細名が空のヘッダーは空のまま出す。ゲート・HT と同じ）
+          headNam: shukoDetailData.juchuKizaiHeadNams.find((h) => h.juchuKizaiHeadId === id)?.headNam ?? '',
         })),
-    [shukoDetailData.juchuKizaiHeadIds, fixedJuchuKizaiHeadIds, originShukoDetailList]
+    [
+      shukoDetailData.juchuKizaiHeadIds,
+      shukoDetailData.juchuKizaiHeadNams,
+      fixedJuchuKizaiHeadIds,
+      originShukoDetailList,
+    ]
   );
   // コンテナ追加ダイアログ制御
   const [ctnDialogOpen, setCtnDialogOpen] = useState(false);
