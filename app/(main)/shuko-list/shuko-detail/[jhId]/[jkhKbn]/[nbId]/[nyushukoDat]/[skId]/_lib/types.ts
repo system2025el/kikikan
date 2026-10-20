@@ -6,6 +6,8 @@ export type ShukoDetailValues = {
   sagyoKbnId: number;
   nyuryokuUser: string | null;
   juchuKizaiHeadIds: number[];
+  /** 合体している受注機材ヘッダーごとの明細名（コンテナを付けるヘッダーの選択肢に使う） */
+  juchuKizaiHeadNams: { juchuKizaiHeadId: number; headNam: string | null }[];
   nyushukoShubetuId: number;
   headNamv: string | null;
   koenNam: string | null;

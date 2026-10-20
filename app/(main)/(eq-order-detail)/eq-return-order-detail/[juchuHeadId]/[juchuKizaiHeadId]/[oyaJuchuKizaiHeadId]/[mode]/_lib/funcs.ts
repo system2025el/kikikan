@@ -31,6 +31,7 @@ import {
   deleteNyushukoDen,
   insertNyushukoDen,
   selectContainerNyushukoDenConfirm,
+  selectNyukoDenWithoutMeisaiTx,
   updateNyushukoDen,
   upsertNyushukoDen,
 } from '@/app/_lib/db/tables/t-nyushuko-den';
@@ -62,6 +63,7 @@ import {
   isOyaShukoFixedTx,
   updJuchuKizaiNyushuko,
 } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
+import { createNyukoDenMeisaiIdPicker } from '@/app/(main)/(eq-order-detail)/_lib/reuse-nyuko-den';
 import { SaveNewChildJuchuKizaiHeadResult } from '@/app/(main)/(eq-order-detail)/_lib/types';
 import { JuchuKizaiHonbanbiValues } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';
 
@@ -263,10 +265,18 @@ export const saveReturnJuchuKizai = async (
       // 受注機材明細id最大値（メイン明細と同じく入出庫伝票の明細idも含める。送信RPCが作った明細の無い伝票と重ならないように）
       let newReturnJuchuKizaiMeisaiId =
         (await selectJuchuKizaiMeisaiMaxIdWithDenTx(data.juchuHeadId, data.juchuKizaiHeadId, connection)) + 1;
+      // HT・ゲートが親機材として読んで先に作った入庫伝票（受注明細なし）があれば、その明細idを使い回す（機材・コンテナ共通）
+      const pickNyukoDenMeisaiId = createNyukoDenMeisaiIdPicker(
+        await selectNyukoDenWithoutMeisaiTx(data.juchuHeadId, data.juchuKizaiHeadId, connection)
+      );
       // 新規機材に明細id割り振り
       const newReturnJuchuKizaiMeisaiData = returnJuchuKizaiMeisaiList.map((data) =>
         data.juchuKizaiMeisaiId === 0 && !data.delFlag
-          ? { ...data, juchuKizaiMeisaiId: newReturnJuchuKizaiMeisaiId++ }
+          ? {
+              ...data,
+              juchuKizaiMeisaiId:
+                pickNyukoDenMeisaiId(false, data.kizaiId, data.dspOrdNum) ?? newReturnJuchuKizaiMeisaiId++,
+            }
           : data
       );
 
@@ -305,7 +315,11 @@ export const saveReturnJuchuKizai = async (
       // 新規コンテナに明細id割り振り
       const newReturnJuchuContainerMeisaiData = returnJuchuContainerMeisaiList.map((data) =>
         data.juchuKizaiMeisaiId === 0 && !data.delFlag
-          ? { ...data, juchuKizaiMeisaiId: newReturnJuchuContainerMeisaiId++ }
+          ? {
+              ...data,
+              juchuKizaiMeisaiId:
+                pickNyukoDenMeisaiId(true, data.kizaiId, data.dspOrdNum) ?? newReturnJuchuContainerMeisaiId++,
+            }
           : data
       );
 
