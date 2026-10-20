@@ -17,6 +17,7 @@ import {
 import {
   selectChildJuchuKizaiHeadConfirm,
   selectChildJuchuKizaiHeadCountTx,
+  selectJuchuKizaiHeadNams,
 } from '@/app/_lib/db/tables/t-juchu-kizai-head';
 import {
   selectJuchuKizaiNyushukoConfirmList,
@@ -88,13 +89,29 @@ export const getShukoDetail = async (
     // 該当行が無い。呼び出し元で「見つかりません」を表示させるためnullを返す。
     if (data.length === 0) return null;
 
+    const juchuKizaiHeadIds: number[] =
+      data[0].juchu_kizai_head_idv?.split(',').map((id: string) => parseInt(id)) || [];
+
+    // 受注機材ヘッダーごとの明細名（head_namv は合体しているヘッダーの明細名をつないだものなので、ヘッダーごとに取り直す）
+    const { data: headNams, error: headNamsError } =
+      juchuKizaiHeadIds.length > 0
+        ? await selectJuchuKizaiHeadNams(juchuHeadId, juchuKizaiHeadIds)
+        : { data: [], error: null };
+    if (headNamsError) {
+      throw new Error('[getShukoDetail] DBエラー:', { cause: headNamsError });
+    }
+
     const nyukoDetailData: ShukoDetailValues = {
       juchuHeadId: juchuHeadId,
       juchuKizaiHeadKbn: juchuKizaiHeadKbn,
       nyushukoBashoId: nyushukoBashoId,
       nyushukoDat: nyushukoDat,
       sagyoKbnId: sagyoKbnId,
-      juchuKizaiHeadIds: data[0].juchu_kizai_head_idv?.split(',').map((id: string) => parseInt(id)) || [],
+      juchuKizaiHeadIds: juchuKizaiHeadIds,
+      juchuKizaiHeadNams: (headNams ?? []).map((h) => ({
+        juchuKizaiHeadId: h.juchu_kizai_head_id,
+        headNam: h.head_nam,
+      })),
       nyushukoShubetuId: NYUSHUKO_SHUBETU_ID.shuko,
       headNamv: data[0].head_namv,
       koenNam: data[0].koen_nam,

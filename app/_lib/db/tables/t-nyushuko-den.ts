@@ -788,6 +788,75 @@ export const selectShukoCtnDenRowsTx = async (
 };
 
 /**
+ * 受注明細の無い入庫伝票（sagyo_kbn_id = 30）取得（トランザクション内。返却・キープの明細追加時の採番用）
+ * HT・ゲートが親機材として読んだ分を送ると、送信RPCは親の表示順で入庫伝票だけを作る（受注機材明細・受注コンテナ明細は無い）。
+ * 返却・キープ明細で同じ機材を追加するときに、この伝票の明細idを使い回して合流させる（送信RPCの再利用と同じ考え方）
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param connection
+ * @returns 明細id・機材id・表示順・コンテナフラグ
+ */
+export const selectNyukoDenWithoutMeisaiTx = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  connection: PoolClient
+) => {
+  const query = `
+    SELECT DISTINCT
+      d.juchu_kizai_meisai_id,
+      d.kizai_id,
+      d.dsp_ord_num,
+      COALESCE(k.ctn_flg, 0) AS ctn_flg
+    FROM
+      ${SCHEMA}.t_nyushuko_den AS d
+      INNER JOIN ${SCHEMA}.m_kizai AS k
+        ON k.kizai_id = d.kizai_id
+    WHERE
+      d.juchu_head_id = $1
+      AND d.juchu_kizai_head_id = $2
+      AND d.sagyo_kbn_id = ${SAGYO_KBN_ID.nyukoCount}
+      AND d.dsp_ord_num IS NOT NULL
+      AND NOT EXISTS (
+        SELECT
+          1
+        FROM
+          ${SCHEMA}.t_juchu_kizai_meisai AS m
+        WHERE
+          m.juchu_head_id = d.juchu_head_id
+          AND m.juchu_kizai_head_id = d.juchu_kizai_head_id
+          AND m.juchu_kizai_meisai_id = d.juchu_kizai_meisai_id
+          AND m.kizai_id = d.kizai_id
+      )
+      AND NOT EXISTS (
+        SELECT
+          1
+        FROM
+          ${SCHEMA}.t_juchu_ctn_meisai AS c
+        WHERE
+          c.juchu_head_id = d.juchu_head_id
+          AND c.juchu_kizai_head_id = d.juchu_kizai_head_id
+          AND c.juchu_kizai_meisai_id = d.juchu_kizai_meisai_id
+          AND c.kizai_id = d.kizai_id
+      )
+    ORDER BY
+      d.juchu_kizai_meisai_id
+  `;
+
+  try {
+    return (
+      await connection.query<{
+        juchu_kizai_meisai_id: number;
+        kizai_id: number;
+        dsp_ord_num: number;
+        ctn_flg: number;
+      }>(query, [juchuHeadId, juchuKizaiHeadId])
+    ).rows;
+  } catch (e) {
+    throw new Error('[selectNyukoDenWithoutMeisaiTx] DBエラー:', { cause: e });
+  }
+};
+
+/**
  * 入出庫伝票テーブルを、送信RPCと同時に採番しないようロックする（トランザクション内、COMMIT/ROLLBACK で解除）
  * 送信RPC（nyushuko_send_*）は冒頭で SHARE モードのロックを取ってから明細idを採番する。
  * SHARE ROW EXCLUSIVE はその SHARE とも、このモードどうしとも衝突するので、Web と RPC の採番が順番に行われる

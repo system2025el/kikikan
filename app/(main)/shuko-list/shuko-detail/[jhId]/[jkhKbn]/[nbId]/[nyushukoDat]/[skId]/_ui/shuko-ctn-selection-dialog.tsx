@@ -98,7 +98,8 @@ export const ShukoCtnSelectionDialog = (props: {
             >
               {heads.map((h) => (
                 <MenuItem key={h.juchuKizaiHeadId} value={h.juchuKizaiHeadId}>
-                  {h.headNam}
+                  {/* 明細名が空でも選択肢の高さがつぶれないよう、空白文字を入れる */}
+                  {h.headNam || ' '}
                 </MenuItem>
               ))}
             </Select>
