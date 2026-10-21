@@ -1023,7 +1023,8 @@ export const deleteNyushukoDen = async (
  * 受注削除として予定数0で残す出庫伝票行の条件（d は対象の伝票行）
  * ・出庫（ピッキング・最終確認）で実績・補正がある
  * ・ピッキングの行は、同じ日時・場所の最終確認に実績・補正が無いときだけ
- * deleteNyushukoDenKeepResulted（明細の削除）と moveShukoDenToDeletedMeisai（出庫場所の変更・準備日の削除）で共通
+ * deleteNyushukoDenKeepResulted（明細の削除）と deleteShukoDenBashoKeepResulted（出庫場所の変更）、
+ * moveJizenDenToDeletedMeisai（準備日の削除）で共通
  * @param jizen true なら事前（事前ピッキング 80・事前最終確認 90）で同じ条件にする
  * @returns SQL の条件式
  */
@@ -1055,31 +1056,95 @@ const shukoKeepCondition = (jizen = false) => {
 };
 
 /**
- * 出庫場所が変わった機材の、元の場所の実績ある出庫伝票を受注削除として残す（新しい明細idに付け替えて予定数0にする）
+ * 出庫場所が変わった機材の、元の場所の出庫伝票（ピッキング・最終確認）を整理する（明細idは変えない）
+ * - 残す条件（shukoKeepCondition）に当たる行：予定数0にして受注削除として残す
+ * - それ以外の行（実績の無い行、最終確認に実績があるピッキングの行）：削除する
  *
- * 出庫場所を変えても受注機材明細（明細id・機材）は残るため、そのまま予定数0にしても「受注明細が無い＝受注削除」の
- * 判定（v_nyushuko_den2_lst・updateDeletedShukoDenDat など）に乗らず、明細id単位で場所を見ずに動く処理
- * （delShukoDen・delShukoResult・updShukoResult）にも巻き込まれる。未使用の明細idに付け替えることで、
- * 明細を削除したときの受注削除と同じ扱いにする。
- * 残す条件は deleteNyushukoDenKeepResulted と同じ。付け替えなかった行は呼び出し元で今までどおり削除する。
- * 実績は moveShukoResultToDeletedMeisai で付け替える（この関数の後に呼ぶ）。
+ * 明細id・機材は変えないので、元の場所に戻したとき（K → Y → K）は、残した行がそのまま通常の行に戻り実績も引き継ぐ。
+ * 受注削除かどうかは、出庫では「その場所の受注明細が無い」（明細の出庫場所も照合する）で判定するので、
+ * 同じ明細idのままでも受注削除として扱われる（v_nyushuko_den2_lst・deleteEmptyNyushukoDen・updateDeletedShukoDenDat）。
+ * 実績は deleteShukoResultBashoKeepDen で、伝票が無くなった分だけ削除する（この関数の後に呼ぶ）。
  *
- * @param data 対象の明細（受注ヘッダーid・受注機材ヘッダーid・変更前の明細id・機材id）
+ * @param data 対象の明細（受注ヘッダーid・受注機材ヘッダーid・明細id・機材id）
  * @param oldSagyoId 変更前の出庫場所
+ * @param updDat 更新日時
+ * @param updUser 更新者
+ * @param connection
+ */
+export const deleteShukoDenBashoKeepResulted = async (
+  data: { juchu_head_id: number; juchu_kizai_head_id: number; juchu_kizai_meisai_id: number; kizai_id: number },
+  oldSagyoId: number,
+  updDat: string,
+  updUser: string,
+  connection: PoolClient
+) => {
+  const keys = [data.juchu_head_id, data.juchu_kizai_head_id, data.juchu_kizai_meisai_id, data.kizai_id, oldSagyoId];
+
+  // 残す行は予定数0にする
+  const updateQuery = `
+    UPDATE
+      ${SCHEMA}.t_nyushuko_den AS d
+    SET
+      plan_qty = 0
+      ,upd_dat = $6
+      ,upd_user = $7
+    WHERE
+      d.juchu_head_id = $1
+      AND d.juchu_kizai_head_id = $2
+      AND d.juchu_kizai_meisai_id = $3
+      AND d.kizai_id = $4
+      AND d.sagyo_id = $5
+      AND ${shukoKeepCondition()}
+  `;
+
+  // 元の場所の出庫伝票のうち、残さない行は削除
+  const deleteQuery = `
+    DELETE FROM
+      ${SCHEMA}.t_nyushuko_den AS d
+    WHERE
+      d.juchu_head_id = $1
+      AND d.juchu_kizai_head_id = $2
+      AND d.juchu_kizai_meisai_id = $3
+      AND d.kizai_id = $4
+      AND d.sagyo_id = $5
+      AND d.sagyo_kbn_id IN (${SAGYO_KBN_ID.shukoPicking}, ${SAGYO_KBN_ID.shukoConfirmation})
+      AND NOT (${shukoKeepCondition()})
+  `;
+
+  try {
+    await connection.query(updateQuery, [...keys, updDat, updUser]);
+    await connection.query(deleteQuery, keys);
+  } catch (e) {
+    throw new Error('[deleteShukoDenBashoKeepResulted] DBエラー:', { cause: e });
+  }
+};
+
+/**
+ * 準備日を消した明細の、実績ある事前の伝票（事前ピッキング 80・事前最終確認 90）を受注削除として残す
+ * （未使用の新しい明細idに付け替えて予定数0にする）
+ *
+ * 準備日を消しても受注機材明細は同じ場所に残るため、明細idのままでは「受注明細が無い＝受注削除」の判定
+ * （v_nyushuko_den2_lst・deleteEmptyNyushukoDen）に乗らない。未使用の明細idに付け替えることで受注削除として扱う。
+ * 残す条件は本番と同じ（shukoKeepCondition の 80/90 版）。付け替えなかった行は呼び出し元で削除する。
+ * 実績は moveJizenResultToDeletedMeisai で付け替える（この関数の後に呼ぶ）。
+ * ※本番（10/20）の出庫場所の変更は、明細idを変えずに予定数0にする形（deleteShukoDenBashoKeepResulted）に変わった。
+ *   事前も同じ形にするかは検討中（そうすると本番の同じ明細とのつながりが保てる）
+ *
+ * @param data 対象の明細（受注ヘッダーid・受注機材ヘッダーid・明細id・機材id）
+ * @param sagyoId 事前の伝票の作業場所（明細の出庫場所）
  * @param newMeisaiId 付け替え先の明細id（未使用のもの）
  * @param updDat 更新日時
  * @param updUser 更新者
  * @param connection
- * @param jizen true なら事前（80/90）の伝票を対象にする（準備日を削除したとき。事前側だけ受注削除として残す）
+ * @returns 付け替えた伝票の件数
  */
-export const moveShukoDenToDeletedMeisai = async (
+export const moveJizenDenToDeletedMeisai = async (
   data: { juchu_head_id: number; juchu_kizai_head_id: number; juchu_kizai_meisai_id: number; kizai_id: number },
-  oldSagyoId: number,
+  sagyoId: number,
   newMeisaiId: number,
   updDat: string,
   updUser: string,
-  connection: PoolClient,
-  jizen = false
+  connection: PoolClient
 ) => {
   const query = `
     UPDATE
@@ -1095,7 +1160,7 @@ export const moveShukoDenToDeletedMeisai = async (
       AND d.juchu_kizai_meisai_id = $3
       AND d.kizai_id = $4
       AND d.sagyo_id = $5
-      AND ${shukoKeepCondition(jizen)}
+      AND ${shukoKeepCondition(true)}
   `;
 
   try {
@@ -1104,14 +1169,66 @@ export const moveShukoDenToDeletedMeisai = async (
       data.juchu_kizai_head_id,
       data.juchu_kizai_meisai_id,
       data.kizai_id,
-      oldSagyoId,
+      sagyoId,
       newMeisaiId,
       updDat,
       updUser,
     ]);
     return rowCount ?? 0;
   } catch (e) {
-    throw new Error('[moveShukoDenToDeletedMeisai] DBエラー:', { cause: e });
+    throw new Error('[moveJizenDenToDeletedMeisai] DBエラー:', { cause: e });
+  }
+};
+
+/**
+ * 出庫伝票（ピッキング・最終確認）を、作業場所の行があれば更新し、無ければ作る（1行）
+ * 出庫場所を変えた明細の、新しい場所の伝票に使う。元の場所に戻したとき（K → Y → K）は、そこに同じ明細id・機材の
+ * 受注削除の行（予定0・実績あり）が残っているので、作り直さずに予定数などを更新して通常の行に戻す（実績を引き継ぐ）。
+ * 作業日時は主キーに入っているので ON CONFLICT ではなく、作業場所で探して UPDATE → 無ければ INSERT の順にする
+ * （受注削除の行の日時が今の出庫日時とずれていても、同じ行を更新できるように）。
+ * @param data 入出庫伝票データ（作業日時・作業場所は新しい値）
+ * @param connection
+ */
+export const upsertShukoDenBasho = async (data: NyushukoDen, connection: PoolClient) => {
+  const updateQuery = `
+    UPDATE
+      ${SCHEMA}.t_nyushuko_den
+    SET
+      plan_qty = $7
+      ,sagyo_den_dat = $8
+      ,dsp_ord_num = $9
+      ,indent_num = $10
+      ,upd_dat = $11
+      ,upd_user = $12
+    WHERE
+      juchu_head_id = $1
+      AND juchu_kizai_head_id = $2
+      AND juchu_kizai_meisai_id = $3
+      AND kizai_id = $4
+      AND sagyo_kbn_id = $5
+      AND sagyo_id = $6
+  `;
+
+  try {
+    const { rowCount } = await connection.query(updateQuery, [
+      data.juchu_head_id,
+      data.juchu_kizai_head_id,
+      data.juchu_kizai_meisai_id,
+      data.kizai_id,
+      data.sagyo_kbn_id,
+      data.sagyo_id,
+      data.plan_qty,
+      data.sagyo_den_dat,
+      data.dsp_ord_num,
+      data.indent_num,
+      data.add_dat,
+      data.add_user,
+    ]);
+    if ((rowCount ?? 0) === 0) {
+      await insertNyushukoDen([data], connection);
+    }
+  } catch (e) {
+    throw new Error('[upsertShukoDenBasho] DBエラー:', { cause: e });
   }
 };
 
