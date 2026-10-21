@@ -1,5 +1,15 @@
--- 適用状況: ステージング 2026-10-19 / 本番 未適用
+-- 適用状況: ステージング 2026-10-19（del-meisai 分。事前準備の変更は 2026-10-21） / 本番 未適用
 -- =====================================================================
+-- ★2026-10-21 追加（事前準備、2026-10-21 ステージング適用）: 入出庫種別の CASE に 80/90 → 3（事前）を追加し、
+--   GROUP BY に「80/90 なら受注機材ヘッダーid、それ以外は 0」を加える（列は足さない。列構成は不変で CREATE OR REPLACE で当てられる）。
+--   事前の行は機材ヘッダーごとに1行になり、juchu_kizai_head_idv はそのヘッダーidの1つだけになる。
+--   依存ビュー側（v_nyushuko_den2・_head・_lst）は、種別 3 のとき juchu_kizai_head_idv と機材ヘッダーidを照合して結合する。
+--   v_nyushuko_den2_lst_oyako は照合しないので事前の行は二重になり得るが、使っている所は入庫（30）だけを見るので影響しない。
+--   2026-10-21 ステージングで検証（一時ビューで読み取りのみ）: 事前の伝票が無い状態で全列・行数（3,559）とも差分0。
+-- ★本番に del-meisai だけを先に当てる場合は、このファイルではなく del-meisai ブランチの版（git show del-meisai:<このファイル>）を使う。
+--   このファイルは del-meisai と事前準備の両方の変更を含む。
+--
+-- ---- ここから del-meisai（受注削除）の変更 ----
 -- v_get_juchu_kizai_head  ヘッダーのまとめ方を「作業区分ごと」→「入出庫種別（出庫／入庫）ごと」に変更（列構成は不変）
 --
 -- 背景: このビューは伝票（t_nyushuko_den）から、受注・作業日時・作業場所・入出庫種別ごとに、合体している受注機材
@@ -27,6 +37,7 @@ CREATE OR REPLACE VIEW public.v_get_juchu_kizai_head WITH (security_invoker = on
         CASE
             WHEN t_nyushuko_den.sagyo_kbn_id = 10 OR t_nyushuko_den.sagyo_kbn_id = 20 THEN 1
             WHEN t_nyushuko_den.sagyo_kbn_id = 30 THEN 2
+            WHEN t_nyushuko_den.sagyo_kbn_id = 80 OR t_nyushuko_den.sagyo_kbn_id = 90 THEN 3
             ELSE NULL::integer
         END AS nyushuko_shubetu_id,
     array_to_string(array_agg(DISTINCT t_nyushuko_den.juchu_kizai_head_id ORDER BY t_nyushuko_den.juchu_kizai_head_id), ','::text) AS juchu_kizai_head_idv,
@@ -57,11 +68,13 @@ CREATE OR REPLACE VIEW public.v_get_juchu_kizai_head WITH (security_invoker = on
         CASE
             WHEN t_nyushuko_den.sagyo_kbn_id = 10 OR t_nyushuko_den.sagyo_kbn_id = 20 THEN 1
             WHEN t_nyushuko_den.sagyo_kbn_id = 30 THEN 2
+            WHEN t_nyushuko_den.sagyo_kbn_id = 80 OR t_nyushuko_den.sagyo_kbn_id = 90 THEN 3
             ELSE NULL::integer
-        END), my_juchu_kizai_head.juchu_kizai_head_kbn
+        END), my_juchu_kizai_head.juchu_kizai_head_kbn, (CASE WHEN t_nyushuko_den.sagyo_kbn_id = 80 OR t_nyushuko_den.sagyo_kbn_id = 90 THEN t_nyushuko_den.juchu_kizai_head_id ELSE 0 END)
   ORDER BY t_nyushuko_den.juchu_head_id, t_nyushuko_den.sagyo_den_dat, t_nyushuko_den.sagyo_id, (
         CASE
             WHEN t_nyushuko_den.sagyo_kbn_id = 10 OR t_nyushuko_den.sagyo_kbn_id = 20 THEN 1
             WHEN t_nyushuko_den.sagyo_kbn_id = 30 THEN 2
+            WHEN t_nyushuko_den.sagyo_kbn_id = 80 OR t_nyushuko_den.sagyo_kbn_id = 90 THEN 3
             ELSE NULL::integer
         END);

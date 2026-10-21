@@ -1582,6 +1582,45 @@ export type Database = {
         };
         Relationships: [];
       };
+      t_juchu_kizai_jizen: {
+        Row: {
+          add_dat: string | null;
+          add_user: string | null;
+          jizen_dat: string;
+          jizen_qty: number;
+          juchu_head_id: number;
+          juchu_kizai_head_id: number;
+          juchu_kizai_meisai_id: number;
+          kizai_id: number;
+          upd_dat: string | null;
+          upd_user: string | null;
+        };
+        Insert: {
+          add_dat?: string | null;
+          add_user?: string | null;
+          jizen_dat: string;
+          jizen_qty: number;
+          juchu_head_id: number;
+          juchu_kizai_head_id: number;
+          juchu_kizai_meisai_id: number;
+          kizai_id: number;
+          upd_dat?: string | null;
+          upd_user?: string | null;
+        };
+        Update: {
+          add_dat?: string | null;
+          add_user?: string | null;
+          jizen_dat?: string;
+          jizen_qty?: number;
+          juchu_head_id?: number;
+          juchu_kizai_head_id?: number;
+          juchu_kizai_meisai_id?: number;
+          kizai_id?: number;
+          upd_dat?: string | null;
+          upd_user?: string | null;
+        };
+        Relationships: [];
+      };
       t_juchu_kizai_meisai: {
         Row: {
           add_dat: string | null;
@@ -3579,6 +3618,7 @@ export type Database = {
       };
       v_nyushuko_den: {
         Row: {
+          jizen_juchu_kizai_head_id: number | null;
           juchu_head_id: number | null;
           juchu_kizai_head_kbn: number | null;
           koen_nam: string | null;
@@ -3919,6 +3959,7 @@ export type Database = {
           count_sts0: number | null;
           count_sts1: number | null;
           count_sts2: number | null;
+          jizen_juchu_kizai_head_id: number | null;
           juchu_head_id: number | null;
           sagyo_den_dat: string | null;
           sagyo_id: number | null;

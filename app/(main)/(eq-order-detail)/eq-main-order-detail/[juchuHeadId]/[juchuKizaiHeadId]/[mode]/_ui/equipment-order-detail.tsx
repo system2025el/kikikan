@@ -84,6 +84,7 @@ import {
 import {
   getHonbanbi,
   getIdoJuchuKizaiMeisai,
+  getJizenResultExists,
   getJuchuKizaiHead,
   getJuchuKizaiMeisai,
   getShukoResultKizaiCount,
@@ -93,13 +94,12 @@ import {
   saveNewJuchuKizaiHead,
 } from '../_lib/funcs';
 import {
-  applyJizenToStock,
-  carryOverJizen,
+  getJizenChangedRows,
   getJizenRange,
   getStockAnchorDate,
-  JIZEN_UI_ONLY,
   validateJizen,
   withJizen,
+  withoutJizen,
 } from '../_lib/jizen';
 import {
   IdoJuchuKizaiMeisaiValues,
@@ -823,17 +823,29 @@ const EquipmentOrderDetail = (props: {
       const checkKicsNyukoDat = dirtyFields.kicsNyukoDat ? true : false;
       const checkYardShukoDat = dirtyFields.yardShukoDat ? true : false;
       const checkYardNyukoDat = dirtyFields.yardNyukoDat ? true : false;
+      // 明細の変更は事前準備の項目を除いて比べる（事前準備だけの変更で明細・本番の伝票の処理まで走らせないため）
       const checkJuchuKizaiMeisai =
-        JSON.stringify(originJuchuKizaiMeisaiList) !==
-        JSON.stringify(juchuKizaiMeisaiList.filter((data) => !data.delFlag));
+        JSON.stringify(withoutJizen(originJuchuKizaiMeisaiList)) !==
+        JSON.stringify(withoutJizen(juchuKizaiMeisaiList.filter((data) => !data.delFlag)));
+      // 事前準備が変わった明細（保存済みの明細のみ。追加・削除した明細は明細の変更として扱う）
+      const jizenChangedRows = getJizenChangedRows(originJuchuKizaiMeisaiList, juchuKizaiMeisaiList);
+      const checkJuchuKizaiJizen = jizenChangedRows.length > 0;
       const checkIdoJuchuKizaiMeisai =
         JSON.stringify(originIdoJuchuKizaiMeisaiList) !==
         JSON.stringify(idoJuchuKizaiMeisaiList.filter((data) => !data.delFlag));
 
-      // 出庫時間に変更があった場合出庫作業チェック
-      if (checkKicsShukoDat || checkYardShukoDat) {
+      // 出庫時間に変更があった場合、または事前の実績がある明細の事前準備を変えた場合は作業中チェック
+      if (checkKicsShukoDat || checkYardShukoDat || checkJuchuKizaiJizen) {
         try {
-          const isWorking = await checkShukoStatus(data.juchuHeadId, data.juchuKizaiHeadId);
+          const isWorking =
+            ((checkKicsShukoDat || checkYardShukoDat) &&
+              (await checkShukoStatus(data.juchuHeadId, data.juchuKizaiHeadId))) ||
+            (checkJuchuKizaiJizen &&
+              (await getJizenResultExists(
+                data.juchuHeadId,
+                data.juchuKizaiHeadId,
+                jizenChangedRows.map((d) => ({ juchuKizaiMeisaiId: d.juchuKizaiMeisaiId, kizaiId: d.kizaiId }))
+              )));
 
           if (isWorking) {
             // ダイアログを表示し、ユーザーが「保存」か「キャンセル」を押すまでここで待機する
@@ -862,6 +874,7 @@ const EquipmentOrderDetail = (props: {
           checkYardShukoDat,
           checkYardNyukoDat,
           checkJuchuKizaiMeisai,
+          checkJuchuKizaiJizen,
           checkIdoJuchuKizaiMeisai,
           data,
           updateShukoDate,
@@ -914,11 +927,7 @@ const EquipmentOrderDetail = (props: {
               getJuchuContainerMeisai(data.juchuHeadId, data.juchuKizaiHeadId),
             ]);
             if (juchuKizaiMeisaiData) {
-              const updatedEqStockData = await reloadEqStockAfterSave(
-                data,
-                updateShukoDate,
-                JIZEN_UI_ONLY ? carryOverJizen(juchuKizaiMeisaiData, juchuKizaiMeisaiList) : juchuKizaiMeisaiData
-              );
+              const updatedEqStockData = await reloadEqStockAfterSave(data, updateShukoDate, juchuKizaiMeisaiData);
               setOriginEqStockList(updatedEqStockData);
               setEqStockList(updatedEqStockData);
             }
@@ -958,16 +967,12 @@ const EquipmentOrderDetail = (props: {
               getStockAnchorDate(updateShukoDate, juchuKizaiMeisaiList),
               juchuKizaiMeisaiList
             );
-            const updatedEqStockData = JIZEN_UI_ONLY
-              ? applyJizenToStock(
-                  stockData,
-                  juchuKizaiMeisaiList,
-                  data.kicsShukoDat ? new Date(data.kicsShukoDat) : null,
-                  data.yardShukoDat ? new Date(data.yardShukoDat) : null
-                )
-              : stockData;
-            setOriginEqStockList(updatedEqStockData);
-            setEqStockList(updatedEqStockData);
+            setOriginEqStockList(stockData);
+            setEqStockList(stockData);
+            // 事前準備も保存したので、元データを今の明細にそろえる（明細は変わっていないので取り直さない）
+            if (checkJuchuKizaiJizen) {
+              setOriginJuchuKizaiMeisaiList(juchuKizaiMeisaiList.filter((d) => !d.delFlag));
+            }
           } else if (checkJuchuKizaiMeisai) {
             // 受注機材明細データ、移動受注機材明細データ、受注コンテナ明細データ
             const [juchuKizaiMeisaiData, idoJuchuKizaiMeisaiData, juchuCtnMeisaiData] = await Promise.all([
@@ -976,11 +981,7 @@ const EquipmentOrderDetail = (props: {
               getJuchuContainerMeisai(data.juchuHeadId, data.juchuKizaiHeadId),
             ]);
             if (juchuKizaiMeisaiData) {
-              const updatedEqStockData = await reloadEqStockAfterSave(
-                data,
-                updateShukoDate,
-                JIZEN_UI_ONLY ? carryOverJizen(juchuKizaiMeisaiData, juchuKizaiMeisaiList) : juchuKizaiMeisaiData
-              );
+              const updatedEqStockData = await reloadEqStockAfterSave(data, updateShukoDate, juchuKizaiMeisaiData);
               setOriginEqStockList(updatedEqStockData);
               setEqStockList(updatedEqStockData);
               // カレンダー選択日更新（在庫テーブルの起点とずれると機材追加時の在庫が別の日付で取得される）
@@ -993,6 +994,13 @@ const EquipmentOrderDetail = (props: {
             // 受注コンテナ明細更新
             setOriginJuchuContainerMeisaiList(juchuCtnMeisaiData);
             setJuchuContainerMeisaiList(juchuCtnMeisaiData);
+          } else if (checkJuchuKizaiJizen) {
+            // 事前準備だけの保存：明細・移動明細・コンテナ明細は変わっていないので取り直さず、在庫表だけ取り直す
+            // （在庫は準備日〜出庫日の前日に準備数を引き当てる。在庫表の左端も最も過去の準備日に合わせて変わる）
+            const savedMeisaiData = juchuKizaiMeisaiList.filter((d) => !d.delFlag);
+            const updatedEqStockData = await reloadEqStockAfterSave(data, updateShukoDate, savedMeisaiData);
+            setOriginEqStockList(updatedEqStockData);
+            setEqStockList(updatedEqStockData);
           }
           if (checkIdoJuchuKizaiMeisai) {
             setOriginIdoJuchuKizaiMeisaiList(idoJuchuKizaiMeisaiList);
@@ -1037,14 +1045,7 @@ const EquipmentOrderDetail = (props: {
       getStockAnchorDate(updateShukoDate, savedMeisaiData),
       savedMeisaiData
     );
-    return JIZEN_UI_ONLY
-      ? applyJizenToStock(
-          stockData,
-          savedMeisaiData,
-          data.kicsShukoDat ? new Date(data.kicsShukoDat) : null,
-          data.yardShukoDat ? new Date(data.yardShukoDat) : null
-        )
-      : stockData;
+    return stockData;
   };
 
   /**

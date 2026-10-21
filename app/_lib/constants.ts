@@ -16,7 +16,18 @@ export const SAGYO_KBN_ID = {
   shukoConfirmed: 60,
   /** 入庫確定 */
   nyukoConfirmed: 70,
+  /** 事前ピッキング（本番の出庫ピッキングの前に準備日時で読む。送信時に本番のピッキングにも同じタグを書く） */
+  jizenPicking: 80,
+  /** 事前最終確認（同上。本番の出庫最終確認に書く） */
+  jizenConfirmation: 90,
 } as const;
+
+/** 事前の作業区分か（80/90） */
+export const isJizenSagyoKbn = (sagyoKbnId: number) =>
+  sagyoKbnId === SAGYO_KBN_ID.jizenPicking || sagyoKbnId === SAGYO_KBN_ID.jizenConfirmation;
+
+/** 事前の作業区分に対応する本番の作業区分（80→10、90→20。それ以外はそのまま） */
+export const toHonbanSagyoKbn = (sagyoKbnId: number) => (isJizenSagyoKbn(sagyoKbnId) ? sagyoKbnId - 70 : sagyoKbnId);
 
 /**
  * 入出庫の確定状況（v_nyushuko_den2 の nyuko_fix_sts / shuko_fix_sts）
@@ -83,6 +94,8 @@ export const NYUSHUKO_SHUBETU_ID = {
   shuko: 1,
   /** 入庫 */
   nyuko: 2,
+  /** 事前（事前ピッキング・事前最終確認。ビューが作業区分 80/90 を 3 にする。機材ヘッダーごとに1行） */
+  jizen: 3,
 } as const;
 
 /**
@@ -148,6 +161,11 @@ export const HONBANBI_SHUBETU_ID = {
   shuko: 2,
   /** 入庫 */
   nyuko: 3,
+  /**
+   * 事前準備（準備日〜出庫日の前日）。在庫表の色（m_honbanbi_color）のためだけの値で、
+   * t_juchu_kizai_honbanbi には入れない（事前準備は t_juchu_kizai_jizen で持つ）
+   */
+  jizen: 4,
   /** 仕込 */
   shikomi: 10,
   /** RH（リハーサル） */

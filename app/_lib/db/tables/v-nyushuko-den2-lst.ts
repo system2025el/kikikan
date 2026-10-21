@@ -78,6 +78,72 @@ export const selectNyushukoDetail = async (
   }
 };
 
+/**
+ * 事前（事前ピッキング・事前最終確認）の明細画面の行
+ * 列は selectNyushukoDetail と同じ。事前の行は機材ヘッダーごとなので機材ヘッダーidで絞る
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param nyushukoBashoId 作業場所
+ * @param nyushukoDat 準備日時
+ * @param sagyoKbnId 作業区分（80/90）
+ */
+export const selectJizenNyushukoDetail = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  nyushukoBashoId: number,
+  nyushukoDat: string,
+  sagyoKbnId: number
+) => {
+  const query = `
+    SELECT
+      n.juchu_head_id,
+      n.juchu_kizai_head_id,
+      n.juchu_kizai_meisai_id,
+      n.juchu_kizai_head_kbnv,
+      n.head_namv,
+      n.kizai_id,
+      n.kizai_nam,
+      n.koen_nam,
+      n.koenbasho_nam,
+      n.kokyaku_nam,
+      n.nyushuko_basho_id,
+      n.nyushuko_dat,
+      n.nyushuko_shubetu_id,
+      n.plan_qty::integer,
+      m.plan_kizai_qty::integer,
+      m.plan_yobi_qty::integer,
+      n.result_adj_qty::integer,
+      n.result_qty::integer,
+      n.sagyo_kbn_id,
+      n.ctn_flg,
+      n.dsp_ord_num_meisai,
+      n.indent_num,
+      n.mem2,
+      n.juchu_meisai_del_flg
+    FROM
+      ${SCHEMA}.v_nyushuko_den2_lst as n
+      LEFT JOIN ${SCHEMA}.t_juchu_kizai_meisai as m
+      ON n.juchu_head_id = m.juchu_head_id
+      AND n.juchu_kizai_head_id = m.juchu_kizai_head_id
+      AND n.juchu_kizai_meisai_id = m.juchu_kizai_meisai_id
+      AND n.kizai_id = m.kizai_id
+    WHERE
+      n.juchu_head_id = $1
+      AND n.juchu_kizai_head_id = $2
+      AND n.nyushuko_basho_id = $3
+      AND n.nyushuko_dat = $4
+      AND n.sagyo_kbn_id = $5
+    ORDER BY
+      n.dsp_ord_num_meisai
+  `;
+
+  try {
+    return (await pool.query(query, [juchuHeadId, juchuKizaiHeadId, nyushukoBashoId, nyushukoDat, sagyoKbnId])).rows;
+  } catch (e) {
+    throw new Error('[selectJizenNyushukoDetail] DBエラー:', { cause: e });
+  }
+};
+
 export const selectCtnNyushukoDetail = async (
   juchuHeadId: number,
   juchuKizaiHeadId: number,

@@ -1,17 +1,10 @@
 import { subDays } from 'date-fns';
 
 import { BASHO_ID } from '@/app/_lib/constants';
-import { toJapanStartOfDay, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanStartOfDay } from '@/app/(main)/_lib/date-conversion';
 import { getRange } from '@/app/(main)/_lib/date-funcs';
 
-import { JuchuKizaiMeisaiValues, StockTableValues } from './types';
-
-/**
- * 事前準備のUIだけを先に実装している間は true
- * DBに保存できないため、保存後も入力した事前準備を画面上に残し（carryOverJizen）、
- * 在庫表の補正も画面側で行う（applyJizenToStock）。DB対応後は false にして両方を外す
- */
-export const JIZEN_UI_ONLY = true;
+import { JuchuKizaiMeisaiValues } from './types';
 
 /**
  * 明細の出庫場所に対応する出庫日時
@@ -91,49 +84,6 @@ export const getJizenStockDiff = (
 };
 
 /**
- * 保存後に読み直した明細へ、保存前に入力していた事前準備を引き継ぐ（JIZEN_UI_ONLY の間だけ使う）
- * 保存時に並び順を表示順で振り直すため、読み直した明細は保存前の表示順と同じ並びになる
- * @param savedRows 保存後に読み直した明細
- * @param beforeRows 保存前の明細
- */
-export const carryOverJizen = (
-  savedRows: JuchuKizaiMeisaiValues[],
-  beforeRows: JuchuKizaiMeisaiValues[]
-): JuchuKizaiMeisaiValues[] => {
-  const visibleBefore = beforeRows.filter((d) => !d.delFlag);
-  return savedRows.map((row, i) => {
-    const before = visibleBefore[i];
-    return before && before.kizaiId === row.kizaiId && before.jizenDat
-      ? withJizen(row, before.jizenDat, before.jizenQty ?? null)
-      : row;
-  });
-};
-
-/**
- * 在庫データに事前準備の分を反映する（JIZEN_UI_ONLY の間だけ使う）
- * DB対応後は在庫ビューが事前準備を引き当てるので不要になる
- * @param stock 在庫データ（明細の行ごと）
- * @param rows 受注機材明細（保存後）
- * @param kicsShukoDat KICS出庫日時（保存後）
- * @param yardShukoDat YARD出庫日時（保存後）
- */
-export const applyJizenToStock = (
-  stock: StockTableValues[][],
-  rows: JuchuKizaiMeisaiValues[],
-  kicsShukoDat: Date | null,
-  yardShukoDat: Date | null
-): StockTableValues[][] => {
-  const diff = getJizenStockDiff(rows, [], kicsShukoDat, yardShukoDat);
-  if (diff.size === 0) return stock;
-  return stock.map((row) =>
-    row.map((d) => {
-      const qty = diff.get(`${d.kizaiId}_${toJapanYMDString(d.calDat)}`);
-      return qty ? { ...d, zaikoQty: Number(d.zaikoQty) - qty } : d;
-    })
-  );
-};
-
-/**
  * 在庫テーブルの基準日（テーブルの左端はこの前日）
  * 事前準備がある明細があれば、最も過去の準備日を基準にする
  * @param shukoDate 出庫日
@@ -177,4 +127,32 @@ export const validateJizen = (
     }
   }
   return messages;
+};
+
+/**
+ * 事前準備の項目（準備日時・準備数）を外した明細
+ * 明細の変更判定（checkJuchuKizaiMeisai）に使う。事前準備だけを変えたときに、明細・本番の伝票・入庫伝票の
+ * 処理まで走らないようにするため
+ * @param rows 受注機材明細
+ */
+export const withoutJizen = (rows: JuchuKizaiMeisaiValues[]) =>
+  rows.map(({ jizenDat: _dat, jizenQty: _qty, ...rest }) => rest);
+
+/**
+ * 事前準備が変わった明細（追加・変更・解除）
+ * 明細の追加・削除はここでは見ない（明細の変更として扱い、保存時に事前準備も一緒に処理する）
+ * @param originRows 受注機材明細（元データ）
+ * @param rows 受注機材明細（編集中）
+ */
+export const getJizenChangedRows = (originRows: JuchuKizaiMeisaiValues[], rows: JuchuKizaiMeisaiValues[]) => {
+  const originMap = new Map(originRows.map((d) => [`${d.juchuKizaiMeisaiId}_${d.kizaiId}`, d]));
+  return rows.filter((row) => {
+    if (row.delFlag || !row.saveFlag) return false;
+    const origin = originMap.get(`${row.juchuKizaiMeisaiId}_${row.kizaiId}`);
+    if (!origin) return false;
+    return (
+      (origin.jizenDat?.getTime() ?? null) !== (row.jizenDat?.getTime() ?? null) ||
+      (origin.jizenQty ?? null) !== (row.jizenQty ?? null)
+    );
+  });
 };

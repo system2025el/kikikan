@@ -25,7 +25,6 @@ import { blue, grey, lightBlue } from '@mui/material/colors';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { BASHO_ID, SAGYO_SIJI_ID } from '@/app/_lib/constants';
-import { stockColors } from '@/app/(main)/_lib/colors';
 import { toJapanMDString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { openOrFocusTab } from '@/app/(main)/_lib/tab-focus';
 import { DateTime, FormDateX } from '@/app/(main)/_ui/date';
@@ -133,7 +132,13 @@ const StockTableRow = React.memo(
     return (
       <TableRow>
         {row.map((cell, colIndex) => {
-          const bgcolor = getStockRowBackgroundColor(cell.calDat, dateRange, shubetuColorMap, juchuColorMap);
+          const bgcolor = getStockRowBackgroundColor(
+            cell.calDat,
+            dateRange,
+            shubetuColorMap,
+            juchuColorMap,
+            jizenRange
+          );
           return (
             <TableCell
               key={colIndex}
@@ -141,11 +146,7 @@ const StockTableRow = React.memo(
               style={styles.row}
               sx={{
                 borderLeft: colIndex === 0 ? '1px solid rgba(0, 0, 0, 0.12)' : 'none',
-                // 本番日・使用期間の色が無い日だけ、事前準備の期間を塗る
-                bgcolor:
-                  bgcolor === 'white' && jizenRange.includes(toJapanYMDString(cell.calDat))
-                    ? stockColors.jizen
-                    : bgcolor,
+                bgcolor: bgcolor,
                 color: cell.zaikoQty < 0 ? 'red' : 'black',
               }}
               size="small"

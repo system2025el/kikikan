@@ -24,6 +24,7 @@ import {
 import { addDays, addMonths, set, subDays, subMonths } from 'date-fns';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+import { HONBANBI_SHUBETU_ID } from '@/app/_lib/constants';
 import { toJapanMDString } from '@/app/(main)/_lib/date-conversion';
 import { permission } from '@/app/(main)/_lib/permission';
 import { User } from '@/app/(main)/_lib/types';
@@ -550,6 +551,13 @@ export const LoanSituation = (props: {
                   sx={{ backgroundColor: colorData.find((c) => c.colorId === 1)?.colorNam }}
                 >
                   使用日
+                </Typography>
+                <Typography
+                  minWidth={60}
+                  textAlign={'center'}
+                  sx={{ backgroundColor: colorData.find((c) => c.colorId === HONBANBI_SHUBETU_ID.jizen)?.colorNam }}
+                >
+                  事前準備
                 </Typography>
                 <Typography
                   minWidth={60}

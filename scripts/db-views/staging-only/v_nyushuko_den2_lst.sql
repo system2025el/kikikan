@@ -1,5 +1,16 @@
--- 適用状況: ステージング 2026-10-06（2026-10-15 の出庫場所の照合も 2026-10-15 適用） / 本番 未適用
+-- 適用状況: ステージング 2026-10-06（2026-10-15 の出庫場所の照合も 2026-10-15 適用。事前準備の変更は 2026-10-21） / 本番 未適用
 -- =====================================================================
+-- ★2026-10-21 追加（事前準備、2026-10-21 ステージング適用。列構成は不変）:
+--   ・v_get_juchu_kizai_head との結合に「種別 3（事前）なら juchu_kizai_head_idv = juchu_kizai_head_id」を加える（事前は機材ヘッダーごと）。
+--   ・受注削除の判定（juchu_meisai_del_flg）の出庫場所の照合に 80/90 を加える（ARRAY[10, 20] → ARRAY[10, 20, 80, 90]）。
+--     準備日を消したとき、事前の実績ある伝票を未使用の明細idに付け替えて予定0で残すので、受注削除の行として出る。
+--   ・予定・読取・補正がすべて 0 の行を出さない条件（今は入庫 30 だけ）に 80/90 を加える。
+--   2026-10-21 ステージングで検証（一時ビューで読み取りのみ）: 事前の伝票が無い状態で全列・行数（123,266）とも差分0。
+--   テストの受注で、事前の明細行が機材ヘッダーごとに1行ずつ（二重にならず）出ることを確認。
+-- ★本番に del-meisai だけを先に当てる場合は、このファイルではなく del-meisai ブランチの版（git show del-meisai:<このファイル>）を使う。
+--   このファイルは del-meisai と事前準備の両方の変更を含む。
+--
+-- ---- ここから del-meisai（受注削除）の変更 ----
 -- v_nyushuko_den2_lst  末尾に juchu_meisai_del_flg（受注削除）の1列を追加（31→32列）
 --
 -- 2026-10-15 追加: 機材の判定で、出庫（sagyo_kbn_id 10/20）のときは受注明細の出庫場所（shozoku_id）が伝票の場所
@@ -60,16 +71,16 @@ CREATE OR REPLACE VIEW public.v_nyushuko_den2_lst WITH (security_invoker = on) A
     v_nyushuko_den_lst.add_user,
     v_nyushuko_den_lst.upd_user,
         CASE
-            WHEN sum(COALESCE(v_nyushuko_den_lst.plan_qty, 0::bigint)) <> 0 THEN 0
+            WHEN sum(COALESCE(v_nyushuko_den_lst.plan_qty, 0::bigint)) <> 0::numeric THEN 0
             WHEN COALESCE(v_nyushuko_den_lst.ctn_flg, 0) = 1 THEN (NOT (EXISTS ( SELECT 1
                FROM t_juchu_ctn_meisai c
               WHERE c.juchu_head_id = v_nyushuko_den_lst.juchu_head_id AND c.juchu_kizai_head_id = v_nyushuko_den_lst.juchu_kizai_head_id AND c.juchu_kizai_meisai_id = v_nyushuko_den_lst.juchu_kizai_meisai_id AND c.kizai_id = v_nyushuko_den_lst.kizai_id AND c.shozoku_id = v_nyushuko_den_lst.nyushuko_basho_id)))::integer
             ELSE (NOT (EXISTS ( SELECT 1
                FROM t_juchu_kizai_meisai m
-              WHERE m.juchu_head_id = v_nyushuko_den_lst.juchu_head_id AND m.juchu_kizai_head_id = v_nyushuko_den_lst.juchu_kizai_head_id AND m.juchu_kizai_meisai_id = v_nyushuko_den_lst.juchu_kizai_meisai_id AND m.kizai_id = v_nyushuko_den_lst.kizai_id AND (v_nyushuko_den_lst.sagyo_kbn_id <> ALL (ARRAY[10, 20]) OR m.shozoku_id = v_nyushuko_den_lst.nyushuko_basho_id))))::integer
+              WHERE m.juchu_head_id = v_nyushuko_den_lst.juchu_head_id AND m.juchu_kizai_head_id = v_nyushuko_den_lst.juchu_kizai_head_id AND m.juchu_kizai_meisai_id = v_nyushuko_den_lst.juchu_kizai_meisai_id AND m.kizai_id = v_nyushuko_den_lst.kizai_id AND ((v_nyushuko_den_lst.sagyo_kbn_id <> ALL (ARRAY[10, 20, 80, 90])) OR m.shozoku_id = v_nyushuko_den_lst.nyushuko_basho_id))))::integer
         END AS juchu_meisai_del_flg
    FROM v_nyushuko_den_lst
-     LEFT JOIN v_get_juchu_kizai_head ON v_nyushuko_den_lst.juchu_head_id = v_get_juchu_kizai_head.juchu_head_id AND v_nyushuko_den_lst.nyushuko_dat = v_get_juchu_kizai_head.sagyo_den_dat AND v_nyushuko_den_lst.nyushuko_basho_id = v_get_juchu_kizai_head.sagyo_id AND v_nyushuko_den_lst.nyushuko_shubetu_id = v_get_juchu_kizai_head.nyushuko_shubetu_id AND v_nyushuko_den_lst.juchu_kizai_head_kbn = v_get_juchu_kizai_head.juchu_kizai_head_kbnv::bigint
-  WHERE v_nyushuko_den_lst.juchu_kizai_meisai_id <> 0 AND v_nyushuko_den_lst.kizai_id <> 0 AND NOT (v_nyushuko_den_lst.sagyo_kbn_id = 30 AND v_nyushuko_den_lst.plan_qty = 0 AND v_nyushuko_den_lst.result_qty = 0 AND v_nyushuko_den_lst.result_adj_qty = 0)
+     LEFT JOIN v_get_juchu_kizai_head ON v_nyushuko_den_lst.juchu_head_id = v_get_juchu_kizai_head.juchu_head_id AND v_nyushuko_den_lst.nyushuko_dat = v_get_juchu_kizai_head.sagyo_den_dat AND v_nyushuko_den_lst.nyushuko_basho_id = v_get_juchu_kizai_head.sagyo_id AND v_nyushuko_den_lst.nyushuko_shubetu_id = v_get_juchu_kizai_head.nyushuko_shubetu_id AND v_nyushuko_den_lst.juchu_kizai_head_kbn = v_get_juchu_kizai_head.juchu_kizai_head_kbnv::bigint AND (v_nyushuko_den_lst.nyushuko_shubetu_id IS DISTINCT FROM 3 OR v_get_juchu_kizai_head.juchu_kizai_head_idv = v_nyushuko_den_lst.juchu_kizai_head_id::text)
+  WHERE v_nyushuko_den_lst.juchu_kizai_meisai_id <> 0 AND v_nyushuko_den_lst.kizai_id <> 0 AND NOT ((v_nyushuko_den_lst.sagyo_kbn_id = 30 OR v_nyushuko_den_lst.sagyo_kbn_id = 80 OR v_nyushuko_den_lst.sagyo_kbn_id = 90) AND v_nyushuko_den_lst.plan_qty = 0 AND v_nyushuko_den_lst.result_qty = 0 AND v_nyushuko_den_lst.result_adj_qty = 0)
   GROUP BY v_nyushuko_den_lst.nyushuko_shubetu_id, v_nyushuko_den_lst.sagyo_kbn_id, v_nyushuko_den_lst.sagyo_kbn_nam, v_nyushuko_den_lst.sagyo_kbn_nam_short, v_nyushuko_den_lst.juchu_head_id, v_nyushuko_den_lst.juchu_kizai_head_id, v_nyushuko_den_lst.juchu_kizai_meisai_id, v_nyushuko_den_lst.nyushuko_dat, v_nyushuko_den_lst.nyushuko_basho_id, v_nyushuko_den_lst.shozoku_nam, v_nyushuko_den_lst.koen_nam, v_nyushuko_den_lst.koenbasho_nam, v_nyushuko_den_lst.kokyaku_nam, v_get_juchu_kizai_head.juchu_kizai_head_idv, v_get_juchu_kizai_head.head_namv, v_get_juchu_kizai_head.juchu_kizai_head_kbnv, v_nyushuko_den_lst.kizai_id, v_nyushuko_den_lst.kizai_nam, v_nyushuko_den_lst.bld_cod, v_nyushuko_den_lst.tana_cod, v_nyushuko_den_lst.eda_cod, (COALESCE(v_nyushuko_den_lst.ctn_flg, 0)), v_nyushuko_den_lst.mem, v_nyushuko_den_lst.dsp_ord_num_meisai, v_nyushuko_den_lst.indent_num, v_nyushuko_den_lst.mem2, v_nyushuko_den_lst.add_user, v_nyushuko_den_lst.upd_user
   ORDER BY v_nyushuko_den_lst.nyushuko_dat, v_nyushuko_den_lst.sagyo_kbn_id, v_nyushuko_den_lst.nyushuko_basho_id, v_nyushuko_den_lst.juchu_head_id, v_nyushuko_den_lst.juchu_kizai_head_id, v_get_juchu_kizai_head.juchu_kizai_head_idv, v_get_juchu_kizai_head.juchu_kizai_head_kbnv, (COALESCE(v_nyushuko_den_lst.ctn_flg, 0)), v_nyushuko_den_lst.dsp_ord_num_meisai, v_nyushuko_den_lst.bld_cod, v_nyushuko_den_lst.tana_cod, v_nyushuko_den_lst.eda_cod, v_nyushuko_den_lst.kizai_id;

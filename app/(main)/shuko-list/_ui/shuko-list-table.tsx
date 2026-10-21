@@ -51,6 +51,15 @@ export const ShukoListTable = (props: {
   };
 
   const handleClickRow = (row: ShukoTableValues, sagyoKbnId: number) => {
+    // 事前の行は機材ヘッダーごとなので、機材ヘッダーidを付けて開く（ピッキング → 事前ピッキング、最終確認 → 事前最終確認）
+    if (row.jizenFlg) {
+      const jizenSagyoKbnId =
+        sagyoKbnId === SAGYO_KBN_ID.shukoPicking ? SAGYO_KBN_ID.jizenPicking : SAGYO_KBN_ID.jizenConfirmation;
+      openOrFocusTab(
+        `shuko-list/shuko-detail/${row.juchuHeadId}/${row.juchuKizaiHeadKbn}/${row.nyushukoBashoId}/${new Date(row.nyushukoDat).toISOString()}/${jizenSagyoKbnId}?jkhId=${row.juchuKizaiHeadIdv}`
+      );
+      return;
+    }
     openOrFocusTab(
       `shuko-list/shuko-detail/${row.juchuHeadId}/${row.juchuKizaiHeadKbn}/${row.nyushukoBashoId}/${new Date(row.nyushukoDat).toISOString()}/${sagyoKbnId}`
     );
@@ -181,13 +190,15 @@ export const ShukoListTable = (props: {
                 <Typography
                   variant="body2"
                   color={
-                    row.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.normal
-                      ? dispColors.main
-                      : row.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.return
-                        ? dispColors.return
-                        : row.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.keep
-                          ? dispColors.keep
-                          : dispColors.main
+                    row.jizenFlg
+                      ? dispColors.jizen
+                      : row.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.normal
+                        ? dispColors.main
+                        : row.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.return
+                          ? dispColors.return
+                          : row.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.keep
+                            ? dispColors.keep
+                            : dispColors.main
                   }
                 >
                   {row.headNamv}

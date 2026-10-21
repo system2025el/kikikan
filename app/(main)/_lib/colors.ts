@@ -71,6 +71,11 @@ export const dispColors = {
    * 通常伝票
    */
   main: 'primary',
+  /**
+   * 事前（事前ピッキング・事前最終確認）。出庫一覧・事前の明細画面の明細名の文字色。
+   * HT・ゲートの一覧の背景色、在庫表の事前準備の期間（m_honbanbi_color の clolor_id = 4）と同じ値
+   */
+  jizen: '#E8D5B7',
 };
 
 /**
@@ -96,17 +101,6 @@ export const sagyoKbnColors = {
    * 移動（出庫・入庫とも共通。MUI の purple[400] と同値）
    */
   ido: 'rgba(171, 71, 188, 1)',
-};
-
-/**
- * 在庫テーブルの色
- */
-export const stockColors = {
-  /**
-   * 事前準備の期間（準備日〜出庫日の前日）
-   * 本番日種別の色（m_honbanbi_color）と見分けがつくよう、それらに無い茶系にしている
-   */
-  jizen: '#E8D5B7',
 };
 
 export const weeklyColors = {
