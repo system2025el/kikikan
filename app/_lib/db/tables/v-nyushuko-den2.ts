@@ -131,7 +131,7 @@ export const selectFilteredShukoList = async (queries: ShukoListSearchValues) =>
   if (queries.section && queries.section.length !== 0) {
     const likeClouds = queries.section
       .map((d) => `d2.section_namv::TEXT LIKE ${p(`%${escapeLikeString(d)}%`)}`)
-      .join(' OR');
+      .join(' OR ');
     query += ` AND (${likeClouds})`;
   }
 
@@ -249,7 +249,7 @@ export const selectFilteredNyukoList = async (queries: NyukoListSearchValues) =>
   if (queries.section && queries.section.length !== 0) {
     const likeClouds = queries.section
       .map((d) => `d2.section_namv::TEXT LIKE ${p(`%${escapeLikeString(d)}%`)}`)
-      .join(' OR');
+      .join(' OR ');
     query += ` AND (${likeClouds})`;
   }
 
