@@ -51,8 +51,8 @@ import {
   deleteNyushukoDen,
   deleteNyushukoDenKeepResulted,
   deleteShukoDen,
+  deleteShukoDenBashoKeepResulted,
   insertNyushukoDen,
-  moveShukoDenToDeletedMeisai,
   selectContainerNyushukoDenConfirm,
   selectShukoResultDenKizaiCount,
   updateDeletedShukoDenDat,
@@ -60,6 +60,7 @@ import {
   updateNyushukoDenFromKizaiMeisai,
   updateShukoCtnDenDat,
   upsertNyushukoDen,
+  upsertShukoDenBasho,
 } from '@/app/_lib/db/tables/t-nyushuko-den';
 import {
   deleteNyushukoFix,
@@ -73,7 +74,7 @@ import {
   deleteKizaiIdNyushukoResultKeepDen,
   deleteNyukoResult,
   deleteShukoResult,
-  moveShukoResultToDeletedMeisai,
+  deleteShukoResultBashoKeepDen,
   updateDeletedShukoResultDat,
   updateShukoResult,
 } from '@/app/_lib/db/tables/t-nyushuko-result';
@@ -1273,19 +1274,19 @@ export const delNyushukoDenKeepResulted = async (
 };
 
 /**
- * 出庫場所が変わった機材の、元の場所の実績ある出庫伝票・実績を受注削除として残す
- * 実績・補正がある伝票だけを新しい明細idに付け替えて予定数0にする（moveShukoDenToDeletedMeisai）。
- * 付け替えなかった伝票・実績は、この後の delShukoDen・delShukoResult で今までどおり削除する
+ * 出庫場所が変わった機材の、元の場所の出庫伝票・実績を整理する（明細idは変えない）
+ * 実績・補正がある伝票は予定数0にして受注削除として元の場所に残し、それ以外の伝票と、伝票が無くなった実績は削除する。
+ * 明細idを変えないので、元の場所に戻したとき（K → Y → K）は残した伝票がそのまま通常の行に戻り、実績も引き継ぐ
+ * （新しい場所の伝票は upsShukoDenBasho で作る／更新する）。
+ * キープの画面は場所を変えたら元の場所を全部消す（delShukoDen・delShukoResult）ので、この関数はメイン明細専用
  * @param shozokuChangedData 出庫場所が変わった受注機材明細（変更後の値）
  * @param originMap 変更前の受注機材明細（明細idがキー）
- * @param meisaiIdCounter 未使用の明細idのカウンター（next が次に使える明細id。付け替えたときだけ進める）
  * @param userNam ユーザー名
  * @param connection
  */
 const keepShozokuChangedShukoDen = async (
   shozokuChangedData: JuchuKizaiMeisaiValues[],
   originMap: Map<number, JuchuKizaiMeisaiValues>,
-  meisaiIdCounter: { next: number },
   userNam: string,
   connection: PoolClient
 ) => {
@@ -1300,21 +1301,64 @@ const keepShozokuChangedShukoDen = async (
       juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
       kizai_id: d.kizaiId,
     };
-    // 付け替える行があるかは更新してみないと分からないので、次の明細idで更新し、付け替えたときだけカウンターを進める
-    const newMeisaiId = meisaiIdCounter.next;
-    const moved = await moveShukoDenToDeletedMeisai(data, origin.shozokuId, newMeisaiId, updDat, userNam, connection);
-    if (moved > 0) {
-      meisaiIdCounter.next++;
-      await moveShukoResultToDeletedMeisai(
-        d.juchuHeadId,
-        d.juchuKizaiHeadId,
-        d.juchuKizaiMeisaiId,
-        d.kizaiId,
-        origin.shozokuId,
-        newMeisaiId,
+    await deleteShukoDenBashoKeepResulted(data, origin.shozokuId, updDat, userNam, connection);
+    await deleteShukoResultBashoKeepDen(
+      d.juchuHeadId,
+      d.juchuKizaiHeadId,
+      d.juchuKizaiMeisaiId,
+      d.kizaiId,
+      origin.shozokuId,
+      connection
+    );
+  }
+};
+
+/**
+ * 出庫場所が変わった機材の、新しい場所の出庫伝票（ピッキング・最終確認）を作る／更新する
+ * 新しい場所に同じ明細id・機材の伝票（元の場所に戻したときの受注削除の行）があれば、予定数・作業日時・表示順・
+ * インデントを更新して通常の行に戻す。無ければ作る。あわせて、その場所の実績の作業日時を新しい出庫日時に揃える
+ * @param juchuKizaiMeisaiData 出庫場所が変わった受注機材明細（変更後の値。shozokuId が新しい場所）
+ * @param shukoDat 新しい場所の出庫日時
+ * @param userNam ユーザー名
+ * @param connection
+ */
+const upsShukoDenBasho = async (
+  juchuKizaiMeisaiData: JuchuKizaiMeisaiValues[],
+  shukoDat: Date,
+  userNam: string,
+  connection: PoolClient
+) => {
+  const now = new Date().toISOString();
+  for (const d of juchuKizaiMeisaiData) {
+    for (const sagyoKbnId of [SAGYO_KBN_ID.shukoPicking, SAGYO_KBN_ID.shukoConfirmation]) {
+      await upsertShukoDenBasho(
+        {
+          juchu_head_id: d.juchuHeadId,
+          juchu_kizai_head_id: d.juchuKizaiHeadId,
+          juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
+          sagyo_kbn_id: sagyoKbnId,
+          sagyo_den_dat: shukoDat.toISOString(),
+          sagyo_id: d.shozokuId,
+          kizai_id: d.kizaiId,
+          plan_qty: d.planQty,
+          dsp_ord_num: d.dspOrdNum,
+          indent_num: d.indentNum,
+          add_dat: now,
+          add_user: userNam,
+        },
         connection
       );
     }
+    // 受注削除の行を通常の行に戻した場合、実績の日時を伝票に揃える（作業場所・機材が条件なので、ほかの場所の実績は動かない）
+    await updateShukoResult(
+      d.juchuHeadId,
+      d.juchuKizaiHeadId,
+      d.juchuKizaiMeisaiId,
+      d.kizaiId,
+      d.shozokuId,
+      shukoDat.toISOString(),
+      connection
+    );
   }
 };
 
@@ -3840,33 +3884,31 @@ export const saveJuchuKizai = async (
 
       // 出庫機材伝票削除、追加
       if (addJuchuKizaiMeisaiData.length > 0 || shozokuChangedData.length > 0) {
-        // 出庫場所が変わった機材の、元の場所の実績ある出庫伝票・実績は、受注削除として元の場所に残す
-        // （新しい明細idに付け替えて予定数0にする。明細を削除したときの受注削除と同じ扱いになる）
-        // 明細idは新規明細の採番の続きから振る（受注機材明細・入出庫伝票の最大値より大きく、未使用）
-        const meisaiIdCounter = { next: newJuchuKizaiMeisaiId };
-        await keepShozokuChangedShukoDen(shozokuChangedData, originMap, meisaiIdCounter, userNam, connection);
-        await delShukoDen(shozokuChangedData, connection);
-        await delShukoResult(shozokuChangedData, connection);
+        // 出庫場所が変わった機材の、元の場所の出庫伝票・実績を整理する（明細idは変えない）
+        // 実績・補正がある伝票は予定数0にして受注削除として元の場所に残し、それ以外は削除する
+        await keepShozokuChangedShukoDen(shozokuChangedData, originMap, userNam, connection);
 
         if (data.kicsShukoDat) {
-          const addKicsJuchuKizaiMeisaiData = [
-            ...addJuchuKizaiMeisaiData.filter((d) => d.shozokuId === BASHO_ID.kics),
-            ...shozokuChangedData.filter((d) => d.shozokuId === BASHO_ID.kics),
-          ];
-
+          // 新規の明細は新しい明細idなので作るだけ
+          const addKicsJuchuKizaiMeisaiData = addJuchuKizaiMeisaiData.filter((d) => d.shozokuId === BASHO_ID.kics);
           if (addKicsJuchuKizaiMeisaiData.length > 0) {
             await addShukoDen(addKicsJuchuKizaiMeisaiData, data.kicsShukoDat, userNam, connection);
+          }
+          // 出庫場所が変わった明細は、新しい場所に同じ明細idの受注削除の行（元に戻した場合）があれば通常の行に戻す
+          const changedKicsJuchuKizaiMeisaiData = shozokuChangedData.filter((d) => d.shozokuId === BASHO_ID.kics);
+          if (changedKicsJuchuKizaiMeisaiData.length > 0) {
+            await upsShukoDenBasho(changedKicsJuchuKizaiMeisaiData, data.kicsShukoDat, userNam, connection);
           }
         }
 
         if (data.yardShukoDat) {
-          const addYardJuchuKizaiMeisaiData = [
-            ...addJuchuKizaiMeisaiData.filter((d) => d.shozokuId === BASHO_ID.yard),
-            ...shozokuChangedData.filter((d) => d.shozokuId === BASHO_ID.yard),
-          ];
-
+          const addYardJuchuKizaiMeisaiData = addJuchuKizaiMeisaiData.filter((d) => d.shozokuId === BASHO_ID.yard);
           if (addYardJuchuKizaiMeisaiData.length > 0) {
             await addShukoDen(addYardJuchuKizaiMeisaiData, data.yardShukoDat, userNam, connection);
+          }
+          const changedYardJuchuKizaiMeisaiData = shozokuChangedData.filter((d) => d.shozokuId === BASHO_ID.yard);
+          if (changedYardJuchuKizaiMeisaiData.length > 0) {
+            await upsShukoDenBasho(changedYardJuchuKizaiMeisaiData, data.yardShukoDat, userNam, connection);
           }
         }
       }
