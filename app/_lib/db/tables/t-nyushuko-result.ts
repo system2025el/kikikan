@@ -48,39 +48,35 @@ export const updateShukoResult = async (
 };
 
 /**
- * 出庫場所が変わった機材の、元の場所の出庫実績（ピッキング・最終確認）を新しい明細idに付け替える
- * moveShukoDenToDeletedMeisai で付け替えた伝票（同じ作業区分・作業日時・作業場所・機材で、新しい明細idのもの）が
- * ある実績だけが対象。付け替えなかった実績は呼び出し元で今までどおり削除する。必ず伝票の付け替えの後に呼ぶこと
+ * 出庫場所が変わった機材の、元の場所の出庫実績（ピッキング・最終確認）のうち、伝票が無くなったものを削除する
+ * deleteShukoDenBashoKeepResulted で元の場所の伝票を整理した後に呼ぶ（残した受注削除の伝票の実績はそのまま残る）。
+ * 判定に伝票の今の状態を使うため、必ず伝票の整理の後に呼ぶこと
  * @param juchuHeadId 受注ヘッダーid
  * @param juchuKizaiHeadId 受注機材ヘッダーid
- * @param oldMeisaiId 変更前の明細id
+ * @param juchuKizaiMeisaiId 受注機材明細id
  * @param kizaiId 機材id
  * @param oldSagyoId 変更前の出庫場所
- * @param newMeisaiId 付け替え先の明細id
  * @param connection
  */
-export const moveShukoResultToDeletedMeisai = async (
+export const deleteShukoResultBashoKeepDen = async (
   juchuHeadId: number,
   juchuKizaiHeadId: number,
-  oldMeisaiId: number,
+  juchuKizaiMeisaiId: number,
   kizaiId: number,
   oldSagyoId: number,
-  newMeisaiId: number,
   connection: PoolClient
 ) => {
   const query = `
-    UPDATE
+    DELETE FROM
       ${SCHEMA}.t_nyushuko_result AS r
-    SET
-      juchu_kizai_meisai_id = $6
     WHERE
       r.juchu_head_id = $1
       AND r.juchu_kizai_head_id = $2
       AND r.juchu_kizai_meisai_id = $3
       AND r.kizai_id = $4
       AND r.sagyo_id = $5
-      AND r.sagyo_kbn_id = ANY($7)
-      AND EXISTS (
+      AND r.sagyo_kbn_id = ANY($6)
+      AND NOT EXISTS (
         SELECT
           1
         FROM
@@ -88,7 +84,7 @@ export const moveShukoResultToDeletedMeisai = async (
         WHERE
           d.juchu_head_id = r.juchu_head_id
           AND d.juchu_kizai_head_id = r.juchu_kizai_head_id
-          AND d.juchu_kizai_meisai_id = $6
+          AND d.juchu_kizai_meisai_id = r.juchu_kizai_meisai_id
           AND d.kizai_id = r.kizai_id
           AND d.sagyo_kbn_id = r.sagyo_kbn_id
           AND d.sagyo_den_dat = r.sagyo_den_dat
@@ -96,12 +92,12 @@ export const moveShukoResultToDeletedMeisai = async (
       )
   `;
 
-  const values = [juchuHeadId, juchuKizaiHeadId, oldMeisaiId, kizaiId, oldSagyoId, newMeisaiId, [10, 20]];
+  const values = [juchuHeadId, juchuKizaiHeadId, juchuKizaiMeisaiId, kizaiId, oldSagyoId, [10, 20]];
 
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw new Error('[moveShukoResultToDeletedMeisai] DBエラー:', { cause: e });
+    throw new Error('[deleteShukoResultBashoKeepDen] DBエラー:', { cause: e });
   }
 };
 
