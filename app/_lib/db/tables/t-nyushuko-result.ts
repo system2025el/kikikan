@@ -57,8 +57,9 @@ export const updateShukoResult = async (
  * @param juchuKizaiHeadId 受注機材ヘッダーid
  * @param juchuKizaiMeisaiId 受注機材明細id
  * @param kizaiId 機材id
- * @param oldSagyoId 変更前の出庫場所
+ * @param oldSagyoId 変更前の出庫場所（事前では事前の実績の作業場所）
  * @param connection
+ * @param jizen true なら事前（80/90）の実績を対象にする（準備日を消したとき）
  */
 export const deleteShukoResultBashoKeepDen = async (
   juchuHeadId: number,
@@ -66,7 +67,8 @@ export const deleteShukoResultBashoKeepDen = async (
   juchuKizaiMeisaiId: number,
   kizaiId: number,
   oldSagyoId: number,
-  connection: PoolClient
+  connection: PoolClient,
+  jizen = false
 ) => {
   const query = `
     DELETE FROM
@@ -94,78 +96,19 @@ export const deleteShukoResultBashoKeepDen = async (
       )
   `;
 
-  const values = [juchuHeadId, juchuKizaiHeadId, juchuKizaiMeisaiId, kizaiId, oldSagyoId, [10, 20]];
-
-  try {
-    await connection.query(query, values);
-  } catch (e) {
-    throw new Error('[deleteShukoResultBashoKeepDen] DBエラー:', { cause: e });
-  }
-};
-
-/**
- * 準備日を消した明細の、事前の実績（事前ピッキング 80・事前最終確認 90）を新しい明細idに付け替える
- * moveJizenDenToDeletedMeisai で付け替えた伝票（同じ作業区分・作業日時・作業場所・機材で、新しい明細idのもの）が
- * ある実績だけが対象。付け替えなかった実績は呼び出し元で削除する。必ず伝票の付け替えの後に呼ぶこと
- * @param juchuHeadId 受注ヘッダーid
- * @param juchuKizaiHeadId 受注機材ヘッダーid
- * @param oldMeisaiId 変更前の明細id
- * @param kizaiId 機材id
- * @param sagyoId 事前の実績の作業場所
- * @param newMeisaiId 付け替え先の明細id
- * @param connection
- */
-export const moveJizenResultToDeletedMeisai = async (
-  juchuHeadId: number,
-  juchuKizaiHeadId: number,
-  oldMeisaiId: number,
-  kizaiId: number,
-  sagyoId: number,
-  newMeisaiId: number,
-  connection: PoolClient
-) => {
-  const query = `
-    UPDATE
-      ${SCHEMA}.t_nyushuko_result AS r
-    SET
-      juchu_kizai_meisai_id = $6
-    WHERE
-      r.juchu_head_id = $1
-      AND r.juchu_kizai_head_id = $2
-      AND r.juchu_kizai_meisai_id = $3
-      AND r.kizai_id = $4
-      AND r.sagyo_id = $5
-      AND r.sagyo_kbn_id = ANY($7)
-      AND EXISTS (
-        SELECT
-          1
-        FROM
-          ${SCHEMA}.t_nyushuko_den AS d
-        WHERE
-          d.juchu_head_id = r.juchu_head_id
-          AND d.juchu_kizai_head_id = r.juchu_kizai_head_id
-          AND d.juchu_kizai_meisai_id = $6
-          AND d.kizai_id = r.kizai_id
-          AND d.sagyo_kbn_id = r.sagyo_kbn_id
-          AND d.sagyo_den_dat = r.sagyo_den_dat
-          AND d.sagyo_id = r.sagyo_id
-      )
-  `;
-
   const values = [
     juchuHeadId,
     juchuKizaiHeadId,
-    oldMeisaiId,
+    juchuKizaiMeisaiId,
     kizaiId,
-    sagyoId,
-    newMeisaiId,
-    [SAGYO_KBN_ID.jizenPicking, SAGYO_KBN_ID.jizenConfirmation],
+    oldSagyoId,
+    jizen ? [SAGYO_KBN_ID.jizenPicking, SAGYO_KBN_ID.jizenConfirmation] : [10, 20],
   ];
 
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw new Error('[moveJizenResultToDeletedMeisai] DBエラー:', { cause: e });
+    throw new Error('[deleteShukoResultBashoKeepDen] DBエラー:', { cause: e });
   }
 };
 
@@ -216,14 +159,16 @@ export const updateJizenResultDat = async (
 };
 
 /**
- * 事前の実績（80/90）を明細1件分すべて削除する（作業場所を問わない）
+ * 事前の実績（80/90）を明細1件分削除する
  * deleteJizenDen と組で使う。本番（10/20）にコピーした実績は消さない
  * @param data 明細のキー
  * @param connection
+ * @param sagyoId 作業場所（省略すると作業場所を問わず全部）
  */
 export const deleteJizenResult = async (
   data: { juchu_head_id: number; juchu_kizai_head_id: number; juchu_kizai_meisai_id: number; kizai_id: number },
-  connection: PoolClient
+  connection: PoolClient,
+  sagyoId?: number
 ) => {
   const query = `
     DELETE FROM
@@ -234,6 +179,7 @@ export const deleteJizenResult = async (
       AND juchu_kizai_meisai_id = $3
       AND kizai_id = $4
       AND sagyo_kbn_id = ANY($5)
+      AND ($6::integer IS NULL OR sagyo_id = $6)
   `;
 
   const values = [
@@ -242,6 +188,7 @@ export const deleteJizenResult = async (
     data.juchu_kizai_meisai_id,
     data.kizai_id,
     [SAGYO_KBN_ID.jizenPicking, SAGYO_KBN_ID.jizenConfirmation],
+    sagyoId ?? null,
   ];
 
   try {

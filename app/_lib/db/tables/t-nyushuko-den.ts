@@ -1023,8 +1023,7 @@ export const deleteNyushukoDen = async (
  * 受注削除として予定数0で残す出庫伝票行の条件（d は対象の伝票行）
  * ・出庫（ピッキング・最終確認）で実績・補正がある
  * ・ピッキングの行は、同じ日時・場所の最終確認に実績・補正が無いときだけ
- * deleteNyushukoDenKeepResulted（明細の削除）と deleteShukoDenBashoKeepResulted（出庫場所の変更）、
- * moveJizenDenToDeletedMeisai（準備日の削除）で共通
+ * deleteNyushukoDenKeepResulted（明細の削除）と deleteShukoDenBashoKeepResulted（出庫場所の変更・準備日の削除）で共通
  * @param jizen true なら事前（事前ピッキング 80・事前最終確認 90）で同じ条件にする
  * @returns SQL の条件式
  */
@@ -1065,20 +1064,29 @@ const shukoKeepCondition = (jizen = false) => {
  * 同じ明細idのままでも受注削除として扱われる（v_nyushuko_den2_lst・deleteEmptyNyushukoDen・updateDeletedShukoDenDat）。
  * 実績は deleteShukoResultBashoKeepDen で、伝票が無くなった分だけ削除する（この関数の後に呼ぶ）。
  *
+ * 事前（jizen = true）では、準備日を消したときに事前の伝票（80/90）を同じ形で整理する。準備日を消しても明細は同じ場所に
+ * 残るので、事前の受注削除は「事前準備の行（t_juchu_kizai_jizen）が無い」で判定する（v_nyushuko_den2_lst・deleteEmptyNyushukoDen）。
+ *
  * @param data 対象の明細（受注ヘッダーid・受注機材ヘッダーid・明細id・機材id）
- * @param oldSagyoId 変更前の出庫場所
+ * @param oldSagyoId 変更前の出庫場所（事前では事前の伝票の作業場所＝明細の出庫場所）
  * @param updDat 更新日時
  * @param updUser 更新者
  * @param connection
+ * @param jizen true なら事前（事前ピッキング 80・事前最終確認 90）の伝票を対象にする
  */
 export const deleteShukoDenBashoKeepResulted = async (
   data: { juchu_head_id: number; juchu_kizai_head_id: number; juchu_kizai_meisai_id: number; kizai_id: number },
   oldSagyoId: number,
   updDat: string,
   updUser: string,
-  connection: PoolClient
+  connection: PoolClient,
+  jizen = false
 ) => {
   const keys = [data.juchu_head_id, data.juchu_kizai_head_id, data.juchu_kizai_meisai_id, data.kizai_id, oldSagyoId];
+  // 対象の作業区分（本番はピッキング・最終確認、事前は事前ピッキング・事前最終確認）
+  const kbnList = jizen
+    ? `${SAGYO_KBN_ID.jizenPicking}, ${SAGYO_KBN_ID.jizenConfirmation}`
+    : `${SAGYO_KBN_ID.shukoPicking}, ${SAGYO_KBN_ID.shukoConfirmation}`;
 
   // 残す行は予定数0にする
   const updateQuery = `
@@ -1094,7 +1102,7 @@ export const deleteShukoDenBashoKeepResulted = async (
       AND d.juchu_kizai_meisai_id = $3
       AND d.kizai_id = $4
       AND d.sagyo_id = $5
-      AND ${shukoKeepCondition()}
+      AND ${shukoKeepCondition(jizen)}
   `;
 
   // 元の場所の出庫伝票のうち、残さない行は削除
@@ -1107,8 +1115,8 @@ export const deleteShukoDenBashoKeepResulted = async (
       AND d.juchu_kizai_meisai_id = $3
       AND d.kizai_id = $4
       AND d.sagyo_id = $5
-      AND d.sagyo_kbn_id IN (${SAGYO_KBN_ID.shukoPicking}, ${SAGYO_KBN_ID.shukoConfirmation})
-      AND NOT (${shukoKeepCondition()})
+      AND d.sagyo_kbn_id IN (${kbnList})
+      AND NOT (${shukoKeepCondition(jizen)})
   `;
 
   try {
@@ -1116,67 +1124,6 @@ export const deleteShukoDenBashoKeepResulted = async (
     await connection.query(deleteQuery, keys);
   } catch (e) {
     throw new Error('[deleteShukoDenBashoKeepResulted] DBエラー:', { cause: e });
-  }
-};
-
-/**
- * 準備日を消した明細の、実績ある事前の伝票（事前ピッキング 80・事前最終確認 90）を受注削除として残す
- * （未使用の新しい明細idに付け替えて予定数0にする）
- *
- * 準備日を消しても受注機材明細は同じ場所に残るため、明細idのままでは「受注明細が無い＝受注削除」の判定
- * （v_nyushuko_den2_lst・deleteEmptyNyushukoDen）に乗らない。未使用の明細idに付け替えることで受注削除として扱う。
- * 残す条件は本番と同じ（shukoKeepCondition の 80/90 版）。付け替えなかった行は呼び出し元で削除する。
- * 実績は moveJizenResultToDeletedMeisai で付け替える（この関数の後に呼ぶ）。
- * ※本番（10/20）の出庫場所の変更は、明細idを変えずに予定数0にする形（deleteShukoDenBashoKeepResulted）に変わった。
- *   事前も同じ形にするかは検討中（そうすると本番の同じ明細とのつながりが保てる）
- *
- * @param data 対象の明細（受注ヘッダーid・受注機材ヘッダーid・明細id・機材id）
- * @param sagyoId 事前の伝票の作業場所（明細の出庫場所）
- * @param newMeisaiId 付け替え先の明細id（未使用のもの）
- * @param updDat 更新日時
- * @param updUser 更新者
- * @param connection
- * @returns 付け替えた伝票の件数
- */
-export const moveJizenDenToDeletedMeisai = async (
-  data: { juchu_head_id: number; juchu_kizai_head_id: number; juchu_kizai_meisai_id: number; kizai_id: number },
-  sagyoId: number,
-  newMeisaiId: number,
-  updDat: string,
-  updUser: string,
-  connection: PoolClient
-) => {
-  const query = `
-    UPDATE
-      ${SCHEMA}.t_nyushuko_den AS d
-    SET
-      juchu_kizai_meisai_id = $6
-      ,plan_qty = 0
-      ,upd_dat = $7
-      ,upd_user = $8
-    WHERE
-      d.juchu_head_id = $1
-      AND d.juchu_kizai_head_id = $2
-      AND d.juchu_kizai_meisai_id = $3
-      AND d.kizai_id = $4
-      AND d.sagyo_id = $5
-      AND ${shukoKeepCondition(true)}
-  `;
-
-  try {
-    const { rowCount } = await connection.query(query, [
-      data.juchu_head_id,
-      data.juchu_kizai_head_id,
-      data.juchu_kizai_meisai_id,
-      data.kizai_id,
-      sagyoId,
-      newMeisaiId,
-      updDat,
-      updUser,
-    ]);
-    return rowCount ?? 0;
-  } catch (e) {
-    throw new Error('[moveJizenDenToDeletedMeisai] DBエラー:', { cause: e });
   }
 };
 
@@ -1396,20 +1343,33 @@ export const deleteEmptyNyushukoDen = async (
       AND d.kizai_id = $7
       AND COALESCE(d.result_qty, 0) = 0
       AND COALESCE(d.result_adj_qty, 0) = 0
+      -- 事前（80/90）は「事前準備の行が無い」で判定する（準備日を消しても受注明細は同じ場所に残るため）
+      AND NOT EXISTS (
+        SELECT
+          1
+        FROM
+          ${SCHEMA}.t_juchu_kizai_jizen AS j
+        WHERE
+          d.sagyo_kbn_id IN (${SAGYO_KBN_ID.jizenPicking}, ${SAGYO_KBN_ID.jizenConfirmation})
+          AND j.juchu_head_id = d.juchu_head_id
+          AND j.juchu_kizai_head_id = d.juchu_kizai_head_id
+          AND j.juchu_kizai_meisai_id = d.juchu_kizai_meisai_id
+          AND j.kizai_id = d.kizai_id
+      )
       AND NOT EXISTS (
         SELECT
           1
         FROM
           ${SCHEMA}.t_juchu_kizai_meisai AS m
         WHERE
-          m.juchu_head_id = d.juchu_head_id
+          d.sagyo_kbn_id NOT IN (${SAGYO_KBN_ID.jizenPicking}, ${SAGYO_KBN_ID.jizenConfirmation})
+          AND m.juchu_head_id = d.juchu_head_id
           AND m.juchu_kizai_head_id = d.juchu_kizai_head_id
           AND m.juchu_kizai_meisai_id = d.juchu_kizai_meisai_id
           AND m.kizai_id = d.kizai_id
           -- 出庫は明細の出庫場所も照合する（明細はあっても出庫場所が変わった＝元の場所に残った受注削除の行を消せるように。
           -- v_nyushuko_den2_lst の受注削除の判定と同じ）
-          -- 事前（80/90）も伝票の場所は明細の出庫場所なので同じ
-          AND (d.sagyo_kbn_id NOT IN (${SAGYO_KBN_ID.shukoPicking}, ${SAGYO_KBN_ID.shukoConfirmation}, ${SAGYO_KBN_ID.jizenPicking}, ${SAGYO_KBN_ID.jizenConfirmation}) OR m.shozoku_id = d.sagyo_id)
+          AND (d.sagyo_kbn_id NOT IN (${SAGYO_KBN_ID.shukoPicking}, ${SAGYO_KBN_ID.shukoConfirmation}) OR m.shozoku_id = d.sagyo_id)
       )
       AND NOT EXISTS (
         SELECT
@@ -1601,14 +1561,16 @@ export const selectJizenResultExists = async (
 };
 
 /**
- * 事前の伝票（80/90）を明細1件分すべて削除する（作業場所を問わない）
- * 出庫場所の変更・明細の削除・分離で使う。受注削除として別の明細idに付け替えた行は対象外（明細idが違う）
+ * 事前の伝票（80/90）を明細1件分削除する
+ * 出庫場所の変更で使う（変更前の場所の分だけ消す。ほかの場所に残っている事前の受注削除の行は残す）
  * @param data 明細のキー
  * @param connection
+ * @param sagyoId 作業場所（省略すると作業場所を問わず全部）
  */
 export const deleteJizenDen = async (
   data: { juchu_head_id: number; juchu_kizai_head_id: number; juchu_kizai_meisai_id: number; kizai_id: number },
-  connection: PoolClient
+  connection: PoolClient,
+  sagyoId?: number
 ) => {
   const query = `
     DELETE FROM
@@ -1619,6 +1581,7 @@ export const deleteJizenDen = async (
       AND juchu_kizai_meisai_id = $3
       AND kizai_id = $4
       AND sagyo_kbn_id = ANY($5)
+      AND ($6::integer IS NULL OR sagyo_id = $6)
   `;
 
   const values = [
@@ -1627,6 +1590,7 @@ export const deleteJizenDen = async (
     data.juchu_kizai_meisai_id,
     data.kizai_id,
     [SAGYO_KBN_ID.jizenPicking, SAGYO_KBN_ID.jizenConfirmation],
+    sagyoId ?? null,
   ];
 
   try {

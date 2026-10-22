@@ -1,9 +1,13 @@
--- 適用状況: ステージング 2026-10-06（2026-10-15 の出庫場所の照合も 2026-10-15 適用。事前準備の変更は 2026-10-21） / 本番 未適用
+-- 適用状況: ステージング 2026-10-06（2026-10-15 の出庫場所の照合も 2026-10-15 適用。事前準備の変更は 2026-10-21、受注削除の判定の変更も 2026-10-21） / 本番 未適用
 -- =====================================================================
 -- ★2026-10-21 追加（事前準備、2026-10-21 ステージング適用。列構成は不変）:
 --   ・v_get_juchu_kizai_head との結合に「種別 3（事前）なら juchu_kizai_head_idv = juchu_kizai_head_id」を加える（事前は機材ヘッダーごと）。
---   ・受注削除の判定（juchu_meisai_del_flg）の出庫場所の照合に 80/90 を加える（ARRAY[10, 20] → ARRAY[10, 20, 80, 90]）。
---     準備日を消したとき、事前の実績ある伝票を未使用の明細idに付け替えて予定0で残すので、受注削除の行として出る。
+--   ・受注削除の判定（juchu_meisai_del_flg）：事前（80/90）は「事前準備の行（t_juchu_kizai_jizen）が無い」で判定する
+--     （2026-10-21 変更・同日ステージング適用）。準備日を消したとき、事前の実績ある伝票は明細idを変えずに予定0で残す
+--     （受注明細は同じ場所に残るので、受注機材明細では判定できない）。明細idが本番と同じまま残るので、事前でのタグ削除・
+--     補正を本番の同じ明細に反映できる。10/20 の出庫場所の照合は ARRAY[10, 20] に戻した（80/90 は上の分岐で判定する）。
+--     ※2026-10-21 のステージング適用時は、80/90 も受注機材明細（出庫場所を照合）で判定し、準備日を消した伝票は
+--       未使用の明細idに付け替えていた。付け替え済みの伝票は事前準備の行も無いので、新しい判定でも受注削除のまま
 --   ・予定・読取・補正がすべて 0 の行を出さない条件（今は入庫 30 だけ）に 80/90 を加える。
 --   2026-10-21 ステージングで検証（一時ビューで読み取りのみ）: 事前の伝票が無い状態で全列・行数（123,266）とも差分0。
 --   テストの受注で、事前の明細行が機材ヘッダーごとに1行ずつ（二重にならず）出ることを確認。
@@ -72,12 +76,15 @@ CREATE OR REPLACE VIEW public.v_nyushuko_den2_lst WITH (security_invoker = on) A
     v_nyushuko_den_lst.upd_user,
         CASE
             WHEN sum(COALESCE(v_nyushuko_den_lst.plan_qty, 0::bigint)) <> 0::numeric THEN 0
+            WHEN v_nyushuko_den_lst.sagyo_kbn_id = ANY (ARRAY[80, 90]) THEN (NOT (EXISTS ( SELECT 1
+               FROM t_juchu_kizai_jizen j
+              WHERE j.juchu_head_id = v_nyushuko_den_lst.juchu_head_id AND j.juchu_kizai_head_id = v_nyushuko_den_lst.juchu_kizai_head_id AND j.juchu_kizai_meisai_id = v_nyushuko_den_lst.juchu_kizai_meisai_id AND j.kizai_id = v_nyushuko_den_lst.kizai_id)))::integer
             WHEN COALESCE(v_nyushuko_den_lst.ctn_flg, 0) = 1 THEN (NOT (EXISTS ( SELECT 1
                FROM t_juchu_ctn_meisai c
               WHERE c.juchu_head_id = v_nyushuko_den_lst.juchu_head_id AND c.juchu_kizai_head_id = v_nyushuko_den_lst.juchu_kizai_head_id AND c.juchu_kizai_meisai_id = v_nyushuko_den_lst.juchu_kizai_meisai_id AND c.kizai_id = v_nyushuko_den_lst.kizai_id AND c.shozoku_id = v_nyushuko_den_lst.nyushuko_basho_id)))::integer
             ELSE (NOT (EXISTS ( SELECT 1
                FROM t_juchu_kizai_meisai m
-              WHERE m.juchu_head_id = v_nyushuko_den_lst.juchu_head_id AND m.juchu_kizai_head_id = v_nyushuko_den_lst.juchu_kizai_head_id AND m.juchu_kizai_meisai_id = v_nyushuko_den_lst.juchu_kizai_meisai_id AND m.kizai_id = v_nyushuko_den_lst.kizai_id AND ((v_nyushuko_den_lst.sagyo_kbn_id <> ALL (ARRAY[10, 20, 80, 90])) OR m.shozoku_id = v_nyushuko_den_lst.nyushuko_basho_id))))::integer
+              WHERE m.juchu_head_id = v_nyushuko_den_lst.juchu_head_id AND m.juchu_kizai_head_id = v_nyushuko_den_lst.juchu_kizai_head_id AND m.juchu_kizai_meisai_id = v_nyushuko_den_lst.juchu_kizai_meisai_id AND m.kizai_id = v_nyushuko_den_lst.kizai_id AND ((v_nyushuko_den_lst.sagyo_kbn_id <> ALL (ARRAY[10, 20])) OR m.shozoku_id = v_nyushuko_den_lst.nyushuko_basho_id))))::integer
         END AS juchu_meisai_del_flg
    FROM v_nyushuko_den_lst
      LEFT JOIN v_get_juchu_kizai_head ON v_nyushuko_den_lst.juchu_head_id = v_get_juchu_kizai_head.juchu_head_id AND v_nyushuko_den_lst.nyushuko_dat = v_get_juchu_kizai_head.sagyo_den_dat AND v_nyushuko_den_lst.nyushuko_basho_id = v_get_juchu_kizai_head.sagyo_id AND v_nyushuko_den_lst.nyushuko_shubetu_id = v_get_juchu_kizai_head.nyushuko_shubetu_id AND v_nyushuko_den_lst.juchu_kizai_head_kbn = v_get_juchu_kizai_head.juchu_kizai_head_kbnv::bigint AND (v_nyushuko_den_lst.nyushuko_shubetu_id IS DISTINCT FROM 3 OR v_get_juchu_kizai_head.juchu_kizai_head_idv = v_nyushuko_den_lst.juchu_kizai_head_id::text)

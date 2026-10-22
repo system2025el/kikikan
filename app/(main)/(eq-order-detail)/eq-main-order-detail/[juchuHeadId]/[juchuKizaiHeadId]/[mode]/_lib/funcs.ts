@@ -59,7 +59,6 @@ import {
   deleteShukoDen,
   deleteShukoDenBashoKeepResulted,
   insertNyushukoDen,
-  moveJizenDenToDeletedMeisai,
   selectContainerNyushukoDenConfirm,
   selectJizenResultExists,
   selectShukoResultDenKizaiCount,
@@ -85,7 +84,6 @@ import {
   deleteNyukoResult,
   deleteShukoResult,
   deleteShukoResultBashoKeepDen,
-  moveJizenResultToDeletedMeisai,
   updateDeletedShukoResultDat,
   updateJizenResultDat,
   updateShukoResult,
@@ -1388,20 +1386,22 @@ const upsShukoDenBasho = async (
  *   削除済み。80/90 は受注削除として残さない）
  * - 出庫場所の変更：変更前の場所の事前の伝票・実績を削除し、事前準備が残っていれば新しい場所で作り直す
  *   （事前の読取は本番にコピー済みで、本番側は keepShozokuChangedShukoDen が受注削除として残す）
- * - 準備日の削除：実績・補正のある事前の伝票・実績を未使用の明細idに付け替えて予定数0で残す（事前側だけ受注削除）。
- *   残す条件は本番と同じ（最終確認に実績があれば最終確認だけ）。それ以外は削除し、事前準備の行も消す
- * - 準備日時・準備数の追加・変更：事前準備の行と事前の伝票（予定数＝準備数）を作る・更新し、準備日時が変わったら
- *   実績の日時も付け替える（本番の出庫日時の変更と同じ扱い）
+ * - 準備日の削除：実績・補正のある事前の伝票は、明細idを変えずに予定数0で残す（事前側だけ受注削除）。
+ *   残す条件は本番と同じ（最終確認に実績があれば最終確認だけ）。それ以外の伝票と、伝票が無くなった実績は削除し、
+ *   事前準備の行も消す。事前の受注削除の判定は「事前準備の行（t_juchu_kizai_jizen）が無い」で行う
+ *   （v_nyushuko_den2_lst・deleteEmptyNyushukoDen）。明細idが本番と同じまま残るので、事前でのタグ削除・補正を
+ *   本番の同じ明細に反映できる。本番の出庫場所の変更（keepShozokuChangedShukoDen）と同じ形
+ * - 準備日時・準備数の追加・変更：事前準備の行と事前の伝票（予定数＝準備数）を作る・更新し、実績の日時も新しい
+ *   準備日時に揃える。準備日を消して受注削除として残っている伝票があれば、同じ伝票を通常の行に戻す（実績を引き継ぐ。
+ *   本番で出庫場所を元に戻したときと同じ）
  * @param originList 変更前の受注機材明細（DBの状態）
  * @param savedList 保存した受注機材明細（明細id採番済み・削除した明細を含む）
- * @param meisaiIdCounter 未使用の明細idのカウンター（受注削除の付け替えに使う。付け替えたときだけ進める）
  * @param userNam ユーザー名
  * @param connection
  */
 const syncJizen = async (
   originList: JuchuKizaiMeisaiValues[],
   savedList: JuchuKizaiMeisaiValues[],
-  meisaiIdCounter: { next: number },
   userNam: string,
   connection: PoolClient
 ) => {
@@ -1425,31 +1425,27 @@ const syncJizen = async (
       continue;
     }
 
+    // 準備日がある明細の出庫場所を変えたときは、変更前の場所の事前の伝票・実績を削除する（新しい場所で作り直す）
+    // 準備日を消して受注削除として残っている事前の伝票（準備日が無い明細）は、場所を変えても残す（本番と同じ）
     const shozokuChanged = !!origin && origin.shozokuId !== d.shozokuId;
     if (shozokuChanged && origin.jizenDat) {
-      await deleteJizenDen(key, connection);
-      await deleteJizenResult(key, connection);
+      await deleteJizenDen(key, connection, origin.shozokuId);
+      await deleteJizenResult(key, connection, origin.shozokuId);
     }
 
     if (!d.jizenDat) {
       if (origin?.jizenDat) {
         if (!shozokuChanged) {
-          const newMeisaiId = meisaiIdCounter.next;
-          const moved = await moveJizenDenToDeletedMeisai(key, origin.shozokuId, newMeisaiId, now, userNam, connection);
-          if (moved > 0) {
-            meisaiIdCounter.next++;
-            await moveJizenResultToDeletedMeisai(
-              d.juchuHeadId,
-              d.juchuKizaiHeadId,
-              d.juchuKizaiMeisaiId,
-              d.kizaiId,
-              origin.shozokuId,
-              newMeisaiId,
-              connection
-            );
-          }
-          await deleteJizenDen(key, connection);
-          await deleteJizenResult(key, connection);
+          await deleteShukoDenBashoKeepResulted(key, origin.shozokuId, now, userNam, connection, true);
+          await deleteShukoResultBashoKeepDen(
+            d.juchuHeadId,
+            d.juchuKizaiHeadId,
+            d.juchuKizaiMeisaiId,
+            d.kizaiId,
+            origin.shozokuId,
+            connection,
+            true
+          );
         }
         await deleteJuchuKizaiJizen(key, connection);
       }
@@ -1482,7 +1478,9 @@ const syncJizen = async (
       userNam,
       connection
     );
-    if (!shozokuChanged && origin?.jizenDat && new Date(origin.jizenDat).getTime() !== new Date(jizenDat).getTime()) {
+    // 実績の日時を準備日時に揃える（準備日時の変更のほか、受注削除として残っていた伝票を付け直しで戻した場合も）
+    // 日時が違う実績だけ更新するので、変わっていなければ何もしない
+    if (!shozokuChanged) {
       await updateJizenResultDat(key, d.shozokuId, jizenDat, connection);
     }
   }
@@ -3416,7 +3414,7 @@ export const juchuMeisaiSeparation = async (
         // 事前準備は元の明細に残す（実績も元の明細のまま）。準備数が分離後の合計数を超えたら合計数まで下げる
         const overJizen = remainEq.filter((d) => d.jizenDat && (d.jizenQty ?? 0) > d.planQty);
         for (const d of overJizen) {
-          await syncJizen([d], [{ ...d, jizenQty: d.planQty }], { next: 0 }, userNam, connection);
+          await syncJizen([d], [{ ...d, jizenQty: d.planQty }], userNam, connection);
         }
       }
     }
@@ -4061,10 +4059,6 @@ export const saveJuchuKizai = async (
         }
       }
 
-      // 準備日を消した明細の事前の伝票（80/90）を受注削除として残すときの付け替え先の明細id
-      // 新規明細の採番の続きから振る（受注機材明細・入出庫伝票の最大値より大きく、未使用）
-      const meisaiIdCounter = { next: newJuchuKizaiMeisaiId };
-
       // 出庫機材伝票削除、追加
       if (addJuchuKizaiMeisaiData.length > 0 || shozokuChangedData.length > 0) {
         // 出庫場所が変わった機材の、元の場所の出庫伝票・実績を整理する（明細idは変えない）
@@ -4125,7 +4119,7 @@ export const saveJuchuKizai = async (
 
       // 事前準備（明細の変更で出庫場所・表示順・削除が変わるため、事前準備に変更が無くても通す）
       if (checkJuchuKizaiMeisai || checkJuchuKizaiJizen) {
-        await syncJizen(originJuchuKizaiMeisaiList, newJuchuKizaiMeisaiData, meisaiIdCounter, userNam, connection);
+        await syncJizen(originJuchuKizaiMeisaiList, newJuchuKizaiMeisaiData, userNam, connection);
       }
 
       // 出庫日時・出庫場所の変更前の受注コンテナ明細（出庫場所がなくなるときの入庫伝票の削除に使う）
@@ -4337,18 +4331,7 @@ export const saveJuchuKizai = async (
       }
     } else if (checkJuchuKizaiJizen) {
       // 事前準備だけの変更（明細・入出庫日時は変わっていない）：明細・本番の伝票・入庫伝票には触れない
-      const juchuKizaiMeisaiMaxId = await selectJuchuKizaiMeisaiMaxIdWithDenTx(
-        data.juchuHeadId,
-        data.juchuKizaiHeadId,
-        connection
-      );
-      await syncJizen(
-        originJuchuKizaiMeisaiList,
-        juchuKizaiMeisaiList,
-        { next: juchuKizaiMeisaiMaxId + 1 },
-        userNam,
-        connection
-      );
+      await syncJizen(originJuchuKizaiMeisaiList, juchuKizaiMeisaiList, userNam, connection);
     }
 
     // 移動伝票更新
