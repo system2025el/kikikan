@@ -124,15 +124,15 @@ export const validateJizen = (
     const name = row.kizaiNam.trim();
     const shukoDat = getMeisaiShukoDat(row, kicsShukoDat, yardShukoDat);
     if (!shukoDat) {
-      messages.push(`${name}：出庫日時が未設定のため準備日時は入力できません`);
+      messages.push(`${name}：出庫日時が未設定のため事前日時は入力できません`);
     } else if (row.jizenDat.getTime() >= shukoDat.getTime()) {
-      messages.push(`${name}：準備日時は出庫日時より前にしてください`);
+      messages.push(`${name}：事前日時は出庫日時より前にしてください`);
     }
     const qty = row.jizenQty ?? 0;
     if (qty < 1) {
-      messages.push(`${name}：準備数は1以上にしてください`);
+      messages.push(`${name}：事前数は1以上にしてください`);
     } else if (qty > row.planQty) {
-      messages.push(`${name}：準備数が合計数（${row.planQty}）を超えています`);
+      messages.push(`${name}：事前数が合計数（${row.planQty}）を超えています`);
     }
   }
   return messages;

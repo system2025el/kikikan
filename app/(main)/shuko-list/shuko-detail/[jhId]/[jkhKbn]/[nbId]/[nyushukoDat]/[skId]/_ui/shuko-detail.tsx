@@ -577,7 +577,7 @@ export const ShukoDetail = (props: {
               />
             </Box>
             <Box display={'flex'} alignItems={'center'}>
-              <Typography mr={4}>{jizen ? '準備日時' : '出庫日時'}</Typography>
+              <Typography mr={4}>{jizen ? '事前日時' : '出庫日時'}</Typography>
               <DateTime value={shukoDetailData.nyushukoDat ? new Date(shukoDetailData.nyushukoDat) : null} disabled />
             </Box>
             <Box display={'flex'} alignItems={'center'}>

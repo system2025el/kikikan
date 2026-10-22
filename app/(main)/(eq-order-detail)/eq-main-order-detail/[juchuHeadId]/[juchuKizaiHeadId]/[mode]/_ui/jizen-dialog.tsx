@@ -31,10 +31,10 @@ export const JizenDialog = ({
       <DialogTitle>事前準備</DialogTitle>
       <DialogContent dividers>
         <Typography fontSize="small" mb={2}>
-          選択した{selectedLength}件の機材に準備日時を設定します。準備数が未入力の機材は合計数を準備数にします。
+          選択した{selectedLength}件の機材に事前日時を設定します。事前数が未入力の機材は合計数を事前数にします。
         </Typography>
         <Box display="flex" alignItems="center">
-          <Typography mr={2}>準備日時</Typography>
+          <Typography mr={2}>事前日時</Typography>
           <DateTime value={jizenDat} onChange={setJizenDat} />
         </Box>
       </DialogContent>

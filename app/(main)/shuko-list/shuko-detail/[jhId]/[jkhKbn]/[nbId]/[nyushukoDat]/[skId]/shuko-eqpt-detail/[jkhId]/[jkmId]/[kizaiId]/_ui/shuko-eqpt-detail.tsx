@@ -121,7 +121,7 @@ export const ShukoEqptDetail = (props: {
     if (user && !isProcessing) {
       // 事前は「読取数＋補正数 ≤ 準備数」（準備数をあえて減らしている場合があるため、補正で超えられないようにする）
       if (jizen && shukoEqptDetailList.length + data.resultAdjQty > shukoEqptDetailData.planQty) {
-        setSnackBarMessage(`読取数と補正数の合計が準備数（${shukoEqptDetailData.planQty}）を超えています`);
+        setSnackBarMessage(`読取数と補正数の合計が事前数（${shukoEqptDetailData.planQty}）を超えています`);
         setSnackBarOpen(true);
         return;
       }
@@ -247,7 +247,7 @@ export const ShukoEqptDetail = (props: {
             </Box>
           </Grid2>
           <Grid2 container spacing={2} p={2}>
-            <Typography>{jizen ? '準備数' : '出庫予定数'}</Typography>
+            <Typography>{jizen ? '事前数' : '出庫予定数'}</Typography>
             <Typography>{shukoEqptDetailData.planQty}</Typography>
           </Grid2>
           <Grid2 container alignItems={'center'} spacing={3} px={2} py={1}>

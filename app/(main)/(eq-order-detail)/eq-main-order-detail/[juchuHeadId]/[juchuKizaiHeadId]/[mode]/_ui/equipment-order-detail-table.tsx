@@ -375,10 +375,10 @@ const EqTableComponent: React.FC<EqTableProps> = ({
               予備
             </TableCell>
             <TableCell align="left" size="small" style={styles.header}>
-              準備日時
+              事前日時
             </TableCell>
             <TableCell align="right" size="small" style={styles.header}>
-              準備
+              事前
             </TableCell>
             <TableCell align="left" size="small" style={styles.header}>
               連絡
