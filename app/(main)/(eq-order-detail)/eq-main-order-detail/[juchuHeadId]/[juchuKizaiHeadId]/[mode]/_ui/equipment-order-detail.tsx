@@ -98,6 +98,7 @@ import {
   getJizenRange,
   getJizenStockDiff,
   getStockAnchorDate,
+  SavedJizenMap,
   validateJizen,
   withJizen,
   withoutJizen,
@@ -387,14 +388,13 @@ const EquipmentOrderDetail = (props: {
   // 出庫明細の閲覧権限
   const canRefNyushuko = !!(user && user.permission.nyushuko & permission.nyushuko_ref);
 
-  // 事前準備の期間（準備日〜出庫日の前日）。保存済みの明細・出庫日時で計算し、保存したときだけ変わる
-  // （行数が多いと入力のたびに全行を計算し直すのが重いため。使用期間の dateRange も保存時に更新している）
-  // キーは `${明細id}_${機材id}`
-  const savedJizenRangeMap = useMemo(() => {
-    const map = new Map<string, string[]>();
+  // 事前準備の期間（準備日〜出庫日の前日）と準備数。保存済みの明細・出庫日時で計算し、保存したときだけ変わる
+  // （通常の出庫の使用期間 dateRange と同じく、期間の色と在庫を減らす日は保存時に反映する）
+  const savedJizenMap = useMemo(() => {
+    const map: SavedJizenMap = new Map();
     for (const row of originJuchuKizaiMeisaiList) {
       const range = getJizenRange(row, kicsShukoDat, yardShukoDat);
-      if (range.length > 0) map.set(`${row.juchuKizaiMeisaiId}_${row.kizaiId}`, range);
+      if (range.length > 0) map.set(`${row.juchuKizaiMeisaiId}_${row.kizaiId}`, { range, qty: row.jizenQty ?? 0 });
     }
     return map;
   }, [originJuchuKizaiMeisaiList, kicsShukoDat, yardShukoDat]);
@@ -402,12 +402,12 @@ const EquipmentOrderDetail = (props: {
   // 在庫テーブルの行（削除されていない明細）と同じ並びにした事前準備の期間。未保存の行は期間なし
   const jizenRanges = useMemo(
     () =>
-      savedJizenRangeMap.size === 0
+      savedJizenMap.size === 0
         ? []
         : juchuKizaiMeisaiList
             .filter((d) => !d.delFlag)
-            .map((row) => savedJizenRangeMap.get(`${row.juchuKizaiMeisaiId}_${row.kizaiId}`) ?? []),
-    [juchuKizaiMeisaiList, savedJizenRangeMap]
+            .map((row) => savedJizenMap.get(`${row.juchuKizaiMeisaiId}_${row.kizaiId}`)?.range ?? []),
+    [juchuKizaiMeisaiList, savedJizenMap]
   );
 
   // 金額算出の元になる単価×受注数の合計（現在値・保存済み）。削除された明細は除く。
@@ -1377,8 +1377,9 @@ const EquipmentOrderDetail = (props: {
   );
 
   /**
-   * 事前準備の変更を在庫表に反映する（保存前の画面上の補正。保存すると在庫データを取り直す）
-   * 同じ機材の在庫行すべてを、準備日〜出庫日の前日の範囲で増減する（受注数の変更 handleCellChange と同じ扱い）
+   * 準備数の変更を在庫表に反映する（保存前の画面上の補正。保存すると在庫データを取り直す）
+   * 同じ機材の在庫行すべてを、保存済みの準備期間で増減する（受注数の変更 handleCellChange と同じ扱い）
+   * 準備日時の設定・変更・解除による期間の変化は、通常の出庫の日付変更と同じく保存時に反映する
    * 在庫表に出ていない日（左端より前）は補正できないが、保存後に取り直すと反映される
    * @param afterRows 変更後の明細
    * @param beforeRows 変更前の明細
@@ -1389,7 +1390,7 @@ const EquipmentOrderDetail = (props: {
     beforeRows: JuchuKizaiMeisaiValues[],
     saved = false
   ) => {
-    const diff = getJizenStockDiff(afterRows, beforeRows, kicsShukoDat, yardShukoDat);
+    const diff = getJizenStockDiff(afterRows, beforeRows, savedJizenMap);
     if ([...diff.values()].every((qty) => qty === 0)) return;
     const apply = (prev: StockTableValues[][]) =>
       prev.map((row) =>
@@ -1404,14 +1405,14 @@ const EquipmentOrderDetail = (props: {
 
   /**
    * 機材テーブルの準備日時・準備数入力時
-   * 在庫表の範囲・在庫数は保存時に反映するので、ここでは明細の値だけを変える
+   * 在庫表は準備数の変更だけを保存済みの準備期間にその場で反映し、期間の変化は保存時に反映する
    * 準備数が未入力なら合計数を入れる。日時を消した場合は準備数も外す
    * @param rowIndex 表示上の行番号
    * @param jizenDat 準備日時
    * @param jizenQty 準備数（undefined なら入力済みの値のまま）
    */
   const updateJizenRow = (rowIndex: number, jizenDat: Date | null, jizenQty?: number) => {
-    // 在庫表をその場で補正する（変更前の準備日〜出庫日前日に準備数を戻し、変更後の期間に準備数を引く）
+    // 在庫表をその場で補正する（保存済みの準備期間で、変更前の準備数を戻し変更後の準備数を引く）
     const before = juchuKizaiMeisaiList.filter((d) => !d.delFlag)[rowIndex];
     if (before) {
       const after = withJizen(before, jizenDat, jizenQty ?? before.jizenQty ?? null);

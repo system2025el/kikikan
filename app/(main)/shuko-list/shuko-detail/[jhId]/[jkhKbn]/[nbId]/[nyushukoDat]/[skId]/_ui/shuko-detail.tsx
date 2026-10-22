@@ -529,7 +529,7 @@ export const ShukoDetail = (props: {
           <Grid2 container alignItems={'center'} spacing={2}>
             {fixSts === FIX_STS.all && (
               <Typography px={1} sx={{ backgroundColor: fixStsColors.all }}>
-                {jizen ? '本番出発済' : '出発済'}
+                出発済
               </Typography>
             )}
             {fixSts === FIX_STS.partial && (

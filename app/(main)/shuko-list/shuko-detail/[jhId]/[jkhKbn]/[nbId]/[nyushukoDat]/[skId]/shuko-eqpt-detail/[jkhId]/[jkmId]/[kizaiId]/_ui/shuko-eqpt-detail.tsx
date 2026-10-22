@@ -200,7 +200,7 @@ export const ShukoEqptDetail = (props: {
   return (
     <Box>
       <Grid2 container justifyContent={'end'} alignItems={'center'} spacing={2} mb={1}>
-        {fixFlag && <Typography>{jizen ? '本番出発済' : '出発済'}</Typography>}
+        {fixFlag && <Typography>出発済</Typography>}
         <Button onClick={handleBack} disabled={isPending}>
           <Box display={'flex'} alignItems={'center'}>
             <ArrowLeftIcon fontSize="small" />
@@ -261,7 +261,7 @@ export const ShukoEqptDetail = (props: {
               実績クリア
             </Button>
             <Box display={'flex'} alignItems={'center'}>
-              <Typography mr={2}>出庫補正数</Typography>
+              <Typography mr={2}>{jizen ? '事前補正数' : '出庫補正数'}</Typography>
               <Controller
                 name="resultAdjQty"
                 control={control}

@@ -55,31 +55,40 @@ export const getJizenRange = (
 };
 
 /**
- * 事前準備による在庫数の増減（機材×日付）
- * 在庫データ（DB）は元データの事前準備を反映済みなので、元データとの差分だけ在庫を減らす
- * @param rows 受注機材明細（編集中）
- * @param originRows 受注機材明細（元データ）
- * @param kicsShukoDat KICS出庫日時
- * @param yardShukoDat YARD出庫日時
+ * 保存済みの事前準備（明細ごとの準備期間と準備数）
+ * キーは `${明細id}_${機材id}`
+ */
+export type SavedJizenMap = Map<string, { range: string[]; qty: number }>;
+
+/**
+ * 事前準備の準備数の変更による在庫数の増減（機材×日付）
+ * 通常の出庫（受注数の変更は保存済みの使用期間にその場で反映し、日付の変更は保存時に反映）と同じく、
+ * 期間は保存済みの準備期間のまま、準備数の差分だけを在庫に反映する。準備日時の設定・変更・解除は保存時に反映する
+ * （解除中や保存前の準備日時の行は、保存済みの準備数のまま数える）
+ * @param afterRows 変更後の明細
+ * @param beforeRows 変更前の明細
+ * @param savedMap 保存済みの事前準備
  * @returns キーは `${kizaiId}_${YYYY/MM/DD}`、値は在庫数から引く数
  */
 export const getJizenStockDiff = (
-  rows: JuchuKizaiMeisaiValues[],
-  originRows: JuchuKizaiMeisaiValues[],
-  kicsShukoDat: Date | null,
-  yardShukoDat: Date | null
+  afterRows: JuchuKizaiMeisaiValues[],
+  beforeRows: JuchuKizaiMeisaiValues[],
+  savedMap: SavedJizenMap
 ): Map<string, number> => {
   const diff = new Map<string, number>();
   const add = (list: JuchuKizaiMeisaiValues[], sign: number) => {
     for (const row of list) {
-      for (const date of getJizenRange(row, kicsShukoDat, yardShukoDat)) {
+      const saved = savedMap.get(`${row.juchuKizaiMeisaiId}_${row.kizaiId}`);
+      if (row.delFlag || !saved) continue;
+      const qty = row.jizenDat ? (row.jizenQty ?? 0) : saved.qty;
+      for (const date of saved.range) {
         const key = `${row.kizaiId}_${date}`;
-        diff.set(key, (diff.get(key) ?? 0) + sign * (row.jizenQty ?? 0));
+        diff.set(key, (diff.get(key) ?? 0) + sign * qty);
       }
     }
   };
-  add(rows, 1);
-  add(originRows, -1);
+  add(afterRows, 1);
+  add(beforeRows, -1);
   return diff;
 };
 
