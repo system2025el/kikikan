@@ -1344,17 +1344,26 @@ export const deleteEmptyNyushukoDen = async (
       AND COALESCE(d.result_qty, 0) = 0
       AND COALESCE(d.result_adj_qty, 0) = 0
       -- 事前（80/90）は「事前準備の行が無い」で判定する（準備日を消しても受注明細は同じ場所に残るため）
+      -- 事前準備の行があっても、明細の今の出庫場所が伝票の場所と違えば受注削除として扱う（出庫と同じ場所の照合。
+      -- 準備日を消して元の場所に残した伝票が、場所を変えて準備日を付け直したときに残り続けないように。
+      -- v_nyushuko_den2_lst の受注削除の判定と同じ）
       AND NOT EXISTS (
         SELECT
           1
         FROM
           ${SCHEMA}.t_juchu_kizai_jizen AS j
+          JOIN ${SCHEMA}.t_juchu_kizai_meisai AS m
+            ON m.juchu_head_id = j.juchu_head_id
+            AND m.juchu_kizai_head_id = j.juchu_kizai_head_id
+            AND m.juchu_kizai_meisai_id = j.juchu_kizai_meisai_id
+            AND m.kizai_id = j.kizai_id
         WHERE
           d.sagyo_kbn_id IN (${SAGYO_KBN_ID.jizenPicking}, ${SAGYO_KBN_ID.jizenConfirmation})
           AND j.juchu_head_id = d.juchu_head_id
           AND j.juchu_kizai_head_id = d.juchu_kizai_head_id
           AND j.juchu_kizai_meisai_id = d.juchu_kizai_meisai_id
           AND j.kizai_id = d.kizai_id
+          AND m.shozoku_id = d.sagyo_id
       )
       AND NOT EXISTS (
         SELECT
@@ -1400,6 +1409,79 @@ export const deleteEmptyNyushukoDen = async (
     return (result.rowCount ?? 0) > 0;
   } catch (e) {
     throw new Error('[deleteEmptyNyushukoDen] DBエラー:', { cause: e });
+  }
+};
+
+/**
+ * 受注明細が無く、実績数・補正数が0になった入出庫伝票を、条件に合う伝票すべてについて削除する
+ * 事前でのタグ削除・補正を本番（10/20）に反映したあと、本番側の受注削除の伝票が空になったら消すために使う
+ * （本番のタグは機材単位で消すので、合体ヘッダーで別の明細の伝票が空になることもある）。
+ * 削除するかどうかの判定は deleteEmptyNyushukoDen と同じ（受注明細がある伝票は残る）
+ * @param cond 受注・作業区分・作業場所・機材は必須。作業日時・受注機材ヘッダー・明細は指定したときだけ絞る
+ * @param connection
+ */
+export const deleteEmptyNyushukoDenMatching = async (
+  cond: {
+    juchu_head_id: number;
+    sagyo_kbn_id: number;
+    sagyo_id: number;
+    kizai_id: number;
+    sagyo_den_dat?: Date | string;
+    juchu_kizai_head_id?: number;
+    juchu_kizai_meisai_id?: number;
+  },
+  connection: PoolClient
+) => {
+  const query = `
+    SELECT
+      juchu_kizai_head_id
+      ,juchu_kizai_meisai_id
+      ,sagyo_den_dat
+    FROM
+      ${SCHEMA}.t_nyushuko_den
+    WHERE
+      juchu_head_id = $1
+      AND sagyo_kbn_id = $2
+      AND sagyo_id = $3
+      AND kizai_id = $4
+      AND ($5::timestamptz IS NULL OR sagyo_den_dat = $5)
+      AND ($6::integer IS NULL OR juchu_kizai_head_id = $6)
+      AND ($7::integer IS NULL OR juchu_kizai_meisai_id = $7)
+      AND COALESCE(result_qty, 0) = 0
+      AND COALESCE(result_adj_qty, 0) = 0
+  `;
+  const values = [
+    cond.juchu_head_id,
+    cond.sagyo_kbn_id,
+    cond.sagyo_id,
+    cond.kizai_id,
+    cond.sagyo_den_dat ?? null,
+    cond.juchu_kizai_head_id ?? null,
+    cond.juchu_kizai_meisai_id ?? null,
+  ];
+
+  try {
+    const { rows } = await connection.query<{
+      juchu_kizai_head_id: number;
+      juchu_kizai_meisai_id: number;
+      sagyo_den_dat: Date;
+    }>(query, values);
+    for (const r of rows) {
+      await deleteEmptyNyushukoDen(
+        {
+          juchu_head_id: cond.juchu_head_id,
+          juchu_kizai_head_id: r.juchu_kizai_head_id,
+          juchu_kizai_meisai_id: r.juchu_kizai_meisai_id,
+          sagyo_kbn_id: cond.sagyo_kbn_id,
+          sagyo_den_dat: r.sagyo_den_dat.toISOString(),
+          sagyo_id: cond.sagyo_id,
+          kizai_id: cond.kizai_id,
+        },
+        connection
+      );
+    }
+  } catch (e) {
+    throw new Error('[deleteEmptyNyushukoDenMatching] DBエラー:', { cause: e });
   }
 };
 
@@ -1557,6 +1639,65 @@ export const selectJizenResultExists = async (
     return rows[0]?.exists_flg ?? false;
   } catch (e) {
     throw new Error('[selectJizenResultExists] DBエラー:', { cause: e });
+  }
+};
+
+/**
+ * 出庫の伝票（10/20/80/90）に、明細ごとの指定の作業場所で実績・補正があるか
+ * 明細画面で出庫場所が変わった明細について、変更前の場所に実績があれば保存前の作業中の確認を出すために使う
+ * （移動日の入力・解除では出庫日時が変わらないため、出庫日時の変更の確認では拾えない）
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param juchuKizaiMeisaiIds 受注機材明細idの配列
+ * @param kizaiIds 機材idの配列（juchuKizaiMeisaiIds と同じ添字が1つの明細）
+ * @param sagyoIds 作業場所の配列（同じ添字の明細の変更前の出庫場所）
+ * @returns あれば true
+ */
+export const selectShukoResultExistsBasho = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  juchuKizaiMeisaiIds: number[],
+  kizaiIds: number[],
+  sagyoIds: number[]
+) => {
+  const query = `
+    SELECT
+      EXISTS (
+        SELECT
+          1
+        FROM
+          ${SCHEMA}.t_nyushuko_den AS d
+          JOIN unnest($3::integer[], $4::integer[], $5::integer[]) AS k(juchu_kizai_meisai_id, kizai_id, sagyo_id)
+            ON d.juchu_kizai_meisai_id = k.juchu_kizai_meisai_id
+            AND d.kizai_id = k.kizai_id
+            AND d.sagyo_id = k.sagyo_id
+        WHERE
+          d.juchu_head_id = $1
+          AND d.juchu_kizai_head_id = $2
+          AND d.sagyo_kbn_id = ANY($6)
+          AND COALESCE(d.result_qty, 0) + COALESCE(d.result_adj_qty, 0) > 0
+      ) AS exists_flg
+  `;
+
+  const values = [
+    juchuHeadId,
+    juchuKizaiHeadId,
+    juchuKizaiMeisaiIds,
+    kizaiIds,
+    sagyoIds,
+    [
+      SAGYO_KBN_ID.shukoPicking,
+      SAGYO_KBN_ID.shukoConfirmation,
+      SAGYO_KBN_ID.jizenPicking,
+      SAGYO_KBN_ID.jizenConfirmation,
+    ],
+  ];
+
+  try {
+    const { rows } = await pool.query<{ exists_flg: boolean }>(query, values);
+    return rows[0]?.exists_flg ?? false;
+  } catch (e) {
+    throw new Error('[selectShukoResultExistsBasho] DBエラー:', { cause: e });
   }
 };
 

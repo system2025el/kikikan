@@ -1,4 +1,4 @@
--- 適用状況: ステージング 2026-10-21（2026-10-22 に読み過ぎの拒否メッセージを「準備数」→「事前数」に変えて再適用） / 本番 未適用
+-- 適用状況: ステージング 2026-10-21（2026-10-22 に読み過ぎの拒否メッセージを「準備数」→「事前数」に変えて再適用、2026-10-23 に読み過ぎの拒否（J2）を外して再適用） / 本番 未適用
 --
 -- 入出庫の送信RPCを新しい関数 nyushuko_send_20261021_1 として作る（事前準備：事前ピッキング 80・事前最終確認 90 の送信を受ける）
 -- 既存の nyushuko_send_20261009_1（del-meisai、ゲート dev が使用中）・nyushuko_send_20260626_1（HT master が使用中）は変更しない。
@@ -17,8 +17,8 @@
 --       ・本番（同じ受注機材ヘッダー・作業場所）が出発済みなら拒否。本番の出庫日時は t_juchu_kizai_nyushuko から取り、
 --         t_nyushuko_fix（60、sagyo_fix_flg = 1）を見る（v_nyushuko_den の事前の行の shuko_fix_flg と同じ判定）
 --       HT・ゲートは予定外・読み過ぎ・出発済みを画面で止めるので、ここは保険。HT はエラーの中身を出さず「送信失敗」だけ表示する。
---   J2. 実績を書いた後、明細ごとの読取数（今回の分を含む）が準備数（t_juchu_kizai_jizen.jizen_qty）を超えたら拒否する。
---       準備日を消した明細（事前準備の行が無い。受注削除として残した伝票）は準備数 0 として扱う。補正は見ない（読取数だけ）。
+--   J2. （削除 2026-10-23）読取数が準備数を超えたら拒否する処理は外した。通常の出庫と同じく、読み過ぎは HT・ゲートの
+--       画面で予定外として止め、過剰になった分は Web で調整する。
 --   J3. 同じタグを本番（80→10、90→20）にも書く（1対1の反映）。日時は本番の同じ明細・機材・作業場所の伝票の日時。
 --       本番の伝票が無ければ書かない。状態値・所属・更新者は事前の行と同じ（HT・ゲートは 80→12、90→22 で送る）。
 --       本番に同じタグの行が既にあれば、受注機材ヘッダー・明細をこちらに付け替える（実績の主キーにヘッダー・明細が無いため）。
@@ -840,56 +840,12 @@ begin
     ,juchu_kizai_meisai_id = excluded.juchu_kizai_meisai_id;
 
   ---------------------------------------------------------------------------------------------------------------------
-  -- 事前準備（80/90）: 準備数を超える読取の拒否と、本番（10/20）への実績のコピー（変更点 J2・J3）
+  -- 事前準備（80/90）: 本番（10/20）への実績のコピー（変更点 J3）
+  -- ※事前数を超える読取は拒否しない（2026-10-23。通常の出庫と同じく、読み過ぎは HT・ゲートの画面で予定外として止め、
+  --   すり抜けて過剰になった分は Web の実績クリア・補正で調整する）
   ---------------------------------------------------------------------------------------------------------------------
 
   if tgt_sagyo_kbn_id in (80, 90) then
-    -- 明細ごとの読取数（この送信で増えた分を含む）が準備数を超えたら拒否する
-    -- ※準備数を減らしてあえて少なく用意する場合があるため。準備日を消した明細（事前準備の行が無い）は 0 として扱う
-    select
-      c.kizai_id
-    into
-      jizen_ng_kizai_id
-    from
-      (
-        select
-          r.juchu_head_id
-          ,r.juchu_kizai_head_id
-          ,r.juchu_kizai_meisai_id
-          ,r.kizai_id
-          ,count(*) as n
-        from
-          public.t_nyushuko_result r
-        where
-          r.juchu_head_id    = tgt_juchu_head_id
-          and r.sagyo_kbn_id = tgt_sagyo_kbn_id
-          and r.sagyo_id     = tgt_sagyo_id
-          and (r.juchu_kizai_head_id, r.juchu_kizai_meisai_id, r.kizai_id) in (
-            select
-              u.juchu_kizai_head_id
-              ,u.juchu_kizai_meisai_id
-              ,u.kizai_id
-            from
-              unnest(updated_nyushuko_result_list) as u
-          )
-        group by
-          r.juchu_head_id
-          ,r.juchu_kizai_head_id
-          ,r.juchu_kizai_meisai_id
-          ,r.kizai_id
-      ) c
-      left join public.t_juchu_kizai_jizen j
-        on j.juchu_head_id           = c.juchu_head_id
-        and j.juchu_kizai_head_id    = c.juchu_kizai_head_id
-        and j.juchu_kizai_meisai_id  = c.juchu_kizai_meisai_id
-        and j.kizai_id               = c.kizai_id
-    where
-      c.n > coalesce(j.jizen_qty, 0)
-    limit 1;
-    if found then
-      raise exception '事前数を超えて読み取った機材は送信できません（機材ID %）', jizen_ng_kizai_id;
-    end if;
-
     -- 同じタグを本番（80→10、90→20）の同じ明細・機材・作業場所の伝票の日時で書く（1対1の反映）
     -- ※本番の伝票が無ければ書かない。状態値・所属・更新者は事前の行と同じ（HT・ゲートは 80→12、90→22 で送る）
     -- ※本番に同じタグの行が既にあれば（合体ヘッダーの別のヘッダーで読んだ行など）、ヘッダー・明細をこちらに付け替える

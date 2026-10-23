@@ -87,6 +87,7 @@ import {
   getJizenResultExists,
   getJuchuKizaiHead,
   getJuchuKizaiMeisai,
+  getShozokuChangedResultExists,
   getShukoResultKizaiCount,
   juchuMeisaiCopy,
   juchuMeisaiSeparation,
@@ -835,8 +836,23 @@ const EquipmentOrderDetail = (props: {
         JSON.stringify(originIdoJuchuKizaiMeisaiList) !==
         JSON.stringify(idoJuchuKizaiMeisaiList.filter((data) => !data.delFlag));
 
-      // 出庫時間に変更があった場合、または事前の実績がある明細の事前準備を変えた場合は作業中チェック
-      if (checkKicsShukoDat || checkYardShukoDat || checkJuchuKizaiJizen) {
+      // 出庫場所が変わった明細（保存済みの明細のみ）。移動日の入力・解除では出庫日時が変わらずに場所だけ変わるため、
+      // 変更前の場所に実績があれば出庫日時の変更と同じく作業中の確認を出す
+      const originMeisaiMap = new Map(
+        originJuchuKizaiMeisaiList.map((d) => [`${d.juchuKizaiMeisaiId}_${d.kizaiId}`, d])
+      );
+      const shozokuChangedRows = juchuKizaiMeisaiList.flatMap((d) => {
+        const origin =
+          d.saveFlag && !d.delFlag ? originMeisaiMap.get(`${d.juchuKizaiMeisaiId}_${d.kizaiId}`) : undefined;
+        return origin && origin.shozokuId !== d.shozokuId
+          ? [{ juchuKizaiMeisaiId: d.juchuKizaiMeisaiId, kizaiId: d.kizaiId, shozokuId: origin.shozokuId }]
+          : [];
+      });
+      const checkShozokuChanged = shozokuChangedRows.length > 0;
+
+      // 出庫時間に変更があった場合、事前の実績がある明細の事前準備を変えた場合、
+      // または実績がある明細の出庫場所を変えた場合は作業中チェック
+      if (checkKicsShukoDat || checkYardShukoDat || checkJuchuKizaiJizen || checkShozokuChanged) {
         try {
           const isWorking =
             ((checkKicsShukoDat || checkYardShukoDat) &&
@@ -846,7 +862,9 @@ const EquipmentOrderDetail = (props: {
                 data.juchuHeadId,
                 data.juchuKizaiHeadId,
                 jizenChangedRows.map((d) => ({ juchuKizaiMeisaiId: d.juchuKizaiMeisaiId, kizaiId: d.kizaiId }))
-              )));
+              ))) ||
+            (checkShozokuChanged &&
+              (await getShozokuChangedResultExists(data.juchuHeadId, data.juchuKizaiHeadId, shozokuChangedRows)));
 
           if (isWorking) {
             // ダイアログを表示し、ユーザーが「保存」か「キャンセル」を押すまでここで待機する

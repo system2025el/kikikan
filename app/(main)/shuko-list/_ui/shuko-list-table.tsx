@@ -43,6 +43,9 @@ export const ShukoListTable = (props: {
 
   const [selected, setSelected] = useState<number[]>([]);
 
+  // チェックできる行（事前の行は納品書の対象外なのでチェックボックスを出さない）
+  const selectableIndexes = datas.map((row, index) => (row.jizenFlg ? null : index)).filter((i) => i !== null);
+
   const handleSelect = (index: number) => {
     const newSelected = selected.includes(index) ? selected.filter((item) => item !== index) : [...selected, index];
 
@@ -75,12 +78,12 @@ export const ShukoListTable = (props: {
               <Checkbox
                 color="primary"
                 onChange={(e) => {
-                  const newSelected = e.target.checked && datas ? datas.map((_, index) => index) : [];
+                  const newSelected = e.target.checked ? selectableIndexes : [];
                   setSelected(newSelected);
                   onSelectionChange(newSelected);
                 }}
-                indeterminate={datas && selected.length > 0 && selected.length < datas.length}
-                checked={datas && datas.length > 0 && selected.length === datas.length}
+                indeterminate={selected.length > 0 && selected.length < selectableIndexes.length}
+                checked={selectableIndexes.length > 0 && selected.length === selectableIndexes.length}
                 sx={{
                   '& .MuiSvgIcon-root': {
                     backgroundColor: '#fff',
@@ -130,7 +133,7 @@ export const ShukoListTable = (props: {
               }}
             >
               <TableCell padding="checkbox">
-                <Checkbox checked={selected.includes(index)} onChange={() => handleSelect(index)} />
+                {!row.jizenFlg && <Checkbox checked={selected.includes(index)} onChange={() => handleSelect(index)} />}
               </TableCell>
               <TableCell align="left">{row.sectionNamv}</TableCell>
               <TableCell align="center">

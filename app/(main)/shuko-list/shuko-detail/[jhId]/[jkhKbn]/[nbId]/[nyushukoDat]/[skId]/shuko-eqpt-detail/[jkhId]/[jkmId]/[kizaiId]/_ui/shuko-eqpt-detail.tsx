@@ -119,12 +119,6 @@ export const ShukoEqptDetail = (props: {
    */
   const onSubmit = async (data: { resultAdjQty: number }) => {
     if (user && !isProcessing) {
-      // 事前は「読取数＋補正数 ≤ 準備数」（準備数をあえて減らしている場合があるため、補正で超えられないようにする）
-      if (jizen && shukoEqptDetailList.length + data.resultAdjQty > shukoEqptDetailData.planQty) {
-        setSnackBarMessage(`読取数と補正数の合計が事前数（${shukoEqptDetailData.planQty}）を超えています`);
-        setSnackBarOpen(true);
-        return;
-      }
       setIsProcessing(true);
 
       const updateResult = await updShukoResultAdjQty(shukoEqptDetailData, data.resultAdjQty, user.name);

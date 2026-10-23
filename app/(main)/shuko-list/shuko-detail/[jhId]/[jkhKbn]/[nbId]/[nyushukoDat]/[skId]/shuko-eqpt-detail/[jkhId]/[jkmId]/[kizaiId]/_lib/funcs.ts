@@ -9,6 +9,7 @@ import pool from '@/app/_lib/db/postgres';
 import { deleteNyushukoCtnResult } from '@/app/_lib/db/tables/t-nyushuko-ctn-result';
 import {
   deleteEmptyNyushukoDen,
+  deleteEmptyNyushukoDenMatching,
   recountNyushukoDenResult,
   updateHonbanAdjFromJizen,
   updateNyushukoDen,
@@ -270,6 +271,17 @@ export const delshukoResult = async (
           userNam,
           connection
         );
+        // 本番側の受注削除の伝票（出庫場所の変更などで残った行）が空になったら消す（本番の画面で消したときと同じ）
+        await deleteEmptyNyushukoDenMatching(
+          {
+            juchu_head_id: shukoEqptDetailData.juchuHeadId,
+            sagyo_kbn_id: honbanSagyoKbnId,
+            sagyo_id: shukoEqptDetailData.nyushukoBashoId,
+            kizai_id: shukoEqptDetailData.kizaiId,
+            sagyo_den_dat: honbanDat,
+          },
+          connection
+        );
       }
     }
 
@@ -362,7 +374,7 @@ export const updShukoResultAdjQty = async (
 /**
  * 事前（80/90）の補正数更新
  * 事前の伝票の補正を更新し、本番（同じ明細・機材・作業場所の 10/20 の伝票）の補正を同じ値で上書きする。
- * 本番が出発済みなら更新しない。事前は「読取数＋補正数 ≤ 準備数（予定数）」を守る
+ * 本番が出発済みなら更新しない（補正数の上限は通常の出庫と同じく設けない）
  * @param shukoEqptDetailData 事前の機材詳細
  * @param resultAdjQty 補正数
  * @param updateData 事前の伝票の更新データ
@@ -375,7 +387,6 @@ const updJizenResultAdjQty = async (
   updateData: NyushukoDen,
   userNam: string
 ) => {
-  if (shukoEqptDetailData.resultQty + resultAdjQty > shukoEqptDetailData.planQty) return false;
   if (
     await selectHonbanShukoFixed(
       shukoEqptDetailData.juchuHeadId,
@@ -401,6 +412,18 @@ const updJizenResultAdjQty = async (
       shukoEqptDetailData.nyushukoBashoId,
       resultAdjQty,
       userNam,
+      connection
+    );
+    // 本番側も、補正を上書きしたことで受注削除の伝票が空になる場合は消す
+    await deleteEmptyNyushukoDenMatching(
+      {
+        juchu_head_id: shukoEqptDetailData.juchuHeadId,
+        sagyo_kbn_id: toHonbanSagyoKbn(shukoEqptDetailData.sagyoKbnId),
+        sagyo_id: shukoEqptDetailData.nyushukoBashoId,
+        kizai_id: shukoEqptDetailData.kizaiId,
+        juchu_kizai_head_id: shukoEqptDetailData.juchuKizaiHeadId,
+        juchu_kizai_meisai_id: shukoEqptDetailData.juchuKizaiMeisaiId,
+      },
       connection
     );
     // 補正数を0に戻したことで、受注明細が無い事前の伝票（準備日を消して残した行）が空になる場合は消す

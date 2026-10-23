@@ -1,4 +1,4 @@
--- 適用状況: ステージング 2026-10-06（2026-10-15 の出庫場所の照合も 2026-10-15 適用。事前準備の変更は 2026-10-21、受注削除の判定の変更も 2026-10-21） / 本番 未適用
+-- 適用状況: ステージング 2026-10-06（2026-10-15 の出庫場所の照合も 2026-10-15 適用。事前準備の変更は 2026-10-21、受注削除の判定の変更も 2026-10-21、事前の場所の照合は 2026-10-23） / 本番 未適用
 -- =====================================================================
 -- ★2026-10-21 追加（事前準備、2026-10-21 ステージング適用。列構成は不変）:
 --   ・v_get_juchu_kizai_head との結合に「種別 3（事前）なら juchu_kizai_head_idv = juchu_kizai_head_id」を加える（事前は機材ヘッダーごと）。
@@ -8,6 +8,9 @@
 --     補正を本番の同じ明細に反映できる。10/20 の出庫場所の照合は ARRAY[10, 20] に戻した（80/90 は上の分岐で判定する）。
 --     ※2026-10-21 のステージング適用時は、80/90 も受注機材明細（出庫場所を照合）で判定し、準備日を消した伝票は
 --       未使用の明細idに付け替えていた。付け替え済みの伝票は事前準備の行も無いので、新しい判定でも受注削除のまま
+--     2026-10-23 変更: 事前準備の行があっても、明細の今の出庫場所（t_juchu_kizai_meisai.shozoku_id）が伝票の場所と
+--     違えば受注削除とする（10/20 と同じ場所の照合）。準備日を消して K に残した伝票が、出庫場所を Y に変えて準備日を
+--     付け直したときに通常の行へ戻ってしまうのを防ぐ。Web の deleteEmptyNyushukoDen も同じ判定。
 --   ・予定・読取・補正がすべて 0 の行を出さない条件（今は入庫 30 だけ）に 80/90 を加える。
 --   2026-10-21 ステージングで検証（一時ビューで読み取りのみ）: 事前の伝票が無い状態で全列・行数（123,266）とも差分0。
 --   テストの受注で、事前の明細行が機材ヘッダーごとに1行ずつ（二重にならず）出ることを確認。
@@ -78,7 +81,8 @@ CREATE OR REPLACE VIEW public.v_nyushuko_den2_lst WITH (security_invoker = on) A
             WHEN sum(COALESCE(v_nyushuko_den_lst.plan_qty, 0::bigint)) <> 0::numeric THEN 0
             WHEN v_nyushuko_den_lst.sagyo_kbn_id = ANY (ARRAY[80, 90]) THEN (NOT (EXISTS ( SELECT 1
                FROM t_juchu_kizai_jizen j
-              WHERE j.juchu_head_id = v_nyushuko_den_lst.juchu_head_id AND j.juchu_kizai_head_id = v_nyushuko_den_lst.juchu_kizai_head_id AND j.juchu_kizai_meisai_id = v_nyushuko_den_lst.juchu_kizai_meisai_id AND j.kizai_id = v_nyushuko_den_lst.kizai_id)))::integer
+                 JOIN t_juchu_kizai_meisai m ON m.juchu_head_id = j.juchu_head_id AND m.juchu_kizai_head_id = j.juchu_kizai_head_id AND m.juchu_kizai_meisai_id = j.juchu_kizai_meisai_id AND m.kizai_id = j.kizai_id
+              WHERE j.juchu_head_id = v_nyushuko_den_lst.juchu_head_id AND j.juchu_kizai_head_id = v_nyushuko_den_lst.juchu_kizai_head_id AND j.juchu_kizai_meisai_id = v_nyushuko_den_lst.juchu_kizai_meisai_id AND j.kizai_id = v_nyushuko_den_lst.kizai_id AND m.shozoku_id = v_nyushuko_den_lst.nyushuko_basho_id)))::integer
             WHEN COALESCE(v_nyushuko_den_lst.ctn_flg, 0) = 1 THEN (NOT (EXISTS ( SELECT 1
                FROM t_juchu_ctn_meisai c
               WHERE c.juchu_head_id = v_nyushuko_den_lst.juchu_head_id AND c.juchu_kizai_head_id = v_nyushuko_den_lst.juchu_kizai_head_id AND c.juchu_kizai_meisai_id = v_nyushuko_den_lst.juchu_kizai_meisai_id AND c.kizai_id = v_nyushuko_den_lst.kizai_id AND c.shozoku_id = v_nyushuko_den_lst.nyushuko_basho_id)))::integer
