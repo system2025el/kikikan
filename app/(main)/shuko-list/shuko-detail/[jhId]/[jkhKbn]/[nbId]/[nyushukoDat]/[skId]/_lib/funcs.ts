@@ -5,20 +5,45 @@ import { PoolClient } from 'pg';
 
 import { JUCHU_KIZAI_HEAD_KBN, NYUSHUKO_SHUBETU_ID, SAGYO_KBN_ID } from '@/app/_lib/constants';
 import pool, { refreshVRfid } from '@/app/_lib/db/postgres';
-import { selectJuchuContainerMeisaiMaxId, upsertJuchuContainerMeisai } from '@/app/_lib/db/tables/t-juchu-ctn-meisai';
-import { selectChildJuchuKizaiHeadConfirm } from '@/app/_lib/db/tables/t-juchu-kizai-head';
-import { selectJuchuKizaiNyushukoConfirmList } from '@/app/_lib/db/tables/t-juchu-kizai-nyushuko';
-import { updateNyushukoDen, upsertNyushukoDen } from '@/app/_lib/db/tables/t-nyushuko-den';
+import {
+  deleteJuchuContainerMeisaiShozoku,
+  selectCtnMaxMeisaiIdTx,
+  selectJuchuContainerMeisaiRowsTx,
+  selectMeisaiMaxDspOrdNumTx,
+  updateJuchuContainerMeisaiMem,
+  updateJuchuContainerMeisaiPlanMem,
+  upsertJuchuContainerMeisaiColumns,
+} from '@/app/_lib/db/tables/t-juchu-ctn-meisai';
+import {
+  selectChildJuchuKizaiHeadConfirm,
+  selectChildJuchuKizaiHeadCountTx,
+  selectJuchuKizaiHeadNams,
+} from '@/app/_lib/db/tables/t-juchu-kizai-head';
+import {
+  selectJuchuKizaiNyushukoConfirmList,
+  selectJuchuKizaiNyushukoMatchTx,
+} from '@/app/_lib/db/tables/t-juchu-kizai-nyushuko';
+import { deleteShukoCtnResult } from '@/app/_lib/db/tables/t-nyushuko-ctn-result';
+import {
+  deleteShukoCtnDen,
+  lockNyushukoDenForNumberingTx,
+  selectShukoCtnDenRowsTx,
+  updateNyushukoDen,
+  upsertNyushukoDen,
+} from '@/app/_lib/db/tables/t-nyushuko-den';
 import {
   deleteNyushukoFix,
   insertNyushukoFix,
   selectFixedJuchuKizaiHeadIdsTx,
+  selectFixedSagyoIdsTx,
 } from '@/app/_lib/db/tables/t-nyushuko-fix';
+import { selectActiveEqpts } from '@/app/_lib/db/tables/v-kizai-lst-sel';
 import { selectNyushukoOne } from '@/app/_lib/db/tables/v-nyushuko-den2-head';
 import { selectCtnNyushukoDetail, selectNyushukoDetail } from '@/app/_lib/db/tables/v-nyushuko-den2-lst';
 import { JuchuCtnMeisai } from '@/app/_lib/db/types/t_juchu_ctn_meisai-type';
 import { NyushukoDen } from '@/app/_lib/db/types/t-nyushuko-den-type';
 import { NyushukoFix } from '@/app/_lib/db/types/t-nyushuko-fix-type';
+import { syncNyukoCtnAfterDelete } from '@/app/(main)/_lib/ctn-nyuko-funcs';
 import {
   NYUSHUKO_FIX_ERROR,
   NyushukoFixError,
@@ -27,7 +52,13 @@ import {
 } from '@/app/(main)/_lib/nyushuko-fix-error';
 
 import { calcShukoDiff, hasShukoDiff } from './shuko-diff';
-import { NyukoValues, ShukoDetailTableValues, ShukoDetailValues } from './types';
+import {
+  NyukoValues,
+  ShukoCtnSaveResult,
+  ShukoCtnSelectionValues,
+  ShukoDetailTableValues,
+  ShukoDetailValues,
+} from './types';
 
 /**
  * 出庫明細取得
@@ -58,13 +89,29 @@ export const getShukoDetail = async (
     // 該当行が無い。呼び出し元で「見つかりません」を表示させるためnullを返す。
     if (data.length === 0) return null;
 
+    const juchuKizaiHeadIds: number[] =
+      data[0].juchu_kizai_head_idv?.split(',').map((id: string) => parseInt(id)) || [];
+
+    // 受注機材ヘッダーごとの明細名（head_namv は合体しているヘッダーの明細名をつないだものなので、ヘッダーごとに取り直す）
+    const { data: headNams, error: headNamsError } =
+      juchuKizaiHeadIds.length > 0
+        ? await selectJuchuKizaiHeadNams(juchuHeadId, juchuKizaiHeadIds)
+        : { data: [], error: null };
+    if (headNamsError) {
+      throw new Error('[getShukoDetail] DBエラー:', { cause: headNamsError });
+    }
+
     const nyukoDetailData: ShukoDetailValues = {
       juchuHeadId: juchuHeadId,
       juchuKizaiHeadKbn: juchuKizaiHeadKbn,
       nyushukoBashoId: nyushukoBashoId,
       nyushukoDat: nyushukoDat,
       sagyoKbnId: sagyoKbnId,
-      juchuKizaiHeadIds: data[0].juchu_kizai_head_idv?.split(',').map((id: string) => parseInt(id)) || [],
+      juchuKizaiHeadIds: juchuKizaiHeadIds,
+      juchuKizaiHeadNams: (headNams ?? []).map((h) => ({
+        juchuKizaiHeadId: h.juchu_kizai_head_id,
+        headNam: h.head_nam,
+      })),
       nyushukoShubetuId: NYUSHUKO_SHUBETU_ID.shuko,
       headNamv: data[0].head_namv,
       koenNam: data[0].koen_nam,
@@ -153,6 +200,9 @@ const toShukoDetailTableValues = (data: Awaited<ReturnType<typeof selectNyushuko
       dspOrdNumMeisai: d.dsp_ord_num_meisai,
       indentNum: d.indent_num ?? 0,
       mem2: d.mem2 ?? '',
+      juchuMeisaiDelFlg: d.juchu_meisai_del_flg ?? 0,
+      saveFlag: true,
+      delFlag: false,
     })
   );
 
@@ -227,14 +277,63 @@ export const updShukoDetail = async (
       throw new NyushukoFixError(NYUSHUKO_FIX_ERROR.diff, '[updShukoDetail] 不足・過剰があります');
     }
 
+    // 最終確認から出発するときは、同じ出庫のピッキングに受注削除の行（実績が残っている）が無いかも確認する
+    // ピッキングだけに実績がある機材を削除すると、受注削除はピッキングの行にだけ残り、最終確認の差異チェックに掛からない
+    // （そのヘッダーは最終確認の行が無くても合体しているヘッダーとして出発済みになるため、取り除く前に出発させない）
+    if (shukoDetailData.sagyoKbnId === SAGYO_KBN_ID.shukoConfirmation) {
+      const pickingTableData = toShukoDetailTableValues(
+        await selectNyushukoDetail(
+          shukoDetailData.juchuHeadId,
+          shukoDetailData.juchuKizaiHeadKbn,
+          shukoDetailData.nyushukoBashoId,
+          shukoDetailData.nyushukoDat,
+          SAGYO_KBN_ID.shukoPicking,
+          connection
+        )
+      );
+      if (
+        pickingTableData.some(
+          (d) =>
+            unfixedJuchuKizaiHeadIds.includes(d.juchuKizaiHeadId) &&
+            d.juchuMeisaiDelFlg === 1 &&
+            (d.resultQty ?? 0) + (d.resultAdjQty ?? 0) > 0
+        )
+      ) {
+        throw new NyushukoFixError(
+          NYUSHUKO_FIX_ERROR.pickingDeleted,
+          '[updShukoDetail] ピッキングに受注削除の行があります'
+        );
+      }
+    }
+
     // 未出発のヘッダーの行だけを対象にする
-    const targetTableData = shukoDetailTableData.filter((d) => unfixedJuchuKizaiHeadIds.includes(d.juchuKizaiHeadId));
+    // ※読取数は DB から取り直した明細を使う（画面を開いた後に HT・ゲートから送信された分も確定に含めるため）
+    const targetTableData = currentTableData.filter((d) => unfixedJuchuKizaiHeadIds.includes(d.juchuKizaiHeadId));
     // コンテナデータ
-    const ctnData = targetTableData.filter((data) => data.ctnFlg);
+    const allCtnData = targetTableData.filter((data) => data.ctnFlg);
+
+    // 読取数＋補正数が0のコンテナは、その場所の出庫伝票・実績・受注コンテナ明細を削除して出発する（入庫伝票も作らない）
+    const zeroCtnData =
+      shukoDetailData.juchuKizaiHeadKbn !== JUCHU_KIZAI_HEAD_KBN.keep
+        ? allCtnData.filter((d) => (d.resultQty ?? 0) + (d.resultAdjQty ?? 0) === 0)
+        : [];
+    for (const d of zeroCtnData) {
+      await deleteShukoCtnDen(d, shukoDetailData.nyushukoBashoId, connection);
+      await deleteShukoCtnResult(
+        d.juchuHeadId,
+        d.juchuKizaiHeadId,
+        d.kizaiId,
+        shukoDetailData.nyushukoBashoId,
+        connection
+      );
+      await deleteJuchuContainerMeisaiShozoku(d, shukoDetailData.nyushukoBashoId, connection);
+    }
+    await syncNyukoCtnAfterDelete(zeroCtnData, shukoDetailData.nyushukoBashoId, userNam, connection);
+    const ctnData = allCtnData.filter((d) => !zeroCtnData.includes(d));
 
     // キープ以外は明細、伝票を更新
     if (shukoDetailData.juchuKizaiHeadKbn !== JUCHU_KIZAI_HEAD_KBN.keep && ctnData && ctnData.length > 0) {
-      // コンテナ明細追加更新
+      // コンテナ明細の予定数を確定（読取数＋補正数）
       const upsertJuchuMeisaiResult = await upsJuchuCtnMeisai(ctnData, userNam, connection);
 
       // コンテナ出庫伝票追加更新
@@ -284,16 +383,28 @@ export const updShukoDetail = async (
             throw new Error('[updShukoDetail] もう一方の出庫場所の出庫日が見つかりません');
           }
 
-          const { data: otherShukoData, error: otherShukoDataError } = await selectCtnNyushukoDetail(
+          // もう一方の出庫場所の数量を足すのは、その場所が出発済みのときだけ（確定した数量だけを入庫予定にする）
+          // 未出発の場所の分は、その場所の出発時に（こちらの確定値と合わせて）入庫伝票に入る
+          const departedBashoIds = await selectFixedSagyoIdsTx(
             shukoDetailData.juchuHeadId,
             juchuKizaiHeadId,
-            shukoDetailData.juchuKizaiHeadKbn,
-            otherShukoDat.nyushuko_basho_id,
-            otherShukoDat.nyushuko_dat,
-            shukoDetailData.sagyoKbnId
+            SAGYO_KBN_ID.shukoConfirmed,
+            connection
           );
+          let otherShukoData: Awaited<ReturnType<typeof selectCtnNyushukoDetail>>['data'] = [];
+          if (departedBashoIds.includes(otherShukoDat.nyushuko_basho_id)) {
+            const { data, error: otherShukoDataError } = await selectCtnNyushukoDetail(
+              shukoDetailData.juchuHeadId,
+              juchuKizaiHeadId,
+              shukoDetailData.juchuKizaiHeadKbn,
+              otherShukoDat.nyushuko_basho_id,
+              otherShukoDat.nyushuko_dat,
+              shukoDetailData.sagyoKbnId
+            );
 
-          if (otherShukoDataError) throw otherShukoDataError;
+            if (otherShukoDataError) throw otherShukoDataError;
+            otherShukoData = data;
+          }
 
           const upsertNyukoDenResult = await upsNyukoDen(
             targetCtnData,
@@ -345,7 +456,9 @@ export const updShukoDetail = async (
 };
 
 /**
- * 受注コンテナ明細追加更新
+ * 受注コンテナ明細の予定数確定（出発時）
+ * 既にある行は予定数（読取数＋補正数）だけを更新し、表示順・メモは変えない。
+ * 行が無いとき（改修前の予定外コンテナなど）だけ追加する。表示順は伝票の表示順（K と Y でそろえた値）を使う
  * @param shukoDetailTableData 出庫テーブルデータ
  * @param userNam ユーザー名
  * @param connection
@@ -368,7 +481,7 @@ export const upsJuchuCtnMeisai = async (
     add_user: userNam,
   }));
   try {
-    await upsertJuchuContainerMeisai(upsertCtnData, connection);
+    await upsertJuchuContainerMeisaiColumns(upsertCtnData, ['plan_kizai_qty'], connection);
 
     return true;
   } catch (e) {
@@ -617,6 +730,16 @@ export const delShukoFix = async (
       throw new NyushukoFixError(NYUSHUKO_FIX_ERROR.noneFixed, '[delShukoFix] すでに出発解除されています');
     }
 
+    // 子伝票（返却・キープ）があると解除できない。画面でも確認しているが、確認の後に作られた分も含めて確かめ直す
+    const childCount = await selectChildJuchuKizaiHeadCountTx(
+      shukoDetailData.juchuHeadId,
+      juchuKizaiHeadIds,
+      connection
+    );
+    if (childCount > 0) {
+      throw new NyushukoFixError(NYUSHUKO_FIX_ERROR.hasChild, '[delShukoFix] 子伝票があるため出発解除できません');
+    }
+
     for (const data of deleteFixData) {
       await deleteNyushukoFix(data, connection);
     }
@@ -687,6 +810,8 @@ export const updShukoAdjust = async (adjustData: ShukoDetailTableValues[], userN
   }));
   const connection = await pool.connect();
   try {
+    await connection.query('BEGIN');
+
     for (const data of updateData) {
       await updateNyushukoDen(data, connection);
     }
@@ -707,6 +832,272 @@ export const updShukoAdjust = async (adjustData: ShukoDetailTableValues[], userN
     refreshVRfid().catch((err) => {
       console.error('バックグラウンドでのマテビュー更新に失敗:', err);
     });
+    connection.release();
+  }
+};
+
+/**
+ * コンテナ保存で、画面に出す理由がある失敗
+ */
+class ShukoCtnSaveError extends Error {}
+
+/**
+ * コンテナ選択ダイアログの選択肢（有効なコンテナ）
+ * @returns
+ */
+export const getShukoCtnSelection = async (): Promise<ShukoCtnSelectionValues[]> => {
+  try {
+    const data = await selectActiveEqpts('');
+    return data.rows
+      .filter((d) => d.ctnFlg === 1)
+      .map((d) => ({ kizaiId: d.kizaiId as number, kizaiNam: (d.kizaiNam as string) ?? '' }));
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
+    throw e;
+  }
+};
+
+/**
+ * コンテナ保存（出庫明細・最終確認）
+ * 追加：出庫チェック伝票（sagyo_kbn_id = 20）とその場所の受注コンテナ明細を作る
+ * 更新：予定数（伝票・受注コンテナ明細）とメモ（受注コンテナ明細）。出発済みのヘッダーはメモだけ
+ * 削除：その場所の出庫伝票（ピッキング・最終確認）・コンテナ実績・受注コンテナ明細
+ * 採番は HT・ゲートの送信RPC（nyushuko_send_20261009_1）と同じ規則（K と Y で明細ID・表示順をそろえる。
+ * 同じコンテナが無ければ受注機材ヘッダー内のコンテナの最大値 + 1）
+ * @param shukoDetailData 出庫データ
+ * @param ctnRows 保存するコンテナの行（追加・削除・変更があった行だけ）
+ * @param userNam ユーザー名
+ * @returns 成功したときは取り直した出庫明細テーブルデータ、失敗したときは画面に出す文言
+ */
+export const saveShukoCtn = async (
+  shukoDetailData: ShukoDetailValues,
+  ctnRows: ShukoDetailTableValues[],
+  userNam: string
+): Promise<ShukoCtnSaveResult> => {
+  if (
+    shukoDetailData.sagyoKbnId !== SAGYO_KBN_ID.shukoConfirmation ||
+    shukoDetailData.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.keep
+  ) {
+    return { ok: false, message: 'この画面ではコンテナを編集できません' };
+  }
+
+  const juchuHeadId = shukoDetailData.juchuHeadId;
+  const bashoId = shukoDetailData.nyushukoBashoId;
+  const nyushukoDat = shukoDetailData.nyushukoDat;
+
+  const targets = ctnRows.filter((d) => d.ctnFlg === 1);
+  const addRows = targets.filter((d) => !d.saveFlag && !d.delFlag);
+  const delRows = targets.filter((d) => d.saveFlag && d.delFlag);
+  const updRows = targets.filter((d) => d.saveFlag && !d.delFlag);
+
+  if ([...addRows, ...updRows].some((d) => d.planQty === null || !Number.isInteger(d.planQty) || d.planQty < 0)) {
+    return { ok: false, message: '予定数は0以上の整数で入力してください' };
+  }
+
+  const connection = await pool.connect();
+
+  try {
+    await connection.query('BEGIN');
+
+    // 追加があるときは、送信RPCと同時に明細idを採番しないよう、確認・採番の前に伝票テーブルをロックする
+    if (addRows.length > 0) {
+      await lockNyushukoDenForNumberingTx(connection);
+    }
+
+    const juchuKizaiHeadIds = [...new Set(targets.map((d) => d.juchuKizaiHeadId))];
+    if (juchuKizaiHeadIds.some((id) => !shukoDetailData.juchuKizaiHeadIds.includes(id))) {
+      throw new ShukoCtnSaveError('この出庫明細に無い受注明細が含まれています。開き直してください');
+    }
+
+    // 画面を開いた後にメイン明細で出庫日時・出庫場所が変えられていないか
+    const matchedJuchuKizaiHeadIds = await selectJuchuKizaiNyushukoMatchTx(
+      juchuHeadId,
+      juchuKizaiHeadIds,
+      NYUSHUKO_SHUBETU_ID.shuko,
+      bashoId,
+      nyushukoDat,
+      connection
+    );
+    if (juchuKizaiHeadIds.some((id) => !matchedJuchuKizaiHeadIds.includes(id))) {
+      throw new ShukoCtnSaveError('出庫日時・場所が変更されています。開き直してください');
+    }
+
+    // 出発済みのヘッダーは、追加・削除・予定数の変更ができない（メモは変更できる）
+    const fixedJuchuKizaiHeadIds = await selectFixedJuchuKizaiHeadIdsTx(
+      juchuHeadId,
+      juchuKizaiHeadIds,
+      SAGYO_KBN_ID.shukoConfirmed,
+      nyushukoDat,
+      bashoId,
+      connection
+    );
+    if ([...addRows, ...delRows].some((d) => fixedJuchuKizaiHeadIds.includes(d.juchuKizaiHeadId))) {
+      throw new ShukoCtnSaveError('出発済みのため、コンテナの追加・削除はできません。開き直してください');
+    }
+
+    const now = new Date().toISOString();
+
+    // 追加
+    for (const juchuKizaiHeadId of [...new Set(addRows.map((d) => d.juchuKizaiHeadId))]) {
+      const rows = addRows.filter((d) => d.juchuKizaiHeadId === juchuKizaiHeadId);
+      const ctnMeisaiRows = await selectJuchuContainerMeisaiRowsTx(juchuHeadId, juchuKizaiHeadId, connection);
+      const ctnDenRows = await selectShukoCtnDenRowsTx(juchuHeadId, juchuKizaiHeadId, connection);
+
+      // 画面を開いた後に HT・ゲートや別の人が同じコンテナを付けていたら、予定数を上書きしないよう中止する
+      if (rows.some((r) => ctnDenRows.some((d) => d.sagyo_id === bashoId && d.kizai_id === r.kizaiId))) {
+        throw new ShukoCtnSaveError('既に追加されているコンテナがあります。開き直してください');
+      }
+
+      // 明細idは受注機材ヘッダー内のコンテナ（受注コンテナ明細・全場所のコンテナの伝票）の最大値 + 1
+      // （場所内の最大値だと、別の場所の別のコンテナと明細idが重なるため。機材とは重なってよい）
+      let maxMeisaiId = await selectCtnMaxMeisaiIdTx(juchuHeadId, juchuKizaiHeadId, connection);
+      let maxDspOrdNum = await selectMeisaiMaxDspOrdNumTx(juchuHeadId, juchuKizaiHeadId, connection);
+
+      const newDen: NyushukoDen[] = [];
+      const newCtnMeisai: JuchuCtnMeisai[] = [];
+      for (const r of rows) {
+        // 同じコンテナが別の場所（受注コンテナ明細・出庫チェック伝票）にあれば、明細ID・表示順をそろえる
+        const sameKizai = [
+          ...ctnMeisaiRows
+            .filter((c) => c.kizai_id === r.kizaiId)
+            .map((c) => ({ meisaiId: c.juchu_kizai_meisai_id, dspOrdNum: c.dsp_ord_num })),
+          ...ctnDenRows
+            .filter((d) => d.sagyo_id !== bashoId && d.kizai_id === r.kizaiId)
+            .map((d) => ({ meisaiId: d.juchu_kizai_meisai_id, dspOrdNum: d.dsp_ord_num })),
+        ];
+        const meisaiId = sameKizai.length > 0 ? Math.min(...sameKizai.map((s) => s.meisaiId)) : ++maxMeisaiId;
+        const sameDspOrdNums = sameKizai.map((s) => s.dspOrdNum).filter((n): n is number => n !== null);
+        const dspOrdNum = sameDspOrdNums.length > 0 ? Math.min(...sameDspOrdNums) : ++maxDspOrdNum;
+
+        newDen.push({
+          juchu_head_id: juchuHeadId,
+          juchu_kizai_head_id: juchuKizaiHeadId,
+          juchu_kizai_meisai_id: meisaiId,
+          kizai_id: r.kizaiId,
+          plan_qty: r.planQty ?? 0,
+          sagyo_den_dat: nyushukoDat,
+          sagyo_id: bashoId,
+          sagyo_kbn_id: SAGYO_KBN_ID.shukoConfirmation,
+          dsp_ord_num: dspOrdNum,
+          indent_num: 0,
+          add_dat: now,
+          add_user: userNam,
+        });
+        newCtnMeisai.push({
+          juchu_head_id: juchuHeadId,
+          juchu_kizai_head_id: juchuKizaiHeadId,
+          juchu_kizai_meisai_id: meisaiId,
+          kizai_id: r.kizaiId,
+          shozoku_id: bashoId,
+          plan_kizai_qty: r.planQty ?? 0,
+          mem: r.mem2 ? r.mem2 : null,
+          dsp_ord_num: dspOrdNum,
+          indent_num: 0,
+          add_dat: now,
+          add_user: userNam,
+        });
+      }
+
+      await upsertNyushukoDen(newDen, connection);
+      await upsertJuchuContainerMeisaiColumns(newCtnMeisai, ['plan_kizai_qty', 'mem'], connection);
+    }
+
+    // 更新
+    for (const r of updRows) {
+      if (fixedJuchuKizaiHeadIds.includes(r.juchuKizaiHeadId)) {
+        // 出発済みはメモだけ
+        await updateJuchuContainerMeisaiMem(
+          {
+            juchuHeadId: r.juchuHeadId,
+            juchuKizaiHeadId: r.juchuKizaiHeadId,
+            juchuKizaiMeisaiId: r.juchuKizaiMeisaiId,
+            kizaiId: r.kizaiId,
+            shozokuId: bashoId,
+            mem: r.mem2 ? r.mem2 : null,
+          },
+          userNam,
+          connection
+        );
+        continue;
+      }
+
+      await updateNyushukoDen(
+        {
+          juchu_head_id: r.juchuHeadId,
+          juchu_kizai_head_id: r.juchuKizaiHeadId,
+          juchu_kizai_meisai_id: r.juchuKizaiMeisaiId,
+          kizai_id: r.kizaiId,
+          sagyo_kbn_id: SAGYO_KBN_ID.shukoConfirmation,
+          sagyo_id: bashoId,
+          sagyo_den_dat: nyushukoDat,
+          plan_qty: r.planQty ?? 0,
+          upd_dat: now,
+          upd_user: userNam,
+        },
+        connection
+      );
+      // 受注コンテナ明細は更新だけ（作らない）。画面を開いた後にほかの人が削除していれば0件で何もしない
+      // （upsert だと、伝票の無い受注コンテナ明細だけが作り直され、在庫を引き当ててしまうため）
+      await updateJuchuContainerMeisaiPlanMem(
+        {
+          juchuHeadId: r.juchuHeadId,
+          juchuKizaiHeadId: r.juchuKizaiHeadId,
+          juchuKizaiMeisaiId: r.juchuKizaiMeisaiId,
+          kizaiId: r.kizaiId,
+          shozokuId: bashoId,
+          planKizaiQty: r.planQty ?? 0,
+          mem: r.mem2 ? r.mem2 : null,
+        },
+        userNam,
+        connection
+      );
+    }
+
+    // 削除
+    for (const r of delRows) {
+      await deleteShukoCtnDen(r, bashoId, connection);
+      await deleteShukoCtnResult(r.juchuHeadId, r.juchuKizaiHeadId, r.kizaiId, bashoId, connection);
+      await deleteJuchuContainerMeisaiShozoku(r, bashoId, connection);
+    }
+    await syncNyukoCtnAfterDelete(delRows, bashoId, userNam, connection);
+
+    await connection.query('COMMIT');
+
+    await revalidatePath('/shuko-list');
+
+    const data = await getShukoDetailTable(
+      juchuHeadId,
+      shukoDetailData.juchuKizaiHeadKbn,
+      bashoId,
+      nyushukoDat,
+      shukoDetailData.sagyoKbnId
+    );
+
+    return { ok: true, data };
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
+    await connection.query('ROLLBACK');
+    return { ok: false, message: e instanceof ShukoCtnSaveError ? e.message : '保存に失敗しました' };
+  } finally {
+    if (delRows.length > 0) {
+      refreshVRfid().catch((err) => {
+        console.error('バックグラウンドでのマテビュー更新に失敗:', err);
+      });
+    }
     connection.release();
   }
 };

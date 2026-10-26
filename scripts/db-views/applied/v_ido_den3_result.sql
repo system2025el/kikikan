@@ -21,7 +21,7 @@
 --   t_juchu_kizai_head への JOIN は必ず juchu_head_id とのペアで行うこと。
 --
 -- 関連: app/_lib/db/tables/v-ido-den3-result.ts
---       scripts/db-migration/ddl/20260924-ido-juchu-meisai.sql
+--       scripts/db-tables/applied/20260924-ido-juchu-meisai.sql
 
 CREATE OR REPLACE VIEW public.v_ido_den3_result WITH (security_invoker = on) AS
  SELECT DISTINCT t_ido_result.rfid_tag_id,

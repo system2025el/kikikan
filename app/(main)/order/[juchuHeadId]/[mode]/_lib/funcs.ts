@@ -25,6 +25,7 @@ import {
 import { deleteJuchuCtnMeisaiFromOrder, insertJuchuContainerMeisai } from '@/app/_lib/db/tables/t-juchu-ctn-meisai';
 import {
   insertJuchuHead,
+  insertJuchuHeadWithTran,
   selectJuchuHead,
   selectMaxId,
   updateJuchuHead,
@@ -181,13 +182,21 @@ export const getMaxId = async () => {
 };
 
 /**
+ * 新規の受注ヘッダーidを採番する（90000から）
+ * @returns 受注ヘッダーid
+ */
+const getNewJuchuHeadId = async () => {
+  const maxId = await getMaxId();
+  return maxId && maxId.juchu_head_id >= 90000 ? maxId.juchu_head_id + 1 : 90000;
+};
+
+/**
  * 受注ヘッダー情報新規追加
  * @param juchuHeadId 受注ヘッダーid
  */
 export const addJuchuHead = async (juchuHeadData: OrderValues, userNam: string) => {
   try {
-    const maxId = await getMaxId();
-    const newOrderId = maxId && maxId.juchu_head_id >= 90000 ? maxId.juchu_head_id + 1 : 90000;
+    const newOrderId = await getNewJuchuHeadId();
 
     const newData: JuchuHead = {
       juchu_head_id: newOrderId,
@@ -995,28 +1004,6 @@ const mergeJuchuKizaiMeisai = async (normalHeads: EqTableValues[], returnHeads: 
   return mergedSets.flatMap((m) => m.rows);
 };
 
-/**
- * 選択された受注機材ヘッダーのコンテナ明細を機材idごとに合算する
- * 返却明細はマイナス値で入っているため、そのまま加算すると減算になる
- */
-const mergeJuchuContainerMeisai = async (originJuchuKizaiHeads: EqTableValues[]) => {
-  const merged = new Map<number, { kizaiNam: string; qty: number; mems: (string | null)[] }>();
-
-  for (const head of originJuchuKizaiHeads) {
-    const isReturn = head.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.return;
-    const ctnList = await getJuchuContainerMeisai(head.juchuHeadId, head.juchuKizaiHeadId);
-
-    for (const d of ctnList) {
-      const current = merged.get(d.kizaiId) ?? { kizaiNam: d.kizaiNam, qty: 0, mems: [] };
-      current.qty += d.planKicsKizaiQty + d.planYardKizaiQty;
-      if (!isReturn) current.mems.push(d.mem);
-      merged.set(d.kizaiId, current);
-    }
-  }
-
-  return merged;
-};
-
 /** 機材マスタの現在の定価（reg_amt）を機材idごとに引けるMapで取得する */
 const getKizaiRegAmts = async (kizaiIds: number[]) => {
   if (kizaiIds.length === 0) return new Map<number, number>();
@@ -1028,6 +1015,15 @@ const getKizaiRegAmts = async (kizaiIds: number[]) => {
   return new Map(data.map((d) => [d.kizai_id, d.reg_amt ?? 0]));
 };
 
+/** 顧客マスタに設定されている割引率を取得する */
+const getNebikiRatByKokyakuId = async (kokyakuId: number) => {
+  const kokyakuData = await selectKokyaku(kokyakuId);
+  if (kokyakuData.error) {
+    throw new Error('[selectKokyaku] DBエラー:', { cause: kokyakuData.error });
+  }
+  return kokyakuData.data.nebiki_rat;
+};
+
 /** コピー先受注の顧客に設定されている割引率を取得する */
 const getKokyakuNebikiRat = async (juchuHeadId: number) => {
   const juchuData = await selectJuchuHead(juchuHeadId);
@@ -1036,11 +1032,231 @@ const getKokyakuNebikiRat = async (juchuHeadId: number) => {
   }
   if (!juchuData.data.kokyaku_id) return null;
 
-  const kokyakuData = await selectKokyaku(juchuData.data.kokyaku_id);
-  if (kokyakuData.error) {
-    throw new Error('[selectKokyaku] DBエラー:', { cause: kokyakuData.error });
+  return await getNebikiRatByKokyakuId(juchuData.data.kokyaku_id);
+};
+
+/**
+ * コピー元の受注機材ヘッダーが、画面側と同じ選択条件を満たしているか確認する
+ * @param originJuchuKizaiHeads コピー元の受注機材ヘッダー（メイン＋返却）
+ * @param data コピーダイアログの入力値
+ * @returns メイン・返却に振り分けたヘッダー（条件を満たさない場合はnull）
+ */
+const validateCopyOrigin = (originJuchuKizaiHeads: EqTableValues[], data: CopyDialogValue) => {
+  const normalHeads = originJuchuKizaiHeads.filter((d) => d.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.normal);
+  const returnHeads = originJuchuKizaiHeads.filter((d) => d.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.return);
+  const normalHeadIds = normalHeads.map((d) => d.juchuKizaiHeadId);
+
+  if (normalHeads.length === 0 || !data.shukoDat || !data.nyukoDat) {
+    console.error('[validateCopyOrigin] メイン明細または出庫日・入庫日が指定されていません');
+    return null;
   }
-  return kokyakuData.data.nebiki_rat;
+  if (normalHeads.length + returnHeads.length !== originJuchuKizaiHeads.length) {
+    console.error('[validateCopyOrigin] メイン・返却以外の明細が含まれています');
+    return null;
+  }
+  if (returnHeads.some((d) => d.oyaJuchuKizaiHeadId === null || !normalHeadIds.includes(d.oyaJuchuKizaiHeadId))) {
+    console.error('[validateCopyOrigin] 親メイン明細が選択されていない返却明細が含まれています');
+    return null;
+  }
+  return { normalHeads, returnHeads, shukoDat: data.shukoDat, nyukoDat: data.nyukoDat };
+};
+
+/**
+ * コピー先に作成する受注機材ヘッダー・明細の内容を取得する（トランザクション開始前に済ませる参照系）
+ * @param normalHeads メイン受注機材ヘッダー
+ * @param returnHeads 返却受注機材ヘッダー
+ */
+const getCopySource = async (normalHeads: EqTableValues[], returnHeads: EqTableValues[]) => {
+  // 受注機材明細（選択された明細をセット単位で合算し、返却分を引いたもの）
+  const mergedKizaiMeisai = await mergeJuchuKizaiMeisai(normalHeads, returnHeads);
+  // 単価はコピー元の値ではなく機材マスタの現在の定価を入れ直す
+  const regAmtByKizaiId = await getKizaiRegAmts([...new Set(mergedKizaiMeisai.map((d) => d.kizaiId))]);
+  return { mergedKizaiMeisai, regAmtByKizaiId };
+};
+
+/**
+ * コピー先の受注ヘッダーに受注機材ヘッダー・明細を作成する。
+ * 呼び出し元のトランザクションに参加するため、必ず connection を渡すこと。
+ * @param params.originJuchuKizaiHeads コピー元の受注機材ヘッダー（メイン＋返却）
+ * @param params.juchuHeadId コピー先の受注ヘッダーid
+ * @param params.headNam 受注明細名
+ * @param params.shukoDat 出庫日
+ * @param params.nyukoDat 入庫日
+ * @param params.mergedKizaiMeisai 合算済みの受注機材明細
+ * @param params.regAmtByKizaiId 機材マスタの定価
+ * @param params.nebikiRat 割引率（コピー先受注の顧客マスタの値）
+ * @param params.honbanbiTemplate コピー先受注の本番日テンプレート
+ * @param userNam ユーザー名
+ * @param connection コネクション
+ */
+const insertCopiedJuchuKizai = async (
+  params: {
+    originJuchuKizaiHeads: EqTableValues[];
+    juchuHeadId: number;
+    headNam: string | null;
+    shukoDat: Date;
+    nyukoDat: Date;
+    mergedKizaiMeisai: MergedKizaiMeisai[];
+    regAmtByKizaiId: Map<number, number>;
+    nebikiRat: number | null;
+    honbanbiTemplate: HonbanbiValues[];
+  },
+  userNam: string,
+  connection: PoolClient
+) => {
+  const { originJuchuKizaiHeads, juchuHeadId, mergedKizaiMeisai, regAmtByKizaiId } = params;
+
+  // 出庫日・入庫日は0:00固定でYARDに登録する
+  const shukoDate = toJapanStartOfDay(params.shukoDat);
+  const nyukoDate = toJapanStartOfDay(params.nyukoDat);
+  const dateRange = getRange(shukoDate, nyukoDate);
+
+  // 受注機材ヘッダーid最大値
+  const JuchuKizaiHeadMaxId = await getJuchuKizaiHeadMaxId(juchuHeadId);
+  // 受注機材ヘッダーid
+  const newJuchuKizaiHeadId = JuchuKizaiHeadMaxId ? JuchuKizaiHeadMaxId.juchu_kizai_head_id + 1 : 1;
+
+  // 受注機材ヘッダーデータ
+  const newJuchuKizaiHeadData: CopyJuchuKizaiHeadValue = {
+    juchuHeadId: juchuHeadId,
+    mem: mergeMem(originJuchuKizaiHeads.map((d) => d.mem)),
+    headNam: params.headNam,
+    kicsShukoDat: null,
+    kicsNyukoDat: null,
+    yardShukoDat: shukoDate,
+    yardNyukoDat: nyukoDate,
+    juchuKizaiHeadKbn: JUCHU_KIZAI_HEAD_KBN.normal,
+    juchuKizaiHeadId: newJuchuKizaiHeadId,
+    juchuHonbanbiQty: 0,
+    nebikiAmt: null,
+    nebikiRat: params.nebikiRat,
+  };
+
+  // 受注機材ヘッダー追加
+  await addJuchuKizaiHead(newJuchuKizaiHeadId, newJuchuKizaiHeadData, JUCHU_KIZAI_HEAD_KBN.normal, userNam, connection);
+
+  // 受注機材入出庫追加
+  await addJuchuKizaiNyushuko(juchuHeadId, newJuchuKizaiHeadId, null, shukoDate, null, nyukoDate, userNam, connection);
+
+  // 受注機材本番日(入出庫、使用中)追加
+  const addJuchuSiyouHonbanbiData: CopyJuchuKizaiHonbanbiValues[] = dateRange.map((d: string) => ({
+    juchuHeadId: juchuHeadId,
+    juchuKizaiHeadId: newJuchuKizaiHeadId,
+    juchuHonbanbiShubetuId: HONBANBI_SHUBETU_ID.use,
+    juchuHonbanbiDat: new Date(d),
+    mem: '',
+    juchuHonbanbiAddQty: 0,
+  }));
+  const addJuchuHonbanbiData: CopyJuchuKizaiHonbanbiValues[] = [
+    {
+      juchuHeadId: juchuHeadId,
+      juchuKizaiHeadId: newJuchuKizaiHeadId,
+      juchuHonbanbiShubetuId: HONBANBI_SHUBETU_ID.shuko,
+      juchuHonbanbiDat: shukoDate,
+      mem: '',
+      juchuHonbanbiAddQty: 0,
+    },
+    {
+      juchuHeadId: juchuHeadId,
+      juchuKizaiHeadId: newJuchuKizaiHeadId,
+      juchuHonbanbiShubetuId: HONBANBI_SHUBETU_ID.nyuko,
+      juchuHonbanbiDat: nyukoDate,
+      mem: '',
+      juchuHonbanbiAddQty: 0,
+    },
+  ];
+  const mergeHonbanbiData: CopyJuchuKizaiHonbanbiValues[] = [...addJuchuSiyouHonbanbiData, ...addJuchuHonbanbiData];
+  await addAllHonbanbi(juchuHeadId, newJuchuKizaiHeadId, mergeHonbanbiData, userNam, connection);
+
+  // 受注本番日(仕込・RH・GP・本番)を受注本番日テンプレートから展開
+  await expandHonbanbiTemplate(
+    juchuHeadId,
+    newJuchuKizaiHeadId,
+    shukoDate,
+    nyukoDate,
+    params.honbanbiTemplate,
+    userNam,
+    connection
+  );
+
+  // 表示順。受注機材明細に1から振る（コンテナはコピーしない）
+  let dspOrdNum = 1;
+
+  const newJuchuKizaiMeisai: CopyJuchuKizaiMeisaiValues[] = mergedKizaiMeisai.map((d, index) => ({
+    juchuHeadId: juchuHeadId,
+    juchuKizaiHeadId: newJuchuKizaiHeadId,
+    juchuKizaiMeisaiId: index + 1,
+    mShozokuId: d.mShozokuId,
+    // コピー先はすべてYARD所属で作成する
+    shozokuId: BASHO_ID.yard,
+    mem: mergeMem(d.mems),
+    mem2: mergeMem(d.mem2s),
+    kizaiId: d.kizaiId,
+    kizaiTankaAmt: regAmtByKizaiId.get(d.kizaiId) ?? 0,
+    kizaiNam: d.kizaiNam,
+    planKizaiQty: d.planKizaiQty,
+    planYobiQty: d.planYobiQty,
+    planQty: d.planKizaiQty + d.planYobiQty,
+    dspOrdNum: dspOrdNum++,
+    indentNum: d.indentNum,
+    delFlag: false,
+    saveFlag: true,
+  }));
+
+  if (newJuchuKizaiMeisai.length > 0) {
+    // 受注機材明細追加
+    await addJuchuKizaiMeisai(newJuchuKizaiMeisai, userNam, connection);
+
+    // 機材入出庫伝票追加
+    await addNyushukoDen(newJuchuKizaiHeadData, newJuchuKizaiMeisai, userNam, connection);
+  }
+
+  // コンテナは出庫明細（最終確認）で管理するため、コピーの対象にしない（受注機材明細のコピー・分離と同じ）
+
+  // 移動受注機材明細
+  // 明細はYARDで作成するため、機材マスタの所属がKICSの機材は出庫日に移動させる
+  const idoPlanQtyByKizaiId = new Map<number, number>();
+  for (const d of newJuchuKizaiMeisai) {
+    if (d.mShozokuId !== BASHO_ID.kics) continue;
+    idoPlanQtyByKizaiId.set(d.kizaiId, (idoPlanQtyByKizaiId.get(d.kizaiId) ?? 0) + d.planQty);
+  }
+
+  const newIdoList: CopyIdoJuchuKizaiMeisaiValues[] = [...idoPlanQtyByKizaiId.entries()]
+    .filter(([, planQty]) => planQty > 0)
+    .map(([kizaiId, planQty]) => ({
+      juchuHeadId: juchuHeadId,
+      juchuKizaiHeadId: newJuchuKizaiHeadId,
+      idoDenId: null,
+      sagyoDenDat: shukoDate,
+      sagyoSijiId: SAGYO_SIJI_ID.ky,
+      mShozokuId: BASHO_ID.kics,
+      shozokuId: BASHO_ID.yard,
+      shozokuNam: '',
+      kizaiId: kizaiId,
+      kizaiNam: newJuchuKizaiMeisai.find((d) => d.kizaiId === kizaiId)?.kizaiNam ?? '',
+      kizaiQty: 0,
+      planKizaiQty: 0,
+      planYobiQty: 0,
+      planQty: planQty,
+      delFlag: false,
+      saveFlag: true,
+    }));
+
+  if (newIdoList.length > 0) {
+    const idoDenMaxId = await getIdoDenJuchuMaxId();
+    const newIdoDenId = idoDenMaxId ? idoDenMaxId + 1 : 1;
+
+    // 移動受注機材明細追加
+    await addIdoDenJuchu(newIdoDenId, newIdoList, userNam, connection);
+  }
+};
+
+/** コピーで変わる一覧画面のキャッシュを破棄する */
+const revalidateCopyPaths = async () => {
+  await revalidatePath('/eqpt-order-list');
+  await revalidatePath('/ido-list');
+  await revalidatePath('/shuko-list');
+  await revalidatePath('/nyuko-list');
 };
 
 /**
@@ -1058,28 +1274,9 @@ export const copyJuchuKizaiHeadMeisai = async (
   data: CopyDialogValue,
   userNam: string
 ) => {
-  const normalHeads = originJuchuKizaiHeads.filter((d) => d.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.normal);
-  const returnHeads = originJuchuKizaiHeads.filter((d) => d.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.return);
-  const normalHeadIds = normalHeads.map((d) => d.juchuKizaiHeadId);
-
   // 画面側と同じ選択条件をサーバー側でも確認する
-  if (normalHeads.length === 0 || !data.shukoDat || !data.nyukoDat) {
-    console.error('[copyJuchuKizaiHeadMeisai] メイン明細または出庫日・入庫日が指定されていません');
-    return false;
-  }
-  if (normalHeads.length + returnHeads.length !== originJuchuKizaiHeads.length) {
-    console.error('[copyJuchuKizaiHeadMeisai] メイン・返却以外の明細が含まれています');
-    return false;
-  }
-  if (returnHeads.some((d) => d.oyaJuchuKizaiHeadId === null || !normalHeadIds.includes(d.oyaJuchuKizaiHeadId))) {
-    console.error('[copyJuchuKizaiHeadMeisai] 親メイン明細が選択されていない返却明細が含まれています');
-    return false;
-  }
-
-  // 出庫日・入庫日は0:00固定でYARDに登録する
-  const shukoDate = toJapanStartOfDay(data.shukoDat);
-  const nyukoDate = toJapanStartOfDay(data.nyukoDat);
-  const dateRange = getRange(shukoDate, nyukoDate);
+  const origin = validateCopyOrigin(originJuchuKizaiHeads, data);
+  if (!origin) return false;
 
   const connection = await pool.connect();
 
@@ -1087,203 +1284,128 @@ export const copyJuchuKizaiHeadMeisai = async (
     // 参照系はトランザクションを開始する前に済ませる
     // 割引率はコピー先受注の顧客マスタの値を初期値にする
     const nebikiRat = await getKokyakuNebikiRat(juchuHeadId);
-    // 受注機材明細（選択された明細をセット単位で合算し、返却分を引いたもの）
-    const mergedKizaiMeisai = await mergeJuchuKizaiMeisai(normalHeads, returnHeads);
-    // 単価はコピー元の値ではなく機材マスタの現在の定価を入れ直す
-    const regAmtByKizaiId = await getKizaiRegAmts([...new Set(mergedKizaiMeisai.map((d) => d.kizaiId))]);
-    // 受注コンテナ明細（機材idごとに合算。数量はYARDに寄せ、KICSは0で作成する）
-    const mergedCtnMeisai = await mergeJuchuContainerMeisai(originJuchuKizaiHeads);
+    const { mergedKizaiMeisai, regAmtByKizaiId } = await getCopySource(origin.normalHeads, origin.returnHeads);
+    const honbanbiTemplate = await getHonbanbiTemplate(juchuHeadId);
 
     await connection.query('BEGIN');
 
-    // 受注機材ヘッダーid最大値
-    const JuchuKizaiHeadMaxId = await getJuchuKizaiHeadMaxId(juchuHeadId);
-    // 受注機材ヘッダーid
-    const newJuchuKizaiHeadId = JuchuKizaiHeadMaxId ? JuchuKizaiHeadMaxId.juchu_kizai_head_id + 1 : 1;
-
-    // 受注機材ヘッダーデータ
-    const newJuchuKizaiHeadData: CopyJuchuKizaiHeadValue = {
-      juchuHeadId: juchuHeadId,
-      mem: mergeMem(originJuchuKizaiHeads.map((d) => d.mem)),
-      headNam: data.headNam,
-      kicsShukoDat: null,
-      kicsNyukoDat: null,
-      yardShukoDat: shukoDate,
-      yardNyukoDat: nyukoDate,
-      juchuKizaiHeadKbn: JUCHU_KIZAI_HEAD_KBN.normal,
-      juchuKizaiHeadId: newJuchuKizaiHeadId,
-      juchuHonbanbiQty: 0,
-      nebikiAmt: null,
-      nebikiRat: nebikiRat,
-    };
-
-    // 受注機材ヘッダー追加
-    await addJuchuKizaiHead(
-      newJuchuKizaiHeadId,
-      newJuchuKizaiHeadData,
-      JUCHU_KIZAI_HEAD_KBN.normal,
-      userNam,
-      connection
-    );
-
-    // 受注機材入出庫追加
-    await addJuchuKizaiNyushuko(
-      juchuHeadId,
-      newJuchuKizaiHeadId,
-      null,
-      shukoDate,
-      null,
-      nyukoDate,
-      userNam,
-      connection
-    );
-
-    // 受注機材本番日(入出庫、使用中)追加
-    const addJuchuSiyouHonbanbiData: CopyJuchuKizaiHonbanbiValues[] = dateRange.map((d: string) => ({
-      juchuHeadId: juchuHeadId,
-      juchuKizaiHeadId: newJuchuKizaiHeadId,
-      juchuHonbanbiShubetuId: HONBANBI_SHUBETU_ID.use,
-      juchuHonbanbiDat: new Date(d),
-      mem: '',
-      juchuHonbanbiAddQty: 0,
-    }));
-    const addJuchuHonbanbiData: CopyJuchuKizaiHonbanbiValues[] = [
+    await insertCopiedJuchuKizai(
       {
-        juchuHeadId: juchuHeadId,
-        juchuKizaiHeadId: newJuchuKizaiHeadId,
-        juchuHonbanbiShubetuId: HONBANBI_SHUBETU_ID.shuko,
-        juchuHonbanbiDat: shukoDate,
-        mem: '',
-        juchuHonbanbiAddQty: 0,
+        originJuchuKizaiHeads,
+        juchuHeadId,
+        headNam: data.headNam,
+        shukoDat: origin.shukoDat,
+        nyukoDat: origin.nyukoDat,
+        mergedKizaiMeisai,
+        regAmtByKizaiId,
+        nebikiRat,
+        honbanbiTemplate,
       },
-      {
-        juchuHeadId: juchuHeadId,
-        juchuKizaiHeadId: newJuchuKizaiHeadId,
-        juchuHonbanbiShubetuId: HONBANBI_SHUBETU_ID.nyuko,
-        juchuHonbanbiDat: nyukoDate,
-        mem: '',
-        juchuHonbanbiAddQty: 0,
-      },
-    ];
-    const mergeHonbanbiData: CopyJuchuKizaiHonbanbiValues[] = [...addJuchuSiyouHonbanbiData, ...addJuchuHonbanbiData];
-    await addAllHonbanbi(juchuHeadId, newJuchuKizaiHeadId, mergeHonbanbiData, userNam, connection);
-
-    // 受注本番日(仕込・RH・GP・本番)を受注本番日テンプレートから展開
-    const honbanbiTemplate = await getHonbanbiTemplate(juchuHeadId);
-    await expandHonbanbiTemplate(
-      juchuHeadId,
-      newJuchuKizaiHeadId,
-      shukoDate,
-      nyukoDate,
-      honbanbiTemplate,
       userNam,
       connection
     );
-
-    // 表示順。受注機材明細に1から振り、続けて受注コンテナ明細に振る
-    let dspOrdNum = 1;
-
-    const newJuchuKizaiMeisai: CopyJuchuKizaiMeisaiValues[] = mergedKizaiMeisai.map((d, index) => ({
-      juchuHeadId: juchuHeadId,
-      juchuKizaiHeadId: newJuchuKizaiHeadId,
-      juchuKizaiMeisaiId: index + 1,
-      mShozokuId: d.mShozokuId,
-      // コピー先はすべてYARD所属で作成する
-      shozokuId: BASHO_ID.yard,
-      mem: mergeMem(d.mems),
-      mem2: mergeMem(d.mem2s),
-      kizaiId: d.kizaiId,
-      kizaiTankaAmt: regAmtByKizaiId.get(d.kizaiId) ?? 0,
-      kizaiNam: d.kizaiNam,
-      planKizaiQty: d.planKizaiQty,
-      planYobiQty: d.planYobiQty,
-      planQty: d.planKizaiQty + d.planYobiQty,
-      dspOrdNum: dspOrdNum++,
-      indentNum: d.indentNum,
-      delFlag: false,
-      saveFlag: true,
-    }));
-
-    if (newJuchuKizaiMeisai.length > 0) {
-      // 受注機材明細追加
-      await addJuchuKizaiMeisai(newJuchuKizaiMeisai, userNam, connection);
-
-      // 機材入出庫伝票追加
-      await addNyushukoDen(newJuchuKizaiHeadData, newJuchuKizaiMeisai, userNam, connection);
-    }
-
-    const newJuchuCtnMeisai: CopyJuchuContainerMeisaiValues[] = [...mergedCtnMeisai.entries()].map(
-      ([kizaiId, d], index) => ({
-        juchuHeadId: juchuHeadId,
-        juchuKizaiHeadId: newJuchuKizaiHeadId,
-        juchuKizaiMeisaiId: index + 1,
-        kizaiId: kizaiId,
-        kizaiNam: d.kizaiNam,
-        planKicsKizaiQty: 0,
-        planYardKizaiQty: Math.max(0, d.qty),
-        planQty: Math.max(0, d.qty),
-        mem: mergeMem(d.mems),
-        dspOrdNum: dspOrdNum++,
-        indentNum: 0,
-        delFlag: false,
-        saveFlag: true,
-      })
-    );
-
-    if (newJuchuCtnMeisai.length > 0) {
-      // 受注コンテナ明細追加
-      await addJuchuContainerMeisai(newJuchuCtnMeisai, userNam, connection);
-
-      // コンテナ入出庫伝票追加(YARDのみ)
-      await addCtnShukoDen(newJuchuCtnMeisai, shukoDate, BASHO_ID.yard, userNam, connection);
-      await addCtnNyukoDen(newJuchuCtnMeisai, nyukoDate, BASHO_ID.yard, BASHO_ID.yard, userNam, connection);
-    }
-
-    // 移動受注機材明細
-    // 明細はYARDで作成するため、機材マスタの所属がKICSの機材は出庫日に移動させる
-    const idoPlanQtyByKizaiId = new Map<number, number>();
-    for (const d of newJuchuKizaiMeisai) {
-      if (d.mShozokuId !== BASHO_ID.kics) continue;
-      idoPlanQtyByKizaiId.set(d.kizaiId, (idoPlanQtyByKizaiId.get(d.kizaiId) ?? 0) + d.planQty);
-    }
-
-    const newIdoList: CopyIdoJuchuKizaiMeisaiValues[] = [...idoPlanQtyByKizaiId.entries()]
-      .filter(([, planQty]) => planQty > 0)
-      .map(([kizaiId, planQty]) => ({
-        juchuHeadId: juchuHeadId,
-        juchuKizaiHeadId: newJuchuKizaiHeadId,
-        idoDenId: null,
-        sagyoDenDat: shukoDate,
-        sagyoSijiId: SAGYO_SIJI_ID.ky,
-        mShozokuId: BASHO_ID.kics,
-        shozokuId: BASHO_ID.yard,
-        shozokuNam: '',
-        kizaiId: kizaiId,
-        kizaiNam: newJuchuKizaiMeisai.find((d) => d.kizaiId === kizaiId)?.kizaiNam ?? '',
-        kizaiQty: 0,
-        planKizaiQty: 0,
-        planYobiQty: 0,
-        planQty: planQty,
-        delFlag: false,
-        saveFlag: true,
-      }));
-
-    if (newIdoList.length > 0) {
-      const idoDenMaxId = await getIdoDenJuchuMaxId();
-      const newIdoDenId = idoDenMaxId ? idoDenMaxId + 1 : 1;
-
-      // 移動受注機材明細追加
-      await addIdoDenJuchu(newIdoDenId, newIdoList, userNam, connection);
-    }
 
     await connection.query('COMMIT');
 
-    await revalidatePath('/eqpt-order-list');
-    await revalidatePath('/ido-list');
-    await revalidatePath('/shuko-list');
-    await revalidatePath('/nyuko-list');
+    await revalidateCopyPaths();
 
     return true;
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
+    await connection.query('ROLLBACK');
+    return false;
+  } finally {
+    connection.release();
+  }
+};
+
+/**
+ * 新規の受注ヘッダーを作成し、そこへ受注機材ヘッダー・明細をコピーする
+ * 顧客・公演名はコピーダイアログの入力値、それ以外は新規受注画面の初期値で作成する。
+ * 受注ヘッダーだけが残らないよう、受注ヘッダーの作成もコピーと同じトランザクションで行う。
+ * @param originJuchuKizaiHeads コピー元の受注機材ヘッダー（メイン＋返却）
+ * @param data コピーダイアログの入力値
+ * @param userNam ユーザー名
+ * @returns 作成した受注ヘッダーid（失敗時はfalse）
+ */
+export const copyJuchuKizaiHeadMeisaiToNewJuchu = async (
+  originJuchuKizaiHeads: EqTableValues[],
+  data: CopyDialogValue,
+  userNam: string
+) => {
+  // 画面側と同じ選択条件をサーバー側でも確認する
+  const origin = validateCopyOrigin(originJuchuKizaiHeads, data);
+  if (!origin) return false;
+
+  const kokyakuId = data.kokyaku.kokyakuId;
+  if (kokyakuId === null || data.koenNam.trim() === '') {
+    console.error('[copyJuchuKizaiHeadMeisaiToNewJuchu] 顧客または公演名が指定されていません');
+    return false;
+  }
+
+  const connection = await pool.connect();
+
+  try {
+    // 参照系はトランザクションを開始する前に済ませる
+    // 割引率は選択した顧客の顧客マスタの値を初期値にする
+    const nebikiRat = await getNebikiRatByKokyakuId(kokyakuId);
+    const { mergedKizaiMeisai, regAmtByKizaiId } = await getCopySource(origin.normalHeads, origin.returnHeads);
+
+    await connection.query('BEGIN');
+
+    const newJuchuHeadId = await getNewJuchuHeadId();
+    const now = new Date();
+
+    // 顧客・公演名以外は新規受注画面の初期値に揃える（本番日・受注期間・メモは空で作成）
+    const newJuchuHead: JuchuHead = {
+      juchu_head_id: newJuchuHeadId,
+      del_flg: 0,
+      juchu_sts: 0,
+      juchu_dat: toJapanYMDString(now, '-'),
+      juchu_str_dat: null,
+      juchu_end_dat: null,
+      nyuryoku_user: userNam,
+      koen_nam: data.koenNam,
+      koenbasho_nam: null,
+      kokyaku_id: kokyakuId,
+      kokyaku_tanto_nam: null,
+      mem: null,
+      zei_kbn: 2,
+      add_dat: now.toISOString(),
+      add_user: userNam,
+    };
+    await insertJuchuHeadWithTran(newJuchuHead, connection);
+
+    await insertCopiedJuchuKizai(
+      {
+        originJuchuKizaiHeads,
+        juchuHeadId: newJuchuHeadId,
+        headNam: data.headNam,
+        shukoDat: origin.shukoDat,
+        nyukoDat: origin.nyukoDat,
+        mergedKizaiMeisai,
+        regAmtByKizaiId,
+        nebikiRat,
+        // 新規の受注ヘッダーには本番日テンプレートが無い
+        honbanbiTemplate: [],
+      },
+      userNam,
+      connection
+    );
+
+    await connection.query('COMMIT');
+
+    await revalidateCopyPaths();
+    await revalidatePath('/order-list');
+
+    return newJuchuHeadId;
   } catch (e) {
     if (e instanceof Error) {
       console.error(`[ERROR] ${e.message}`);

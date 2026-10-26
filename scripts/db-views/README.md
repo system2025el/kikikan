@@ -2,7 +2,7 @@
 
 `public` スキーマのビュー定義を手で変更したときの、適用SQLとロールバックSQLを置く場所です。**フォルダで本番への適用状況を表します。**
 
-同じ構成の姉妹フォルダが2つあります。テーブル定義（DDL）の変更は [`../db-tables/`](../db-tables/README.md)、マスタデータなどのデータ変更（INSERT/UPDATE/DELETE）は [`../db-data/`](../db-data/README.md) に置いてください。
+同じ構成の姉妹フォルダが3つあります。テーブル定義（DDL）の変更は [`../db-tables/`](../db-tables/README.md)、関数（RPC）の変更は [`../db-functions/`](../db-functions/README.md)、マスタデータなどのデータ変更（INSERT/UPDATE/DELETE）は [`../db-data/`](../db-data/README.md) に置いてください。**共通の運用ルール・適用手順・フォルダをまたぐ適用順序は [`../README.md`](../README.md) にまとめてあります。**
 
 | フォルダ        | 意味                                     |
 | --------------- | ---------------------------------------- |
@@ -41,25 +41,27 @@
 
 ### applied/ — ステージング・本番とも適用済み
 
-| ビュー                       | 変更内容                                                                                                                                                                                                                                                                                                                          | ステージング        | 本番            | 関連                              |
-| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- | --------------- | --------------------------------- |
-| `v_rfid_sts`                 | **第1弾** 5つの相関サブクエリを窓関数1回スキャンに統合／**第2弾** 窓関数3つを `GROUP BY` の集約1パスに統合。`v_rfid` のリフレッシュは 16.8〜25秒 → 3.8秒 → **1.43秒**                                                                                                                                                             | ① 08-18 ② 08-25     | ① 08-19 ② 09-03 | `refreshVRfid()`                  |
-| `v_nyushuko_total_time_sts`  | 4回自己JOINを `count(*) FILTER` に統合                                                                                                                                                                                                                                                                                            | 2026-08-17          | 2026-08-19      | `shuko-list` / `nyuko-list`       |
-| `v_ido_total_time_sts_union` | 4回自己JOINを `count(*) FILTER` に統合                                                                                                                                                                                                                                                                                            | 2026-08-19          | 2026-08-19      | `ido-list`                        |
-| `v_juchu_kizai_dat_qty`      | 末尾に所属別数量6列（`kics_*` / `yard_*`）を追加                                                                                                                                                                                                                                                                                  | 日付不明（08-19前） | 2026-08-19      | `stock` ブランチ（**未マージ**）  |
-| `v_zaiko_qty`                | 末尾に所属別数量6列＋`kics_zaiko_qty` / `yard_zaiko_qty` の計8列を追加                                                                                                                                                                                                                                                            | 日付不明（08-19前） | 2026-08-19      | `stock` ブランチ（**未マージ**）  |
-| `v_ido_den2`                 | 末尾に `mem` 列（移動メモ）を追加。`t_ido_mem` を LEFT JOIN                                                                                                                                                                                                                                                                       | 日付不明（08-19前） | 2026-08-19      | 参照コードなし・`t_ido_mem` は0行 |
-| `v_juchu_kizai_head_lst`     | 末尾に `nyuryoku_user`（入力者）と `add_dat`（作成日）の2列を追加。既存列の値は不変                                                                                                                                                                                                                                               | 2026-08-20          | 2026-09-03      | `4a335287` / `be8a69c2`           |
-| `v_nyushuko_den_lst`         | **①** `mem2` を `COALESCE(機材明細.mem2, コンテナ明細.mem)` に変更＋コンテナ明細をJOIN／**②** `add_user`・`upd_user` を追加（34→36列）                                                                                                                                                                                            | ① 08-20 ② 08-21     | 2026-09-03      | `51905975`                        |
-| `v_nyushuko_den2_lst`        | 末尾に `add_user`・`upd_user` の2列を追加（29→31列）。`v_nyushuko_den_lst` から素通し                                                                                                                                                                                                                                             | 2026-08-21          | 2026-09-03      | 同上                              |
-| `v_nyushuko_den_head`        | 末尾に `nyuryoku_user`（`varchar(100)`）の1列を追加（17→18列）                                                                                                                                                                                                                                                                    | 2026-08-21          | 2026-09-03      | 入出庫伝票                        |
-| `v_nyushuko_den2_head`       | 末尾に `nyuryoku_user` の1列を追加（20→21列）。`v_nyushuko_den_head` から素通し                                                                                                                                                                                                                                                   | 2026-08-21          | 2026-09-03      | 同上                              |
-| `v_ido_den3_lst`             | **第1弾** 末尾に `juchu_meisai`（jsonb）を追加（31→32列）。`juchu_flg` の算出を相関EXISTS×2からLEFT JOINに変更／**第2弾** 機材単位 → **受注機材ヘッダー単位**に作り替え。`juchu_meisai` を廃止し `juchu_head_id` / `juchu_kizai_head_id` / `koen_nam` / `head_nam` と並び順用の `kizai_grp_cod` / `dsp_ord_num` を追加（32→37列） | ① 09-01 ② 09-24     | ① 09-03 ② 10-07 | `dc99e9a2` 移動明細（Web専用）    |
-| `v_honbanbi_calc`            | 本番日テンプレート（`juchu_kizai_head_id = 0`）の行を除外。列構成は不変                                                                                                                                                                                                                                                           | 2026-09-03          | 2026-09-03      | `8c5dc552` 伝票画面               |
-| `v_ido_den3_result`          | 末尾に `juchu_head_id` / `juchu_kizai_head_id` / `koen_nam` / `head_nam` の4列を追加（37→41列）。既存37列は不変                                                                                                                                                                                                                   | 2026-09-24          | 2026-10-07      | 移動機材詳細・ゲート              |
-| `v_ido_den2_meisai_lst`      | **新規**。HT・ゲート向けの明細単位リスト（29列）。`v_ido_den2_lst` は機材単位のまま残す                                                                                                                                                                                                                                           | 2026-09-24          | 2026-10-07      | 段階2（HT・ゲート改修）           |
-| `v_nyushuko_den`             | 末尾に `nyuko_fix_sts` / `shuko_fix_sts`（到着・出発の 0=なし / 1=一部 / 2=全部）を追加（24→26列）。`nyuko_fix_flg` / `shuko_fix_flg` を「全部確定済みのときだけ1」に変更（2026-10-01）                                                                                                                                           | 2026-09-30          | 2026-10-07      | 入出庫一覧の3段階表示             |
-| `v_nyushuko_den2`            | `v_nyushuko_den` の上記2列を末尾に通す（GROUP BY にも追加。33→35列）                                                                                                                                                                                                                                                              | 2026-09-30          | 2026-10-07      | 入出庫一覧の3段階表示             |
+| ビュー                       | 変更内容                                                                                                                                                                                                                                                                                                                          | ステージング             | 本番            | 関連                              |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ | --------------- | --------------------------------- |
+| `v_rfid_sts`                 | **第1弾** 5つの相関サブクエリを窓関数1回スキャンに統合／**第2弾** 窓関数3つを `GROUP BY` の集約1パスに統合。`v_rfid` のリフレッシュは 16.8〜25秒 → 3.8秒 → **1.43秒**                                                                                                                                                             | ① 08-18 ② 08-25          | ① 08-19 ② 09-03 | `refreshVRfid()`                  |
+| `v_nyushuko_total_time_sts`  | 4回自己JOINを `count(*) FILTER` に統合                                                                                                                                                                                                                                                                                            | 2026-08-17               | 2026-08-19      | `shuko-list` / `nyuko-list`       |
+| `v_ido_total_time_sts_union` | 4回自己JOINを `count(*) FILTER` に統合                                                                                                                                                                                                                                                                                            | 2026-08-19               | 2026-08-19      | `ido-list`                        |
+| `v_juchu_kizai_dat_qty`      | 末尾に所属別数量6列（`kics_*` / `yard_*`）を追加                                                                                                                                                                                                                                                                                  | 日付不明（08-19前）      | 2026-08-19      | `stock` ブランチ（**未マージ**）  |
+| `v_zaiko_qty`                | 末尾に所属別数量6列＋`kics_zaiko_qty` / `yard_zaiko_qty` の計8列を追加                                                                                                                                                                                                                                                            | 日付不明（08-19前）      | 2026-08-19      | `stock` ブランチ（**未マージ**）  |
+| `v_ido_den2`                 | 末尾に `mem` 列（移動メモ）を追加。`t_ido_mem` を LEFT JOIN                                                                                                                                                                                                                                                                       | 日付不明（08-19前）      | 2026-08-19      | 参照コードなし・`t_ido_mem` は0行 |
+| `v_juchu_kizai_head_lst`     | 末尾に `nyuryoku_user`（入力者）と `add_dat`（作成日）の2列を追加。既存列の値は不変                                                                                                                                                                                                                                               | 2026-08-20               | 2026-09-03      | `4a335287` / `be8a69c2`           |
+| `v_nyushuko_den_lst`         | **①** `mem2` を `COALESCE(機材明細.mem2, コンテナ明細.mem)` に変更＋コンテナ明細をJOIN／**②** `add_user`・`upd_user` を追加（34→36列）                                                                                                                                                                                            | ① 08-20 ② 08-21          | 2026-09-03      | `51905975`                        |
+| `v_nyushuko_den2_lst`        | **①** 末尾に `add_user`・`upd_user` の2列を追加（29→31列）。`v_nyushuko_den_lst` から素通し／**②** 末尾に `juchu_meisai_del_flg`（受注削除）を追加（31→32列）。予定数0で受注明細が無い行を1にする（コンテナは `t_juchu_ctn_meisai` のその場所の行で判定）。出庫は明細の出庫場所も照合                                             | ① 08-21 ② 10-06（10-15） | ① 09-03 ② 10-26 | 同上／明細削除時の入出庫伝票      |
+| `v_nyushuko_den_head`        | 末尾に `nyuryoku_user`（`varchar(100)`）の1列を追加（17→18列）                                                                                                                                                                                                                                                                    | 2026-08-21               | 2026-09-03      | 入出庫伝票                        |
+| `v_nyushuko_den2_head`       | 末尾に `nyuryoku_user` の1列を追加（20→21列）。`v_nyushuko_den_head` から素通し                                                                                                                                                                                                                                                   | 2026-08-21               | 2026-09-03      | 同上                              |
+| `v_ido_den3_lst`             | **第1弾** 末尾に `juchu_meisai`（jsonb）を追加（31→32列）。`juchu_flg` の算出を相関EXISTS×2からLEFT JOINに変更／**第2弾** 機材単位 → **受注機材ヘッダー単位**に作り替え。`juchu_meisai` を廃止し `juchu_head_id` / `juchu_kizai_head_id` / `koen_nam` / `head_nam` と並び順用の `kizai_grp_cod` / `dsp_ord_num` を追加（32→37列） | ① 09-01 ② 09-24          | ① 09-03 ② 10-07 | `dc99e9a2` 移動明細（Web専用）    |
+| `v_honbanbi_calc`            | 本番日テンプレート（`juchu_kizai_head_id = 0`）の行を除外。列構成は不変                                                                                                                                                                                                                                                           | 2026-09-03               | 2026-09-03      | `8c5dc552` 伝票画面               |
+| `v_ido_den3_result`          | 末尾に `juchu_head_id` / `juchu_kizai_head_id` / `koen_nam` / `head_nam` の4列を追加（37→41列）。既存37列は不変                                                                                                                                                                                                                   | 2026-09-24               | 2026-10-07      | 移動機材詳細・ゲート              |
+| `v_ido_den2_meisai_lst`      | **新規**。HT・ゲート向けの明細単位リスト（29列）。`v_ido_den2_lst` は機材単位のまま残す                                                                                                                                                                                                                                           | 2026-09-24               | 2026-10-07      | 段階2（HT・ゲート改修）           |
+| `v_nyushuko_den`             | 末尾に `nyuko_fix_sts` / `shuko_fix_sts`（到着・出発の 0=なし / 1=一部 / 2=全部）を追加（24→26列）。`nyuko_fix_flg` / `shuko_fix_flg` を「全部確定済みのときだけ1」に変更（2026-10-01）                                                                                                                                           | 2026-09-30               | 2026-10-07      | 入出庫一覧の3段階表示             |
+| `v_nyushuko_den2`            | `v_nyushuko_den` の上記2列を末尾に通す（GROUP BY にも追加。33→35列）                                                                                                                                                                                                                                                              | 2026-09-30               | 2026-10-07      | 入出庫一覧の3段階表示             |
+| `v_juchu_ctn_meisai`         | K / Y の片方だけのコンテナ明細に対応。無い側の数量を 0、`mem` は K と Y が違えば改行でつなぐ、`dsp_ord_num` は `COALESCE(K, Y)`。同じコンテナが2行に分かれなくなる（列構成は不変）                                                                                                                                                | 2026-10-09               | 2026-10-26      | コンテナ管理を出庫側へ            |
+| `v_get_juchu_kizai_head`     | 合体している受注機材ヘッダーのまとめ方を「作業区分ごと」→「入出庫種別ごと」に変更（列構成は不変）。ピッキングと最終確認でヘッダーの組み合わせが違うと出庫一覧・明細が2行に分かれていたのを直す                                                                                                                                    | 2026-10-19               | 2026-10-26      | 受注削除・コンテナ                |
 
 適用時の検証結果は上3件が新旧で全列差分0、下3件が既存列の差分0（いずれも本番データで `EXCEPT ALL` 双方向）。適用直前の本番バックアップは `~/db-backup/prod_20260819_1804/`（全69ビューの定義を含む `prod_all_viewdefs.sql` もある）。
 
@@ -71,7 +73,44 @@
 
 ### staging-only/ — 本番未適用
 
-現在ありません（2026-10-07 に5件すべてを本番へ適用し `applied/` へ移動しました）。
+現在はありません。
+
+### 2026-10-26 の本番適用（受注削除・コンテナ管理を出庫側へ）
+
+`v_nyushuko_den2_lst` → `v_juchu_ctn_meisai` → `v_get_juchu_kizai_head` の順に、1本ずつ別トランザクション（`lock_timeout 5s`・`statement_timeout 60s`）で適用しました。同じ日に、先に RPC [`../db-functions/applied/20261009-nyushuko-send-ctn.sql`](../db-functions/applied/20261009-nyushuko-send-ctn.sql) を作成しています。適用直前の本番バックアップは `~/db-backup/prod_20261026_1831/`（スキーマ、DB全体の `.dump`、全70ビュー・全17関数の定義 `prod_all_viewdefs_BEFORE.sql` / `prod_all_funcdefs_BEFORE.sql`、適用ログを含む）。
+
+- 適用前に、3本とも本番の定義が `.rollback.sql` と同じこと、テーブルの列・型が本番とステージングで同じこと、分かれている出庫が0件であることを読み取りで確認
+- 適用後：`v_nyushuko_den2_lst` は 31→32列（末尾が `juchu_meisai_del_flg`）、他の2本は列・権限・`security_invoker` が不変。定義はファイルと PG が補う括弧の違いだけ。分かれている出庫は0件。受注削除として表示される古い行（予定0・受注明細なし）は適用前の確認で16行
+- `v_rfid_sts` と同じく、`v_nyushuko_den2_lst` は2回目の変更なので、第1弾（2026-09-03）の2ファイルを削除して置き換えました。`applied/v_nyushuko_den2_lst.rollback.sql` は第1弾の31列の定義に戻すものです
+
+#### v_nyushuko_den2_lst（受注削除の判定列）
+
+メイン受注機材明細で出庫の実績・補正がある機材を削除すると、出庫伝票を予定数0で残し、出庫明細に「受注削除」と表示します（現物を取り除いてもらうため）。
+これまで Web だけが自前の SQL（`selectNyushukoDetail`）で判定していましたが、HT・ゲートでも同じ表示をするため、判定をビューの列にしました。Web はこの列を読む形に置き換え済みです。
+
+- 判定：予定数（合計）が0、かつ受注明細が無い。機材は `t_juchu_kizai_meisai`、コンテナは `t_juchu_ctn_meisai` の `shozoku_id = nyushuko_basho_id` の行で探す
+- 2026-10-06 にステージングで新定義の SELECT を読み取り専用で実行して比較：行数 123,180 で不変、既存31列は `EXCEPT ALL` 双方向で差分0、新しい列は Web の旧判定と全行一致（1 は14行）。出庫明細1画面分（432行）の取得時間も旧 30ms／新 30ms で変わらない
+- 依存するビューは無い。適用は列を末尾に足すだけなので `CREATE OR REPLACE VIEW` で済む。ロールバックは列を減らすため `CREATE OR REPLACE` では戻せず、`.rollback.sql` は `DROP VIEW` → `CREATE VIEW` → GRANT の付け直しになっている（GRANT はステージングの権限に合わせてあるので、本番で戻すときは本番の権限を確認する）
+- **出す順番はビュー → Web → HT・ゲート**。Web（del-meisai ブランチ以降）はこの列を読むので、ビューを当てる前にデプロイすると出庫明細が開けなくなる
+- 2026-10-15 追加（ステージング適用）：機材の判定で、出庫（10/20）のときは受注明細の出庫場所（`shozoku_id`）が伝票の場所（`nyushuko_basho_id`）と同じものだけを「明細あり」とする。出庫場所を変えた機材も受注削除として残すようになり、HT・ゲートの読取画面を開いたまま場所が変わって送信された行（元の明細idのまま元の場所にできる）も受注削除として出すため。送信RPC の変更点7と同じ照合。列構成は不変。適用前後で列・権限・行数（123,250行）が同じで、フラグが変わったのは場所の合わない古い受注 90953 の予定0・実績0の行（ピッキング・最終確認の2行）だけであることを確認
+
+#### v_get_juchu_kizai_head（合体ヘッダーのまとめ方）
+
+伝票から、受注・作業日時・作業場所・入出庫種別ごとに合体している受注機材ヘッダー（`juchu_kizai_head_idv` など）を1行にまとめるビューです。GROUP BY が作業区分単位だったため、ピッキングと最終確認で伝票のあるヘッダーの組み合わせが違うと出庫で2行になり、入出庫種別で結合している `v_nyushuko_den2`・`v_nyushuko_den2_head`・`v_nyushuko_den2_lst`・`v_nyushuko_den2_lst_oyako` で、出庫一覧に同じ出庫が2行出たり明細が二重になったりしていました。受注削除（ピッキングだけに実績がある機材を削除するとピッキングの行だけ残る）や、コンテナしか無いヘッダー（コンテナの伝票は最終確認にしか無い）で起きます。
+
+- 変更：GROUP BY の `sagyo_kbn_id` を入出庫種別の CASE 式に置き換えた。列・型・順序は不変なので `CREATE OR REPLACE` で当てられ、依存ビューの作り直しは不要。`security_invoker = on` を `WITH` で必ず付ける（省くと外れる）
+- 2026-10-19 にステージングで確認：変わったのは分かれていた受注 91601 の1件だけ（`v_get_juchu_kizai_head` 3,552 → 3,551 行、`v_nyushuko_den2_lst` は二重になっていた10行が減った）。適用後に分かれている出庫は0件
+- Web 側：最終確認の画面には、最終確認の行が無いヘッダー（ピッキングに受注削除だけ残ったヘッダー）も合体しているヘッダーとして入り、出発で一緒に出発済みになる。そのため出発時に、同じ出庫のピッキングに受注削除の行（実績あり）が残っていれば止めるようにした（`updShukoDetail`、理由 `pickingDeleted`）
+- ⚠️ 予行で、作り直したトランザクションの中で依存ビューの全件 count を流したところ、接続が切れても DB 側で集計が続き、排他ロックを持ったまま `v_nyushuko_den2` などが数十分開けなくなった。当てるときは `lock_timeout` と短い `statement_timeout` を付け、重い確認は別の接続で読み取りだけで行うこと
+
+#### v_juchu_ctn_meisai（コンテナ管理を出庫側へ）
+
+受注コンテナ明細は、これまでメイン明細から KICS・YARD の2行を必ず作っていましたが、出庫明細の保存時・HT/ゲートの送信時に
+その作業場所の1行だけを作るように変わります（RPC は [`../db-functions/applied/20261009-nyushuko-send-ctn.sql`](../db-functions/applied/20261009-nyushuko-send-ctn.sql)）。結合は変えず、出力列の式だけを変えています。
+
+- 2026-10-09 にステージングへ適用：行数 2,452 → 2,374（キーの数 2,374 は不変）。コンテナごとの数量（K・Y の予定数・キープ数）は適用前後で差分0、列・権限・`security_invoker` も不変
+- 2026-10-05 にステージングでトランザクション内で差し替えて比較（ROLLBACK 済み）：2,452行 → 2,374行。K と Y で `mem`・`dsp_ord_num` が違うために2行に分かれていた78件が1行になり、それ以外は NULL→0 を除いて差分0
+- `mem` の型は元の `character varying(200)` に合わせている（`CREATE OR REPLACE VIEW` は列の型を変えられないため）。K と Y を改行でつないで200文字を超えると、明示キャストにより末尾が切り捨てられる（エラーにはならない）
 
 ### 2026-10-07 の本番適用（移動の明細単位化・入出庫の3段階表示）
 
@@ -81,7 +120,7 @@ DB全体の `prod_alldb_20261007_1831.dump` を含む）。
 
 適用順は親→子で `v_nyushuko_den` → `v_nyushuko_den2` → `v_ido_den3_lst` → `v_ido_den3_result` → `v_ido_den2_meisai_lst`。
 `v_ido_*` の3本は「移動を受注機材ヘッダー単位にする」改修の一部で、
-**テーブル変更 [`scripts/db-migration/ddl/20260924-ido-juchu-meisai.sql`](../db-migration/ddl/20260924-ido-juchu-meisai.sql) と RPC修理 `20260924-ido-send-rpc-fix.sql` が先に適用されていないと動きません**（同日、ビューより先に適用済み）。
+**テーブル変更 [`scripts/db-tables/applied/20260924-ido-juchu-meisai.sql`](../db-tables/applied/20260924-ido-juchu-meisai.sql) と RPC修理 `20260924-ido-send-rpc-fix.sql` が先に適用されていないと動きません**（同日、ビューより先に適用済み）。
 
 検証結果:
 
@@ -106,7 +145,7 @@ HT・ゲートも一部確定済みなら送信できるようにそろえるた
 
 - 開発環境で既存列の `EXCEPT ALL` 双方向の差分0・行数不変（3,537行）、一覧相当のクエリ時間も変わらないこと（約0.8秒）を確認済み（2026-09-30）
 - 適用順は `v_nyushuko_den.sql` → `v_nyushuko_den2.sql`。ロールバックは列削除を伴うため `DROP` → `CREATE`（`v_nyushuko_den.rollback.sql` は `v_nyushuko_den2` も作り直す。GRANT の再付与も含む）
-- 同じ改修のテーブル変更：[`scripts/db-migration/ddl/20260930-t-nyushuko-den-nyuko-fix-qty.sql`](../db-migration/ddl/20260930-t-nyushuko-den-nyuko-fix-qty.sql)（入庫明細の差分到着用。ビューとは独立）
+- 同じ改修のテーブル変更：[`scripts/db-tables/applied/20260930-t-nyushuko-den-nyuko-fix-qty.sql`](../db-tables/applied/20260930-t-nyushuko-den-nyuko-fix-qty.sql)（入庫明細の差分到着用。ビューとは独立）
 
 #### v_ido_den3_lst（明細単位への作り替え）
 
@@ -141,13 +180,13 @@ v_ido_den2_meisai_lst → 明細単位（新規。移行先）
 
 **適用順序**: 親→子の順に適用してください。逆順だと子が存在しない列を参照してエラーになります。
 
-| 適用順序                                                                   | ロールバック順序（逆）                         |
-| -------------------------------------------------------------------------- | ---------------------------------------------- |
-| `v_nyushuko_den_lst.sql` → `v_nyushuko_den2_lst.sql`                       | `v_nyushuko_den2_lst` → `v_nyushuko_den_lst`   |
-| `v_nyushuko_den_head.sql` → `v_nyushuko_den2_head.sql`                     | `v_nyushuko_den2_head` → `v_nyushuko_den_head` |
-| `v_honbanbi_calc.sql` → `db-data` の `t_juchu_kizai_honbanbi_template.sql` | テンプレート行のDELETE → `v_honbanbi_calc`     |
+| 適用順序                                               | ロールバック順序（逆）                         |
+| ------------------------------------------------------ | ---------------------------------------------- |
+| `v_nyushuko_den_lst.sql` → `v_nyushuko_den2_lst.sql`   | `v_nyushuko_den2_lst` → `v_nyushuko_den_lst`   |
+| `v_nyushuko_den_head.sql` → `v_nyushuko_den2_head.sql` | `v_nyushuko_den2_head` → `v_nyushuko_den_head` |
+| `v_nyushuko_den.sql` → `v_nyushuko_den2.sql`           | `v_nyushuko_den2` → `v_nyushuko_den`           |
 
-最後の1組はビューとデータをまたぐ順序制約です。`v_honbanbi_calc` はテンプレート行（`juchu_kizai_head_id = 0`）を除外する変更なので、**先にビューを適用してからテンプレートをINSERT**しないと、その間このビューの行数が倍近くに膨らみます（本番実測で 662 → 1,228 行）。
+**フォルダをまたぐ順序制約は [`../README.md`](../README.md) に集約しています。** ビューが関わるものだけ挙げると、テーブルへの列追加（`db-tables/20260924-ido-juchu-meisai`・`20260930-t-nyushuko-den-nyuko-fix-qty`）は対応するビューより先、`v_honbanbi_calc` は `db-data` のテンプレートINSERTより先です。
 
 `v_nyushuko_den_lst` の変更①は**列追加ではなく既存列 `mem2` の値が変わる変更**です。コンテナ明細は同一キーに `shozoku_id` 別で複数行あり、JOIN条件を誤ると `sum(plan_qty)` 等がfanoutして二重集計になります。本番適用前に行数と `mem2` の差分検証を必ず行ってください（ファイル冒頭のコメントに詳細あり）。
 

@@ -128,11 +128,8 @@ export const NyukoDetail = (props: {
 
     setIsProcessing(true);
 
-    if (nyukoDetailTableData.length === 0) {
-      setIsProcessing(false);
-      return;
-    }
-
+    // 一覧が空でも解除する（返却を読取・補正0で到着すると予定数が0になり一覧に出なくなるが、
+    // 解除できないと返却明細を二度と編集できなくなるため。対象のヘッダーは画面のヘッダー情報から取る）
     const releaseResult = await delNyukoFix(nyukoDetailData, nyukoDetailTableData, user.name);
 
     if (releaseResult.ok) {

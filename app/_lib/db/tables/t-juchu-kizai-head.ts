@@ -57,6 +57,29 @@ export const selectJuchuKizaiHead = async (juchuHeadId: number, juchuKizaiHeadId
 };
 
 /**
+ * 受注機材ヘッダーの明細名取得（複数）
+ * 合体している出庫で、受注機材ヘッダーごとの明細名を出すために使う
+ * （v_nyushuko_den2 系の head_namv は合体しているヘッダーの明細名を重複を除いてつないだもので、ヘッダーごとには分けられないため）
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadIds 受注機材ヘッダーid
+ * @returns 受注機材ヘッダーid・明細名
+ */
+export const selectJuchuKizaiHeadNams = async (juchuHeadId: number, juchuKizaiHeadIds: number[]) => {
+  const supabase = await createClient();
+  try {
+    return await supabase
+      .schema(SCHEMA)
+      .from('t_juchu_kizai_head')
+      .select('juchu_kizai_head_id, head_nam')
+      .eq('juchu_head_id', juchuHeadId)
+      .in('juchu_kizai_head_id', juchuKizaiHeadIds)
+      .order('juchu_kizai_head_id');
+  } catch (e) {
+    throw new Error('[selectJuchuKizaiHeadNams] DBエラー:', { cause: e });
+  }
+};
+
+/**
  * キープ受注機材ヘッダー取得
  * @param juchuHeadId 受注ヘッダーid
  * @param juchuKizaiHeadId 受注機材ヘッダーid
@@ -117,6 +140,42 @@ export const selectChildJuchuKizaiHeadConfirm = async (juchuHeadId: number, juch
       .neq('juchu_kizai_head_kbn', JUCHU_KIZAI_HEAD_KBN.normal);
   } catch (e) {
     throw new Error('[selectChildJuchuKizaiHeadConfirm] DBエラー:', { cause: e });
+  }
+};
+
+/**
+ * 子受注機材ヘッダー（返却・キープ）の件数取得（トランザクション内）
+ * 出発解除の処理で、画面で確認した後に作られた子伝票も含めて確かめ直すために使う
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadIds 親の受注機材ヘッダーid
+ * @param connection
+ * @returns 子受注機材ヘッダーの件数
+ */
+export const selectChildJuchuKizaiHeadCountTx = async (
+  juchuHeadId: number,
+  juchuKizaiHeadIds: number[],
+  connection: PoolClient
+) => {
+  const query = `
+    SELECT
+      COUNT(*)::integer AS cnt
+    FROM
+      ${SCHEMA}.t_juchu_kizai_head
+    WHERE
+      juchu_head_id = $1
+      AND oya_juchu_kizai_head_id = ANY($2::int[])
+      AND juchu_kizai_head_kbn <> $3
+  `;
+
+  try {
+    const { rows } = await connection.query<{ cnt: number }>(query, [
+      juchuHeadId,
+      juchuKizaiHeadIds,
+      JUCHU_KIZAI_HEAD_KBN.normal,
+    ]);
+    return rows[0]?.cnt ?? 0;
+  } catch (e) {
+    throw new Error('[selectChildJuchuKizaiHeadCountTx] DBエラー:', { cause: e });
   }
 };
 

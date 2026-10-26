@@ -14,8 +14,10 @@ import {
   updateIdoDenJuchu,
 } from '@/app/_lib/db/tables/t-ido-den-juchu';
 import {
+  deleteAllJuchuContainerMeisaiShozoku,
   deleteJuchuContainerMeisai,
   insertJuchuContainerMeisai,
+  selectJuchuContainerMeisaiRowsTx,
   updateJuchuContainerMeisai,
 } from '@/app/_lib/db/tables/t-juchu-ctn-meisai';
 import {
@@ -35,32 +37,45 @@ import {
   deleteJuchuKizaiMeisai,
   insertJuchuKizaiMeisai,
   selectJuchuKizaiMeisaiKizaiTanka,
+  selectJuchuKizaiMeisaiMaxIdWithDenTx,
   updateJuchuKizaiMeisai,
 } from '@/app/_lib/db/tables/t-juchu-kizai-meisai';
+import { updateShukoCtnResultDat } from '@/app/_lib/db/tables/t-nyushuko-ctn-result';
 import {
   deleteAllNyushukoDen,
+  deleteAllShukoCtnDenBasho,
   deleteContainerNyushukoDen,
   deleteKicsOrYardNyukoDen,
   deleteKicsOrYardShukoDen,
   deleteNyukoDen,
   deleteNyushukoDen,
+  deleteNyushukoDenKeepResulted,
   deleteShukoDen,
+  deleteShukoDenBashoKeepResulted,
   insertNyushukoDen,
   selectContainerNyushukoDenConfirm,
+  selectShukoResultDenKizaiCount,
+  updateDeletedShukoDenDat,
   updateNyushukoDen,
   updateNyushukoDenFromKizaiMeisai,
+  updateShukoCtnDenDat,
   upsertNyushukoDen,
+  upsertShukoDenBasho,
 } from '@/app/_lib/db/tables/t-nyushuko-den';
 import {
   deleteNyushukoFix,
   insertNyushukoFix,
+  selectFixedSagyoIdsTx,
   selectNyushukoFixConfirm,
   updateNyushukoFix,
 } from '@/app/_lib/db/tables/t-nyushuko-fix';
 import {
   deleteKizaiIdNyushukoResult,
+  deleteKizaiIdNyushukoResultKeepDen,
   deleteNyukoResult,
   deleteShukoResult,
+  deleteShukoResultBashoKeepDen,
+  updateDeletedShukoResultDat,
   updateShukoResult,
 } from '@/app/_lib/db/tables/t-nyushuko-result';
 import { selectActiveBumons } from '@/app/_lib/db/tables/v_bumon_lst';
@@ -79,6 +94,7 @@ import { JuchuKizaiHonbanbi } from '@/app/_lib/db/types/t-juchu-kizai-honbanbi-t
 import { JuchuKizaiMeisai } from '@/app/_lib/db/types/t-juchu-kizai-meisai-type';
 import { NyushukoDen } from '@/app/_lib/db/types/t-nyushuko-den-type';
 import { NyushukoFix } from '@/app/_lib/db/types/t-nyushuko-fix-type';
+import { syncNyukoCtnAfterDelete } from '@/app/(main)/_lib/ctn-nyuko-funcs';
 import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { getNyukoDate, getRange } from '@/app/(main)/_lib/date-funcs';
 import { expandHonbanbiTemplate, getHonbanbiTemplate } from '@/app/(main)/_lib/honbanbi-funcs';
@@ -86,19 +102,16 @@ import {
   addAllHonbanbi,
   addJuchuKizaiNyushuko,
   delAllKicsOrYardNyukoDen,
-  delAllKicsOrYardShukoCtnDen,
   delAllKicsOrYardShukoCtnResult,
   delAllKicsOrYardShukoDen,
   delAllNyukoResult,
   delAllNyushukoDen,
   delAllNyushukoResult,
   delAllShukoResult,
-  delNyushukoCtnResult,
   delSiyouHonbanbi,
   getChildJuchuKizaiHead,
-  getJuchuContainerMeisaiMaxId,
+  getJuchuContainerMeisaiTx,
   getJuchuKizaiHeadMaxId,
-  getJuchuKizaiMeisaiMaxId,
   getJuchuKizaiNyushuko,
   updJuchuKizaiNyushuko,
 } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
@@ -1220,6 +1233,135 @@ export const delNyushukoDen = async (juchuKizaiMeisaiData: JuchuKizaiMeisaiValue
   }
 };
 
+/**
+ * 入出庫伝票削除（出庫実績が残っている行は予定数0にして残す）
+ *
+ * 明細を削除しても出庫実績が残っている行は消さずに残し、出庫画面で
+ * 「受注から削除された＝現物を取り除くべきもの」として見えるようにする。
+ *
+ * @param juchuKizaiMeisaiData 受注機材明細データ
+ * @param userNam ユーザー名
+ * @param connection
+ */
+export const delNyushukoDenKeepResulted = async (
+  juchuKizaiMeisaiData: JuchuKizaiMeisaiValues[],
+  userNam: string,
+  connection: PoolClient
+) => {
+  const deleteData = juchuKizaiMeisaiData.map((d) => ({
+    juchu_head_id: d.juchuHeadId,
+    juchu_kizai_head_id: d.juchuKizaiHeadId,
+    juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
+    kizai_id: d.kizaiId,
+  }));
+  const updDat = new Date().toISOString();
+
+  try {
+    for (const data of deleteData) {
+      await deleteNyushukoDenKeepResulted(data, updDat, userNam, connection);
+    }
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
+    throw e;
+  }
+};
+
+/**
+ * 出庫場所が変わった機材の、元の場所の出庫伝票・実績を整理する（明細idは変えない）
+ * 実績・補正がある伝票は予定数0にして受注削除として元の場所に残し、それ以外の伝票と、伝票が無くなった実績は削除する。
+ * 明細idを変えないので、元の場所に戻したとき（K → Y → K）は残した伝票がそのまま通常の行に戻り、実績も引き継ぐ
+ * （新しい場所の伝票は upsShukoDenBasho で作る／更新する）。
+ * キープの画面は場所を変えたら元の場所を全部消す（delShukoDen・delShukoResult）ので、この関数はメイン明細専用
+ * @param shozokuChangedData 出庫場所が変わった受注機材明細（変更後の値）
+ * @param originMap 変更前の受注機材明細（明細idがキー）
+ * @param userNam ユーザー名
+ * @param connection
+ */
+const keepShozokuChangedShukoDen = async (
+  shozokuChangedData: JuchuKizaiMeisaiValues[],
+  originMap: Map<number, JuchuKizaiMeisaiValues>,
+  userNam: string,
+  connection: PoolClient
+) => {
+  const updDat = new Date().toISOString();
+  for (const d of shozokuChangedData) {
+    const origin = originMap.get(d.juchuKizaiMeisaiId);
+    if (!origin) continue;
+
+    const data = {
+      juchu_head_id: d.juchuHeadId,
+      juchu_kizai_head_id: d.juchuKizaiHeadId,
+      juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
+      kizai_id: d.kizaiId,
+    };
+    await deleteShukoDenBashoKeepResulted(data, origin.shozokuId, updDat, userNam, connection);
+    await deleteShukoResultBashoKeepDen(
+      d.juchuHeadId,
+      d.juchuKizaiHeadId,
+      d.juchuKizaiMeisaiId,
+      d.kizaiId,
+      origin.shozokuId,
+      connection
+    );
+  }
+};
+
+/**
+ * 出庫場所が変わった機材の、新しい場所の出庫伝票（ピッキング・最終確認）を作る／更新する
+ * 新しい場所に同じ明細id・機材の伝票（元の場所に戻したときの受注削除の行）があれば、予定数・作業日時・表示順・
+ * インデントを更新して通常の行に戻す。無ければ作る。あわせて、その場所の実績の作業日時を新しい出庫日時に揃える
+ * @param juchuKizaiMeisaiData 出庫場所が変わった受注機材明細（変更後の値。shozokuId が新しい場所）
+ * @param shukoDat 新しい場所の出庫日時
+ * @param userNam ユーザー名
+ * @param connection
+ */
+const upsShukoDenBasho = async (
+  juchuKizaiMeisaiData: JuchuKizaiMeisaiValues[],
+  shukoDat: Date,
+  userNam: string,
+  connection: PoolClient
+) => {
+  const now = new Date().toISOString();
+  for (const d of juchuKizaiMeisaiData) {
+    for (const sagyoKbnId of [SAGYO_KBN_ID.shukoPicking, SAGYO_KBN_ID.shukoConfirmation]) {
+      await upsertShukoDenBasho(
+        {
+          juchu_head_id: d.juchuHeadId,
+          juchu_kizai_head_id: d.juchuKizaiHeadId,
+          juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
+          sagyo_kbn_id: sagyoKbnId,
+          sagyo_den_dat: shukoDat.toISOString(),
+          sagyo_id: d.shozokuId,
+          kizai_id: d.kizaiId,
+          plan_qty: d.planQty,
+          dsp_ord_num: d.dspOrdNum,
+          indent_num: d.indentNum,
+          add_dat: now,
+          add_user: userNam,
+        },
+        connection
+      );
+    }
+    // 受注削除の行を通常の行に戻した場合、実績の日時を伝票に揃える（作業場所・機材が条件なので、ほかの場所の実績は動かない）
+    await updateShukoResult(
+      d.juchuHeadId,
+      d.juchuKizaiHeadId,
+      d.juchuKizaiMeisaiId,
+      d.kizaiId,
+      d.shozokuId,
+      shukoDat.toISOString(),
+      connection
+    );
+  }
+};
+
 export const delShukoDen = async (juchuKizaiMeisaiData: JuchuKizaiMeisaiValues[], connection: PoolClient) => {
   const deleteData = juchuKizaiMeisaiData.map((d) => ({
     juchu_head_id: d.juchuHeadId,
@@ -1888,6 +2030,8 @@ export const updShukoResult = async (
     juchuHeadId: d.juchuHeadId,
     juchuKizaiHeadId: d.juchuKizaiHeadId,
     juchuKizaiMeisaiId: d.juchuKizaiMeisaiId,
+    kizaiId: d.kizaiId,
+    shozokuId: d.shozokuId,
   }));
 
   try {
@@ -1896,6 +2040,8 @@ export const updShukoResult = async (
         data.juchuHeadId,
         data.juchuKizaiHeadId,
         data.juchuKizaiMeisaiId,
+        data.kizaiId,
+        data.shozokuId,
         shukoDat.toISOString(),
         connection
       );
@@ -1936,6 +2082,88 @@ export const delNyushukoResult = async (juchuKizaiMeisaiData: JuchuKizaiMeisaiVa
         connection
       );
     }
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
+    throw e;
+  }
+};
+
+/**
+ * 入出庫実績削除（伝票行が残っているものは残す）
+ *
+ * どのRFIDタグを確保していたかを出庫画面に出すため、予定数0で残した出庫伝票行の
+ * 実績は残す。伝票の削除より後に呼ぶこと。
+ *
+ * @param juchuKizaiMeisaiData 受注機材明細データ
+ * @param connection
+ */
+export const delNyushukoResultKeepDen = async (
+  juchuKizaiMeisaiData: JuchuKizaiMeisaiValues[],
+  connection: PoolClient
+) => {
+  const deleteData = juchuKizaiMeisaiData.map((d) => ({
+    juchuHeadId: d.juchuHeadId,
+    juchuKizaiHeadId: d.juchuKizaiHeadId,
+    juchuKizaiMeisaiId: d.juchuKizaiMeisaiId,
+    kizaiId: d.kizaiId,
+  }));
+  try {
+    for (const data of deleteData) {
+      await deleteKizaiIdNyushukoResultKeepDen(
+        data.juchuHeadId,
+        data.juchuKizaiHeadId,
+        data.juchuKizaiMeisaiId,
+        data.kizaiId,
+        connection
+      );
+    }
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
+    throw e;
+  }
+};
+
+/**
+ * 削除対象のうち出庫実績・補正数がある機材の件数を取得
+ *
+ * 削除確認ダイアログで「既に実績があります」の警告を出すために使う。実際に伝票を残す
+ * 条件（入出庫伝票の実績数＋補正数）で数えるので、RFIDタグを付けられない機材で補正数
+ * だけ入っているケースも警告に含まれる。
+ * コンテナは出庫明細で管理するため（この画面では削除できない）、対象は機材だけ。
+ *
+ * @param juchuKizaiMeisaiData 削除対象の受注機材明細データ
+ * @returns 出庫実績・補正数のある機材の件数
+ */
+export const getShukoResultKizaiCount = async (juchuKizaiMeisaiData: JuchuKizaiMeisaiValues[]) => {
+  const targets = juchuKizaiMeisaiData;
+
+  if (targets.length === 0) {
+    return 0;
+  }
+
+  try {
+    const rows = await selectShukoResultDenKizaiCount(
+      targets[0].juchuHeadId,
+      targets.map((d) => d.juchuKizaiHeadId),
+      targets.map((d) => d.juchuKizaiMeisaiId),
+      targets.map((d) => d.kizaiId)
+    );
+
+    return (rows[0]?.kizai_cnt as number | undefined) ?? 0;
   } catch (e) {
     if (e instanceof Error) {
       console.error(`[ERROR] ${e.message}`);
@@ -2494,6 +2722,7 @@ export const checkSetoptions = async (idList: number[]): Promise<number[]> => {
 
 /**
  * 機材選択に表示するための機材リスト
+ * コンテナは出庫明細（最終確認）で追加するため、受注機材明細の機材選択には出さない
  * @param query 検索キーワード
  * @returns
  */
@@ -2503,7 +2732,7 @@ export const getEqptsForEqptSelection = async (query: string = ''): Promise<Eqpt
     if (!data || data.rowCount === 0) {
       return [];
     }
-    return data.rows;
+    return data.rows.filter((d) => d.ctnFlg !== 1);
   } catch (e) {
     if (e instanceof Error) {
       console.error(`[ERROR] ${e.message}`);
@@ -3441,7 +3670,6 @@ export const saveNewJuchuKizaiHead = async (
  * @param checkJuchuKizaiHead
  * @param checkJuchuHonbanbi
  * @param checkJuchuKizaiMeisai
- * @param checkJuchuContainerMeisai
  * @param data
  * @param updateShukoDate
  * @param updateNyukoDate
@@ -3449,9 +3677,11 @@ export const saveNewJuchuKizaiHead = async (
  * @param juchuHonbanbiList
  * @param juchuHonbanbiDeleteList
  * @param juchuKizaiMeisaiList
- * @param juchuContainerMeisaiList
  * @param userNam
  * @returns
+ *
+ * コンテナの追加・削除・予定数・メモは出庫明細（最終確認）で管理するため、ここでは変更しない。
+ * 出庫日時・出庫場所の変更をコンテナの伝票・実績・受注コンテナ明細に反映し、入庫伝票を作り直すだけ。
  */
 export const saveJuchuKizai = async (
   checkJuchuKizaiHead: boolean,
@@ -3461,7 +3691,6 @@ export const saveJuchuKizai = async (
   checkYardNyukoDat: boolean,
   checkJuchuKizaiMeisai: boolean,
   checkIdoJuchuKizaiMeisai: boolean,
-  checkJuchuContainerMeisai: boolean,
   data: JuchuKizaiHeadValues,
   updateShukoDate: Date,
   updateNyukoDate: Date,
@@ -3469,7 +3698,6 @@ export const saveJuchuKizai = async (
   originJuchuKizaiMeisaiList: JuchuKizaiMeisaiValues[],
   juchuKizaiMeisaiList: JuchuKizaiMeisaiValues[],
   idoJuchuKizaiMeisaiList: IdoJuchuKizaiMeisaiValues[],
-  juchuContainerMeisaiList: JuchuContainerMeisaiValues[],
   userNam: string
 ) => {
   const connection = await pool.connect();
@@ -3592,17 +3820,14 @@ export const saveJuchuKizai = async (
 
     let dspOrdNum = 1;
     // 受注明細、入出庫伝票、入出庫実績
-    if (
-      checkKicsShukoDat ||
-      checkKicsNyukoDat ||
-      checkYardShukoDat ||
-      checkYardNyukoDat ||
-      checkJuchuKizaiMeisai ||
-      checkJuchuContainerMeisai
-    ) {
-      // 受注機材明細id最大値
-      const juchuKizaiMeisaiMaxId = await getJuchuKizaiMeisaiMaxId(data.juchuHeadId, data.juchuKizaiHeadId);
-      let newJuchuKizaiMeisaiId = juchuKizaiMeisaiMaxId ? juchuKizaiMeisaiMaxId.juchu_kizai_meisai_id + 1 : 1;
+    if (checkKicsShukoDat || checkKicsNyukoDat || checkYardShukoDat || checkYardNyukoDat || checkJuchuKizaiMeisai) {
+      // 受注機材明細id最大値（受注削除で残した入出庫伝票の明細idも含める。使い回すと残した伝票と主キーが重なるため）
+      const juchuKizaiMeisaiMaxId = await selectJuchuKizaiMeisaiMaxIdWithDenTx(
+        data.juchuHeadId,
+        data.juchuKizaiHeadId,
+        connection
+      );
+      let newJuchuKizaiMeisaiId = juchuKizaiMeisaiMaxId + 1;
       // 機材の並び順設定
       const updKizaiDspOrdNum = juchuKizaiMeisaiList.map((data) =>
         !data.delFlag ? { ...data, dspOrdNum: dspOrdNum++ } : data
@@ -3632,60 +3857,11 @@ export const saveJuchuKizai = async (
         await updJuchuKizaiMeisai(updateJuchuKizaiMeisaiData, userNam, connection);
       }
 
-      // 受注コンテナ明細id最大値
-      const juchuContainerMeisaiMaxId = await getJuchuContainerMeisaiMaxId(data.juchuHeadId, data.juchuKizaiHeadId);
-      let newJuchuContainerMeisaiId = juchuContainerMeisaiMaxId
-        ? juchuContainerMeisaiMaxId.juchu_kizai_meisai_id + 1
-        : 1;
-      // コンテナの並び順設定
-      const updCtnDspOrdNum = juchuContainerMeisaiList.map((data) =>
-        !data.delFlag ? { ...data, dspOrdNum: dspOrdNum++ } : data
-      );
-      // 新規コンテナに明細id割り振り
-      const newJuchuContainerMeisaiData = updCtnDspOrdNum.map((data) =>
-        data.juchuKizaiMeisaiId === 0 && !data.delFlag
-          ? { ...data, juchuKizaiMeisaiId: newJuchuContainerMeisaiId++ }
-          : data
-      );
-
-      // 追加コンテナ
-      const addJuchuContainerMeisaiData = newJuchuContainerMeisaiData.filter((data) => !data.delFlag && !data.saveFlag);
-      // 更新コンテナ
-      const updateJuchuContainerMeisaiData = newJuchuContainerMeisaiData.filter(
-        (data) => !data.delFlag && data.saveFlag
-      );
-      // 削除コンテナ
-      const deleteJuchuContainerMeisaiData = newJuchuContainerMeisaiData.filter(
-        (data) => data.delFlag && data.saveFlag
-      );
-
-      // 削除
-      if (deleteJuchuContainerMeisaiData.length > 0) {
-        const deleteKizaiiIds = deleteJuchuContainerMeisaiData.map((data) => data.kizaiId);
-        await delJuchuContainerMeisai(data.juchuHeadId, data.juchuKizaiHeadId, deleteKizaiiIds, connection);
-      }
-      // 追加
-      if (addJuchuContainerMeisaiData.length > 0) {
-        await addJuchuContainerMeisai(addJuchuContainerMeisaiData, userNam, connection);
-      }
-      // 更新
-      if (updateJuchuContainerMeisaiData.length > 0) {
-        await updJuchuContainerMeisai(updateJuchuContainerMeisaiData, userNam, connection);
-      }
-
       // 削除処理された機材の入出庫伝票、入出庫実績削除
+      // 出庫実績が残っている行は予定数0にして残し、出庫画面で取り除くべき現物として見せる
       if (deleteJuchuKizaiMeisaiData.length > 0) {
-        await delNyushukoDen(deleteJuchuKizaiMeisaiData, connection);
-        await delNyushukoResult(deleteJuchuKizaiMeisaiData, connection);
-      }
-      // 削除処理されたコンテナの入出庫伝票、入出庫実績削除
-      if (deleteJuchuContainerMeisaiData.length > 0) {
-        await delCtnNyushukoDen(deleteJuchuContainerMeisaiData, connection);
-
-        const deleteIds = deleteJuchuContainerMeisaiData.map((d) => d.kizaiId);
-        if (deleteIds.length > 0) {
-          await delNyushukoCtnResult(data.juchuHeadId, data.juchuKizaiHeadId, deleteIds, connection);
-        }
+        await delNyushukoDenKeepResulted(deleteJuchuKizaiMeisaiData, userNam, connection);
+        await delNyushukoResultKeepDen(deleteJuchuKizaiMeisaiData, connection);
       }
 
       // 出庫場所が変更された機材の出庫伝票、出庫実績削除
@@ -3708,28 +3884,31 @@ export const saveJuchuKizai = async (
 
       // 出庫機材伝票削除、追加
       if (addJuchuKizaiMeisaiData.length > 0 || shozokuChangedData.length > 0) {
-        await delShukoDen(shozokuChangedData, connection);
-        await delShukoResult(shozokuChangedData, connection);
+        // 出庫場所が変わった機材の、元の場所の出庫伝票・実績を整理する（明細idは変えない）
+        // 実績・補正がある伝票は予定数0にして受注削除として元の場所に残し、それ以外は削除する
+        await keepShozokuChangedShukoDen(shozokuChangedData, originMap, userNam, connection);
 
         if (data.kicsShukoDat) {
-          const addKicsJuchuKizaiMeisaiData = [
-            ...addJuchuKizaiMeisaiData.filter((d) => d.shozokuId === BASHO_ID.kics),
-            ...shozokuChangedData.filter((d) => d.shozokuId === BASHO_ID.kics),
-          ];
-
+          // 新規の明細は新しい明細idなので作るだけ
+          const addKicsJuchuKizaiMeisaiData = addJuchuKizaiMeisaiData.filter((d) => d.shozokuId === BASHO_ID.kics);
           if (addKicsJuchuKizaiMeisaiData.length > 0) {
             await addShukoDen(addKicsJuchuKizaiMeisaiData, data.kicsShukoDat, userNam, connection);
+          }
+          // 出庫場所が変わった明細は、新しい場所に同じ明細idの受注削除の行（元に戻した場合）があれば通常の行に戻す
+          const changedKicsJuchuKizaiMeisaiData = shozokuChangedData.filter((d) => d.shozokuId === BASHO_ID.kics);
+          if (changedKicsJuchuKizaiMeisaiData.length > 0) {
+            await upsShukoDenBasho(changedKicsJuchuKizaiMeisaiData, data.kicsShukoDat, userNam, connection);
           }
         }
 
         if (data.yardShukoDat) {
-          const addYardJuchuKizaiMeisaiData = [
-            ...addJuchuKizaiMeisaiData.filter((d) => d.shozokuId === BASHO_ID.yard),
-            ...shozokuChangedData.filter((d) => d.shozokuId === BASHO_ID.yard),
-          ];
-
+          const addYardJuchuKizaiMeisaiData = addJuchuKizaiMeisaiData.filter((d) => d.shozokuId === BASHO_ID.yard);
           if (addYardJuchuKizaiMeisaiData.length > 0) {
             await addShukoDen(addYardJuchuKizaiMeisaiData, data.yardShukoDat, userNam, connection);
+          }
+          const changedYardJuchuKizaiMeisaiData = shozokuChangedData.filter((d) => d.shozokuId === BASHO_ID.yard);
+          if (changedYardJuchuKizaiMeisaiData.length > 0) {
+            await upsShukoDenBasho(changedYardJuchuKizaiMeisaiData, data.yardShukoDat, userNam, connection);
           }
         }
       }
@@ -3761,62 +3940,54 @@ export const saveJuchuKizai = async (
         }
       }
 
-      const ctnKizaiIds = juchuContainerMeisaiList.map((d) => d.kizaiId);
+      // 出庫日時・出庫場所の変更前の受注コンテナ明細（出庫場所がなくなるときの入庫伝票の削除に使う）
+      const beforeJuchuContainerMeisaiData = await getJuchuContainerMeisaiTx(
+        data.juchuHeadId,
+        data.juchuKizaiHeadId,
+        connection
+      );
 
-      if (checkKicsShukoDat) {
-        // const deleteAllKicsShukoDenResult = await delAllKicsOrYardShukoDen(
-        //   data.juchuHeadId,
-        //   data.juchuKizaiHeadId,
-        //   1,
-        //   connection
-        // );
+      // 出庫場所ごとの受注コンテナ明細（出庫場所をなくすときに、その場所にあったコンテナを知るために削除前に読む）
+      const beforeCtnMeisaiRows = await selectJuchuContainerMeisaiRowsTx(
+        data.juchuHeadId,
+        data.juchuKizaiHeadId,
+        connection
+      );
 
-        // const deleteAllKicsShukoResultResult = await delAllShukoResult(
-        //   data.juchuHeadId,
-        //   data.juchuKizaiHeadId,
-        //   1,
-        //   connection
-        // );
+      // コンテナの出庫伝票・実績：出庫日時が変わっても削除せず日時だけ更新する（機材と同じ）
+      // 出庫場所がなくなる場合（Y出庫のみ → K出庫のみ など）は、その場所の伝票・実績・受注コンテナ明細を削除する
+      // ※対象は m_kizai.ctn_flg = 1 で絞る（画面に出ていない予定外コンテナの伝票も漏れなく扱うため）
+      const ctnShukoBashos = [
+        { bashoId: BASHO_ID.kics, checkShukoDat: checkKicsShukoDat, shukoDat: data.kicsShukoDat },
+        { bashoId: BASHO_ID.yard, checkShukoDat: checkYardShukoDat, shukoDat: data.yardShukoDat },
+      ];
+      for (const { bashoId, checkShukoDat, shukoDat } of ctnShukoBashos) {
+        if (!checkShukoDat) continue;
 
-        // if (data.kicsShukoDat && data.yardShukoDat && !checkYardShukoDat) {
-        //   const kicsShukoData = newJuchuKizaiMeisaiData.filter((d) => !d.delFlag && d.shozokuId === BASHO_ID.kics);
-        //   if (kicsShukoData.length > 0) {
-        //     await delKicsOrYardShukoDen(kicsShukoData, 2, connection);
+        if (shukoDat) {
+          const newShukoDat = new Date(shukoDat).toISOString();
+          await updateShukoCtnDenDat(data.juchuHeadId, data.juchuKizaiHeadId, bashoId, newShukoDat, connection);
+          await updateShukoCtnResultDat(data.juchuHeadId, data.juchuKizaiHeadId, bashoId, newShukoDat, connection);
+          // 受注削除で残した機材の伝票・実績も新しい日時に移す（通常の機材は画面の明細ごとに更新しているが、
+          // 受注明細が無いこの行は対象に入らず、古い日時のまま取り残されるため）
+          await updateDeletedShukoDenDat(data.juchuHeadId, data.juchuKizaiHeadId, bashoId, newShukoDat, connection);
+          await updateDeletedShukoResultDat(data.juchuHeadId, data.juchuKizaiHeadId, bashoId, newShukoDat, connection);
+        } else {
+          await deleteAllShukoCtnDenBasho(data.juchuHeadId, data.juchuKizaiHeadId, bashoId, connection);
+          await delAllKicsOrYardShukoCtnResult(data.juchuHeadId, data.juchuKizaiHeadId, bashoId, connection);
+          await deleteAllJuchuContainerMeisaiShozoku(data.juchuHeadId, data.juchuKizaiHeadId, bashoId, connection);
 
-        //     await delShukoResult(kicsShukoData, connection);
-        //   }
-        // }
-
-        await delAllKicsOrYardShukoCtnDen(data.juchuHeadId, data.juchuKizaiHeadId, ctnKizaiIds, 1, connection);
-        await delAllKicsOrYardShukoCtnResult(data.juchuHeadId, data.juchuKizaiHeadId, 1, connection);
-      }
-      if (checkYardShukoDat) {
-        // const deleteAllYardShukoDenResult = await delAllKicsOrYardShukoDen(
-        //   data.juchuHeadId,
-        //   data.juchuKizaiHeadId,
-        //   2,
-        //   connection
-        // );
-
-        // const deleteAllYardShukoResultResult = await delAllShukoResult(
-        //   data.juchuHeadId,
-        //   data.juchuKizaiHeadId,
-        //   2,
-        //   connection
-        // );
-
-        // if (data.kicsShukoDat && data.yardShukoDat && !checkKicsShukoDat) {
-        //   const yardShukoData = newJuchuKizaiMeisaiData.filter((d) => !d.delFlag && d.shozokuId === BASHO_ID.yard);
-
-        //   if (yardShukoData.length > 0) {
-        //     await delKicsOrYardShukoDen(yardShukoData, 1, connection);
-
-        //     await delShukoResult(yardShukoData, connection);
-        //   }
-        // }
-
-        await delAllKicsOrYardShukoCtnDen(data.juchuHeadId, data.juchuKizaiHeadId, ctnKizaiIds, 2, connection);
-        await delAllKicsOrYardShukoCtnResult(data.juchuHeadId, data.juchuKizaiHeadId, 2, connection);
+          // 出発解除後などで入庫伝票が残っていることがあるため、出庫明細でコンテナを削除したときと同じように入庫伝票・入庫実績を合わせる
+          const removedCtnRows = beforeCtnMeisaiRows
+            .filter((c) => c.shozoku_id === bashoId)
+            .map((c) => ({
+              juchuHeadId: data.juchuHeadId,
+              juchuKizaiHeadId: data.juchuKizaiHeadId,
+              juchuKizaiMeisaiId: c.juchu_kizai_meisai_id,
+              kizaiId: c.kizai_id,
+            }));
+          await syncNyukoCtnAfterDelete(removedCtnRows, bashoId, userNam, connection);
+        }
       }
       if (checkKicsNyukoDat) {
         await delAllKicsOrYardNyukoDen(data.juchuHeadId, data.juchuKizaiHeadId, 1, connection);
@@ -3850,55 +4021,64 @@ export const saveJuchuKizai = async (
       }
 
       if (!data.kicsShukoDat && checkKicsShukoDat && data.kicsNyukoDat && !checkKicsNyukoDat) {
-        const deleteJuchuCtnMeisai = newJuchuContainerMeisaiData.filter((d) => !d.delFlag);
-        if (deleteJuchuCtnMeisai.length > 0) {
-          await delKicsOrYardCtnNyukoDen(deleteJuchuCtnMeisai, BASHO_ID.kics, connection);
+        if (beforeJuchuContainerMeisaiData.length > 0) {
+          await delKicsOrYardCtnNyukoDen(beforeJuchuContainerMeisaiData, BASHO_ID.kics, connection);
         }
       }
 
       if (!data.yardShukoDat && checkYardShukoDat && data.yardNyukoDat && !checkYardNyukoDat) {
-        const deleteJuchuCtnMeisai = newJuchuContainerMeisaiData.filter((d) => !d.delFlag);
-        if (deleteJuchuCtnMeisai.length > 0) {
-          await delKicsOrYardCtnNyukoDen(deleteJuchuCtnMeisai, BASHO_ID.yard, connection);
+        if (beforeJuchuContainerMeisaiData.length > 0) {
+          await delKicsOrYardCtnNyukoDen(beforeJuchuContainerMeisaiData, BASHO_ID.yard, connection);
         }
       }
 
-      // KICSコンテナ出庫追加更新
-      if (data.kicsShukoDat) {
-        // const kicsShukoData = newJuchuKizaiMeisaiData.filter((d) => !d.delFlag && d.shozokuId === BASHO_ID.kics);
+      // コンテナの出庫伝票はここでは作らない（出庫明細の保存・HT/ゲートの送信・出発で作る）
 
-        // if (kicsShukoData.length > 0) {
-        //   const upsertKicsShukoDenResult = await upsShukoDen(kicsShukoData, data.kicsShukoDat, BASHO_ID.kics, userNam, connection);
-        // }
-
-        const KicsCtnShukoData = newJuchuContainerMeisaiData.filter((d) => !d.delFlag);
-        if (KicsCtnShukoData.length > 0) {
-          await upsCtnShukoDen(KicsCtnShukoData, data.kicsShukoDat, BASHO_ID.kics, userNam, connection);
-        }
-      }
-
-      // YARDコンテナ出庫追加更新
-      if (data.yardShukoDat) {
-        // const upsertYardJuchuKizaiMeisaiData = newJuchuKizaiMeisaiData.filter((d) => !d.delFlag && d.shozokuId === BASHO_ID.yard);
-
-        // if (upsertYardJuchuKizaiMeisaiData.length > 0) {
-        //   const upsertShukoDenResult = await upsShukoDen(
-        //     upsertYardJuchuKizaiMeisaiData,
-        //     data.yardShukoDat,
-        //     2,
-        //     userNam,
-        //     connection
-        //   );
-        // }
-
-        const upsertYardJuchuCtnMeisaiData = newJuchuContainerMeisaiData.filter((d) => !d.delFlag);
-        if (upsertYardJuchuCtnMeisaiData.length > 0) {
-          await upsCtnShukoDen(upsertYardJuchuCtnMeisaiData, data.yardShukoDat, BASHO_ID.yard, userNam, connection);
-        }
-      }
+      // コンテナの入庫伝票に使う受注コンテナ明細（上で削除した場所の分を反映した状態で読み直す）
+      const juchuContainerMeisaiData = await getJuchuContainerMeisaiTx(
+        data.juchuHeadId,
+        data.juchuKizaiHeadId,
+        connection
+      );
 
       // 返却データ
       const returnData = await selectFinishedReturn(data.juchuHeadId, data.juchuKizaiHeadId, connection);
+
+      // コンテナの入庫伝票は、流れ込む出庫場所が出発済みの分だけ作り直す（メイン明細から未出発の分を作らない）
+      // 入庫が2か所なら同じ場所の出庫、入庫が1か所なら K・Y 両方の出庫が流れ込む（planQtyId が others）
+      const departedShukoBashoIds = await selectFixedSagyoIdsTx(
+        data.juchuHeadId,
+        data.juchuKizaiHeadId,
+        SAGYO_KBN_ID.shukoConfirmed,
+        connection
+      );
+      const ctnMeisaiRows = await selectJuchuContainerMeisaiRowsTx(data.juchuHeadId, data.juchuKizaiHeadId, connection);
+      const upsDepartedCtnNyukoDen = async (nyukoDat: Date, sagyoId: number, planQtyId: number) => {
+        const shukoBashoIds = planQtyId === BASHO_ID.others ? [BASHO_ID.kics, BASHO_ID.yard] : [planQtyId];
+        const targets = juchuContainerMeisaiData.filter((d) =>
+          ctnMeisaiRows.some(
+            (c) =>
+              c.juchu_kizai_meisai_id === d.juchuKizaiMeisaiId &&
+              c.kizai_id === d.kizaiId &&
+              shukoBashoIds.includes(c.shozoku_id) &&
+              departedShukoBashoIds.includes(c.shozoku_id)
+          )
+        );
+        if (targets.length === 0) return;
+
+        // K・Y 両方が流れ込む場合の予定数は、出発済みの場所の分だけを合計する（出発時の計算と同じ）
+        const departedTargets =
+          planQtyId === BASHO_ID.others
+            ? targets.map((d) => ({
+                ...d,
+                planQty:
+                  (departedShukoBashoIds.includes(BASHO_ID.kics) ? d.planKicsKizaiQty : 0) +
+                  (departedShukoBashoIds.includes(BASHO_ID.yard) ? d.planYardKizaiQty : 0),
+              }))
+            : targets;
+
+        await upsCtnNyukoDen(departedTargets, returnData, nyukoDat, sagyoId, planQtyId, userNam, connection);
+      };
 
       // 入庫追加更新
       if (data.kicsNyukoDat && data.yardNyukoDat) {
@@ -3916,48 +4096,16 @@ export const saveJuchuKizai = async (
         }
 
         // コンテナ入庫明細
-        const ctnNyukoData = newJuchuContainerMeisaiData.filter((d) => !d.delFlag);
+        const ctnNyukoData = juchuContainerMeisaiData;
         if (ctnNyukoData.length > 0) {
           if (data.kicsShukoDat && data.yardShukoDat) {
-            await upsCtnNyukoDen(
-              ctnNyukoData,
-              returnData,
-              data.kicsNyukoDat,
-              BASHO_ID.kics,
-              BASHO_ID.kics,
-              userNam,
-              connection
-            );
+            await upsDepartedCtnNyukoDen(data.kicsNyukoDat, BASHO_ID.kics, BASHO_ID.kics);
 
-            await upsCtnNyukoDen(
-              ctnNyukoData,
-              returnData,
-              data.yardNyukoDat,
-              BASHO_ID.yard,
-              BASHO_ID.yard,
-              userNam,
-              connection
-            );
+            await upsDepartedCtnNyukoDen(data.yardNyukoDat, BASHO_ID.yard, BASHO_ID.yard);
           } else if (data.kicsShukoDat && !data.yardShukoDat) {
-            await upsCtnNyukoDen(
-              ctnNyukoData,
-              returnData,
-              data.kicsNyukoDat,
-              BASHO_ID.kics,
-              BASHO_ID.kics,
-              userNam,
-              connection
-            );
+            await upsDepartedCtnNyukoDen(data.kicsNyukoDat, BASHO_ID.kics, BASHO_ID.kics);
           } else if (!data.kicsShukoDat && data.yardShukoDat) {
-            await upsCtnNyukoDen(
-              ctnNyukoData,
-              returnData,
-              data.yardNyukoDat,
-              BASHO_ID.yard,
-              BASHO_ID.yard,
-              userNam,
-              connection
-            );
+            await upsDepartedCtnNyukoDen(data.yardNyukoDat, BASHO_ID.yard, BASHO_ID.yard);
           }
         }
       } else if (data.kicsNyukoDat && !data.yardNyukoDat) {
@@ -3969,38 +4117,14 @@ export const saveJuchuKizai = async (
         }
 
         // KICSコンテナ入庫明細
-        const ctnNyukoData = newJuchuContainerMeisaiData.filter((d) => !d.delFlag);
+        const ctnNyukoData = juchuContainerMeisaiData;
         if (ctnNyukoData.length > 0) {
           if (data.kicsShukoDat && data.yardShukoDat) {
-            await upsCtnNyukoDen(
-              ctnNyukoData,
-              returnData,
-              data.kicsNyukoDat,
-              BASHO_ID.kics,
-              BASHO_ID.others,
-              userNam,
-              connection
-            );
+            await upsDepartedCtnNyukoDen(data.kicsNyukoDat, BASHO_ID.kics, BASHO_ID.others);
           } else if (data.kicsShukoDat && !data.yardShukoDat) {
-            await upsCtnNyukoDen(
-              ctnNyukoData,
-              returnData,
-              data.kicsNyukoDat,
-              BASHO_ID.kics,
-              BASHO_ID.kics,
-              userNam,
-              connection
-            );
+            await upsDepartedCtnNyukoDen(data.kicsNyukoDat, BASHO_ID.kics, BASHO_ID.kics);
           } else if (!data.kicsShukoDat && data.yardShukoDat) {
-            await upsCtnNyukoDen(
-              ctnNyukoData,
-              returnData,
-              data.kicsNyukoDat,
-              BASHO_ID.kics,
-              BASHO_ID.yard,
-              userNam,
-              connection
-            );
+            await upsDepartedCtnNyukoDen(data.kicsNyukoDat, BASHO_ID.kics, BASHO_ID.yard);
           }
         }
       } else if (!data.kicsNyukoDat && data.yardNyukoDat) {
@@ -4012,38 +4136,14 @@ export const saveJuchuKizai = async (
         }
 
         // YARDコンテナ入庫明細
-        const ctnNyukoData = newJuchuContainerMeisaiData.filter((d) => !d.delFlag);
+        const ctnNyukoData = juchuContainerMeisaiData;
         if (ctnNyukoData.length > 0) {
           if (data.kicsShukoDat && data.yardShukoDat) {
-            await upsCtnNyukoDen(
-              ctnNyukoData,
-              returnData,
-              data.yardNyukoDat,
-              BASHO_ID.yard,
-              BASHO_ID.others,
-              userNam,
-              connection
-            );
+            await upsDepartedCtnNyukoDen(data.yardNyukoDat, BASHO_ID.yard, BASHO_ID.others);
           } else if (data.kicsShukoDat && !data.yardShukoDat) {
-            await upsCtnNyukoDen(
-              ctnNyukoData,
-              returnData,
-              data.yardNyukoDat,
-              BASHO_ID.yard,
-              BASHO_ID.kics,
-              userNam,
-              connection
-            );
+            await upsDepartedCtnNyukoDen(data.yardNyukoDat, BASHO_ID.yard, BASHO_ID.kics);
           } else if (!data.kicsShukoDat && data.yardShukoDat) {
-            await upsCtnNyukoDen(
-              ctnNyukoData,
-              returnData,
-              data.yardNyukoDat,
-              BASHO_ID.yard,
-              BASHO_ID.yard,
-              userNam,
-              connection
-            );
+            await upsDepartedCtnNyukoDen(data.yardNyukoDat, BASHO_ID.yard, BASHO_ID.yard);
           }
         }
       }

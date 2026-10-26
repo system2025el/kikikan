@@ -43,7 +43,7 @@
 --   juchu_head_id / juchu_kizai_head_id は ALTER TABLE ADD COLUMN で末尾に付いたので12・13番目。
 --   列を足し引きしたらこの関数も必ず直すこと。
 --
--- 関連: scripts/db-migration/ddl/20260924-ido-juchu-meisai.sql
+-- 関連: scripts/db-tables/applied/20260924-ido-juchu-meisai.sql
 --       scripts/db-views/staging-only/v_ido_den2_meisai_lst.sql（HT・ゲートの乗り換え先ビュー）
 
 \set ON_ERROR_STOP on

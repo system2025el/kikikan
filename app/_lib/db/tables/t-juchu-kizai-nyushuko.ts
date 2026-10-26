@@ -7,6 +7,89 @@ import { createClient } from '../supabase-server';
 import { JuchuKizaiNyushuko } from '../types/t-juchu-kizai-nyushuko-type';
 
 /**
+ * 指定した場所・日時の入出庫日を持つ受注機材ヘッダーid取得（トランザクション内）
+ * 画面を開いた後に入出庫日時・場所が変わっていないかの確認に使う
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadIds 確認する受注機材ヘッダーid
+ * @param nyushukoShubetuId 入出庫種別id
+ * @param nyushukoBashoId 入出庫場所id
+ * @param nyushukoDat 入出庫日時
+ * @param connection
+ * @returns 一致した受注機材ヘッダーid
+ */
+export const selectJuchuKizaiNyushukoMatchTx = async (
+  juchuHeadId: number,
+  juchuKizaiHeadIds: number[],
+  nyushukoShubetuId: number,
+  nyushukoBashoId: number,
+  nyushukoDat: string,
+  connection: PoolClient
+) => {
+  const query = `
+    SELECT
+      juchu_kizai_head_id
+    FROM
+      ${SCHEMA}.t_juchu_kizai_nyushuko
+    WHERE
+      juchu_head_id = $1
+      AND juchu_kizai_head_id = ANY($2::int[])
+      AND nyushuko_shubetu_id = $3
+      AND nyushuko_basho_id = $4
+      AND nyushuko_dat = $5::timestamptz
+  `;
+
+  try {
+    const result = await connection.query<{ juchu_kizai_head_id: number }>(query, [
+      juchuHeadId,
+      juchuKizaiHeadIds,
+      nyushukoShubetuId,
+      nyushukoBashoId,
+      nyushukoDat,
+    ]);
+    return result.rows.map((r) => r.juchu_kizai_head_id);
+  } catch (e) {
+    throw new Error('[selectJuchuKizaiNyushukoMatchTx] DBエラー:', { cause: e });
+  }
+};
+
+/**
+ * 受注機材ヘッダーの入出庫場所id取得（トランザクション内）
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param nyushukoShubetuId 入出庫種別id（出庫 1 / 入庫 2）
+ * @param connection
+ * @returns 入出庫場所id
+ */
+export const selectJuchuKizaiNyushukoBashoIdsTx = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  nyushukoShubetuId: number,
+  connection: PoolClient
+) => {
+  const query = `
+    SELECT
+      nyushuko_basho_id
+    FROM
+      ${SCHEMA}.t_juchu_kizai_nyushuko
+    WHERE
+      juchu_head_id = $1
+      AND juchu_kizai_head_id = $2
+      AND nyushuko_shubetu_id = $3
+  `;
+
+  try {
+    const result = await connection.query<{ nyushuko_basho_id: number }>(query, [
+      juchuHeadId,
+      juchuKizaiHeadId,
+      nyushukoShubetuId,
+    ]);
+    return result.rows.map((r) => r.nyushuko_basho_id);
+  } catch (e) {
+    throw new Error('[selectJuchuKizaiNyushukoBashoIdsTx] DBエラー:', { cause: e });
+  }
+};
+
+/**
  * 受注機材入出庫データ取得
  * @param juchuHeadId 受注ヘッダーid
  * @param juchuKizaiHeadId 受注機材ヘッダーid

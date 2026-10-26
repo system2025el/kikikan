@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 
 import { getCurrentUser } from '@/app/(main)/_lib/funcs';
 import { permission } from '@/app/(main)/_lib/permission';
+import { NyushukoEqptDetailNotFound } from '@/app/(main)/_ui/nyushuko-not-found';
 
 import { getShukoEqptDetail, getShukoEqptDetailTable, getShukoFixFlag } from './_lib/funcs';
 import { ShukoEqptDetailTableValues, ShukoEqptDetailValues } from './_lib/types';
@@ -66,7 +67,13 @@ const Page = async (props: {
   ]);
 
   if (!shukoEqptDetailData) {
-    return <div>データが見つかりません</div>;
+    return (
+      <NyushukoEqptDetailNotFound
+        message="データが見つかりません"
+        backLabel="出庫明細"
+        backPath={`/shuko-list/shuko-detail/${params.jhId}/${params.jkhKbn}/${params.nbId}/${date}/${params.skId}`}
+      />
+    );
   }
 
   const fixFlag = await getShukoFixFlag(

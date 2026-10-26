@@ -65,7 +65,7 @@
 --   行数 10,598 → 11,214（明細に分かれた分）。
 --
 -- 関連: app/_lib/db/tables/v-ido-den3-lst.ts / ido-list の移動明細画面
---       scripts/db-migration/ddl/20260924-ido-juchu-meisai.sql
+--       scripts/db-tables/applied/20260924-ido-juchu-meisai.sql
 
 DROP VIEW IF EXISTS public.v_ido_den3_lst;
 

@@ -682,53 +682,23 @@ export const IdoEqTable: React.FC<IdoEqTableProps> = React.memo(
 
 IdoEqTable.displayName = 'IdoEqTable';
 
+/** コンテナの K・Y 列の最小幅（以前の入力欄と同じくらいの幅） */
+const CTN_QTY_MIN_WIDTH = 72;
+
 type ContainerTableRowProps = {
   row: JuchuContainerMeisaiValues;
   rowIndex: number;
-  edit: boolean;
-  shukoFixFlag: boolean;
   shukoDate: Date | null;
-  handleContainerMemoChange: (rowIndex: number, memo: string) => void;
-  handleContainerCellChange: (rowIndex: number, kicsValue: number, yardValue: number) => void;
-  handleCtnSelect: (row: JuchuContainerMeisaiValues) => void;
-  handleContainerKicsRef: (el: HTMLInputElement | null, rowIndex: number) => void;
-  handleContainerYardRef: (el: HTMLInputElement | null, rowIndex: number) => void;
-  handleKicsKeyDown: (e: React.KeyboardEvent, rowIndex: number) => void;
-  handleYardKeyDown: (e: React.KeyboardEvent, rowIndex: number) => void;
 };
 
+/**
+ * コンテナの行（閲覧のみ）
+ * コンテナの追加・削除・予定数・メモの編集は出庫明細（最終確認）で行う
+ */
 const ContainerTableRow = React.memo(
-  ({
-    row,
-    rowIndex,
-    edit,
-    shukoFixFlag,
-    shukoDate,
-    handleContainerMemoChange,
-    handleContainerCellChange,
-    handleCtnSelect,
-    handleContainerKicsRef,
-    handleContainerYardRef,
-    handleKicsKeyDown,
-    handleYardKeyDown,
-  }: ContainerTableRowProps) => {
+  ({ row, rowIndex, shukoDate }: ContainerTableRowProps) => {
     return (
       <TableRow hover>
-        <TableCell
-          sx={{
-            padding: 0,
-            borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
-            borderRight: '1px solid rgba(0, 0, 0, 0.12)',
-          }}
-        >
-          <Checkbox
-            color="primary"
-            checked={row.selected}
-            onChange={() => handleCtnSelect(row)}
-            sx={{ padding: 0 }}
-            disabled={!edit || shukoFixFlag}
-          />
-        </TableCell>
         <TableCell
           align="right"
           size="small"
@@ -753,93 +723,11 @@ const ContainerTableRow = React.memo(
             {row.kizaiNam}
           </Button>
         </TableCell>
-        <TableCell style={styles.row} align="right" size="small">
-          <TextField
-            variant="standard"
-            value={row.planKicsKizaiQty}
-            type="tel"
-            onChange={(e) => {
-              if (/^\d*$/.test(e.target.value)) {
-                handleContainerCellChange(rowIndex, Number(e.target.value), row.planYardKizaiQty);
-              }
-            }}
-            sx={{
-              '& .MuiInputBase-input': {
-                textAlign: 'right',
-                padding: 0,
-                fontSize: 'small',
-                width: 60,
-              },
-              '& input[type=number]': {
-                MozAppearance: 'textfield',
-              },
-              '& input[type=number]::-webkit-outer-spin-button': {
-                WebkitAppearance: 'none',
-                margin: 0,
-              },
-              '& input[type=number]::-webkit-inner-spin-button': {
-                WebkitAppearance: 'none',
-                margin: 0,
-              },
-            }}
-            slotProps={{
-              input: {
-                style: { textAlign: 'right' },
-                disableUnderline: true,
-                inputMode: 'numeric',
-              },
-            }}
-            inputRef={(el) => handleContainerKicsRef(el, rowIndex)}
-            onKeyDown={(e) => {
-              handleKicsKeyDown(e, rowIndex);
-            }}
-            onFocus={(e) => e.target.select()}
-            disabled={!edit || shukoFixFlag}
-          />
+        <TableCell style={styles.row} align="right" size="small" sx={{ minWidth: CTN_QTY_MIN_WIDTH }}>
+          {row.planKicsKizaiQty}
         </TableCell>
-        <TableCell style={styles.row} align="right" size="small">
-          <TextField
-            variant="standard"
-            value={row.planYardKizaiQty}
-            type="tel"
-            onChange={(e) => {
-              if (/^\d*$/.test(e.target.value)) {
-                handleContainerCellChange(rowIndex, row.planKicsKizaiQty, Number(e.target.value));
-              }
-            }}
-            sx={{
-              '& .MuiInputBase-input': {
-                textAlign: 'right',
-                padding: 0,
-                fontSize: 'small',
-                width: 60,
-              },
-              '& input[type=number]': {
-                MozAppearance: 'textfield',
-              },
-              '& input[type=number]::-webkit-outer-spin-button': {
-                WebkitAppearance: 'none',
-                margin: 0,
-              },
-              '& input[type=number]::-webkit-inner-spin-button': {
-                WebkitAppearance: 'none',
-                margin: 0,
-              },
-            }}
-            slotProps={{
-              input: {
-                style: { textAlign: 'right' },
-                disableUnderline: true,
-                inputMode: 'numeric',
-              },
-            }}
-            inputRef={(el) => handleContainerYardRef(el, rowIndex)}
-            onKeyDown={(e) => {
-              handleYardKeyDown(e, rowIndex);
-            }}
-            onFocus={(e) => e.target.select()}
-            disabled={!edit || shukoFixFlag}
-          />
+        <TableCell style={styles.row} align="right" size="small" sx={{ minWidth: CTN_QTY_MIN_WIDTH }}>
+          {row.planYardKizaiQty}
         </TableCell>
         <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: lightBlue[100] }}>
           {row.planQty}
@@ -848,9 +736,9 @@ const ContainerTableRow = React.memo(
           <MemoTooltip
             name={row.kizaiNam}
             memo={row.mem ? row.mem : ''}
-            handleMemoChange={handleContainerMemoChange}
+            handleMemoChange={() => {}}
             rowIndex={rowIndex}
-            disabled={!edit || shukoFixFlag}
+            disabled={true}
           />
         </TableCell>
       </TableRow>
@@ -860,79 +748,21 @@ const ContainerTableRow = React.memo(
     return (
       prevProps.row === nextProps.row &&
       prevProps.rowIndex === nextProps.rowIndex &&
-      prevProps.edit === nextProps.edit &&
-      prevProps.shukoFixFlag === nextProps.shukoFixFlag
+      prevProps.shukoDate === nextProps.shukoDate
     );
   }
 );
 
 ContainerTableRow.displayName = 'ContainerTableRow';
 
-export const ContainerTable = (props: {
-  rows: JuchuContainerMeisaiValues[];
-  edit: boolean;
-  shukoFixFlag: boolean;
-  shukoDate: Date | null;
-  handleContainerMemoChange: (rowIndex: number, memo: string) => void;
-  handleContainerCellChange: (rowIndex: number, kicsValue: number, yardValue: number) => void;
-  handleCtnSelect: (row: JuchuContainerMeisaiValues) => void;
-  handleCtnAllSelect: () => void;
-}) => {
-  const {
-    rows,
-    edit,
-    shukoFixFlag,
-    shukoDate,
-    handleContainerMemoChange,
-    handleContainerCellChange,
-    handleCtnSelect,
-    handleCtnAllSelect,
-  } = props;
-
-  const inputKicsRefs = useRef<(HTMLInputElement | null)[]>([]);
-  const inputYardRefs = useRef<(HTMLInputElement | null)[]>([]);
+/**
+ * コンテナのテーブル（閲覧のみ）
+ * コンテナの追加・削除・予定数・メモの編集は出庫明細（最終確認）で行う
+ */
+export const ContainerTable = (props: { rows: JuchuContainerMeisaiValues[]; shukoDate: Date | null }) => {
+  const { rows, shukoDate } = props;
 
   const visibleRows = rows.filter((row) => !row.delFlag);
-
-  const handleKicsKeyDown = (e: React.KeyboardEvent, rowIndex: number) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      inputKicsRefs.current[rowIndex + 1]?.focus();
-    } else if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      inputKicsRefs.current[rowIndex + 1]?.focus();
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      inputKicsRefs.current[rowIndex - 1]?.focus();
-    } else if (e.key === 'ArrowRight') {
-      e.preventDefault();
-      inputYardRefs.current[rowIndex]?.focus();
-    }
-  };
-
-  const handleContainerKicsRef = (el: HTMLInputElement | null, rowIndex: number) => {
-    inputKicsRefs.current[rowIndex] = el;
-  };
-
-  const handleYardKeyDown = (e: React.KeyboardEvent, rowIndex: number) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      inputYardRefs.current[rowIndex + 1]?.focus();
-    } else if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      inputYardRefs.current[rowIndex + 1]?.focus();
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      inputYardRefs.current[rowIndex - 1]?.focus();
-    } else if (e.key === 'ArrowLeft') {
-      e.preventDefault();
-      inputKicsRefs.current[rowIndex]?.focus();
-    }
-  };
-
-  const handleContainerYardRef = (el: HTMLInputElement | null, rowIndex: number) => {
-    inputYardRefs.current[rowIndex] = el;
-  };
 
   return (
     <TableContainer
@@ -944,44 +774,14 @@ export const ContainerTable = (props: {
       <Table stickyHeader sx={{ borderCollapse: 'separate', borderSpacing: 0 }}>
         <TableHead>
           <TableRow>
-            <TableCell
-              sx={{
-                padding: 0,
-                borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
-                borderRight: '1px solid rgba(0, 0, 0, 0.12)',
-              }}
-            >
-              <Checkbox
-                indeterminate={
-                  visibleRows &&
-                  visibleRows.filter((d) => d.selected).length > 0 &&
-                  visibleRows.filter((d) => d.selected).length < visibleRows.length
-                }
-                checked={
-                  visibleRows &&
-                  visibleRows.length > 0 &&
-                  visibleRows.filter((d) => d.selected).length === visibleRows.length
-                }
-                onChange={handleCtnAllSelect}
-                sx={{
-                  padding: 0,
-                  '& .MuiSvgIcon-root': {
-                    backgroundColor: '#fff',
-                    borderRadius: '4px',
-                    transition: 'background-color 0.3s',
-                  },
-                }}
-                disabled={!edit || shukoFixFlag}
-              />
-            </TableCell>
             <TableCell size="small" style={styles.header} />
             <TableCell align="left" size="small" style={styles.header}>
               機材名
             </TableCell>
-            <TableCell align="right" size="small" style={styles.header}>
+            <TableCell align="right" size="small" style={styles.header} sx={{ minWidth: CTN_QTY_MIN_WIDTH }}>
               K
             </TableCell>
-            <TableCell align="right" size="small" style={styles.header}>
+            <TableCell align="right" size="small" style={styles.header} sx={{ minWidth: CTN_QTY_MIN_WIDTH }}>
               Y
             </TableCell>
             <TableCell align="right" size="small" style={styles.header}>
@@ -995,19 +795,10 @@ export const ContainerTable = (props: {
         <TableBody>
           {visibleRows.map((row, rowIndex) => (
             <ContainerTableRow
-              key={rowIndex}
+              key={`${row.juchuKizaiMeisaiId}-${row.kizaiId}`}
               row={row}
               rowIndex={rowIndex}
-              edit={edit}
-              shukoFixFlag={shukoFixFlag}
               shukoDate={shukoDate}
-              handleContainerMemoChange={handleContainerMemoChange}
-              handleContainerCellChange={handleContainerCellChange}
-              handleCtnSelect={handleCtnSelect}
-              handleContainerKicsRef={handleContainerKicsRef}
-              handleContainerYardRef={handleContainerYardRef}
-              handleKicsKeyDown={handleKicsKeyDown}
-              handleYardKeyDown={handleYardKeyDown}
             />
           ))}
         </TableBody>

@@ -1,6 +1,9 @@
 'use client';
 
+import AddIcon from '@mui/icons-material/Add';
 import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+import SaveAsIcon from '@mui/icons-material/SaveAs';
 import WarningIcon from '@mui/icons-material/Warning';
 import {
   Box,
@@ -10,6 +13,7 @@ import {
   DialogContentText,
   DialogTitle,
   Divider,
+  Fab,
   Grid2,
   Paper,
   Snackbar,
@@ -18,11 +22,12 @@ import {
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { set } from 'zod';
 
 import { BASHO_ID, FIX_STS, FixSts, JUCHU_KIZAI_HEAD_KBN, SAGYO_KBN_ID } from '@/app/_lib/constants';
 import { dispColors, fixStsColors, sagyoKbnColors, statusColors } from '@/app/(main)/_lib/colors';
+import { useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
 import {
   getNyushukoFixErrorMessage,
   NyushukoFixAction,
@@ -33,6 +38,7 @@ import { permission } from '@/app/(main)/_lib/permission';
 import { User } from '@/app/(main)/_lib/types';
 import { BackButton } from '@/app/(main)/_ui/buttons';
 import { DateTime, FormDateX } from '@/app/(main)/_ui/date';
+import { useDirty } from '@/app/(main)/_ui/dirty-context';
 import { LoadingOverlay } from '@/app/(main)/_ui/loading';
 
 import {
@@ -40,12 +46,25 @@ import {
   delShukoFix,
   getShukoDetail,
   getShukoDetailTable,
+  saveShukoCtn,
   updShukoAdjust,
   updShukoDetail,
 } from '../_lib/funcs';
-import { hasShukoDiff } from '../_lib/shuko-diff';
-import { ShukoDetailTableValues, ShukoDetailValues } from '../_lib/types';
-import { ShukoDetailTable } from './shuko-detail-table';
+import { calcShukoDiff, hasShukoDiff } from '../_lib/shuko-diff';
+import { ShukoCtnSelectionValues, ShukoDetailTableValues, ShukoDetailValues } from '../_lib/types';
+import { ShukoCtnSelectionDialog } from './shuko-ctn-selection-dialog';
+import { ShukoDetailTable, toShukoRowKey } from './shuko-detail-table';
+
+/**
+ * コンテナの編集内容の比較用（追加・削除・予定数・メモ）
+ * @param list 出庫明細の行
+ * @returns
+ */
+const toCtnSignature = (list: ShukoDetailTableValues[]) =>
+  list
+    .filter((d) => d.ctnFlg === 1)
+    .map((d) => `${toShukoRowKey(d)}:${d.saveFlag}:${d.delFlag}:${d.planQty}:${d.mem2 ?? ''}`)
+    .join('|');
 
 export const ShukoDetail = (props: {
   user: User;
@@ -71,9 +90,63 @@ export const ShukoDetail = (props: {
   const [isLoading, setIsLoading] = useState(false);
   // 処理中制御
   const [isProcessing, setIsProcessing] = useState(false);
+  // 一覧はブラウザ側で描画する（サーバー描画で出すと、コンテナのメモ欄（複数行の自動高さ調整）が
+  // 表示後に高さを測り直して、行が一瞬伸び縮みするため。ブラウザ側の描画なら測り直しは表示前に終わる）
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
-  // 出庫データ
+  // 出庫データ（保存済みの状態）
+  const [originShukoDetailList, setOriginShukoDetailList] = useState<ShukoDetailTableValues[]>(
+    props.shukoDetailTableData
+  );
+  // 出庫データ（画面で編集中の状態。コンテナの追加・削除・予定数・メモ）
   const [shukoDetailList, setShukoDetailList] = useState<ShukoDetailTableValues[]>(props.shukoDetailTableData);
+  // 表示する行（削除したコンテナは出さない）
+  const visibleShukoDetailList = useMemo(() => shukoDetailList.filter((d) => !d.delFlag), [shukoDetailList]);
+
+  // コンテナを編集できるか（最終確認・キープ以外・入出庫の更新権限あり）
+  const ctnEditable =
+    shukoDetailData.sagyoKbnId === SAGYO_KBN_ID.shukoConfirmation &&
+    shukoDetailData.juchuKizaiHeadKbn !== JUCHU_KIZAI_HEAD_KBN.keep &&
+    !!(user.permission.nyushuko & permission.nyushuko_upd);
+  // コンテナを追加できる受注機材ヘッダー（この画面＝最終確認に行があり、未出発のもの）
+  // 合体しているヘッダーの一覧（juchuKizaiHeadIds）はピッキングと最終確認を合わせたものなので、ピッキングにだけ
+  // 伝票がある（受注削除だけが残っている）ヘッダーも入っている。そこには最終確認する現物が無いので、追加先に出さない
+  // （ゲートの予定外コンテナの送り先と同じく、最終確認の行に出てくるヘッダーだけにする）
+  const addableHeads = useMemo(
+    () =>
+      shukoDetailData.juchuKizaiHeadIds
+        .filter((id) => originShukoDetailList.some((d) => d.juchuKizaiHeadId === id))
+        .filter((id) => !fixedJuchuKizaiHeadIds.includes(id))
+        .map((id) => ({
+          juchuKizaiHeadId: id,
+          // 受注機材ヘッダーごとの明細名（明細名が空のヘッダーは空のまま出す。ゲート・HT と同じ）
+          headNam: shukoDetailData.juchuKizaiHeadNams.find((h) => h.juchuKizaiHeadId === id)?.headNam ?? '',
+        })),
+    [
+      shukoDetailData.juchuKizaiHeadIds,
+      shukoDetailData.juchuKizaiHeadNams,
+      fixedJuchuKizaiHeadIds,
+      originShukoDetailList,
+    ]
+  );
+  // コンテナ追加ダイアログ制御
+  const [ctnDialogOpen, setCtnDialogOpen] = useState(false);
+  // コンテナ削除確認（読取実績があるとき）
+  const [ctnDeleteTarget, setCtnDeleteTarget] = useState<ShukoDetailTableValues | null>(null);
+
+  // 未保存の変更
+  const { setIsDirty } = useDirty();
+  const editFlag = useMemo(
+    () => toCtnSignature(originShukoDetailList) !== toCtnSignature(shukoDetailList),
+    [originShukoDetailList, shukoDetailList]
+  );
+  useUnsavedChangesWarning(editFlag);
+  useEffect(() => {
+    setIsDirty(editFlag);
+  }, [editFlag, setIsDirty]);
 
   // 警告ダイアログ制御
   const [alertOpen, setAlertOpen] = useState(false);
@@ -239,11 +312,171 @@ export const ShukoDetail = (props: {
         shukoDetailData.sagyoKbnId
       );
       setShukoDetailList(updatedShukoDetailTableData);
+      setOriginShukoDetailList(updatedShukoDetailTableData);
       setAdjustOpen(false);
       setSnackBarMessage('一括補正しました');
       setSnackBarOpen(true);
     } catch (e) {
       setSnackBarMessage('一括補正に失敗しました');
+      setSnackBarOpen(true);
+    }
+    setIsLoading(false);
+    setIsProcessing(false);
+  };
+
+  /**
+   * コンテナ追加（選んだ受注機材ヘッダーの末尾に、未保存の行として追加する）
+   * @param juchuKizaiHeadId 追加先の受注機材ヘッダーid
+   * @param selected 追加するコンテナ
+   */
+  const handleAddCtn = (juchuKizaiHeadId: number, selected: ShukoCtnSelectionValues[]) => {
+    setCtnDialogOpen(false);
+    if (selected.length === 0) return;
+
+    const headNam = addableHeads.find((h) => h.juchuKizaiHeadId === juchuKizaiHeadId)?.headNam ?? null;
+    setShukoDetailList((prev) => {
+      // 同じヘッダーにすでにあるコンテナは追加しない（削除して保存前のものは、削除を取り消して戻す）
+      const restored = prev.map((d) =>
+        d.delFlag &&
+        d.ctnFlg === 1 &&
+        d.juchuKizaiHeadId === juchuKizaiHeadId &&
+        selected.some((s) => s.kizaiId === d.kizaiId)
+          ? { ...d, delFlag: false }
+          : d
+      );
+      const existing = restored.filter((d) => d.juchuKizaiHeadId === juchuKizaiHeadId && !d.delFlag);
+      const newRows: ShukoDetailTableValues[] = selected
+        .filter((s) => !existing.some((d) => d.kizaiId === s.kizaiId))
+        .map((s) => ({
+          juchuHeadId: shukoDetailData.juchuHeadId,
+          juchuKizaiHeadId: juchuKizaiHeadId,
+          juchuKizaiMeisaiId: 0,
+          juchuKizaiHeadKbn: shukoDetailData.juchuKizaiHeadKbn,
+          headNamv: headNam,
+          kizaiId: s.kizaiId,
+          kizaiNam: s.kizaiNam,
+          koenNam: shukoDetailData.koenNam,
+          koenbashoNam: shukoDetailData.koenbashoNam,
+          kokyakuNam: shukoDetailData.kokyakuNam,
+          nyushukoBashoId: shukoDetailData.nyushukoBashoId,
+          nyushukoDat: shukoDetailData.nyushukoDat,
+          nyushukoShubetuId: shukoDetailData.nyushukoShubetuId,
+          planQty: 0,
+          planKizaiQty: null,
+          planYobiQty: null,
+          resultAdjQty: 0,
+          resultQty: 0,
+          sagyoKbnId: shukoDetailData.sagyoKbnId,
+          diff: calcShukoDiff(0, 0, 0),
+          ctnFlg: 1,
+          dspOrdNumMeisai: null,
+          indentNum: 0,
+          mem2: '',
+          juchuMeisaiDelFlg: 0,
+          saveFlag: false,
+          delFlag: false,
+        }));
+
+      // 一覧はヘッダー → 表示順の順に並んでいるので、選んだヘッダーの最後の行の後ろに入れる
+      const lastIndex = restored.map((d) => d.juchuKizaiHeadId).lastIndexOf(juchuKizaiHeadId);
+      return lastIndex < 0
+        ? [...restored, ...newRows]
+        : [...restored.slice(0, lastIndex + 1), ...newRows, ...restored.slice(lastIndex + 1)];
+    });
+  };
+
+  /**
+   * コンテナの予定数入力
+   * @param row 対象の行
+   * @param planQty 予定数（空欄は null）
+   */
+  const handlePlanQtyChange = (row: ShukoDetailTableValues, planQty: number | null) => {
+    const key = toShukoRowKey(row);
+    setShukoDetailList((prev) =>
+      prev.map((d) =>
+        toShukoRowKey(d) === key
+          ? { ...d, planQty: planQty, diff: calcShukoDiff(planQty ?? 0, d.resultQty, d.resultAdjQty) }
+          : d
+      )
+    );
+  };
+
+  /**
+   * コンテナのメモ入力
+   * @param row 対象の行
+   * @param mem メモ
+   */
+  const handleMemChange = (row: ShukoDetailTableValues, mem: string) => {
+    const key = toShukoRowKey(row);
+    setShukoDetailList((prev) => prev.map((d) => (toShukoRowKey(d) === key ? { ...d, mem2: mem } : d)));
+  };
+
+  /**
+   * コンテナ削除（読取実績があるときは確認してから）
+   * @param row 対象の行
+   */
+  const handleDeleteCtn = (row: ShukoDetailTableValues) => {
+    if ((row.resultQty ?? 0) !== 0 || (row.resultAdjQty ?? 0) !== 0) {
+      setCtnDeleteTarget(row);
+      return;
+    }
+    executeDeleteCtn(row);
+  };
+
+  /**
+   * コンテナ削除の実行（保存済みの行は保存時に削除する。未保存の行はそのまま取り除く）
+   * @param row 対象の行
+   */
+  const executeDeleteCtn = (row: ShukoDetailTableValues) => {
+    const key = toShukoRowKey(row);
+    setShukoDetailList((prev) =>
+      row.saveFlag
+        ? prev.map((d) => (toShukoRowKey(d) === key ? { ...d, delFlag: true } : d))
+        : prev.filter((d) => toShukoRowKey(d) !== key)
+    );
+    setCtnDeleteTarget(null);
+  };
+
+  /**
+   * コンテナの保存
+   * @returns
+   */
+  const handleSaveCtn = async () => {
+    if (!user || isProcessing || !editFlag) return;
+
+    if (shukoDetailList.some((d) => d.ctnFlg === 1 && !d.delFlag && d.planQty === null)) {
+      setAlertTitle('予定数が入力されていません');
+      setAlertMessage('コンテナの予定数を入力してください');
+      setAlertOpen(true);
+      return;
+    }
+
+    // 追加・削除・変更があった行だけを送る
+    const originMap = new Map(originShukoDetailList.map((d) => [toShukoRowKey(d), d]));
+    const changedRows = shukoDetailList.filter((d) => {
+      if (d.ctnFlg !== 1) return false;
+      if (!d.saveFlag) return !d.delFlag;
+      if (d.delFlag) return true;
+      const origin = originMap.get(toShukoRowKey(d));
+      return !origin || origin.planQty !== d.planQty || (origin.mem2 ?? '') !== (d.mem2 ?? '');
+    });
+
+    setIsProcessing(true);
+    setIsLoading(true);
+    try {
+      const result = await saveShukoCtn(shukoDetailData, changedRows, user.name);
+      if (result.ok) {
+        setShukoDetailList(result.data);
+        setOriginShukoDetailList(result.data);
+        setSnackBarMessage('保存しました');
+        setSnackBarOpen(true);
+      } else {
+        setAlertTitle('保存できませんでした');
+        setAlertMessage(result.message);
+        setAlertOpen(true);
+      }
+    } catch (e) {
+      setSnackBarMessage('保存に失敗しました');
       setSnackBarOpen(true);
     }
     setIsLoading(false);
@@ -290,8 +523,12 @@ export const ShukoDetail = (props: {
             )}
             <Button
               onClick={() => setDepartureOpen(true)}
+              // 未保存のコンテナの変更があるあいだは出発できない
               disabled={
-                fixFlag || user?.permission.nyushuko === permission.nyushuko_ref || shukoDetailList.length === 0
+                fixFlag ||
+                user?.permission.nyushuko === permission.nyushuko_ref ||
+                shukoDetailList.length === 0 ||
+                editFlag
               }
               sx={{ display: shukoDetailData.sagyoKbnId === SAGYO_KBN_ID.shukoConfirmation ? 'block' : 'none' }}
             >
@@ -376,7 +613,19 @@ export const ShukoDetail = (props: {
         <Divider />
         <Box width={'100%'}>
           <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} width={'70vw'} p={1}>
-            <Typography>全{shukoDetailList ? shukoDetailList.length : 0}件</Typography>
+            <Box display={'flex'} alignItems={'center'}>
+              <Typography>全{visibleShukoDetailList.length}件</Typography>
+              {ctnEditable && (
+                <Button
+                  onClick={() => setCtnDialogOpen(true)}
+                  disabled={addableHeads.length === 0 || isProcessing}
+                  sx={{ ml: 2 }}
+                >
+                  <AddIcon fontSize="small" />
+                  コンテナ追加
+                </Button>
+              )}
+            </Box>
             <Box display={'flex'} alignItems={'center'}>
               <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.completed }}>
                 済
@@ -390,12 +639,18 @@ export const ShukoDetail = (props: {
               <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.ctn }}>
                 コンテナ
               </Typography>
+              {ctnEditable && (
+                <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.unsaved }}>
+                  未保存
+                </Typography>
+              )}
               <Button
                 onClick={() => setAdjustOpen(true)}
                 disabled={
                   !shukoDetailList.find((data) => data.diff !== 0) ||
                   fixFlag ||
-                  user?.permission.nyushuko === permission.nyushuko_ref
+                  user?.permission.nyushuko === permission.nyushuko_ref ||
+                  editFlag
                 }
                 sx={{ ml: 2 }}
               >
@@ -404,22 +659,79 @@ export const ShukoDetail = (props: {
             </Box>
           </Box>
         </Box>
-        {shukoDetailList.length > 0 && (
+        {isMounted && visibleShukoDetailList.length > 0 && (
           <ShukoDetailTable
-            datas={shukoDetailList}
+            datas={visibleShukoDetailList}
             fixFlag={fixFlag}
             user={user}
             setAdjustOpen={setAdjustOpen}
             sagyoKbnId={shukoDetailData.sagyoKbnId}
+            ctnEditable={ctnEditable}
+            fixedJuchuKizaiHeadIds={fixedJuchuKizaiHeadIds}
+            onPlanQtyChange={handlePlanQtyChange}
+            onMemChange={handleMemChange}
+            onDelete={handleDeleteCtn}
           />
         )}
       </Paper>
+      {/** 固定ボタン 保存＆ページトップ（コンテナを編集できるときだけ保存を出す） */}
+      <Box position={'fixed'} zIndex={1050} bottom={25} right={25} alignItems={'center'}>
+        {ctnEditable && (
+          <Fab
+            variant="extended"
+            color="primary"
+            onClick={handleSaveCtn}
+            disabled={isProcessing || !editFlag}
+            sx={{ mr: 2 }}
+          >
+            <SaveAsIcon sx={{ mr: 1 }} />
+            保存
+          </Fab>
+        )}
+        <Fab color="primary" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+          <ArrowUpwardIcon />
+        </Fab>
+      </Box>
+      <Dialog open={ctnDialogOpen} onClose={() => setCtnDialogOpen(false)}>
+        {ctnDialogOpen && (
+          <ShukoCtnSelectionDialog
+            heads={addableHeads}
+            existingKizaiIds={
+              new Map(
+                addableHeads.map((h) => [
+                  h.juchuKizaiHeadId,
+                  visibleShukoDetailList
+                    .filter((d) => d.juchuKizaiHeadId === h.juchuKizaiHeadId && d.ctnFlg === 1)
+                    .map((d) => d.kizaiId),
+                ])
+              )
+            }
+            onConfirm={handleAddCtn}
+            onClose={() => setCtnDialogOpen(false)}
+          />
+        )}
+      </Dialog>
+      <Dialog open={ctnDeleteTarget !== null}>
+        <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
+          <WarningIcon color="warning" />
+          <Box>コンテナ削除</Box>
+        </DialogTitle>
+        <DialogContentText m={2} p={2} sx={{ whiteSpace: 'pre-line' }}>
+          {`${ctnDeleteTarget?.kizaiNam ?? ''} には読取実績があります。\n保存すると読取実績も削除されます。削除してよろしいですか？`}
+        </DialogContentText>
+        <DialogActions>
+          <Button color="error" onClick={() => ctnDeleteTarget && executeDeleteCtn(ctnDeleteTarget)}>
+            削除
+          </Button>
+          <Button onClick={() => setCtnDeleteTarget(null)}>戻る</Button>
+        </DialogActions>
+      </Dialog>
       <Dialog open={alertOpen}>
         <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
           <WarningIcon color="error" />
           <Box>{alertTitle}</Box>
         </DialogTitle>
-        <DialogContentText m={2} p={2}>
+        <DialogContentText m={2} p={2} sx={{ whiteSpace: 'pre-line' }}>
           {alertMessage}
         </DialogContentText>
         <DialogActions>

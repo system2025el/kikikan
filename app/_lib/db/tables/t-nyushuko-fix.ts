@@ -144,6 +144,41 @@ export const selectFixedJuchuKizaiHeadIdsTx = async (
 };
 
 /**
+ * 確定済みの作業場所id取得（受注機材ヘッダー単位、トランザクション内）
+ * コンテナの入庫伝票を作る・残すかを、出庫場所ごとの出発状況で決めるために使う
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param sagyoKbnId 作業区分id（出庫確定 60 / 入庫確定 70）
+ * @param connection
+ * @returns 確定済みの作業id（作業場所）
+ */
+export const selectFixedSagyoIdsTx = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  sagyoKbnId: number,
+  connection: PoolClient
+) => {
+  const query = `
+    SELECT DISTINCT
+      sagyo_id
+    FROM
+      ${SCHEMA}.t_nyushuko_fix
+    WHERE
+      juchu_head_id = $1
+      AND juchu_kizai_head_id = $2
+      AND sagyo_kbn_id = $3
+      AND sagyo_fix_flg = 1
+  `;
+
+  try {
+    const result = await connection.query<{ sagyo_id: number }>(query, [juchuHeadId, juchuKizaiHeadId, sagyoKbnId]);
+    return result.rows.map((r) => r.sagyo_id);
+  } catch (e) {
+    throw new Error('[selectFixedSagyoIdsTx] DBエラー:', { cause: e });
+  }
+};
+
+/**
  * 入出庫確定確認
  * @param data 入出庫確定確認データ
  * @returns
