@@ -1,9 +1,23 @@
--- 適用状況: ステージング 2026-10-19 / 本番 未適用
+-- 適用状況: ステージング 2026-10-19 / 本番 2026-10-26
 -- =====================================================================
--- v_get_juchu_kizai_head のロールバック（本番の現在の定義）
--- 2026-10-19 にステージングから pg_get_viewdef で取得（本番と同じかは本番に当てる前に確認すること）。
--- GROUP BY が作業区分（sagyo_kbn_id）単位。列構成は変わらないので CREATE OR REPLACE で戻せる。
--- reloptions: security_invoker = on（ステージングで確認）
+-- v_get_juchu_kizai_head  ヘッダーのまとめ方を「作業区分ごと」→「入出庫種別（出庫／入庫）ごと」に変更（列構成は不変）
+--
+-- 背景: このビューは伝票（t_nyushuko_den）から、受注・作業日時・作業場所・入出庫種別ごとに、合体している受注機材
+--       ヘッダー（juchu_kizai_head_idv など）を1行にまとめる。ところが GROUP BY が作業区分（sagyo_kbn_id）単位だった
+--       ため、ピッキング（10）と最終確認（20）で伝票のあるヘッダーの組み合わせが違うと、出庫（入出庫種別1）で2行になる。
+--       v_nyushuko_den2・v_nyushuko_den2_head・v_nyushuko_den2_lst・v_nyushuko_den2_lst_oyako は入出庫種別で結合するので、
+--       出庫一覧に同じ出庫が2行（合体したものと一部のヘッダーだけのもの）出たり、明細の行が二重になったりする。
+--       受注削除（実績のある機材を削除するとピッキングの行だけ残る場合がある）や、コンテナしか無いヘッダー（コンテナの
+--       伝票は最終確認にしか無い）で起きるようになった（2026-10-19 受注 91601 で確認）。
+--
+-- 変更: GROUP BY の sagyo_kbn_id を、SELECT と同じ入出庫種別の CASE 式に置き換える。SELECT の列・型・順序は変えない。
+--       2026-10-19 にステージングで読み取りのみで試算：今の 3,552 行 → 3,551 行。変わるのは受注 91601（ヘッダー 17 と
+--       「17,18」の2行 → 「17,18」の1行）だけで、ほかの行は列の値まで同じ。
+--
+-- reloptions: security_invoker = on（CREATE OR REPLACE で WITH を省くと外れるので必ず付ける）
+-- 依存しているビュー: v_nyushuko_den2, v_nyushuko_den2_head, v_nyushuko_den2_lst, v_nyushuko_den2_lst_oyako
+--   列構成を変えないので CREATE OR REPLACE で当てられ、依存ビューの作り直しは不要。
+-- ロールバック: v_get_juchu_kizai_head.rollback.sql（今の定義）
 -- =====================================================================
 
 CREATE OR REPLACE VIEW public.v_get_juchu_kizai_head WITH (security_invoker = on) AS
@@ -39,7 +53,12 @@ CREATE OR REPLACE VIEW public.v_get_juchu_kizai_head WITH (security_invoker = on
             t_juchu_kizai_head.nebiki_rat
            FROM t_juchu_kizai_head
           ORDER BY t_juchu_kizai_head.juchu_head_id, t_juchu_kizai_head.dsp_ord_num) my_juchu_kizai_head ON t_juchu_head.juchu_head_id = my_juchu_kizai_head.juchu_head_id AND t_nyushuko_den.juchu_head_id = my_juchu_kizai_head.juchu_head_id AND t_nyushuko_den.juchu_kizai_head_id = my_juchu_kizai_head.juchu_kizai_head_id
-  GROUP BY t_nyushuko_den.juchu_head_id, t_nyushuko_den.sagyo_den_dat, t_nyushuko_den.sagyo_id, t_nyushuko_den.sagyo_kbn_id, my_juchu_kizai_head.juchu_kizai_head_kbn
+  GROUP BY t_nyushuko_den.juchu_head_id, t_nyushuko_den.sagyo_den_dat, t_nyushuko_den.sagyo_id, (
+        CASE
+            WHEN t_nyushuko_den.sagyo_kbn_id = 10 OR t_nyushuko_den.sagyo_kbn_id = 20 THEN 1
+            WHEN t_nyushuko_den.sagyo_kbn_id = 30 THEN 2
+            ELSE NULL::integer
+        END), my_juchu_kizai_head.juchu_kizai_head_kbn
   ORDER BY t_nyushuko_den.juchu_head_id, t_nyushuko_den.sagyo_den_dat, t_nyushuko_den.sagyo_id, (
         CASE
             WHEN t_nyushuko_den.sagyo_kbn_id = 10 OR t_nyushuko_den.sagyo_kbn_id = 20 THEN 1
