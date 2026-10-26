@@ -128,6 +128,7 @@ import {
 } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
 import { IdoList } from '@/app/(main)/ido-list/_ui/ido-list';
 
+import { validateJizen } from './jizen';
 import {
   EqptSelection,
   IdoJuchuKizaiMeisaiValues,
@@ -3917,6 +3918,18 @@ export const saveJuchuKizai = async (
   idoJuchuKizaiMeisaiList: IdoJuchuKizaiMeisaiValues[],
   userNam: string
 ) => {
+  // 事前準備の入力チェック（画面の保存前チェックと同じ。画面を通らずに呼ばれた場合に備えてサーバー側でも確かめる）
+  // 日時は通信で文字列になり得るので Date に揃えてから比べる
+  const toDate = (v: Date | string | null | undefined) => (v ? new Date(v) : null);
+  const jizenErrors = validateJizen(
+    juchuKizaiMeisaiList.map((d) => (d.jizenDat ? { ...d, jizenDat: new Date(d.jizenDat) } : d)),
+    toDate(data.kicsShukoDat),
+    toDate(data.yardShukoDat)
+  );
+  if (jizenErrors.length > 0) {
+    throw new Error(`[saveJuchuKizai] 事前準備の入力に誤りがあります: ${jizenErrors.join(' / ')}`);
+  }
+
   const connection = await pool.connect();
 
   try {
