@@ -102,7 +102,15 @@ npx tsc --noEmit          # 型チェックは全体で問題なく通る
 | `tab-focus`    | 既存タブの検出とフォーカス（`tab-focus.ts`）                                                                                                                   |
 | `nyushuko-fix` | 出発・出発解除を他タブの一覧に反映（`nyushuko-fix-notify.ts`。明細画面は処理後に `window.close()` するので**閉じる前に** `notifyNyushukoFixChanged()` を呼ぶ） |
 
-**入出庫の到着・出発（確定）**: 入出庫明細画面は同じ日時・場所の受注機材ヘッダーを**複数合体して**表示するが、確定（`t_nyushuko_fix`）はヘッダー単位なので「なし／一部／全部」の3状態になる。`app/(main)/_lib/nyushuko-fix-state.ts` の `getNyushukoFixState()` で状態と確定済みヘッダーidを取り、色は `fixStsColors` を使う。失敗理由はServer Actionの戻り値 `NyushukoFixResult`（`nyushuko-fix-error.ts` の `allFixed` / `noneFixed` / `diff` / `other`）で返し、画面側で文言を出し分ける。**他の人が先に到着・出発している可能性があるので、例外ではなく理由付きの結果を返すこと。**
+**入出庫の到着・出発（確定）**: 入出庫明細画面は同じ日時・場所の受注機材ヘッダーを**複数合体して**表示するが、確定（`t_nyushuko_fix`）はヘッダー単位なので「なし／一部／全部」の3状態になる。`app/(main)/_lib/nyushuko-fix-state.ts` の `getNyushukoFixState()` で状態と確定済みヘッダーidを取り、色は `fixStsColors` を使う。失敗理由はServer Actionの戻り値 `NyushukoFixResult`（`nyushuko-fix-error.ts` の `allFixed` / `noneFixed` / `diff` / `hasChild`（出発解除時に返却・キープの子伝票がある）/ `pickingDeleted`（出発時に同じ出庫のピッキングに受注削除の行が残っている）/ `other`）で返し、画面側で文言を出し分ける。**他の人が先に到着・出発している可能性があるので、例外ではなく理由付きの結果を返すこと。**
+
+**コンテナ管理と受注削除（2026-10-26 本番反映）**:
+
+- **コンテナ（`t_juchu_ctn_meisai`）の追加・削除・予定数・メモは出庫明細（最終確認 `sagyo_kbn_id = 20`）で行う**（`saveShukoCtn`）。メイン受注機材明細では閲覧のみで、保存・コピー・分離もコンテナを扱わない。コンテナ明細は出庫明細の保存時と HT・ゲートの送信時に、**その作業場所（`shozoku_id`）の1行だけ**作る。出発時（`updShukoDetail`）は予定数を読取数＋補正数で確定するだけで、読取0のコンテナは伝票・実績・コンテナ明細ごと削除する。入庫伝票（30）のコンテナ分は出発済みの出庫場所の分だけで作る（削除時は `ctn-nyuko-funcs.ts` の `syncNyukoCtnAfterDelete` で合わせる）。
+- **採番**：コンテナの明細IDは、同じ受注機材ヘッダーの別の場所に同じ機材があればその値、無ければヘッダー内のコンテナの最大値＋1（機材の明細IDとは重なってよい）。表示順は K と Y でそろえる。Web の採番は `t_nyushuko_den` を `SHARE ROW EXCLUSIVE` でロックしてから行い、送信RPC（`SHARE`）と順番に採番される。機材の明細IDは `t_juchu_kizai_meisai` と `t_nyushuko_den` の最大値から採番する（受注削除の行と PK が衝突しないように）。
+- **受注削除**：実績のある機材をメイン明細で削除した、または出庫場所を変えたときは、元の場所の出庫伝票を**同じ明細IDのまま予定数0で残す**（過剰なので出発できない＝現物を取り除いてもらう）。判定は `v_nyushuko_den2_lst.juchu_meisai_del_flg`（予定0かつ受注明細が無い。出庫では明細の `shozoku_id` と伝票の場所も照合）で、Web・HT・ゲートとも同じ列を読む。表示は機材名を `statusColors.deleted`（文字色）で赤くする（Web だけ「受注削除」の文字も出す）。解消は出庫明細で実績をクリアする。
+- **送信RPC は `nyushuko_send_20261009_1`**（HT・ゲート共通）。旧 `nyushuko_send_20260626_1` は全端末の切り替えが済むまで残す。
+- 合体している受注機材ヘッダーは `v_get_juchu_kizai_head` が**入出庫種別ごと**にまとめる（ピッキングと最終確認でヘッダーの組み合わせが違っても1行）。そのため最終確認の画面には最終確認の行が無いヘッダーも入り、一緒に出発済みになる（上の `pickingDeleted` はこのためのガード）。ヘッダー名は `t_juchu_kizai_head` から引き、空なら空欄で表示する。
 
 **検索条件の文字列エスケープ**: PostgREST の `.like()` / `.ilike()` / `.or()` にユーザー入力を渡すときは、`app/(main)/_lib/escape-string.ts` を必ず通す（17ファイルが利用）。`escapeLikeString` は `%` `_` `\` をエスケープ、`escapeOrLikeString` はさらに `.or()` のダブルクォートを閉じてしまわないよう2段階でエスケープする。素通しすると検索が壊れるだけでなく、`.or()` ではフィルタ式を注入できてしまう。
 
@@ -167,6 +175,6 @@ npx tsc --noEmit          # 型チェックは全体で問題なく通る
   - ただし**`Asia/Tokyo` はこのファイル専用ではない**。「今日・明日・今月」といった**検索条件の日付範囲を組み立てる側**（`app/_lib/db/tables/v-juchu-lst.ts`・`v-juchu-kizai-head-lst.ts`・`v-nyushuko-den2.ts`・`v-seikyu-date-lst.ts` など）では `dayjs().tz('Asia/Tokyo')` を直に書いている。日付の境界（`startOf('day')`）がJSTでないと一覧の絞り込みが1日ずれるため、**範囲条件を書くときはタイムゾーン指定を省略しないこと**。
 - 一覧テーブルは各featureで `<feature>-table.tsx` として MUI の `Table`/`TableContainer` を直接使って実装する。固定ヘッダーは `<TableContainer sx={{ maxHeight: '86vh' }}><Table stickyHeader size="small" padding="none">` の組み合わせ、ページングは `MuiTablePagination`（`_ui/table-pagination.tsx`）、セルのはみ出し表示は `LightTooltipWithText`（`(masters)/_ui/tables.tsx`）、ヘッダー固定時の高さ維持は末尾の空行（emptyRows）を使う。
   - 共通コンポーネントの `app/(main)/_ui/gridtable.tsx` は**どこからも参照されていない**ので使わないこと。`_ui/table.tsx` も一覧用途では使わない（`SelectTable` だけが受注画面の1箇所で使われている）。
-- **色はハードコードせず `app/(main)/_lib/colors.ts` から取る**（20ファイルが参照）。`statusColors`（過剰・不足・済・コンテナ・未保存）、`fixStsColors`（到着・出発の全部済／一部済）、`sagyoKbnColors`（出庫ピッキング・出庫最終確認・入庫カウント・移動。明細/詳細画面のタイトルとテーブルヘッダーの背景に使い、出庫・入庫はハンディアプリと色を合わせている）、`dispColors`、`weeklyColors`。
+- **色はハードコードせず `app/(main)/_lib/colors.ts` から取る**（20ファイルが参照）。`statusColors`（過剰・不足・済・コンテナ・未保存は背景色、受注削除 `deleted` だけは**文字色**）、`fixStsColors`（到着・出発の全部済／一部済）、`sagyoKbnColors`（出庫ピッキング・出庫最終確認・入庫カウント・移動。明細/詳細画面のタイトルとテーブルヘッダーの背景に使い、出庫・入庫はハンディアプリと色を合わせている）、`dispColors`、`weeklyColors`。
 
 **ファイル・コンポーネント命名**: 各featureの `_ui/` 内は `<feature>.tsx`（ルートに対応するトップレベルのクライアントコンポーネント）、`<feature>-table.tsx`（一覧テーブル）、`*-dialog.tsx`（モーダル）という命名パターンに揃える。

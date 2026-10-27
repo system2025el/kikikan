@@ -1,9 +1,7 @@
--- 適用状況: ステージング 2026-10-19 / 本番 未適用
+-- 適用状況: ロールバック用（本番の今の定義。del-meisai 分を 2026-10-26 に本番適用した版 = applied/v_get_juchu_kizai_head.sql と同じ）
 -- =====================================================================
--- v_get_juchu_kizai_head のロールバック（本番の現在の定義）
--- 2026-10-19 にステージングから pg_get_viewdef で取得（本番と同じかは本番に当てる前に確認すること）。
--- GROUP BY が作業区分（sagyo_kbn_id）単位。列構成は変わらないので CREATE OR REPLACE で戻せる。
--- reloptions: security_invoker = on（ステージングで確認）
+-- v_get_juchu_kizai_head のロールバック。staging-only/v_get_juchu_kizai_head.sql（事前準備の変更）を当てた後に戻すときに使う。
+-- reloptions: security_invoker = on
 -- =====================================================================
 
 CREATE OR REPLACE VIEW public.v_get_juchu_kizai_head WITH (security_invoker = on) AS
@@ -39,7 +37,12 @@ CREATE OR REPLACE VIEW public.v_get_juchu_kizai_head WITH (security_invoker = on
             t_juchu_kizai_head.nebiki_rat
            FROM t_juchu_kizai_head
           ORDER BY t_juchu_kizai_head.juchu_head_id, t_juchu_kizai_head.dsp_ord_num) my_juchu_kizai_head ON t_juchu_head.juchu_head_id = my_juchu_kizai_head.juchu_head_id AND t_nyushuko_den.juchu_head_id = my_juchu_kizai_head.juchu_head_id AND t_nyushuko_den.juchu_kizai_head_id = my_juchu_kizai_head.juchu_kizai_head_id
-  GROUP BY t_nyushuko_den.juchu_head_id, t_nyushuko_den.sagyo_den_dat, t_nyushuko_den.sagyo_id, t_nyushuko_den.sagyo_kbn_id, my_juchu_kizai_head.juchu_kizai_head_kbn
+  GROUP BY t_nyushuko_den.juchu_head_id, t_nyushuko_den.sagyo_den_dat, t_nyushuko_den.sagyo_id, (
+        CASE
+            WHEN t_nyushuko_den.sagyo_kbn_id = 10 OR t_nyushuko_den.sagyo_kbn_id = 20 THEN 1
+            WHEN t_nyushuko_den.sagyo_kbn_id = 30 THEN 2
+            ELSE NULL::integer
+        END), my_juchu_kizai_head.juchu_kizai_head_kbn
   ORDER BY t_nyushuko_den.juchu_head_id, t_nyushuko_den.sagyo_den_dat, t_nyushuko_den.sagyo_id, (
         CASE
             WHEN t_nyushuko_den.sagyo_kbn_id = 10 OR t_nyushuko_den.sagyo_kbn_id = 20 THEN 1
