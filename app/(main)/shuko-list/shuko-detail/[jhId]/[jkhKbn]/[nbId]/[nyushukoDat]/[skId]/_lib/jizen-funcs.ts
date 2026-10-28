@@ -2,7 +2,7 @@
 
 import { JUCHU_KIZAI_HEAD_KBN, NYUSHUKO_SHUBETU_ID, toHonbanSagyoKbn } from '@/app/_lib/constants';
 import pool, { refreshVRfid } from '@/app/_lib/db/postgres';
-import { updateHonbanAdjFromJizen, updateNyushukoDen } from '@/app/_lib/db/tables/t-nyushuko-den';
+import { updateHonbanAdjFromJizen, updateNyushukoDenAdjustToPlan } from '@/app/_lib/db/tables/t-nyushuko-den';
 import { selectHonbanShukoFixed } from '@/app/_lib/db/tables/t-nyushuko-fix';
 import { selectJizenNyushukoOne } from '@/app/_lib/db/tables/v-nyushuko-den2-head';
 import { selectJizenNyushukoDetail } from '@/app/_lib/db/tables/v-nyushuko-den2-lst';
@@ -112,6 +112,7 @@ export const getJizenDetailTable = async (
         indentNum: d.indent_num ?? 0,
         mem2: d.mem2 ?? '',
         juchuMeisaiDelFlg: d.juchu_meisai_del_flg ?? 0,
+        planChgFlg: d.plan_chg_flg ?? 0,
         saveFlag: true,
         delFlag: false,
       })
@@ -154,7 +155,7 @@ export const getHonbanShukoFixed = async (juchuHeadId: number, juchuKizaiHeadId:
 };
 
 /**
- * 事前明細の一括補正（不足の行の補正数を 準備数 − 読取数 にする）
+ * 事前明細の一括補正（画面で不足の行の補正数を 画面の準備数 − 読取数 にする）
  * 出庫明細の一括補正（updShukoAdjust）から、作業区分が 80/90 のときに呼ばれる
  * 本番（80→10、90→20 の同じ明細・機材・作業場所の伝票）の補正も同じ値で上書きする（片方向）。
  * 本番が出発済みなら何もしない
@@ -173,22 +174,24 @@ export const updJizenAdjust = async (adjustData: ShukoDetailTableValues[], userN
 
     await connection.query('BEGIN');
     for (const d of adjustData) {
-      const resultAdjQty = (d.planQty ?? 0) - (d.resultQty ?? 0);
-      await updateNyushukoDen(
+      // 補正は画面に出ている準備数までにとどめ、準備数は書かない（開いたあとに準備数が変わっていれば、補正後の再表示で
+      // 数量変更の強調と差が出る）。読取数は DB の今の値を使う（読み足された分まで補正しない）
+      const resultAdjQty = await updateNyushukoDenAdjustToPlan(
         {
           juchu_head_id: d.juchuHeadId,
           juchu_kizai_head_id: d.juchuKizaiHeadId,
           juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
-          kizai_id: d.kizaiId,
           sagyo_kbn_id: d.sagyoKbnId ?? 0,
           sagyo_den_dat: d.nyushukoDat,
           sagyo_id: d.nyushukoBashoId,
-          result_adj_qty: resultAdjQty,
-          upd_dat: new Date().toISOString(),
-          upd_user: userNam,
+          kizai_id: d.kizaiId,
         },
+        d.planQty ?? 0,
+        userNam,
         connection
       );
+      // 開いたあとに一致・過剰になっていて補正しなかった行は、本番にも反映しない
+      if (resultAdjQty === null) continue;
       await updateHonbanAdjFromJizen(
         {
           juchu_head_id: d.juchuHeadId,

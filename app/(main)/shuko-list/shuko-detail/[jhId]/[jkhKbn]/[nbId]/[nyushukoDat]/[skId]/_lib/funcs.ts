@@ -29,6 +29,7 @@ import {
   lockNyushukoDenForNumberingTx,
   selectShukoCtnDenRowsTx,
   updateNyushukoDen,
+  updateNyushukoDenAdjustToPlan,
   upsertNyushukoDen,
 } from '@/app/_lib/db/tables/t-nyushuko-den';
 import {
@@ -216,6 +217,7 @@ const toShukoDetailTableValues = (data: Awaited<ReturnType<typeof selectNyushuko
       indentNum: d.indent_num ?? 0,
       mem2: d.mem2 ?? '',
       juchuMeisaiDelFlg: d.juchu_meisai_del_flg ?? 0,
+      planChgFlg: d.plan_chg_flg ?? 0,
       saveFlag: true,
       delFlag: false,
     })
@@ -815,27 +817,27 @@ export const updShukoAdjust = async (adjustData: ShukoDetailTableValues[], userN
     }
     return;
   }
-  const updateData: NyushukoDen[] = adjustData.map((d) => ({
-    juchu_head_id: d.juchuHeadId,
-    juchu_kizai_head_id: d.juchuKizaiHeadId,
-    juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
-    kizai_id: d.kizaiId,
-    plan_qty: d.planQty,
-    result_adj_qty: (d.planQty ?? 0) - (d.resultQty ?? 0),
-    sagyo_den_dat: d.nyushukoDat,
-    sagyo_id: d.nyushukoBashoId,
-    sagyo_kbn_id: d.sagyoKbnId ?? 0,
-    dsp_ord_num: d.dspOrdNumMeisai,
-    indent_num: d.indentNum,
-    upd_dat: new Date().toISOString(),
-    upd_user: userNam,
-  }));
   const connection = await pool.connect();
   try {
     await connection.query('BEGIN');
 
-    for (const data of updateData) {
-      await updateNyushukoDen(data, connection);
+    // 補正は画面に出ている予定数までにとどめ、予定数は書かない（書くと開いたあとに受注側で変えた予定数が戻ってしまう。
+    // 予定数が変わっていれば、補正後の再表示で数量変更の強調と差が出る）
+    for (const d of adjustData) {
+      await updateNyushukoDenAdjustToPlan(
+        {
+          juchu_head_id: d.juchuHeadId,
+          juchu_kizai_head_id: d.juchuKizaiHeadId,
+          juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
+          sagyo_kbn_id: d.sagyoKbnId ?? 0,
+          sagyo_den_dat: d.nyushukoDat,
+          sagyo_id: d.nyushukoBashoId,
+          kizai_id: d.kizaiId,
+        },
+        d.planQty ?? 0,
+        userNam,
+        connection
+      );
     }
 
     await connection.query('COMMIT');

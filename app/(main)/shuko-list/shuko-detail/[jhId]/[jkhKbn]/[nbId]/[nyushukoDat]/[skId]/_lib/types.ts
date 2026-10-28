@@ -44,6 +44,8 @@ export type ShukoDetailTableValues = {
   mem2: string | null;
   /** 受注から削除されたのに実績が残っている行（1のとき受注明細が存在しない） */
   juchuMeisaiDelFlg: number;
+  /** 読取実績のある状態で受注側の数量が変わり、まだ 予定数 = 読取数＋補正数 になっていない行（1のとき） */
+  planChgFlg: number;
   /** 保存済み（false は画面で追加したまだ保存していないコンテナ） */
   saveFlag: boolean;
   /** 画面で削除したコンテナ（保存すると削除される） */

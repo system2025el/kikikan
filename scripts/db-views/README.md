@@ -124,9 +124,19 @@
 
 適用順（ビュー同士）：`v_nyushuko_total_time_sts` → `v_nyushuko_den` → `v_nyushuko_den_head` → `v_nyushuko_den_lst` → `v_get_juchu_kizai_head` → `v_get_juchu_kizai_section` → `v_nyushuko_den2` → `v_nyushuko_den2_head` → `v_nyushuko_den2_lst` → `v_juchu_kizai_dat_qty` → `v_juchu_kizai_dat_qty_kasi` → `v_honbanbi_kasi_jokyo`。在庫の3本は `t_juchu_kizai_jizen` を参照するので**テーブルより後**。
 
-ロールバック：列を足した3本（`v_nyushuko_total_time_sts`・`v_nyushuko_den`・`v_nyushuko_den_head`）は `CREATE OR REPLACE` で戻せないので、依存ビューごと `DROP` → `CREATE` → GRANT 付け直しにしてある。作り直すと既定の権限で anon に全権限が付くので、`v_nyushuko_total_time_sts`（anon は `arwd`）は REVOKE してから付け直す。ほかは `CREATE OR REPLACE`。逆順（`v_honbanbi_kasi_jokyo` → … → `v_nyushuko_total_time_sts`）に流す。`v_get_juchu_kizai_head`・`v_nyushuko_den2_lst` の `staging-only/` の `.rollback.sql` は本番の今の定義（del-meisai 分。2026-10-26 本番適用）に戻すもので、ステージングもこれで del-meisai の状態に戻る。
+ロールバック：列を足した3本（`v_nyushuko_total_time_sts`・`v_nyushuko_den`・`v_nyushuko_den_head`）は `CREATE OR REPLACE` で戻せないので、依存ビューごと `DROP` → `CREATE` → GRANT 付け直しにしてある。作り直すと既定の権限で anon に全権限が付くので、`v_nyushuko_total_time_sts`（anon は `arwd`）は REVOKE してから付け直す。ほかは `CREATE OR REPLACE`。逆順（`v_honbanbi_kasi_jokyo` → … → `v_nyushuko_total_time_sts`）に流す。`v_get_juchu_kizai_head`・`v_nyushuko_den2_lst` の `staging-only/` の `.rollback.sql` は本番の今の定義（del-meisai 分。2026-10-26 本番適用）に戻すもので、ステージングもこれで del-meisai の状態に戻る（`v_nyushuko_den2_lst` は 2026-10-28 の数量変更の列で `DROP` → `CREATE` → GRANT になった。下の節）。
 
 ★ del-meisai 分は 2026-10-26 に本番へ適用済み（`applied/`）。事前準備を本番に当てるときは、この2本も `staging-only/` の `.sql` を流せばよい（del-meisai 分は本番に入っているので、差は事前準備の分だけ）。
+
+#### v_nyushuko_den2_lst（数量変更の列。2026-10-28 追加）
+
+読取実績のある機材の数量を受注側で変えたことを、出庫明細・HT・ゲートで強調するための列 `plan_chg_flg` を末尾に足しました（32→33列）。事前準備（`change-planqty` ブランチは jizen から切っている）に累積しているので、`staging-only/` の `.sql` が「del-meisai ＋ 事前準備 ＋ 数量変更」の最終形です。
+
+- 値は `t_nyushuko_den.plan_chg_flg`（トリガーが立てる・消す。[`../db-tables/staging-only/20261028-t-nyushuko-den-plan-chg-flg.sql`](../db-tables/staging-only/20261028-t-nyushuko-den-plan-chg-flg.sql)）を、伝票の主キーで1行引いて出す。`v_nyushuko_den_lst` には依存ビューが3本あるので、列を通さずにこのビューで引いている
+- 予定数（合計）が0の行は0にする（受注削除の表示を優先する）
+- **テーブルの列とトリガーを先に当てる**（このビューが列を参照する）。出す順番はテーブル → ビュー → Web → HT・ゲート
+- 2026-10-28 ステージング適用（テーブル → ビューの順。別トランザクション、`lock_timeout 5s`）。適用前に、今の定義が git の staging-only 版と同じこと（一時ビューで `pg_get_viewdef` を比較）、行の型を使う関数が0件であることを確認。リハーサル（ROLLBACK）で、伝票1行の予定・読取を変えてフラグが立つ・消える・予定0ではビューが0になることを確認。適用後は33列、`security_invoker`・権限は不変、立っているフラグは0件。出庫明細1画面分の取得は 14ms
+- ロールバックで列が減るので、`staging-only/v_nyushuko_den2_lst.rollback.sql` は `DROP VIEW` → `CREATE VIEW` → GRANT の付け直しに変えた（それまでは `CREATE OR REPLACE`）。これは本番の定義（del-meisai 分）に戻すもので、事前準備の分も戻る。ステージングで数量変更の列だけを外すときは、git で 2026-10-28 より前の `.sql` を取り出し、同じく DROP → CREATE → GRANT で当てる
 
 #### v_nyushuko_den2_lst（受注削除の判定列）
 

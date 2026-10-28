@@ -167,19 +167,33 @@ export const ShukoDetailTable = (props: {
                   sx={{
                     cursor: row.saveFlag ? 'pointer' : 'default',
                     '&:hover': { backgroundColor: dispColors.hover },
-                    // 受注削除の行は機材名を赤文字にする（HT・ゲートと同じ見せ方）
-                    color: row.juchuMeisaiDelFlg === 1 ? statusColors.deleted : undefined,
+                    // 受注削除・数量変更の行は機材名を文字色で強調する（HT・ゲートと同じ見せ方）
+                    color:
+                      row.juchuMeisaiDelFlg === 1
+                        ? statusColors.deleted
+                        : row.planChgFlg === 1
+                          ? statusColors.planChanged
+                          : undefined,
                   }}
                 >
                   {row.kizaiNam}
-                  {row.juchuMeisaiDelFlg === 1 && (
+                  {row.juchuMeisaiDelFlg === 1 ? (
                     <Typography
                       component="span"
-                      // 「受注削除」の文字は Web だけ（HT・ゲートは機材名の赤文字だけ）
+                      // 「受注削除」「数量変更」の文字は Web だけ（HT・ゲートは機材名の文字色だけ）
                       sx={{ ml: 1, color: statusColors.deleted, fontWeight: 'bold', fontSize: 'inherit' }}
                     >
                       受注削除
                     </Typography>
+                  ) : (
+                    row.planChgFlg === 1 && (
+                      <Typography
+                        component="span"
+                        sx={{ ml: 1, color: statusColors.planChanged, fontWeight: 'bold', fontSize: 'inherit' }}
+                      >
+                        数量変更
+                      </Typography>
+                    )
                   )}
                 </TableCell>
                 <TableCell

@@ -2226,6 +2226,7 @@ export type Database = {
           juchu_kizai_meisai_id: number;
           kizai_id: number;
           nyuko_fix_qty: number | null;
+          plan_chg_flg: number;
           plan_qty: number | null;
           result_adj_qty: number | null;
           result_qty: number | null;
@@ -2245,6 +2246,7 @@ export type Database = {
           juchu_kizai_meisai_id: number;
           kizai_id: number;
           nyuko_fix_qty?: number | null;
+          plan_chg_flg?: number;
           plan_qty?: number | null;
           result_adj_qty?: number | null;
           result_qty?: number | null;
@@ -2264,6 +2266,7 @@ export type Database = {
           juchu_kizai_meisai_id?: number;
           kizai_id?: number;
           nyuko_fix_qty?: number | null;
+          plan_chg_flg?: number;
           plan_qty?: number | null;
           result_adj_qty?: number | null;
           result_qty?: number | null;
@@ -3773,6 +3776,7 @@ export type Database = {
           nyushuko_basho_id: number | null;
           nyushuko_dat: string | null;
           nyushuko_shubetu_id: number | null;
+          plan_chg_flg: number | null;
           plan_qty: number | null;
           result_adj_qty: number | null;
           result_qty: number | null;
