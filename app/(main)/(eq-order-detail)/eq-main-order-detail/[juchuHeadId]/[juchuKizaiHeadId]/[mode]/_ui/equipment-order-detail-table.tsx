@@ -174,6 +174,8 @@ type EqTableProps = {
   edit: boolean;
   shukoFixFlag: boolean;
   shukoDate: Date | null;
+  // 事前日時・事前数の列を表示するか
+  showJizen: boolean;
   // 事前準備日時の上限（明細の出庫場所の出庫日時）に使う
   kicsShukoDat: Date | null;
   yardShukoDat: Date | null;
@@ -198,6 +200,7 @@ const EqTableComponent: React.FC<EqTableProps> = ({
   edit,
   shukoFixFlag,
   shukoDate,
+  showJizen,
   kicsShukoDat,
   yardShukoDat,
   handleCellChange,
@@ -329,11 +332,13 @@ const EqTableComponent: React.FC<EqTableProps> = ({
       <Table stickyHeader sx={{ borderCollapse: 'separate', borderSpacing: 0 }}>
         <TableHead>
           <TableRow>
+            {/* 表がボタン列の幅まで伸びたとき、伸びた分は機材名の列だけが受け持つ（ほかの列は width: 1% で中身の幅に縮める） */}
             <TableCell
               sx={{
                 padding: 0,
                 borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
                 borderRight: '1px solid rgba(0, 0, 0, 0.12)',
+                width: '1%',
               }}
             >
               <Checkbox
@@ -359,28 +364,32 @@ const EqTableComponent: React.FC<EqTableProps> = ({
                 disabled={!edit || shukoFixFlag}
               />
             </TableCell>
-            <TableCell align="left" size="small" style={styles.header}>
+            <TableCell align="left" size="small" style={styles.headerFit}>
               メモ
             </TableCell>
             <TableCell align="left" size="small" style={styles.header}>
               機材名
             </TableCell>
-            <TableCell align="right" size="small" style={styles.header}>
+            <TableCell align="right" size="small" style={styles.headerFit}>
               合計
             </TableCell>
-            <TableCell align="right" size="small" style={styles.header}>
+            <TableCell align="right" size="small" style={styles.headerFit}>
               受注
             </TableCell>
-            <TableCell align="right" size="small" style={styles.header}>
+            <TableCell align="right" size="small" style={styles.headerFit}>
               予備
             </TableCell>
-            <TableCell align="left" size="small" style={styles.header}>
-              事前日時
-            </TableCell>
-            <TableCell align="right" size="small" style={styles.header}>
-              事前
-            </TableCell>
-            <TableCell align="left" size="small" style={styles.header}>
+            {showJizen && (
+              <>
+                <TableCell align="left" size="small" style={styles.headerFit}>
+                  事前日時
+                </TableCell>
+                <TableCell align="right" size="small" style={styles.headerFit}>
+                  事前
+                </TableCell>
+              </>
+            )}
+            <TableCell align="left" size="small" style={styles.headerFit}>
               連絡
             </TableCell>
           </TableRow>
@@ -394,6 +403,7 @@ const EqTableComponent: React.FC<EqTableProps> = ({
               edit={edit}
               shukoFixFlag={shukoFixFlag}
               shukoDate={shukoDate}
+              showJizen={showJizen}
               jizenMaxDat={getMeisaiShukoDat(row, kicsShukoDat, yardShukoDat)}
               handleOrderRef={handleOrderRef(rowIndex)}
               handleYobiRef={handleYobiRef(rowIndex)}
@@ -424,6 +434,7 @@ type EqTableRowProps = {
   edit: boolean;
   shukoFixFlag: boolean;
   shukoDate: Date | null;
+  showJizen: boolean;
   jizenMaxDat: Date | null;
   handleOrderRef: (el: HTMLInputElement | null) => void;
   handleYobiRef: (el: HTMLInputElement | null) => void;
@@ -502,6 +513,7 @@ const EqTableRow = React.memo(
     edit,
     shukoFixFlag,
     shukoDate,
+    showJizen,
     jizenMaxDat,
     handleOrderRef,
     handleYobiRef,
@@ -647,47 +659,51 @@ const EqTableRow = React.memo(
             disabled={!edit || shukoFixFlag}
           />
         </TableCell>
-        <TableCell style={styles.row} size="small">
-          <JizenDatCell
-            value={row.jizenDat ?? null}
-            maxDate={jizenMaxDat}
-            onCommit={(date) => handleJizenDatChange(rowIndex, date)}
-            disabled={!edit || shukoFixFlag}
-          />
-        </TableCell>
-        <TableCell style={styles.row} align="right" size="small">
-          <TextField
-            variant="standard"
-            value={row.jizenQty ?? ''}
-            type="tel"
-            onChange={(e) => {
-              if (/^\d*$/.test(e.target.value)) {
-                handleJizenQtyChange(rowIndex, Number(e.target.value));
-              }
-            }}
-            sx={{
-              '& .MuiInputBase-input': {
-                textAlign: 'right',
-                padding: 0,
-                fontSize: 'small',
-              },
-            }}
-            slotProps={{
-              input: {
-                style: { textAlign: 'right' },
-                disableUnderline: true,
-                inputMode: 'numeric',
-              },
-            }}
-            inputRef={handleJizenRef}
-            onKeyDown={(e) => {
-              handleJizenKeyDown(e, rowIndex);
-            }}
-            onFocus={(e) => e.target.select()}
-            // 準備日時が無い行は準備数を持たない
-            disabled={!edit || shukoFixFlag || !row.jizenDat}
-          />
-        </TableCell>
+        {showJizen && (
+          <>
+            <TableCell style={styles.row} size="small">
+              <JizenDatCell
+                value={row.jizenDat ?? null}
+                maxDate={jizenMaxDat}
+                onCommit={(date) => handleJizenDatChange(rowIndex, date)}
+                disabled={!edit || shukoFixFlag}
+              />
+            </TableCell>
+            <TableCell style={styles.row} align="right" size="small">
+              <TextField
+                variant="standard"
+                value={row.jizenQty ?? ''}
+                type="tel"
+                onChange={(e) => {
+                  if (/^\d*$/.test(e.target.value)) {
+                    handleJizenQtyChange(rowIndex, Number(e.target.value));
+                  }
+                }}
+                sx={{
+                  '& .MuiInputBase-input': {
+                    textAlign: 'right',
+                    padding: 0,
+                    fontSize: 'small',
+                  },
+                }}
+                slotProps={{
+                  input: {
+                    style: { textAlign: 'right' },
+                    disableUnderline: true,
+                    inputMode: 'numeric',
+                  },
+                }}
+                inputRef={handleJizenRef}
+                onKeyDown={(e) => {
+                  handleJizenKeyDown(e, rowIndex);
+                }}
+                onFocus={(e) => e.target.select()}
+                // 準備日時が無い行は準備数を持たない
+                disabled={!edit || shukoFixFlag || !row.jizenDat}
+              />
+            </TableCell>
+          </>
+        )}
         <TableCell style={styles.row} align="center" size="small">
           <MemoTooltip
             name={row.kizaiNam}
@@ -705,6 +721,7 @@ const EqTableRow = React.memo(
       prevProps.row === nextProps.row &&
       prevProps.edit === nextProps.edit &&
       prevProps.shukoFixFlag === nextProps.shukoFixFlag &&
+      prevProps.showJizen === nextProps.showJizen &&
       prevProps.jizenMaxDat?.getTime() === nextProps.jizenMaxDat?.getTime()
     );
   }
@@ -1011,6 +1028,18 @@ const styles: { [key: string]: React.CSSProperties } = {
     paddingBottom: 0,
     paddingLeft: 4,
     paddingRight: 4,
+  },
+  // ヘッダー（列幅を中身の幅に縮める）
+  headerFit: {
+    borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
+    borderRight: '1px solid rgba(0, 0, 0, 0.12)',
+    whiteSpace: 'nowrap',
+    height: '25px',
+    paddingTop: 0,
+    paddingBottom: 0,
+    paddingLeft: 4,
+    paddingRight: 4,
+    width: '1%',
   },
   // 行
   row: {

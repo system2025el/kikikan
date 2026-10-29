@@ -250,6 +250,8 @@ const EquipmentOrderDetail = (props: {
   const [sortDialogOpen, setSortDialogOpen] = useState(false);
   // 事前準備ダイアログ制御
   const [jizenDialogOpen, setJizenDialogOpen] = useState(false);
+  // 明細テーブルの事前日時・事前数の列の表示（初期は非表示）
+  const [showJizen, setShowJizen] = useState(false);
   // 削除ダイアログ制御
   const [deleteOpen, setDeleteOpen] = useState(false);
   // 削除対象のうちピッキング済みの機材件数
@@ -783,6 +785,8 @@ const EquipmentOrderDetail = (props: {
         data.yardShukoDat ? new Date(data.yardShukoDat) : null
       );
       if (jizenErrors.length > 0) {
+        // 直す場所が見えるよう事前の列を開く
+        setShowJizen(true);
         setAlertTitle('事前準備の入力に誤りがあります');
         setAlertMessage(jizenErrors.join('\n'));
         setAlertOpen(true);
@@ -1450,6 +1454,8 @@ const EquipmentOrderDetail = (props: {
 
       if (lockResult) {
         setJizenDialogOpen(true);
+        // 設定・解除した結果が見えるよう事前の列も開く
+        setShowJizen(true);
       }
     } catch (e) {
       setSnackBarMessage('サーバー接続エラー');
@@ -3334,7 +3340,15 @@ const EquipmentOrderDetail = (props: {
                         minWidth: juchuKizaiMeisaiList.filter((d) => !d.delFlag).length === 0 ? '40%' : 'none',
                       }}
                     >
-                      <Grid2 container my={1} mx={1} spacing={2}>
+                      <Grid2
+                        container
+                        my={1}
+                        mx={1}
+                        spacing={2}
+                        // 幅が min-content のとき、表が狭い（事前の列を閉じた）とボタンが折り返して表が下がり、右の在庫表と行がずれる。
+                        // 折り返さず、ボタンの並びの幅を左側の幅の下限にする
+                        sx={{ flexWrap: { lg: 'nowrap' }, '& .MuiButton-root': { whiteSpace: 'nowrap' } }}
+                      >
                         <Button disabled={!edit || shukoFixFlag} onClick={handleOpenEqDialog}>
                           <AddIcon fontSize="small" />
                           機材追加
@@ -3359,13 +3373,13 @@ const EquipmentOrderDetail = (props: {
                           </Button>
                         )}
                         {juchuKizaiMeisaiList.filter((d) => !d.delFlag).length !== 0 && (
+                          // 編集できて明細を選択しているときは一括設定のダイアログ、それ以外（閲覧・出発済みを含む）は事前の列の開閉
                           <Button
-                            disabled={
-                              !edit ||
-                              shukoFixFlag ||
-                              juchuKizaiMeisaiList.filter((d) => !d.delFlag && d.selected).length === 0
+                            onClick={() =>
+                              edit && !shukoFixFlag && juchuKizaiMeisaiList.some((d) => !d.delFlag && d.selected)
+                                ? handleOpenJizenDialog()
+                                : setShowJizen((prev) => !prev)
                             }
-                            onClick={handleOpenJizenDialog}
                           >
                             <EventNoteIcon fontSize="small" />
                             事前準備
@@ -3409,6 +3423,7 @@ const EquipmentOrderDetail = (props: {
                           edit={edit}
                           shukoFixFlag={shukoFixFlag}
                           shukoDate={shukoDate}
+                          showJizen={showJizen}
                           kicsShukoDat={kicsShukoDat}
                           yardShukoDat={yardShukoDat}
                           handleCellChange={handleCellChange}
