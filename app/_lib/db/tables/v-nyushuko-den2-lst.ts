@@ -50,7 +50,9 @@ export const selectNyushukoDetail = async (
       n.indent_num,
       n.mem2,
       -- 受注から削除されたのに実績が残っている行（判定はビュー側。HT・ゲートと同じ列を使う）
-      n.juchu_meisai_del_flg
+      n.juchu_meisai_del_flg,
+      -- 読取実績のある状態で受注側の数量が変わり、まだ予定数＝読取数＋補正数になっていない行（判定はトリガーとビュー側）
+      n.plan_chg_flg
     FROM
       ${SCHEMA}.v_nyushuko_den2_lst as n
       LEFT JOIN ${SCHEMA}.t_juchu_kizai_meisai as m
@@ -119,7 +121,8 @@ export const selectJizenNyushukoDetail = async (
       n.dsp_ord_num_meisai,
       n.indent_num,
       n.mem2,
-      n.juchu_meisai_del_flg
+      n.juchu_meisai_del_flg,
+      n.plan_chg_flg
     FROM
       ${SCHEMA}.v_nyushuko_den2_lst as n
       LEFT JOIN ${SCHEMA}.t_juchu_kizai_meisai as m

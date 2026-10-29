@@ -2173,3 +2173,67 @@ export const updateHonbanAdjFromJizen = async (
     throw new Error('[updateHonbanAdjFromJizen] DBエラー:', { cause: e });
   }
 };
+
+/**
+ * 出庫明細の一括補正。画面で不足になっている伝票の補正数を 画面の予定数 − 読取数 にする
+ * 予定数は書き換えない。画面を開いたあとに受注側で予定数が変わっていても、補正は画面に出ている予定数までにとどめる
+ * （予定数は DB の新しい値のまま残るので、補正後の再表示で数量変更の強調と差が出て、追加・取り除きが必要と分かる）。
+ * 読取数は DB の今の値を使い、画面の予定数に対してまだ不足している行（画面の予定数 − 読取数 − 補正数 > 0）だけ
+ * 更新する（開いたあとに HT・ゲートで読み足されて一致・過剰になった行は変わらない）
+ * @param data 伝票の主キー
+ * @param planQty 画面に出ている予定数
+ * @param userNam 更新者
+ * @param connection
+ * @returns 更新した行の補正数（不足でなく更新しなかったときは null）
+ */
+export const updateNyushukoDenAdjustToPlan = async (
+  data: {
+    juchu_head_id: number;
+    juchu_kizai_head_id: number;
+    juchu_kizai_meisai_id: number;
+    sagyo_kbn_id: number;
+    sagyo_den_dat: string;
+    sagyo_id: number;
+    kizai_id: number;
+  },
+  planQty: number,
+  userNam: string,
+  connection: PoolClient
+) => {
+  const query = `
+    UPDATE
+      ${SCHEMA}.t_nyushuko_den
+    SET
+      result_adj_qty = $9::integer - COALESCE(result_qty, 0)
+      ,upd_dat = now()
+      ,upd_user = $8
+    WHERE
+      juchu_head_id = $1
+      AND juchu_kizai_head_id = $2
+      AND juchu_kizai_meisai_id = $3
+      AND sagyo_kbn_id = $4
+      AND sagyo_den_dat = $5
+      AND sagyo_id = $6
+      AND kizai_id = $7
+      AND $9::integer - COALESCE(result_qty, 0) - COALESCE(result_adj_qty, 0) > 0
+    RETURNING
+      result_adj_qty
+  `;
+
+  try {
+    const { rows } = await connection.query<{ result_adj_qty: number }>(query, [
+      data.juchu_head_id,
+      data.juchu_kizai_head_id,
+      data.juchu_kizai_meisai_id,
+      data.sagyo_kbn_id,
+      data.sagyo_den_dat,
+      data.sagyo_id,
+      data.kizai_id,
+      userNam,
+      planQty,
+    ]);
+    return rows.length > 0 ? rows[0].result_adj_qty : null;
+  } catch (e) {
+    throw new Error('[updateNyushukoDenAdjustToPlan] DBエラー:', { cause: e });
+  }
+};

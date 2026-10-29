@@ -56,6 +56,7 @@ npx tsc --noEmit          # 型チェックは全体で問題なく通る
     - 2026-09-30: `t_nyushuko_den` の `nyuko_fix_qty`、`v_nyushuko_den` / `v_nyushuko_den2` の `nyuko_fix_sts`・`shuko_fix_sts`
     - 2026-10-06: `v_nyushuko_den2_lst` の `juchu_meisai_del_flg`
     - 2026-10-21: `t_juchu_kizai_jizen`（新規テーブル。事前準備）、`v_nyushuko_den` / `v_nyushuko_total_time_sts` の `jizen_juchu_kizai_head_id`
+    - 2026-10-28: `t_nyushuko_den` / `v_nyushuko_den2_lst` の `plan_chg_flg`
 - `app/_lib/db/storage/*.ts` — Supabase Storage へのアクセス層。**このファイル群には `'use server'` を付けない**（付けるとexportが外部から直接叩けるServer Actionsになり、任意のパスに対しservice_role権限の署名付きURLを発行できてしまう）。呼び出しは必ず権限チェックを行う feature 側の `_lib/*-funcs.ts` を経由させる。
 - DBのカラムはsnake_case、アプリコードはcamelCase。変換は自動レイヤーがなく、クエリごと（SQLのエイリアス指定や手動マッピング）に行っている。
 
@@ -109,6 +110,7 @@ npx tsc --noEmit          # 型チェックは全体で問題なく通る
 - **コンテナ（`t_juchu_ctn_meisai`）の追加・削除・予定数・メモは出庫明細（最終確認 `sagyo_kbn_id = 20`）で行う**（`saveShukoCtn`）。メイン受注機材明細では閲覧のみで、保存・コピー・分離もコンテナを扱わない。コンテナ明細は出庫明細の保存時と HT・ゲートの送信時に、**その作業場所（`shozoku_id`）の1行だけ**作る。出発時（`updShukoDetail`）は予定数を読取数＋補正数で確定するだけで、読取0のコンテナは伝票・実績・コンテナ明細ごと削除する。入庫伝票（30）のコンテナ分は出発済みの出庫場所の分だけで作る（削除時は `ctn-nyuko-funcs.ts` の `syncNyukoCtnAfterDelete` で合わせる）。
 - **採番**：コンテナの明細IDは、同じ受注機材ヘッダーの別の場所に同じ機材があればその値、無ければヘッダー内のコンテナの最大値＋1（機材の明細IDとは重なってよい）。表示順は K と Y でそろえる。Web の採番は `t_nyushuko_den` を `SHARE ROW EXCLUSIVE` でロックしてから行い、送信RPC（`SHARE`）と順番に採番される。機材の明細IDは `t_juchu_kizai_meisai` と `t_nyushuko_den` の最大値から採番する（受注削除の行と PK が衝突しないように）。
 - **受注削除**：実績のある機材をメイン明細で削除した、または出庫場所を変えたときは、元の場所の出庫伝票を**同じ明細IDのまま予定数0で残す**（過剰なので出発できない＝現物を取り除いてもらう）。判定は `v_nyushuko_den2_lst.juchu_meisai_del_flg`（予定0かつ受注明細が無い。出庫では明細の `shozoku_id` と伝票の場所も照合）で、Web・HT・ゲートとも同じ列を読む。表示は機材名を `statusColors.deleted`（文字色）で赤くする（Web だけ「受注削除」の文字も出す）。解消は出庫明細で実績をクリアする。
+- **数量変更**：読取実績のある機材の数量を受注側（メイン・キープ・分離）で変えると、`t_nyushuko_den.plan_chg_flg` が1になり、出庫明細・ゲートで機材名を強調する（HT は別担当で未対応。`v_nyushuko_den2_lst.plan_chg_flg` を読めば同じ表示にできる。受注削除と同じ赤（2026-10-29 決定）。Web だけ「数量変更」の文字も出す。色の定数は受注削除と分けて `statusColors.planChanged`）。予定数 = 読取数＋補正数 になると0に戻る。**立てる・消すは `t_nyushuko_den` の BEFORE UPDATE トリガー（`trg_nyushuko_den_plan_chg`）が行い、アプリからは書かない**（このDBで唯一のトリガー。送信RPCを含むすべての UPDATE で効く）。出庫（10/20）と事前（80/90）の機材が対象で、表示はビューの列を読む。一括補正（`updShukoAdjust`）は予定数を書き戻さず、補正数だけを「画面に出ている予定数 − DB の今の読取数」にする（`updateNyushukoDenAdjustToPlan`。開いたあとに受注側で予定数が変わっていても補正は画面の予定数までで、再表示で数量変更の強調と差が残る）。
 - **送信RPC は `nyushuko_send_20261009_1`**（HT・ゲート共通）。旧 `nyushuko_send_20260626_1` は全端末の切り替えが済むまで残す。
 - 合体している受注機材ヘッダーは `v_get_juchu_kizai_head` が**入出庫種別ごと**にまとめる（ピッキングと最終確認でヘッダーの組み合わせが違っても1行）。そのため最終確認の画面には最終確認の行が無いヘッダーも入り、一緒に出発済みになる（上の `pickingDeleted` はこのためのガード）。ヘッダー名は `t_juchu_kizai_head` から引き、空なら空欄で表示する。
 
@@ -154,6 +156,8 @@ npx tsc --noEmit          # 型チェックは全体で問題なく通る
 **新テーブルでは `GRANT` を必ず書くこと**（ステージングには `public` スキーマの default privileges が無く `CREATE TABLE` だけでは 42501 になる。本番には default privileges があるが anon には SELECT しか付かない）。**RLSを有効化しないこと**（既存テーブルはすべて `relrowsecurity = false`）。適用は「DB → 型再生成 → コードデプロイ」の順。ただし**列を削るときや別名にするときはコードが先**。
 
 **関数の中の `row(...)::<テーブル名>` は列の個数と物理順に依存する**ので、テーブルに列を足すときは依存ビューだけでなく `pg_get_functiondef` の全文検索も行うこと（移動の送信RPC3本がこれで壊れた）。
+
+**`t_nyushuko_den` には BEFORE UPDATE トリガー（`trg_nyushuko_den_plan_chg`）がある**（このDBで唯一）。`plan_chg_flg` しか書き換えないが、トリガーが落ちると `t_nyushuko_den` への UPDATE がすべて失敗する。トリガー関数を変えるときは `scripts/db-tables/` のファイルを更新し、ステージングでトランザクション内の確認をしてから当てること。
 
 ## コーディング規約
 

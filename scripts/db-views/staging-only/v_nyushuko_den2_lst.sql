@@ -1,5 +1,12 @@
--- 適用状況: ステージング（del-meisai 分・事前準備の変更とも適用済み） / 本番 del-meisai 分のみ 2026-10-26 適用（事前準備の変更は未適用）
+-- 適用状況: ステージング（del-meisai 分・事前準備の変更とも適用済み。数量変更の列は 2026-10-28 適用） / 本番 del-meisai 分のみ 2026-10-26 適用（事前準備・数量変更の変更は未適用）
 -- =====================================================================
+-- ★2026-10-28 追加（数量変更。末尾に plan_chg_flg を追加して 32→33列）。2026-10-28 ステージング適用:
+--   ・t_nyushuko_den.plan_chg_flg（トリガーが更新する。scripts/db-tables/staging-only/20261028-t-nyushuko-den-plan-chg-flg.sql）を、
+--     伝票の主キーで1行引いて出す。v_nyushuko_den_lst は依存ビューが3本あるので列を通さない（このビューの行は伝票1行に対応する）。
+--   ・予定数（合計）が 0 の行は 0 にする（受注削除の表示を優先する。受注削除は予定0が前提なので重ならない）。
+--   ・Web 出庫明細・HT・ゲートの出庫読取画面で、機材名を強調するのに使う（受注削除と同じ赤。Web だけ「数量変更」の文字も出す。2026-10-29 決定）。
+--   ・列の追加なので CREATE OR REPLACE で当てられる。戻すときは列が減るので DROP して作り直す（.rollback.sql）。
+--   ・テーブルの列とトリガーを先に当てること（このビューが列を参照する）。
 -- ★2026-10-21 追加（事前準備、2026-10-21 ステージング適用。列構成は不変）:
 --   ・v_get_juchu_kizai_head との結合に「種別 3（事前）なら juchu_kizai_head_idv = juchu_kizai_head_id」を加える（事前は機材ヘッダーごと）。
 --   ・受注削除の判定（juchu_meisai_del_flg）：事前（80/90）は「事前準備の行（t_juchu_kizai_jizen）が無い」で判定する
@@ -89,7 +96,13 @@ CREATE OR REPLACE VIEW public.v_nyushuko_den2_lst WITH (security_invoker = on) A
             ELSE (NOT (EXISTS ( SELECT 1
                FROM t_juchu_kizai_meisai m
               WHERE m.juchu_head_id = v_nyushuko_den_lst.juchu_head_id AND m.juchu_kizai_head_id = v_nyushuko_den_lst.juchu_kizai_head_id AND m.juchu_kizai_meisai_id = v_nyushuko_den_lst.juchu_kizai_meisai_id AND m.kizai_id = v_nyushuko_den_lst.kizai_id AND ((v_nyushuko_den_lst.sagyo_kbn_id <> ALL (ARRAY[10, 20])) OR m.shozoku_id = v_nyushuko_den_lst.nyushuko_basho_id))))::integer
-        END AS juchu_meisai_del_flg
+        END AS juchu_meisai_del_flg,
+        CASE
+            WHEN sum(COALESCE(v_nyushuko_den_lst.plan_qty, 0::bigint)) = 0::numeric THEN 0
+            ELSE COALESCE(( SELECT max(d.plan_chg_flg) AS max
+               FROM t_nyushuko_den d
+              WHERE d.juchu_head_id = v_nyushuko_den_lst.juchu_head_id AND d.juchu_kizai_head_id = v_nyushuko_den_lst.juchu_kizai_head_id AND d.juchu_kizai_meisai_id = v_nyushuko_den_lst.juchu_kizai_meisai_id AND d.sagyo_kbn_id = v_nyushuko_den_lst.sagyo_kbn_id AND d.sagyo_den_dat = v_nyushuko_den_lst.nyushuko_dat AND d.sagyo_id = v_nyushuko_den_lst.nyushuko_basho_id AND d.kizai_id = v_nyushuko_den_lst.kizai_id), 0::smallint)::integer
+        END AS plan_chg_flg
    FROM v_nyushuko_den_lst
      LEFT JOIN v_get_juchu_kizai_head ON v_nyushuko_den_lst.juchu_head_id = v_get_juchu_kizai_head.juchu_head_id AND v_nyushuko_den_lst.nyushuko_dat = v_get_juchu_kizai_head.sagyo_den_dat AND v_nyushuko_den_lst.nyushuko_basho_id = v_get_juchu_kizai_head.sagyo_id AND v_nyushuko_den_lst.nyushuko_shubetu_id = v_get_juchu_kizai_head.nyushuko_shubetu_id AND v_nyushuko_den_lst.juchu_kizai_head_kbn = v_get_juchu_kizai_head.juchu_kizai_head_kbnv::bigint AND (v_nyushuko_den_lst.nyushuko_shubetu_id IS DISTINCT FROM 3 OR v_get_juchu_kizai_head.juchu_kizai_head_idv = v_nyushuko_den_lst.juchu_kizai_head_id::text)
   WHERE v_nyushuko_den_lst.juchu_kizai_meisai_id <> 0 AND v_nyushuko_den_lst.kizai_id <> 0 AND NOT ((v_nyushuko_den_lst.sagyo_kbn_id = 30 OR v_nyushuko_den_lst.sagyo_kbn_id = 80 OR v_nyushuko_den_lst.sagyo_kbn_id = 90) AND v_nyushuko_den_lst.plan_qty = 0 AND v_nyushuko_den_lst.result_qty = 0 AND v_nyushuko_den_lst.result_adj_qty = 0)

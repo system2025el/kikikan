@@ -390,6 +390,7 @@ export const ShukoDetail = (props: {
           indentNum: 0,
           mem2: '',
           juchuMeisaiDelFlg: 0,
+          planChgFlg: 0,
           saveFlag: false,
           delFlag: false,
         }));
