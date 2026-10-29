@@ -2,6 +2,9 @@
 
 import { PoolClient } from 'pg';
 
+import { NYUSHUKO_SHUBETU_ID, SAGYO_KBN_ID } from '@/app/_lib/constants';
+
+import pool from '../postgres';
 import { SCHEMA } from '../schema';
 import { createClient } from '../supabase-server';
 import { NyushukoFix } from '../types/t-nyushuko-fix-type';
@@ -337,5 +340,51 @@ export const deleteNyushukoFixFromOrder = async (
     await connection.query(query, values);
   } catch (e) {
     throw new Error('[deleteNyushukoFixFromOrder] DBエラー:', { cause: e });
+  }
+};
+
+/**
+ * 本番の出庫（同じ受注機材ヘッダー・作業場所）が出発済みか
+ * 事前（事前ピッキング・事前最終確認）の画面で、補正・実績クリアを止めるために使う。
+ * 本番の出庫日時は t_juchu_kizai_nyushuko から取る（v_nyushuko_den の事前の行・送信RPC と同じ判定）
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param sagyoId 作業場所（出庫場所）
+ * @returns 出発済みなら true
+ */
+export const selectHonbanShukoFixed = async (juchuHeadId: number, juchuKizaiHeadId: number, sagyoId: number) => {
+  const query = `
+    SELECT
+      EXISTS (
+        SELECT
+          1
+        FROM
+          ${SCHEMA}.t_juchu_kizai_nyushuko AS n
+          JOIN ${SCHEMA}.t_nyushuko_fix AS f
+            ON f.juchu_head_id = n.juchu_head_id
+            AND f.juchu_kizai_head_id = n.juchu_kizai_head_id
+            AND f.sagyo_kbn_id = $4
+            AND f.sagyo_den_dat = n.nyushuko_dat
+            AND f.sagyo_id = n.nyushuko_basho_id
+            AND f.sagyo_fix_flg = 1
+        WHERE
+          n.juchu_head_id = $1
+          AND n.juchu_kizai_head_id = $2
+          AND n.nyushuko_shubetu_id = $5
+          AND n.nyushuko_basho_id = $3
+      ) AS fixed
+  `;
+
+  try {
+    const { rows } = await pool.query<{ fixed: boolean }>(query, [
+      juchuHeadId,
+      juchuKizaiHeadId,
+      sagyoId,
+      SAGYO_KBN_ID.shukoConfirmed,
+      NYUSHUKO_SHUBETU_ID.shuko,
+    ]);
+    return rows[0]?.fixed ?? false;
+  } catch (e) {
+    throw new Error('[selectHonbanShukoFixed] DBエラー:', { cause: e });
   }
 };

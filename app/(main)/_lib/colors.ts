@@ -71,6 +71,12 @@ export const dispColors = {
    * 通常伝票
    */
   main: 'primary',
+  /**
+   * 事前（事前ピッキング・事前最終確認）。出庫一覧・事前の明細画面の明細名の文字色。
+   * 文字色なので、HT・ゲートの一覧の背景色・在庫表の事前準備の期間（m_honbanbi_color の clolor_id = 4）の
+   * #E8D5B7 より少し濃くしている
+   */
+  jizen: '#D2B48C',
 };
 
 /**

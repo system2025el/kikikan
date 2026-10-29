@@ -17,7 +17,7 @@ import { grey, lightBlue } from '@mui/material/colors';
 import { usePathname, useRouter } from 'next/navigation';
 import { Dispatch, SetStateAction, useState } from 'react';
 
-import { JUCHU_KIZAI_HEAD_KBN, SAGYO_KBN_ID } from '@/app/_lib/constants';
+import { isJizenSagyoKbn, JUCHU_KIZAI_HEAD_KBN, SAGYO_KBN_ID, toHonbanSagyoKbn } from '@/app/_lib/constants';
 import { dispColors, sagyoKbnColors, statusColors } from '@/app/(main)/_lib/colors';
 import { User } from '@/app/(main)/_lib/types';
 
@@ -78,10 +78,10 @@ export const ShukoDetailTable = (props: {
           sx={{
             '& .MuiTableCell-stickyHeader': {
               backgroundColor:
-                sagyoKbnId === SAGYO_KBN_ID.shukoConfirmation
+                toHonbanSagyoKbn(sagyoKbnId) === SAGYO_KBN_ID.shukoConfirmation
                   ? sagyoKbnColors.shukoConfirmation
                   : sagyoKbnColors.shukoPicking,
-              color: sagyoKbnId === SAGYO_KBN_ID.shukoConfirmation ? 'black' : 'white',
+              color: toHonbanSagyoKbn(sagyoKbnId) === SAGYO_KBN_ID.shukoConfirmation ? 'black' : 'white',
             },
           }}
         >
@@ -96,7 +96,7 @@ export const ShukoDetailTable = (props: {
                 borderLeftColor: grey[500],
               }}
             >
-              出庫予定数
+              {isJizenSagyoKbn(sagyoKbnId) ? '事前数' : '出庫予定数'}
             </TableCell>
             {datas[0].juchuKizaiHeadKbn !== JUCHU_KIZAI_HEAD_KBN.keep && (
               <>

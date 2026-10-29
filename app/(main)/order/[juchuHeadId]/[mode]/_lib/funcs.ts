@@ -40,6 +40,7 @@ import {
   selectKizaiHeadRangesForHonbanbi,
 } from '@/app/_lib/db/tables/t-juchu-kizai-head';
 import { deleteJuchuKizaiHonbanbiFromOrder, insertAllHonbanbi } from '@/app/_lib/db/tables/t-juchu-kizai-honbanbi';
+import { deleteJuchuKizaiJizenFromOrder } from '@/app/_lib/db/tables/t-juchu-kizai-jizen';
 import {
   deleteJuchuKizaiMeisaiFromOrder,
   insertJuchuKizaiMeisai,
@@ -708,6 +709,8 @@ export const delJuchuKizaiNyushuko = async (juchuHeadId: number, juchuKizaiHeadI
 export const delJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId: number, connection: PoolClient) => {
   try {
     await deleteJuchuKizaiMeisaiFromOrder(juchuHeadId, juchuKizaiHeadId, connection);
+    // 事前準備も明細と一緒に消す（機材ヘッダーidは最大値＋1で使い回されるため、残すと次のヘッダーに付いてしまう）
+    await deleteJuchuKizaiJizenFromOrder(juchuHeadId, juchuKizaiHeadId, connection);
   } catch (e) {
     if (e instanceof Error) {
       console.error(`[ERROR] ${e.message}`);

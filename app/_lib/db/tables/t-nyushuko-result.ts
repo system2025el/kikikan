@@ -2,6 +2,8 @@
 
 import { PoolClient } from 'pg';
 
+import { SAGYO_KBN_ID } from '@/app/_lib/constants';
+
 import { SCHEMA } from '../schema';
 
 /**
@@ -55,8 +57,9 @@ export const updateShukoResult = async (
  * @param juchuKizaiHeadId 受注機材ヘッダーid
  * @param juchuKizaiMeisaiId 受注機材明細id
  * @param kizaiId 機材id
- * @param oldSagyoId 変更前の出庫場所
+ * @param oldSagyoId 変更前の出庫場所（事前では事前の実績の作業場所）
  * @param connection
+ * @param jizen true なら事前（80/90）の実績を対象にする（準備日を消したとき）
  */
 export const deleteShukoResultBashoKeepDen = async (
   juchuHeadId: number,
@@ -64,7 +67,8 @@ export const deleteShukoResultBashoKeepDen = async (
   juchuKizaiMeisaiId: number,
   kizaiId: number,
   oldSagyoId: number,
-  connection: PoolClient
+  connection: PoolClient,
+  jizen = false
 ) => {
   const query = `
     DELETE FROM
@@ -92,12 +96,105 @@ export const deleteShukoResultBashoKeepDen = async (
       )
   `;
 
-  const values = [juchuHeadId, juchuKizaiHeadId, juchuKizaiMeisaiId, kizaiId, oldSagyoId, [10, 20]];
+  const values = [
+    juchuHeadId,
+    juchuKizaiHeadId,
+    juchuKizaiMeisaiId,
+    kizaiId,
+    oldSagyoId,
+    jizen ? [SAGYO_KBN_ID.jizenPicking, SAGYO_KBN_ID.jizenConfirmation] : [10, 20],
+  ];
 
   try {
     await connection.query(query, values);
   } catch (e) {
     throw new Error('[deleteShukoResultBashoKeepDen] DBエラー:', { cause: e });
+  }
+};
+
+/**
+ * 事前の実績（80/90）の作業日時を更新（明細・機材・作業場所単位）
+ * 準備日時を変えたときに、伝票（upsertJizenDen）と同じ新しい日時に移す
+ * @param data 明細のキー
+ * @param sagyoId 作業場所（明細の出庫場所）
+ * @param jizenDat 新しい準備日時
+ * @param connection
+ */
+export const updateJizenResultDat = async (
+  data: { juchu_head_id: number; juchu_kizai_head_id: number; juchu_kizai_meisai_id: number; kizai_id: number },
+  sagyoId: number,
+  jizenDat: string,
+  connection: PoolClient
+) => {
+  const query = `
+    UPDATE
+      ${SCHEMA}.t_nyushuko_result
+    SET
+      sagyo_den_dat = $1
+    WHERE
+      juchu_head_id = $2
+      AND juchu_kizai_head_id = $3
+      AND juchu_kizai_meisai_id = $4
+      AND kizai_id = $5
+      AND sagyo_id = $6
+      AND sagyo_kbn_id = ANY($7)
+      AND sagyo_den_dat <> $1
+  `;
+
+  const values = [
+    jizenDat,
+    data.juchu_head_id,
+    data.juchu_kizai_head_id,
+    data.juchu_kizai_meisai_id,
+    data.kizai_id,
+    sagyoId,
+    [SAGYO_KBN_ID.jizenPicking, SAGYO_KBN_ID.jizenConfirmation],
+  ];
+
+  try {
+    await connection.query(query, values);
+  } catch (e) {
+    throw new Error('[updateJizenResultDat] DBエラー:', { cause: e });
+  }
+};
+
+/**
+ * 事前の実績（80/90）を明細1件分削除する
+ * deleteJizenDen と組で使う。本番（10/20）にコピーした実績は消さない
+ * @param data 明細のキー
+ * @param connection
+ * @param sagyoId 作業場所（省略すると作業場所を問わず全部）
+ */
+export const deleteJizenResult = async (
+  data: { juchu_head_id: number; juchu_kizai_head_id: number; juchu_kizai_meisai_id: number; kizai_id: number },
+  connection: PoolClient,
+  sagyoId?: number
+) => {
+  const query = `
+    DELETE FROM
+      ${SCHEMA}.t_nyushuko_result
+    WHERE
+      juchu_head_id = $1
+      AND juchu_kizai_head_id = $2
+      AND juchu_kizai_meisai_id = $3
+      AND kizai_id = $4
+      AND sagyo_kbn_id = ANY($5)
+      AND ($6::integer IS NULL OR sagyo_id = $6)
+  `;
+
+  const values = [
+    data.juchu_head_id,
+    data.juchu_kizai_head_id,
+    data.juchu_kizai_meisai_id,
+    data.kizai_id,
+    [SAGYO_KBN_ID.jizenPicking, SAGYO_KBN_ID.jizenConfirmation],
+    sagyoId ?? null,
+  ];
+
+  try {
+    await connection.query(query, values);
+  } catch (e) {
+    throw new Error('[deleteJizenResult] DBエラー:', { cause: e });
   }
 };
 
@@ -476,5 +573,77 @@ export const deleteNyushukoResultFromOrder = async (
     await connection.query(query, values);
   } catch (e) {
     throw new Error('[deleteNyushukoResultFromOrder] DBエラー:', { cause: e });
+  }
+};
+
+/**
+ * 事前で削除したタグを、本番（事前ピッキング→ピッキング、事前最終確認→最終確認）からも削除する
+ * 本番の行は「受注・作業区分・本番の出庫日時・作業場所・機材・タグ」で探す（機材ヘッダー・明細は見ない。
+ * 合体ヘッダーで別のヘッダーに付いていても消す）。本番の行が無ければ何もしない
+ * 本番の出庫日時は、事前の明細と同じ明細・機材・作業場所の本番の伝票から取る
+ * @param data 事前の明細のキー
+ * @param honbanSagyoKbnId 本番の作業区分（10/20）
+ * @param sagyoId 作業場所
+ * @param rfidTagIds 削除したタグ
+ * @param connection
+ * @returns 本番の出庫日時（伝票が無ければ null。読取数の数え直しに使う）
+ */
+export const deleteHonbanResultByJizenTags = async (
+  data: { juchu_head_id: number; juchu_kizai_head_id: number; juchu_kizai_meisai_id: number; kizai_id: number },
+  honbanSagyoKbnId: number,
+  sagyoId: number,
+  rfidTagIds: string[],
+  connection: PoolClient
+) => {
+  const datQuery = `
+    SELECT
+      sagyo_den_dat
+    FROM
+      ${SCHEMA}.t_nyushuko_den
+    WHERE
+      juchu_head_id = $1
+      AND juchu_kizai_head_id = $2
+      AND juchu_kizai_meisai_id = $3
+      AND kizai_id = $4
+      AND sagyo_kbn_id = $5
+      AND sagyo_id = $6
+    ORDER BY
+      sagyo_den_dat DESC
+    LIMIT 1
+  `;
+  const deleteQuery = `
+    DELETE FROM
+      ${SCHEMA}.t_nyushuko_result
+    WHERE
+      juchu_head_id = $1
+      AND sagyo_kbn_id = $2
+      AND sagyo_den_dat = $3
+      AND sagyo_id = $4
+      AND kizai_id = $5
+      AND rfid_tag_id = ANY($6)
+  `;
+
+  try {
+    const { rows } = await connection.query<{ sagyo_den_dat: Date }>(datQuery, [
+      data.juchu_head_id,
+      data.juchu_kizai_head_id,
+      data.juchu_kizai_meisai_id,
+      data.kizai_id,
+      honbanSagyoKbnId,
+      sagyoId,
+    ]);
+    const honbanDat = rows[0]?.sagyo_den_dat ?? null;
+    if (!honbanDat || rfidTagIds.length === 0) return honbanDat;
+    await connection.query(deleteQuery, [
+      data.juchu_head_id,
+      honbanSagyoKbnId,
+      honbanDat,
+      sagyoId,
+      data.kizai_id,
+      rfidTagIds,
+    ]);
+    return honbanDat;
+  } catch (e) {
+    throw new Error('[deleteHonbanResultByJizenTags] DBエラー:', { cause: e });
   }
 };

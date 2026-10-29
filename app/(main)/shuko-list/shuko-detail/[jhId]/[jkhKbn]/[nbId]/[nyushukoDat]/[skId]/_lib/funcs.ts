@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { PoolClient } from 'pg';
 
-import { JUCHU_KIZAI_HEAD_KBN, NYUSHUKO_SHUBETU_ID, SAGYO_KBN_ID } from '@/app/_lib/constants';
+import { isJizenSagyoKbn, JUCHU_KIZAI_HEAD_KBN, NYUSHUKO_SHUBETU_ID, SAGYO_KBN_ID } from '@/app/_lib/constants';
 import pool, { refreshVRfid } from '@/app/_lib/db/postgres';
 import {
   deleteJuchuContainerMeisaiShozoku,
@@ -51,6 +51,7 @@ import {
   toNyushukoFixErrorReason,
 } from '@/app/(main)/_lib/nyushuko-fix-error';
 
+import { getJizenDetail, getJizenDetailTable, updJizenAdjust } from './jizen-funcs';
 import { calcShukoDiff, hasShukoDiff } from './shuko-diff';
 import {
   NyukoValues,
@@ -67,6 +68,7 @@ import {
  * @param nyushukoBashoId 入出庫場所id
  * @param nyushukoDat 入出庫日時
  * @param sagyoKbnId 作業区分id
+ * @param juchuKizaiHeadId 受注機材ヘッダーid（事前（80/90）のときだけ。事前は機材ヘッダーごとに開く）
  * @returns
  */
 export const getShukoDetail = async (
@@ -74,8 +76,14 @@ export const getShukoDetail = async (
   juchuKizaiHeadKbn: number,
   nyushukoBashoId: number,
   nyushukoDat: string,
-  sagyoKbnId: number
+  sagyoKbnId: number,
+  juchuKizaiHeadId?: number
 ) => {
+  if (isJizenSagyoKbn(sagyoKbnId)) {
+    return juchuKizaiHeadId
+      ? await getJizenDetail(juchuHeadId, juchuKizaiHeadId, nyushukoBashoId, nyushukoDat, sagyoKbnId)
+      : null;
+  }
   try {
     const data = await selectNyushukoOne(
       juchuHeadId,
@@ -142,6 +150,7 @@ export const getShukoDetail = async (
  * @param nyushukoBashoId 入出庫場所id
  * @param nyushukoDat 入出庫日
  * @param sagyoKbnId 作業区分id
+ * @param juchuKizaiHeadId 受注機材ヘッダーid（事前（80/90）のときだけ）
  * @returns
  */
 export const getShukoDetailTable = async (
@@ -149,8 +158,14 @@ export const getShukoDetailTable = async (
   juchuKizaiHeadKbn: number,
   nyushukoBashoId: number,
   nyushukoDat: string,
-  sagyoKbnId: number
+  sagyoKbnId: number,
+  juchuKizaiHeadId?: number
 ) => {
+  if (isJizenSagyoKbn(sagyoKbnId)) {
+    return juchuKizaiHeadId
+      ? await getJizenDetailTable(juchuHeadId, juchuKizaiHeadId, nyushukoBashoId, nyushukoDat, sagyoKbnId)
+      : [];
+  }
   try {
     const data = await selectNyushukoDetail(juchuHeadId, juchuKizaiHeadKbn, nyushukoBashoId, nyushukoDat, sagyoKbnId);
 
@@ -793,6 +808,13 @@ export const confirmChildJuchuKizaiHead = async (juchuHeadId: number, juchuKizai
 };
 
 export const updShukoAdjust = async (adjustData: ShukoDetailTableValues[], userNam: string) => {
+  // 事前（80/90）は本番の補正も上書きする。本番が出発済みなら補正しない
+  if (adjustData.length > 0 && isJizenSagyoKbn(adjustData[0].sagyoKbnId ?? 0)) {
+    if (!(await updJizenAdjust(adjustData, userNam))) {
+      throw new Error('[updShukoAdjust] 本番の出庫が出発済みのため、事前の補正はできません');
+    }
+    return;
+  }
   const updateData: NyushukoDen[] = adjustData.map((d) => ({
     juchu_head_id: d.juchuHeadId,
     juchu_kizai_head_id: d.juchuKizaiHeadId,

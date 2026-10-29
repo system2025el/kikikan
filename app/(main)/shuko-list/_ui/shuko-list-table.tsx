@@ -43,6 +43,9 @@ export const ShukoListTable = (props: {
 
   const [selected, setSelected] = useState<number[]>([]);
 
+  // チェックできる行（事前の行は納品書の対象外なのでチェックボックスを出さない）
+  const selectableIndexes = datas.map((row, index) => (row.jizenFlg ? null : index)).filter((i) => i !== null);
+
   const handleSelect = (index: number) => {
     const newSelected = selected.includes(index) ? selected.filter((item) => item !== index) : [...selected, index];
 
@@ -51,6 +54,15 @@ export const ShukoListTable = (props: {
   };
 
   const handleClickRow = (row: ShukoTableValues, sagyoKbnId: number) => {
+    // 事前の行は機材ヘッダーごとなので、機材ヘッダーidを付けて開く（ピッキング → 事前ピッキング、最終確認 → 事前最終確認）
+    if (row.jizenFlg) {
+      const jizenSagyoKbnId =
+        sagyoKbnId === SAGYO_KBN_ID.shukoPicking ? SAGYO_KBN_ID.jizenPicking : SAGYO_KBN_ID.jizenConfirmation;
+      openOrFocusTab(
+        `shuko-list/shuko-detail/${row.juchuHeadId}/${row.juchuKizaiHeadKbn}/${row.nyushukoBashoId}/${new Date(row.nyushukoDat).toISOString()}/${jizenSagyoKbnId}?jkhId=${row.juchuKizaiHeadIdv}`
+      );
+      return;
+    }
     openOrFocusTab(
       `shuko-list/shuko-detail/${row.juchuHeadId}/${row.juchuKizaiHeadKbn}/${row.nyushukoBashoId}/${new Date(row.nyushukoDat).toISOString()}/${sagyoKbnId}`
     );
@@ -66,12 +78,12 @@ export const ShukoListTable = (props: {
               <Checkbox
                 color="primary"
                 onChange={(e) => {
-                  const newSelected = e.target.checked && datas ? datas.map((_, index) => index) : [];
+                  const newSelected = e.target.checked ? selectableIndexes : [];
                   setSelected(newSelected);
                   onSelectionChange(newSelected);
                 }}
-                indeterminate={datas && selected.length > 0 && selected.length < datas.length}
-                checked={datas && datas.length > 0 && selected.length === datas.length}
+                indeterminate={selected.length > 0 && selected.length < selectableIndexes.length}
+                checked={selectableIndexes.length > 0 && selected.length === selectableIndexes.length}
                 sx={{
                   '& .MuiSvgIcon-root': {
                     backgroundColor: '#fff',
@@ -121,7 +133,7 @@ export const ShukoListTable = (props: {
               }}
             >
               <TableCell padding="checkbox">
-                <Checkbox checked={selected.includes(index)} onChange={() => handleSelect(index)} />
+                {!row.jizenFlg && <Checkbox checked={selected.includes(index)} onChange={() => handleSelect(index)} />}
               </TableCell>
               <TableCell align="left">{row.sectionNamv}</TableCell>
               <TableCell align="center">
@@ -181,13 +193,15 @@ export const ShukoListTable = (props: {
                 <Typography
                   variant="body2"
                   color={
-                    row.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.normal
-                      ? dispColors.main
-                      : row.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.return
-                        ? dispColors.return
-                        : row.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.keep
-                          ? dispColors.keep
-                          : dispColors.main
+                    row.jizenFlg
+                      ? dispColors.jizen
+                      : row.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.normal
+                        ? dispColors.main
+                        : row.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.return
+                          ? dispColors.return
+                          : row.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.keep
+                            ? dispColors.keep
+                            : dispColors.main
                   }
                 >
                   {row.headNamv}

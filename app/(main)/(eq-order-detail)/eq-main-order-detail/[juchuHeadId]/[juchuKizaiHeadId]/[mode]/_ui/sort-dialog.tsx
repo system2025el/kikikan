@@ -203,7 +203,7 @@ const SortableItem = React.memo(
         <TableCell style={styles.row}>
           <Checkbox size="small" checked={checked} onChange={() => onToggleChecked(id)} sx={{ padding: 0 }} />
         </TableCell>
-        <TableCell style={styles.row} {...attributes} {...listeners}>
+        <TableCell style={styles.handle} {...attributes} {...listeners}>
           <DragHandleIcon sx={{ cursor: 'move' }} />
         </TableCell>
         <TableCell style={styles.row}>{data.kizaiNam}</TableCell>
@@ -238,6 +238,17 @@ const styles: { [key: string]: React.CSSProperties } = {
     paddingBottom: 0,
     paddingLeft: 4,
     paddingRight: 4,
+  },
+  // ドラッグハンドル（タッチで動かしたときにブラウザのスクロールに奪われてドラッグが外れないようにする）
+  handle: {
+    border: '1px solid lightGray',
+    whiteSpace: 'nowrap',
+    height: '26px',
+    paddingTop: 0,
+    paddingBottom: 0,
+    paddingLeft: 4,
+    paddingRight: 4,
+    touchAction: 'none',
   },
   // 行（右寄せ）
   rowRight: {

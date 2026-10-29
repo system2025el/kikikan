@@ -25,7 +25,15 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { set } from 'zod';
 
-import { BASHO_ID, FIX_STS, FixSts, JUCHU_KIZAI_HEAD_KBN, SAGYO_KBN_ID } from '@/app/_lib/constants';
+import {
+  BASHO_ID,
+  FIX_STS,
+  FixSts,
+  isJizenSagyoKbn,
+  JUCHU_KIZAI_HEAD_KBN,
+  SAGYO_KBN_ID,
+  toHonbanSagyoKbn,
+} from '@/app/_lib/constants';
 import { dispColors, fixStsColors, sagyoKbnColors, statusColors } from '@/app/(main)/_lib/colors';
 import { useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
 import {
@@ -81,6 +89,14 @@ export const ShukoDetail = (props: {
   const user = props.user;
 
   const router = useRouter();
+
+  // 事前（事前ピッキング・事前最終確認）の画面か。事前は機材ヘッダーごとに開き、出発もコンテナも無い
+  // （出発・コンテナの操作は最終確認(20)のときだけ出すので、事前最終確認(90)では出ない）
+  const jizen = isJizenSagyoKbn(shukoDetailData.sagyoKbnId);
+  // 色・表題に使う本番の作業区分（事前ピッキング→ピッキング、事前最終確認→最終確認）
+  const isConfirmation = toHonbanSagyoKbn(shukoDetailData.sagyoKbnId) === SAGYO_KBN_ID.shukoConfirmation;
+  // 事前の行を取り直すときに渡す機材ヘッダーid
+  const jizenJuchuKizaiHeadId = jizen ? shukoDetailData.juchuKizaiHeadIds[0] : undefined;
 
   // 出発状況
   const [fixSts, setFixSts] = useState<FixSts>(props.fixSts);
@@ -309,7 +325,8 @@ export const ShukoDetail = (props: {
         shukoDetailData.juchuKizaiHeadKbn,
         shukoDetailData.nyushukoBashoId,
         shukoDetailData.nyushukoDat,
-        shukoDetailData.sagyoKbnId
+        shukoDetailData.sagyoKbnId,
+        jizenJuchuKizaiHeadId
       );
       setShukoDetailList(updatedShukoDetailTableData);
       setOriginShukoDetailList(updatedShukoDetailTableData);
@@ -501,14 +518,13 @@ export const ShukoDetail = (props: {
             fontSize={'large'}
             px={1}
             sx={{
-              backgroundColor:
-                shukoDetailData.sagyoKbnId === SAGYO_KBN_ID.shukoConfirmation
-                  ? sagyoKbnColors.shukoConfirmation
-                  : sagyoKbnColors.shukoPicking,
-              color: shukoDetailData.sagyoKbnId === SAGYO_KBN_ID.shukoConfirmation ? 'black' : 'white',
+              backgroundColor: isConfirmation ? sagyoKbnColors.shukoConfirmation : sagyoKbnColors.shukoPicking,
+              color: isConfirmation ? 'black' : 'white',
             }}
           >
-            出庫明細({shukoDetailData.sagyoKbnId === SAGYO_KBN_ID.shukoConfirmation ? '最終確認' : 'ピッキング'})
+            {jizen
+              ? `事前明細(${isConfirmation ? '事前最終確認' : '事前ピッキング'})`
+              : `出庫明細(${isConfirmation ? '最終確認' : 'ピッキング'})`}
           </Typography>
           <Grid2 container alignItems={'center'} spacing={2}>
             {fixSts === FIX_STS.all && (
@@ -561,7 +577,7 @@ export const ShukoDetail = (props: {
               />
             </Box>
             <Box display={'flex'} alignItems={'center'}>
-              <Typography mr={4}>出庫日時</Typography>
+              <Typography mr={4}>{jizen ? '事前日時' : '出庫日時'}</Typography>
               <DateTime value={shukoDetailData.nyushukoDat ? new Date(shukoDetailData.nyushukoDat) : null} disabled />
             </Box>
             <Box display={'flex'} alignItems={'center'}>
@@ -600,8 +616,11 @@ export const ShukoDetail = (props: {
             disabled
             sx={{
               '.MuiOutlinedInput-input.Mui-disabled': {
-                WebkitTextFillColor:
-                  shukoDetailData.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.keep ? dispColors.keep : 'inherit',
+                WebkitTextFillColor: jizen
+                  ? dispColors.jizen
+                  : shukoDetailData.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.keep
+                    ? dispColors.keep
+                    : 'inherit',
               },
             }}
           />
@@ -779,8 +798,10 @@ export const ShukoDetail = (props: {
           <WarningIcon color="error" />
           <Box>一括補正</Box>
         </DialogTitle>
-        <DialogContentText m={2} p={2}>
-          一括補正してよろしいでしょうか？
+        <DialogContentText m={2} p={2} sx={{ whiteSpace: 'pre-line' }}>
+          {jizen
+            ? '本番の同じ機材の補正数も上書きされます。\n一括補正してよろしいでしょうか？'
+            : '一括補正してよろしいでしょうか？'}
         </DialogContentText>
         <DialogActions>
           <Button onClick={executeAdjust} loading={isProcessing}>
