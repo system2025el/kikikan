@@ -53,7 +53,7 @@ import {
 import { toJapanTimeString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { getNyukoDate, getRange, getShukoDate } from '@/app/(main)/_lib/date-funcs';
 import { addLock, getDic, getLock } from '@/app/(main)/_lib/funcs';
-import { useStableCallback, useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
+import { useStableCallback, useSyncScroll, useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
 import { lockCheck, lockRelease } from '@/app/(main)/_lib/lock';
 import { useNyushukoFixChanged } from '@/app/(main)/_lib/nyushuko-fix-notify';
 import { permission } from '@/app/(main)/_lib/permission';
@@ -334,7 +334,6 @@ const EquipmentOrderDetail = (props: {
   const tableAnchorDateRef = useRef<Date | null>(null);
   const leftRef = useRef<HTMLDivElement>(null);
   const rightRef = useRef<HTMLDivElement>(null);
-  const isSyncing = useRef(false);
   // 割引率・本番日数・機材数量を一度でも編集したか。
   // trueの間は割引金額（確定）を自動計算値に追従させ、保存済みデータを読み直す（reset）際にfalseへ戻す
   const nebikiSyncedRef = useRef(false);
@@ -642,33 +641,6 @@ const EquipmentOrderDetail = (props: {
       setPath(path);
       setDirtyOpen(true);
     }
-  };
-
-  /**
-   * 同期スクロール処理
-   * @param source
-   * @returns
-   */
-  const syncScroll = (source: 'left' | 'right') => {
-    if (isSyncing.current) return;
-    isSyncing.current = true;
-
-    const left = leftRef.current;
-    const right = rightRef.current;
-
-    if (!left || !right) return;
-
-    if (source === 'left') {
-      const ratio = left.scrollTop / (left.scrollHeight - left.clientHeight);
-      right.scrollTop = ratio * (right.scrollHeight - right.clientHeight);
-    } else {
-      const ratio = right.scrollTop / (right.scrollHeight - right.clientHeight);
-      left.scrollTop = ratio * (left.scrollHeight - left.clientHeight);
-    }
-
-    requestAnimationFrame(() => {
-      isSyncing.current = false;
-    });
   };
 
   /**
@@ -2628,22 +2600,8 @@ const EquipmentOrderDetail = (props: {
     eqStockListRef.current = eqStockList;
   }, [eqStockList]);
 
-  useEffect(() => {
-    const left = leftRef.current;
-    const right = rightRef.current;
-
-    if (left && right) {
-      left.addEventListener('scroll', () => syncScroll('left'));
-      right.addEventListener('scroll', () => syncScroll('right'));
-    }
-
-    return () => {
-      if (left && right) {
-        left.removeEventListener('scroll', () => syncScroll('left'));
-        right.removeEventListener('scroll', () => syncScroll('right'));
-      }
-    };
-  }, [juchuKizaiMeisaiList, isLoading, isDetailLoading]);
+  // 同期スクロール
+  useSyncScroll(leftRef, rightRef, [juchuKizaiMeisaiList, isLoading, isDetailLoading]);
 
   useEffect(() => {
     // 機材idをキーとして受注数、予備数、合計数の各合計値算出

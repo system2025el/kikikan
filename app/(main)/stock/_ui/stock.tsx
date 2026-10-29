@@ -22,6 +22,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 
+import { useSyncScroll } from '../../_lib/hook';
 import { permission } from '../../_lib/permission';
 import { Calendar, CalendarView } from '../../_ui/date';
 import { Loading } from '../../_ui/loading';
@@ -54,7 +55,6 @@ export const Stock = () => {
   // ref
   const leftRef = useRef<HTMLDivElement>(null);
   const rightRef = useRef<HTMLDivElement>(null);
-  const isSyncing = useRef(false);
 
   /* 検索useForm-------------------------- */
   const {
@@ -69,33 +69,6 @@ export const Stock = () => {
     resolver: zodResolver(StockSearchSchema),
     defaultValues: { bumonId: FAKE_NEW_ID, keyword: '' },
   });
-
-  /**
-   * 同期スクロール処理
-   * @param source
-   * @returns
-   */
-  const syncScroll = (source: 'left' | 'right') => {
-    if (isSyncing.current) return;
-    isSyncing.current = true;
-
-    const left = leftRef.current;
-    const right = rightRef.current;
-
-    if (!left || !right) return;
-
-    if (source === 'left') {
-      const ratio = left.scrollTop / (left.scrollHeight - left.clientHeight);
-      right.scrollTop = ratio * (right.scrollHeight - right.clientHeight);
-    } else {
-      const ratio = right.scrollTop / (right.scrollHeight - right.clientHeight);
-      left.scrollTop = ratio * (left.scrollHeight - left.clientHeight);
-    }
-
-    requestAnimationFrame(() => {
-      isSyncing.current = false;
-    });
-  };
 
   /**
    * 検索ボタン押下時
@@ -204,22 +177,8 @@ export const Stock = () => {
     getList();
   }, [reset]);
 
-  useEffect(() => {
-    const left = leftRef.current;
-    const right = rightRef.current;
-
-    if (left && right) {
-      left.addEventListener('scroll', () => syncScroll('left'));
-      right.addEventListener('scroll', () => syncScroll('right'));
-    }
-
-    return () => {
-      if (left && right) {
-        left.removeEventListener('scroll', () => syncScroll('left'));
-        right.removeEventListener('scroll', () => syncScroll('right'));
-      }
-    };
-  }, [eqList, isLoading]);
+  // 同期スクロール
+  useSyncScroll(leftRef, rightRef, [eqList, isLoading]);
 
   if (error) throw error;
 
