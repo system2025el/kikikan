@@ -43,10 +43,10 @@ export const JizenDialog = ({
           解除
         </Button>
         <Box flexGrow={1} />
-        <Button onClick={handleClose}>キャンセル</Button>
         <Button variant="contained" disabled={!jizenDat} onClick={() => jizenDat && handleSet(jizenDat)}>
           設定
         </Button>
+        <Button onClick={handleClose}>キャンセル</Button>
       </DialogActions>
     </Paper>
   );
