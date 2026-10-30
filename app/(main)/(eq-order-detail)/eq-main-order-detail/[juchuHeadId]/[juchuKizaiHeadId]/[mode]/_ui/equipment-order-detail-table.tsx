@@ -22,15 +22,20 @@ import {
   Typography,
 } from '@mui/material';
 import { blue, grey, lightBlue } from '@mui/material/colors';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { BASHO_ID, SAGYO_SIJI_ID } from '@/app/_lib/constants';
-import { toJapanMDString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanMDString } from '@/app/(main)/_lib/date-conversion';
 import { openOrFocusTab } from '@/app/(main)/_lib/tab-focus';
 import { DateTime, FormDateX } from '@/app/(main)/_ui/date';
 import { MemoTooltip } from '@/app/(main)/(eq-order-detail)/_ui/memo-tooltip';
 
-import { getDateHeaderBackgroundColor, getStockRowBackgroundColor } from '../_lib/colorselect';
+import {
+  getDateHeaderBackgroundColor,
+  getJizenBackgroundColor,
+  getStockBaseBackgroundColor,
+  toStockDateKey,
+} from '../_lib/colorselect';
 import { getMeisaiShukoDat } from '../_lib/jizen';
 import {
   IdoJuchuKizaiMeisaiValues,
@@ -59,6 +64,20 @@ const StockTableComponent: React.FC<StockTableProps> = ({
   /*juchuHonbanbiList*/ juchuColorMap,
   ref,
 }) => {
+  // 日付だけで決まる背景色。機材の行をまたいで同じなので、日付ごとに1回だけ求める
+  const getBaseColor = useMemo(() => {
+    const cache = new Map<string, string | null>();
+    return (dateKey: string) => {
+      let color = cache.get(dateKey);
+      if (color === undefined) {
+        color = getStockBaseBackgroundColor(dateKey, dateRange, shubetuColorMap, juchuColorMap);
+        cache.set(dateKey, color);
+      }
+      return color;
+    };
+  }, [dateRange, shubetuColorMap, juchuColorMap]);
+  const jizenColor = useMemo(() => getJizenBackgroundColor(shubetuColorMap), [shubetuColorMap]);
+
   return (
     <TableContainer
       ref={ref}
@@ -67,7 +86,28 @@ const StockTableComponent: React.FC<StockTableProps> = ({
         maxHeight: '80vh',
       }}
     >
-      <Table stickyHeader sx={{ borderCollapse: 'separate', borderSpacing: 0 }}>
+      <Table
+        stickyHeader
+        sx={(theme) => ({
+          borderCollapse: 'separate',
+          borderSpacing: 0,
+          // 本体のセルは 機材数×91日 あるので MUI の TableCell を使わず素の td にし、
+          // 共通のスタイルはここで1回だけ当てる（TableCell の body・small と styles.row に合わせてある）
+          // sx の padding は数値だと spacing 倍になるので px で書く
+          '& tbody td': {
+            ...theme.typography.body2,
+            borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
+            borderRight: '1px solid rgba(0, 0, 0, 0.12)',
+            whiteSpace: 'nowrap',
+            height: '26px',
+            padding: '0 4px',
+            textAlign: 'right',
+          },
+          '& tbody td:first-of-type': {
+            borderLeft: '1px solid rgba(0, 0, 0, 0.12)',
+          },
+        })}
+      >
         <TableHead>
           <TableRow>
             {eqStockList.length > 0 &&
@@ -81,7 +121,7 @@ const StockTableComponent: React.FC<StockTableProps> = ({
                     borderRight: '1px solid lightGray',
                     whiteSpace: 'nowrap',
                     color: 'white',
-                    bgcolor: getDateHeaderBackgroundColor(toJapanYMDString(data.calDat), dateRange),
+                    bgcolor: getDateHeaderBackgroundColor(toStockDateKey(data.calDat), dateRange),
                     paddingY: 0,
                     paddingX: 0.5,
                     height: '25px',
@@ -98,12 +138,9 @@ const StockTableComponent: React.FC<StockTableProps> = ({
               <StockTableRow
                 key={rowIndex}
                 row={row}
-                index={rowIndex}
-                dateRange={dateRange}
                 jizenRange={jizenRanges[rowIndex] ?? EMPTY_RANGE}
-                //juchuHonbanbiList={juchuHonbanbiList}
-                shubetuColorMap={shubetuColorMap}
-                juchuColorMap={juchuColorMap}
+                jizenColor={jizenColor}
+                getBaseColor={getBaseColor}
               />
             ))}
         </TableBody>
@@ -120,48 +157,33 @@ const EMPTY_RANGE: string[] = [];
 
 export type StockTableRowProps = {
   row: StockTableValues[];
-  index: number;
-  dateRange: string[];
   jizenRange: string[];
-  shubetuColorMap: Map<number, string>;
-  juchuColorMap: Map<string, string>;
+  jizenColor: string;
+  getBaseColor: (dateKey: string) => string | null;
 };
 
 const StockTableRow = React.memo(
-  ({ row, index, dateRange, jizenRange, shubetuColorMap, juchuColorMap }: StockTableRowProps) => {
+  ({ row, jizenRange, jizenColor, getBaseColor }: StockTableRowProps) => {
     return (
-      <TableRow>
+      <tr>
         {row.map((cell, colIndex) => {
-          const bgcolor = getStockRowBackgroundColor(
-            cell.calDat,
-            dateRange,
-            shubetuColorMap,
-            juchuColorMap,
-            jizenRange
-          );
+          const dateKey = toStockDateKey(cell.calDat);
+          // 事前準備の期間は、本番日・出入庫日・使用期間の色が無い日だけ塗る
+          const bgcolor = getBaseColor(dateKey) ?? (jizenRange.includes(dateKey) ? jizenColor : 'white');
           return (
-            <TableCell
-              key={colIndex}
-              align={'right'}
-              style={styles.row}
-              sx={{
-                borderLeft: colIndex === 0 ? '1px solid rgba(0, 0, 0, 0.12)' : 'none',
-                bgcolor: bgcolor,
-                color: cell.zaikoQty < 0 ? 'red' : 'black',
-              }}
-              size="small"
-            >
+            <td key={colIndex} style={{ backgroundColor: bgcolor, color: cell.zaikoQty < 0 ? 'red' : 'black' }}>
               {cell.zaikoQty}
-            </TableCell>
+            </td>
           );
         })}
-      </TableRow>
+      </tr>
     );
   },
   (prevProps, nextProps) => {
     return (
       prevProps.row === nextProps.row &&
-      prevProps.juchuColorMap === nextProps.juchuColorMap &&
+      prevProps.getBaseColor === nextProps.getBaseColor &&
+      prevProps.jizenColor === nextProps.jizenColor &&
       prevProps.jizenRange.join() === nextProps.jizenRange.join()
     );
   }
