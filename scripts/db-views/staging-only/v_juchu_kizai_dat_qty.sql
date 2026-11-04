@@ -10,13 +10,16 @@
 --   ・同じ機材・日付の行は1行に集計する（v_zaiko_qty はこのビューを集計せずに使うので、別の UNION ALL の行にすると2行になる）。
 --
 -- 依存しているビュー: v_zaiko_qty（列構成を変えないので作り直し不要）
--- reloptions: なし（ステージングで確認。このビューだけ security_invoker を付けていない）
+-- reloptions: security_invoker = on を明示する（本番の現状に合わせる。applied/ の版と同じ）。
+--   ★CREATE OR REPLACE VIEW は WITH を書かないと付いているオプションを空にするので、省くと本番の security_invoker が外れる。
+--   ステージングは付いていなかった（2026-10-21 の作成時はこれを見てオプションなしにしていた）。2026-11-04 の本番の事前確認で
+--   食い違いが分かり、ファイルに明示し、ステージングも ALTER VIEW ... SET (security_invoker = on) で揃えた。
 -- 2026-10-21 ステージングで検証（一時ビューで読み取りのみ）: 事前準備が無い状態で全列・行数（334,527）とも差分0。
 --   テストの受注で、準備日〜出庫日の前日だけ在庫が準備数ぶん減り、出庫日以降は変わらないこと、v_zaiko_qty に同じ機材・日付の行が2行出ないことを確認。
 --   在庫表相当（v_zaiko_qty、200機材×40日）: 約 0.29秒で変わらず。
 -- =====================================================================
 
-CREATE OR REPLACE VIEW public.v_juchu_kizai_dat_qty AS
+CREATE OR REPLACE VIEW public.v_juchu_kizai_dat_qty WITH (security_invoker = on) AS
  SELECT src.plan_dat,
     src.kizai_id,
     sum(COALESCE(src.plan_kizai_qty, 0)) AS juchu_qty,

@@ -3,9 +3,11 @@
 -- v_juchu_kizai_dat_qty のロールバック（本番の現在の定義）
 -- 2026-10-21 にステージングから pg_get_viewdef で取得（applied/ と同じ定義。本番と同じかは本番に当てる前に確認すること）。
 -- 列構成は変わらないので CREATE OR REPLACE で戻せる。
+-- 2026-11-04 本番の事前確認で、本番の定義がこのファイルと同じこと、reloptions が security_invoker=on であることを確認。
+-- WITH を省くと security_invoker が外れるので明示する（applied/ の版と同じ）。
 -- =====================================================================
 
-CREATE OR REPLACE VIEW public.v_juchu_kizai_dat_qty AS
+CREATE OR REPLACE VIEW public.v_juchu_kizai_dat_qty WITH (security_invoker = on) AS
  SELECT t_juchu_kizai_honbanbi.juchu_honbanbi_dat AS plan_dat,
     t_juchu_kizai_meisai.kizai_id,
     sum(COALESCE(t_juchu_kizai_meisai.plan_kizai_qty, 0)) AS juchu_qty,
