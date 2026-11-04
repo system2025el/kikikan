@@ -295,9 +295,10 @@ export const UseTable = (props: UseTableProps) => {
                       bgcolor: cell.juchuHonbanbiColor,
                       borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
                       borderRight: '1px solid rgba(0, 0, 0, 0.12)',
+                      // 返却で使用数が減る日を赤にする。事前準備（事前数）から出庫日（合計数）のように増える日は赤にしない
                       color:
                         cell.planQty <= 0 ||
-                        (row[colIndex - 1]?.planQty && row[colIndex].planQty !== row[colIndex - 1].planQty)
+                        (row[colIndex - 1]?.planQty && row[colIndex].planQty < row[colIndex - 1].planQty)
                           ? 'red'
                           : 'black',
                       height: 25,

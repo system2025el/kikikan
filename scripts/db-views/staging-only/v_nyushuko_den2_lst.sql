@@ -1,5 +1,10 @@
--- 適用状況: ステージング（del-meisai 分・事前準備の変更とも適用済み。数量変更の列は 2026-10-28 適用） / 本番 del-meisai 分のみ 2026-10-26 適用（事前準備・数量変更の変更は未適用）
+-- 適用状況: ステージング（del-meisai 分・事前準備の変更とも適用済み。数量変更の列は 2026-10-28 適用。事前数0の変更は 2026-11-04 適用） / 本番 del-meisai 分のみ 2026-10-26 適用（事前準備・数量変更の変更は未適用）
 -- =====================================================================
+-- ★2026-11-04 変更（事前数0。列構成は不変）。2026-11-04 ステージング適用（列コメント t_juchu_kizai_jizen.jizen_qty も同時に更新）:
+--   ・事前数を 0 でも保存できるようにした（受注数・予備数と同じ）。予定・読取・補正がすべて 0 の行を出さない条件から
+--     80/90 を外し、本番（10/20）と同じく予定0の行も出す（入庫 30 だけに戻す）。
+--   ・この条件で隠れていた 80/90 の行は無い（準備日の削除・タグの全削除で空になった事前の伝票は Web が削除する）ので、
+--     今あるデータの見え方は変わらない。予定0の事前の行は事前準備の行があるので受注削除にはならない。
 -- ★2026-10-28 追加（数量変更。末尾に plan_chg_flg を追加して 32→33列）。2026-10-28 ステージング適用:
 --   ・t_nyushuko_den.plan_chg_flg（トリガーが更新する。scripts/db-tables/staging-only/20261028-t-nyushuko-den-plan-chg-flg.sql）を、
 --     伝票の主キーで1行引いて出す。v_nyushuko_den_lst は依存ビューが3本あるので列を通さない（このビューの行は伝票1行に対応する）。
@@ -18,7 +23,7 @@
 --     2026-10-23 変更: 事前準備の行があっても、明細の今の出庫場所（t_juchu_kizai_meisai.shozoku_id）が伝票の場所と
 --     違えば受注削除とする（10/20 と同じ場所の照合）。準備日を消して K に残した伝票が、出庫場所を Y に変えて準備日を
 --     付け直したときに通常の行へ戻ってしまうのを防ぐ。Web の deleteEmptyNyushukoDen も同じ判定。
---   ・予定・読取・補正がすべて 0 の行を出さない条件（今は入庫 30 だけ）に 80/90 を加える。
+--   ・予定・読取・補正がすべて 0 の行を出さない条件（今は入庫 30 だけ）に 80/90 を加える（2026-11-04 に外した）。
 --   2026-10-21 ステージングで検証（一時ビューで読み取りのみ）: 事前の伝票が無い状態で全列・行数（123,266）とも差分0。
 --   テストの受注で、事前の明細行が機材ヘッダーごとに1行ずつ（二重にならず）出ることを確認。
 -- ★del-meisai 分は 2026-10-26 に本番へ適用済み（その定義は applied/v_nyushuko_den2_lst.sql）。このファイルは del-meisai と事前準備の両方を
@@ -105,6 +110,6 @@ CREATE OR REPLACE VIEW public.v_nyushuko_den2_lst WITH (security_invoker = on) A
         END AS plan_chg_flg
    FROM v_nyushuko_den_lst
      LEFT JOIN v_get_juchu_kizai_head ON v_nyushuko_den_lst.juchu_head_id = v_get_juchu_kizai_head.juchu_head_id AND v_nyushuko_den_lst.nyushuko_dat = v_get_juchu_kizai_head.sagyo_den_dat AND v_nyushuko_den_lst.nyushuko_basho_id = v_get_juchu_kizai_head.sagyo_id AND v_nyushuko_den_lst.nyushuko_shubetu_id = v_get_juchu_kizai_head.nyushuko_shubetu_id AND v_nyushuko_den_lst.juchu_kizai_head_kbn = v_get_juchu_kizai_head.juchu_kizai_head_kbnv::bigint AND (v_nyushuko_den_lst.nyushuko_shubetu_id IS DISTINCT FROM 3 OR v_get_juchu_kizai_head.juchu_kizai_head_idv = v_nyushuko_den_lst.juchu_kizai_head_id::text)
-  WHERE v_nyushuko_den_lst.juchu_kizai_meisai_id <> 0 AND v_nyushuko_den_lst.kizai_id <> 0 AND NOT ((v_nyushuko_den_lst.sagyo_kbn_id = 30 OR v_nyushuko_den_lst.sagyo_kbn_id = 80 OR v_nyushuko_den_lst.sagyo_kbn_id = 90) AND v_nyushuko_den_lst.plan_qty = 0 AND v_nyushuko_den_lst.result_qty = 0 AND v_nyushuko_den_lst.result_adj_qty = 0)
+  WHERE v_nyushuko_den_lst.juchu_kizai_meisai_id <> 0 AND v_nyushuko_den_lst.kizai_id <> 0 AND NOT (v_nyushuko_den_lst.sagyo_kbn_id = 30 AND v_nyushuko_den_lst.plan_qty = 0 AND v_nyushuko_den_lst.result_qty = 0 AND v_nyushuko_den_lst.result_adj_qty = 0)
   GROUP BY v_nyushuko_den_lst.nyushuko_shubetu_id, v_nyushuko_den_lst.sagyo_kbn_id, v_nyushuko_den_lst.sagyo_kbn_nam, v_nyushuko_den_lst.sagyo_kbn_nam_short, v_nyushuko_den_lst.juchu_head_id, v_nyushuko_den_lst.juchu_kizai_head_id, v_nyushuko_den_lst.juchu_kizai_meisai_id, v_nyushuko_den_lst.nyushuko_dat, v_nyushuko_den_lst.nyushuko_basho_id, v_nyushuko_den_lst.shozoku_nam, v_nyushuko_den_lst.koen_nam, v_nyushuko_den_lst.koenbasho_nam, v_nyushuko_den_lst.kokyaku_nam, v_get_juchu_kizai_head.juchu_kizai_head_idv, v_get_juchu_kizai_head.head_namv, v_get_juchu_kizai_head.juchu_kizai_head_kbnv, v_nyushuko_den_lst.kizai_id, v_nyushuko_den_lst.kizai_nam, v_nyushuko_den_lst.bld_cod, v_nyushuko_den_lst.tana_cod, v_nyushuko_den_lst.eda_cod, (COALESCE(v_nyushuko_den_lst.ctn_flg, 0)), v_nyushuko_den_lst.mem, v_nyushuko_den_lst.dsp_ord_num_meisai, v_nyushuko_den_lst.indent_num, v_nyushuko_den_lst.mem2, v_nyushuko_den_lst.add_user, v_nyushuko_den_lst.upd_user
   ORDER BY v_nyushuko_den_lst.nyushuko_dat, v_nyushuko_den_lst.sagyo_kbn_id, v_nyushuko_den_lst.nyushuko_basho_id, v_nyushuko_den_lst.juchu_head_id, v_nyushuko_den_lst.juchu_kizai_head_id, v_get_juchu_kizai_head.juchu_kizai_head_idv, v_get_juchu_kizai_head.juchu_kizai_head_kbnv, (COALESCE(v_nyushuko_den_lst.ctn_flg, 0)), v_nyushuko_den_lst.dsp_ord_num_meisai, v_nyushuko_den_lst.bld_cod, v_nyushuko_den_lst.tana_cod, v_nyushuko_den_lst.eda_cod, v_nyushuko_den_lst.kizai_id;
