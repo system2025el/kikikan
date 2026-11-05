@@ -55,6 +55,8 @@ npx tsc --noEmit          # 型チェックは全体で問題なく通る
     - 2026-09-24: `t_ido_den` / `t_ido_result` / `t_ido_ctn_result` の `juchu_head_id`・`juchu_kizai_head_id`、`v_ido_den3_lst`（列の入れ替え）、`v_ido_den3_result`（4列追加）、`v_ido_den2_meisai_lst`（新規ビュー）
     - 2026-09-30: `t_nyushuko_den` の `nyuko_fix_qty`、`v_nyushuko_den` / `v_nyushuko_den2` の `nyuko_fix_sts`・`shuko_fix_sts`
     - 2026-10-06: `v_nyushuko_den2_lst` の `juchu_meisai_del_flg`
+    - 2026-10-21: `t_juchu_kizai_jizen`（新規テーブル。事前準備）、`v_nyushuko_den` / `v_nyushuko_total_time_sts` の `jizen_juchu_kizai_head_id`
+    - 2026-10-28: `t_nyushuko_den` / `v_nyushuko_den2_lst` の `plan_chg_flg`
 - `app/_lib/db/storage/*.ts` — Supabase Storage へのアクセス層。**このファイル群には `'use server'` を付けない**（付けるとexportが外部から直接叩けるServer Actionsになり、任意のパスに対しservice_role権限の署名付きURLを発行できてしまう）。呼び出しは必ず権限チェックを行う feature 側の `_lib/*-funcs.ts` を経由させる。
 - DBのカラムはsnake_case、アプリコードはcamelCase。変換は自動レイヤーがなく、クエリごと（SQLのエイリアス指定や手動マッピング）に行っている。
 
@@ -108,8 +110,18 @@ npx tsc --noEmit          # 型チェックは全体で問題なく通る
 - **コンテナ（`t_juchu_ctn_meisai`）の追加・削除・予定数・メモは出庫明細（最終確認 `sagyo_kbn_id = 20`）で行う**（`saveShukoCtn`）。メイン受注機材明細では閲覧のみで、保存・コピー・分離もコンテナを扱わない。コンテナ明細は出庫明細の保存時と HT・ゲートの送信時に、**その作業場所（`shozoku_id`）の1行だけ**作る。出発時（`updShukoDetail`）は予定数を読取数＋補正数で確定するだけで、読取0のコンテナは伝票・実績・コンテナ明細ごと削除する。入庫伝票（30）のコンテナ分は出発済みの出庫場所の分だけで作る（削除時は `ctn-nyuko-funcs.ts` の `syncNyukoCtnAfterDelete` で合わせる）。
 - **採番**：コンテナの明細IDは、同じ受注機材ヘッダーの別の場所に同じ機材があればその値、無ければヘッダー内のコンテナの最大値＋1（機材の明細IDとは重なってよい）。表示順は K と Y でそろえる。Web の採番は `t_nyushuko_den` を `SHARE ROW EXCLUSIVE` でロックしてから行い、送信RPC（`SHARE`）と順番に採番される。機材の明細IDは `t_juchu_kizai_meisai` と `t_nyushuko_den` の最大値から採番する（受注削除の行と PK が衝突しないように）。
 - **受注削除**：実績のある機材をメイン明細で削除した、または出庫場所を変えたときは、元の場所の出庫伝票を**同じ明細IDのまま予定数0で残す**（過剰なので出発できない＝現物を取り除いてもらう）。判定は `v_nyushuko_den2_lst.juchu_meisai_del_flg`（予定0かつ受注明細が無い。出庫では明細の `shozoku_id` と伝票の場所も照合）で、Web・HT・ゲートとも同じ列を読む。表示は機材名を `statusColors.deleted`（文字色）で赤くする（Web だけ「受注削除」の文字も出す）。解消は出庫明細で実績をクリアする。
-- **送信RPC は `nyushuko_send_20261009_1`**（HT・ゲート共通）。旧 `nyushuko_send_20260626_1` は全端末の切り替えが済むまで残す。
+- **数量変更**：読取実績のある機材の数量を受注側（メイン・キープ・分離）で変えると、`t_nyushuko_den.plan_chg_flg` が1になり、出庫明細（事前明細を含む）・HT・ゲートで機材名を強調する（どれも `v_nyushuko_den2_lst.plan_chg_flg` を読む。受注削除と同じ赤（2026-10-29 決定）。Web だけ「数量変更」の文字も出す。色の定数は受注削除と分けて `statusColors.planChanged`）。予定数 = 読取数＋補正数 になると0に戻る。**HT・ゲートは送信後に明細を取り直さないので、送信で一致しても開き直すまで赤いまま**（端末側で一致を判定して消すと、読取クリアの後に DB と食い違うため消さない。2026-11-04 決定）。**立てる・消すは `t_nyushuko_den` の BEFORE UPDATE トリガー（`trg_nyushuko_den_plan_chg`）が行い、アプリからは書かない**（このDBで唯一のトリガー。送信RPCを含むすべての UPDATE で効く）。出庫（10/20）と事前（80/90）の機材が対象で、表示はビューの列を読む。一括補正（`updShukoAdjust`）は予定数を書き戻さず、補正数だけを「画面に出ている予定数 − DB の今の読取数」にする（`updateNyushukoDenAdjustToPlan`。開いたあとに受注側で予定数が変わっていても補正は画面の予定数までで、再表示で数量変更の強調と差が残る）。
+- **送信RPC は `nyushuko_send_20261021_1`**（HT・ゲート共通。`20261009_1` に事前準備 80/90 の受付を足したもの）。旧 `nyushuko_send_20261009_1`・`nyushuko_send_20260626_1` は全端末の切り替えが済むまで残す。RPC が拒否するとき（事前の拒否4種など）は `RAISE EXCEPTION` の文言がそのまま端末に出る（ゲートは `R.GetErrorMessage` で JSON から文言だけを取り出す）ので、利用者が読める日本語で書くこと。
 - 合体している受注機材ヘッダーは `v_get_juchu_kizai_head` が**入出庫種別ごと**にまとめる（ピッキングと最終確認でヘッダーの組み合わせが違っても1行）。そのため最終確認の画面には最終確認の行が無いヘッダーも入り、一緒に出発済みになる（上の `pickingDeleted` はこのためのガード）。ヘッダー名は `t_juchu_kizai_head` から引き、空なら空欄で表示する。
+
+**事前準備（事前ピッキング 80・事前最終確認 90。数量変更と合わせて 2026-11-05 本番反映）**: 出庫日より前に機材を用意しておくための作業。メイン受注機材明細に「事前日時・事前数」を持たせ、事前の出庫伝票を作り、事前で読んだタグを本番の出庫に引き継ぐ。
+
+- **データ**：`t_juchu_kizai_jizen`（キーは受注機材明細と同じ4列。1明細に0〜1行）。対象はメインの受注機材ヘッダーの機材だけ（返却・キープ・コンテナは対象外）。明細のコピー・受注コピーでは引き継がない。入力チェックは「事前日時 < 明細の出庫場所の出庫日時（時刻まで）」「0 ≤ 事前数 ≤ 合計数」で、画面（`_lib/jizen.ts` の `validateJizen`）と `saveJuchuKizai` の両方で行う。事前数0は受注数・予備数と同じく保存できる。
+- **伝票**：保存時に `t_nyushuko_den` に 80/90 の2行を作る（日時＝事前日時、場所＝明細の `shozoku_id`、予定数＝事前数。`saveJuchuKizai` 内の事前準備の保存）。事前準備だけの変更では明細・本番の伝票・入庫伝票の処理を通さない（`withoutJizen` / `getJizenChangedRows` で分けて判定）。
+- **変更・削除**：事前日を消すと、実績・補正のある事前の伝票は同じ明細IDのまま予定0で残る（事前だけ受注削除。判定は「事前準備の行が無い、または明細の出庫場所が伝票の場所と違う」で、`v_nyushuko_den2_lst` と `deleteEmptyNyushukoDen` が同じ判定）。出庫場所を変えると変更前の場所の事前の伝票・実績は削除する（本番は受注削除として残る）。明細の削除では事前は削除。分離は本番と同じ（全数なら削除、一部なら元の明細に残し事前数を合計数まで下げる）。事前日時の設定・変更・解除で事前の実績があると作業中確認を出す（事前数だけの変更では出さない）。
+- **本番との連動**：送信RPC が事前の読取を本番（80→10、90→20。同じ明細・場所）にコピーする（タグの状態値は本番と同じ12/22）。Web の事前詳細でのタグ削除と補正は**事前→本番の片方向**で反映する（`deleteHonbanResultByJizenTags`、補正は本番を上書きする `updateHonbanAdjFromJizen`）。本番で消した・入れたものは事前に影響しない。事前には出発が無く、**本番が出発済みなら事前の送信・補正・タグ削除はできない**（ビューが事前の行に本番の出発済みを返す）。
+- **画面**：出庫一覧に入出庫種別 3（`NYUSHUKO_SHUBETU_ID.jizen`）として**機材ヘッダーごとに1行**（合体しない）で混ぜる。日付は事前日時、明細名は `dispColors.jizen` の文字色、チェックボックスは無い。事前明細・事前詳細は出庫明細・出庫詳細の画面を流用し、作業区分 80/90 と `?jkhId=機材ヘッダーid` で開く（サーバー側は `shuko-detail/_lib/jizen-funcs.ts`）。80/90 を本番の作業区分として扱う判定は `isJizenSagyoKbn` / `toHonbanSagyoKbn`（`app/_lib/constants.ts`）を使う。メイン受注機材明細の事前日時・事前数の列は初期非表示で、「事前準備」ボタンで開閉する（明細を選んでいれば一括設定のダイアログ）。
+- **在庫と色**：下の「在庫数の算出」を参照。色は本番日色マスタの `clolor_id = 4`（`HONBANBI_SHUBETU_ID.jizen`）。
 
 **検索条件の文字列エスケープ**: PostgREST の `.like()` / `.ilike()` / `.or()` にユーザー入力を渡すときは、`app/(main)/_lib/escape-string.ts` を必ず通す（17ファイルが利用）。`escapeLikeString` は `%` `_` `\` をエスケープ、`escapeOrLikeString` はさらに `.or()` のダブルクォートを閉じてしまわないよう2段階でエスケープする。素通しすると検索が壊れるだけでなく、`.or()` ではフィルタ式を注入できてしまう。
 
@@ -119,7 +131,7 @@ npx tsc --noEmit          # 型チェックは全体で問題なく通る
 
 **マテリアライズドビュー**: `postgres.ts` の `refreshVRfid()` は `v_rfid` マテリアライズドビューを手動でリフレッシュする。設計上、エラーは握りつぶしてログ出力のみ行う（リフレッシュ失敗を理由に呼び出し元の更新処理自体を失敗させないため）。RFIDのステータスに影響する書き込みの後に呼び出すこと。
 
-**`t_juchu_kizai_honbanbi` は「本番日」ではなく使用日カレンダー**: 名前とカラム名（`juchu_honbanbi_dat`、`juchu_honbanbi_shubetu_id`）が「本番日」だが、実体は**受注機材ヘッダー単位の使用日を1日1行で持つカレンダー**であり、仕込み・本番といったイベント日だけのテーブルではない。種別IDは `HONBANBI_SHUBETU_ID`（`app/_lib/constants.ts`）と `m_honbanbi_color` に対応する：`1` 使用中（出庫日〜入庫日の全日）、`2` 出庫日、`3` 入庫日、`10` 仕込み、`20` RH、`30` GP、`40` 本番。
+**`t_juchu_kizai_honbanbi` は「本番日」ではなく使用日カレンダー**: 名前とカラム名（`juchu_honbanbi_dat`、`juchu_honbanbi_shubetu_id`）が「本番日」だが、実体は**受注機材ヘッダー単位の使用日を1日1行で持つカレンダー**であり、仕込み・本番といったイベント日だけのテーブルではない。種別IDは `HONBANBI_SHUBETU_ID`（`app/_lib/constants.ts`）と `m_honbanbi_color` に対応する：`1` 使用中（出庫日〜入庫日の全日）、`2` 出庫日、`3` 入庫日、`10` 仕込み、`20` RH、`30` GP、`40` 本番。`4` 事前準備は色だけに使う値で、このテーブルには入れない（事前準備は `t_juchu_kizai_jizen` で持つ）。
 
 - 機材明細画面の保存時、種別 `1` は `deleteSiyouHonbanbi`（種別1のみDELETE）→ `getRange(出庫日, 入庫日)` の全日を再INSERTという作り直し方式で更新する。種別 `2`/`3` は出庫日・入庫日にupsert、種別 `10`〜`40` は本番日入力ダイアログの差分（追加・更新・削除）で更新する。返却受注機材ヘッダーには「返却日〜親の入庫日」の範囲で種別 `1` が作られる。
 - 出庫日・入庫日が未設定だと `getRange` が空配列を返し、種別 `1` の行が1件も作られない（＝在庫を消費しない）点に注意。
@@ -128,6 +140,7 @@ npx tsc --noEmit          # 型チェックは全体で問題なく通る
 
 - 分子の保有数 `kizai_qty` は**RFIDタグの実本数**（`v_rfid` で `del_flg = 0` かつ `rfid_kizai_sts < 100` またはNULL。100以上はNG・廃棄・紛失・無効化）。ピッキング中や出発済みなどの作業ステータスは保有数に影響しない。所属（KICS/YARD）別ではなく全体合計。
 - 分母の `plan_qty` は `t_juchu_kizai_honbanbi` の日付（種別を問わず `DISTINCT`）に紐づく `plan_kizai_qty + plan_yobi_qty` の全受注合計。上記の通り種別 `1` が期間全日に入るため、**引き当ては出庫日〜入庫日の全日に効く**。同じ日に種別1と種別40があっても `DISTINCT` で1回にまとまり二重計上はされない。コンテナ明細（`t_juchu_ctn_meisai`）もUNION ALLで加算される。
+- **事前準備**は、準備日〜出庫日の前日（JST の日付）に事前数を引き当てる（`v_juchu_kizai_dat_qty`・`v_juchu_kizai_dat_qty_kasi` の UNION ALL。その受注機材ヘッダーに使用日がある日は除く＝その日は合計数で引き当て済み）。出庫日以降は今までどおり合計数。在庫表の左端は「最も早い準備日の前日」から始まり、準備の期間は色マスタ4で塗る（貸出状況の色は `v_honbanbi_kasi_jokyo` が種別4で返す）。画面で事前数を変えたときは保存済みの準備期間だけをローカル補正し、事前日時の変更は保存後に反映する（通常の出庫日の変更と同じ）。
 - 除外条件は `t_juchu_head.del_flg = 0` のみで、`juchu_sts`（入力中・受注キャンセル等）は考慮されない。キープヘッダーの `keep_qty` は集計対象外。返却ヘッダーの明細はマイナス数量で保存され、合算により在庫が戻る。
 - 該当日に行が無い場合は在庫データではなく保有数をそのまま表示する（`COALESCE(v.zaiko_qty, k.kizai_qty)`）。画面側で編集中の増減は出庫日〜入庫日の範囲だけをローカル補正しており、これはDB側の引き当て範囲と一致している。
 
@@ -154,6 +167,8 @@ npx tsc --noEmit          # 型チェックは全体で問題なく通る
 
 **関数の中の `row(...)::<テーブル名>` は列の個数と物理順に依存する**ので、テーブルに列を足すときは依存ビューだけでなく `pg_get_functiondef` の全文検索も行うこと（移動の送信RPC3本がこれで壊れた）。
 
+**`t_nyushuko_den` には BEFORE UPDATE トリガー（`trg_nyushuko_den_plan_chg`）がある**（このDBで唯一）。`plan_chg_flg` しか書き換えないが、トリガーが落ちると `t_nyushuko_den` への UPDATE がすべて失敗する。トリガー関数を変えるときは `scripts/db-tables/` のファイルを更新し、ステージングでトランザクション内の確認をしてから当てること。
+
 ## コーディング規約
 
 - import順序は `eslint-plugin-simple-import-sort` により強制される（`import/order` ではない）。`npm run fix` で自動修正可能。
@@ -174,6 +189,6 @@ npx tsc --noEmit          # 型チェックは全体で問題なく通る
   - ただし**`Asia/Tokyo` はこのファイル専用ではない**。「今日・明日・今月」といった**検索条件の日付範囲を組み立てる側**（`app/_lib/db/tables/v-juchu-lst.ts`・`v-juchu-kizai-head-lst.ts`・`v-nyushuko-den2.ts`・`v-seikyu-date-lst.ts` など）では `dayjs().tz('Asia/Tokyo')` を直に書いている。日付の境界（`startOf('day')`）がJSTでないと一覧の絞り込みが1日ずれるため、**範囲条件を書くときはタイムゾーン指定を省略しないこと**。
 - 一覧テーブルは各featureで `<feature>-table.tsx` として MUI の `Table`/`TableContainer` を直接使って実装する。固定ヘッダーは `<TableContainer sx={{ maxHeight: '86vh' }}><Table stickyHeader size="small" padding="none">` の組み合わせ、ページングは `MuiTablePagination`（`_ui/table-pagination.tsx`）、セルのはみ出し表示は `LightTooltipWithText`（`(masters)/_ui/tables.tsx`）、ヘッダー固定時の高さ維持は末尾の空行（emptyRows）を使う。
   - 共通コンポーネントの `app/(main)/_ui/gridtable.tsx` は**どこからも参照されていない**ので使わないこと。`_ui/table.tsx` も一覧用途では使わない（`SelectTable` だけが受注画面の1箇所で使われている）。
-- **色はハードコードせず `app/(main)/_lib/colors.ts` から取る**（20ファイルが参照）。`statusColors`（過剰・不足・済・コンテナ・未保存は背景色、受注削除 `deleted` だけは**文字色**）、`fixStsColors`（到着・出発の全部済／一部済）、`sagyoKbnColors`（出庫ピッキング・出庫最終確認・入庫カウント・移動。明細/詳細画面のタイトルとテーブルヘッダーの背景に使い、出庫・入庫はハンディアプリと色を合わせている）、`dispColors`、`weeklyColors`。
+- **色はハードコードせず `app/(main)/_lib/colors.ts` から取る**（20ファイルが参照）。`statusColors`（過剰・不足・済・コンテナ・未保存は背景色、受注削除 `deleted` と数量変更 `planChanged` は**文字色**）、`fixStsColors`（到着・出発の全部済／一部済）、`sagyoKbnColors`（出庫ピッキング・出庫最終確認・入庫カウント・移動。明細/詳細画面のタイトルとテーブルヘッダーの背景に使い、出庫・入庫はハンディアプリと色を合わせている。事前の画面も本番と同じ作業区分の色）、`dispColors`（キープ・返却・事前 `jizen` の明細名の文字色など）、`weeklyColors`。在庫表・貸出状況の色（本番日・使用期間・事前準備）はコードではなく本番日色マスタ `m_honbanbi_color` から取る。
 
 **ファイル・コンポーネント命名**: 各featureの `_ui/` 内は `<feature>.tsx`（ルートに対応するトップレベルのクライアントコンポーネント）、`<feature>-table.tsx`（一覧テーブル）、`*-dialog.tsx`（モーダル）という命名パターンに揃える。

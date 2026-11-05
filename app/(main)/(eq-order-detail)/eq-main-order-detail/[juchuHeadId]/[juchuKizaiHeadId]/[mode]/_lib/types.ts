@@ -124,6 +124,10 @@ export type JuchuKizaiMeisaiValues = {
   delFlag: boolean;
   saveFlag: boolean;
   selected: boolean;
+  // 事前準備日時（未設定ならプロパティ自体を持たない。JSON比較で未保存判定するため null は入れない）
+  jizenDat?: Date;
+  // 事前準備数
+  jizenQty?: number;
 };
 
 export type IdoJuchuKizaiMeisaiValues = {

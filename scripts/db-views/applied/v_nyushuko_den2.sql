@@ -1,14 +1,15 @@
--- 適用状況: ステージング 2026-09-30 / 本番 2026-10-07
+-- 適用状況: ステージング 2026-10-21 / 本番 2026-11-05
 -- =====================================================================
--- v_nyushuko_den2  末尾に nyuko_fix_sts / shuko_fix_sts（到着・出発の 0=なし / 1=一部 / 2=全部）を追加
+-- v_nyushuko_den2  事前の行（入出庫種別 3）を機材ヘッダーごとに結合する（列構成は不変）
 --
--- 変更内容: v_nyushuko_den の2列をそのまま通し、GROUP BY にも同2列を追加した。
--- 行が増えない根拠: 2列は v_nyushuko_den の1行（= 既存の GROUP BY キー）に対して1つに決まる。
+-- v_get_juchu_kizai_head との結合に「種別 3 なら juchu_kizai_head_idv = v_nyushuko_den.jizen_juchu_kizai_head_id」を加える。
+-- v_get_juchu_kizai_head は事前の行を機材ヘッダーごとに分けて返すので、この条件で同じヘッダーの行だけを選ぶ（種別 1・2 は今と同じ）。
+-- 事前の行の juchu_kizai_head_idv は、その機材ヘッダーidの1つだけになる。出庫一覧（Web・HT・ゲート）は種別 1 と 3 で取得する。
 --
--- nyuko_fix_flg / shuko_fix_flg は v_nyushuko_den の値をそのまま通す（2026-10-01 から「全部確定済みのときだけ 1」。
--- 定義の変更は v_nyushuko_den.sql 側だけで、このファイルの SQL 本体は変わらない）。
--- 前提: v_nyushuko_den.sql → v_nyushuko_den2.sql の順で適用する（ロールバックは逆順）。
--- reloptions: security_invoker = on（開発環境・本番とも同じ）
+-- 前提: v_nyushuko_den.sql と v_get_juchu_kizai_head.sql を先に当てる。
+-- reloptions: security_invoker = on
+-- 2026-10-21 ステージングで検証（一時ビューで読み取りのみ）: 事前の伝票が無い状態で全列・行数（3,559）とも差分0。
+--   テストの受注（91432）に事前準備を3明細入れた状態で、同じ準備日時の2ヘッダーが別々の行になり、本番の行（合体）の値は変わらないことを確認。
 -- =====================================================================
 
 CREATE OR REPLACE VIEW public.v_nyushuko_den2 WITH (security_invoker = on) AS
@@ -48,7 +49,7 @@ CREATE OR REPLACE VIEW public.v_nyushuko_den2 WITH (security_invoker = on) AS
     v_nyushuko_den.nyuko_fix_sts,
     v_nyushuko_den.shuko_fix_sts
    FROM v_nyushuko_den
-     LEFT JOIN v_get_juchu_kizai_head ON v_nyushuko_den.juchu_head_id = v_get_juchu_kizai_head.juchu_head_id AND v_nyushuko_den.nyushuko_dat = v_get_juchu_kizai_head.sagyo_den_dat AND v_nyushuko_den.nyushuko_basho_id = v_get_juchu_kizai_head.sagyo_id AND v_nyushuko_den.nyushuko_shubetu_id = v_get_juchu_kizai_head.nyushuko_shubetu_id AND v_nyushuko_den.juchu_kizai_head_kbn = v_get_juchu_kizai_head.juchu_kizai_head_kbn
+     LEFT JOIN v_get_juchu_kizai_head ON v_nyushuko_den.juchu_head_id = v_get_juchu_kizai_head.juchu_head_id AND v_nyushuko_den.nyushuko_dat = v_get_juchu_kizai_head.sagyo_den_dat AND v_nyushuko_den.nyushuko_basho_id = v_get_juchu_kizai_head.sagyo_id AND v_nyushuko_den.nyushuko_shubetu_id = v_get_juchu_kizai_head.nyushuko_shubetu_id AND v_nyushuko_den.juchu_kizai_head_kbn = v_get_juchu_kizai_head.juchu_kizai_head_kbn AND (v_nyushuko_den.nyushuko_shubetu_id IS DISTINCT FROM 3 OR v_get_juchu_kizai_head.juchu_kizai_head_idv = v_nyushuko_den.jizen_juchu_kizai_head_id::text)
      LEFT JOIN v_get_juchu_kizai_section ON v_nyushuko_den.juchu_head_id = v_get_juchu_kizai_section.juchu_head_id AND v_nyushuko_den.nyushuko_dat = v_get_juchu_kizai_section.sagyo_den_dat AND v_nyushuko_den.nyushuko_basho_id = v_get_juchu_kizai_section.sagyo_id AND v_nyushuko_den.nyushuko_shubetu_id = v_get_juchu_kizai_section.nyushuko_shubetu_id AND v_nyushuko_den.juchu_kizai_head_kbn = v_get_juchu_kizai_section.juchu_kizai_head_kbn
      LEFT JOIN t_juchu_head ON v_nyushuko_den.juchu_head_id = t_juchu_head.juchu_head_id
      LEFT JOIN t_juchu_kizai_head ON t_juchu_head.juchu_head_id = t_juchu_kizai_head.juchu_head_id

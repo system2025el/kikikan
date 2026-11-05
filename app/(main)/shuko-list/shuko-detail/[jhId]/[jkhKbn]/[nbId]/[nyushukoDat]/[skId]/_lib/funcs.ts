@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { PoolClient } from 'pg';
 
-import { JUCHU_KIZAI_HEAD_KBN, NYUSHUKO_SHUBETU_ID, SAGYO_KBN_ID } from '@/app/_lib/constants';
+import { isJizenSagyoKbn, JUCHU_KIZAI_HEAD_KBN, NYUSHUKO_SHUBETU_ID, SAGYO_KBN_ID } from '@/app/_lib/constants';
 import pool, { refreshVRfid } from '@/app/_lib/db/postgres';
 import {
   deleteJuchuContainerMeisaiShozoku,
@@ -29,6 +29,7 @@ import {
   lockNyushukoDenForNumberingTx,
   selectShukoCtnDenRowsTx,
   updateNyushukoDen,
+  updateNyushukoDenAdjustToPlan,
   upsertNyushukoDen,
 } from '@/app/_lib/db/tables/t-nyushuko-den';
 import {
@@ -51,6 +52,7 @@ import {
   toNyushukoFixErrorReason,
 } from '@/app/(main)/_lib/nyushuko-fix-error';
 
+import { getJizenDetail, getJizenDetailTable, updJizenAdjust } from './jizen-funcs';
 import { calcShukoDiff, hasShukoDiff } from './shuko-diff';
 import {
   NyukoValues,
@@ -67,6 +69,7 @@ import {
  * @param nyushukoBashoId 入出庫場所id
  * @param nyushukoDat 入出庫日時
  * @param sagyoKbnId 作業区分id
+ * @param juchuKizaiHeadId 受注機材ヘッダーid（事前（80/90）のときだけ。事前は機材ヘッダーごとに開く）
  * @returns
  */
 export const getShukoDetail = async (
@@ -74,8 +77,14 @@ export const getShukoDetail = async (
   juchuKizaiHeadKbn: number,
   nyushukoBashoId: number,
   nyushukoDat: string,
-  sagyoKbnId: number
+  sagyoKbnId: number,
+  juchuKizaiHeadId?: number
 ) => {
+  if (isJizenSagyoKbn(sagyoKbnId)) {
+    return juchuKizaiHeadId
+      ? await getJizenDetail(juchuHeadId, juchuKizaiHeadId, nyushukoBashoId, nyushukoDat, sagyoKbnId)
+      : null;
+  }
   try {
     const data = await selectNyushukoOne(
       juchuHeadId,
@@ -142,6 +151,7 @@ export const getShukoDetail = async (
  * @param nyushukoBashoId 入出庫場所id
  * @param nyushukoDat 入出庫日
  * @param sagyoKbnId 作業区分id
+ * @param juchuKizaiHeadId 受注機材ヘッダーid（事前（80/90）のときだけ）
  * @returns
  */
 export const getShukoDetailTable = async (
@@ -149,8 +159,14 @@ export const getShukoDetailTable = async (
   juchuKizaiHeadKbn: number,
   nyushukoBashoId: number,
   nyushukoDat: string,
-  sagyoKbnId: number
+  sagyoKbnId: number,
+  juchuKizaiHeadId?: number
 ) => {
+  if (isJizenSagyoKbn(sagyoKbnId)) {
+    return juchuKizaiHeadId
+      ? await getJizenDetailTable(juchuHeadId, juchuKizaiHeadId, nyushukoBashoId, nyushukoDat, sagyoKbnId)
+      : [];
+  }
   try {
     const data = await selectNyushukoDetail(juchuHeadId, juchuKizaiHeadKbn, nyushukoBashoId, nyushukoDat, sagyoKbnId);
 
@@ -201,6 +217,7 @@ const toShukoDetailTableValues = (data: Awaited<ReturnType<typeof selectNyushuko
       indentNum: d.indent_num ?? 0,
       mem2: d.mem2 ?? '',
       juchuMeisaiDelFlg: d.juchu_meisai_del_flg ?? 0,
+      planChgFlg: d.plan_chg_flg ?? 0,
       saveFlag: true,
       delFlag: false,
     })
@@ -793,27 +810,34 @@ export const confirmChildJuchuKizaiHead = async (juchuHeadId: number, juchuKizai
 };
 
 export const updShukoAdjust = async (adjustData: ShukoDetailTableValues[], userNam: string) => {
-  const updateData: NyushukoDen[] = adjustData.map((d) => ({
-    juchu_head_id: d.juchuHeadId,
-    juchu_kizai_head_id: d.juchuKizaiHeadId,
-    juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
-    kizai_id: d.kizaiId,
-    plan_qty: d.planQty,
-    result_adj_qty: (d.planQty ?? 0) - (d.resultQty ?? 0),
-    sagyo_den_dat: d.nyushukoDat,
-    sagyo_id: d.nyushukoBashoId,
-    sagyo_kbn_id: d.sagyoKbnId ?? 0,
-    dsp_ord_num: d.dspOrdNumMeisai,
-    indent_num: d.indentNum,
-    upd_dat: new Date().toISOString(),
-    upd_user: userNam,
-  }));
+  // 事前（80/90）は本番の補正も上書きする。本番が出発済みなら補正しない
+  if (adjustData.length > 0 && isJizenSagyoKbn(adjustData[0].sagyoKbnId ?? 0)) {
+    if (!(await updJizenAdjust(adjustData, userNam))) {
+      throw new Error('[updShukoAdjust] 本番の出庫が出発済みのため、事前の補正はできません');
+    }
+    return;
+  }
   const connection = await pool.connect();
   try {
     await connection.query('BEGIN');
 
-    for (const data of updateData) {
-      await updateNyushukoDen(data, connection);
+    // 補正は画面に出ている予定数までにとどめ、予定数は書かない（書くと開いたあとに受注側で変えた予定数が戻ってしまう。
+    // 予定数が変わっていれば、補正後の再表示で数量変更の強調と差が出る）
+    for (const d of adjustData) {
+      await updateNyushukoDenAdjustToPlan(
+        {
+          juchu_head_id: d.juchuHeadId,
+          juchu_kizai_head_id: d.juchuKizaiHeadId,
+          juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
+          sagyo_kbn_id: d.sagyoKbnId ?? 0,
+          sagyo_den_dat: d.nyushukoDat,
+          sagyo_id: d.nyushukoBashoId,
+          kizai_id: d.kizaiId,
+        },
+        d.planQty ?? 0,
+        userNam,
+        connection
+      );
     }
 
     await connection.query('COMMIT');

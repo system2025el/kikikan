@@ -35,6 +35,8 @@ export type ShukoTableValues = {
   nyuryokuUser: string;
   sstbPlanQty: number;
   schkPlanQty: number;
+  /** 事前（事前ピッキング・事前最終確認）の行。機材ヘッダーごとに1行で、日時は準備日時 */
+  jizenFlg: boolean;
 };
 
 export type ShukoKizai = {

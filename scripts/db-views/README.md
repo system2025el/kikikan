@@ -83,6 +83,69 @@
 - 適用後：`v_nyushuko_den2_lst` は 31→32列（末尾が `juchu_meisai_del_flg`）、他の2本は列・権限・`security_invoker` が不変。定義はファイルと PG が補う括弧の違いだけ。分かれている出庫は0件。受注削除として表示される古い行（予定0・受注明細なし）は適用前の確認で16行
 - `v_rfid_sts` と同じく、`v_nyushuko_den2_lst` は2回目の変更なので、第1弾（2026-09-03）の2ファイルを削除して置き換えました。`applied/v_nyushuko_den2_lst.rollback.sql` は第1弾の31列の定義に戻すものです
 
+### 2026-11-05 の本番適用（事前準備・数量変更）
+
+事前準備（作業区分 80 事前ピッキング・90 事前最終確認）で次の12本を変えました（2026-10-21 ステージング適用、2026-11-05 本番適用）。詳細は下の「事前準備」の節。`v_nyushuko_den2_lst` は数量変更の列（2026-10-28）と事前数0の変更（2026-11-04）も含む最終形を1回で当てています。
+
+- 本番は「テーブル `t_juchu_kizai_jizen` → `plan_chg_flg` の列とトリガー → マスタ2件 → このビュー12本 → 送信RPC `nyushuko_send_20261021_1`」の順。ビュー12本は下の適用順で**1つのトランザクション**（`lock_timeout 5s`・`statement_timeout 60s`、DDL だけで約0.2秒）で当てた。適用直前の本番バックアップは `~/db-backup/prod_20261105_1830/`（スキーマ、public 全体の `.dump`、全70ビュー・全18関数の定義 `prod_all_viewdefs_BEFORE.sql` / `prod_all_funcdefs_BEFORE.sql`、各段の適用ログ `apply_step*.txt`、適用後の確認 `verify_after_*.txt`）
+- 適用前（2026-11-04、本番・読み取りのみ）に、12本とも本番の定義が `.rollback.sql` と一致すること、新しい定義を一時ビューにして12本＋依存の `v_zaiko_qty`・`v_zaiko_qty_kasi` の全14本が行数一致・`EXCEPT ALL` 双方向で差分0であることを確認
+- ⚠️ そのとき、`v_juchu_kizai_dat_qty` のファイルに `WITH (security_invoker = on)` が無いことが分かった（ステージングに付いていなかったため）。`CREATE OR REPLACE VIEW` は WITH を省くとオプションを空にするので、そのまま当てると本番の `security_invoker` が外れるところだった。ファイルに明示し、ステージングも `ALTER VIEW ... SET (security_invoker = on)` で揃えてから当てた。**ステージングの定義からファイルを起こすときは、本番の `reloptions` も確認すること**
+- 適用後：12本とも定義がファイルと一致、`security_invoker` は12本とも on、ACL は適用前と同じ、列数は `v_nyushuko_total_time_sts` 11・`v_nyushuko_den` 27・`v_nyushuko_den_head` 19・`v_nyushuko_den2_lst` 33
+- `applied/` にあった前の版（`v_get_juchu_kizai_head`・`v_juchu_kizai_dat_qty`・`v_nyushuko_den`・`v_nyushuko_den2`・`v_nyushuko_den2_head`・`v_nyushuko_den2_lst`・`v_nyushuko_den_head`・`v_nyushuko_den_lst`・`v_nyushuko_total_time_sts` の9本）は削除して今回の版で置き換えた（`v_nyushuko_den2_lst` の第1弾・第2弾と同じ扱い）。`.rollback.sql` は 2026-11-05 の適用前の本番の定義に戻すもの
+
+| ビュー                       | 変更内容                                                                                                                              | ステージング | 本番       |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ------------ | ---------- |
+| `v_nyushuko_total_time_sts`  | 末尾に `jizen_juchu_kizai_head_id` を追加（10→11列）。80/90 の作業状態を 10/20 に読み替えて 11/12/21/22 にする。0件の行の除外に 80/90 | 2026-10-21   | 2026-11-05 |
+| `v_nyushuko_den`             | 入出庫種別に 80/90→3、末尾に `jizen_juchu_kizai_head_id`（26→27列）。事前の行の出発は本番（同じヘッダー・場所）の出発済みを返す       | 2026-10-21   | 2026-11-05 |
+| `v_nyushuko_den_head`        | 入出庫種別に 80/90→3、末尾に `jizen_juchu_kizai_head_id`（18→19列）。予定数・出発は `v_nyushuko_den` と同じ                           | 2026-10-21   | 2026-11-05 |
+| `v_nyushuko_den_lst`         | 入出庫種別に 80/90→3（列構成は不変）                                                                                                  | 2026-10-21   | 2026-11-05 |
+| `v_get_juchu_kizai_head`     | 入出庫種別に 80/90→3。事前は GROUP BY に機材ヘッダーを足して1ヘッダー1行（列構成は不変）                                              | 2026-10-21   | 2026-11-05 |
+| `v_get_juchu_kizai_section`  | 入出庫種別に 80/90→3（列構成は不変）。**定義を初めてリポジトリに入れた**                                                              | 2026-10-21   | 2026-11-05 |
+| `v_nyushuko_den2`            | 種別3のとき `v_get_juchu_kizai_head` を機材ヘッダーで照合して結合（列構成は不変）                                                     | 2026-10-21   | 2026-11-05 |
+| `v_nyushuko_den2_head`       | 同上（列構成は不変）                                                                                                                  | 2026-10-21   | 2026-11-05 |
+| `v_nyushuko_den2_lst`        | 同上。0件の行の除外に 80/90 を追加。80/90 の受注削除の判定は「事前準備の行が無い、または明細の出庫場所が違う」（列構成は不変）        | 2026-10-21   | 2026-11-05 |
+| `v_juchu_kizai_dat_qty`      | 準備日〜出庫日の前日に準備数を引き当てる（列構成・型は不変）                                                                          | 2026-10-21   | 2026-11-05 |
+| `v_juchu_kizai_dat_qty_kasi` | 同上（貸出状況の受注別）。**定義を初めてリポジトリに入れた**                                                                          | 2026-10-21   | 2026-11-05 |
+| `v_honbanbi_kasi_jokyo`      | 事前準備の期間を種別4（色マスタ `clolor_id = 4`）で返す（貸出状況のセルの色）。**定義を初めてリポジトリに入れた**                     | 2026-10-21   | 2026-11-05 |
+
+#### 事前準備（2026-10-21）
+
+メイン受注機材明細の「準備日時・準備数」（`t_juchu_kizai_jizen`。[`../db-tables/README.md`](../db-tables/README.md) の 20261021）から作る、作業区分 80・90 の出庫伝票を出庫一覧・明細に出し、在庫を引き当てるための変更です。
+
+- **出庫一覧に混ぜる。** 入出庫種別 3（事前）として、機材ヘッダーごとに1行。日付は準備日時。Web・HT・ゲートの一覧は種別 1 と 3 で取得する。事前の行の `juchu_kizai_head_idv` はそのヘッダーidの1つだけになる
+- **ヘッダー単位に分ける仕組み**：`v_nyushuko_total_time_sts`・`v_nyushuko_den`・`v_nyushuko_den_head` の末尾に `jizen_juchu_kizai_head_id`（80/90 はヘッダーid、それ以外は 0）を足して GROUP BY に入れる。`v_get_juchu_kizai_head` は列を足さずに GROUP BY だけ分け、`v_nyushuko_den2`・`_head`・`_lst` は種別3のときだけ `juchu_kizai_head_idv` と機材ヘッダーidを照合して結合する。種別1・2は0なので行は変わらない
+- **作業状態**：事前の行のピッキング列に 80、最終確認列に 90 の状態を、10/20 に読み替えた 11/12/21/22 で入れる（`m_sagyo_sts` に 81〜92 は足さない）。一覧の状態の絞り込みはそのまま使える
+- **出発**：事前には出発が無い。事前の行の `shuko_fix_flg`・`shuko_fix_sts` には、本番（同じ機材ヘッダー・場所、本番の出庫日時は `t_juchu_kizai_nyushuko`）の出発済みを返す。HT・ゲートの送信不可・グレー表示がそのまま効く
+- **在庫**：準備日〜出庫日の前日（JST の日付）に準備数を引き当てる。その受注機材ヘッダーに使用日（`t_juchu_kizai_honbanbi`）がある日は除く（その日は合計数で引き当て済みで、準備数 ≤ 合計数のため）。出庫日時が未設定なら引き当てない
+- `v_nyushuko_den2_lst_oyako` は `v_get_juchu_kizai_head` を機材ヘッダーで照合せずに結合するので、事前の行が二重になり得るが、使っている所（Web・関数 `nyuko_list_cut_keep_*`）は入庫（30）だけを見るので変えていない
+- `v_get_juchu_kizai_section` は事前の行をヘッダーで分けていない。同じ準備日時・場所に事前のヘッダーが2つあると、セクション名は2つ分をまとめたものになる（表示だけの差で行は増えない）
+
+検証（2026-10-21、ステージング。新定義を**一時ビュー**に作り読み取りのみで比較）：
+
+- 事前のデータが無い状態で、12本と依存の `v_zaiko_qty`・`v_zaiko_qty_kasi` の全14本が、既存列・行数とも `EXCEPT ALL` 双方向で差分0。列の型・順も不変
+- テストの受注（91432）に事前準備を3明細入れて、同じ準備日時の2ヘッダーが別々の行になる・状態が 11/12 で出る・本番の行の値は変わらない・本番を出発済みにすると事前の行だけ出発済みになる・在庫が準備日〜出庫日の前日だけ準備数ぶん減る・色が種別4になることを確認
+- 実行時間（同じ接続で新旧を交互に3回）：出庫一覧（1週間）約 0.66秒 → 0.70秒、出庫一覧（今日）約 1.15秒 → 1.25秒、出庫明細・ヘッダー・在庫表・貸出状況は変化なし
+- ⚠️ 最初は事前の行の出発を、本番の出発の結合を `COALESCE(本番の出庫日時, 伝票の日時)` の1本にまとめる形で書いたが、マージ結合が使えず `t_nyushuko_fix` を総当たりして一覧が 1.3 倍遅くなった。事前用に `t_nyushuko_fix` を主キーで引く結合を別に足している
+- **2026-10-21 変更（同日ステージング適用）**：準備日を消したとき、事前の伝票を未使用の明細idに付け替えるのをやめ、同じ明細idのまま予定0で残す形にした（本番の出庫場所の変更が del-meisai `c4251738` で同じ形になったのに合わせた）。そのため `v_nyushuko_den2_lst` の受注削除の判定は、80/90 だけ「事前準備の行（`t_juchu_kizai_jizen`）が無い」にした（準備日を消しても受注明細は同じ場所に残るので、受注機材明細では判定できない）。明細idが本番と同じまま残るので、事前でのタグ削除・補正を本番の同じ明細に反映できる。予行（一時ビューで読み取りのみ）で、既存列・行数（123,289）とも差分0、事前準備の行を消すと 80/90 だけが受注削除になることを確認
+- **2026-10-23 変更**：80/90 の受注削除の判定に、明細の今の出庫場所（`t_juchu_kizai_meisai.shozoku_id`）と伝票の場所の照合を足した（10/20 と同じ）。準備日を消して K に残した伝票が、出庫場所を Y に変えて準備日を付け直すと通常の行に戻り、タグを消しても残り続ける問題の修正。Web の `deleteEmptyNyushukoDen` も同じ判定。予行（ROLLBACK）で、列数（32）・`reloptions`・権限は不変、今の 80/90 の16行と各作業区分の受注削除の件数は変化なし
+- 実際のファイル（テーブル・マスタ・ビュー12本）を1トランザクションで流し、続けてロールバックファイルを流して元の定義・`reloptions`・権限に戻ることを確認し、最後に ROLLBACK（DDL だけで約0.7秒。重い集計は流していない）
+
+適用順（ビュー同士）：`v_nyushuko_total_time_sts` → `v_nyushuko_den` → `v_nyushuko_den_head` → `v_nyushuko_den_lst` → `v_get_juchu_kizai_head` → `v_get_juchu_kizai_section` → `v_nyushuko_den2` → `v_nyushuko_den2_head` → `v_nyushuko_den2_lst` → `v_juchu_kizai_dat_qty` → `v_juchu_kizai_dat_qty_kasi` → `v_honbanbi_kasi_jokyo`。在庫の3本は `t_juchu_kizai_jizen` を参照するので**テーブルより後**。
+
+ロールバック：列を足した3本（`v_nyushuko_total_time_sts`・`v_nyushuko_den`・`v_nyushuko_den_head`）は `CREATE OR REPLACE` で戻せないので、依存ビューごと `DROP` → `CREATE` → GRANT 付け直しにしてある。作り直すと既定の権限で anon に全権限が付くので、`v_nyushuko_total_time_sts`（anon は `arwd`）は REVOKE してから付け直す。ほかは `CREATE OR REPLACE`。逆順（`v_honbanbi_kasi_jokyo` → … → `v_nyushuko_total_time_sts`）に流す。`v_get_juchu_kizai_head`・`v_nyushuko_den2_lst` の `.rollback.sql`（2026-11-05 から `applied/`）は 2026-11-05 の適用前の本番の定義（del-meisai 分。2026-10-26 本番適用）に戻すもので、ステージングもこれで del-meisai の状態に戻る（`v_nyushuko_den2_lst` は 2026-10-28 の数量変更の列で `DROP` → `CREATE` → GRANT になった。下の節）。
+
+★ del-meisai 分は 2026-10-26 に本番へ適用済み。事前準備を本番に当てたとき（2026-11-05）は、この2本も「del-meisai ＋ 事前準備」の最終形の `.sql` を流した（del-meisai 分は本番に入っていたので、差は事前準備の分だけ）。
+
+#### v_nyushuko_den2_lst（数量変更の列。2026-10-28 追加）
+
+読取実績のある機材の数量を受注側で変えたことを、出庫明細・HT・ゲートで強調するための列 `plan_chg_flg` を末尾に足しました（32→33列）。事前準備（`change-planqty` ブランチは jizen から切っている）に累積しているので、`.sql` が「del-meisai ＋ 事前準備 ＋ 数量変更」の最終形です（2026-11-05 に本番適用し `applied/` へ移した）。
+
+- 値は `t_nyushuko_den.plan_chg_flg`（トリガーが立てる・消す。[`../db-tables/applied/20261028-t-nyushuko-den-plan-chg-flg.sql`](../db-tables/applied/20261028-t-nyushuko-den-plan-chg-flg.sql)）を、伝票の主キーで1行引いて出す。`v_nyushuko_den_lst` には依存ビューが3本あるので、列を通さずにこのビューで引いている
+- 予定数（合計）が0の行は0にする（受注削除の表示を優先する）
+- **テーブルの列とトリガーを先に当てる**（このビューが列を参照する）。出す順番はテーブル → ビュー → Web → HT・ゲート
+- 2026-10-28 ステージング適用（テーブル → ビューの順。別トランザクション、`lock_timeout 5s`）。適用前に、今の定義が git の staging-only 版と同じこと（一時ビューで `pg_get_viewdef` を比較）、行の型を使う関数が0件であることを確認。リハーサル（ROLLBACK）で、伝票1行の予定・読取を変えてフラグが立つ・消える・予定0ではビューが0になることを確認。適用後は33列、`security_invoker`・権限は不変、立っているフラグは0件。出庫明細1画面分の取得は 14ms
+- ロールバックで列が減るので、`applied/v_nyushuko_den2_lst.rollback.sql` は `DROP VIEW` → `CREATE VIEW` → GRANT の付け直しに変えた（それまでは `CREATE OR REPLACE`）。これは本番の定義（del-meisai 分）に戻すもので、事前準備の分も戻る。ステージングで数量変更の列だけを外すときは、git で 2026-10-28 より前の `.sql` を取り出し、同じく DROP → CREATE → GRANT で当てる
+
 #### v_nyushuko_den2_lst（受注削除の判定列）
 
 メイン受注機材明細で出庫の実績・補正がある機材を削除すると、出庫伝票を予定数0で残し、出庫明細に「受注削除」と表示します（現物を取り除いてもらうため）。

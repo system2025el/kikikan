@@ -86,6 +86,9 @@ export const NyukoList = (props: { user: User }) => {
     try {
       const newNyukoList = await getNyukoList(data);
       setNyukoList(newNyukoList);
+      // 選択は行の添字で持っているので、一覧を取り直したら外す（古い添字のまま員数表を出すと、別の行が出力されるため。
+      // 表は検索中に外れて、チェックの表示は空に戻っている）
+      setSelected([]);
     } catch (e) {
       setError(e instanceof Error ? e : new Error(String(e)));
     }
@@ -115,9 +118,12 @@ export const NyukoList = (props: { user: User }) => {
     setIsProcessing(true);
 
     // チェックされた行を取り出し
-    const selectList = selected.map((index) => nyukoList[index]);
+    const selectList = selected.map((index) => nyukoList[index]).filter((row) => row);
 
-    if (selectList.length === 0) return;
+    if (selectList.length === 0) {
+      setIsProcessing(false);
+      return;
+    }
 
     // awaitのあとにwindow.openを呼ぶとポップアップブロックの対象になるため、先に空タブを確保する
     const target = window.open('', '_blank');

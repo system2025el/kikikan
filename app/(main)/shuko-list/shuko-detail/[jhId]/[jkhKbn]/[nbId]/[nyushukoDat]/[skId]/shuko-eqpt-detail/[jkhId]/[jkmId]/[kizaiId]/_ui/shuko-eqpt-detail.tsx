@@ -24,7 +24,7 @@ import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 
-import { SAGYO_KBN_ID } from '@/app/_lib/constants';
+import { isJizenSagyoKbn, SAGYO_KBN_ID, toHonbanSagyoKbn } from '@/app/_lib/constants';
 import { sagyoKbnColors } from '@/app/(main)/_lib/colors';
 import { useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
 import { permission } from '@/app/(main)/_lib/permission';
@@ -41,9 +41,19 @@ export const ShukoEqptDetail = (props: {
   user: User;
   shukoEqptDetailData: ShukoEqptDetailValues;
   shukoEqptDetailTableData: ShukoEqptDetailTableValues[];
+  /** 出発済み（事前の画面では本番が出発済み） */
   fixFlag: boolean;
 }) => {
   const { shukoEqptDetailData, fixFlag } = props;
+  // 事前（事前ピッキング・事前最終確認）の画面か
+  const jizen = isJizenSagyoKbn(shukoEqptDetailData.sagyoKbnId);
+  // 本番の作業区分（事前ピッキング→ピッキング、事前最終確認→最終確認）。色・表題に使う
+  const honbanSagyoKbnId = toHonbanSagyoKbn(shukoEqptDetailData.sagyoKbnId);
+  const isConfirmation = honbanSagyoKbnId === SAGYO_KBN_ID.shukoConfirmation;
+  // 戻り先の明細画面（事前は機材ヘッダーごとに開くので機材ヘッダーidを付ける）
+  const backPath =
+    `/shuko-list/shuko-detail/${shukoEqptDetailData.juchuHeadId}/${shukoEqptDetailData.juchuKizaiHeadKbnId}/${shukoEqptDetailData.nyushukoBashoId}/${new Date(shukoEqptDetailData.nyushukoDat).toISOString()}/${shukoEqptDetailData.sagyoKbnId}` +
+    (jizen ? `?jkhId=${shukoEqptDetailData.juchuKizaiHeadId}` : '');
 
   // user情報
   const user = props.user;
@@ -117,9 +127,7 @@ export const ShukoEqptDetail = (props: {
         setSnackBarOpen(true);
         reset(data);
         setIsProcessing(false);
-        router.push(
-          `/shuko-list/shuko-detail/${shukoEqptDetailData.juchuHeadId}/${shukoEqptDetailData.juchuKizaiHeadKbnId}/${shukoEqptDetailData.nyushukoBashoId}/${new Date(shukoEqptDetailData.nyushukoDat).toISOString()}/${shukoEqptDetailData.sagyoKbnId}`
-        );
+        router.push(backPath);
       } else {
         setSnackBarMessage('保存に失敗しました');
         setSnackBarOpen(true);
@@ -131,8 +139,7 @@ export const ShukoEqptDetail = (props: {
   // 出庫明細ボタン押下
   const handleBack = () => {
     if (isPending) return;
-    const path = `/shuko-list/shuko-detail/${shukoEqptDetailData.juchuHeadId}/${shukoEqptDetailData.juchuKizaiHeadKbnId}/${shukoEqptDetailData.nyushukoBashoId}/${new Date(shukoEqptDetailData.nyushukoDat).toISOString()}/${shukoEqptDetailData.sagyoKbnId}`;
-    requestNavigation(path);
+    requestNavigation(backPath);
   };
 
   /**
@@ -191,7 +198,7 @@ export const ShukoEqptDetail = (props: {
         <Button onClick={handleBack} disabled={isPending}>
           <Box display={'flex'} alignItems={'center'}>
             <ArrowLeftIcon fontSize="small" />
-            出庫明細
+            {jizen ? '事前明細' : '出庫明細'}
           </Box>
         </Button>
       </Grid2>
@@ -202,14 +209,12 @@ export const ShukoEqptDetail = (props: {
               fontSize={'large'}
               px={1}
               sx={{
-                backgroundColor:
-                  shukoEqptDetailData.sagyoKbnId === SAGYO_KBN_ID.shukoConfirmation
-                    ? sagyoKbnColors.shukoConfirmation
-                    : sagyoKbnColors.shukoPicking,
-                color: shukoEqptDetailData.sagyoKbnId === SAGYO_KBN_ID.shukoConfirmation ? 'black' : 'white',
+                backgroundColor: isConfirmation ? sagyoKbnColors.shukoConfirmation : sagyoKbnColors.shukoPicking,
+                color: isConfirmation ? 'black' : 'white',
               }}
             >
-              出庫詳細({shukoEqptDetailData.sagyoKbnId === SAGYO_KBN_ID.shukoConfirmation ? '最終確認' : 'ピッキング'})
+              {jizen ? '事前詳細' : '出庫詳細'}({jizen ? '事前' : ''}
+              {isConfirmation ? '最終確認' : 'ピッキング'})
             </Typography>
             {/* <Button type="submit">保存</Button> */}
           </Box>
@@ -236,7 +241,7 @@ export const ShukoEqptDetail = (props: {
             </Box>
           </Grid2>
           <Grid2 container spacing={2} p={2}>
-            <Typography>出庫予定数</Typography>
+            <Typography>{jizen ? '事前数' : '出庫予定数'}</Typography>
             <Typography>{shukoEqptDetailData.planQty}</Typography>
           </Grid2>
           <Grid2 container alignItems={'center'} spacing={3} px={2} py={1}>
@@ -250,7 +255,7 @@ export const ShukoEqptDetail = (props: {
               実績クリア
             </Button>
             <Box display={'flex'} alignItems={'center'}>
-              <Typography mr={2}>出庫補正数</Typography>
+              <Typography mr={2}>{jizen ? '事前補正数' : '出庫補正数'}</Typography>
               <Controller
                 name="resultAdjQty"
                 control={control}
@@ -310,7 +315,7 @@ export const ShukoEqptDetail = (props: {
             datas={shukoEqptDetailList}
             selected={selected}
             handleSelect={handleSelect}
-            sagyoKbnId={shukoEqptDetailData.sagyoKbnId}
+            sagyoKbnId={honbanSagyoKbnId}
           />
         )}
       </Paper>

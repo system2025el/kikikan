@@ -49,7 +49,7 @@ import { BASHO_ID, JUCHU_KIZAI_HEAD_KBN, LOCK_SHUBETU, SAGYO_KBN_ID } from '@/ap
 import { toJapanTimeString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { getNyukoDate, getRange, getShukoDate } from '@/app/(main)/_lib/date-funcs';
 import { addLock, getLock } from '@/app/(main)/_lib/funcs';
-import { useStableCallback, useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
+import { useStableCallback, useSyncScroll, useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
 import { lockCheck, lockRelease } from '@/app/(main)/_lib/lock';
 import { permission } from '@/app/(main)/_lib/permission';
 import { LockValues, User } from '@/app/(main)/_lib/types';
@@ -215,7 +215,6 @@ export const EquipmentReturnOrderDetail = (props: {
   const tableAnchorDateRef = useRef<Date | null>(null);
   const leftRef = useRef<HTMLDivElement>(null);
   const rightRef = useRef<HTMLDivElement>(null);
-  const isSyncing = useRef(false);
 
   /* useForm ------------------------- */
   const {
@@ -436,29 +435,6 @@ export const EquipmentReturnOrderDetail = (props: {
       setPath(path);
       setDirtyOpen(true);
     }
-  };
-
-  // 同期スクロール処理
-  const syncScroll = (source: 'left' | 'right') => {
-    if (isSyncing.current) return;
-    isSyncing.current = true;
-
-    const left = leftRef.current;
-    const right = rightRef.current;
-
-    if (!left || !right) return;
-
-    if (source === 'left') {
-      const ratio = left.scrollTop / (left.scrollHeight - left.clientHeight);
-      right.scrollTop = ratio * (right.scrollHeight - right.clientHeight);
-    } else {
-      const ratio = right.scrollTop / (right.scrollHeight - right.clientHeight);
-      left.scrollTop = ratio * (left.scrollHeight - left.clientHeight);
-    }
-
-    requestAnimationFrame(() => {
-      isSyncing.current = false;
-    });
   };
 
   /**
@@ -1505,22 +1481,8 @@ export const EquipmentReturnOrderDetail = (props: {
     eqStockListRef.current = eqStockList;
   }, [eqStockList]);
 
-  useEffect(() => {
-    const left = leftRef.current;
-    const right = rightRef.current;
-
-    if (left && right) {
-      left.addEventListener('scroll', () => syncScroll('left'));
-      right.addEventListener('scroll', () => syncScroll('right'));
-    }
-
-    return () => {
-      if (left && right) {
-        left.removeEventListener('scroll', () => syncScroll('left'));
-        right.removeEventListener('scroll', () => syncScroll('right'));
-      }
-    };
-  }, [returnJuchuKizaiMeisaiList, isLoading, isDetailLoading]);
+  // 同期スクロール
+  useSyncScroll(leftRef, rightRef, [returnJuchuKizaiMeisaiList, isLoading, isDetailLoading]);
 
   if (isError) throw isError;
 

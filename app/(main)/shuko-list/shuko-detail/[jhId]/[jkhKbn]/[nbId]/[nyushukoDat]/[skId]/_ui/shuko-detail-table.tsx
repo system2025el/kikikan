@@ -17,7 +17,7 @@ import { grey, lightBlue } from '@mui/material/colors';
 import { usePathname, useRouter } from 'next/navigation';
 import { Dispatch, SetStateAction, useState } from 'react';
 
-import { JUCHU_KIZAI_HEAD_KBN, SAGYO_KBN_ID } from '@/app/_lib/constants';
+import { isJizenSagyoKbn, JUCHU_KIZAI_HEAD_KBN, SAGYO_KBN_ID, toHonbanSagyoKbn } from '@/app/_lib/constants';
 import { dispColors, sagyoKbnColors, statusColors } from '@/app/(main)/_lib/colors';
 import { User } from '@/app/(main)/_lib/types';
 
@@ -78,10 +78,10 @@ export const ShukoDetailTable = (props: {
           sx={{
             '& .MuiTableCell-stickyHeader': {
               backgroundColor:
-                sagyoKbnId === SAGYO_KBN_ID.shukoConfirmation
+                toHonbanSagyoKbn(sagyoKbnId) === SAGYO_KBN_ID.shukoConfirmation
                   ? sagyoKbnColors.shukoConfirmation
                   : sagyoKbnColors.shukoPicking,
-              color: sagyoKbnId === SAGYO_KBN_ID.shukoConfirmation ? 'black' : 'white',
+              color: toHonbanSagyoKbn(sagyoKbnId) === SAGYO_KBN_ID.shukoConfirmation ? 'black' : 'white',
             },
           }}
         >
@@ -96,7 +96,7 @@ export const ShukoDetailTable = (props: {
                 borderLeftColor: grey[500],
               }}
             >
-              出庫予定数
+              {isJizenSagyoKbn(sagyoKbnId) ? '事前数' : '出庫予定数'}
             </TableCell>
             {datas[0].juchuKizaiHeadKbn !== JUCHU_KIZAI_HEAD_KBN.keep && (
               <>
@@ -167,19 +167,33 @@ export const ShukoDetailTable = (props: {
                   sx={{
                     cursor: row.saveFlag ? 'pointer' : 'default',
                     '&:hover': { backgroundColor: dispColors.hover },
-                    // 受注削除の行は機材名を赤文字にする（HT・ゲートと同じ見せ方）
-                    color: row.juchuMeisaiDelFlg === 1 ? statusColors.deleted : undefined,
+                    // 受注削除・数量変更の行は機材名を文字色で強調する（HT・ゲートと同じ見せ方）
+                    color:
+                      row.juchuMeisaiDelFlg === 1
+                        ? statusColors.deleted
+                        : row.planChgFlg === 1
+                          ? statusColors.planChanged
+                          : undefined,
                   }}
                 >
                   {row.kizaiNam}
-                  {row.juchuMeisaiDelFlg === 1 && (
+                  {row.juchuMeisaiDelFlg === 1 ? (
                     <Typography
                       component="span"
-                      // 「受注削除」の文字は Web だけ（HT・ゲートは機材名の赤文字だけ）
+                      // 「受注削除」「数量変更」の文字は Web だけ（HT・ゲートは機材名の文字色だけ）
                       sx={{ ml: 1, color: statusColors.deleted, fontWeight: 'bold', fontSize: 'inherit' }}
                     >
                       受注削除
                     </Typography>
+                  ) : (
+                    row.planChgFlg === 1 && (
+                      <Typography
+                        component="span"
+                        sx={{ ml: 1, color: statusColors.planChanged, fontWeight: 'bold', fontSize: 'inherit' }}
+                      >
+                        数量変更
+                      </Typography>
+                    )
                   )}
                 </TableCell>
                 <TableCell

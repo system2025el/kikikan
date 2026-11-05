@@ -2,10 +2,12 @@ import { Typography } from '@mui/material';
 import { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
+import { isJizenSagyoKbn } from '@/app/_lib/constants';
 import { getCurrentUser } from '@/app/(main)/_lib/funcs';
 import { permission } from '@/app/(main)/_lib/permission';
 import { NyushukoEqptDetailNotFound } from '@/app/(main)/_ui/nyushuko-not-found';
 
+import { getHonbanShukoFixed } from '../../../../_lib/jizen-funcs';
 import { getShukoEqptDetail, getShukoEqptDetailTable, getShukoFixFlag } from './_lib/funcs';
 import { ShukoEqptDetailTableValues, ShukoEqptDetailValues } from './_lib/types';
 import { ShukoEqptDetail } from './_ui/shuko-eqpt-detail';
@@ -71,18 +73,24 @@ const Page = async (props: {
       <NyushukoEqptDetailNotFound
         message="データが見つかりません"
         backLabel="出庫明細"
-        backPath={`/shuko-list/shuko-detail/${params.jhId}/${params.jkhKbn}/${params.nbId}/${date}/${params.skId}`}
+        backPath={
+          `/shuko-list/shuko-detail/${params.jhId}/${params.jkhKbn}/${params.nbId}/${date}/${params.skId}` +
+          (isJizenSagyoKbn(Number(params.skId)) ? `?jkhId=${params.jkhId}` : '')
+        }
       />
     );
   }
 
-  const fixFlag = await getShukoFixFlag(
-    Number(params.jhId),
-    shukoEqptDetailData.juchuKizaiHeadId,
-    60,
-    shukoEqptDetailData.nyushukoDat,
-    Number(params.nbId)
-  );
+  // 事前（80/90）には出発が無いので、本番（同じ機材ヘッダー・場所）が出発済みかを見る（補正・実績クリアを止める）
+  const fixFlag = isJizenSagyoKbn(Number(params.skId))
+    ? await getHonbanShukoFixed(Number(params.jhId), shukoEqptDetailData.juchuKizaiHeadId, Number(params.nbId))
+    : await getShukoFixFlag(
+        Number(params.jhId),
+        shukoEqptDetailData.juchuKizaiHeadId,
+        60,
+        shukoEqptDetailData.nyushukoDat,
+        Number(params.nbId)
+      );
 
   return (
     <ShukoEqptDetail

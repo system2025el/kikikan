@@ -22,7 +22,8 @@ const createParamPusher = (values: unknown[]) => (value: unknown) => {
 };
 
 export const selectFilteredShukoList = async (queries: ShukoListSearchValues) => {
-  const values: unknown[] = [NYUSHUKO_SHUBETU_ID.shuko];
+  // 事前（事前ピッキング・事前最終確認）の行も混ぜる。事前の行は機材ヘッダーごとに1行で、日時は準備日時
+  const values: unknown[] = [[NYUSHUKO_SHUBETU_ID.shuko, NYUSHUKO_SHUBETU_ID.jizen]];
   const p = createParamPusher(values);
 
   let query = `
@@ -45,11 +46,12 @@ export const selectFilteredShukoList = async (queries: ShukoListSearchValues) =>
       d2.shuko_fix_sts,
       d2.nyuryoku_user,
       d2.sstb_plan_qty,
-      d2.schk_plan_qty
+      d2.schk_plan_qty,
+      d2.nyushuko_shubetu_id
     FROM
       ${SCHEMA}.v_nyushuko_den2 as d2
     WHERE
-      d2.nyushuko_shubetu_id = $1
+      d2.nyushuko_shubetu_id = ANY($1)
   `;
 
   // 入出庫日
@@ -133,7 +135,7 @@ export const selectFilteredShukoList = async (queries: ShukoListSearchValues) =>
     query += ` AND (${likeClouds})`;
   }
 
-  query += ' ORDER BY d2.nyushuko_dat';
+  query += ' ORDER BY d2.nyushuko_dat, d2.nyushuko_shubetu_id';
 
   try {
     return (await pool.query(query, values)).rows;
