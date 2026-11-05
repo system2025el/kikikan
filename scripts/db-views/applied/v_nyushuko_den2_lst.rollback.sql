@@ -1,13 +1,13 @@
--- 適用状況: ステージング 2026-10-06 / 本番 2026-10-26
+-- 適用状況: ロールバック用（2026-11-05 の本番適用より前の定義＝del-meisai 分（2026-10-26 本番適用）。適用前の本番と一致することを確認済み）
 -- =====================================================================
--- v_nyushuko_den2_lst のロールバック（本番の現在の定義）
--- 2026-10-06 にステージングから pg_get_viewdef で取得。applied/v_nyushuko_den2_lst.sql（本番 2026-09-03 適用）と
--- 空白以外は同一であることを確認済み。
--- reloptions: security_invoker = on（開発環境・本番とも同じ）
+-- v_nyushuko_den2_lst のロールバック。applied/v_nyushuko_den2_lst.sql（事前準備・数量変更の変更）を当てた後に戻すときに使う。
+-- reloptions: security_invoker = on
 --
--- 末尾の列（juchu_meisai_del_flg）を消す変更なので CREATE OR REPLACE では戻せない。DROP して作り直し、GRANT も付け直す。
--- GRANT はステージングの現在の権限（2026-10-06 確認）に合わせている。本番でロールバックする前に、本番の権限
--- （information_schema.role_table_grants）を確認して必要なら合わせること。依存するビューは無い。
+-- 2026-10-28: 数量変更で末尾に plan_chg_flg を足した（32→33列）ので、CREATE OR REPLACE では戻せない。DROP して作り直し、
+-- GRANT も付け直す。GRANT は applied/v_nyushuko_den2_lst.rollback.sql と同じ（ステージングの 2026-10-06 時点の権限）。
+-- 当てる前に information_schema.role_table_grants で今の権限を確認し、違えば合わせること。依存するビューは無い。
+-- ※これは本番の定義に戻すもの（事前準備の分も戻る）。ステージングで数量変更の列だけを外したいときは、
+--   git でこのファイルの 2026-10-28 より前の .sql（事前準備まで）を取り出し、同じく DROP → CREATE → GRANT で当てる。
 -- =====================================================================
 
 DROP VIEW public.v_nyushuko_den2_lst;
@@ -43,7 +43,16 @@ CREATE VIEW public.v_nyushuko_den2_lst WITH (security_invoker = on) AS
     v_nyushuko_den_lst.indent_num,
     v_nyushuko_den_lst.mem2,
     v_nyushuko_den_lst.add_user,
-    v_nyushuko_den_lst.upd_user
+    v_nyushuko_den_lst.upd_user,
+        CASE
+            WHEN sum(COALESCE(v_nyushuko_den_lst.plan_qty, 0::bigint)) <> 0 THEN 0
+            WHEN COALESCE(v_nyushuko_den_lst.ctn_flg, 0) = 1 THEN (NOT (EXISTS ( SELECT 1
+               FROM t_juchu_ctn_meisai c
+              WHERE c.juchu_head_id = v_nyushuko_den_lst.juchu_head_id AND c.juchu_kizai_head_id = v_nyushuko_den_lst.juchu_kizai_head_id AND c.juchu_kizai_meisai_id = v_nyushuko_den_lst.juchu_kizai_meisai_id AND c.kizai_id = v_nyushuko_den_lst.kizai_id AND c.shozoku_id = v_nyushuko_den_lst.nyushuko_basho_id)))::integer
+            ELSE (NOT (EXISTS ( SELECT 1
+               FROM t_juchu_kizai_meisai m
+              WHERE m.juchu_head_id = v_nyushuko_den_lst.juchu_head_id AND m.juchu_kizai_head_id = v_nyushuko_den_lst.juchu_kizai_head_id AND m.juchu_kizai_meisai_id = v_nyushuko_den_lst.juchu_kizai_meisai_id AND m.kizai_id = v_nyushuko_den_lst.kizai_id AND (v_nyushuko_den_lst.sagyo_kbn_id <> ALL (ARRAY[10, 20]) OR m.shozoku_id = v_nyushuko_den_lst.nyushuko_basho_id))))::integer
+        END AS juchu_meisai_del_flg
    FROM v_nyushuko_den_lst
      LEFT JOIN v_get_juchu_kizai_head ON v_nyushuko_den_lst.juchu_head_id = v_get_juchu_kizai_head.juchu_head_id AND v_nyushuko_den_lst.nyushuko_dat = v_get_juchu_kizai_head.sagyo_den_dat AND v_nyushuko_den_lst.nyushuko_basho_id = v_get_juchu_kizai_head.sagyo_id AND v_nyushuko_den_lst.nyushuko_shubetu_id = v_get_juchu_kizai_head.nyushuko_shubetu_id AND v_nyushuko_den_lst.juchu_kizai_head_kbn = v_get_juchu_kizai_head.juchu_kizai_head_kbnv::bigint
   WHERE v_nyushuko_den_lst.juchu_kizai_meisai_id <> 0 AND v_nyushuko_den_lst.kizai_id <> 0 AND NOT (v_nyushuko_den_lst.sagyo_kbn_id = 30 AND v_nyushuko_den_lst.plan_qty = 0 AND v_nyushuko_den_lst.result_qty = 0 AND v_nyushuko_den_lst.result_adj_qty = 0)

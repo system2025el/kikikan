@@ -1,9 +1,9 @@
--- 適用状況: ステージング 2026-10-21 / 本番 未適用
+-- 適用状況: ステージング 2026-10-21 / 本番 2026-11-05
 -- =====================================================================
 -- v_honbanbi_kasi_jokyo  事前準備の期間を種別 4 として加える（貸出状況のセルの色。列構成・型は不変）
 --
 -- 事前準備の行（v_juchu_kizai_dat_qty と同じ条件。使用日がある日は除く）を UNION ALL で足し、
--- juchu_honbanbi_shubetu_id = 4、色は m_honbanbi_color の clolor_id = 4（db-data/staging-only/20261021-m-honbanbi-color-jizen.sql）。
+-- juchu_honbanbi_shubetu_id = 4、色は m_honbanbi_color の clolor_id = 4（db-data/applied/20261021-m-honbanbi-color-jizen.sql）。
 -- 色マスタに 4 が無ければ 'white'（既存の行と同じ扱い）。種別 4 は t_juchu_kizai_honbanbi には入れない（色のためだけの値）。
 --
 -- リポジトリに定義が無かったビュー。2026-10-21 にステージングの pg_get_viewdef から起こした。

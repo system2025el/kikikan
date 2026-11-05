@@ -19,6 +19,22 @@ export const getMeisaiShukoDat = (
 ): Date | null => (row.shozokuId === BASHO_ID.kics ? kicsShukoDat : yardShukoDat);
 
 /**
+ * 一括設定で選べる最後の日（明細ごとの出庫日時のうち最も早いもの）
+ * 出庫日時が未設定の明細は除く（保存時の入力チェックで止まる）
+ * @param rows 一括設定する明細
+ * @param kicsShukoDat KICS出庫日時
+ * @param yardShukoDat YARD出庫日時
+ */
+export const getJizenMaxDat = (
+  rows: JuchuKizaiMeisaiValues[],
+  kicsShukoDat: Date | null,
+  yardShukoDat: Date | null
+): Date | null => {
+  const times = rows.flatMap((row) => getMeisaiShukoDat(row, kicsShukoDat, yardShukoDat)?.getTime() ?? []);
+  return times.length > 0 ? new Date(Math.min(...times)) : null;
+};
+
+/**
  * 事前準備日時・準備数を設定した明細を返す
  * 解除時はプロパティごと外す（元データには項目自体が無いため、null を入れると JSON 比較で未保存扱いのまま残る）
  * @param row 受注機材明細
@@ -106,8 +122,35 @@ export const getStockAnchorDate = (shukoDate: Date | null, rows: JuchuKizaiMeisa
   return earliest < toJapanStartOfDay(shukoDate) ? earliest : shukoDate;
 };
 
+/** 事前準備の入力の誤り（明細1行分） */
+export type JizenRowError = {
+  /** 事前日時：出庫日時が未設定 */
+  noShukoDat: boolean;
+  /** 事前日時：出庫日時以降 */
+  afterShukoDat: boolean;
+  /** 事前数：合計数を超えている（0 は受注数・予備数と同じく入力できる） */
+  qtyOver: boolean;
+};
+
+/**
+ * 明細1行の事前準備の入力チェック（保存時のチェックと、明細表の該当欄の赤枠に使う）
+ * @param row 受注機材明細
+ * @param shukoDat 明細の出庫場所の出庫日時（入力中の値）
+ * @returns 誤りが無い（事前準備が無い行を含む）なら null
+ */
+export const getJizenRowError = (row: JuchuKizaiMeisaiValues, shukoDat: Date | null): JizenRowError | null => {
+  if (row.delFlag || !row.jizenDat) return null;
+  const error = {
+    noShukoDat: !shukoDat,
+    afterShukoDat: !!shukoDat && row.jizenDat.getTime() >= shukoDat.getTime(),
+    qtyOver: (row.jizenQty ?? 0) > row.planQty,
+  };
+  return Object.values(error).some(Boolean) ? error : null;
+};
+
 /**
  * 事前準備の入力チェック
+ * 機材が多いと1件ずつ並べても把握しきれないので、誤りの種類ごとに件数だけを返す（該当の欄は明細表で赤枠にする）
  * @param rows 受注機材明細
  * @param kicsShukoDat KICS出庫日時（入力中の値）
  * @param yardShukoDat YARD出庫日時（入力中の値）
@@ -118,24 +161,13 @@ export const validateJizen = (
   kicsShukoDat: Date | null,
   yardShukoDat: Date | null
 ): string[] => {
-  const messages: string[] = [];
-  for (const row of rows) {
-    if (row.delFlag || !row.jizenDat) continue;
-    const name = row.kizaiNam.trim();
-    const shukoDat = getMeisaiShukoDat(row, kicsShukoDat, yardShukoDat);
-    if (!shukoDat) {
-      messages.push(`${name}：出庫日時が未設定のため事前日時は入力できません`);
-    } else if (row.jizenDat.getTime() >= shukoDat.getTime()) {
-      messages.push(`${name}：事前日時は出庫日時より前にしてください`);
-    }
-    const qty = row.jizenQty ?? 0;
-    if (qty < 1) {
-      messages.push(`${name}：事前数は1以上にしてください`);
-    } else if (qty > row.planQty) {
-      messages.push(`${name}：事前数が合計数（${row.planQty}）を超えています`);
-    }
-  }
-  return messages;
+  const errors = rows.flatMap((row) => getJizenRowError(row, getMeisaiShukoDat(row, kicsShukoDat, yardShukoDat)) ?? []);
+  const count = (key: keyof JizenRowError) => errors.filter((e) => e[key]).length;
+  return [
+    { n: count('noShukoDat'), message: '出庫日時が未設定なのに事前日時が入っている機材があります' },
+    { n: count('afterShukoDat'), message: '事前日時が出庫日時より前になっていない機材があります' },
+    { n: count('qtyOver'), message: '事前数が合計数を超えている機材があります' },
+  ].flatMap(({ n, message }) => (n > 0 ? [`${message}（${n}件）`] : []));
 };
 
 /**

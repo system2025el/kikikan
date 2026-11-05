@@ -2,7 +2,7 @@
 --
 -- 1. だけ流せば、フラグは更新されなくなり、立っているフラグも消える（列は残るので、列を読むコードはそのまま動く）。
 -- ⚠️ 2. の列の削除は、plan_chg_flg を読むコードを先に戻してから。v_nyushuko_den2_lst が列を参照しているので、
---    先に db-views/staging-only/v_nyushuko_den2_lst.rollback.sql でビューを戻すこと（戻さないと DROP COLUMN が失敗する）。
+--    先に db-views/applied/v_nyushuko_den2_lst.rollback.sql でビューを戻すこと（戻さないと DROP COLUMN が失敗する）。
 --    HT・ゲートはビューの列を名前で読んでいるので、ビューから列を消す前に HT・ゲートも戻すこと。
 
 \set ON_ERROR_STOP on

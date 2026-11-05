@@ -1,4 +1,4 @@
--- 適用状況: ステージング 2026-10-21 / 本番 未適用
+-- 適用状況: ステージング 2026-10-21 / 本番 2026-11-05
 -- ============================================================
 -- 20261021-t-juchu-kizai-jizen.sql
 -- 事前準備（事前ピッキング・事前最終確認）の追加
@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS public.t_juchu_kizai_jizen (
 
 COMMENT ON TABLE  public.t_juchu_kizai_jizen           IS '事前準備。受注機材明細ごとの準備日時・準備数（明細idは t_juchu_kizai_meisai と同じ）';
 COMMENT ON COLUMN public.t_juchu_kizai_jizen.jizen_dat IS '準備日時。この日から出庫日の前日まで、在庫を準備数だけ引き当てる';
-COMMENT ON COLUMN public.t_juchu_kizai_jizen.jizen_qty IS '準備数（1以上、明細の合計数以下。アプリで検証する）';
+COMMENT ON COLUMN public.t_juchu_kizai_jizen.jizen_qty IS '準備数（0以上、明細の合計数以下。アプリで検証する）';
 
 -- 権限（★必須）。t_juchu_kizai_meisai と同じ
 -- ★ステージングでは CREATE TABLE の時点で anon に全権限（arwdDxt）が付いた（2026-10-21 適用時に確認）。

@@ -9,17 +9,20 @@ import { DateTime } from '@/app/(main)/_ui/date';
  * 事前準備の一括設定ダイアログ
  * 選択した明細に、準備日時をまとめて設定または解除する
  * @param selectedLength 選択中の明細数
+ * @param maxDate 選択できる最後の日（選択した明細の出庫場所の出庫日時のうち最も早いもの。明細のセルと同じ上限）
  * @param handleSet 設定（準備数が未入力の明細は合計数になる）
  * @param handleClear 解除
  * @param handleClose 閉じる
  */
 export const JizenDialog = ({
   selectedLength,
+  maxDate,
   handleSet,
   handleClear,
   handleClose,
 }: {
   selectedLength: number;
+  maxDate: Date | null;
   handleSet: (jizenDat: Date) => void;
   handleClear: () => void;
   handleClose: () => void;
@@ -35,7 +38,7 @@ export const JizenDialog = ({
         </Typography>
         <Box display="flex" alignItems="center">
           <Typography mr={2}>事前日時</Typography>
-          <DateTime value={jizenDat} onChange={setJizenDat} />
+          <DateTime value={jizenDat} maxDate={maxDate ?? undefined} onChange={setJizenDat} />
         </Box>
       </DialogContent>
       <DialogActions>

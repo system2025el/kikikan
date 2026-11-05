@@ -21,10 +21,13 @@ export const AlertDialog = ({
         <WarningIcon color="error" />
         <Box>{title}</Box>
       </DialogTitle>
-      {/* 複数のエラーを改行で区切って渡せるよう、改行をそのまま表示する */}
-      <DialogContentText m={2} p={2} sx={{ whiteSpace: 'pre-line' }}>
-        {message}
-      </DialogContentText>
+      {/* 複数のエラーを改行で区切って渡せるよう、改行をそのまま表示する。
+          件数が多くても見出しと確認ボタンが隠れないよう、メッセージの部分だけをスクロールさせる */}
+      <DialogContent sx={{ p: 0 }}>
+        <DialogContentText m={2} p={2} sx={{ whiteSpace: 'pre-line' }}>
+          {message}
+        </DialogContentText>
+      </DialogContent>
       <DialogActions>
         <Button onClick={onClick}>確認</Button>
       </DialogActions>

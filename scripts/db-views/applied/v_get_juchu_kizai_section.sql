@@ -1,8 +1,13 @@
--- 適用状況: ステージング 2026-10-21 / 本番 未適用
+-- 適用状況: ステージング 2026-10-21 / 本番 2026-11-05
 -- =====================================================================
--- v_get_juchu_kizai_section のロールバック（本番の現在の定義）
--- 2026-10-21 にステージングから pg_get_viewdef で取得（本番と同じかは本番に当てる前に確認すること）。
--- 列構成は変わらないので CREATE OR REPLACE で戻せる。
+-- v_get_juchu_kizai_section  入出庫種別（nyushuko_shubetu_id）の CASE に 80/90 → 3（事前）を追加（列構成は不変）
+--
+-- リポジトリに定義が無かったビュー。2026-10-21 にステージングの pg_get_viewdef から起こした。
+-- セクション名（section_namv）は、受注・作業日時・場所・作業区分ごとにまとめる。事前の行は機材ヘッダーで分けていないので、
+-- 同じ準備日時・場所に事前準備のヘッダーが2つあると、セクション名は2つのヘッダーの分をまとめたものになる（表示だけの差。行は増えない）。
+-- 依存しているビュー: v_nyushuko_den2, v_nyushuko_den2_head（列構成を変えないので作り直し不要）
+-- reloptions: security_invoker = on
+-- 2026-10-21 ステージングで検証（一時ビューで読み取りのみ）: 事前の伝票が無い状態で全列・行数（3,586）とも差分0
 -- =====================================================================
 
 CREATE OR REPLACE VIEW public.v_get_juchu_kizai_section WITH (security_invoker = on) AS
@@ -12,6 +17,7 @@ CREATE OR REPLACE VIEW public.v_get_juchu_kizai_section WITH (security_invoker =
         CASE
             WHEN t_nyushuko_den.sagyo_kbn_id = 10 OR t_nyushuko_den.sagyo_kbn_id = 20 THEN 1
             WHEN t_nyushuko_den.sagyo_kbn_id = 30 THEN 2
+            WHEN t_nyushuko_den.sagyo_kbn_id = 80 OR t_nyushuko_den.sagyo_kbn_id = 90 THEN 3
             ELSE NULL::integer
         END AS nyushuko_shubetu_id,
     array_to_string(array_agg(DISTINCT
@@ -31,5 +37,6 @@ CREATE OR REPLACE VIEW public.v_get_juchu_kizai_section WITH (security_invoker =
         CASE
             WHEN t_nyushuko_den.sagyo_kbn_id = 10 OR t_nyushuko_den.sagyo_kbn_id = 20 THEN 1
             WHEN t_nyushuko_den.sagyo_kbn_id = 30 THEN 2
+            WHEN t_nyushuko_den.sagyo_kbn_id = 80 OR t_nyushuko_den.sagyo_kbn_id = 90 THEN 3
             ELSE NULL::integer
         END);

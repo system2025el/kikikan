@@ -36,7 +36,7 @@ import {
   getStockBaseBackgroundColor,
   toStockDateKey,
 } from '../_lib/colorselect';
-import { getMeisaiShukoDat } from '../_lib/jizen';
+import { getJizenRowError, getMeisaiShukoDat } from '../_lib/jizen';
 import {
   IdoJuchuKizaiMeisaiValues,
   JuchuContainerMeisaiValues,
@@ -198,7 +198,7 @@ type EqTableProps = {
   shukoDate: Date | null;
   // 事前日時・事前数の列を表示するか
   showJizen: boolean;
-  // 事前準備日時の上限（明細の出庫場所の出庫日時）に使う
+  // 事前準備日時の上限（明細の出庫場所の出庫日時）に使う。保存前の出庫日時の変更にも追従させるため入力中の値を渡す
   kicsShukoDat: Date | null;
   yardShukoDat: Date | null;
   handleCellChange: (
@@ -490,11 +490,13 @@ type EqTableRowProps = {
 const JizenDatCell = ({
   value,
   maxDate,
+  error,
   disabled,
   onCommit,
 }: {
   value: Date | null;
   maxDate: Date | null;
+  error: boolean;
   disabled: boolean;
   onCommit: (date: Date | null) => void;
 }) => {
@@ -520,6 +522,8 @@ const JizenDatCell = ({
         },
       }}
       value={draft}
+      // false を渡すと上限を超えたときの日付部品自身の赤枠まで消えるので、誤りが無いときは渡さない
+      error={error || undefined}
       maxDate={maxDate ?? undefined}
       onChange={setDraft}
       onCommit={onCommit}
@@ -550,6 +554,8 @@ const EqTableRow = React.memo(
     handleJizenKeyDown,
     handleEqSelect,
   }: EqTableRowProps) => {
+    // 保存前から、入力中の値（出庫日時・合計数を含む）で誤りのある欄を赤枠にする
+    const jizenError = getJizenRowError(row, jizenMaxDat);
     return (
       <TableRow hover>
         <TableCell
@@ -687,6 +693,7 @@ const EqTableRow = React.memo(
               <JizenDatCell
                 value={row.jizenDat ?? null}
                 maxDate={jizenMaxDat}
+                error={!!jizenError && (jizenError.noShukoDat || jizenError.afterShukoDat)}
                 onCommit={(date) => handleJizenDatChange(rowIndex, date)}
                 disabled={!edit || shukoFixFlag}
               />
@@ -706,6 +713,10 @@ const EqTableRow = React.memo(
                     textAlign: 'right',
                     padding: 0,
                     fontSize: 'small',
+                  },
+                  // 下線を出さない入力欄なので、誤りは枠で示す
+                  '& .MuiInputBase-root': {
+                    outline: jizenError?.qtyOver ? '1px solid red' : undefined,
                   },
                 }}
                 slotProps={{

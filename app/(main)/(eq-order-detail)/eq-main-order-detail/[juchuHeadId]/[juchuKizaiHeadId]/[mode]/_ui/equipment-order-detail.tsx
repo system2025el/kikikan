@@ -97,6 +97,7 @@ import {
 } from '../_lib/funcs';
 import {
   getJizenChangedRows,
+  getJizenMaxDat,
   getJizenRange,
   getJizenStockDiff,
   getStockAnchorDate,
@@ -381,6 +382,9 @@ const EquipmentOrderDetail = (props: {
   const nebikiRat = watch('nebikiRat');
   /** 割引金額の監視 */
   const nebikiAmt = watch('nebikiAmt');
+  // 入力中の出庫日時（事前日時の入力範囲に使う。保存前に出庫日時を変えても範囲と赤枠が追従するように）
+  const inputKicsShukoDat = watch('kicsShukoDat');
+  const inputYardShukoDat = watch('yardShukoDat');
   // KICS出庫日時（出庫明細ボタンの表示制御用。編集中のリアルタイム変化を反映したくないため、
   // watchではなく初期表示時・保存時のみ更新するstateにしている）
   const [kicsShukoDat, setKicsShukoDat] = useState(
@@ -789,7 +793,7 @@ const EquipmentOrderDetail = (props: {
         data.yardShukoDat ? new Date(data.yardShukoDat) : null
       );
       if (jizenErrors.length > 0) {
-        // 直す場所が見えるよう事前の列を開く
+        // 直す場所（赤枠の欄）が見えるよう事前の列を開く
         setShowJizen(true);
         setAlertTitle('事前準備の入力に誤りがあります');
         setAlertMessage(jizenErrors.join('\n'));
@@ -830,18 +834,26 @@ const EquipmentOrderDetail = (props: {
       });
       const checkShozokuChanged = shozokuChangedRows.length > 0;
 
-      // 出庫時間に変更があった場合、事前の実績がある明細の事前準備を変えた場合、
+      // 事前日時を設定・変更・解除した明細。事前数だけの変更は、受注数・予備数の変更と同じく確認を出さない
+      // （実績は消えず、変わったことは出庫側の数量変更の表示で分かる）
+      const jizenDatChangedRows = jizenChangedRows.filter(
+        (d) =>
+          (originMeisaiMap.get(`${d.juchuKizaiMeisaiId}_${d.kizaiId}`)?.jizenDat?.getTime() ?? null) !==
+          (d.jizenDat?.getTime() ?? null)
+      );
+
+      // 出庫時間に変更があった場合、事前の実績がある明細の事前日時を変えた場合、
       // または実績がある明細の出庫場所を変えた場合は作業中チェック
-      if (checkKicsShukoDat || checkYardShukoDat || checkJuchuKizaiJizen || checkShozokuChanged) {
+      if (checkKicsShukoDat || checkYardShukoDat || jizenDatChangedRows.length > 0 || checkShozokuChanged) {
         try {
           const isWorking =
             ((checkKicsShukoDat || checkYardShukoDat) &&
               (await checkShukoStatus(data.juchuHeadId, data.juchuKizaiHeadId))) ||
-            (checkJuchuKizaiJizen &&
+            (jizenDatChangedRows.length > 0 &&
               (await getJizenResultExists(
                 data.juchuHeadId,
                 data.juchuKizaiHeadId,
-                jizenChangedRows.map((d) => ({ juchuKizaiMeisaiId: d.juchuKizaiMeisaiId, kizaiId: d.kizaiId }))
+                jizenDatChangedRows.map((d) => ({ juchuKizaiMeisaiId: d.juchuKizaiMeisaiId, kizaiId: d.kizaiId }))
               ))) ||
             (checkShozokuChanged &&
               (await getShozokuChangedResultExists(data.juchuHeadId, data.juchuKizaiHeadId, shozokuChangedRows)));
@@ -3405,6 +3417,11 @@ const EquipmentOrderDetail = (props: {
                         <Dialog open={jizenDialogOpen} sx={{ zIndex: 1201 }}>
                           <JizenDialog
                             selectedLength={juchuKizaiMeisaiList.filter((d) => !d.delFlag && d.selected).length}
+                            maxDate={getJizenMaxDat(
+                              juchuKizaiMeisaiList.filter((d) => !d.delFlag && d.selected),
+                              inputKicsShukoDat,
+                              inputYardShukoDat
+                            )}
                             handleSet={(jizenDat) => handleJizenConfirmed(jizenDat)}
                             handleClear={() => handleJizenConfirmed(null)}
                             handleClose={() => setJizenDialogOpen(false)}
@@ -3440,8 +3457,8 @@ const EquipmentOrderDetail = (props: {
                           shukoFixFlag={shukoFixFlag}
                           shukoDate={shukoDate}
                           showJizen={showJizen}
-                          kicsShukoDat={kicsShukoDat}
-                          yardShukoDat={yardShukoDat}
+                          kicsShukoDat={inputKicsShukoDat}
+                          yardShukoDat={inputYardShukoDat}
                           handleCellChange={handleCellChange}
                           handleJizenDatChange={handleJizenDatChange}
                           handleJizenQtyChange={handleJizenQtyChange}
