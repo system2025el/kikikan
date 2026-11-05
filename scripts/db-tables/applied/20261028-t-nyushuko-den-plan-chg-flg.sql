@@ -1,4 +1,4 @@
--- 適用状況: ステージング 2026-10-28 / 本番 未適用
+-- 適用状況: ステージング 2026-10-28 / 本番 2026-11-05
 -- ============================================================
 -- 20261028-t-nyushuko-den-plan-chg-flg.sql
 -- 出庫伝票の「数量変更」フラグ（plan_chg_flg）とトリガー
@@ -30,7 +30,7 @@
 --        AND pg_get_functiondef(p.oid) ~* '(::\s*(public\.)?t_nyushuko_den\M|t_nyushuko_den%rowtype)';
 --   既存テーブルへの列追加なので GRANT・移行の除外リスト（scripts/db-migration）の変更は不要。
 --
--- 適用順: このファイル → db-views/staging-only/v_nyushuko_den2_lst.sql → Web → HT・ゲート
+-- 適用順: このファイル → db-views/applied/v_nyushuko_den2_lst.sql → Web → HT・ゲート
 -- ロールバック: 20261028-t-nyushuko-den-plan-chg-flg.rollback.sql
 -- ============================================================
 

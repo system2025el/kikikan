@@ -1,23 +1,48 @@
--- 適用状況: 開発環境(preview/public) 日付不明（2026-08-19以前） / 本番 2026-08-19
+-- 適用状況: ロールバック用（2026-11-05 の事前準備の本番適用より前の定義。適用前の本番と一致することを確認済み）
 -- =====================================================================
--- v_juchu_kizai_dat_qty 変更前定義（ロールバック用バックアップ）
---
--- 取得元 : 本番 Supabase プロジェクト exekmmbmletvrzpavmzg / public スキーマ
--- 取得日 : 2026-08-19（適用直前）
--- 取得方法: SELECT pg_get_viewdef('public.v_juchu_kizai_dat_qty', true)
--- reloptions: ["security_invoker=on"]
---
--- 用途: v_juchu_kizai_dat_qty.sql を適用したあとに問題が出た場合、
---       このファイルをそのまま実行すれば変更前の定義に戻せる。
+-- v_juchu_kizai_dat_qty のロールバック（本番の現在の定義）
+-- 2026-10-21 にステージングから pg_get_viewdef で取得（applied/ と同じ定義。本番と同じかは本番に当てる前に確認すること）。
+-- 列構成は変わらないので CREATE OR REPLACE で戻せる。
+-- 2026-11-04 本番の事前確認で、本番の定義がこのファイルと同じこと、reloptions が security_invoker=on であることを確認。
+-- WITH を省くと security_invoker が外れるので明示する（applied/ の版と同じ）。
 -- =====================================================================
 
-CREATE OR REPLACE VIEW public.v_juchu_kizai_dat_qty
-WITH (security_invoker = on) AS
+CREATE OR REPLACE VIEW public.v_juchu_kizai_dat_qty WITH (security_invoker = on) AS
  SELECT t_juchu_kizai_honbanbi.juchu_honbanbi_dat AS plan_dat,
     t_juchu_kizai_meisai.kizai_id,
     sum(COALESCE(t_juchu_kizai_meisai.plan_kizai_qty, 0)) AS juchu_qty,
     sum(COALESCE(t_juchu_kizai_meisai.plan_yobi_qty, 0)) AS yobi_qty,
-    sum(COALESCE(t_juchu_kizai_meisai.plan_kizai_qty, 0)) + sum(COALESCE(t_juchu_kizai_meisai.plan_yobi_qty, 0)) AS plan_qty
+    sum(COALESCE(t_juchu_kizai_meisai.plan_kizai_qty, 0)) + sum(COALESCE(t_juchu_kizai_meisai.plan_yobi_qty, 0)) AS plan_qty,
+    sum(
+        CASE
+            WHEN t_juchu_kizai_meisai.shozoku_id = 1 THEN COALESCE(t_juchu_kizai_meisai.plan_kizai_qty, 0)
+            ELSE 0
+        END) AS kics_juchu_qty,
+    sum(
+        CASE
+            WHEN t_juchu_kizai_meisai.shozoku_id = 1 THEN COALESCE(t_juchu_kizai_meisai.plan_yobi_qty, 0)
+            ELSE 0
+        END) AS kics_yobi_qty,
+    sum(
+        CASE
+            WHEN t_juchu_kizai_meisai.shozoku_id = 1 THEN COALESCE(t_juchu_kizai_meisai.plan_kizai_qty, 0) + COALESCE(t_juchu_kizai_meisai.plan_yobi_qty, 0)
+            ELSE 0
+        END) AS kics_plan_qty,
+    sum(
+        CASE
+            WHEN t_juchu_kizai_meisai.shozoku_id = 2 THEN COALESCE(t_juchu_kizai_meisai.plan_kizai_qty, 0)
+            ELSE 0
+        END) AS yard_juchu_qty,
+    sum(
+        CASE
+            WHEN t_juchu_kizai_meisai.shozoku_id = 2 THEN COALESCE(t_juchu_kizai_meisai.plan_yobi_qty, 0)
+            ELSE 0
+        END) AS yard_yobi_qty,
+    sum(
+        CASE
+            WHEN t_juchu_kizai_meisai.shozoku_id = 2 THEN COALESCE(t_juchu_kizai_meisai.plan_kizai_qty, 0) + COALESCE(t_juchu_kizai_meisai.plan_yobi_qty, 0)
+            ELSE 0
+        END) AS yard_plan_qty
    FROM t_juchu_head
      LEFT JOIN t_juchu_kizai_head ON t_juchu_head.juchu_head_id = t_juchu_kizai_head.juchu_head_id
      LEFT JOIN t_juchu_kizai_meisai ON t_juchu_kizai_head.juchu_head_id = t_juchu_kizai_meisai.juchu_head_id AND t_juchu_kizai_head.juchu_kizai_head_id = t_juchu_kizai_meisai.juchu_kizai_head_id
@@ -32,7 +57,29 @@ UNION ALL
     t_juchu_ctn_meisai.kizai_id,
     sum(COALESCE(t_juchu_ctn_meisai.plan_kizai_qty, 0)) AS juchu_qty,
     0 AS yobi_qty,
-    sum(COALESCE(t_juchu_ctn_meisai.plan_kizai_qty, 0)) AS plan_qty
+    sum(COALESCE(t_juchu_ctn_meisai.plan_kizai_qty, 0)) AS plan_qty,
+    sum(
+        CASE
+            WHEN t_juchu_ctn_meisai.shozoku_id = 1 THEN COALESCE(t_juchu_ctn_meisai.plan_kizai_qty, 0)
+            ELSE 0
+        END) AS kics_juchu_qty,
+    0 AS kics_yobi_qty,
+    sum(
+        CASE
+            WHEN t_juchu_ctn_meisai.shozoku_id = 1 THEN COALESCE(t_juchu_ctn_meisai.plan_kizai_qty, 0)
+            ELSE 0
+        END) AS kics_plan_qty,
+    sum(
+        CASE
+            WHEN t_juchu_ctn_meisai.shozoku_id = 2 THEN COALESCE(t_juchu_ctn_meisai.plan_kizai_qty, 0)
+            ELSE 0
+        END) AS yard_juchu_qty,
+    0 AS yard_yobi_qty,
+    sum(
+        CASE
+            WHEN t_juchu_ctn_meisai.shozoku_id = 2 THEN COALESCE(t_juchu_ctn_meisai.plan_kizai_qty, 0)
+            ELSE 0
+        END) AS yard_plan_qty
    FROM t_juchu_head
      LEFT JOIN t_juchu_kizai_head ON t_juchu_head.juchu_head_id = t_juchu_kizai_head.juchu_head_id
      LEFT JOIN t_juchu_ctn_meisai ON t_juchu_kizai_head.juchu_head_id = t_juchu_ctn_meisai.juchu_head_id AND t_juchu_kizai_head.juchu_kizai_head_id = t_juchu_ctn_meisai.juchu_kizai_head_id

@@ -37,9 +37,10 @@
 | `db-tables/20260924-ido-juchu-meisai` → `db-views/v_ido_den3_lst` ほか2本                                                                         | ビュー → テーブル                          | ビューが存在しない列（`juchu_head_id` 等）を参照してエラー                                                                                                                                                                     |
 | `db-tables/20260930-t-nyushuko-den-nyuko-fix-qty` → `db-views/v_nyushuko_den` → `v_nyushuko_den2`                                                 | 逆順                                       | 同上                                                                                                                                                                                                                           |
 | `db-tables/20261021-t-juchu-kizai-jizen` → `db-data/20261021-*-jizen` → `db-views`（事前準備の12本）→ `db-functions/20261021-nyushuko-send-jizen` | 関数 → ビュー → データ → テーブル          | 在庫のビュー3本と関数が `t_juchu_kizai_jizen` を参照するので、テーブルが無いとエラー。逆にテーブルを先に消そうとすると依存があって `DROP` できない。マスタ（80/90・色4）は無くてもエラーにはならないが、作業区分名・色が出ない |
+| `db-tables/20261028-t-nyushuko-den-plan-chg-flg` → `db-views/v_nyushuko_den2_lst`                                                                 | ビュー → テーブル                          | ビューが `t_nyushuko_den.plan_chg_flg` を参照するので、列が無いとエラー。逆に列を先に消そうとすると依存があって `DROP COLUMN` できない                                                                                         |
 | `db-views/v_honbanbi_calc` → `db-data/t_juchu_kizai_honbanbi_template`                                                                            | テンプレート行のDELETE → `v_honbanbi_calc` | 先にテンプレートをINSERTすると、その間 `v_honbanbi_calc` の行数が倍近くに膨らむ（本番実測 662 → 1,228行）                                                                                                                      |
 
-2026-10-07 の本番適用はこの順（テーブル → 関数 → ビュー）で行いました。
+2026-10-07 の本番適用はこの順（テーブル → 関数 → ビュー）で行いました。2026-11-05 の事前準備・数量変更の本番適用は「`t_juchu_kizai_jizen` → `plan_chg_flg` の列とトリガー → マスタ2件 → ビュー12本 → 送信RPC」の順です（[`db-views/README.md`](db-views/README.md) の「2026-11-05 の本番適用」）。
 
 ## 適用手順
 

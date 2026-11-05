@@ -1,13 +1,18 @@
--- v_nyushuko_den のロールバック（v_nyushuko_den2 も一緒に作り直す）
--- 本番の適用前の定義そのもの（2026-09-30 に pg_get_viewdef で取得。ステージングも同一、md5 一致）。
--- 末尾の列を消す変更なので CREATE OR REPLACE では戻せない。DROP して作り直す（GRANT も付け直す）。
--- v_nyushuko_den2 以外にこの2ビューへ依存するビューは無い（2026-09-30 確認）。
--- v_nyushuko_den2 が v_nyushuko_den に依存しているため、v_nyushuko_den2 → v_nyushuko_den の順に DROP し、
--- v_nyushuko_den → v_nyushuko_den2 の順に作り直す。v_nyushuko_den2.rollback.sql を先に流していても、このファイルだけで戻る。
+-- 適用状況: ロールバック用（2026-11-05 の事前準備の本番適用より前の定義。適用前の本番と一致することを確認済み）
+-- =====================================================================
+-- v_nyushuko_den のロールバック（本番の現在の定義）
+-- 2026-10-21 にステージングから pg_get_viewdef で取得（applied/ と同じ定義。本番と同じかは本番に当てる前に確認すること）。
+-- 末尾の列を消すので CREATE OR REPLACE では戻せない。v_nyushuko_den2 → v_nyushuko_den の順に DROP し、作り直して GRANT を付け直す。
+-- GRANT はステージングの現在の権限（2026-10-21）に合わせている。本番で戻す前に本番の権限を確認すること。
+-- =====================================================================
+
+\set ON_ERROR_STOP on
 
 BEGIN;
 
-DROP VIEW IF EXISTS public.v_nyushuko_den2;
+SET LOCAL lock_timeout = '5s';
+
+DROP VIEW public.v_nyushuko_den2;
 DROP VIEW public.v_nyushuko_den;
 
 CREATE VIEW public.v_nyushuko_den WITH (security_invoker = on) AS
@@ -35,12 +40,36 @@ CREATE VIEW public.v_nyushuko_den WITH (security_invoker = on) AS
     COALESCE(max(m_nchk.sts_nam::text), max(m_no_meisai.sts_nam::text)) AS nchk_sagyo_sts_nam,
     COALESCE(max(m_nchk.sts_nam_short::text), max(m_no_meisai.sts_nam_short::text)) AS nchk_sagyo_sts_nam_short,
         CASE
-            WHEN min(shuko_fix.sagyo_sts_id) <> 62 OR min(shuko_fix.sagyo_sts_id) IS NULL THEN 0
-            ELSE 1
+            WHEN count(DISTINCT
+            CASE
+                WHEN shuko_fix.sagyo_sts_id = 62 THEN t_nyushuko_den.juchu_kizai_head_id
+                ELSE NULL::integer
+            END) > 0 AND count(DISTINCT
+            CASE
+                WHEN shuko_fix.sagyo_sts_id = 62 THEN t_nyushuko_den.juchu_kizai_head_id
+                ELSE NULL::integer
+            END) = count(DISTINCT
+            CASE
+                WHEN t_nyushuko_den.sagyo_kbn_id = 10 OR t_nyushuko_den.sagyo_kbn_id = 20 THEN t_nyushuko_den.juchu_kizai_head_id
+                ELSE NULL::integer
+            END) THEN 1
+            ELSE 0
         END AS shuko_fix_flg,
         CASE
-            WHEN min(nyuko_fix.sagyo_sts_id) <> 72 OR min(nyuko_fix.sagyo_sts_id) IS NULL THEN 0
-            ELSE 1
+            WHEN count(DISTINCT
+            CASE
+                WHEN nyuko_fix.sagyo_sts_id = 72 THEN t_nyushuko_den.juchu_kizai_head_id
+                ELSE NULL::integer
+            END) > 0 AND count(DISTINCT
+            CASE
+                WHEN nyuko_fix.sagyo_sts_id = 72 THEN t_nyushuko_den.juchu_kizai_head_id
+                ELSE NULL::integer
+            END) = count(DISTINCT
+            CASE
+                WHEN t_nyushuko_den.sagyo_kbn_id = 30 THEN t_nyushuko_den.juchu_kizai_head_id
+                ELSE NULL::integer
+            END) THEN 1
+            ELSE 0
         END AS nyuko_fix_flg,
     sum(COALESCE(
         CASE
@@ -56,7 +85,41 @@ CREATE VIEW public.v_nyushuko_den WITH (security_invoker = on) AS
         CASE
             WHEN t_nyushuko_den.sagyo_kbn_id = 30 THEN t_nyushuko_den.plan_qty::bigint
             ELSE NULL::bigint
-        END, 0::bigint))::bigint AS nchk_plan_qty
+        END, 0::bigint))::bigint AS nchk_plan_qty,
+        CASE
+            WHEN count(DISTINCT
+            CASE
+                WHEN nyuko_fix.sagyo_sts_id = 72 THEN t_nyushuko_den.juchu_kizai_head_id
+                ELSE NULL::integer
+            END) = 0 THEN 0
+            WHEN count(DISTINCT
+            CASE
+                WHEN nyuko_fix.sagyo_sts_id = 72 THEN t_nyushuko_den.juchu_kizai_head_id
+                ELSE NULL::integer
+            END) = count(DISTINCT
+            CASE
+                WHEN t_nyushuko_den.sagyo_kbn_id = 30 THEN t_nyushuko_den.juchu_kizai_head_id
+                ELSE NULL::integer
+            END) THEN 2
+            ELSE 1
+        END AS nyuko_fix_sts,
+        CASE
+            WHEN count(DISTINCT
+            CASE
+                WHEN shuko_fix.sagyo_sts_id = 62 THEN t_nyushuko_den.juchu_kizai_head_id
+                ELSE NULL::integer
+            END) = 0 THEN 0
+            WHEN count(DISTINCT
+            CASE
+                WHEN shuko_fix.sagyo_sts_id = 62 THEN t_nyushuko_den.juchu_kizai_head_id
+                ELSE NULL::integer
+            END) = count(DISTINCT
+            CASE
+                WHEN t_nyushuko_den.sagyo_kbn_id = 10 OR t_nyushuko_den.sagyo_kbn_id = 20 THEN t_nyushuko_den.juchu_kizai_head_id
+                ELSE NULL::integer
+            END) THEN 2
+            ELSE 1
+        END AS shuko_fix_sts
    FROM t_nyushuko_den
      JOIN t_juchu_head ON t_nyushuko_den.juchu_head_id = t_juchu_head.juchu_head_id AND t_juchu_head.del_flg = 0
      LEFT JOIN t_juchu_kizai_head ON t_juchu_head.juchu_head_id = t_juchu_kizai_head.juchu_head_id AND t_nyushuko_den.juchu_head_id = t_juchu_kizai_head.juchu_head_id AND t_nyushuko_den.juchu_kizai_head_id = t_juchu_kizai_head.juchu_kizai_head_id
@@ -79,9 +142,7 @@ CREATE VIEW public.v_nyushuko_den WITH (security_invoker = on) AS
         END)
   ORDER BY t_nyushuko_den.sagyo_den_dat, t_nyushuko_den.sagyo_id, m_shozoku.shozoku_nam, t_nyushuko_den.juchu_head_id, t_juchu_head.koen_nam, m_kokyaku.kokyaku_nam;
 
--- 権限は適用前と同じにする（本番: anon=r / authenticated=arwdDxtm、ステージング: anon・authenticated とも arwdDxt）。
--- 戻した後に relacl を確認し、環境の既存ビューと違えば揃えること。
-GRANT SELECT ON public.v_nyushuko_den TO anon;
+GRANT ALL ON public.v_nyushuko_den TO anon;
 GRANT ALL ON public.v_nyushuko_den TO authenticated;
 
 CREATE VIEW public.v_nyushuko_den2 WITH (security_invoker = on) AS
@@ -117,7 +178,9 @@ CREATE VIEW public.v_nyushuko_den2 WITH (security_invoker = on) AS
     t_juchu_head.juchu_dat,
     v_nyushuko_den.sstb_plan_qty,
     v_nyushuko_den.schk_plan_qty,
-    v_nyushuko_den.nchk_plan_qty
+    v_nyushuko_den.nchk_plan_qty,
+    v_nyushuko_den.nyuko_fix_sts,
+    v_nyushuko_den.shuko_fix_sts
    FROM v_nyushuko_den
      LEFT JOIN v_get_juchu_kizai_head ON v_nyushuko_den.juchu_head_id = v_get_juchu_kizai_head.juchu_head_id AND v_nyushuko_den.nyushuko_dat = v_get_juchu_kizai_head.sagyo_den_dat AND v_nyushuko_den.nyushuko_basho_id = v_get_juchu_kizai_head.sagyo_id AND v_nyushuko_den.nyushuko_shubetu_id = v_get_juchu_kizai_head.nyushuko_shubetu_id AND v_nyushuko_den.juchu_kizai_head_kbn = v_get_juchu_kizai_head.juchu_kizai_head_kbn
      LEFT JOIN v_get_juchu_kizai_section ON v_nyushuko_den.juchu_head_id = v_get_juchu_kizai_section.juchu_head_id AND v_nyushuko_den.nyushuko_dat = v_get_juchu_kizai_section.sagyo_den_dat AND v_nyushuko_den.nyushuko_basho_id = v_get_juchu_kizai_section.sagyo_id AND v_nyushuko_den.nyushuko_shubetu_id = v_get_juchu_kizai_section.nyushuko_shubetu_id AND v_nyushuko_den.juchu_kizai_head_kbn = v_get_juchu_kizai_section.juchu_kizai_head_kbn
@@ -127,12 +190,10 @@ CREATE VIEW public.v_nyushuko_den2 WITH (security_invoker = on) AS
      LEFT JOIN t_juchu_kizai_nyushuko kics_nyuko ON t_juchu_kizai_head.juchu_head_id = kics_nyuko.juchu_head_id AND t_juchu_kizai_head.juchu_kizai_head_id = kics_nyuko.juchu_kizai_head_id AND kics_nyuko.nyushuko_basho_id = 1 AND kics_nyuko.nyushuko_shubetu_id = 2
      LEFT JOIN t_juchu_kizai_nyushuko yard_shuko ON t_juchu_kizai_head.juchu_head_id = yard_shuko.juchu_head_id AND t_juchu_kizai_head.juchu_kizai_head_id = yard_shuko.juchu_kizai_head_id AND yard_shuko.nyushuko_basho_id = 2 AND yard_shuko.nyushuko_shubetu_id = 1
      LEFT JOIN t_juchu_kizai_nyushuko yard_nyuko ON t_juchu_kizai_head.juchu_head_id = yard_nyuko.juchu_head_id AND t_juchu_kizai_head.juchu_kizai_head_id = yard_nyuko.juchu_kizai_head_id AND yard_nyuko.nyushuko_basho_id = 2 AND yard_nyuko.nyushuko_shubetu_id = 2
-  GROUP BY v_nyushuko_den.nyushuko_dat, v_nyushuko_den.nyushuko_basho_id, v_nyushuko_den.shozoku_nam, v_nyushuko_den.shozoku_nam_short, v_nyushuko_den.juchu_head_id, v_get_juchu_kizai_head.juchu_kizai_head_idv, v_get_juchu_kizai_head.head_namv, v_get_juchu_kizai_head.juchu_kizai_head_kbnv, v_nyushuko_den.koen_nam, v_nyushuko_den.koenbasho_nam, v_nyushuko_den.kokyaku_nam, v_nyushuko_den.nyushuko_shubetu_id, v_nyushuko_den.sstb_sagyo_sts_id, v_nyushuko_den.sstb_sagyo_sts_nam, v_nyushuko_den.sstb_sagyo_sts_nam_short, v_nyushuko_den.schk_sagyo_sts_id, v_nyushuko_den.schk_sagyo_sts_nam, v_nyushuko_den.schk_sagyo_sts_nam_short, v_nyushuko_den.nchk_sagyo_sts_id, v_nyushuko_den.nchk_sagyo_sts_nam, v_nyushuko_den.nchk_sagyo_sts_nam_short, v_nyushuko_den.shuko_fix_flg, v_nyushuko_den.nyuko_fix_flg, t_juchu_head.juchu_dat, v_nyushuko_den.sstb_plan_qty, v_nyushuko_den.schk_plan_qty, v_nyushuko_den.nchk_plan_qty
+  GROUP BY v_nyushuko_den.nyushuko_dat, v_nyushuko_den.nyushuko_basho_id, v_nyushuko_den.shozoku_nam, v_nyushuko_den.shozoku_nam_short, v_nyushuko_den.juchu_head_id, v_get_juchu_kizai_head.juchu_kizai_head_idv, v_get_juchu_kizai_head.head_namv, v_get_juchu_kizai_head.juchu_kizai_head_kbnv, v_nyushuko_den.koen_nam, v_nyushuko_den.koenbasho_nam, v_nyushuko_den.kokyaku_nam, v_nyushuko_den.nyushuko_shubetu_id, v_nyushuko_den.sstb_sagyo_sts_id, v_nyushuko_den.sstb_sagyo_sts_nam, v_nyushuko_den.sstb_sagyo_sts_nam_short, v_nyushuko_den.schk_sagyo_sts_id, v_nyushuko_den.schk_sagyo_sts_nam, v_nyushuko_den.schk_sagyo_sts_nam_short, v_nyushuko_den.nchk_sagyo_sts_id, v_nyushuko_den.nchk_sagyo_sts_nam, v_nyushuko_den.nchk_sagyo_sts_nam_short, v_nyushuko_den.shuko_fix_flg, v_nyushuko_den.nyuko_fix_flg, t_juchu_head.juchu_dat, v_nyushuko_den.sstb_plan_qty, v_nyushuko_den.schk_plan_qty, v_nyushuko_den.nchk_plan_qty, v_nyushuko_den.nyuko_fix_sts, v_nyushuko_den.shuko_fix_sts
   ORDER BY v_nyushuko_den.nyushuko_dat, v_nyushuko_den.nyushuko_basho_id, v_nyushuko_den.juchu_head_id;
 
--- 権限は適用前と同じにする（本番: anon=r / authenticated=arwdDxtm、ステージング: anon・authenticated とも arwdDxt）。
--- 戻した後に relacl を確認し、環境の既存ビューと違えば揃えること。
-GRANT SELECT ON public.v_nyushuko_den2 TO anon;
+GRANT ALL ON public.v_nyushuko_den2 TO anon;
 GRANT ALL ON public.v_nyushuko_den2 TO authenticated;
 
 COMMIT;
