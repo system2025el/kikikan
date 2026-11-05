@@ -11,7 +11,7 @@ import {
   TextField,
   Tooltip,
 } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import { MEMO_MAX_LENGTH } from '@/app/_lib/constants';
 import { validationMessages } from '@/app/(main)/_lib/validation-messages';
@@ -26,7 +26,14 @@ export const MemoTooltip = (props: {
   const { name, memo, rowIndex, disabled, handleMemoChange } = props;
   const [open, setOpen] = useState(false);
   const [isSave, setIsSave] = useState(false);
-  const [equipmentMemo, setEquipmentMemo] = useState('');
+  const [equipmentMemo, setEquipmentMemo] = useState(memo);
+  // 外からメモが変わったら（保存後の再取得・取消など）入力中の値も合わせる。
+  // useEffect で合わせると表示直後に全行がもう一度描画されるので、描画中に前回の値と比べる
+  const [prevMemo, setPrevMemo] = useState(memo);
+  if (memo !== prevMemo) {
+    setPrevMemo(memo);
+    setEquipmentMemo(memo);
+  }
   const isOverMaxLength = equipmentMemo.length > MEMO_MAX_LENGTH;
 
   const handleOpen = () => {
@@ -44,10 +51,6 @@ export const MemoTooltip = (props: {
     handleMemoChange(rowIndex, equipmentMemo);
     setOpen(false);
   };
-
-  useEffect(() => {
-    setEquipmentMemo(memo);
-  }, [memo]);
 
   return (
     <>

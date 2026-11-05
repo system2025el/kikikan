@@ -93,20 +93,22 @@ import { SCHEMA } from '../schema';
  * @param juchuKizaiHeadId
  * @param kizaiIds
  * @param date
+ * @param days 取得する日数（date から）
  * @returns
  */
 export const selectDetailStockListBulk = async (
   juchuHeadId: number,
   juchuKizaiHeadId: number,
   kizaiIds: number[],
-  date: string
+  date: string,
+  days: number
 ) => {
   try {
     const query = `
       WITH target_days AS (
-        -- 指定日から91日分のカレンダーを作成
+        -- 指定日から指定日数分のカレンダーを作成
         SELECT $4::date + g.i AS cal_dat
-        FROM generate_series(0, 90) AS g(i)
+        FROM generate_series(0, $5::integer - 1) AS g(i)
       ),
         target_kizai AS (
             -- 対象の機材情報を一度に取得（$1は機材IDの配列 [1, 2, 3...]）
@@ -119,13 +121,13 @@ export const selectDetailStockListBulk = async (
         -- 「JOIN相手から来る値」になって集約の内側に押し込めず、全受注を集約し切ってから
         -- 捨てることになる（機材1件でも約1.9秒かかっていた）。
         -- kizai_id も plan_dat もGROUP BYのキーなので、ここで定数の述語として先に当てておくと
-        -- 集約の内側まで押し込まれる。日付範囲は上の generate_series(0, 90) と一致させること。
+        -- 集約の内側まで押し込まれる。日付範囲は上の generate_series と一致させること。
         zaiko AS (
             SELECT plan_dat, kizai_id, juchu_qty, zaiko_qty
             FROM ${SCHEMA}.v_zaiko_qty
             WHERE kizai_id = ANY($1)
               AND plan_dat >= $4::date
-              AND plan_dat < $4::date + 91
+              AND plan_dat < $4::date + $5::integer
         ),
         honbanbi AS (
             SELECT plan_dat, kizai_id, juchu_honbanbi_shubetu_id, juchu_honbanbi_shubetu_color
@@ -134,7 +136,7 @@ export const selectDetailStockListBulk = async (
               AND juchu_head_id = $2
               AND juchu_kizai_head_id = $3
               AND plan_dat >= $4::date
-              AND plan_dat < $4::date + 91
+              AND plan_dat < $4::date + $5::integer
         )
         SELECT
             d.cal_dat AS "calDat",
@@ -157,7 +159,7 @@ export const selectDetailStockListBulk = async (
             k.kizai_id, d.cal_dat;
     `;
 
-    const values = [kizaiIds, juchuHeadId, juchuKizaiHeadId, date];
+    const values = [kizaiIds, juchuHeadId, juchuKizaiHeadId, date, days];
 
     return await pool.query(query, values);
   } catch (e) {

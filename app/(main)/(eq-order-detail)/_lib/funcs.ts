@@ -690,13 +690,15 @@ export const getOyaJuchuContainerMeisai = async (juchuHeadId: number, juchuKizai
  * @param kizaiId 機材id
  * @param planQty 使用数
  * @param date 開始日
+ * @param days 取得する日数（開始日から）。メイン明細は31日、返却明細は91日
  * @returns 機材在庫テーブル用データ
  */
 export const getALLStockList = async (
   juchuHeadId: number,
   juchuKizaiHeadId: number,
   kizaiIds: number[],
-  date: Date
+  date: Date,
+  days: number = 91
 ) => {
   const stringDate = toJapanYMDString(date, '-');
   try {
@@ -704,7 +706,8 @@ export const getALLStockList = async (
       juchuHeadId,
       juchuKizaiHeadId,
       kizaiIds,
-      stringDate
+      stringDate,
+      days
     );
     const data: StockTableValues[] = result.rows;
     return data;

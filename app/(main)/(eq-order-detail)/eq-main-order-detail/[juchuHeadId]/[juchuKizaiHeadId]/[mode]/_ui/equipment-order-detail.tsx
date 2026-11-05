@@ -36,7 +36,7 @@ import {
 } from '@mui/material';
 import { addDays, addMonths, set, setDate, subDays, subMonths } from 'date-fns';
 import { redirect, useRouter } from 'next/navigation';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import React from 'react';
 import { Controller, SubmitErrorHandler, useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
@@ -81,6 +81,7 @@ import {
   WORKING_DELETE_ITEMS_MAIN,
   WorkingConfirmDialog,
 } from '../../../../../_ui/caveat-dialog';
+import { STOCK_TABLE_DAYS } from '../_lib/constants';
 import {
   getHonbanbi,
   getIdoJuchuKizaiMeisai,
@@ -104,6 +105,7 @@ import {
   withJizen,
   withoutJizen,
 } from '../_lib/jizen';
+import { perfCommit, perfFinish, perfMark } from '../_lib/perf-measure'; // [計測用]
 import {
   IdoJuchuKizaiMeisaiValues,
   JuchuContainerMeisaiValues,
@@ -171,6 +173,8 @@ const EquipmentOrderDetail = (props: {
   const [isLoading, setIsLoading] = useState(true);
   // 機材明細ローディング
   const [isDetailLoading, setIsDetailLoading] = useState(false);
+  // [計測用] コミットのたびに時刻を記録する（在庫の取得後の描き直しの回数と時間を見る）
+  useLayoutEffect(() => perfCommit());
   // 処理中
   const [isProcessing, setIsProcessing] = useState(false);
   // エラーハンドリング
@@ -1068,7 +1072,8 @@ const EquipmentOrderDetail = (props: {
           juchuHeadId,
           juchuKizaiHeadId,
           uniqueIds,
-          subDays(shukoDate, 1)
+          subDays(shukoDate, 1),
+          STOCK_TABLE_DAYS
         );
         tableAnchorDateRef.current = shukoDate;
 
@@ -1148,14 +1153,14 @@ const EquipmentOrderDetail = (props: {
       setAnchorEl(null);
     }
   };
-  // 3か月前
+  // 表示日数分前（前の表示期間とすき間なくつながる）
   const handleBackDateChange = () => {
-    const date = subDays(new Date(tableAnchorDateRef.current ?? selectDate), 91);
+    const date = subDays(new Date(tableAnchorDateRef.current ?? selectDate), STOCK_TABLE_DAYS);
     handleDateChange(date, 'day');
   };
-  // 3か月後
+  // 表示日数分後
   const handleForwardDateChange = () => {
-    const date = addDays(new Date(tableAnchorDateRef.current ?? selectDate), 91);
+    const date = addDays(new Date(tableAnchorDateRef.current ?? selectDate), STOCK_TABLE_DAYS);
     handleDateChange(date, 'day');
   };
 
@@ -1953,7 +1958,8 @@ const EquipmentOrderDetail = (props: {
             getValues('juchuHeadId'),
             getValues('juchuKizaiHeadId'),
             fetchTargetIds,
-            subDays(tableAnchorDateRef.current ?? selectDate, 1)
+            subDays(tableAnchorDateRef.current ?? selectDate, 1),
+            STOCK_TABLE_DAYS
           );
         }
 
@@ -2463,12 +2469,14 @@ const EquipmentOrderDetail = (props: {
       const juchuKizaiHeadData = getValues();
 
       try {
+        perfMark('取得開始'); // [計測用]
         // 受注機材明細データ、移動受注機材明細データ、受注コンテナ明細データ
         const [juchuKizaiMeisaiData, idoJuchuKizaiMeisaiData, juchuContainerMeisaiData] = await Promise.all([
           getJuchuKizaiMeisai(juchuKizaiHeadData.juchuHeadId, juchuKizaiHeadData.juchuKizaiHeadId),
           getIdoJuchuKizaiMeisai(juchuKizaiHeadData.juchuHeadId, juchuKizaiHeadData.juchuKizaiHeadId),
           getJuchuContainerMeisai(juchuKizaiHeadData.juchuHeadId, juchuKizaiHeadData.juchuKizaiHeadId),
         ]);
+        perfMark('明細取得完了'); // [計測用]
 
         // 出庫日
         const shukoDate = getShukoDate(
@@ -2494,6 +2502,7 @@ const EquipmentOrderDetail = (props: {
                 juchuKizaiMeisaiData
               )
             : [];
+        perfMark('在庫取得完了'); // [計測用]
 
         setOriginJuchuKizaiMeisaiList(juchuKizaiMeisaiData ?? []);
         setJuchuKizaiMeisaiList(juchuKizaiMeisaiData ?? []);
@@ -2530,6 +2539,7 @@ const EquipmentOrderDetail = (props: {
       } catch (e) {
         setIsError(e instanceof Error ? e : new Error(String(e)));
       }
+      perfMark('ロック確認完了'); // [計測用]
       setIsLoading(false);
     };
 
@@ -2543,6 +2553,12 @@ const EquipmentOrderDetail = (props: {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
+
+  // [計測用] 明細と在庫の表示（ロック確認も含めてローディングが明けたところ）で計測を締める
+  useEffect(() => {
+    if (!isLoading && !isDetailLoading) perfFinish(juchuKizaiMeisaiList.filter((d) => !d.delFlag).length);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoading, isDetailLoading]);
 
   // 割引金額（確定）を、金額の元になる項目（機材数量・割引率・本番日数）の編集に追従させる。
   // useEffectは初期表示でも必ず発火し、明細はクライアント側で非同期取得するためpriceTotalは
