@@ -64,6 +64,7 @@ import { Calendar, CalendarView, DateTime, FormDateX } from '@/app/(main)/_ui/da
 import { IsDirtyAlertDialog, useDirty } from '@/app/(main)/_ui/dirty-context';
 import { HonbanbiCalendar } from '@/app/(main)/_ui/honbanbi-calendar';
 import { Loading, LoadingOverlay } from '@/app/(main)/_ui/loading';
+import { STOCK_TABLE_DAYS } from '@/app/(main)/(eq-order-detail)/_lib/constants';
 import {
   checkShukoStatus,
   getALLStockList,
@@ -81,7 +82,6 @@ import {
   WORKING_DELETE_ITEMS_MAIN,
   WorkingConfirmDialog,
 } from '../../../../../_ui/caveat-dialog';
-import { STOCK_TABLE_DAYS } from '../_lib/constants';
 import {
   getHonbanbi,
   getIdoJuchuKizaiMeisai,
@@ -1084,8 +1084,7 @@ const EquipmentOrderDetail = (props: {
           juchuHeadId,
           juchuKizaiHeadId,
           uniqueIds,
-          subDays(shukoDate, 1),
-          STOCK_TABLE_DAYS
+          subDays(shukoDate, 1)
         );
         tableAnchorDateRef.current = shukoDate;
 
@@ -1970,8 +1969,7 @@ const EquipmentOrderDetail = (props: {
             getValues('juchuHeadId'),
             getValues('juchuKizaiHeadId'),
             fetchTargetIds,
-            subDays(tableAnchorDateRef.current ?? selectDate, 1),
-            STOCK_TABLE_DAYS
+            subDays(tableAnchorDateRef.current ?? selectDate, 1)
           );
         }
 

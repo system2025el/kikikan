@@ -55,7 +55,7 @@ const stockDateKeyCache = new Map<number, string>();
 
 /**
  * 在庫セルの日付を YYYY/MM/DD の文字列にする
- * 在庫テーブルは 機材数×91日 のセルごとに日付を比べるので、dayjs のタイムゾーン変換は日付ごとに1回で済ませる
+ * 在庫テーブルは 機材数×表示日数 のセルごとに日付を比べるので、dayjs のタイムゾーン変換は日付ごとに1回で済ませる
  * @param date 在庫データの日付
  * @returns YYYY/MM/DD
  */

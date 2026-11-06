@@ -63,6 +63,7 @@ import {
   JuchuKizaiHonbanbiValues,
   StockTableValues,
 } from '../eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';
+import { STOCK_TABLE_DAYS } from './constants';
 import { DetailOerValues, OyaJuchuContainerMeisaiValues, OyaJuchuKizaiMeisaiValues } from './types';
 
 /**
@@ -689,16 +690,14 @@ export const getOyaJuchuContainerMeisai = async (juchuHeadId: number, juchuKizai
  * @param juchuKizaiHeadId 受注機材ヘッダーid
  * @param kizaiId 機材id
  * @param planQty 使用数
- * @param date 開始日
- * @param days 取得する日数（開始日から）。メイン明細は31日、返却明細は91日
+ * @param date 開始日（ここから在庫テーブルの表示日数分を取得する）
  * @returns 機材在庫テーブル用データ
  */
 export const getALLStockList = async (
   juchuHeadId: number,
   juchuKizaiHeadId: number,
   kizaiIds: number[],
-  date: Date,
-  days: number = 91
+  date: Date
 ) => {
   const stringDate = toJapanYMDString(date, '-');
   try {
@@ -707,7 +706,7 @@ export const getALLStockList = async (
       juchuKizaiHeadId,
       kizaiIds,
       stringDate,
-      days
+      STOCK_TABLE_DAYS
     );
     const data: StockTableValues[] = result.rows;
     return data;

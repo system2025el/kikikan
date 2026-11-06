@@ -57,6 +57,7 @@ import { BackButton } from '@/app/(main)/_ui/buttons';
 import { Calendar, CalendarView, DateTime, FormDateX } from '@/app/(main)/_ui/date';
 import { IsDirtyAlertDialog, useDirty } from '@/app/(main)/_ui/dirty-context';
 import { Loading, LoadingOverlay } from '@/app/(main)/_ui/loading';
+import { STOCK_TABLE_DAYS } from '@/app/(main)/(eq-order-detail)/_lib/constants';
 import {
   getALLStockList,
   getDetailJuchuHead,
@@ -785,14 +786,14 @@ export const EquipmentReturnOrderDetail = (props: {
       }
     }
   };
-  // 3か月前
+  // 表示日数分前（前の表示期間とすき間なくつながる）
   const handleBackDateChange = () => {
-    const date = subDays(new Date(tableAnchorDateRef.current ?? selectDate), 91);
+    const date = subDays(new Date(tableAnchorDateRef.current ?? selectDate), STOCK_TABLE_DAYS);
     handleDateChange(date, 'day');
   };
-  // 3か月後
+  // 表示日数分後
   const handleForwardDateChange = () => {
-    const date = addDays(new Date(tableAnchorDateRef.current ?? selectDate), 91);
+    const date = addDays(new Date(tableAnchorDateRef.current ?? selectDate), STOCK_TABLE_DAYS);
     handleDateChange(date, 'day');
   };
 

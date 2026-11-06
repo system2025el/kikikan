@@ -25,7 +25,7 @@ import { blue, grey, lightBlue } from '@mui/material/colors';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { BASHO_ID, SAGYO_SIJI_ID } from '@/app/_lib/constants';
-import { toJapanMDString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanMDString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { openOrFocusTab } from '@/app/(main)/_lib/tab-focus';
 import { DateTime, FormDateX } from '@/app/(main)/_ui/date';
 import { MemoTooltip } from '@/app/(main)/(eq-order-detail)/_ui/memo-tooltip';
@@ -781,6 +781,93 @@ type IdoEqTableRowProps = {
   handleCellDateClear: (kizaiId: number) => void;
 };
 
+const idoDatTextStyle: React.CSSProperties = {
+  boxSizing: 'border-box',
+  width: 160,
+  height: 23,
+  padding: '0 14px',
+  border: '1px solid rgba(0, 0, 0, 0.23)',
+  borderRadius: 4,
+  fontSize: '1rem',
+  lineHeight: '21px',
+  whiteSpace: 'nowrap',
+};
+
+/**
+ * 移動日のセル
+ * 日付部品は1つでも重く、移動機材は明細とほぼ同じ行数があるので、ふだんは文字で出し、
+ * クリック（またはTabでフォーカス）した行だけ日付部品に切り替える。フォーカスが外れたら文字に戻す
+ * @param value 移動日
+ * @param disabled 入力不可
+ * @param onChange 日付部品で値が変わったとき
+ */
+const IdoDatCell = ({
+  value,
+  disabled,
+  onChange,
+}: {
+  value: Date | null;
+  disabled: boolean;
+  onChange: (date: Date | null) => void;
+}) => {
+  const [editing, setEditing] = useState(false);
+  const blurTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  if (disabled) {
+    // 入力中に入力不可になったら、次に入力可に戻ったとき日付部品のまま残らないようにする
+    if (editing) setEditing(false);
+    return (
+      <div style={{ ...idoDatTextStyle, backgroundColor: grey[200], borderColor: 'rgba(0, 0, 0, 0.26)' }}>
+        {value ? toJapanYMDString(value) : ''}
+      </div>
+    );
+  }
+
+  if (!editing) {
+    return (
+      <div
+        role="button"
+        tabIndex={0}
+        style={{ ...idoDatTextStyle, backgroundColor: 'white', cursor: 'pointer' }}
+        onFocus={() => setEditing(true)}
+      >
+        {value ? toJapanYMDString(value) : ''}
+      </div>
+    );
+  }
+
+  return (
+    // カレンダーは別の場所（portal）に出るが、React のフォーカスイベントはここまで伝わる。
+    // 外れた直後に中へフォーカスが戻ってくる（カレンダーを開く・閉じる）ことがあるので、少し待ってから文字に戻す
+    <div
+      onBlur={() => {
+        blurTimerRef.current = setTimeout(() => setEditing(false), 0);
+      }}
+      onFocus={() => {
+        if (blurTimerRef.current) clearTimeout(blurTimerRef.current);
+      }}
+    >
+      <FormDateX
+        sx={{
+          width: 160,
+          '& .MuiPickersInputBase-root': {
+            height: '23px',
+          },
+          '& .MuiPickersSectionList-root': {
+            padding: 0,
+          },
+          '& .MuiButtonBase-root': {
+            padding: 0,
+          },
+        }}
+        value={value}
+        onChange={onChange}
+        autoFocus
+      />
+    </div>
+  );
+};
+
 const IdoEqTableRow = React.memo(
   ({ row, rowIndex, edit, shukoFixFlag, shukoDate, handleCellDateChange, handleCellDateClear }: IdoEqTableRowProps) => {
     return (
@@ -800,19 +887,7 @@ const IdoEqTableRow = React.memo(
         </TableCell>
         <TableCell style={styles.row} size="small">
           <Box display="flex" width={'200px'}>
-            <FormDateX
-              sx={{
-                width: 160,
-                '& .MuiPickersInputBase-root': {
-                  height: '23px',
-                },
-                '& .MuiPickersSectionList-root': {
-                  padding: 0,
-                },
-                '& .MuiButtonBase-root': {
-                  padding: 0,
-                },
-              }}
+            <IdoDatCell
               value={row.sagyoDenDat}
               onChange={(date) => (date ? handleCellDateChange(row.kizaiId, date) : handleCellDateClear(row.kizaiId))}
               disabled={!edit || shukoFixFlag}
