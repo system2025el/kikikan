@@ -72,6 +72,7 @@ import {
 } from '@/app/(main)/(eq-order-detail)/_lib/types';
 import { AlertDialog, DeleteAlertDialog } from '@/app/(main)/(eq-order-detail)/_ui/caveat-dialog';
 import { OyaEqSelectionDialog } from '@/app/(main)/(eq-order-detail)/_ui/equipment-selection-dialog';
+import { toEqStockList } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/stock-list';
 import {
   JuchuContainerMeisaiValues,
   JuchuKizaiMeisaiValues,
@@ -81,6 +82,7 @@ import { getJuchuKizaiMeisaiList } from '@/app/(main)/quotation-list/_lib/funcs'
 
 import {
   getReturnJuchuContainerMeisai,
+  getReturnJuchuKizaiDetailData,
   getReturnJuchuKizaiHead,
   getReturnJuchuKizaiMeisai,
   saveNewReturnJuchuKizaiHead,
@@ -332,20 +334,6 @@ export const EquipmentReturnOrderDetail = (props: {
           return false;
         }
 
-        // 返却受注機材明細データ、返却受注コンテナ明細データ
-        const [returnJuchuKizaiMeisaiData, returnJuchuContainerMeisaiData] = await Promise.all([
-          getReturnJuchuKizaiMeisai(
-            returnJuchuKizaiHeadData.juchuHeadId,
-            returnJuchuKizaiHeadData.juchuKizaiHeadId,
-            returnJuchuKizaiHeadData.oyaJuchuKizaiHeadId
-          ),
-          getReturnJuchuContainerMeisai(
-            returnJuchuKizaiHeadData.juchuHeadId,
-            returnJuchuKizaiHeadData.juchuKizaiHeadId,
-            returnJuchuKizaiHeadData.oyaJuchuKizaiHeadId
-          ),
-        ]);
-
         // 返却入庫日
         const returnNyukoDate = getNyukoDate(
           returnJuchuKizaiHeadData.kicsNyukoDat && new Date(returnJuchuKizaiHeadData.kicsNyukoDat),
@@ -354,16 +342,17 @@ export const EquipmentReturnOrderDetail = (props: {
         // 出庫日から入庫日
         const dateRange = getRange(returnNyukoDate, oyaNyukoDate);
 
-        // 機材在庫データ
-        const updatedEqStockData =
-          returnJuchuKizaiMeisaiData.length > 0
-            ? await updateEqStock(
-                returnJuchuKizaiHeadData.juchuHeadId,
-                returnJuchuKizaiHeadData.juchuKizaiHeadId,
-                returnNyukoDate,
-                returnJuchuKizaiMeisaiData
-              )
-            : [];
+        // 返却受注機材明細データ、返却受注コンテナ明細データ、機材在庫データ
+        const {
+          returnJuchuKizaiMeisaiData,
+          returnJuchuContainerMeisaiData,
+          eqStockData: updatedEqStockData,
+        } = await fetchDetailData(
+          returnJuchuKizaiHeadData.juchuHeadId,
+          returnJuchuKizaiHeadData.juchuKizaiHeadId,
+          returnJuchuKizaiHeadData.oyaJuchuKizaiHeadId,
+          returnNyukoDate
+        );
 
         reset(returnJuchuKizaiHeadData);
         setOriginReturnJuchuKizaiMeisaiList(returnJuchuKizaiMeisaiData ?? []);
@@ -697,26 +686,38 @@ export const EquipmentReturnOrderDetail = (props: {
         );
         tableAnchorDateRef.current = nyukoDate;
 
-        const idToStockMap = new Map<number, StockTableValues[]>();
-        for (const row of allStockData) {
-          if (!idToStockMap.has(row.kizaiId)) {
-            idToStockMap.set(row.kizaiId, []);
-          }
-          idToStockMap.get(row.kizaiId)!.push(row);
-        }
-
-        updatedEqStockData = ids.map((id) => {
-          const stockArray = idToStockMap.get(id);
-          if (!stockArray) {
-            return [];
-          }
-          return stockArray;
-        });
+        updatedEqStockData = toEqStockList(ids, allStockData);
       }
       return updatedEqStockData;
     } catch (e) {
       throw e;
     }
+  };
+
+  /**
+   * 明細一式（返却受注機材明細・返却受注コンテナ明細・機材在庫）を1回の Server Action で取得する
+   * 在庫を取得したときは、在庫テーブルの基準日も合わせる（updateEqStock と同じ）
+   * @param juchuHeadId 受注ヘッダーid
+   * @param juchuKizaiHeadId 受注機材ヘッダーid
+   * @param oyaJuchuKizaiHeadId 親受注機材ヘッダーid
+   * @param nyukoDate 返却入庫日
+   */
+  const fetchDetailData = async (
+    juchuHeadId: number,
+    juchuKizaiHeadId: number,
+    oyaJuchuKizaiHeadId: number,
+    nyukoDate: Date | null
+  ) => {
+    const { stockList, ...meisaiData } = await getReturnJuchuKizaiDetailData(
+      juchuHeadId,
+      juchuKizaiHeadId,
+      oyaJuchuKizaiHeadId,
+      nyukoDate
+    );
+    if (stockList.length > 0) {
+      tableAnchorDateRef.current = nyukoDate;
+    }
+    return { ...meisaiData, eqStockData: stockList };
   };
 
   /**
@@ -1381,20 +1382,6 @@ export const EquipmentReturnOrderDetail = (props: {
       const juchuKizaiHeadData = getValues();
 
       try {
-        // 返却受注機材明細データ、返却受注コンテナ明細データ
-        const [returnJuchuKizaiMeisaiData, returnJuchuContainerMeisaiData] = await Promise.all([
-          getReturnJuchuKizaiMeisai(
-            juchuKizaiHeadData.juchuHeadId,
-            juchuKizaiHeadData.juchuKizaiHeadId,
-            juchuKizaiHeadData.oyaJuchuKizaiHeadId
-          ),
-          getReturnJuchuContainerMeisai(
-            juchuKizaiHeadData.juchuHeadId,
-            juchuKizaiHeadData.juchuKizaiHeadId,
-            juchuKizaiHeadData.oyaJuchuKizaiHeadId
-          ),
-        ]);
-
         // 返却入庫日
         const returnNyukoDate = getNyukoDate(
           juchuKizaiHeadData.kicsNyukoDat && new Date(juchuKizaiHeadData.kicsNyukoDat),
@@ -1403,16 +1390,17 @@ export const EquipmentReturnOrderDetail = (props: {
         // 出庫日から入庫日
         const dateRange = getRange(returnNyukoDate, oyaNyukoDate);
 
-        // 機材在庫データ
-        const updatedEqStockData =
-          returnJuchuKizaiMeisaiData.length > 0
-            ? await updateEqStock(
-                juchuKizaiHeadData?.juchuHeadId,
-                juchuKizaiHeadData?.juchuKizaiHeadId,
-                returnNyukoDate,
-                returnJuchuKizaiMeisaiData
-              )
-            : [];
+        // 返却受注機材明細データ、返却受注コンテナ明細データ、機材在庫データ
+        const {
+          returnJuchuKizaiMeisaiData,
+          returnJuchuContainerMeisaiData,
+          eqStockData: updatedEqStockData,
+        } = await fetchDetailData(
+          juchuKizaiHeadData.juchuHeadId,
+          juchuKizaiHeadData.juchuKizaiHeadId,
+          juchuKizaiHeadData.oyaJuchuKizaiHeadId,
+          returnNyukoDate
+        );
 
         setOriginReturnJuchuKizaiMeisaiList(returnJuchuKizaiMeisaiData);
         setReturnJuchuKizaiMeisaiList(returnJuchuKizaiMeisaiData);
