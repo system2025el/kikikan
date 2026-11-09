@@ -351,7 +351,29 @@ const EqTableComponent: React.FC<EqTableProps> = ({
         maxHeight: '80vh',
       }}
     >
-      <Table stickyHeader sx={{ borderCollapse: 'separate', borderSpacing: 0 }}>
+      <Table
+        stickyHeader
+        sx={(theme) => ({
+          borderCollapse: 'separate',
+          borderSpacing: 0,
+          // 本体のセルは 機材数×8列ほどあるので MUI の TableCell・TableRow を使わず素の tr・td にし、
+          // 共通のスタイルはここで1回だけ当てる（TableCell の body・small と styles.row に合わせてある。在庫テーブルと同じ）
+          // sx の padding は数値だと spacing 倍になるので px で書く
+          '& tbody td': {
+            ...theme.typography.body2,
+            color: theme.palette.text.primary,
+            borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
+            borderRight: '1px solid rgba(0, 0, 0, 0.12)',
+            whiteSpace: 'nowrap',
+            height: '26px',
+            padding: '0 4px',
+          },
+          // TableRow の hover と同じ
+          '& tbody tr:hover': {
+            backgroundColor: theme.palette.action.hover,
+          },
+        })}
+      >
         <TableHead>
           <TableRow>
             {/* 表がボタン列の幅まで伸びたとき、伸びた分は機材名の列だけが受け持つ（ほかの列は width: 1% で中身の幅に縮める） */}
@@ -557,14 +579,9 @@ const EqTableRow = React.memo(
     // 保存前から、入力中の値（出庫日時・合計数を含む）で誤りのある欄を赤枠にする
     const jizenError = getJizenRowError(row, jizenMaxDat);
     return (
-      <TableRow hover>
-        <TableCell
-          sx={{
-            padding: 0,
-            borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
-            borderRight: '1px solid rgba(0, 0, 0, 0.12)',
-          }}
-        >
+      // セルの共通のスタイル（罫線・高さ・余白・文字）とマウスを乗せたときの色は EqTable の sx で当てる
+      <tr>
+        <td style={{ padding: 0 }}>
           <Checkbox
             color="primary"
             checked={row.selected}
@@ -572,8 +589,8 @@ const EqTableRow = React.memo(
             sx={{ padding: 0 }}
             disabled={!edit || shukoFixFlag}
           />
-        </TableCell>
-        <TableCell style={styles.row} align="center" size="small">
+        </td>
+        <td style={{ textAlign: 'center' }}>
           <MemoTooltip
             name={row.kizaiNam}
             memo={row.mem ? row.mem : ''}
@@ -581,8 +598,8 @@ const EqTableRow = React.memo(
             rowIndex={rowIndex}
             disabled={!edit || shukoFixFlag}
           />
-        </TableCell>
-        <TableCell style={styles.row} align="left" size="small">
+        </td>
+        <td style={{ textAlign: 'left' }}>
           <Button
             variant="text"
             sx={{ p: 0, justifyContent: 'start', textTransform: 'none', color: 'text.primary' }}
@@ -592,16 +609,17 @@ const EqTableRow = React.memo(
           >
             {row.kizaiNam}
           </Button>
-        </TableCell>
-        <TableCell
-          style={styles.row}
-          align="right"
-          size="small"
-          sx={{ bgcolor: lightBlue[100], color: row.planQty === 0 ? 'red' : 'inherit' }}
+        </td>
+        <td
+          style={{
+            textAlign: 'right',
+            backgroundColor: lightBlue[100],
+            color: row.planQty === 0 ? 'red' : undefined,
+          }}
         >
           {row.planQty}
-        </TableCell>
-        <TableCell style={styles.row} align="right" size="small">
+        </td>
+        <td style={{ textAlign: 'right' }}>
           <TextField
             variant="standard"
             value={row.planKizaiQty}
@@ -643,8 +661,8 @@ const EqTableRow = React.memo(
             onFocus={(e) => e.target.select()}
             disabled={!edit || shukoFixFlag}
           />
-        </TableCell>
-        <TableCell style={styles.row} align="right" size="small">
+        </td>
+        <td style={{ textAlign: 'right' }}>
           <TextField
             variant="standard"
             value={row.planYobiQty}
@@ -686,10 +704,10 @@ const EqTableRow = React.memo(
             onFocus={(e) => e.target.select()}
             disabled={!edit || shukoFixFlag}
           />
-        </TableCell>
+        </td>
         {showJizen && (
           <>
-            <TableCell style={styles.row} size="small">
+            <td>
               <JizenDatCell
                 value={row.jizenDat ?? null}
                 maxDate={jizenMaxDat}
@@ -697,8 +715,8 @@ const EqTableRow = React.memo(
                 onCommit={(date) => handleJizenDatChange(rowIndex, date)}
                 disabled={!edit || shukoFixFlag}
               />
-            </TableCell>
-            <TableCell style={styles.row} align="right" size="small">
+            </td>
+            <td style={{ textAlign: 'right' }}>
               <TextField
                 variant="standard"
                 value={row.jizenQty ?? ''}
@@ -734,10 +752,10 @@ const EqTableRow = React.memo(
                 // 準備日時が無い行は準備数を持たない
                 disabled={!edit || shukoFixFlag || !row.jizenDat}
               />
-            </TableCell>
+            </td>
           </>
         )}
-        <TableCell style={styles.row} align="center" size="small">
+        <td style={{ textAlign: 'center' }}>
           <MemoTooltip
             name={row.kizaiNam}
             memo={row.mem2 ?? ''}
@@ -745,8 +763,8 @@ const EqTableRow = React.memo(
             rowIndex={rowIndex}
             disabled={!edit || shukoFixFlag}
           />
-        </TableCell>
-      </TableRow>
+        </td>
+      </tr>
     );
   },
   (prevProps, nextProps) => {
