@@ -45,6 +45,8 @@ export const MemoTooltip = (props: {
     setOpen(true);
     setDialogMounted(true);
     setIsSave(false);
+    // 開いたままにすると、メモが空のとき（ツールチップは出ない）にダイアログで入力した内容がツールチップに出てしまう
+    setTooltipOpen(false);
   };
   const handleClose = () => {
     setEquipmentMemo(props.memo);
@@ -82,7 +84,8 @@ export const MemoTooltip = (props: {
           title={equipmentMemo}
           arrow
           sx={{ p: 0 }}
-          open={tooltipOpen}
+          // ダイアログを開いている間は出さない
+          open={tooltipOpen && !open}
           onOpen={() => setTooltipOpen(true)}
           onClose={() => setTooltipOpen(false)}
         >
