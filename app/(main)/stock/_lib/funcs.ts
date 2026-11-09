@@ -97,6 +97,23 @@ export const getEqData = async (bumonId: number, keyword: string) => {
 // };
 
 /**
+ * 検索時の機材一覧と在庫の取得
+ * Server Action は1本ずつ順番に処理され、1往復ごとに時間が上乗せされるので、
+ * 機材一覧で決まる在庫の取得までサーバー側で続けて行い、画面からは1回の呼び出しで済ませる
+ * （エラーの記録は中で呼ぶ各取得関数が行う）
+ * @param bumonId 部門id
+ * @param keyword 機材名キーワード
+ * @param date 在庫の開始日
+ * @returns 機材一覧と、その機材の在庫（機材×日付）
+ */
+export const getStockSearchData = async (bumonId: number, keyword: string, date: Date) => {
+  const eqList = await getEqData(bumonId, keyword);
+  const uniqueKizaiIds = Array.from(new Set(eqList.map((d) => d.kizaiId)));
+  const stockData = await getAllStockData(uniqueKizaiIds, date);
+  return { eqList, stockData };
+};
+
+/**
  * 複数機材在庫情報一括取得
  * @param kizaiIds
  * @param date

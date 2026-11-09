@@ -110,7 +110,9 @@ export const selectDetailStockListBulk = async (
         SELECT $4::date + g.i AS cal_dat
         FROM generate_series(0, $5::integer - 1) AS g(i)
       ),
-        target_kizai AS (
+        -- MATERIALIZED：機材の並び順が下に伝わらないようにし、機材と日付の両方で突き合わせる計画にする
+        -- （selectStockListBulk と同じ。外すと機材が多いときに遅い計画が選ばれやすい）
+        target_kizai AS MATERIALIZED (
             -- 対象の機材の保有数を一度に取得（$1は機材IDの配列 [1, 2, 3...]）
             -- 保有数は v_kizai_qty.kizai_qty と同じ数え方（削除されておらず、状態が100未満か未設定のタグの本数）。
             -- v_kizai_qty は NG数・削除数・KICS/YARD数のために v_rfid を5回全件集計し、機材の絞り込みも
@@ -552,21 +554,37 @@ export const selectStockListBulk = async (kizaiIds: number[], date: string) => {
     SELECT $2::date + g.i AS cal_dat 
     FROM generate_series(0, 90) AS g(i)
 ),
-target_kizai AS (
-    -- 対象機材のリストとマスターの保有数を一括取得
-    -- $1 は [101, 102, 103...] という機材IDの配列
-    SELECT kizai_id, kizai_qty
-    FROM ${SCHEMA}.v_kizai_qty
-    WHERE kizai_id = ANY($1)
+-- MATERIALIZED：外すと、機材が数百件を超えたときに「機材だけで突き合わせて日付は後から絞る」計画が選ばれ、
+-- 変更前（v_kizai_qty・v_zaiko_qty を使っていたとき）より遅くなる（1731機材で 約0.76秒→約1.2秒）。
+-- 先に確定させると機材の並び順が下に伝わらず、機材と日付の両方で突き合わせる計画になる（同 約0.56秒）
+target_kizai AS MATERIALIZED (
+    -- 対象機材の保有数を一括取得（$1 は [101, 102, 103...] という機材IDの配列）
+    -- 保有数は v_kizai_qty.kizai_qty と同じ数え方（削除されておらず、状態が100未満か未設定のタグの本数）。
+    -- v_kizai_qty は NG数・削除数・KICS/YARD数のために v_rfid を5回全件集計し、機材の絞り込みも
+    -- 集計の内側に届かないので、ここでは対象の機材のタグだけを1回で数える（selectDetailStockListBulk と同じ）。
+    -- v_kizai_qty の保有数の条件を変えたら、ここも合わせること
+    SELECT m.kizai_id, COALESCE(r.qty, 0::bigint) AS kizai_qty
+    FROM ${SCHEMA}.m_kizai m
+    LEFT JOIN (
+        SELECT kizai_id, count(*) AS qty
+        FROM ${SCHEMA}.v_rfid
+        WHERE kizai_id = ANY($1)
+          AND del_flg = 0
+          AND (rfid_kizai_sts < 100 OR rfid_kizai_sts IS NULL)
+        GROUP BY kizai_id
+    ) r ON r.kizai_id = m.kizai_id
+    WHERE m.kizai_id = ANY($1)
 ),
--- v_zaiko_qty は全受注・全日付を横断する GROUP BY (kizai_id, plan_dat) の集約ビュー。
+-- 機材・日付ごとの使用数。在庫数（保有数 − 使用数）は下の SELECT で target_kizai の保有数から求める
+-- （v_zaiko_qty を使うと、その中で v_kizai_qty を全機材分もう一度計算することになる）。
+-- v_juchu_kizai_dat_qty は全受注・全日付を横断する GROUP BY (kizai_id, plan_dat) の集約ビュー。
 -- 絞り込みをJOIN条件で渡すと「JOIN相手から来る値」になって集約の内側に押し込めず、
 -- 全受注を集約し切ってから捨てることになる（50機材でも約1.9秒かかっていた）。
 -- kizai_id も plan_dat もGROUP BYのキーなので、ここで定数の述語として先に当てておくと
 -- 集約の内側まで押し込まれる。日付範囲は上の generate_series(0, 90) と一致させること。
 zaiko AS (
-    SELECT plan_dat, kizai_id, zaiko_qty
-    FROM ${SCHEMA}.v_zaiko_qty
+    SELECT plan_dat, kizai_id, plan_qty
+    FROM ${SCHEMA}.v_juchu_kizai_dat_qty
     WHERE kizai_id = ANY($1)
       AND plan_dat >= $2::date
       AND plan_dat < $2::date + 91
@@ -574,8 +592,8 @@ zaiko AS (
 SELECT
     d.cal_dat AS "calDat",
     k.kizai_id AS "kizaiId",
-    -- 在庫データがあればそれを使用、なければマスターの保有数を使用
-    COALESCE(v.zaiko_qty, k.kizai_qty)::integer AS "zaikoQty"
+    -- 使用数が無い日は保有数をそのまま在庫数にする
+    COALESCE(k.kizai_qty - v.plan_qty, k.kizai_qty)::integer AS "zaikoQty"
 FROM
     target_days d
 CROSS JOIN
