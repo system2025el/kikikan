@@ -38,15 +38,12 @@ export const MemoTooltip = (props: {
   // 明細の行数×2つ並ぶので、ツールチップは初めてマウスを乗せたとき、ダイアログは初めて開いたときに作る
   // （どちらも閉じていても部品の処理は走り、行数が多いと表示が遅くなるため）
   const [tooltipActive, setTooltipActive] = useState(false);
-  const [tooltipOpen, setTooltipOpen] = useState(false);
   const [dialogMounted, setDialogMounted] = useState(false);
 
   const handleOpen = () => {
     setOpen(true);
     setDialogMounted(true);
     setIsSave(false);
-    // 開いたままにすると、メモが空のとき（ツールチップは出ない）にダイアログで入力した内容がツールチップに出てしまう
-    setTooltipOpen(false);
   };
   const handleClose = () => {
     setEquipmentMemo(props.memo);
@@ -60,16 +57,13 @@ export const MemoTooltip = (props: {
     setOpen(false);
   };
 
-  // 初めてマウスが乗ったときにツールチップを作り、そのまま開く（作る前の mouseover はツールチップに届かないため）
-  const handleFirstMouseEnter = () => {
-    setTooltipActive(true);
-    setTooltipOpen(true);
-  };
-
+  // 初めてマウスが乗ったときにツールチップを作る。開閉は Tooltip に任せる
+  // （作り直したボタンの上でマウスが少しでも動けば、Tooltip が普段どおり開く。こちらで開閉を持つと、
+  //  ボタンを作り直した直後にマウスが離れたときに閉じる合図が届かず、開いたまま残ることがある）
   const iconButton = (
     <IconButton
       onClick={handleOpen}
-      onMouseEnter={tooltipActive ? undefined : handleFirstMouseEnter}
+      onMouseEnter={tooltipActive ? undefined : () => setTooltipActive(true)}
       sx={{ padding: 0 }}
       color={memo ? 'primary' : 'default'}
     >
@@ -80,15 +74,7 @@ export const MemoTooltip = (props: {
   return (
     <>
       {tooltipActive ? (
-        <Tooltip
-          title={equipmentMemo}
-          arrow
-          sx={{ p: 0 }}
-          // ダイアログを開いている間は出さない
-          open={tooltipOpen && !open}
-          onOpen={() => setTooltipOpen(true)}
-          onClose={() => setTooltipOpen(false)}
-        >
+        <Tooltip title={equipmentMemo} arrow sx={{ p: 0 }}>
           {iconButton}
         </Tooltip>
       ) : (
