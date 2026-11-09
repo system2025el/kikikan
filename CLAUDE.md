@@ -82,7 +82,7 @@ npx tsc --noEmit          # 型チェックは全体で問題なく通る
 - **ルートの保護は `middleware.ts`**（ルート直下）。全リクエストで `supabase.auth.getUser()` を呼んでトークンを検証・リフレッシュし、未ログインなら `/login` にリダイレクトする。公開パスは `/`・`/login`・`/error` のみで、`signup`・`auth`・静的ファイルは matcher 側で除外している。招待直後（`user_metadata.setup_completed === false`）は `/signup` へ、ログイン済みで `/login` を開いたら `/dashboard` へ飛ばす。リダイレクト時もリフレッシュ済みcookieを引き継ぐ実装になっているので、この関数を触るときは `redirectWithCookies` を経由すること。
 - **ユーザー情報の受け渡し**: `app/(main)/layout.tsx` が `getCurrentUser()`（`app/(main)/_lib/funcs.ts`）でユーザーを解決し、`UserProvider`（`app/(main)/_ui/user-context.tsx`）で配下に渡す。クライアントコンポーネントは `useUser()` で参照する。`getCurrentUser` は Supabase authユーザーのメールアドレスで `m_user` を引き、ビットマスク権限を含む `User` 型を返す（`react`の`cache`でリクエスト単位にメモ化）。**`getCurrentUser` 自身はリダイレクトせず `null` を返す**ので、`/login` へ飛ばすのは呼び出し側の責務（`layout.tsx` は `null` と例外の両方で `redirect('/login')` する）。
 - Server Component 側では `getCurrentUser()` を直接呼んでチェックしているページもある（受注機材明細など）。`(main)` 配下の新規ページで権限判定が必要なら、propsで受け取るか `getCurrentUser()` を呼ぶ。
-- `app/(main)/_ui/userstoreInitializer.tsx` はページ遷移のたびに `router.refresh()` して最新のユーザー情報（権限変更など）を反映する。DBへの問い合わせすぎを防ぐため60秒間引きしている。
+- **layout のユーザー情報（サイドバーのログイン名・メニュー）は画面遷移では更新しない**（2026-11-09 決定）。App Router の layout は遷移で作り直されないので、権限変更はそのタブを再読み込み（F5）するか別タブで開くまでサイドバーに出ない。権限変更はまれなので運用で再読み込みしてもらう。以前は遷移のたびに `router.refresh()` していたが、layout とページのサーバー処理を丸ごとやり直し、遷移先のデータ取得（Server Action）を待たせていたので外した。**ページの中身の権限は page.tsx が開くたびに `getCurrentUser()` で確かめる**（`(main)` の page.tsx は `order-list` 以外すべて）ので、サイドバーが古くても権限の無い画面は表示されない。
 - 権限は `app/(main)/_lib/permission.ts` のビットマスクとビットAND演算で判定する。`User.permission` は `juchu`・`nyushuko`・`masters`・`loginSetting`・`ht`・`schedule` の6カテゴリに分かれた数値で、定数側は `juchu_ref: 1`／`juchu_upd: 2`／`nyushuko_*: 4,8`／`mst_*: 16,32`／`ht: 64`／`login: 128`／`sche_upd: 256`／`system: 65535`。`*_full` の定数は `*_ref` と `*_upd` のビットOR。
 
 **排他ロック**: `app/(main)/_lib/lock.ts` は、`t-lock` テーブルを使った編集画面向けの排他制御（悲観的ロック）を実装している（受注・見積の明細画面など）。`lockCheck` は10分間有効なロックを新規作成/更新するか、他ユーザーが保持中であれば既存ロック情報を返す。`lockRelease` はロックを解除する。複数ユーザーが同時に開き得る編集画面を新規追加する際は、この仕組みを使うこと。
@@ -136,7 +136,7 @@ npx tsc --noEmit          # 型チェックは全体で問題なく通る
 - 機材明細画面の保存時、種別 `1` は `deleteSiyouHonbanbi`（種別1のみDELETE）→ `getRange(出庫日, 入庫日)` の全日を再INSERTという作り直し方式で更新する。種別 `2`/`3` は出庫日・入庫日にupsert、種別 `10`〜`40` は本番日入力ダイアログの差分（追加・更新・削除）で更新する。返却受注機材ヘッダーには「返却日〜親の入庫日」の範囲で種別 `1` が作られる。
 - 出庫日・入庫日が未設定だと `getRange` が空配列を返し、種別 `1` の行が1件も作られない（＝在庫を消費しない）点に注意。
 
-**在庫数の算出**: 在庫数は `v_zaiko_qty.zaiko_qty = v_kizai_qty.kizai_qty − v_juchu_kizai_dat_qty.plan_qty` で求まる。機材明細画面や貸出状況の在庫テーブルはこのビューを日付でCROSS JOINして表示している（`app/_lib/db/tables/stock-table.ts`）。
+**在庫数の算出**: 在庫数は `v_zaiko_qty.zaiko_qty = v_kizai_qty.kizai_qty − v_juchu_kizai_dat_qty.plan_qty` で求まる。機材明細画面や貸出状況の在庫テーブルはこのビューを日付でCROSS JOINして表示している（`app/_lib/db/tables/stock-table.ts`）。ただし**受注機材明細（メイン・返却）用の `selectDetailStockListBulk` だけはビューを使わず同じ式を自前で計算している**（2026-11-09。`v_kizai_qty` が `v_rfid` を5回全件集計し、`v_zaiko_qty` の中でもう一度全機材分計算するため。DB内 約310ms → 150ms）。保有数の条件（下記）を変えるときは、`v_kizai_qty` とこのSQLの両方を直すこと。
 
 - 分子の保有数 `kizai_qty` は**RFIDタグの実本数**（`v_rfid` で `del_flg = 0` かつ `rfid_kizai_sts < 100` またはNULL。100以上はNG・廃棄・紛失・無効化）。ピッキング中や出発済みなどの作業ステータスは保有数に影響しない。所属（KICS/YARD）別ではなく全体合計。
 - 分母の `plan_qty` は `t_juchu_kizai_honbanbi` の日付（種別を問わず `DISTINCT`）に紐づく `plan_kizai_qty + plan_yobi_qty` の全受注合計。上記の通り種別 `1` が期間全日に入るため、**引き当ては出庫日〜入庫日の全日に効く**。同じ日に種別1と種別40があっても `DISTINCT` で1回にまとまり二重計上はされない。コンテナ明細（`t_juchu_ctn_meisai`）もUNION ALLで加算される。

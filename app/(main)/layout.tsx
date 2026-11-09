@@ -17,7 +17,6 @@ import { DirtyProvider } from './_ui/dirty-context';
 import Sidebar from './_ui/sidebar';
 import { TabFocusResponder } from './_ui/tab-focus-responder';
 import { UserProvider } from './_ui/user-context';
-import { UserStoreInitializer } from './_ui/userstoreInitializer';
 
 // /** @type {Metadata} metadata */
 // export const metadata: Metadata = {
@@ -74,7 +73,6 @@ const Layout = async ({ children }: Readonly<{ children: React.ReactNode }>) => 
   return (
     <CustomProvider locale={jaJP}>
       <DirtyProvider>
-        <UserStoreInitializer /*user={userData}*/ />
         <Suspense fallback={null}>
           <TabFocusResponder />
         </Suspense>
