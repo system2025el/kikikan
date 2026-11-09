@@ -22,7 +22,7 @@ import {
   Typography,
 } from '@mui/material';
 import { addDays, addMonths, set, subDays, subMonths } from 'date-fns';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import { HONBANBI_SHUBETU_ID } from '@/app/_lib/constants';
 import { toJapanMDString } from '@/app/(main)/_lib/date-conversion';
@@ -40,6 +40,7 @@ import {
   getLoanJuchuReturnData,
   getLoanStockData,
 } from '../_lib/funcs';
+import { perfCommit, perfFinish, perfMark, perfStart } from '../_lib/perf-measure'; // [計測用]
 import { HonbanbiColorValues, LoanJuchu, LoanKizai, LoanStockTableValues, LoanUseTableValues } from '../_lib/types';
 import { LoanSituationTable, UseTable } from './loan-situation-table';
 
@@ -60,6 +61,8 @@ export const LoanSituation = (props: {
 
   // ローディング
   const [isLoading, setIsLoading] = useState(true);
+  // [計測用] コミットのたびに時刻を記録する（使用数の取得後の描き直しの回数と時間を見る）
+  useLayoutEffect(() => perfCommit());
   // エラーハンドリング
   const [error, setError] = useState<Error | null>(null);
   // 貸出受注データリスト
@@ -86,6 +89,7 @@ export const LoanSituation = (props: {
 
   // 貸出状況取得
   const getData = async (strDat: Date) => {
+    perfMark('取得開始'); // [計測用]
     try {
       // 親子を分割で表示(現状合体のみ)
       if (divisionFlag) {
@@ -206,8 +210,10 @@ export const LoanSituation = (props: {
           getLoanStockData(kizaiData.kizaiId, strDat),
           getLoanJuchuData(kizaiData.kizaiId, strDat),
         ]);
+        perfMark('在庫・受注取得完了'); // [計測用]
 
         if (loanJuchuData.length === 0) {
+          perfMark('使用数取得完了'); // [計測用] 受注が無いときは使用数を取らない
           setLoanJuchuList([]);
           setEqUseList([]);
           setEqStockList(eqStockData);
@@ -260,6 +266,7 @@ export const LoanSituation = (props: {
 
         // 使用数取得
         const allLoanUseData: LoanUseTableValues[] = await getAllMergeLoanUseData(targetIds, kizaiData.kizaiId, strDat);
+        perfMark('使用数取得完了'); // [計測用]
 
         const loanUseMap = new Map<string, LoanUseTableValues[]>();
         for (const row of allLoanUseData) {
@@ -296,6 +303,7 @@ export const LoanSituation = (props: {
 
     if (view === 'day') {
       setIsLoading(true);
+      perfStart('日付変更'); // [計測用]
       // ヘッダー開始日
       const strDat = subDays(date, 1);
 
@@ -334,6 +342,7 @@ export const LoanSituation = (props: {
    */
   const handleReload = async () => {
     setIsLoading(true);
+    perfStart('再表示'); // [計測用]
 
     // ヘッダー開始日
     const strDat = subDays(selectDate, 1);
@@ -377,6 +386,12 @@ export const LoanSituation = (props: {
 
   // 同期スクロール
   useSyncScroll(leftRef, rightRef, [loanJuchuList, eqUseList, isLoading]);
+
+  // [計測用] ローディングが明けて一覧と使用数が出たところで計測を締める
+  useEffect(() => {
+    if (!isLoading) perfFinish(loanJuchuList.length, eqStockList.length);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoading]);
 
   if (error) throw error;
 

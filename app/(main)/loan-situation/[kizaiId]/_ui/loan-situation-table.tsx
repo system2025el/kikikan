@@ -236,7 +236,25 @@ export const UseTable = (props: UseTableProps) => {
       variant="outlined"
       sx={{ maxHeight: '80vh' }}
     >
-      <Table stickyHeader padding="none" sx={{ borderCollapse: 'separate', borderSpacing: 0 }}>
+      <Table
+        stickyHeader
+        padding="none"
+        sx={(theme) => ({
+          borderCollapse: 'separate',
+          borderSpacing: 0,
+          // 本体のセルは 受注数×91日 あるので MUI の TableCell・TableRow を使わず素の tr・td にし、
+          // 共通のスタイルはここで1回だけ当てる（元の TableCell の指定に合わせてある。在庫確認画面と同じ）
+          '& tbody td': {
+            ...theme.typography.body2,
+            borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
+            borderRight: '1px solid rgba(0, 0, 0, 0.12)',
+            height: '25px',
+            padding: '0 4px',
+            minWidth: 0,
+            textAlign: 'right',
+          },
+        })}
+      >
         <TableHead>
           <TableRow>
             {eqStockList.length > 0 &&
@@ -286,31 +304,24 @@ export const UseTable = (props: UseTableProps) => {
         <TableBody>
           {eqUseList.length > 0 &&
             eqUseList.map((row, rowIndex) => (
-              <TableRow key={rowIndex}>
+              <tr key={rowIndex}>
                 {row.map((cell, colIndex) => (
-                  <TableCell
+                  <td
                     key={colIndex}
-                    align="right"
-                    sx={{
-                      bgcolor: cell.juchuHonbanbiColor,
-                      borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
-                      borderRight: '1px solid rgba(0, 0, 0, 0.12)',
+                    style={{
+                      backgroundColor: cell.juchuHonbanbiColor,
                       // 返却で使用数が減る日を赤にする。事前準備（事前数）から出庫日（合計数）のように増える日は赤にしない
                       color:
                         cell.planQty <= 0 ||
                         (row[colIndex - 1]?.planQty && row[colIndex].planQty < row[colIndex - 1].planQty)
                           ? 'red'
                           : 'black',
-                      height: 25,
-                      py: 0,
-                      px: '4px',
-                      minWidth: 0,
                     }}
                   >
                     {cell.planQty}
-                  </TableCell>
+                  </td>
                 ))}
-              </TableRow>
+              </tr>
             ))}
         </TableBody>
         <TableFooter>
