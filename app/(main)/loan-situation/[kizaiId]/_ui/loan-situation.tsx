@@ -22,7 +22,7 @@ import {
   Typography,
 } from '@mui/material';
 import { addDays, addMonths, set, subDays, subMonths } from 'date-fns';
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { HONBANBI_SHUBETU_ID } from '@/app/_lib/constants';
 import { toJapanMDString } from '@/app/(main)/_lib/date-conversion';
@@ -35,12 +35,11 @@ import { Loading } from '@/app/(main)/_ui/loading';
 
 import {
   getAllLoanUseData,
-  getAllMergeLoanUseData,
   getLoanJuchuData,
   getLoanJuchuReturnData,
+  getLoanSituationData,
   getLoanStockData,
 } from '../_lib/funcs';
-import { perfCommit, perfFinish, perfMark, perfStart } from '../_lib/perf-measure'; // [計測用]
 import { HonbanbiColorValues, LoanJuchu, LoanKizai, LoanStockTableValues, LoanUseTableValues } from '../_lib/types';
 import { LoanSituationTable, UseTable } from './loan-situation-table';
 
@@ -61,8 +60,6 @@ export const LoanSituation = (props: {
 
   // ローディング
   const [isLoading, setIsLoading] = useState(true);
-  // [計測用] コミットのたびに時刻を記録する（使用数の取得後の描き直しの回数と時間を見る）
-  useLayoutEffect(() => perfCommit());
   // エラーハンドリング
   const [error, setError] = useState<Error | null>(null);
   // 貸出受注データリスト
@@ -89,7 +86,6 @@ export const LoanSituation = (props: {
 
   // 貸出状況取得
   const getData = async (strDat: Date) => {
-    perfMark('取得開始'); // [計測用]
     try {
       // 親子を分割で表示(現状合体のみ)
       if (divisionFlag) {
@@ -205,34 +201,20 @@ export const LoanSituation = (props: {
         setEqStockList(eqStockData);
         // 親子合体で表示
       } else {
-        // 機材在庫データ、ヘッダー開始日から終了日までに該当する貸出受注(メイン)、(返却)データ
-        const [eqStockData, loanJuchuData] = await Promise.all([
-          getLoanStockData(kizaiData.kizaiId, strDat),
-          getLoanJuchuData(kizaiData.kizaiId, strDat),
-        ]);
-        perfMark('在庫・受注取得完了'); // [計測用]
+        // 機材在庫データ、ヘッダー開始日から終了日までに該当する貸出受注(メイン)（重複排除済み）、使用数データを
+        // 1回の Server Action で取得する
+        const {
+          eqStockData,
+          loanJuchuData: uniqueData,
+          loanUseData: allLoanUseData,
+        } = await getLoanSituationData(kizaiData.kizaiId, strDat);
 
-        if (loanJuchuData.length === 0) {
-          perfMark('使用数取得完了'); // [計測用] 受注が無いときは使用数を取らない
+        if (uniqueData.length === 0) {
           setLoanJuchuList([]);
           setEqUseList([]);
           setEqStockList(eqStockData);
           return;
         }
-
-        // 重複排除
-        const uniqueData = Array.from(
-          loanJuchuData
-            .reduce((map, item) => {
-              const key = `${item.juchuHeadId}-${item.juchuKizaiHeadId}`;
-
-              if (!map.has(key)) {
-                map.set(key, item);
-              }
-              return map;
-            }, new Map())
-            .values()
-        );
 
         // ラジオボタンで選択されている出庫日or入庫日順にソート
         if (sortValue === 'shuko') {
@@ -263,10 +245,6 @@ export const LoanSituation = (props: {
           juchuHeadId: d.juchuHeadId,
           juchuKizaiHeadId: d.juchuKizaiHeadId,
         }));
-
-        // 使用数取得
-        const allLoanUseData: LoanUseTableValues[] = await getAllMergeLoanUseData(targetIds, kizaiData.kizaiId, strDat);
-        perfMark('使用数取得完了'); // [計測用]
 
         const loanUseMap = new Map<string, LoanUseTableValues[]>();
         for (const row of allLoanUseData) {
@@ -303,7 +281,6 @@ export const LoanSituation = (props: {
 
     if (view === 'day') {
       setIsLoading(true);
-      perfStart('日付変更'); // [計測用]
       // ヘッダー開始日
       const strDat = subDays(date, 1);
 
@@ -342,7 +319,6 @@ export const LoanSituation = (props: {
    */
   const handleReload = async () => {
     setIsLoading(true);
-    perfStart('再表示'); // [計測用]
 
     // ヘッダー開始日
     const strDat = subDays(selectDate, 1);
@@ -386,12 +362,6 @@ export const LoanSituation = (props: {
 
   // 同期スクロール
   useSyncScroll(leftRef, rightRef, [loanJuchuList, eqUseList, isLoading]);
-
-  // [計測用] ローディングが明けて一覧と使用数が出たところで計測を締める
-  useEffect(() => {
-    if (!isLoading) perfFinish(loanJuchuList.length, eqStockList.length);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoading]);
 
   if (error) throw error;
 

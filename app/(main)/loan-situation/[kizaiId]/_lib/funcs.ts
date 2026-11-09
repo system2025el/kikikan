@@ -253,6 +253,41 @@ export const getAllMergeLoanUseData = async (
 };
 
 /**
+ * 貸出状況の表示データ（在庫・貸出受注・使用数）の取得
+ * Server Action は1本ずつ順番に処理され、1往復ごとに時間が上乗せされるので、
+ * 受注の一覧で決まる使用数の取得までサーバー側で続けて行い、画面からは1回の呼び出しで済ませる
+ * （エラーの記録は中で呼ぶ各取得関数が行う）
+ * @param kizaiId 機材id
+ * @param strDat ヘッダー開始日
+ * @returns loanJuchuData は受注・受注機材ヘッダーで重複を除いた貸出受注（並べ替えは画面側で行う）
+ */
+export const getLoanSituationData = async (kizaiId: number, strDat: Date) => {
+  const [eqStockData, loanJuchuData] = await Promise.all([
+    getLoanStockData(kizaiId, strDat),
+    getLoanJuchuData(kizaiId, strDat),
+  ]);
+
+  // 重複排除（同じ受注・受注機材ヘッダーは最初の1件を残す）
+  const uniqueMap = new Map<string, LoanJuchu>();
+  for (const d of loanJuchuData) {
+    const key = `${d.juchuHeadId}-${d.juchuKizaiHeadId}`;
+    if (!uniqueMap.has(key)) uniqueMap.set(key, d);
+  }
+  const uniqueData = Array.from(uniqueMap.values());
+
+  const loanUseData =
+    uniqueData.length > 0
+      ? await getAllMergeLoanUseData(
+          uniqueData.map((d) => ({ juchuHeadId: d.juchuHeadId, juchuKizaiHeadId: d.juchuKizaiHeadId })),
+          kizaiId,
+          strDat
+        )
+      : [];
+
+  return { eqStockData, loanJuchuData: uniqueData, loanUseData };
+};
+
+/**
  * 貸出状況用在庫データ取得
  * @param kizaiId 機材id
  * @param date 日付
