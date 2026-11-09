@@ -18,7 +18,7 @@ import {
   Typography,
 } from '@mui/material';
 import { addDays, addMonths, set, subDays, subMonths } from 'date-fns';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 
@@ -28,12 +28,15 @@ import { Calendar, CalendarView } from '../../_ui/date';
 import { Loading } from '../../_ui/loading';
 import { FAKE_NEW_ID } from '../../(masters)/_lib/constants';
 import { getAllStockData, getBumonsData, getEqData } from '../_lib/funcs';
+import { perfCommit, perfFinish, perfMark, perfStart } from '../_lib/perf-measure'; // [計測用]
 import { Bumon, EqTableValues, StockSearchSchema, StockSearchValues, StockTableValues } from '../_lib/types';
 import { EqStockTable, EqTable } from './stock-table';
 
 export const Stock = () => {
   // ローディング
   const [isLoading, setIsLoading] = useState(false);
+  // [計測用] コミットのたびに時刻を記録する（在庫の取得後の描き直しの回数と時間を見る）
+  useLayoutEffect(() => perfCommit());
   // エラーハンドリング
   const [error, setError] = useState<Error | null>(null);
 
@@ -76,13 +79,16 @@ export const Stock = () => {
    */
   const onSubmit = async (data: StockSearchValues) => {
     setIsLoading(true);
+    perfStart('検索'); // [計測用]
     try {
       const newEqList = await getEqData(data.bumonId, data.keyword);
+      perfMark('機材取得完了'); // [計測用]
       const kizaiIds = newEqList.map((data) => data.kizaiId);
 
       const uniqueKizaiIds = Array.from(new Set(kizaiIds));
 
       const allStockData: StockTableValues[] = await getAllStockData(uniqueKizaiIds, subDays(selectDate, 1));
+      perfMark('在庫取得完了'); // [計測用]
 
       const stockMap = new Map<number, StockTableValues[]>();
       for (const row of allStockData) {
@@ -114,12 +120,14 @@ export const Stock = () => {
 
     if (view === 'day') {
       setIsLoading(true);
+      perfStart('日付変更'); // [計測用]
       const kizaiIds = eqList.map((data) => data.kizaiId);
 
       const uniqueKizaiIds = Array.from(new Set(kizaiIds));
 
       try {
         const allStockData: StockTableValues[] = await getAllStockData(uniqueKizaiIds, subDays(date, 1));
+        perfMark('在庫取得完了'); // [計測用]
 
         const stockMap = new Map<number, StockTableValues[]>();
         for (const row of allStockData) {
@@ -179,6 +187,12 @@ export const Stock = () => {
 
   // 同期スクロール
   useSyncScroll(leftRef, rightRef, [eqList, isLoading]);
+
+  // [計測用] ローディングが明けて一覧と在庫が出たところで計測を締める
+  useEffect(() => {
+    if (!isLoading) perfFinish(eqList.length, eqStockList[0]?.length ?? 0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoading]);
 
   if (error) throw error;
 
