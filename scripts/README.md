@@ -114,13 +114,16 @@ npx prettier --write app/_lib/db/types/types.ts
 
 ## 本番とステージングの環境差
 
-2026-08-27 に実測した差分です。**ACL文字列を本番とステージングで単純比較しないこと。**
+2026-08-27 に実測した差分です（default privileges は 2026-11-09 に再確認）。**ACL文字列を本番とステージングで単純比較しないこと。**
 
-| 項目                           | 本番                                              | ステージング                         |
-| ------------------------------ | ------------------------------------------------- | ------------------------------------ |
-| PostgreSQL                     | 17.6                                              | 15.8                                 |
-| `public` の default privileges | **1件**（anon=SELECTのみ / authenticated=全権限） | なし                                 |
-| 新テーブルのACL（GRANT適用後） | `anon=arwd`／`authenticated=arwdDxtm`             | `anon=arwd`／`authenticated=arwdDxt` |
+| 項目                                       | 本番                                              | ステージング                                                                                                          |
+| ------------------------------------------ | ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| PostgreSQL                                 | 17.6                                              | 15.8                                                                                                                  |
+| `public` の default privileges（テーブル） | **1件**（anon=SELECTのみ / authenticated=全権限） | `public` 専用は無し。`postgres` の全スキーマ向けで anon・authenticated に `arwdDxt` が付く（2026-08-27 には無かった） |
+| `public` の default privileges（関数）     | 無し（PostgreSQL 既定の PUBLIC に EXECUTE だけ）  | 全スキーマ向けで PUBLIC・anon・authenticated に EXECUTE が付く                                                        |
+| 新テーブルのACL（GRANT適用後）             | `anon=arwd`／`authenticated=arwdDxtm`             | `anon=arwd`／`authenticated=arwdDxt`（2026-10-21 の `t_juchu_kizai_jizen` の実績）                                    |
+
+- **ステージングは GRANT を書き忘れても動いてしまう**（自動で付く）。本番では anon が SELECT だけになり 42501 になるので、GRANT はステージングの動作ではなく本番に合わせて必ず書く
 
 - `m`（MAINTAIN）はPG17で追加された権限なので、**PG15のステージングには構造的に付きません**。ACLは「環境をまたいで一致させる」のではなく「その環境の既存テーブルと一致させる」で判断します
 - `pg_get_viewdef` の出力もPG17とPG15で違います（PG17は曖昧でなければテーブル修飾を省く）。単純diffだと全ビューが「差分あり」に見えるので、修飾子を落としてから比較してください

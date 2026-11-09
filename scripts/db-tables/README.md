@@ -93,7 +93,8 @@ END $$;
 
 ## 新しいテーブルを追加するときの必須事項
 
-- **`GRANT` を必ず書くこと**。ステージングには `public` スキーマの default privileges が無く、本番も anon には SELECT しか付かないため、`CREATE TABLE` だけでは PostgREST から `permission denied for table`（42501）になります。既存テーブルに合わせて anon / authenticated に付与します
+- **`GRANT` を必ず書くこと**。本番は `public` の default privileges で anon には SELECT しか付かないため、`CREATE TABLE` だけでは PostgREST から `permission denied for table`（42501）になります。既存テーブルに合わせて anon / authenticated に付与します
+  - ステージングは 2026-11-09 時点で `postgres` の全スキーマ向け default privileges があり、新テーブルに anon / authenticated の `arwdDxt` が自動で付きます（2026-08-27 の時点では無かった。いつ足されたかは不明）。**ステージングで GRANT を書き忘れても動いてしまい、本番でだけ 42501 になる**ので、ステージングの動作で GRANT の要否を判断しないこと
 - **RLSは有効化しないこと**。既存テーブルはすべて `relrowsecurity = false` です（ポリシー自体は多数ありますが休眠状態）。新テーブルだけ有効化すると、ポリシーが無いため全アクセスが拒否されて画面が壊れます
 - **本番データのステージング移行の除外リストに入れるかを判断すること**。`../db-migration/02-truncate-staging.sql` の `skip_tbl` と `../db-migration/03-migrate.sh` の `EXCLUDES` の**両方**にあります。片方だけでは機能しません
 - ステージングでは `GRANT` した以上の権限（`anon=arwdDxt`）が付くことがありました。既存テーブルの慣習は `anon=arwd` なので、適用後にACLを確認し、余分が付いていたら `REVOKE TRUNCATE, REFERENCES, TRIGGER ... FROM anon` で揃えてください
