@@ -35,9 +35,9 @@ import { Loading } from '@/app/(main)/_ui/loading';
 
 import {
   getAllLoanUseData,
-  getAllMergeLoanUseData,
   getLoanJuchuData,
   getLoanJuchuReturnData,
+  getLoanSituationData,
   getLoanStockData,
 } from '../_lib/funcs';
 import { HonbanbiColorValues, LoanJuchu, LoanKizai, LoanStockTableValues, LoanUseTableValues } from '../_lib/types';
@@ -201,32 +201,20 @@ export const LoanSituation = (props: {
         setEqStockList(eqStockData);
         // 親子合体で表示
       } else {
-        // 機材在庫データ、ヘッダー開始日から終了日までに該当する貸出受注(メイン)、(返却)データ
-        const [eqStockData, loanJuchuData] = await Promise.all([
-          getLoanStockData(kizaiData.kizaiId, strDat),
-          getLoanJuchuData(kizaiData.kizaiId, strDat),
-        ]);
+        // 機材在庫データ、ヘッダー開始日から終了日までに該当する貸出受注(メイン)（重複排除済み）、使用数データを
+        // 1回の Server Action で取得する
+        const {
+          eqStockData,
+          loanJuchuData: uniqueData,
+          loanUseData: allLoanUseData,
+        } = await getLoanSituationData(kizaiData.kizaiId, strDat);
 
-        if (loanJuchuData.length === 0) {
+        if (uniqueData.length === 0) {
           setLoanJuchuList([]);
           setEqUseList([]);
           setEqStockList(eqStockData);
           return;
         }
-
-        // 重複排除
-        const uniqueData = Array.from(
-          loanJuchuData
-            .reduce((map, item) => {
-              const key = `${item.juchuHeadId}-${item.juchuKizaiHeadId}`;
-
-              if (!map.has(key)) {
-                map.set(key, item);
-              }
-              return map;
-            }, new Map())
-            .values()
-        );
 
         // ラジオボタンで選択されている出庫日or入庫日順にソート
         if (sortValue === 'shuko') {
@@ -257,9 +245,6 @@ export const LoanSituation = (props: {
           juchuHeadId: d.juchuHeadId,
           juchuKizaiHeadId: d.juchuKizaiHeadId,
         }));
-
-        // 使用数取得
-        const allLoanUseData: LoanUseTableValues[] = await getAllMergeLoanUseData(targetIds, kizaiData.kizaiId, strDat);
 
         const loanUseMap = new Map<string, LoanUseTableValues[]>();
         for (const row of allLoanUseData) {

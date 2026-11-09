@@ -92,7 +92,35 @@ export const EqStockTable = (props: EqStockTableProps) => {
 
   return (
     <TableContainer ref={ref} component={Paper} style={{ overflowX: 'auto', maxHeight: '80vh' }} square>
-      <Table stickyHeader sx={{ borderCollapse: 'separate', borderSpacing: 0 }}>
+      <Table
+        stickyHeader
+        sx={{
+          borderCollapse: 'separate',
+          borderSpacing: 0,
+          // 本体のセルは 機材数×91日 あるので MUI の TableCell・TableRow を使わず素の tr・td にし、
+          // 共通のスタイルはここで1回だけ当てる（元の TableCell の指定に合わせてある。受注機材明細の在庫テーブルと同じ）
+          '& tbody td': {
+            ...theme.typography.body2,
+            color: theme.palette.text.primary,
+            borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
+            borderRight: '1px solid rgba(0, 0, 0, 0.12)',
+            height: '25px',
+            padding: '0 4px',
+            textAlign: 'right',
+          },
+          '& tbody td:first-of-type': {
+            borderLeft: '1px solid rgba(0, 0, 0, 0.12)',
+          },
+          // TableRow の hover と同じ
+          '& tbody tr:hover': {
+            backgroundColor: theme.palette.action.hover,
+          },
+          // 1行おきの背景色（2行目・4行目…。左の機材の表と合わせる）
+          '& tbody tr:nth-of-type(even) td': {
+            backgroundColor: borderColor,
+          },
+        }}
+      >
         <TableHead>
           <TableRow>
             {eqStockList.length > 0 &&
@@ -120,26 +148,13 @@ export const EqStockTable = (props: EqStockTableProps) => {
         <TableBody>
           {eqStockList.length > 0 &&
             eqStockList.map((row, rowIndex) => (
-              <TableRow key={rowIndex} hover>
+              <tr key={rowIndex}>
                 {row.map((cell, colIndex) => (
-                  <TableCell
-                    key={colIndex}
-                    align="right"
-                    sx={{
-                      borderLeft: colIndex === 0 ? '1px solid rgba(0, 0, 0, 0.12)' : 'none',
-                      borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
-                      borderRight: '1px solid rgba(0, 0, 0, 0.12)',
-                      height: 25,
-                      py: 0,
-                      px: '4px',
-                      color: Number(cell.zaikoQty) < 0 ? red[500] : undefined,
-                      bgcolor: rowIndex % 2 === 1 ? borderColor : undefined,
-                    }}
-                  >
+                  <td key={colIndex} style={Number(cell.zaikoQty) < 0 ? { color: red[500] } : undefined}>
                     {cell.zaikoQty}
-                  </TableCell>
+                  </td>
                 ))}
-              </TableRow>
+              </tr>
             ))}
         </TableBody>
       </Table>
