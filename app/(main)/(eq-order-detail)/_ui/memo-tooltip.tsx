@@ -35,10 +35,18 @@ export const MemoTooltip = (props: {
     setEquipmentMemo(memo);
   }
   const isOverMaxLength = equipmentMemo.length > MEMO_MAX_LENGTH;
+  // 明細の行数×2つ並ぶので、ツールチップは初めてマウスを乗せたとき、ダイアログは初めて開いたときに作る
+  // （どちらも閉じていても部品の処理は走り、行数が多いと表示が遅くなるため）
+  const [tooltipActive, setTooltipActive] = useState(false);
+  const [tooltipOpen, setTooltipOpen] = useState(false);
+  const [dialogMounted, setDialogMounted] = useState(false);
 
   const handleOpen = () => {
     setOpen(true);
+    setDialogMounted(true);
     setIsSave(false);
+    // 開いたままにすると、メモが空のとき（ツールチップは出ない）にダイアログで入力した内容がツールチップに出てしまう
+    setTooltipOpen(false);
   };
   const handleClose = () => {
     setEquipmentMemo(props.memo);
@@ -52,35 +60,64 @@ export const MemoTooltip = (props: {
     setOpen(false);
   };
 
+  // 初めてマウスが乗ったときにツールチップを作り、そのまま開く（作る前の mouseover はツールチップに届かないため）
+  const handleFirstMouseEnter = () => {
+    setTooltipActive(true);
+    setTooltipOpen(true);
+  };
+
+  const iconButton = (
+    <IconButton
+      onClick={handleOpen}
+      onMouseEnter={tooltipActive ? undefined : handleFirstMouseEnter}
+      sx={{ padding: 0 }}
+      color={memo ? 'primary' : 'default'}
+    >
+      <EditNoteIcon fontSize="small" />
+    </IconButton>
+  );
+
   return (
     <>
-      <Tooltip title={equipmentMemo} arrow sx={{ p: 0 }}>
-        <IconButton onClick={handleOpen} sx={{ padding: 0 }} color={memo ? 'primary' : 'default'}>
-          <EditNoteIcon fontSize="small" />
-        </IconButton>
-      </Tooltip>
+      {tooltipActive ? (
+        <Tooltip
+          title={equipmentMemo}
+          arrow
+          sx={{ p: 0 }}
+          // ダイアログを開いている間は出さない
+          open={tooltipOpen && !open}
+          onOpen={() => setTooltipOpen(true)}
+          onClose={() => setTooltipOpen(false)}
+        >
+          {iconButton}
+        </Tooltip>
+      ) : (
+        iconButton
+      )}
 
-      <Dialog open={open} onClose={handleClose}>
-        <DialogTitle fontSize="medium">{name}</DialogTitle>
-        <DialogContent>
-          <TextField
-            value={equipmentMemo}
-            onChange={(e) => setEquipmentMemo(e.target.value)}
-            fullWidth
-            multiline
-            minRows={3}
-            disabled={disabled}
-            error={isOverMaxLength}
-            helperText={isOverMaxLength ? validationMessages.maxStringLength(MEMO_MAX_LENGTH) : ''}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleSave} variant="contained" disabled={disabled || isOverMaxLength} loading={isSave}>
-            保存
-          </Button>
-          <Button onClick={handleClose}>キャンセル</Button>
-        </DialogActions>
-      </Dialog>
+      {dialogMounted && (
+        <Dialog open={open} onClose={handleClose}>
+          <DialogTitle fontSize="medium">{name}</DialogTitle>
+          <DialogContent>
+            <TextField
+              value={equipmentMemo}
+              onChange={(e) => setEquipmentMemo(e.target.value)}
+              fullWidth
+              multiline
+              minRows={3}
+              disabled={disabled}
+              error={isOverMaxLength}
+              helperText={isOverMaxLength ? validationMessages.maxStringLength(MEMO_MAX_LENGTH) : ''}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleSave} variant="contained" disabled={disabled || isOverMaxLength} loading={isSave}>
+              保存
+            </Button>
+            <Button onClick={handleClose}>キャンセル</Button>
+          </DialogActions>
+        </Dialog>
+      )}
     </>
   );
 };
