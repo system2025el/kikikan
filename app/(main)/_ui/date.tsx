@@ -302,6 +302,7 @@ export const FormDateX = ({
   minDate,
   maxDate,
   notClearable,
+  autoFocus,
   onChange,
   onBlur,
 }: {
@@ -314,12 +315,14 @@ export const FormDateX = ({
   minDate?: Date;
   maxDate?: Date;
   notClearable?: boolean;
+  autoFocus?: boolean;
   onChange?: (date: Date | null) => void;
   onBlur?: Noop;
 }) => {
   return (
     <DatePicker
       name="date"
+      autoFocus={autoFocus}
       format="YYYY/MM/DD" // テキストエリア内のフォーマット
       slotProps={{
         field: {

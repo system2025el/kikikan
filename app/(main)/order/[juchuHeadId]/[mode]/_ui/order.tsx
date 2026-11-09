@@ -54,6 +54,7 @@ import { Loading, LoadingOverlay } from '@/app/(main)/_ui/loading';
 import { SelectTable } from '@/app/(main)/_ui/table';
 import { getOyaShukoFixed } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
 import { HonbanbiColorValues } from '@/app/(main)/(eq-order-detail)/eq-keep-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[oyaJuchuKizaiHeadId]/[mode]/_lib/types';
+import { perfStartNavigation } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/perf-measure'; // [計測用]
 import { WillDeleteAlertDialog } from '@/app/(main)/(masters)/_ui/dialogs';
 import { equipmentRows, users, vehicleHeaders, vehicleRows } from '@/app/(main)/order/[juchuHeadId]/[mode]/_lib/data';
 import { delJuchuSharyoMeisais } from '@/app/(main)/vehicle-order-detail/[jhid]/[jshid]/[mode]/_lib/funcs';
@@ -762,6 +763,7 @@ export const Order = (props: {
             : `/eq-main-order-detail/${row.juchuHeadId}/${row.juchuKizaiHeadId}/${mode}`;
 
     if (!isDirty) setIsLoading(true);
+    perfStartNavigation(); // [計測用]
     requestNavigation(path);
   };
 

@@ -1,5 +1,6 @@
 'use server';
 
+import { subDays } from 'date-fns';
 import { revalidatePath } from 'next/cache';
 import { PoolClient } from 'pg';
 
@@ -58,6 +59,7 @@ import {
   delAllNyushukoDen,
   delNyushukoCtnResult,
   delSiyouHonbanbi,
+  getALLStockList,
   getJuchuKizaiHeadMaxId,
   getJuchuKizaiNyushuko,
   isOyaShukoFixedTx,
@@ -65,7 +67,11 @@ import {
 } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
 import { createNyukoDenMeisaiIdPicker } from '@/app/(main)/(eq-order-detail)/_lib/reuse-nyuko-den';
 import { SaveNewChildJuchuKizaiHeadResult } from '@/app/(main)/(eq-order-detail)/_lib/types';
-import { JuchuKizaiHonbanbiValues } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';
+import { toEqStockList } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/stock-list';
+import {
+  JuchuKizaiHonbanbiValues,
+  StockTableValues,
+} from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';
 
 import { ReturnJuchuContainerMeisaiValues, ReturnJuchuKizaiHeadValues, ReturnJuchuKizaiMeisaiValues } from './types';
 
@@ -882,6 +888,38 @@ export const getReturnJuchuContainerMeisai = async (
     }
     throw e;
   }
+};
+
+/**
+ * 返却明細画面を開いたときの明細一式（返却受注機材明細・返却受注コンテナ明細・機材在庫）の取得
+ * Server Action は1本ずつ順番に処理され、1往復ごとに時間が上乗せされるので、
+ * 明細の内容で決まる在庫の取得までサーバー側で続けて行い、画面からは1回の呼び出しで済ませる（メイン明細と同じ）
+ * （エラーの記録は中で呼ぶ各取得関数が行う）
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param oyaJuchuKizaiHeadId 親受注機材ヘッダーid
+ * @param nyukoDate 返却入庫日（在庫テーブルの基準日。テーブルの左端はこの前日）
+ * @returns stockList は返却受注機材明細の並びに合わせた明細ごとの在庫（明細が無い・返却入庫日が無いときは空配列）
+ */
+export const getReturnJuchuKizaiDetailData = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  oyaJuchuKizaiHeadId: number,
+  nyukoDate: Date | null
+) => {
+  const [returnJuchuKizaiMeisaiData, returnJuchuContainerMeisaiData] = await Promise.all([
+    getReturnJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId, oyaJuchuKizaiHeadId),
+    getReturnJuchuContainerMeisai(juchuHeadId, juchuKizaiHeadId, oyaJuchuKizaiHeadId),
+  ]);
+
+  const kizaiIds = returnJuchuKizaiMeisaiData.filter((d) => !d.delFlag).map((d) => d.kizaiId);
+  const uniqueIds = Array.from(new Set(kizaiIds));
+  const stockList: StockTableValues[][] =
+    uniqueIds.length > 0 && nyukoDate
+      ? toEqStockList(kizaiIds, await getALLStockList(juchuHeadId, juchuKizaiHeadId, uniqueIds, subDays(nyukoDate, 1)))
+      : [];
+
+  return { returnJuchuKizaiMeisaiData, returnJuchuContainerMeisaiData, stockList };
 };
 
 /**

@@ -965,6 +965,26 @@ export const getKeepJuchuContainerMeisai = async (
 };
 
 /**
+ * キープ明細画面を開いたときの明細一式（キープ受注機材明細・キープ受注コンテナ明細）の取得
+ * Server Action は1本ずつ順番に処理され、1往復ごとに時間が上乗せされるので、画面からは1回の呼び出しで済ませる
+ * （メイン・返却明細と同じ。エラーの記録は中で呼ぶ各取得関数が行う）
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param oyaJuchuKizaiHeadId 親受注機材ヘッダーid
+ */
+export const getKeepJuchuKizaiDetailData = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  oyaJuchuKizaiHeadId: number
+) => {
+  const [keepJuchuKizaiMeisaiData, keepJuchuContainerMeisaiData] = await Promise.all([
+    getKeepJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId, oyaJuchuKizaiHeadId),
+    getKeepJuchuContainerMeisai(juchuHeadId, juchuKizaiHeadId, oyaJuchuKizaiHeadId),
+  ]);
+  return { keepJuchuKizaiMeisaiData, keepJuchuContainerMeisaiData };
+};
+
+/**
  * キープ受注コンテナ明細新規追加
  * @param juchuKizaiMeisaiData 受注機材明細データ
  * @param userNam ユーザー名
