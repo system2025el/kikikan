@@ -3374,7 +3374,9 @@ const EquipmentOrderDetail = (props: {
                         )}
                         {juchuKizaiMeisaiList.filter((d) => !d.delFlag).length !== 0 && (
                           // 編集できて明細を選択しているときは一括設定のダイアログ、それ以外（閲覧・出発済みを含む）は事前の列の開閉
+                          // 開閉する事前の列は表の右寄りにあるので、ボタンも右端（表の右端）に寄せる
                           <Button
+                            sx={{ ml: 'auto', mr: 1 }}
                             onClick={() =>
                               edit && !shukoFixFlag && juchuKizaiMeisaiList.some((d) => !d.delFlag && d.selected)
                                 ? handleOpenJizenDialog()
