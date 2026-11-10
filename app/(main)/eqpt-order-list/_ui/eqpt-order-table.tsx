@@ -22,7 +22,7 @@ import { dispColors } from '../../_lib/colors';
 import { openOrFocusTab } from '../../_lib/tab-focus';
 import { Loading } from '../../_ui/loading';
 import { MuiTablePagination } from '../../_ui/table-pagination';
-import { ROWS_PER_MASTER_TABLE_PAGE } from '../../(masters)/_lib/constants';
+import { FAKE_NEW_ID, ROWS_PER_MASTER_TABLE_PAGE } from '../../(masters)/_lib/constants';
 import { LightTooltipWithText } from '../../(masters)/_ui/tables';
 import { EqptOrderListTableValues, EqptOrderSearchValues } from '../_lib/types';
 
@@ -122,39 +122,42 @@ export const EqptOrderTable = ({
                       </LightTooltipWithText>
                     </TableCell>
                     <TableCell sx={{ minWidth: 0, whiteSpace: 'nowrap' }}>
-                      <Button
-                        variant="text"
-                        size="medium"
-                        sx={{
-                          px: 0,
-                          m: 0,
-                          minWidth: 1,
-                          justifyContent: 'left',
-                          color:
-                            order.headKbn === 1
-                              ? dispColors.main
-                              : order.headKbn === 2
-                                ? dispColors.return
-                                : order.headKbn === 3
-                                  ? dispColors.keep
-                                  : dispColors.main,
-                        }}
-                        onClick={() => {
-                          openOrFocusTab(
-                            order.headKbn === 1
-                              ? `/eq-main-order-detail/${order.juchuHeadId}/${order.kizaiHeadId}/view`
-                              : order.headKbn === 2
-                                ? `/eq-return-order-detail/${order.juchuHeadId}/${order.kizaiHeadId}/${order.oyaJuchuKizaiHeadId}/view`
-                                : order.headKbn === 3
-                                  ? `/eq-keep-order-detail/${order.juchuHeadId}/${order.kizaiHeadId}/${order.oyaJuchuKizaiHeadId}/view`
-                                  : `/eq-main-order-detail/${order.juchuHeadId}/${order.kizaiHeadId}/view`
-                          );
-                        }}
-                      >
-                        <LightTooltipWithText variant={'button'} maxWidth={300}>
-                          {order.headNam}
-                        </LightTooltipWithText>
-                      </Button>
+                      {/* 機材明細が無い受注（機材ヘッダーidが無い）はリンクにしない */}
+                      {order.kizaiHeadId !== FAKE_NEW_ID && (
+                        <Button
+                          variant="text"
+                          size="medium"
+                          sx={{
+                            px: 0,
+                            m: 0,
+                            minWidth: 1,
+                            justifyContent: 'left',
+                            color:
+                              order.headKbn === 1
+                                ? dispColors.main
+                                : order.headKbn === 2
+                                  ? dispColors.return
+                                  : order.headKbn === 3
+                                    ? dispColors.keep
+                                    : dispColors.main,
+                          }}
+                          onClick={() => {
+                            openOrFocusTab(
+                              order.headKbn === 1
+                                ? `/eq-main-order-detail/${order.juchuHeadId}/${order.kizaiHeadId}/view`
+                                : order.headKbn === 2
+                                  ? `/eq-return-order-detail/${order.juchuHeadId}/${order.kizaiHeadId}/${order.oyaJuchuKizaiHeadId}/view`
+                                  : order.headKbn === 3
+                                    ? `/eq-keep-order-detail/${order.juchuHeadId}/${order.kizaiHeadId}/${order.oyaJuchuKizaiHeadId}/view`
+                                    : `/eq-main-order-detail/${order.juchuHeadId}/${order.kizaiHeadId}/view`
+                            );
+                          }}
+                        >
+                          <LightTooltipWithText variant={'button'} maxWidth={300}>
+                            {order.headNam}
+                          </LightTooltipWithText>
+                        </Button>
+                      )}
                     </TableCell>
                     <TableCell>
                       <LightTooltipWithText variant={'body2'} maxWidth={200}>
