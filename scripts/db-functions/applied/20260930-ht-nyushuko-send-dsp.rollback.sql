@@ -6,6 +6,8 @@
 -- 本番に適用する直前に、本番の定義の md5 が上の値のままか確認すること。
 --
 --   select md5(pg_get_functiondef('public.nyushuko_send_20260626_1'::regproc));
+--
+-- ★★ 2026-11-09 に nyushuko_send_20260626_1 は削除済み（20261109-drop-unused-rpc）。流すと削除した関数を作り直してしまうので流さないこと。
 
 \set ON_ERROR_STOP on
 

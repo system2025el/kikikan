@@ -27,7 +27,7 @@ import { permission } from '../../_lib/permission';
 import { Calendar, CalendarView } from '../../_ui/date';
 import { Loading } from '../../_ui/loading';
 import { FAKE_NEW_ID } from '../../(masters)/_lib/constants';
-import { getAllStockData, getBumonsData, getEqData } from '../_lib/funcs';
+import { getAllStockData, getBumonsData, getStockSearchData } from '../_lib/funcs';
 import { Bumon, EqTableValues, StockSearchSchema, StockSearchValues, StockTableValues } from '../_lib/types';
 import { EqStockTable, EqTable } from './stock-table';
 
@@ -77,12 +77,13 @@ export const Stock = () => {
   const onSubmit = async (data: StockSearchValues) => {
     setIsLoading(true);
     try {
-      const newEqList = await getEqData(data.bumonId, data.keyword);
+      // 機材一覧と在庫を1回の Server Action で取得する
+      const { eqList: newEqList, stockData: allStockData } = await getStockSearchData(
+        data.bumonId,
+        data.keyword,
+        subDays(selectDate, 1)
+      );
       const kizaiIds = newEqList.map((data) => data.kizaiId);
-
-      const uniqueKizaiIds = Array.from(new Set(kizaiIds));
-
-      const allStockData: StockTableValues[] = await getAllStockData(uniqueKizaiIds, subDays(selectDate, 1));
 
       const stockMap = new Map<number, StockTableValues[]>();
       for (const row of allStockData) {

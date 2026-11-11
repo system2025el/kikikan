@@ -58,6 +58,7 @@ import { OyaEqSelectionDialog } from '@/app/(main)/(eq-order-detail)/_ui/equipme
 
 import {
   getKeepJuchuContainerMeisai,
+  getKeepJuchuKizaiDetailData,
   getKeepJuchuKizaiHead,
   getKeepJuchuKizaiMeisai,
   saveKeepJuchuKizai,
@@ -298,18 +299,11 @@ export const EquipmentKeepOrderDetail = (props: {
         }
 
         // キープ受注機材明細データ、キープ受注コンテナ明細データ
-        const [keepJuchuKizaiMeisaiData, keepJuchuContainerMeisaiData] = await Promise.all([
-          getKeepJuchuKizaiMeisai(
-            keepJuchuKizaiHeadData.juchuHeadId,
-            keepJuchuKizaiHeadData.juchuKizaiHeadId,
-            keepJuchuKizaiHeadData.oyaJuchuKizaiHeadId
-          ),
-          getKeepJuchuContainerMeisai(
-            keepJuchuKizaiHeadData.juchuHeadId,
-            keepJuchuKizaiHeadData.juchuKizaiHeadId,
-            keepJuchuKizaiHeadData.oyaJuchuKizaiHeadId
-          ),
-        ]);
+        const { keepJuchuKizaiMeisaiData, keepJuchuContainerMeisaiData } = await getKeepJuchuKizaiDetailData(
+          keepJuchuKizaiHeadData.juchuHeadId,
+          keepJuchuKizaiHeadData.juchuKizaiHeadId,
+          keepJuchuKizaiHeadData.oyaJuchuKizaiHeadId
+        );
 
         // キープ出庫日
         const keepShukoDate = getShukoDate(
@@ -1131,18 +1125,12 @@ export const EquipmentKeepOrderDetail = (props: {
 
       try {
         // キープ受注機材明細データ、キープ受注コンテナ明細データ
-        const [juchuKizaiMeisaiData, keepJuchuContainerMeisaiData] = await Promise.all([
-          getKeepJuchuKizaiMeisai(
+        const { keepJuchuKizaiMeisaiData: juchuKizaiMeisaiData, keepJuchuContainerMeisaiData } =
+          await getKeepJuchuKizaiDetailData(
             juchuKizaiHeadData.juchuHeadId,
             juchuKizaiHeadData.juchuKizaiHeadId,
             juchuKizaiHeadData.oyaJuchuKizaiHeadId
-          ),
-          getKeepJuchuContainerMeisai(
-            juchuKizaiHeadData.juchuHeadId,
-            juchuKizaiHeadData.juchuKizaiHeadId,
-            juchuKizaiHeadData.oyaJuchuKizaiHeadId
-          ),
-        ]);
+          );
 
         // キープ出庫日
         const keepShukoDate = getShukoDate(

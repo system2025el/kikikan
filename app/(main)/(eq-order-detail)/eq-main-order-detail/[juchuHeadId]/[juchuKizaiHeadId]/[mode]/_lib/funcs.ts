@@ -1,5 +1,6 @@
 'use server';
 
+import { subDays } from 'date-fns';
 import { revalidatePath } from 'next/cache';
 import { PoolClient } from 'pg';
 
@@ -120,7 +121,9 @@ import {
   delAllNyushukoResult,
   delAllShukoResult,
   delSiyouHonbanbi,
+  getALLStockList,
   getChildJuchuKizaiHead,
+  getJuchuContainerMeisai,
   getJuchuContainerMeisaiTx,
   getJuchuKizaiHeadMaxId,
   getJuchuKizaiNyushuko,
@@ -128,7 +131,8 @@ import {
 } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
 import { IdoList } from '@/app/(main)/ido-list/_ui/ido-list';
 
-import { validateJizen } from './jizen';
+import { getStockAnchorDate, validateJizen } from './jizen';
+import { toEqStockList } from './stock-list';
 import {
   EqptSelection,
   IdoJuchuKizaiMeisaiValues,
@@ -137,6 +141,7 @@ import {
   JuchuKizaiHonbanbiValues,
   JuchuKizaiMeisaiValues,
   SelectedEqptsValues,
+  StockTableValues,
 } from './types';
 
 /**
@@ -414,6 +419,42 @@ export const getIdoJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHead
     }
     throw e;
   }
+};
+
+/**
+ * 明細画面を開いたときの明細一式（受注機材明細・移動受注機材明細・受注コンテナ明細・機材在庫）の取得
+ * Server Action は1本ずつ順番に処理され、1往復ごとに時間が上乗せされるので、
+ * 明細の内容で決まる在庫の取得までサーバー側で続けて行い、画面からは1回の呼び出しで済ませる
+ * （エラーの記録は中で呼ぶ各取得関数が行う）
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param shukoDate 出庫日
+ * @returns stockList は受注機材明細の並びに合わせた明細ごとの在庫（明細が無い・基準日が無いときは空配列）、
+ * stockAnchorDate は在庫テーブルの基準日（テーブルの左端はこの前日。在庫を取得したときだけ画面の基準日にする）
+ */
+export const getJuchuKizaiDetailData = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  shukoDate: Date | null
+) => {
+  const [juchuKizaiMeisaiData, idoJuchuKizaiMeisaiData, juchuContainerMeisaiData] = await Promise.all([
+    getJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId),
+    getIdoJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId),
+    getJuchuContainerMeisai(juchuHeadId, juchuKizaiHeadId),
+  ]);
+
+  const stockAnchorDate = getStockAnchorDate(shukoDate, juchuKizaiMeisaiData);
+  const kizaiIds = juchuKizaiMeisaiData.filter((d) => !d.delFlag).map((d) => d.kizaiId);
+  const uniqueIds = Array.from(new Set(kizaiIds));
+  const stockList: StockTableValues[][] =
+    uniqueIds.length > 0 && stockAnchorDate
+      ? toEqStockList(
+          kizaiIds,
+          await getALLStockList(juchuHeadId, juchuKizaiHeadId, uniqueIds, subDays(stockAnchorDate, 1))
+        )
+      : [];
+
+  return { juchuKizaiMeisaiData, idoJuchuKizaiMeisaiData, juchuContainerMeisaiData, stockList, stockAnchorDate };
 };
 
 /**

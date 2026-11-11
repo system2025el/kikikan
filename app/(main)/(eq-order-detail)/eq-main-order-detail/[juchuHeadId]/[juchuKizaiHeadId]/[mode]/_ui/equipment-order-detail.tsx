@@ -64,6 +64,7 @@ import { Calendar, CalendarView, DateTime, FormDateX } from '@/app/(main)/_ui/da
 import { IsDirtyAlertDialog, useDirty } from '@/app/(main)/_ui/dirty-context';
 import { HonbanbiCalendar } from '@/app/(main)/_ui/honbanbi-calendar';
 import { Loading, LoadingOverlay } from '@/app/(main)/_ui/loading';
+import { STOCK_TABLE_DAYS } from '@/app/(main)/(eq-order-detail)/_lib/constants';
 import {
   checkShukoStatus,
   getALLStockList,
@@ -85,6 +86,7 @@ import {
   getHonbanbi,
   getIdoJuchuKizaiMeisai,
   getJizenResultExists,
+  getJuchuKizaiDetailData,
   getJuchuKizaiHead,
   getJuchuKizaiMeisai,
   getShozokuChangedResultExists,
@@ -105,6 +107,7 @@ import {
   withJizen,
   withoutJizen,
 } from '../_lib/jizen';
+import { toEqStockList } from '../_lib/stock-list';
 import {
   IdoJuchuKizaiMeisaiValues,
   JuchuContainerMeisaiValues,
@@ -520,13 +523,6 @@ const EquipmentOrderDetail = (props: {
           return false;
         }
 
-        // 受注機材明細データ、移動受注機材明細データ、受注コンテナ明細データ
-        const [juchuKizaiMeisaiData, idoJuchuKizaiMeisaiData, juchuContainerMeisaiData] = await Promise.all([
-          getJuchuKizaiMeisai(juchuKizaiHeadData.juchuHeadId, juchuKizaiHeadData.juchuKizaiHeadId),
-          getIdoJuchuKizaiMeisai(juchuKizaiHeadData.juchuHeadId, juchuKizaiHeadData.juchuKizaiHeadId),
-          getJuchuContainerMeisai(juchuKizaiHeadData.juchuHeadId, juchuKizaiHeadData.juchuKizaiHeadId),
-        ]);
-
         // 出庫日
         const shukoDate = getShukoDate(
           juchuKizaiHeadData.kicsShukoDat && new Date(juchuKizaiHeadData.kicsShukoDat),
@@ -541,16 +537,13 @@ const EquipmentOrderDetail = (props: {
         // 出庫日から入庫日
         const dateRange = getRange(shukoDate, nyukoDate);
 
-        // 機材在庫データ
-        const updatedEqStockData =
-          juchuKizaiMeisaiData.length > 0
-            ? await updateEqStock(
-                juchuKizaiHeadData?.juchuHeadId,
-                juchuKizaiHeadData?.juchuKizaiHeadId,
-                getStockAnchorDate(shukoDate, juchuKizaiMeisaiData),
-                juchuKizaiMeisaiData
-              )
-            : [];
+        // 受注機材明細データ、移動受注機材明細データ、受注コンテナ明細データ、機材在庫データ
+        const {
+          juchuKizaiMeisaiData,
+          idoJuchuKizaiMeisaiData,
+          juchuContainerMeisaiData,
+          eqStockData: updatedEqStockData,
+        } = await fetchDetailData(juchuKizaiHeadData.juchuHeadId, juchuKizaiHeadData.juchuKizaiHeadId, shukoDate);
 
         // 割引金額（確定）の自動追従を解除
         nebikiSyncedRef.current = false;
@@ -1084,26 +1077,31 @@ const EquipmentOrderDetail = (props: {
         );
         tableAnchorDateRef.current = shukoDate;
 
-        const idToStockMap = new Map<number, StockTableValues[]>();
-        for (const row of allStockData) {
-          if (!idToStockMap.has(row.kizaiId)) {
-            idToStockMap.set(row.kizaiId, []);
-          }
-          idToStockMap.get(row.kizaiId)!.push(row);
-        }
-
-        updatedEqStockData = ids.map((id) => {
-          const stockArray = idToStockMap.get(id);
-          if (!stockArray) {
-            return [];
-          }
-          return stockArray;
-        });
+        updatedEqStockData = toEqStockList(ids, allStockData);
       }
       return updatedEqStockData;
     } catch (e) {
       throw e;
     }
+  };
+
+  /**
+   * 明細一式（受注機材明細・移動受注機材明細・受注コンテナ明細・機材在庫）を1回の Server Action で取得する
+   * 在庫を取得したときは、在庫テーブルの基準日も合わせる（updateEqStock と同じ）
+   * @param juchuHeadId 受注ヘッダーid
+   * @param juchuKizaiHeadId 受注機材ヘッダーid
+   * @param shukoDate 出庫日
+   */
+  const fetchDetailData = async (juchuHeadId: number, juchuKizaiHeadId: number, shukoDate: Date | null) => {
+    const { stockList, stockAnchorDate, ...meisaiData } = await getJuchuKizaiDetailData(
+      juchuHeadId,
+      juchuKizaiHeadId,
+      shukoDate
+    );
+    if (stockList.length > 0) {
+      tableAnchorDateRef.current = stockAnchorDate;
+    }
+    return { ...meisaiData, eqStockData: stockList };
   };
 
   /**
@@ -1160,14 +1158,14 @@ const EquipmentOrderDetail = (props: {
       setAnchorEl(null);
     }
   };
-  // 3か月前
+  // 表示日数分前（前の表示期間とすき間なくつながる）
   const handleBackDateChange = () => {
-    const date = subDays(new Date(tableAnchorDateRef.current ?? selectDate), 91);
+    const date = subDays(new Date(tableAnchorDateRef.current ?? selectDate), STOCK_TABLE_DAYS);
     handleDateChange(date, 'day');
   };
-  // 3か月後
+  // 表示日数分後
   const handleForwardDateChange = () => {
-    const date = addDays(new Date(tableAnchorDateRef.current ?? selectDate), 91);
+    const date = addDays(new Date(tableAnchorDateRef.current ?? selectDate), STOCK_TABLE_DAYS);
     handleDateChange(date, 'day');
   };
 
@@ -2475,13 +2473,6 @@ const EquipmentOrderDetail = (props: {
       const juchuKizaiHeadData = getValues();
 
       try {
-        // 受注機材明細データ、移動受注機材明細データ、受注コンテナ明細データ
-        const [juchuKizaiMeisaiData, idoJuchuKizaiMeisaiData, juchuContainerMeisaiData] = await Promise.all([
-          getJuchuKizaiMeisai(juchuKizaiHeadData.juchuHeadId, juchuKizaiHeadData.juchuKizaiHeadId),
-          getIdoJuchuKizaiMeisai(juchuKizaiHeadData.juchuHeadId, juchuKizaiHeadData.juchuKizaiHeadId),
-          getJuchuContainerMeisai(juchuKizaiHeadData.juchuHeadId, juchuKizaiHeadData.juchuKizaiHeadId),
-        ]);
-
         // 出庫日
         const shukoDate = getShukoDate(
           juchuKizaiHeadData.kicsShukoDat && new Date(juchuKizaiHeadData.kicsShukoDat),
@@ -2496,16 +2487,13 @@ const EquipmentOrderDetail = (props: {
         // 出庫日から入庫日
         const dateRange = getRange(shukoDate, nyukoDate);
 
-        // 機材在庫データ
-        const updatedEqStockData =
-          juchuKizaiMeisaiData.length > 0
-            ? await updateEqStock(
-                juchuKizaiHeadData?.juchuHeadId,
-                juchuKizaiHeadData?.juchuKizaiHeadId,
-                getStockAnchorDate(shukoDate, juchuKizaiMeisaiData),
-                juchuKizaiMeisaiData
-              )
-            : [];
+        // 受注機材明細データ、移動受注機材明細データ、受注コンテナ明細データ、機材在庫データ
+        const {
+          juchuKizaiMeisaiData,
+          idoJuchuKizaiMeisaiData,
+          juchuContainerMeisaiData,
+          eqStockData: updatedEqStockData,
+        } = await fetchDetailData(juchuKizaiHeadData.juchuHeadId, juchuKizaiHeadData.juchuKizaiHeadId, shukoDate);
 
         setOriginJuchuKizaiMeisaiList(juchuKizaiMeisaiData ?? []);
         setJuchuKizaiMeisaiList(juchuKizaiMeisaiData ?? []);
@@ -3386,7 +3374,9 @@ const EquipmentOrderDetail = (props: {
                         )}
                         {juchuKizaiMeisaiList.filter((d) => !d.delFlag).length !== 0 && (
                           // 編集できて明細を選択しているときは一括設定のダイアログ、それ以外（閲覧・出発済みを含む）は事前の列の開閉
+                          // 開閉する事前の列は表の右寄りにあるので、ボタンも右端（表の右端）に寄せる
                           <Button
+                            sx={{ ml: 'auto', mr: 1 }}
                             onClick={() =>
                               edit && !shukoFixFlag && juchuKizaiMeisaiList.some((d) => !d.delFlag && d.selected)
                                 ? handleOpenJizenDialog()

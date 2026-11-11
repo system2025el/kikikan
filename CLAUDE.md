@@ -82,7 +82,7 @@ npx tsc --noEmit          # 型チェックは全体で問題なく通る
 - **ルートの保護は `middleware.ts`**（ルート直下）。全リクエストで `supabase.auth.getUser()` を呼んでトークンを検証・リフレッシュし、未ログインなら `/login` にリダイレクトする。公開パスは `/`・`/login`・`/error` のみで、`signup`・`auth`・静的ファイルは matcher 側で除外している。招待直後（`user_metadata.setup_completed === false`）は `/signup` へ、ログイン済みで `/login` を開いたら `/dashboard` へ飛ばす。リダイレクト時もリフレッシュ済みcookieを引き継ぐ実装になっているので、この関数を触るときは `redirectWithCookies` を経由すること。
 - **ユーザー情報の受け渡し**: `app/(main)/layout.tsx` が `getCurrentUser()`（`app/(main)/_lib/funcs.ts`）でユーザーを解決し、`UserProvider`（`app/(main)/_ui/user-context.tsx`）で配下に渡す。クライアントコンポーネントは `useUser()` で参照する。`getCurrentUser` は Supabase authユーザーのメールアドレスで `m_user` を引き、ビットマスク権限を含む `User` 型を返す（`react`の`cache`でリクエスト単位にメモ化）。**`getCurrentUser` 自身はリダイレクトせず `null` を返す**ので、`/login` へ飛ばすのは呼び出し側の責務（`layout.tsx` は `null` と例外の両方で `redirect('/login')` する）。
 - Server Component 側では `getCurrentUser()` を直接呼んでチェックしているページもある（受注機材明細など）。`(main)` 配下の新規ページで権限判定が必要なら、propsで受け取るか `getCurrentUser()` を呼ぶ。
-- `app/(main)/_ui/userstoreInitializer.tsx` はページ遷移のたびに `router.refresh()` して最新のユーザー情報（権限変更など）を反映する。DBへの問い合わせすぎを防ぐため60秒間引きしている。
+- **layout のユーザー情報（サイドバーのログイン名・メニュー）は画面遷移では更新しない**（2026-11-09 決定）。App Router の layout は遷移で作り直されないので、権限変更はそのタブを再読み込み（F5）するか別タブで開くまでサイドバーに出ない。権限変更はまれなので運用で再読み込みしてもらう。以前は遷移のたびに `router.refresh()` していたが、layout とページのサーバー処理を丸ごとやり直し、遷移先のデータ取得（Server Action）を待たせていたので外した。**ページの中身の権限は page.tsx が開くたびに `getCurrentUser()` で確かめる**（`(main)` の page.tsx は `order-list` 以外すべて）ので、サイドバーが古くても権限の無い画面は表示されない。
 - 権限は `app/(main)/_lib/permission.ts` のビットマスクとビットAND演算で判定する。`User.permission` は `juchu`・`nyushuko`・`masters`・`loginSetting`・`ht`・`schedule` の6カテゴリに分かれた数値で、定数側は `juchu_ref: 1`／`juchu_upd: 2`／`nyushuko_*: 4,8`／`mst_*: 16,32`／`ht: 64`／`login: 128`／`sche_upd: 256`／`system: 65535`。`*_full` の定数は `*_ref` と `*_upd` のビットOR。
 
 **排他ロック**: `app/(main)/_lib/lock.ts` は、`t-lock` テーブルを使った編集画面向けの排他制御（悲観的ロック）を実装している（受注・見積の明細画面など）。`lockCheck` は10分間有効なロックを新規作成/更新するか、他ユーザーが保持中であれば既存ロック情報を返す。`lockRelease` はロックを解除する。複数ユーザーが同時に開き得る編集画面を新規追加する際は、この仕組みを使うこと。
@@ -111,7 +111,7 @@ npx tsc --noEmit          # 型チェックは全体で問題なく通る
 - **採番**：コンテナの明細IDは、同じ受注機材ヘッダーの別の場所に同じ機材があればその値、無ければヘッダー内のコンテナの最大値＋1（機材の明細IDとは重なってよい）。表示順は K と Y でそろえる。Web の採番は `t_nyushuko_den` を `SHARE ROW EXCLUSIVE` でロックしてから行い、送信RPC（`SHARE`）と順番に採番される。機材の明細IDは `t_juchu_kizai_meisai` と `t_nyushuko_den` の最大値から採番する（受注削除の行と PK が衝突しないように）。
 - **受注削除**：実績のある機材をメイン明細で削除した、または出庫場所を変えたときは、元の場所の出庫伝票を**同じ明細IDのまま予定数0で残す**（過剰なので出発できない＝現物を取り除いてもらう）。判定は `v_nyushuko_den2_lst.juchu_meisai_del_flg`（予定0かつ受注明細が無い。出庫では明細の `shozoku_id` と伝票の場所も照合）で、Web・HT・ゲートとも同じ列を読む。表示は機材名を `statusColors.deleted`（文字色）で赤くする（Web だけ「受注削除」の文字も出す）。解消は出庫明細で実績をクリアする。
 - **数量変更**：読取実績のある機材の数量を受注側（メイン・キープ・分離）で変えると、`t_nyushuko_den.plan_chg_flg` が1になり、出庫明細（事前明細を含む）・HT・ゲートで機材名を強調する（どれも `v_nyushuko_den2_lst.plan_chg_flg` を読む。受注削除と同じ赤（2026-10-29 決定）。Web だけ「数量変更」の文字も出す。色の定数は受注削除と分けて `statusColors.planChanged`）。予定数 = 読取数＋補正数 になると0に戻る。**HT・ゲートは送信後に明細を取り直さないので、送信で一致しても開き直すまで赤いまま**（端末側で一致を判定して消すと、読取クリアの後に DB と食い違うため消さない。2026-11-04 決定）。**立てる・消すは `t_nyushuko_den` の BEFORE UPDATE トリガー（`trg_nyushuko_den_plan_chg`）が行い、アプリからは書かない**（このDBで唯一のトリガー。送信RPCを含むすべての UPDATE で効く）。出庫（10/20）と事前（80/90）の機材が対象で、表示はビューの列を読む。一括補正（`updShukoAdjust`）は予定数を書き戻さず、補正数だけを「画面に出ている予定数 − DB の今の読取数」にする（`updateNyushukoDenAdjustToPlan`。開いたあとに受注側で予定数が変わっていても補正は画面の予定数までで、再表示で数量変更の強調と差が残る）。
-- **送信RPC は `nyushuko_send_20261021_1`**（HT・ゲート共通。`20261009_1` に事前準備 80/90 の受付を足したもの）。旧 `nyushuko_send_20261009_1`・`nyushuko_send_20260626_1` は全端末の切り替えが済むまで残す。RPC が拒否するとき（事前の拒否4種など）は `RAISE EXCEPTION` の文言がそのまま端末に出る（ゲートは `R.GetErrorMessage` で JSON から文言だけを取り出す）ので、利用者が読める日本語で書くこと。
+- **送信RPC は `nyushuko_send_20261021_1`**（HT・ゲート共通。`20261009_1` に事前準備 80/90 の受付を足したもの）。旧 `nyushuko_send_20261009_1`・`nyushuko_send_20260626_1` など、HT・ゲートが呼ばなくなった旧RPCは 2026-11-09 に削除した（今ある関数の一覧は `scripts/db-functions/README.md`）。RPC が拒否するとき（事前の拒否4種など）は `RAISE EXCEPTION` の文言がそのまま端末に出る（ゲートは `R.GetErrorMessage` で JSON から文言だけを取り出す）ので、利用者が読める日本語で書くこと。
 - 合体している受注機材ヘッダーは `v_get_juchu_kizai_head` が**入出庫種別ごと**にまとめる（ピッキングと最終確認でヘッダーの組み合わせが違っても1行）。そのため最終確認の画面には最終確認の行が無いヘッダーも入り、一緒に出発済みになる（上の `pickingDeleted` はこのためのガード）。ヘッダー名は `t_juchu_kizai_head` から引き、空なら空欄で表示する。
 
 **事前準備（事前ピッキング 80・事前最終確認 90。数量変更と合わせて 2026-11-05 本番反映）**: 出庫日より前に機材を用意しておくための作業。メイン受注機材明細に「事前日時・事前数」を持たせ、事前の出庫伝票を作り、事前で読んだタグを本番の出庫に引き継ぐ。
@@ -136,7 +136,7 @@ npx tsc --noEmit          # 型チェックは全体で問題なく通る
 - 機材明細画面の保存時、種別 `1` は `deleteSiyouHonbanbi`（種別1のみDELETE）→ `getRange(出庫日, 入庫日)` の全日を再INSERTという作り直し方式で更新する。種別 `2`/`3` は出庫日・入庫日にupsert、種別 `10`〜`40` は本番日入力ダイアログの差分（追加・更新・削除）で更新する。返却受注機材ヘッダーには「返却日〜親の入庫日」の範囲で種別 `1` が作られる。
 - 出庫日・入庫日が未設定だと `getRange` が空配列を返し、種別 `1` の行が1件も作られない（＝在庫を消費しない）点に注意。
 
-**在庫数の算出**: 在庫数は `v_zaiko_qty.zaiko_qty = v_kizai_qty.kizai_qty − v_juchu_kizai_dat_qty.plan_qty` で求まる。機材明細画面や貸出状況の在庫テーブルはこのビューを日付でCROSS JOINして表示している（`app/_lib/db/tables/stock-table.ts`）。
+**在庫数の算出**: 在庫数は `v_zaiko_qty.zaiko_qty = v_kizai_qty.kizai_qty − v_juchu_kizai_dat_qty.plan_qty` で求まる。機材明細画面や貸出状況の在庫テーブルはこのビューを日付でCROSS JOINして表示している（`app/_lib/db/tables/stock-table.ts`）。ただし**受注機材明細（メイン・返却）用の `selectDetailStockListBulk` だけはビューを使わず同じ式を自前で計算している**（2026-11-09。`v_kizai_qty` が `v_rfid` を5回全件集計し、`v_zaiko_qty` の中でもう一度全機材分計算するため。DB内 約310ms → 150ms）。保有数の条件（下記）を変えるときは、`v_kizai_qty` とこのSQLの両方を直すこと。
 
 - 分子の保有数 `kizai_qty` は**RFIDタグの実本数**（`v_rfid` で `del_flg = 0` かつ `rfid_kizai_sts < 100` またはNULL。100以上はNG・廃棄・紛失・無効化）。ピッキング中や出発済みなどの作業ステータスは保有数に影響しない。所属（KICS/YARD）別ではなく全体合計。
 - 分母の `plan_qty` は `t_juchu_kizai_honbanbi` の日付（種別を問わず `DISTINCT`）に紐づく `plan_kizai_qty + plan_yobi_qty` の全受注合計。上記の通り種別 `1` が期間全日に入るため、**引き当ては出庫日〜入庫日の全日に効く**。同じ日に種別1と種別40があっても `DISTINCT` で1回にまとまり二重計上はされない。コンテナ明細（`t_juchu_ctn_meisai`）もUNION ALLで加算される。
@@ -163,7 +163,7 @@ npx tsc --noEmit          # 型チェックは全体で問題なく通る
 
 どのフォルダも `applied/`（本番適用済み）と `staging-only/`（本番未適用）で適用状況を表し、本番に適用したら `git mv` で移して各ファイル1行目の `-- 適用状況:` を更新する。`db-views/` だけ `<view>.sql`（1ビュー1ファイルで変更を累積）、他は `YYYYMMDD-対象.sql`。
 
-**新テーブルでは `GRANT` を必ず書くこと**（ステージングには `public` スキーマの default privileges が無く `CREATE TABLE` だけでは 42501 になる。本番には default privileges があるが anon には SELECT しか付かない）。**RLSを有効化しないこと**（既存テーブルはすべて `relrowsecurity = false`）。適用は「DB → 型再生成 → コードデプロイ」の順。ただし**列を削るときや別名にするときはコードが先**。
+**新テーブル・新関数では `GRANT` を必ず書くこと**（本番の `public` の default privileges では anon に SELECT しか付かず、`CREATE TABLE` だけでは 42501 になる。ステージングは 2026-11-09 時点で全スキーマ向けの default privileges があり書き忘れても動いてしまうので、ステージングの動作で判断しないこと）。**RLSを有効化しないこと**（既存テーブルはすべて `relrowsecurity = false`）。適用は「DB → 型再生成 → コードデプロイ」の順。ただし**列を削るときや別名にするときはコードが先**。
 
 **関数の中の `row(...)::<テーブル名>` は列の個数と物理順に依存する**ので、テーブルに列を足すときは依存ビューだけでなく `pg_get_functiondef` の全文検索も行うこと（移動の送信RPC3本がこれで壊れた）。
 
