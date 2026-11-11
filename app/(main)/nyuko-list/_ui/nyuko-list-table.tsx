@@ -17,7 +17,7 @@ import { Dispatch, SetStateAction, useState } from 'react';
 
 import { BASHO_ID, FIX_STS, JUCHU_KIZAI_HEAD_KBN, SAGYO_KBN_ID } from '@/app/_lib/constants';
 
-import { dispColors, fixStsColors } from '../../_lib/colors';
+import { dispColors, fixStsColors, sagyoKbnColors } from '../../_lib/colors';
 import { toJapanTimeString } from '../../_lib/date-conversion';
 import { permission } from '../../_lib/permission';
 import { openOrFocusTab } from '../../_lib/tab-focus';
@@ -59,7 +59,11 @@ export const NyukoListTable = (props: {
     <TableContainer sx={{ overflow: 'auto', maxHeight: '80vh' }}>
       {isLoading && <LoadingOverlay />}
       <Table stickyHeader size="small">
-        <TableHead>
+        <TableHead
+          sx={{
+            '& .MuiTableCell-stickyHeader': { backgroundColor: sagyoKbnColors.nyukoCount, color: 'inherit' },
+          }}
+        >
           <TableRow sx={{ whiteSpace: 'nowrap' }}>
             <TableCell padding="checkbox">
               <Checkbox
