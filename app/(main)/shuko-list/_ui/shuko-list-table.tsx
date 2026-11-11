@@ -2,6 +2,7 @@
 
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import {
+  Box,
   Button,
   Checkbox,
   Table,
@@ -133,7 +134,36 @@ export const ShukoListTable = (props: {
               }}
             >
               <TableCell padding="checkbox">
-                {!row.jizenFlg && <Checkbox checked={selected.includes(index)} onChange={() => handleSelect(index)} />}
+                {row.jizenFlg ? (
+                  // 事前は選択できないので、チェックボックスの代わりに目印を置く。
+                  // 列幅がずれないよう、チェックボックスと同じ部品（余白・アイコン20px）で描く
+                  <Checkbox
+                    disabled
+                    icon={
+                      <Box
+                        component="span"
+                        sx={{
+                          width: 24,
+                          height: 20,
+                          // □(20px)より4px広いので、左右に2pxずつはみ出させて□と中心・列幅をそろえる
+                          mx: '-2px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: 11,
+                          whiteSpace: 'nowrap',
+                          borderRadius: 1,
+                          bgcolor: dispColors.jizen,
+                          color: 'black',
+                        }}
+                      >
+                        事前
+                      </Box>
+                    }
+                  />
+                ) : (
+                  <Checkbox checked={selected.includes(index)} onChange={() => handleSelect(index)} />
+                )}
               </TableCell>
               <TableCell align="left">{row.sectionNamv}</TableCell>
               <TableCell align="center">
@@ -204,7 +234,8 @@ export const ShukoListTable = (props: {
                             : dispColors.main
                   }
                 >
-                  {row.headNamv}
+                  {/* 色だけだと明細名が空のときに事前と分からないので、末尾に(事前)も付ける */}
+                  {row.jizenFlg ? `${row.headNamv ?? ''}(事前)` : row.headNamv}
                 </Typography>
               </TableCell>
               <TableCell align="left">{row.koenbashoNam}</TableCell>
