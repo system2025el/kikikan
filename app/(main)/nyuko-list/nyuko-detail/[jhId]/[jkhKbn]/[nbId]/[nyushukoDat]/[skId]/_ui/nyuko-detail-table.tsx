@@ -17,7 +17,7 @@ import { grey } from '@mui/material/colors';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-import { dispColors, sagyoKbnColors, statusColors } from '@/app/(main)/_lib/colors';
+import { dispColors, sagyoKbnColors, sectionColors, statusColors } from '@/app/(main)/_lib/colors';
 
 import { NyukoDetailTableValues } from '../_lib/types';
 
@@ -75,7 +75,14 @@ export const NyukoDetailTable = (props: { datas: NyukoDetailTableValues[] }) => 
               <TableCell
                 align="left"
                 onClick={() => handleClick(row.juchuKizaiHeadId, row.juchuKizaiMeisaiId, row.kizaiId)}
-                sx={{ cursor: 'pointer', '&:hover': { backgroundColor: dispColors.hover } }}
+                sx={{
+                  cursor: 'pointer',
+                  // 課ごとの色。済の行は行の背景色（グレー）を優先する
+                  backgroundColor:
+                    row.diff !== 0 && row.sectionNum !== null ? sectionColors[row.sectionNum] : undefined,
+                  // 背景色（課の色）は残し、薄い黒を上に重ねて少し暗くする
+                  '&:hover': { backgroundImage: `linear-gradient(${dispColors.hover}, ${dispColors.hover})` },
+                }}
               >
                 {row.kizaiNam}
               </TableCell>

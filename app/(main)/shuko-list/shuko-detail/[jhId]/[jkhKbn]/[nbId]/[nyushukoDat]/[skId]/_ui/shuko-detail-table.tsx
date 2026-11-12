@@ -18,7 +18,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { Dispatch, SetStateAction, useState } from 'react';
 
 import { isJizenSagyoKbn, JUCHU_KIZAI_HEAD_KBN, SAGYO_KBN_ID, toHonbanSagyoKbn } from '@/app/_lib/constants';
-import { dispColors, sagyoKbnColors, statusColors } from '@/app/(main)/_lib/colors';
+import { dispColors, sagyoKbnColors, sectionColors, statusColors } from '@/app/(main)/_lib/colors';
 import { User } from '@/app/(main)/_lib/types';
 
 import { ShukoDetailTableValues } from '../_lib/types';
@@ -166,7 +166,13 @@ export const ShukoDetailTable = (props: {
                   onClick={() => handleClick(row)}
                   sx={{
                     cursor: row.saveFlag ? 'pointer' : 'default',
-                    '&:hover': { backgroundColor: dispColors.hover },
+                    // 課ごとの色。済（と未保存）の行は行の背景色を優先する
+                    backgroundColor:
+                      row.saveFlag && row.diff !== 0 && row.sectionNum !== null
+                        ? sectionColors[row.sectionNum]
+                        : undefined,
+                    // 背景色（課の色）は残し、薄い黒を上に重ねて少し暗くする
+                    '&:hover': { backgroundImage: `linear-gradient(${dispColors.hover}, ${dispColors.hover})` },
                     // 受注削除・数量変更の行は機材名を文字色で強調する（HT・ゲートと同じ見せ方）
                     color:
                       row.juchuMeisaiDelFlg === 1

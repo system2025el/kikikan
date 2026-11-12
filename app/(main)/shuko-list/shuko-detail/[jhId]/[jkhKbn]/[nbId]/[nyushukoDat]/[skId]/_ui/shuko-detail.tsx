@@ -391,6 +391,8 @@ export const ShukoDetail = (props: {
           mem2: '',
           juchuMeisaiDelFlg: 0,
           planChgFlg: 0,
+          // コンテナは課を持たない（m_kizai では所属無し）ので色を付けない
+          sectionNum: null,
           saveFlag: false,
           delFlag: false,
         }));
