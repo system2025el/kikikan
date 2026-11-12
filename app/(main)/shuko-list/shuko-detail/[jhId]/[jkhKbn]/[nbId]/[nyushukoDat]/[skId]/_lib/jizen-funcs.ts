@@ -2,6 +2,7 @@
 
 import { JUCHU_KIZAI_HEAD_KBN, NYUSHUKO_SHUBETU_ID, toHonbanSagyoKbn } from '@/app/_lib/constants';
 import pool, { refreshVRfid } from '@/app/_lib/db/postgres';
+import { selectJuchuKizaiNyushuko } from '@/app/_lib/db/tables/t-juchu-kizai-nyushuko';
 import { updateHonbanAdjFromJizen, updateNyushukoDenAdjustToPlan } from '@/app/_lib/db/tables/t-nyushuko-den';
 import { selectHonbanShukoFixed } from '@/app/_lib/db/tables/t-nyushuko-fix';
 import { selectJizenNyushukoOne } from '@/app/_lib/db/tables/v-nyushuko-den2-head';
@@ -27,8 +28,18 @@ export const getJizenDetail = async (
   sagyoKbnId: number
 ) => {
   try {
-    const data = await selectJizenNyushukoOne(juchuHeadId, juchuKizaiHeadId, nyushukoBashoId, nyushukoDat);
+    const [data, { data: nyushukoData, error: nyushukoError }] = await Promise.all([
+      selectJizenNyushukoOne(juchuHeadId, juchuKizaiHeadId, nyushukoBashoId, nyushukoDat),
+      selectJuchuKizaiNyushuko(juchuHeadId, juchuKizaiHeadId),
+    ]);
+    if (nyushukoError) throw new Error('[getJizenDetail] DBエラー:', { cause: nyushukoError });
     if (data.length === 0) return null;
+
+    // 本番の出庫日時（事前の作業場所と同じ場所の出庫。事前日時は明細の出庫場所の出庫日時より前でしか保存できない）
+    const honbanShukoDat =
+      nyushukoData?.find(
+        (d) => d.nyushuko_shubetu_id === NYUSHUKO_SHUBETU_ID.shuko && d.nyushuko_basho_id === nyushukoBashoId
+      )?.nyushuko_dat ?? null;
 
     const jizenDetailData: ShukoDetailValues = {
       juchuHeadId: juchuHeadId,
@@ -46,6 +57,7 @@ export const getJizenDetail = async (
       juchuDat: data[0].juchu_dat,
       memv: data[0].memv,
       nyuryokuUser: data[0].nyuryoku_user,
+      honbanShukoDat: honbanShukoDat,
     };
     return jizenDetailData;
   } catch (e) {

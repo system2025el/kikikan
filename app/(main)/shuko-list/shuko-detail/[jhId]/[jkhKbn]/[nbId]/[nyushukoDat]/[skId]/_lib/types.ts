@@ -15,6 +15,8 @@ export type ShukoDetailValues = {
   kokyakuNam: string | null;
   juchuDat: string | null;
   memv: string | null;
+  /** 事前明細のときだけ：本番の出庫日時（同じ機材ヘッダー・作業場所の出庫） */
+  honbanShukoDat?: string | null;
 };
 
 export type ShukoDetailTableValues = {
