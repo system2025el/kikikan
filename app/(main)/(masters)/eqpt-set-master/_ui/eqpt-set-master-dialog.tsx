@@ -22,7 +22,6 @@ import { useEffect, useState } from 'react';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 
-import { deleteEqptSets } from '@/app/_lib/db/tables/m-kizai-set';
 import { permission } from '@/app/(main)/_lib/permission';
 import { User } from '@/app/(main)/_lib/types';
 import { CloseMasterDialogButton, DeleteButton, MakeEditModeButton, SubmitButton } from '@/app/(main)/_ui/buttons';
@@ -32,7 +31,13 @@ import { Loading } from '@/app/(main)/_ui/loading';
 import { FAKE_NEW_ID } from '../../_lib/constants';
 import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
 import { emptyEqptSet, formItems } from '../_lib/datas';
-import { addNewEqptSet, getEqptSetMasterDialogData, getEqptsForOyaEqptSelection, updateEqptSet } from '../_lib/funcs';
+import {
+  addNewEqptSet,
+  delEqptSets,
+  getEqptSetMasterDialogData,
+  getEqptsForOyaEqptSelection,
+  updateEqptSet,
+} from '../_lib/funcs';
 import { EqptSetsMasterDialogSchema, EqptSetsMasterDialogValues } from '../_lib/types';
 import { EqptSetSelectionDialog } from './eqtp-selection-dialog';
 
@@ -159,7 +164,7 @@ export const EqptSetsMasterDialog = ({
     } else {
       // 編集時はセットマスタを削除する
       try {
-        await deleteEqptSets(oyaId);
+        await delEqptSets(oyaId);
       } catch (e) {
         setSnackBarMessage('削除に失敗しました');
         setSnackBarOpen(true);

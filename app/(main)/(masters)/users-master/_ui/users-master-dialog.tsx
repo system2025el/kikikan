@@ -16,7 +16,6 @@ import {
 import { useEffect, useState } from 'react';
 import { RadioButtonGroup, TextFieldElement, useForm } from 'react-hook-form-mui';
 
-import { checkMailAdr, checkShainCod, selectActiveUsers } from '@/app/_lib/db/tables/m-user';
 import { User } from '@/app/(main)/_lib/types';
 import { FormBox } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
@@ -40,6 +39,8 @@ import {
   addNewUser,
   deleteUsers,
   getChosenUser,
+  getMailAdrExists,
+  getShainCodExists,
   restoreUsers,
   restoreUsersAndShainCod,
   updateUser,
@@ -121,18 +122,18 @@ export const UsersMasterDialog = ({
       // 新規処理
       // メールアドレスと社員コードの重複確認
       try {
-        const adr = await checkMailAdr(data.mailAdr.toLowerCase());
+        const adrExists = await getMailAdrExists(data.mailAdr.toLowerCase());
         // 社員コードは入力されていれば重複チェック
-        const cod = data.shainCod ? await checkShainCod(data.shainCod) : { data: null };
-        if (!adr.data && !cod.data) {
+        const codExists = data.shainCod ? await getShainCodExists(data.shainCod) : false;
+        if (!adrExists && !codExists) {
           await addNewUser(data, user?.name ?? '');
           handleCloseDialog();
           refetchUsers();
         } else {
-          if (adr.data) {
+          if (adrExists) {
             setAdrErrorMsg('既に使われているメールアドレスです');
           }
-          if (cod.data) {
+          if (codExists) {
             setCodErrorMsg(`既に使われている社員コードです`);
           }
         }
@@ -150,8 +151,7 @@ export const UsersMasterDialog = ({
           if (willRestore) {
             // 有効化処理
             if (data.shainCod) {
-              const cod = await checkShainCod(data.shainCod);
-              if (cod.data) {
+              if (await getShainCodExists(data.shainCod)) {
                 setCodErrorMsg(`既に使われている社員コードです`);
                 setEditable(true);
               } else {
@@ -163,8 +163,7 @@ export const UsersMasterDialog = ({
           } else {
             // 保存処理
             if (data.shainCod && data.shainCod !== currentShainCod) {
-              const cod = await checkShainCod(data.shainCod);
-              if (cod.data) {
+              if (await getShainCodExists(data.shainCod)) {
                 setCodErrorMsg(`既に使われている社員コードです`);
                 setEditable(true);
               } else {
@@ -195,8 +194,7 @@ export const UsersMasterDialog = ({
         // 社員コードの重複確認
         try {
           if (currentShainCod) {
-            const cod = await checkShainCod(currentShainCod);
-            if (cod.data) {
+            if (await getShainCodExists(currentShainCod)) {
               setCodErrorMsg(`既に使われている社員コードです`);
               setValue('delFlg', false);
               setWillRestore(true);

@@ -127,6 +127,31 @@ export const getChosenRfid = async (id: string) => {
 };
 
 /**
+ * RFIDタグIDが既に登録されているかを確認する関数（新規登録時の重複確認）
+ * @param tagId RFIDタグID
+ * @returns {Promise<boolean>} 登録されていれば true
+ */
+export const getRfidTagExists = async (tagId: string) => {
+  try {
+    const { data, error } = await selectOneRfid(tagId);
+    if (error) {
+      throw new Error('[getRfidTagExists] DBエラー:', { cause: error });
+    }
+    return !!data;
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
+    throw e;
+  }
+};
+
+/**
  * RFIDマスタに新規登録する関数
  * @param data フォームで取得したRFID情報
  */

@@ -5,7 +5,6 @@ import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 
-import { checkExIsshiki } from '@/app/_lib/db/tables/m-kizai';
 import { permission } from '@/app/(main)/_lib/permission';
 import { User } from '@/app/(main)/_lib/types';
 import { FormBox, SelectTypes } from '@/app/(main)/_ui/form-box';

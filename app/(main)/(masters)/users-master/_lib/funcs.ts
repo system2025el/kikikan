@@ -8,6 +8,8 @@ import { createClient } from '@/app/_lib/db/supabase-server';
 // import { supabase /*supabaseAdmin*/ } from '@/app/_lib/db/supabase';
 // import { supabaseAdmin } from '@/app/_lib/db/supabase-admin';
 import {
+  checkMailAdr,
+  checkShainCod,
   insertNewUser,
   selectFilteredUsers,
   selectOneUser,
@@ -106,6 +108,56 @@ export const getChosenUser = async (mailAdr: string) => {
       lastLoginAt: !rows[0].last_sign_in_at ? null : toJapanTimeString(rows[0].last_sign_in_at),
     };
     return UserDetails;
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
+    throw e;
+  }
+};
+
+/**
+ * メールアドレスが既に使われているかを確認する関数（無効の担当者も含める）
+ * @param mailAdr メールアドレス
+ * @returns {Promise<boolean>} 使われていれば true
+ */
+export const getMailAdrExists = async (mailAdr: string) => {
+  try {
+    const { data, error } = await checkMailAdr(mailAdr);
+    if (error) {
+      throw new Error('[getMailAdrExists] DBエラー:', { cause: error });
+    }
+    return !!data;
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
+    throw e;
+  }
+};
+
+/**
+ * 社員コードが既に使われているかを確認する関数（有効な担当者のみ）
+ * @param shainCod 社員コード
+ * @returns {Promise<boolean>} 使われていれば true
+ */
+export const getShainCodExists = async (shainCod: string) => {
+  try {
+    const { data, error } = await checkShainCod(shainCod);
+    if (error) {
+      throw new Error('[getShainCodExists] DBエラー:', { cause: error });
+    }
+    return !!data;
   } catch (e) {
     if (e instanceof Error) {
       console.error(`[ERROR] ${e.message}`);

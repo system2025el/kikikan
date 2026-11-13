@@ -24,7 +24,6 @@ import {
   useForm,
 } from 'react-hook-form-mui';
 
-import { selectElNumExists, selectOneRfid } from '@/app/_lib/db/tables/v-rfid';
 import { User } from '@/app/(main)/_lib/types';
 
 import { FormBox, selectNone, SelectTypes } from '../../../../_ui/form-box';
@@ -33,7 +32,7 @@ import { FAKE_NEW_ID } from '../../../_lib/constants';
 import { MasterDialogTitle } from '../../../_ui/dialog-title';
 import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../../_ui/dialogs';
 import { emptyRfid, formItems } from '../_lib/datas';
-import { addNewRfid, getChosenRfid, updateRfid, updRfidDelFlg } from '../_lib/funcs';
+import { addNewRfid, getChosenRfid, getRfidTagExists, updateRfid, updRfidDelFlg } from '../_lib/funcs';
 import { RfidsMasterDialogSchema, RfidsMasterDialogValues } from '../_lib/types';
 
 export const RfidMasterDialog = ({
@@ -111,8 +110,8 @@ export const RfidMasterDialog = ({
         // 新規登録 -----------------------------
         //const [tagResult, elNumResult] = await Promise.all([selectOneRfid(data.tagId), selectElNumExists(data.elNum!)]);
         try {
-          const tagResult = await selectOneRfid(data.tagId);
-          if (tagResult.data) {
+          const tagExists = await getRfidTagExists(data.tagId);
+          if (tagExists) {
             setTagMessage('このRFIDはすでに存在しています');
           } else {
             setTagMessage('');
@@ -122,7 +121,7 @@ export const RfidMasterDialog = ({
           // } else {
           //   setElMessage('');
           // }
-          if (!tagResult.data /* && !elNumResult.data*/) {
+          if (!tagExists /* && !elNumResult.data*/) {
             await addNewRfid(data, kizaiId, user?.name ?? '');
             handleCloseDialog();
             refetchRfids();

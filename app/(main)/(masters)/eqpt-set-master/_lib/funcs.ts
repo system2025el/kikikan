@@ -6,6 +6,7 @@ import pool from '@/app/_lib/db/postgres';
 import { selectActiveEqptsForSet } from '@/app/_lib/db/tables/m-kizai';
 import {
   delEqptSetListPg,
+  deleteEqptSets,
   insertNewEqptSet,
   selectFilteredEqptSets,
   selectOneEqptSet,
@@ -208,6 +209,29 @@ export const updateEqptSet = async (newData: EqptSetsMasterDialogValues, current
     throw e;
   } finally {
     connection.release();
+  }
+};
+
+/**
+ * 親機材のセット機材をすべて削除する関数（セット機材を0件にして保存したとき）
+ * @param oyaId 親機材の機材id
+ */
+export const delEqptSets = async (oyaId: number) => {
+  try {
+    const { error } = await deleteEqptSets(oyaId);
+    if (error) {
+      throw new Error('[delEqptSets] DBエラー:', { cause: error });
+    }
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
+    throw e;
   }
 };
 
