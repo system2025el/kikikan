@@ -37,6 +37,8 @@ export type NyukoDetailTableValues = {
   dspOrdNumMeisai: number | null;
   indentNum: number;
   mem2: string | null;
+  /** 機材の課（m_kizai.section_num。機材名の背景色に使う） */
+  sectionNum: number | null;
 };
 
 /**

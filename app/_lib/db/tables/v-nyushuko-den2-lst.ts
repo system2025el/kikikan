@@ -52,7 +52,9 @@ export const selectNyushukoDetail = async (
       -- 受注から削除されたのに実績が残っている行（判定はビュー側。HT・ゲートと同じ列を使う）
       n.juchu_meisai_del_flg,
       -- 読取実績のある状態で受注側の数量が変わり、まだ予定数＝読取数＋補正数になっていない行（判定はトリガーとビュー側）
-      n.plan_chg_flg
+      n.plan_chg_flg,
+      -- 課（機材名の背景色に使う。m_section.section_id）
+      k.section_num
     FROM
       ${SCHEMA}.v_nyushuko_den2_lst as n
       LEFT JOIN ${SCHEMA}.t_juchu_kizai_meisai as m
@@ -60,6 +62,8 @@ export const selectNyushukoDetail = async (
       AND n.juchu_kizai_head_id = m.juchu_kizai_head_id
       AND n.juchu_kizai_meisai_id = m.juchu_kizai_meisai_id
       AND n.kizai_id = m.kizai_id
+      LEFT JOIN ${SCHEMA}.m_kizai as k
+      ON n.kizai_id = k.kizai_id
     WHERE
       n.juchu_head_id = $1
       AND n.juchu_kizai_head_kbnv = $2
@@ -122,7 +126,8 @@ export const selectJizenNyushukoDetail = async (
       n.indent_num,
       n.mem2,
       n.juchu_meisai_del_flg,
-      n.plan_chg_flg
+      n.plan_chg_flg,
+      k.section_num
     FROM
       ${SCHEMA}.v_nyushuko_den2_lst as n
       LEFT JOIN ${SCHEMA}.t_juchu_kizai_meisai as m
@@ -130,6 +135,8 @@ export const selectJizenNyushukoDetail = async (
       AND n.juchu_kizai_head_id = m.juchu_kizai_head_id
       AND n.juchu_kizai_meisai_id = m.juchu_kizai_meisai_id
       AND n.kizai_id = m.kizai_id
+      LEFT JOIN ${SCHEMA}.m_kizai as k
+      ON n.kizai_id = k.kizai_id
     WHERE
       n.juchu_head_id = $1
       AND n.juchu_kizai_head_id = $2
