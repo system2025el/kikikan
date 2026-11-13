@@ -23,8 +23,6 @@ import { User } from '../../_lib/types';
 import { FormDateX } from '../../_ui/date';
 import { SelectTypes } from '../../_ui/form-box';
 import { Loading } from '../../_ui/loading';
-import { getCustomerSelection } from '../../(masters)/_lib/funcs';
-import { getSectionShortSelections } from '../../(masters)/sections-master/_lib/funcs';
 import { radioData } from '../_lib/datas';
 import { getNyukoList, getPdfData } from '../_lib/funcs';
 import { buildNyukoListQuery, parseNyukoListQuery } from '../_lib/search-params';
@@ -32,7 +30,12 @@ import { NyukoListSearchValues, NyukoTableValues } from '../_lib/types';
 import { NyukoPdfModel, usePdf } from '../nyuko/_lib/hooks/usePdf';
 import { NyukoListTable } from './nyuko-list-table';
 
-export const NyukoList = (props: { user: User }) => {
+export const NyukoList = (props: {
+  user: User;
+  /** 検索条件の選択肢(顧客、課)。page.tsx で取得 */
+  options: { custs: SelectTypes[]; sect: SelectTypes[] };
+}) => {
+  const options = props.options;
   // user情報
   const user = props.user;
 
@@ -45,11 +48,6 @@ export const NyukoList = (props: { user: User }) => {
 
   // 出庫一覧データ
   const [nyukoList, setNyukoList] = useState<NyukoTableValues[]>(/*props.shukoData*/ []);
-  // 選択肢(顧客、課)
-  const [options, setOptions] = useState<{ custs: SelectTypes[]; sect: SelectTypes[] }>({
-    custs: [],
-    sect: [],
-  });
   //PDF出力
   const [selected, setSelected] = useState<number[]>([]);
   // スナックバー制御
@@ -93,16 +91,6 @@ export const NyukoList = (props: { user: User }) => {
       setError(e instanceof Error ? e : new Error(String(e)));
     }
     setIsLoading(false);
-  };
-
-  /** 選択肢の取得 */
-  const getOptions = async () => {
-    try {
-      const [custs, sect] = await Promise.all([getCustomerSelection(), getSectionShortSelections()]);
-      setOptions({ custs: custs, sect: sect });
-    } catch (e) {
-      setError(e instanceof Error ? e : new Error(String(e)));
-    }
   };
 
   /* 員数表出力(PDF) ------------------- */
@@ -173,7 +161,6 @@ export const NyukoList = (props: { user: User }) => {
     const searchPramsString = sessionStorage.getItem('nyukoListSearchParams');
     const searchParams: NyukoListSearchValues =
       queryParams ?? (searchPramsString ? JSON.parse(searchPramsString) : null);
-    getOptions();
 
     const getList = async (searchParams: NyukoListSearchValues) => {
       try {

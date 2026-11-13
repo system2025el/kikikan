@@ -16,7 +16,10 @@ const Page = async () => {
     await redirect('/login');
     return;
   }
-  return <Stock />;
+  // 部門リストはサーバー側で取って渡す（画面から取ると開いたあとに Server Action の往復が1回増えるため）
+  const bumons = await getBumonsData();
+
+  return <Stock bumons={bumons} />;
 };
 
 export default Page;

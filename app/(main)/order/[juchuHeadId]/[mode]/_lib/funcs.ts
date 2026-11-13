@@ -392,6 +392,23 @@ export const delJuchuHead = async (juchuHeadId: number, userNam: string) => {
 };
 
 /**
+ * ほかの人が編集中で編集に入れなかったときに、受注画面を最新の内容に読み直すためのデータを取得する
+ * （受注ヘッダー（本番日を含む）・受注機材ヘッダー一覧・受注車両ヘッダー一覧）
+ * Server Action は1本ずつ順番に処理されるので、画面からは1回の呼び出しで済ませ、サーバー側で3つを同時に取る
+ * （エラーの記録は中で呼ぶ各取得関数が行う）
+ * @param juchuHeadId 受注ヘッダーid
+ * @returns 受注ヘッダー・受注機材ヘッダー一覧・受注車両ヘッダー一覧
+ */
+export const getOrderReloadData = async (juchuHeadId: number) => {
+  const [juchuHeadData, juchuKizaiHeadDatas, juchuSharyoHeadDatas] = await Promise.all([
+    getJuchuHead(juchuHeadId),
+    getJuchuKizaiHeadList(juchuHeadId),
+    getJuchuSharyoHeadList(juchuHeadId),
+  ]);
+  return { juchuHeadData, juchuKizaiHeadDatas, juchuSharyoHeadDatas };
+};
+
+/**
  * 受注機材ヘッダーリスト取得
  * @param juchuHeadId 受注機材ヘッダーid
  * @returns

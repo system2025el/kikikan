@@ -38,14 +38,25 @@ import { Loading } from '@/app/(main)/_ui/loading';
 import { MuiTablePagination } from '@/app/(main)/_ui/table-pagination';
 
 import { FAKE_NEW_ID, ROWS_PER_MASTER_TABLE_PAGE } from '../../../_lib/constants';
-import { getRfidKizaiStsSelection } from '../../../_lib/funcs';
 import { LightTooltipWithText } from '../../../_ui/tables';
-import { getEqptNam, getRfidsOfTheKizai, updateRfidTagSts } from '../_lib/funcs';
+import { getRfidsOfTheKizai, updateRfidTagSts } from '../_lib/funcs';
 import { RfidsMasterTableValues } from '../_lib/types';
 import { RfidDeleteDialog } from './rfid-delete-dialog';
 import { RfidMasterDialog } from './rfid-master-dialog';
 
-export const RfidMaster = ({ user, kizaiId }: { user: User; kizaiId: number }) => {
+export const RfidMaster = ({
+  user,
+  kizaiId,
+  kizaiNam,
+  options,
+}: {
+  user: User;
+  kizaiId: number;
+  /** 機材名（page.tsx で取得） */
+  kizaiNam: string;
+  /** 選択肢（状態・所属。page.tsx で取得。所属は登録・編集ダイアログで使う） */
+  options: { sts: SelectTypes[]; shozoku: SelectTypes[] };
+}) => {
   /** テーブル1ページの行数 */
   const rowsPerPage = ROWS_PER_MASTER_TABLE_PAGE;
 
@@ -54,10 +65,8 @@ export const RfidMaster = ({ user, kizaiId }: { user: User; kizaiId: number }) =
   const [theRfids, setTheRfids] = useState<RfidsMasterTableValues[] | undefined>([]);
   /** 初期表示のRFIDリスト（一括変更に利用） */
   const [currentRfids, setCurrentRfids] = useState<RfidsMasterTableValues[] | undefined>([]);
-  /** 機材名 */
-  const [kizaiNam, setKizaiNam] = useState<string>('');
-  /** 選択肢 */
-  const [stsOption, setStsOption] = useState<SelectTypes[]>([]);
+  /** 状態の選択肢 */
+  const stsOption = options.sts;
   /** 今開いてるテーブルのページ数 */
   const [page, setPage] = useState(1);
   /** DBのローディング */
@@ -282,13 +291,10 @@ export const RfidMaster = ({ user, kizaiId }: { user: User; kizaiId: number }) =
   useEffect(() => {
     const getList = async () => {
       setIsLoading(true);
+      // 機材名と状態の選択肢は page.tsx で取得済みなので、RFID一覧だけ取る
       const rfids = await getRfidsOfTheKizai(Number(kizaiId));
-      const sts = await getRfidKizaiStsSelection();
-      const kizai = await getEqptNam(Number(kizaiId));
       setTheRfids(rfids);
       setCurrentRfids(rfids);
-      setKizaiNam(kizai);
-      setStsOption(sts);
       setIsLoading(false);
     };
     getList();
@@ -557,6 +563,7 @@ export const RfidMaster = ({ user, kizaiId }: { user: User; kizaiId: number }) =
             rfidId={openId}
             refetchRfids={refetchRfids}
             kizaiId={kizaiId}
+            selectOptions={options}
           />
         </Dialog>
         <Dialog open={deleteDialogOpen} fullScreen>

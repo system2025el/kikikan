@@ -1,7 +1,5 @@
 'use client';
 
-'use client';
-
 import { alpha, useTheme } from '@mui/material';
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
@@ -11,44 +9,33 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import * as React from 'react';
-import { useEffect, useState } from 'react';
 
-import { getIdoBumonsForEqptSelection } from '../_lib/funcs';
+/** 移動機材選択の部門一覧の1行 */
+export type IdoEqptBumon = {
+  tblDspNum: number;
+  id: number;
+  label: string;
+};
 
 /**
  * 機材選択の部門選択テーブル
+ * 部門一覧は機材一覧と一緒に移動機材選択ダイアログが取得して渡す
  * @param param0
  * @returns 機材選択の部門選択テーブルコンポーネント
  */
 export const IdoEqptBumonsTable = ({
+  bumons,
   selected,
   handleClick,
 }: {
+  /** 部門一覧（取得前は空配列） */
+  bumons: IdoEqptBumon[];
   selected: number;
   handleClick: (id: number) => void;
 }) => {
   /* 選択されているときの背景色 */
   const theme = useTheme();
   const selectedColor = alpha(theme.palette.primary.light, 0.4);
-
-  /* useState ---------------------------------------- */
-  /* 部門一覧 */
-  const [bumons, setBumons] = useState<
-    {
-      tblDspNum: number;
-      id: number;
-      label: string;
-    }[]
-  >([]);
-
-  /* useeffect ------------------------ */
-  useEffect(() => {
-    const getBumons = async () => {
-      const abumons = await getIdoBumonsForEqptSelection();
-      setBumons(abumons!);
-    };
-    getBumons();
-  }, []);
 
   return (
     <TableContainer component={Paper} variant="outlined" square sx={{ height: '75vh' }}>

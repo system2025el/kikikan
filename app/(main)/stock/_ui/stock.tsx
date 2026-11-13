@@ -18,7 +18,7 @@ import {
   Typography,
 } from '@mui/material';
 import { addDays, addMonths, set, subDays, subMonths } from 'date-fns';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 
@@ -27,18 +27,20 @@ import { permission } from '../../_lib/permission';
 import { Calendar, CalendarView } from '../../_ui/date';
 import { Loading } from '../../_ui/loading';
 import { FAKE_NEW_ID } from '../../(masters)/_lib/constants';
-import { getAllStockData, getBumonsData, getStockSearchData } from '../_lib/funcs';
+import { getAllStockData, getStockSearchData } from '../_lib/funcs';
 import { Bumon, EqTableValues, StockSearchSchema, StockSearchValues, StockTableValues } from '../_lib/types';
 import { EqStockTable, EqTable } from './stock-table';
 
-export const Stock = () => {
+export const Stock = ({
+  bumons,
+}: {
+  /** 部門リスト（page.tsx で取得） */
+  bumons: Bumon[];
+}) => {
   // ローディング
   const [isLoading, setIsLoading] = useState(false);
   // エラーハンドリング
   const [error, setError] = useState<Error | null>(null);
-
-  // 部門リスト
-  const [bumons, setBumons] = useState<Bumon[]>([]);
 
   // 機材リスト
   const [eqList, setEqList] = useState<EqTableValues[]>([]);
@@ -60,7 +62,6 @@ export const Stock = () => {
   const {
     control,
     handleSubmit,
-    reset,
     trigger,
     formState: { errors },
   } = useForm<StockSearchValues>({
@@ -164,19 +165,7 @@ export const Stock = () => {
   };
 
   /* useEffect ----------------------------------- */
-  /** 初期表示 */
-  useEffect(() => {
-    const getList = async () => {
-      try {
-        const bumonList = await getBumonsData();
-        setBumons(bumonList);
-        //reset({ bumonId: bumonList[0].bumonId });
-      } catch (e) {
-        setError(e instanceof Error ? e : new Error(String(e)));
-      }
-    };
-    getList();
-  }, [reset]);
+  // 部門リストは page.tsx で取得して受け取る（以前は開いてから Server Action で取っていた）
 
   // 同期スクロール
   useSyncScroll(leftRef, rightRef, [eqList, isLoading]);

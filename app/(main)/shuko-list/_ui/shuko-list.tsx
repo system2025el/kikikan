@@ -26,8 +26,6 @@ import { User } from '../../_lib/types';
 import { FormDateX } from '../../_ui/date';
 import { SelectTypes } from '../../_ui/form-box';
 import { Loading } from '../../_ui/loading';
-import { getCustomerSelection } from '../../(masters)/_lib/funcs';
-import { getSectionShortSelections } from '../../(masters)/sections-master/_lib/funcs';
 import { radioData } from '../_lib/datas';
 import { getPdfData, getShukoList } from '../_lib/funcs';
 import { buildShukoListQuery, parseShukoListQuery } from '../_lib/search-params';
@@ -35,7 +33,12 @@ import { ShukoKizai, ShukoListSearchValues, ShukoTableValues } from '../_lib/typ
 import { ShukoPdfModel, usePdf } from '../shuko/_lib/hooks/usePdf';
 import { ShukoListTable } from './shuko-list-table';
 
-export const ShukoList = (props: { user: User }) => {
+export const ShukoList = (props: {
+  user: User;
+  /** 検索条件の選択肢(顧客、課)。page.tsx で取得 */
+  options: { custs: SelectTypes[]; sect: SelectTypes[] };
+}) => {
+  const options = props.options;
   // user情報
   const user = props.user;
 
@@ -50,11 +53,6 @@ export const ShukoList = (props: { user: User }) => {
   const [selected, setSelected] = useState<number[]>([]);
   // 出庫一覧データ
   const [shukoList, setShukoList] = useState<ShukoTableValues[]>(/*props.shukoData*/ []);
-  // 選択肢(顧客、課)
-  const [options, setOptions] = useState<{ custs: SelectTypes[]; sect: SelectTypes[] }>({
-    custs: [],
-    sect: [],
-  });
   // 員数表変換フラグ
   const [conversionFlag, setConversionFlag] = useState(false);
   // スナックバー制御
@@ -98,16 +96,6 @@ export const ShukoList = (props: { user: User }) => {
       setError(e instanceof Error ? e : new Error(String(e)));
     }
     setIsLoading(false);
-  };
-
-  /** 選択肢の取得 */
-  const getOptions = async () => {
-    try {
-      const [custs, sect] = await Promise.all([getCustomerSelection(), getSectionShortSelections()]);
-      setOptions({ custs: custs, sect: sect });
-    } catch (e) {
-      setError(e instanceof Error ? e : new Error(String(e)));
-    }
   };
 
   /* 納品書出力(PDF) ------------------- */
@@ -178,8 +166,6 @@ export const ShukoList = (props: { user: User }) => {
     const searchPramsString = sessionStorage.getItem('shukoListSearchParams');
     const searchParams: ShukoListSearchValues =
       queryParams ?? (searchPramsString ? JSON.parse(searchPramsString) : null);
-
-    getOptions();
 
     const getList = async (searchParams: ShukoListSearchValues) => {
       try {

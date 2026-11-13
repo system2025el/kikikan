@@ -25,6 +25,7 @@ import { SelectTypes } from '@/app/(main)/_ui/form-box';
 
 import { permission } from '../../_lib/permission';
 import { FAKE_NEW_ID } from '../../(masters)/_lib/constants';
+import { getCustomerSelection } from '../../(masters)/_lib/funcs';
 import {
   EqptSelection,
   JuchuValues,
@@ -152,6 +153,21 @@ export const getMituStsSelection = async () => {
     }
     throw e;
   }
+};
+
+/**
+ * 見積の一覧・明細で使う選択肢（担当者・見積ステータス・顧客）をまとめて取得する
+ * page.tsx（サーバー側）から呼び、画面には props で渡す
+ * （エラーの記録は中で呼ぶ各取得関数が行う）
+ * @returns 担当者・見積ステータス・顧客の選択肢
+ */
+export const getQuotOptions = async () => {
+  const [users, mituSts, custs] = await Promise.all([
+    getUsersSelection(),
+    getMituStsSelection(),
+    getCustomerSelection(),
+  ]);
+  return { users, mituSts, custs };
 };
 
 /**
@@ -651,4 +667,45 @@ export const getSetOptions = async (kizaiId: number) => {
     }
     throw e;
   }
+};
+
+/**
+ * セットオプション選択ダイアログで、1つのセット有機材を表示するときのデータを取得する
+ * （親機材の詳細・セットオプション一覧。開いたときはセットの無い単独機材の詳細も）
+ * Server Action は1本ずつ順番に処理されるので、画面からは1回の呼び出しで済ませ、サーバー側で同時に取る
+ * （エラーの記録は中で呼ぶ各取得関数が行う）
+ * @param oyaKizaiId 表示するセット有機材の機材id
+ * @param soloKizaiIds セットの無い単独機材の機材id（開いたときだけ渡す。null なら取らない）
+ * @returns oya 親機材の詳細、sets セットオプション一覧と親機材名、solo 単独機材の詳細（取らないときは空配列）
+ */
+export const getSetOptionDialogData = async (oyaKizaiId: number, soloKizaiIds: number[] | null) => {
+  const [oya, sets, solo] = await Promise.all([
+    getSelectedEqpts([oyaKizaiId]),
+    getSetOptions(oyaKizaiId),
+    soloKizaiIds ? getSelectedEqpts(soloKizaiIds) : [],
+  ]);
+  return { oya, sets, solo };
+};
+
+/**
+ * セットオプション選択ダイアログの「別セット選択」で、選んだセット機材と次の親機材の詳細をまとめて取得する
+ * （エラーの記録は中で呼ぶ getSelectedEqpts が行う）
+ * @param setKizaiIds 選んだセット機材の機材id
+ * @param oyaKizaiId 親機材の機材id
+ * @returns sets 選んだセット機材の詳細、oya 親機材の詳細
+ */
+export const getSetAndOyaEqpts = async (setKizaiIds: number[], oyaKizaiId: number) => {
+  const [sets, oya] = await Promise.all([getSelectedEqpts(setKizaiIds), getSelectedEqpts([oyaKizaiId])]);
+  return { sets, oya };
+};
+
+/**
+ * 機材選択ダイアログを開いたときのデータ（機材一覧・部門一覧）を取得する
+ * Server Action は1本ずつ順番に処理されるので、画面からは1回の呼び出しで済ませ、サーバー側で2つを同時に取る
+ * （エラーの記録は中で呼ぶ各取得関数が行う。受注機材明細の機材選択ダイアログにも同じ関数がある）
+ * @returns eqpts 機材一覧（検索キーワードなし）、bumons 部門一覧
+ */
+export const getEqptSelectionDialogData = async () => {
+  const [eqpts, bumons] = await Promise.all([getEqptsForEqptSelection(''), getBumonsForEqptSelection()]);
+  return { eqpts, bumons };
 };

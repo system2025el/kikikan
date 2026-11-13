@@ -2,11 +2,12 @@ import AddIcon from '@mui/icons-material/Add';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { Autocomplete, Box, Button, Dialog, Grid2, IconButton, TextField } from '@mui/material';
+import { Box, Button, Dialog, Grid2, IconButton, TextField } from '@mui/material';
 import { memo, useEffect, useState } from 'react';
 import { Controller, useFieldArray, useFormContext, useWatch } from 'react-hook-form';
 import { SelectElement, TextFieldElement } from 'react-hook-form-mui';
 
+import { PrefilledAutocomplete } from '../../_ui/prefilled-autocomplete';
 import { quotationLaborSelectItems } from '../_lib/datas';
 import { QuotHeadValues, SelectedEqptsValues } from '../_lib/types';
 import { QuotEqptSelectionDialog } from './equipment-selection-dialog';
@@ -345,7 +346,7 @@ const MeisaiLinesComponent = ({
                   name={`meisaiHeads.${sectionNam}.${index}.meisai.${i}.nam`}
                   control={control}
                   render={({ field }) => (
-                    <Autocomplete
+                    <PrefilledAutocomplete
                       {...field}
                       getOptionKey={(option) => (typeof option === 'string' ? option : option.id)}
                       onChange={(_, value) => {

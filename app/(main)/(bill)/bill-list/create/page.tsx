@@ -7,6 +7,7 @@ import { getCurrentUser } from '@/app/(main)/_lib/funcs';
 import { permission } from '@/app/(main)/_lib/permission';
 import { getChosenCustomerIdAndName } from '@/app/(main)/(masters)/customers-master/_lib/funcs';
 
+import { getBillOptions } from '../_lib/funcs';
 import { BillHeadValues } from '../_lib/types';
 import { Bill } from '../_ui/bill';
 import { getJuchusForBill } from './_lib/funcs';
@@ -32,13 +33,17 @@ const Page = async ({ searchParams }: { searchParams: Promise<{ [key: string]: s
     return <Typography>このページを閲覧する権限がありません。</Typography>;
   }
 
-  const custs = await getChosenCustomerIdAndName(Number(kokyakuId));
-  const juchus = await getJuchusForBill({
-    kokyakuId: Number(kokyakuId),
-    date: date ?? toJapanYMDString(undefined, '-'),
-    flg: flg === 'true' ? true : false,
-    tantouNam: tantou === 'null' ? null : (tantou ?? null),
-  });
+  // 顧客・受注・選択肢は互いに依存しないので同時に取る
+  const [custs, juchus, options] = await Promise.all([
+    getChosenCustomerIdAndName(Number(kokyakuId)),
+    getJuchusForBill({
+      kokyakuId: Number(kokyakuId),
+      date: date ?? toJapanYMDString(undefined, '-'),
+      flg: flg === 'true' ? true : false,
+      tantouNam: tantou === 'null' ? null : (tantou ?? null),
+    }),
+    getBillOptions(),
+  ]);
 
   const chukei =
     juchus && juchus.length > 0
@@ -86,7 +91,7 @@ const Page = async ({ searchParams }: { searchParams: Promise<{ [key: string]: s
     zeiAmt: zeiAmt === 0 ? null : zeiAmt,
     gokeiAmt: chukei + zeiAmt,
   };
-  return <Bill user={user} isNew={true} bill={bill} />;
+  return <Bill user={user} isNew={true} bill={bill} options={options} />;
 };
 
 export default Page;

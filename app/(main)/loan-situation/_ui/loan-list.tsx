@@ -27,11 +27,15 @@ import { Loading } from '../../_ui/loading';
 import { MuiTablePagination } from '../../_ui/table-pagination';
 import { ROWS_PER_MASTER_TABLE_PAGE } from '../../(masters)/_lib/constants';
 import { LightTooltipWithText } from '../../(masters)/_ui/tables';
-import { getSectionShortSelections } from '../../(masters)/sections-master/_lib/funcs';
 import { getFilteredEqpts } from '../_lib/funcs';
 import { LoanEqTableValues } from '../_lib/types';
 
-export const LoanList = () => {
+export const LoanList = ({
+  options,
+}: {
+  /** 検索条件の選択肢（課。page.tsx で取得） */
+  options: { sect: SelectTypes[] };
+}) => {
   /** 表示する行数 */
   const rowsPerPage = ROWS_PER_MASTER_TABLE_PAGE;
 
@@ -41,8 +45,6 @@ export const LoanList = () => {
   const [error, setError] = useState<Error | null>(null);
   const [page, setPage] = useState(1);
   const [rows, setRows] = useState<LoanEqTableValues[]>([]);
-  // 選択肢(課)
-  const [options, setOptions] = useState<{ sect: SelectTypes[] }>({ sect: [] });
 
   /* useForm ---------------------------------------- */
   const { control, handleSubmit } = useForm({
@@ -61,16 +63,6 @@ export const LoanList = () => {
       setError(e instanceof Error ? e : new Error(String(e)));
     }
     setIsLoading(false);
-  };
-
-  /** 選択肢の取得 */
-  const getOptions = async () => {
-    try {
-      const sect = await getSectionShortSelections();
-      setOptions({ sect: sect });
-    } catch (e) {
-      setError(e instanceof Error ? e : new Error(String(e)));
-    }
   };
 
   // 行移動
@@ -99,8 +91,7 @@ export const LoanList = () => {
 
   /** 初期表示 */
   useEffect(() => {
-    getOptions();
-
+    // 選択肢（課）は page.tsx で取得済み
     const getList = async () => {
       setIsLoading(true);
       try {

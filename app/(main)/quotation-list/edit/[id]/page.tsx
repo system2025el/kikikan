@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/app/(main)/_lib/funcs';
 import { permission } from '@/app/(main)/_lib/permission';
 
-import { getChosenQuot } from '../../_lib/funcs';
+import { getChosenQuot, getQuotOptions } from '../../_lib/funcs';
 import { QuotHeadValues } from '../../_lib/types';
 import { Quotation } from '../../_ui/quotation';
 
@@ -30,7 +30,8 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
     return <Typography>このページを閲覧する権限がありません。</Typography>;
   }
 
-  const data = await getChosenQuot(quotId);
+  // 選択肢は見積と同時に取る
+  const [data, options] = await Promise.all([getChosenQuot(quotId), getQuotOptions()]);
   const quot: QuotHeadValues = {
     ...data.m,
     kizaiChukeiAmt: (data.m.meisaiHeads?.kizai ?? []).reduce((acc, item) => acc + (item.nebikiAftAmt ?? 0), 0),
@@ -58,7 +59,7 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
     nebikiAmt: null,
     zeiKbn: null,
   };
-  return <Quotation user={user} order={order} isNew={false} quot={quot} />;
+  return <Quotation user={user} order={order} isNew={false} quot={quot} options={options} />;
 };
 
 export default Page;
