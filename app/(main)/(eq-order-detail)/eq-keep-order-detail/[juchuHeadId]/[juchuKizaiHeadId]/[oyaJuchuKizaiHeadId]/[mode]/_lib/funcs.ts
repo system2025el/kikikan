@@ -58,6 +58,7 @@ import { JuchuCtnMeisai } from '@/app/_lib/db/types/t_juchu_ctn_meisai-type';
 import { JuchuKizaiHead } from '@/app/_lib/db/types/t-juchu-kizai-head-type';
 import { JuchuKizaiMeisai } from '@/app/_lib/db/types/t-juchu-kizai-meisai-type';
 import { NyushukoDen } from '@/app/_lib/db/types/t-nyushuko-den-type';
+import { getNyukoDate, getShukoDate } from '@/app/(main)/_lib/date-funcs';
 import {
   addDummyNyushukoDen,
   addJuchuKizaiNyushuko,
@@ -69,8 +70,10 @@ import {
   delAllNyushukoResult,
   delAllShukoResult,
   delNyushukoCtnResult,
+  getDetailJuchuHead,
   getJuchuKizaiHeadMaxId,
   getJuchuKizaiNyushuko,
+  getNyushukoFixFlags,
   isOyaShukoFixedTx,
   updJuchuKizaiNyushuko,
 } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
@@ -982,6 +985,64 @@ export const getKeepJuchuKizaiDetailData = async (
     getKeepJuchuContainerMeisai(juchuHeadId, juchuKizaiHeadId, oyaJuchuKizaiHeadId),
   ]);
   return { keepJuchuKizaiMeisaiData, keepJuchuContainerMeisaiData };
+};
+
+/**
+ * ほかの人が編集中で編集に入れなかったときに、画面を最新の内容に読み直すためのデータを取得する
+ * （受注ヘッダー・親受注機材入出庫・出発/到着フラグ・キープ受注機材ヘッダー・明細一式）
+ * 以前は画面から3回に分けて呼んでいた（Server Action は1本ずつ順番に処理される）ので、サーバー側で続けて取る
+ * （エラーの記録は中で呼ぶ各取得関数が行う）
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid（0 は新規なので、キープ受注機材ヘッダー以降は取らない）
+ * @param oyaJuchuKizaiHeadId 親受注機材ヘッダーid
+ * @returns kizai はキープ受注機材ヘッダーが無いとき（新規・見つからない）は null
+ */
+export const getKeepJuchuKizaiLockReloadData = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  oyaJuchuKizaiHeadId: number
+) => {
+  const [juchuHeadData, oyaJuchuKizaiHeadData, { shukoFixFlag, nyukoFixFlag }] = await Promise.all([
+    getDetailJuchuHead(juchuHeadId),
+    getJuchuKizaiNyushuko(juchuHeadId, oyaJuchuKizaiHeadId),
+    getNyushukoFixFlags(juchuHeadId, juchuKizaiHeadId),
+  ]);
+
+  // 画面側は、受注ヘッダー・親の入出庫データ・親の出庫日/入庫日のどれかが無ければここで読み直しをやめる。
+  // そのときは以前と同じくキープ受注機材ヘッダー以降を取らない（取得でエラーになることもあるため）
+  const noOyaDate =
+    !oyaJuchuKizaiHeadData ||
+    !getShukoDate(
+      oyaJuchuKizaiHeadData.kicsShukoDat ? new Date(oyaJuchuKizaiHeadData.kicsShukoDat) : null,
+      oyaJuchuKizaiHeadData.yardShukoDat ? new Date(oyaJuchuKizaiHeadData.yardShukoDat) : null
+    ) ||
+    !getNyukoDate(
+      oyaJuchuKizaiHeadData.kicsNyukoDat ? new Date(oyaJuchuKizaiHeadData.kicsNyukoDat) : null,
+      oyaJuchuKizaiHeadData.yardNyukoDat ? new Date(oyaJuchuKizaiHeadData.yardNyukoDat) : null
+    );
+  if (!juchuHeadData || noOyaDate || juchuKizaiHeadId === 0) {
+    return { juchuHeadData, oyaJuchuKizaiHeadData, shukoFixFlag, nyukoFixFlag, kizai: null };
+  }
+
+  const keepJuchuKizaiHeadData = await getKeepJuchuKizaiHead(juchuHeadId, juchuKizaiHeadId);
+  if (!keepJuchuKizaiHeadData) {
+    return { juchuHeadData, oyaJuchuKizaiHeadData, shukoFixFlag, nyukoFixFlag, kizai: null };
+  }
+
+  // 明細一式はキープ受注機材ヘッダーの値で取る（画面側と同じ）
+  const detailData = await getKeepJuchuKizaiDetailData(
+    keepJuchuKizaiHeadData.juchuHeadId,
+    keepJuchuKizaiHeadData.juchuKizaiHeadId,
+    keepJuchuKizaiHeadData.oyaJuchuKizaiHeadId
+  );
+
+  return {
+    juchuHeadData,
+    oyaJuchuKizaiHeadData,
+    shukoFixFlag,
+    nyukoFixFlag,
+    kizai: { keepJuchuKizaiHeadData, ...detailData },
+  };
 };
 
 /**

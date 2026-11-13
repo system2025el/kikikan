@@ -6,7 +6,7 @@ import { insertNewBumon, selectOneBumon, upDateBumonDB } from '@/app/_lib/db/tab
 import { selectFilteredBumons } from '@/app/_lib/db/tables/v_bumon_lst';
 
 import { FAKE_NEW_ID } from '../../_lib/constants';
-import { getDaibumonsSelection, getShukeibumonsSelection } from '../../_lib/funcs';
+import { getAllBumonDSSelections, getDaibumonsSelection, getShukeibumonsSelection } from '../../_lib/funcs';
 import { emptyBumon } from './datas';
 import { BumonsMasterDialogValues, BumonsMasterTableValues } from './types';
 
@@ -51,6 +51,21 @@ export const getFilteredBumons = async (
     }
     throw e;
   }
+};
+
+/**
+ * 部門マスタのダイアログを開いたときのデータ（選択肢・選んだ部門）を取得する
+ * Server Action は1本ずつ順番に処理されるので、画面からは1回の呼び出しで済ませ、サーバー側で同時に取る
+ * （エラーの記録は中で呼ぶ各取得関数が行う）
+ * @param bumonId 部門マスタID（FAKE_NEW_ID は新規なので、部門は取らない）
+ * @returns selections ダイアログの選択肢、bumon 選んだ部門（新規のときは null）
+ */
+export const getBumonMasterDialogData = async (bumonId: number) => {
+  const [selections, bumon] = await Promise.all([
+    getAllBumonDSSelections(),
+    bumonId === FAKE_NEW_ID ? null : getChosenbumon(bumonId),
+  ]);
+  return { selections, bumon };
 };
 
 /**

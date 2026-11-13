@@ -31,9 +31,8 @@ import { Loading } from '@/app/(main)/_ui/loading';
 
 import { FAKE_NEW_ID } from '../../_lib/constants';
 import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
-import { getEqptNam } from '../../rfid-master/[kizaiId]/_lib/funcs';
 import { emptyEqptSet, formItems } from '../_lib/datas';
-import { addNewEqptSet, getChosenEqptSet, getEqptsForOyaEqptSelection, updateEqptSet } from '../_lib/funcs';
+import { addNewEqptSet, getEqptSetMasterDialogData, getEqptsForOyaEqptSelection, updateEqptSet } from '../_lib/funcs';
 import { EqptSetsMasterDialogSchema, EqptSetsMasterDialogValues } from '../_lib/types';
 import { EqptSetSelectionDialog } from './eqtp-selection-dialog';
 
@@ -191,9 +190,9 @@ export const EqptSetsMasterDialog = ({
           setIsLoading(false);
           setIsNew(true);
         } else {
-          const oyaEqptNam = await getEqptNam(oyaId);
+          // 親機材名とセット内容を1回の Server Action で取る
+          const { oyaEqptNam, eqptSet: eqptSet1 } = await getEqptSetMasterDialogData(oyaId);
           setKizaiNam(oyaEqptNam);
-          const eqptSet1 = await getChosenEqptSet(oyaId);
           if (eqptSet1) {
             reset(eqptSet1); // 取得したデータでフォーム初期化
             setCurrentSetList(eqptSet1.setEqptList.map((d) => d.id)); // 初期のセットリストをセット

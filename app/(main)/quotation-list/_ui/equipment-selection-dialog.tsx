@@ -29,9 +29,16 @@ import { TextFieldElement } from 'react-hook-form-mui';
 
 import { Loading } from '@/app/(main)/_ui/loading';
 
-import { checkSetoptions, getEqptsForEqptSelection, getSelectedEqpts, getSetOptions } from '../_lib/funcs';
+import {
+  checkSetoptions,
+  getEqptSelectionDialogData,
+  getEqptsForEqptSelection,
+  getSelectedEqpts,
+  getSetAndOyaEqpts,
+  getSetOptionDialogData,
+} from '../_lib/funcs';
 import { EqptGroup, EqptSelection, SelectedEqptsValues } from '../_lib/types';
-import { EqptBumonsTable } from './equipment-bumons-table';
+import { EqptBumon, EqptBumonsTable } from './equipment-bumons-table';
 import { EqptTable } from './equipments-table';
 
 /**
@@ -55,6 +62,8 @@ export const QuotEqptSelectionDialog = ({
   const [selectedBumon, setSelectedBumon] = useState(-100);
   /* 機材リスト全体 */
   const [theEqpts, setTheEqpts] = useState<EqptSelection[]>([]);
+  /* 部門一覧（null は取得中） */
+  const [bumons, setBumons] = useState<EqptBumon[] | null>(null);
   /* 検索中かどうか */
   const [searching, setSearching] = useState<boolean>(false);
   /* Loadingかどうか */
@@ -149,9 +158,12 @@ export const QuotEqptSelectionDialog = ({
     setSearching(false);
     const getEqpts = async () => {
       try {
-        const a = await getEqptsForEqptSelection('');
-        setTheEqpts(a!);
+        // 機材一覧と部門一覧を1回の Server Action で取る（以前は部門の表が別に取っていた）
+        const { eqpts, bumons } = await getEqptSelectionDialogData();
+        setTheEqpts(eqpts!);
+        setBumons(bumons);
       } catch (e) {
+        setBumons([]);
         setSnackBarMessage('サーバー接続エラー');
         setSnackBarOpen(true);
       }
@@ -223,7 +235,7 @@ export const QuotEqptSelectionDialog = ({
 
         <Grid2 container display={'flex'} pb={2} spacing={1} justifyContent={'space-between'}>
           <Grid2 size={5}>
-            <EqptBumonsTable selected={selectedBumon} handleClick={handleClickBumon} />
+            <EqptBumonsTable bumons={bumons} selected={selectedBumon} handleClick={handleClickBumon} />
           </Grid2>
           <Grid2 size={7}>
             <EqptTable
@@ -370,7 +382,7 @@ const BundleDialog = ({
   const handleClickAnother = async () => {
     setIsLoading(true);
     try {
-      const [sets, oya] = await Promise.all([getSelectedEqpts(selected), getSelectedEqpts([eqptsWSet[currentIndex]])]);
+      const { sets, oya } = await getSetAndOyaEqpts(selected, eqptsWSet[currentIndex]);
       // セットなので、indentNumを1にする
       const setList = sets!.map((d) => ({ ...d, indentNum: 1 }));
       selectedEqptListRef.current.push(...setList);
@@ -393,16 +405,13 @@ const BundleDialog = ({
         setIsLoading(true);
         const getSet = async () => {
           try {
-            // セット有機材詳細と表示するセット機材を取得
-            const [oya, sets] = await Promise.all([
-              getSelectedEqpts([eqptsWSet[0]]), // 0番目を決め打ちで取得
-              getSetOptions(eqptsWSet[0]),
-            ]);
+            // セット有機材詳細と表示するセット機材、セットがない単独の機材を取得（1回の Server Action で取る）
+            const { oya, sets, solo } = await getSetOptionDialogData(
+              eqptsWSet[0], // 0番目を決め打ちで取得
+              eqptsAll.filter((d) => !eqptsWSet.includes(d))
+            );
             setBundles(sets.setList);
             setOyakizaiNam(sets.eqptNam);
-
-            // セットがない単独の機材
-            const solo = await getSelectedEqpts(eqptsAll.filter((d) => !eqptsWSet.includes(d)));
 
             // 配列をリセットしてから親機材と単独機材をpush
             selectedEqptListRef.current = [];
@@ -434,10 +443,10 @@ const BundleDialog = ({
       setIsLoading(true);
       const getSet = async () => {
         try {
-          const [oya, sets] = await Promise.all([
-            getSelectedEqpts([eqptsWSet[currentIndex]]), // 変更後の currentIndex を使用
-            getSetOptions(eqptsWSet[currentIndex]),
-          ]);
+          const { oya, sets } = await getSetOptionDialogData(
+            eqptsWSet[currentIndex], // 変更後の currentIndex を使用
+            null
+          );
           setBundles(sets.setList);
           setOyakizaiNam(sets.eqptNam);
           // 選択された機材配列に親機材をpush

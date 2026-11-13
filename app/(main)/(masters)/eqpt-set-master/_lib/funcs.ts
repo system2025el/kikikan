@@ -15,6 +15,7 @@ import { selectActiveEqpts } from '@/app/_lib/db/tables/v-kizai-lst-sel';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { EqptSelection } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';
 
+import { getEqptNam } from '../../rfid-master/[kizaiId]/_lib/funcs';
 import { emptyEqptSet } from './datas';
 import { EqptSetsMasterDialogValues, EqptSetsMasterTableValues } from './types';
 
@@ -53,6 +54,18 @@ export const getFilteredEqptSets = async (query: string = '') => {
     }
     throw e;
   }
+};
+
+/**
+ * 機材セットマスタのダイアログを編集で開いたときのデータ（親機材名・セット内容）を取得する
+ * Server Action は1本ずつ順番に処理されるので、画面からは1回の呼び出しで済ませ、サーバー側で同時に取る
+ * （エラーの記録は中で呼ぶ各取得関数が行う）
+ * @param oyaId 親機材の機材id
+ * @returns oyaEqptNam 親機材名、eqptSet セット内容
+ */
+export const getEqptSetMasterDialogData = async (oyaId: number) => {
+  const [oyaEqptNam, eqptSet] = await Promise.all([getEqptNam(oyaId), getChosenEqptSet(oyaId)]);
+  return { oyaEqptNam, eqptSet };
 };
 
 /**

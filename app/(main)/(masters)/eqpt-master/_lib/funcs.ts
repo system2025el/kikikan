@@ -10,7 +10,12 @@ import { selectCountOfTheEqpt } from '@/app/_lib/db/tables/m-rfid';
 import { selectFilteredEqpts } from '@/app/_lib/db/tables/v-kizai-list';
 
 import { FAKE_NEW_ID } from '../../_lib/constants';
-import { getBumonsSelection, getDaibumonsSelection, getShukeibumonsSelection } from '../../_lib/funcs';
+import {
+  getAllSelections,
+  getBumonsSelection,
+  getDaibumonsSelection,
+  getShukeibumonsSelection,
+} from '../../_lib/funcs';
 import { fakeToNull, nullToFake } from '../../_lib/value-converters';
 import { emptyEqpt } from './datas';
 import { EqptsMasterDialogValues, EqptsMasterTableValues } from './types';
@@ -79,6 +84,21 @@ export const getFilteredEqpts = async (
     }
     throw e;
   }
+};
+
+/**
+ * 機材マスタのダイアログを開いたときのデータ（選択肢・選んだ機材）を取得する
+ * Server Action は1本ずつ順番に処理されるので、画面からは1回の呼び出しで済ませ、サーバー側で同時に取る
+ * （エラーの記録は中で呼ぶ各取得関数が行う）
+ * @param eqptId 機材マスタID（FAKE_NEW_ID は新規なので、機材は取らない）
+ * @returns selections ダイアログの選択肢、eqpt 選んだ機材と保有数（新規のときは null）
+ */
+export const getEqptMasterDialogData = async (eqptId: number) => {
+  const [selections, eqpt] = await Promise.all([
+    getAllSelections(),
+    eqptId === FAKE_NEW_ID ? null : getChosenEqpt(eqptId),
+  ]);
+  return { selections, eqpt };
 };
 
 /**

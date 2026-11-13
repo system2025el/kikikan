@@ -23,6 +23,7 @@ import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { getDic } from '@/app/(main)/_lib/funcs';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
+import { getUsersSelection } from '@/app/(main)/quotation-list/_lib/funcs';
 
 import { BillHeadValues, BillMeisaiHeadsValues, BillSearchValues, BillsListTableValues } from './types';
 
@@ -55,6 +56,17 @@ export const getBillingStsSelection = async (): Promise<SelectTypes[]> => {
     }
     throw e;
   }
+};
+
+/**
+ * 請求の明細画面で使う選択肢（担当者・請求ステータス）をまとめて取得する
+ * page.tsx（サーバー側）から呼び、画面には props で渡す
+ * （エラーの記録は中で呼ぶ各取得関数が行う）
+ * @returns 担当者・請求ステータスの選択肢
+ */
+export const getBillOptions = async () => {
+  const [users, sts] = await Promise.all([getUsersSelection(), getBillingStsSelection()]);
+  return { users, sts };
 };
 
 /**

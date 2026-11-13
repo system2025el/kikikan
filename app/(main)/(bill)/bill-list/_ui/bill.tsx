@@ -10,7 +10,6 @@ import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
-  Autocomplete,
   Box,
   Button,
   Container,
@@ -40,10 +39,10 @@ import { FormDateX } from '@/app/(main)/_ui/date';
 import { IsDirtyAlertDialog, useDirty } from '@/app/(main)/_ui/dirty-context';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { LoadingOverlay } from '@/app/(main)/_ui/loading';
+import { PrefilledAutocomplete } from '@/app/(main)/_ui/prefilled-autocomplete';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
-import { getUsersSelection } from '@/app/(main)/quotation-list/_lib/funcs';
 
-import { getBillingStsSelection, getKeisho } from '../_lib/funcs';
+import { getKeisho } from '../_lib/funcs';
 import { usePdf } from '../_lib/hooks/usePdf';
 import { BillHeadSchema, BillHeadValues } from '../_lib/types';
 import { addBill } from '../create/_lib/funcs';
@@ -105,19 +104,29 @@ const BillTotalsCalculator = () => {
  * @param param0
  * @returns {JSX.Element} 請求書作成画面コンポーネント
  */
-export const Bill = ({ user, isNew, bill }: { user: User; isNew: boolean; bill: BillHeadValues }) => {
+export const Bill = ({
+  user,
+  isNew,
+  bill,
+  options,
+}: {
+  user: User;
+  isNew: boolean;
+  bill: BillHeadValues;
+  /** 選択肢（page.tsx で取得） */
+  options: { users: SelectTypes[]; sts: SelectTypes[] };
+}) => {
   const router = useRouter();
 
   /** 全体の編集状態 */
   const editable = !!((user?.permission.juchu ?? 0) & permission.juchu_upd);
   /* useState ----------------------------------------------------------------- */
-  /* ローディング中かどうか */
-  const [isLoading, setIsLoading] = useState(true); /** 処理中かどうか */
+  /* ローディング中かどうか（選択肢は page.tsx で取得済みなので、開いた時点では読み込み中ではない） */
+  const [isLoading, setIsLoading] = useState(false);
+  /** 処理中かどうか */
   const [isProcessing, setIsProcessing] = useState(false);
   /* エラーハンドリング */
   const [isError, setIsError] = useState<Error | null>(null);
-  /** 選択肢 */
-  const [options, setOptions] = useState<{ users: SelectTypes[]; sts: SelectTypes[] }>({ users: [], sts: [] });
   // 請求ヘッダアコーディオン制御
   const [seikyuExpanded, setSeikyuExpanded] = useState(true);
 
@@ -135,14 +144,15 @@ export const Bill = ({ user, isNew, bill }: { user: User; isNew: boolean; bill: 
     mode: 'onChange',
     reValidateMode: 'onChange',
     resolver: zodResolver(BillHeadSchema),
-    defaultValues: bill,
+    // 新規（コピーを含む）なら入力者はログインアカウント。
+    // 表示後に setValue すると、開いた直後に入力者が切り替わって見えるので初期値に入れる
+    defaultValues: isNew && user?.name ? { ...bill, nyuryokuUser: user.name } : bill,
   });
   const {
     control,
     handleSubmit,
     reset,
     getValues,
-    setValue,
     formState: { isDirty },
   } = billForm;
 
@@ -161,8 +171,15 @@ export const Bill = ({ user, isNew, bill }: { user: User; isNew: boolean; bill: 
     try {
       if (isNew) {
         const id = await addBill(data, user?.name ?? '');
-        // setIsLoading(true);
+        setSnackBarMessage('保存しました');
+        setSnackBarOpen(true);
+        reset(data);
+        // router.replace は移動を始めるだけで、編集画面が出るまで待たない。
+        // ここでローディングを消すと、切り替わるまでの間に作成画面を触れてしまい、
+        // もう一度保存すると二重に登録される。ローディングは消さずに抜ける
+        // （作成画面と編集画面は別ページなので、切り替わると作成画面ごと消える）
         router.replace(`/bill-list/edit/${id}`);
+        return;
       } else {
         await updateBill(data, user?.name ?? '');
       }
@@ -177,41 +194,6 @@ export const Bill = ({ user, isNew, bill }: { user: User; isNew: boolean; bill: 
   };
 
   /* useEffect ------------------------------------------------------------ */
-  // 初期表示とログインユーザを取得とセット
-  useEffect(() => {
-    let cancelled = false;
-
-    const getOptions = async () => {
-      try {
-        const [users, sts] = await Promise.all([getUsersSelection(), getBillingStsSelection()]);
-        if (cancelled) return;
-        setOptions({ users: users, sts: sts });
-      } catch (e) {
-        if (cancelled) return;
-        setIsError(e instanceof Error ? e : new Error(String(e)));
-      } finally {
-        if (!cancelled) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    if (isNew) {
-      // 新規なら入力者をログインアカウントから取得する
-      if (user?.name) {
-        setValue('nyuryokuUser', user.name);
-      }
-    } else {
-      // 編集でログインユーザがあるときロックデータを確認する
-      // if (user && bill.seikyuHeadId) asyncProcess();
-    }
-
-    getOptions();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [user, isNew, bill, setValue]);
 
   // 変更あるかどうか
   useEffect(() => {
@@ -402,7 +384,7 @@ export const Bill = ({ user, isNew, bill }: { user: User; isNew: boolean; bill: 
                       name="nyuryokuUser"
                       control={control}
                       render={({ field }) => (
-                        <Autocomplete
+                        <PrefilledAutocomplete
                           {...field}
                           options={options.users}
                           // getOptionLabel={(option) => option.label}

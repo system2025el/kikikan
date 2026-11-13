@@ -108,7 +108,7 @@ import { NyushukoDen } from '@/app/_lib/db/types/t-nyushuko-den-type';
 import { NyushukoFix } from '@/app/_lib/db/types/t-nyushuko-fix-type';
 import { syncNyukoCtnAfterDelete } from '@/app/(main)/_lib/ctn-nyuko-funcs';
 import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
-import { getNyukoDate, getRange } from '@/app/(main)/_lib/date-funcs';
+import { getNyukoDate, getRange, getShukoDate } from '@/app/(main)/_lib/date-funcs';
 import { expandHonbanbiTemplate, getHonbanbiTemplate } from '@/app/(main)/_lib/honbanbi-funcs';
 import {
   addAllHonbanbi,
@@ -123,10 +123,12 @@ import {
   delSiyouHonbanbi,
   getALLStockList,
   getChildJuchuKizaiHead,
+  getDetailJuchuHead,
   getJuchuContainerMeisai,
   getJuchuContainerMeisaiTx,
   getJuchuKizaiHeadMaxId,
   getJuchuKizaiNyushuko,
+  getNyushukoFixFlags,
   updJuchuKizaiNyushuko,
 } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
 import { IdoList } from '@/app/(main)/ido-list/_ui/ido-list';
@@ -455,6 +457,42 @@ export const getJuchuKizaiDetailData = async (
       : [];
 
   return { juchuKizaiMeisaiData, idoJuchuKizaiMeisaiData, juchuContainerMeisaiData, stockList, stockAnchorDate };
+};
+
+/**
+ * ほかの人が編集中で編集に入れなかったときに、画面を最新の内容に読み直すためのデータを取得する
+ * （受注ヘッダー・出発/到着フラグ・受注機材ヘッダー・本番日・明細一式）
+ * 以前は画面から3回に分けて呼んでいた（Server Action は1本ずつ順番に処理される）ので、サーバー側で続けて取る
+ * （エラーの記録は中で呼ぶ各取得関数が行う）
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid（0 は新規なので、受注機材ヘッダー以降は取らない）
+ * @returns kizai は受注機材ヘッダーが無いとき（新規・見つからない）は null
+ */
+export const getJuchuKizaiLockReloadData = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
+  const [juchuHeadData, { shukoFixFlag, nyukoFixFlag }, juchuKizaiHeadData, juchuHonbanbiData] = await Promise.all([
+    getDetailJuchuHead(juchuHeadId),
+    getNyushukoFixFlags(juchuHeadId, juchuKizaiHeadId),
+    juchuKizaiHeadId === 0 ? null : getJuchuKizaiHead(juchuHeadId, juchuKizaiHeadId),
+    juchuKizaiHeadId === 0 ? null : getHonbanbi(juchuHeadId, juchuKizaiHeadId),
+  ]);
+
+  if (!juchuHeadData || !juchuKizaiHeadData) {
+    return { juchuHeadData, shukoFixFlag, nyukoFixFlag, kizai: null };
+  }
+
+  // 明細一式は出庫日（在庫テーブルの基準日）が要るので、受注機材ヘッダーの後に取る（画面側と同じ求め方）
+  const shukoDate = getShukoDate(
+    juchuKizaiHeadData.kicsShukoDat && new Date(juchuKizaiHeadData.kicsShukoDat),
+    juchuKizaiHeadData.yardShukoDat && new Date(juchuKizaiHeadData.yardShukoDat)
+  );
+  const detailData = await getJuchuKizaiDetailData(juchuHeadId, juchuKizaiHeadId, shukoDate);
+
+  return {
+    juchuHeadData,
+    shukoFixFlag,
+    nyukoFixFlag,
+    kizai: { juchuKizaiHeadData, juchuHonbanbiData, ...detailData },
+  };
 };
 
 /**
@@ -2932,6 +2970,17 @@ export const getBumonsForEqptSelection = async () => {
 };
 
 /**
+ * 機材選択ダイアログを開いたときのデータ（機材一覧・部門一覧）を取得する
+ * Server Action は1本ずつ順番に処理されるので、画面からは1回の呼び出しで済ませ、サーバー側で2つを同時に取る
+ * （エラーの記録は中で呼ぶ各取得関数が行う。見積の機材選択ダイアログにも同じ関数がある）
+ * @returns eqpts 機材一覧（検索キーワードなし）、bumons 部門一覧
+ */
+export const getEqptSelectionDialogData = async () => {
+  const [eqpts, bumons] = await Promise.all([getEqptsForEqptSelection(''), getBumonsForEqptSelection()]);
+  return { eqpts, bumons };
+};
+
+/**
  * セットオプションを持つ機材のIDの配列を取得する関数
  * @param idList 選ばれた機材たちの機材IDリスト
  * @returns セットオプション付きの機材の配列、なかった場合は空配列を返す
@@ -3075,6 +3124,36 @@ export const getSetOptions = async (kizaiId: number) => {
     }
     throw e;
   }
+};
+
+/**
+ * セットオプション選択ダイアログで、1つのセット有機材を表示するときのデータを取得する
+ * （親機材の詳細・セットオプション一覧。開いたときはセットの無い単独機材の詳細も）
+ * Server Action は1本ずつ順番に処理されるので、画面からは1回の呼び出しで済ませ、サーバー側で同時に取る
+ * （エラーの記録は中で呼ぶ各取得関数が行う。見積の機材選択ダイアログにも同じ関数がある）
+ * @param oyaKizaiId 表示するセット有機材の機材id
+ * @param soloKizaiIds セットの無い単独機材の機材id（開いたときだけ渡す。null なら取らない）
+ * @returns oya 親機材の詳細、sets セットオプション一覧と親機材名、solo 単独機材の詳細（取らないときは空配列）
+ */
+export const getSetOptionDialogData = async (oyaKizaiId: number, soloKizaiIds: number[] | null) => {
+  const [oya, sets, solo] = await Promise.all([
+    getSelectedEqpts([oyaKizaiId]),
+    getSetOptions(oyaKizaiId),
+    soloKizaiIds ? getSelectedEqpts(soloKizaiIds) : [],
+  ]);
+  return { oya, sets, solo };
+};
+
+/**
+ * セットオプション選択ダイアログの「別セット選択」で、選んだセット機材と次の親機材の詳細をまとめて取得する
+ * （エラーの記録は中で呼ぶ getSelectedEqpts が行う）
+ * @param setKizaiIds 選んだセット機材の機材id
+ * @param oyaKizaiId 親機材の機材id
+ * @returns sets 選んだセット機材の詳細、oya 親機材の詳細
+ */
+export const getSetAndOyaEqpts = async (setKizaiIds: number[], oyaKizaiId: number) => {
+  const [sets, oya] = await Promise.all([getSelectedEqpts(setKizaiIds), getSelectedEqpts([oyaKizaiId])]);
+  return { sets, oya };
 };
 
 /**

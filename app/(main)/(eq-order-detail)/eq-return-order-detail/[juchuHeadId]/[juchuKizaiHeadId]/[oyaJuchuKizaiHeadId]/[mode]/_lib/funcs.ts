@@ -49,6 +49,7 @@ import { JuchuCtnMeisai } from '@/app/_lib/db/types/t_juchu_ctn_meisai-type';
 import { JuchuKizaiHead } from '@/app/_lib/db/types/t-juchu-kizai-head-type';
 import { JuchuKizaiMeisai } from '@/app/_lib/db/types/t-juchu-kizai-meisai-type';
 import { NyushukoDen } from '@/app/_lib/db/types/t-nyushuko-den-type';
+import { getNyukoDate, getShukoDate } from '@/app/(main)/_lib/date-funcs';
 import { expandHonbanbiTemplate, getHonbanbiTemplate } from '@/app/(main)/_lib/honbanbi-funcs';
 import {
   addAllHonbanbi,
@@ -60,8 +61,10 @@ import {
   delNyushukoCtnResult,
   delSiyouHonbanbi,
   getALLStockList,
+  getDetailJuchuHead,
   getJuchuKizaiHeadMaxId,
   getJuchuKizaiNyushuko,
+  getNyushukoFixFlag,
   isOyaShukoFixedTx,
   updJuchuKizaiNyushuko,
 } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
@@ -920,6 +923,57 @@ export const getReturnJuchuKizaiDetailData = async (
       : [];
 
   return { returnJuchuKizaiMeisaiData, returnJuchuContainerMeisaiData, stockList };
+};
+
+/**
+ * ほかの人が編集中で編集に入れなかったときに、画面を最新の内容に読み直すためのデータを取得する
+ * （受注ヘッダー・親受注機材入出庫・到着フラグ・返却受注機材ヘッダー・明細一式）
+ * 以前は画面から3回に分けて呼んでいた（Server Action は1本ずつ順番に処理される）ので、サーバー側で続けて取る
+ * （エラーの記録は中で呼ぶ各取得関数が行う）
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid（0 は新規なので、返却受注機材ヘッダー以降は取らない）
+ * @param oyaJuchuKizaiHeadId 親受注機材ヘッダーid
+ * @returns kizai は返却受注機材ヘッダーが無いとき（新規・見つからない）は null
+ */
+export const getReturnJuchuKizaiLockReloadData = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  oyaJuchuKizaiHeadId: number
+) => {
+  const [juchuHeadData, oyaJuchuKizaiHeadData, nyukoFixFlag] = await Promise.all([
+    getDetailJuchuHead(juchuHeadId),
+    getJuchuKizaiNyushuko(juchuHeadId, oyaJuchuKizaiHeadId),
+    getNyushukoFixFlag(juchuHeadId, juchuKizaiHeadId, SAGYO_KBN_ID.nyukoConfirmed),
+  ]);
+
+  // 画面側は、受注ヘッダー・親の入出庫データ・親の出庫日/入庫日のどれかが無ければここで読み直しをやめる。
+  // そのときは以前と同じく返却受注機材ヘッダー以降を取らない（取得でエラーになることもあるため）
+  const noOyaDate =
+    !oyaJuchuKizaiHeadData ||
+    !getShukoDate(oyaJuchuKizaiHeadData.kicsShukoDat, oyaJuchuKizaiHeadData.yardShukoDat) ||
+    !getNyukoDate(oyaJuchuKizaiHeadData.kicsNyukoDat, oyaJuchuKizaiHeadData.yardNyukoDat);
+  if (!juchuHeadData || noOyaDate || juchuKizaiHeadId === 0) {
+    return { juchuHeadData, oyaJuchuKizaiHeadData, nyukoFixFlag, kizai: null };
+  }
+
+  const returnJuchuKizaiHeadData = await getReturnJuchuKizaiHead(juchuHeadId, juchuKizaiHeadId);
+  if (!returnJuchuKizaiHeadData) {
+    return { juchuHeadData, oyaJuchuKizaiHeadData, nyukoFixFlag, kizai: null };
+  }
+
+  // 明細一式は返却入庫日（在庫テーブルの基準日）が要るので、返却受注機材ヘッダーの後に取る（画面側と同じ求め方）
+  const returnNyukoDate = getNyukoDate(
+    returnJuchuKizaiHeadData.kicsNyukoDat && new Date(returnJuchuKizaiHeadData.kicsNyukoDat),
+    returnJuchuKizaiHeadData.yardNyukoDat && new Date(returnJuchuKizaiHeadData.yardNyukoDat)
+  );
+  const detailData = await getReturnJuchuKizaiDetailData(
+    returnJuchuKizaiHeadData.juchuHeadId,
+    returnJuchuKizaiHeadData.juchuKizaiHeadId,
+    returnJuchuKizaiHeadData.oyaJuchuKizaiHeadId,
+    returnNyukoDate
+  );
+
+  return { juchuHeadData, oyaJuchuKizaiHeadData, nyukoFixFlag, kizai: { returnJuchuKizaiHeadData, ...detailData } };
 };
 
 /**

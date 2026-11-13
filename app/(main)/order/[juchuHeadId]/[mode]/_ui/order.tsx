@@ -69,6 +69,7 @@ import {
   getJuchuKizaiHeadList,
   getJuchuSharyoHeadList,
   getMaxId,
+  getOrderReloadData,
   updJuchuHead,
 } from '../_lib/funcs';
 import {
@@ -257,12 +258,10 @@ export const Order = (props: {
       setAlertTitle('編集中');
       setAlertMessage(`${lockData.addUser}が編集中です`);
       setAlertOpen(true);
-      // 受注ヘッダーデータ（本番日を含む）、受注機材ヘッダーデータ、受注車両ヘッダーデータ
-      const [juchuHeadData, juchuKizaiHeadDatas, juchuSharyoHeadDatas] = await Promise.all([
-        getJuchuHead(getValues('juchuHeadId')),
-        getJuchuKizaiHeadList(getValues('juchuHeadId')),
-        getJuchuSharyoHeadList(getValues('juchuHeadId')),
-      ]);
+      // 受注ヘッダーデータ（本番日を含む）、受注機材ヘッダーデータ、受注車両ヘッダーデータ（1回の Server Action で取る）
+      const { juchuHeadData, juchuKizaiHeadDatas, juchuSharyoHeadDatas } = await getOrderReloadData(
+        getValues('juchuHeadId')
+      );
       if (!juchuHeadData) {
         return <div>受注情報が見つかりません。</div>;
       }
