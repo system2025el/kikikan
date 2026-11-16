@@ -1,4 +1,4 @@
-'use server';
+import 'server-only';
 
 import { NYUSHUKO_SHUBETU_ID } from '@/app/_lib/constants';
 

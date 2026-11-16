@@ -1,4 +1,5 @@
-'use server';
+import 'server-only';
+
 import { PoolClient } from 'pg';
 
 import { SCHEMA } from '../schema';

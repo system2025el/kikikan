@@ -1,4 +1,4 @@
-'use server';
+import 'server-only';
 
 import { BASHO_ID, JUCHU_KIZAI_HEAD_KBN, SAGYO_KBN_ID } from '@/app/_lib/constants';
 

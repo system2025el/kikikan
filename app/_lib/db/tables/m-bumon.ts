@@ -1,4 +1,4 @@
-'use server';
+import 'server-only';
 
 import { escapeLikeString } from '@/app/(main)/_lib/escape-string';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';

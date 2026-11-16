@@ -1,4 +1,4 @@
-'use server';
+import 'server-only';
 
 import { escapeLikeString } from '@/app/(main)/_lib/escape-string';
 import { DaibumonsMasterDialogValues } from '@/app/(main)/(masters)/daibumons-master/_lib/types';

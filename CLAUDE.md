@@ -48,7 +48,8 @@ npx tsc --noEmit          # 型チェックは全体で問題なく通る
   - `app/_lib/db/supabase-client.ts` — ブラウザ用（`createBrowserClient`）。
 - `app/_lib/db/schema.ts` — `SCHEMA` 定数（現在は `'public'`）。各所で `.schema(SCHEMA)` や生SQLの `${SCHEMA}.テーブル名` として利用している。スキーマ名を直書きせずこの定数を切り替えることで、アプリ全体を別のPostgresスキーマ（例：開発用スキーマ）に向けられる。
 - `app/_lib/db/supabase-admin.ts` — service-role クライアント。サーバー専用。クライアントコンポーネントに絶対にimportしないこと。
-- `app/_lib/db/tables/*.ts` — テーブル/ビューごとにクエリ関数をまとめたファイル（`'use server'`）。ファイル名の接頭辞が種別を表す：`m-*` はマスタテーブル、`t-*` はトランザクションテーブル、`v-*` はビュー。
+- `app/_lib/db/tables/*.ts` — テーブル/ビューごとにクエリ関数をまとめたファイル。ファイル名の接頭辞が種別を表す：`m-*` はマスタテーブル、`t-*` はトランザクションテーブル、`v-*` はビュー。
+  - **先頭は `import 'server-only';` で、`'use server'` は付けない**（2026-11-16 に全80ファイルを切り替え）。`'use server'` を付けると export がすべて外から直接叩ける Server Action になり、feature 側の `funcs.ts` の権限チェック・エラーチェックを通らずにDBを操作できてしまう。画面からは必ず feature 側の `_lib/funcs.ts`（`'use server'`）を経由して呼ぶこと。誤って画面（クライアントコンポーネント）から import すると `server-only` がビルドエラーで止める。新しいファイルを足すときも1行目に `import 'server-only';`、その次に空行を入れる（空行がないと `simple-import-sort` のエラーになる）。
 - `app/_lib/db/types/*.ts` — テーブルごとに手動管理している行の型定義、および Supabase の `Database` 型を自動生成した `types.ts`。`types.ts` は手動編集せず、スキーマ変更時は Supabase CLI で再生成すること（`npx supabase login` が必要。未ログインだと再生成できない）。
   - **`types.ts` には手書きで追加したブロックがある**（CLI未ログインのため）。いずれも生成物と同じ形式に揃えてあり型チェック・ビルドは通るが、**次に誰かがCLIで再生成できる状況になったら、まずこのファイルを再生成して差分が出ないことを確認してほしい**。なお冒頭の `public /*dev7*/ :` も手作業で入ったマーカーなので、素朴に再生成すると消える点に注意。
     - 2026-08-27: `t_juchu_tempu`

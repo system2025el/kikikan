@@ -1,4 +1,4 @@
-'use server';
+import 'server-only';
 
 import { escapeLikeString } from '@/app/(main)/_lib/escape-string';
 import { ShukeibumonsMasterDialogValues } from '@/app/(main)/(masters)/shukeibumons-master/_lib/types';
