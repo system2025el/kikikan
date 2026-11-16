@@ -1,4 +1,4 @@
-'use server';
+import 'server-only';
 
 import dayjs from 'dayjs';
 import timezone from 'dayjs/plugin/timezone';

@@ -1,4 +1,4 @@
-'use server';
+import 'server-only';
 
 import { VehsMasterDialogValues } from '@/app/(main)/(masters)/vehicles-master/_lib/types';
 

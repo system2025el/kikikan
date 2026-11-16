@@ -1,4 +1,4 @@
-'use server';
+import 'server-only';
 
 import { PoolClient } from 'pg';
 
@@ -187,7 +187,7 @@ export const updateEqptSetDB = async (data: MKizaiSetDBValues[], connection: Poo
 export const deleteEqptSets = async (kizaiId: number) => {
   const supabase = await createClient();
   try {
-    await supabase.schema(SCHEMA).from('m_kizai_set').delete().eq('kizai_id', kizaiId).select('*');
+    return await supabase.schema(SCHEMA).from('m_kizai_set').delete().eq('kizai_id', kizaiId).select('*');
   } catch (e) {
     throw new Error('[deleteEqptSets] DBエラー:', { cause: e });
   }

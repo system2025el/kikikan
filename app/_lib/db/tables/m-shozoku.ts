@@ -1,4 +1,4 @@
-'use server';
+import 'server-only';
 
 import { BasesMasterDialogValues } from '@/app/(main)/(masters)/bases-master/_lib/types';
 

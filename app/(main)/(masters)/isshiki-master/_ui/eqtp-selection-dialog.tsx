@@ -21,7 +21,6 @@ import {
 import { SetStateAction, useEffect, useMemo, useState } from 'react';
 import { UseFormSetValue } from 'react-hook-form';
 
-import { checkExIsshiki } from '@/app/_lib/db/tables/m-kizai';
 import { CloseMasterDialogButton } from '@/app/(main)/_ui/buttons';
 import { Loading } from '@/app/(main)/_ui/loading';
 import { getSelectedEqpts } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/funcs';

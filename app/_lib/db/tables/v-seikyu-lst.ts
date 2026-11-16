@@ -1,4 +1,4 @@
-'use server';
+import 'server-only';
 
 import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { escapeLikeString } from '@/app/(main)/_lib/escape-string';

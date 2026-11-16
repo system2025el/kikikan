@@ -1,4 +1,4 @@
-'use server';
+import 'server-only';
 
 import { SCHEMA } from '../schema';
 import { createClient } from '../supabase-server';

@@ -1,4 +1,4 @@
-'use server';
+import 'server-only';
 
 import { SectionsMasterDialogValues } from '@/app/(main)/(masters)/sections-master/_lib/types';
 

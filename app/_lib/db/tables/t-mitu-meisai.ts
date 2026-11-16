@@ -1,4 +1,5 @@
-'use server';
+import 'server-only';
+
 import { PoolClient } from 'pg';
 
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
