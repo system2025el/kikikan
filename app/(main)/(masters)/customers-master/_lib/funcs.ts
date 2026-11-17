@@ -225,7 +225,10 @@ export const updateCustomer = async (rawData: CustomersMasterDialogValues, id: n
     upd_user: user,
   };
   try {
-    await upDateCustomerDB(updateData);
+    const { error } = await upDateCustomerDB(updateData);
+    if (error) {
+      throw new Error('[upDateCustomerDB] DBエラー:', { cause: error });
+    }
     await revalidatePath('/customer-master');
   } catch (e) {
     if (e instanceof Error) {

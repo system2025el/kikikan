@@ -119,7 +119,7 @@ export const checkRfid = async (list: RfidImportTypes[], connection: PoolClient,
       }
 
       // ループ終了後に更新処理
-      updateMasterUpdates('m_rfid', connection);
+      await updateMasterUpdates('m_rfid', connection);
     }
 
     // 更新処理

@@ -112,7 +112,7 @@ export const insertNewIsshiki = async (data: MIsshikiDBValues, connection: PoolC
 export const updateIsshikiDB = async (data: MIsshikiDBValues) => {
   const supabase = await createClient();
   try {
-    await supabase
+    return await supabase
       .schema(SCHEMA)
       .from('m_issiki')
       .update({ ...data })
@@ -137,7 +137,7 @@ export const updIsshikiDelFlgDB = async (
 ) => {
   const supabase = await createClient();
   try {
-    await supabase.schema(SCHEMA).from('m_issiki').update(data).eq('issiki_id', id);
+    return await supabase.schema(SCHEMA).from('m_issiki').update(data).eq('issiki_id', id);
   } catch (e) {
     throw new Error('[updIsshikiDelFlgDB] DBエラー:', { cause: e });
   }

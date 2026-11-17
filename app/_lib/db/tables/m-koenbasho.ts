@@ -126,7 +126,7 @@ export const insertNewLoc = async (data: LocsMasterDialogValues, user: string) =
 export const upDateLocDB = async (data: MKoenbashoDBValues) => {
   const supabase = await createClient();
   try {
-    await supabase
+    return await supabase
       .schema(SCHEMA)
       .from('m_koenbasho')
       .update({ ...data })

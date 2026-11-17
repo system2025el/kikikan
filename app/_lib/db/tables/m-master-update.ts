@@ -3,17 +3,20 @@ import 'server-only';
 import { PoolClient } from 'pg';
 
 import { SCHEMA } from '../schema';
-import { createClient } from '../supabase-server';
 
 /**
- * マスタ更新テーブルにレコード追加する関数
+ * マスタ更新テーブルの更新日時を更新する関数
+ * 呼び出し元のトランザクション（connection）の中で更新するので、マスタ本体と同時に確定・ロールバックされる
  * @param masterNam 更新するマスタテーブル名
+ * @param connection 呼び出し元のトランザクションの接続
  */
 export const updateMasterUpdates = async (masterNam: string, connection: PoolClient) => {
   const date = new Date().toISOString();
-  const supabase = await createClient();
   try {
-    await supabase.schema(SCHEMA).from('m_master_update').update({ upd_dat: date }).eq('master_nam', masterNam);
+    await connection.query(`UPDATE ${SCHEMA}.m_master_update SET upd_dat = $1 WHERE master_nam = $2`, [
+      date,
+      masterNam,
+    ]);
   } catch (e) {
     throw new Error('[updateMasterUpdates] DBエラー:', { cause: e });
   }

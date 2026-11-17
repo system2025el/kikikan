@@ -36,7 +36,7 @@ npx tsc --noEmit          # 型チェックは全体で問題なく通る
 
 **技術スタック**: Next.js 15（App Router）/ React 19 / TypeScript / MUI v6。UIライブラリはMUIに統一しているが、**日付ピッカーだけ rsuite** を使っている（`app/(main)/_ui/date.tsx` と、そのロケール設定のための `layout.tsx` の `CustomProvider` のみ。他では使わない）。PDF生成は `pdf-lib` + `@pdf-lib/fontkit`、Excel入出力は `xlsx`。**`xlsx` は npm レジストリではなく SheetJS のCDN tarball から入れている**（`package.json` のURL指定）ので、オフライン環境やレジストリをミラーしている環境ではインストール（`yarn install`）が失敗する。
 
-**ルーティング**: `app/` 配下の Next.js App Router。`app/(main)/` が認証済みユーザー向けのアプリ本体で、`login`・`signup` は認証不要のトップレベルルート。`auth/callback` は Supabase の認証コールバック用 Route Handler（後述のとおりここだけ例外的にRoute Handlerを使う）。`app/test` は動作確認用の置き場で本番導線からは辿れない。
+**ルーティング**: `app/` 配下の Next.js App Router。`app/(main)/` が認証済みユーザー向けのアプリ本体で、`login`・`signup` は認証不要のトップレベルルート。`auth/callback` は Supabase の認証コールバック用 Route Handler（後述のとおりここだけ例外的にRoute Handlerを使う）。
 
 `(main)` の中では、関連するページを整理目的のみでルートグループ（括弧付きフォルダ）にまとめている。例：`(masters)` は `*-master` 系のCRUDページ、`(bill)` は請求関連ページ、`(eq-order-detail)` は受注明細（機材）のメイン・返却・キープ3画面。ルートグループはURLには影響しない。
 
@@ -85,7 +85,7 @@ npx tsc --noEmit          # 型チェックは全体で問題なく通る
 - **ルートの保護は `middleware.ts`**（ルート直下）。全リクエストで `supabase.auth.getUser()` を呼んでトークンを検証・リフレッシュし、未ログインなら `/login` にリダイレクトする。公開パスは `/`・`/login`・`/error` のみで、`signup`・`auth`・静的ファイルは matcher 側で除外している。招待直後（`user_metadata.setup_completed === false`）は `/signup` へ、ログイン済みで `/login` を開いたら `/dashboard` へ飛ばす。リダイレクト時もリフレッシュ済みcookieを引き継ぐ実装になっているので、この関数を触るときは `redirectWithCookies` を経由すること。
 - **ユーザー情報の受け渡し**: `app/(main)/layout.tsx` が `getCurrentUser()`（`app/(main)/_lib/funcs.ts`）でユーザーを解決し、`UserProvider`（`app/(main)/_ui/user-context.tsx`）で配下に渡す。クライアントコンポーネントは `useUser()` で参照する。`getCurrentUser` は Supabase authユーザーのメールアドレスで `m_user` を引き、ビットマスク権限を含む `User` 型を返す（`react`の`cache`でリクエスト単位にメモ化）。**`getCurrentUser` 自身はリダイレクトせず `null` を返す**ので、`/login` へ飛ばすのは呼び出し側の責務（`layout.tsx` は `null` と例外の両方で `redirect('/login')` する）。
 - Server Component 側では `getCurrentUser()` を直接呼んでチェックしているページもある（受注機材明細など）。`(main)` 配下の新規ページで権限判定が必要なら、propsで受け取るか `getCurrentUser()` を呼ぶ。
-- **layout のユーザー情報（サイドバーのログイン名・メニュー）は画面遷移では更新しない**（2026-11-09 決定）。App Router の layout は遷移で作り直されないので、権限変更はそのタブを再読み込み（F5）するか別タブで開くまでサイドバーに出ない。権限変更はまれなので運用で再読み込みしてもらう。以前は遷移のたびに `router.refresh()` していたが、layout とページのサーバー処理を丸ごとやり直し、遷移先のデータ取得（Server Action）を待たせていたので外した。**ページの中身の権限は page.tsx が開くたびに `getCurrentUser()` で確かめる**（`(main)` の page.tsx は `order-list` 以外すべて）ので、サイドバーが古くても権限の無い画面は表示されない。
+- **layout のユーザー情報（サイドバーのログイン名・メニュー）は画面遷移では更新しない**（2026-11-09 決定）。App Router の layout は遷移で作り直されないので、権限変更はそのタブを再読み込み（F5）するか別タブで開くまでサイドバーに出ない。権限変更はまれなので運用で再読み込みしてもらう。以前は遷移のたびに `router.refresh()` していたが、layout とページのサーバー処理を丸ごとやり直し、遷移先のデータ取得（Server Action）を待たせていたので外した。**ページの中身の権限は page.tsx が開くたびに `getCurrentUser()` で確かめる**（`(main)` の page.tsx はすべて）ので、サイドバーが古くても権限の無い画面は表示されない。
 - 権限は `app/(main)/_lib/permission.ts` のビットマスクとビットAND演算で判定する。`User.permission` は `juchu`・`nyushuko`・`masters`・`loginSetting`・`ht`・`schedule` の6カテゴリに分かれた数値で、定数側は `juchu_ref: 1`／`juchu_upd: 2`／`nyushuko_*: 4,8`／`mst_*: 16,32`／`ht: 64`／`login: 128`／`sche_upd: 256`／`system: 65535`。`*_full` の定数は `*_ref` と `*_upd` のビットOR。
 
 **排他ロック**: `app/(main)/_lib/lock.ts` は、`t-lock` テーブルを使った編集画面向けの排他制御（悲観的ロック）を実装している。ロック種別は `LOCK_SHUBETU.juchuHead`（`app/_lib/constants.ts`）の1種類だけで、**受注ヘッダー単位**でロックする。使っているのは受注画面・受注機材明細（メイン・返却・キープ）・受注車両明細の5画面で、どれも同じ受注ヘッダーのロックを取り合う（見積にはロックが無い）。`lockCheck` は10分間有効なロックを新規作成/更新するか、他ユーザーが保持中であれば既存ロック情報を返す。`lockRelease` はロックを解除する。複数ユーザーが同時に開き得る編集画面を新規追加する際は、この仕組みを使うこと。

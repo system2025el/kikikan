@@ -29,7 +29,6 @@ type MenuItem = {
 /* 受注管理リスト */
 const orderList: MenuItem[] = [
   { name: '新規受注', url: '/order/0/edit' },
-  // { name: '受注一覧', url: '/order-list' },
   { name: '受注明細一覧', url: '/eqpt-order-list' },
   { name: '見積一覧', url: '/quotation-list' },
   { name: '請求一覧', url: '/bill-list' },

@@ -150,7 +150,10 @@ export const updateBase = async (rawData: BasesMasterDialogValues, id: number, u
   };
 
   try {
-    await upDateShozokuDB(updateData);
+    const { error } = await upDateShozokuDB(updateData);
+    if (error) {
+      throw new Error('[upDateShozokuDB] DBエラー:', { cause: error });
+    }
     await revalidatePath('/bases-master');
   } catch (e) {
     if (e instanceof Error) {

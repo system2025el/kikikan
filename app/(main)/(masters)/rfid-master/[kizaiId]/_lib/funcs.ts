@@ -175,7 +175,7 @@ export const addNewRfid = async (data: RfidsMasterDialogValues, kizaiId: number,
   };
   const connection = await pool.connect();
   try {
-    connection.query('BEGIN');
+    await connection.query('BEGIN');
     await insertNewRfid(insertData, connection);
     await insertNewRfidSts(insertStsData, connection);
     await updateMasterUpdates('m_rfid', connection);
@@ -254,7 +254,7 @@ export const updateRfid = async (
 
   const connection = await pool.connect();
   try {
-    connection.query('BEGIN');
+    await connection.query('BEGIN');
     if (masterChanged) {
       await upDateRfidDB(updateData, connection);
       await updateMasterUpdates('m_rfid', connection);

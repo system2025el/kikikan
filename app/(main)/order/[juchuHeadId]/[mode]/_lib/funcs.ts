@@ -1423,7 +1423,6 @@ export const copyJuchuKizaiHeadMeisaiToNewJuchu = async (
     await connection.query('COMMIT');
 
     await revalidateCopyPaths();
-    await revalidatePath('/order-list');
 
     return newJuchuHeadId;
   } catch (e) {
