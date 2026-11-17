@@ -1,4 +1,4 @@
-'use server';
+import 'server-only';
 
 import { PoolClient } from 'pg';
 
@@ -158,7 +158,7 @@ export const updateRfidTagDelFlgs = async (
 export const updRfidDelFlgDB = async (tagId: string, data: { del_flg: number; upd_dat: string; upd_user: string }) => {
   const supabase = await createClient();
   try {
-    return await supabase.schema(SCHEMA).from('m_rfid').update(data).like('rfid_tag_id', tagId);
+    return await supabase.schema(SCHEMA).from('m_rfid').update(data).eq('rfid_tag_id', tagId);
   } catch (e) {
     throw new Error('[updRfidDelFlgDB] DBエラー:', { cause: e });
   }

@@ -170,23 +170,11 @@ export const NyukoDetail = (props: {
       </Box>
       <Paper variant="outlined">
         <Box display={'flex'} justifyContent={'space-between'} alignItems="center" px={2}>
-          <Typography fontSize={'large'} px={1} sx={{ backgroundColor: sagyoKbnColors.nyukoCount }}>
-            入庫明細(カウント)
-          </Typography>
-          <Grid2 container alignItems={'center'} spacing={2}>
-            {nyukoDetailData.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.return && (
-              <Typography color="red">※返却時は到着ボタンで親の入庫明細の数量に反映されます。</Typography>
-            )}
-            {fixSts === FIX_STS.all && (
-              <Typography px={1} sx={{ backgroundColor: fixStsColors.all }}>
-                到着済
-              </Typography>
-            )}
-            {fixSts === FIX_STS.partial && (
-              <Typography px={1} sx={{ backgroundColor: fixStsColors.partial }}>
-                一部到着済
-              </Typography>
-            )}
+          {/* 到着・到着解除は「閉じる」と離すため、タイトルの右隣に置く（誤タップ対策） */}
+          <Box display={'flex'} alignItems={'center'} gap={2}>
+            <Typography fontSize={'large'} px={1} sx={{ backgroundColor: sagyoKbnColors.nyukoCount }}>
+              入庫明細(カウント)
+            </Typography>
             <Button
               onClick={handleArrivalOpen}
               disabled={
@@ -205,6 +193,21 @@ export const NyukoDetail = (props: {
             >
               到着解除
             </Button>
+          </Box>
+          <Grid2 container alignItems={'center'} spacing={2}>
+            {nyukoDetailData.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.return && (
+              <Typography color="red">※返却時は到着ボタンで親の入庫明細の数量に反映されます。</Typography>
+            )}
+            {fixSts === FIX_STS.all && (
+              <Typography px={1} sx={{ backgroundColor: fixStsColors.all }}>
+                到着済
+              </Typography>
+            )}
+            {fixSts === FIX_STS.partial && (
+              <Typography px={1} sx={{ backgroundColor: fixStsColors.partial }}>
+                一部到着済
+              </Typography>
+            )}
           </Grid2>
         </Box>
         <Divider />

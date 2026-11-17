@@ -1,10 +1,9 @@
-'use server';
+import 'server-only';
 
 import dayjs from 'dayjs';
 
 import { escapeLikeString } from '@/app/(main)/_lib/escape-string';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
-import { OrderSearchValues } from '@/app/(main)/order-list/_lib/types';
 
 import pool from '../postgres';
 import { SCHEMA } from '../schema';

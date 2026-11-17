@@ -1,4 +1,4 @@
-'use server';
+import 'server-only';
 
 import { BasesMasterDialogValues } from '@/app/(main)/(masters)/bases-master/_lib/types';
 
@@ -101,7 +101,7 @@ export const insertNewShozoku = async (data: BasesMasterDialogValues, user: stri
 export const upDateShozokuDB = async (data: MShozokuDBValues) => {
   const supabase = await createClient();
   try {
-    await supabase
+    return await supabase
       .schema(SCHEMA)
       .from('m_shozoku')
       .update({ ...data })

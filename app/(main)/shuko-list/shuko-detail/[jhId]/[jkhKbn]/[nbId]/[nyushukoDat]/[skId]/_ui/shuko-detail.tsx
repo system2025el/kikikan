@@ -391,6 +391,8 @@ export const ShukoDetail = (props: {
           mem2: '',
           juchuMeisaiDelFlg: 0,
           planChgFlg: 0,
+          // コンテナは課を持たない（m_kizai では所属無し）ので色を付けない
+          sectionNum: null,
           saveFlag: false,
           delFlag: false,
         }));
@@ -515,29 +517,20 @@ export const ShukoDetail = (props: {
       </Box>
       <Paper variant="outlined">
         <Box display={'flex'} justifyContent={'space-between'} alignItems="center" px={2}>
-          <Typography
-            fontSize={'large'}
-            px={1}
-            sx={{
-              backgroundColor: isConfirmation ? sagyoKbnColors.shukoConfirmation : sagyoKbnColors.shukoPicking,
-              color: isConfirmation ? 'black' : 'white',
-            }}
-          >
-            {jizen
-              ? `事前明細(${isConfirmation ? '事前最終確認' : '事前ピッキング'})`
-              : `出庫明細(${isConfirmation ? '最終確認' : 'ピッキング'})`}
-          </Typography>
-          <Grid2 container alignItems={'center'} spacing={2}>
-            {fixSts === FIX_STS.all && (
-              <Typography px={1} sx={{ backgroundColor: fixStsColors.all }}>
-                出発済
-              </Typography>
-            )}
-            {fixSts === FIX_STS.partial && (
-              <Typography px={1} sx={{ backgroundColor: fixStsColors.partial }}>
-                一部出発済
-              </Typography>
-            )}
+          {/* 出発・出発解除は「閉じる」と離すため、タイトルの右隣に置く（誤タップ対策） */}
+          <Box display={'flex'} alignItems={'center'} gap={2}>
+            <Typography
+              fontSize={'large'}
+              px={1}
+              sx={{
+                backgroundColor: isConfirmation ? sagyoKbnColors.shukoConfirmation : sagyoKbnColors.shukoPicking,
+                color: isConfirmation ? 'black' : 'white',
+              }}
+            >
+              {jizen
+                ? `事前明細(${isConfirmation ? '事前最終確認' : '事前ピッキング'})`
+                : `出庫明細(${isConfirmation ? '最終確認' : 'ピッキング'})`}
+            </Typography>
             <Button
               onClick={() => setDepartureOpen(true)}
               // 未保存のコンテナの変更があるあいだは出発できない
@@ -559,6 +552,18 @@ export const ShukoDetail = (props: {
             >
               出発解除
             </Button>
+          </Box>
+          <Grid2 container alignItems={'center'} spacing={2}>
+            {fixSts === FIX_STS.all && (
+              <Typography px={1} sx={{ backgroundColor: fixStsColors.all }}>
+                出発済
+              </Typography>
+            )}
+            {fixSts === FIX_STS.partial && (
+              <Typography px={1} sx={{ backgroundColor: fixStsColors.partial }}>
+                一部出発済
+              </Typography>
+            )}
           </Grid2>
         </Box>
         <Divider />
@@ -581,6 +586,15 @@ export const ShukoDetail = (props: {
               <Typography mr={4}>{jizen ? '事前日時' : '出庫日時'}</Typography>
               <DateTime value={shukoDetailData.nyushukoDat ? new Date(shukoDetailData.nyushukoDat) : null} disabled />
             </Box>
+            {jizen && (
+              <Box display={'flex'} alignItems={'center'}>
+                <Typography mr={4}>出庫日時</Typography>
+                <DateTime
+                  value={shukoDetailData.honbanShukoDat ? new Date(shukoDetailData.honbanShukoDat) : null}
+                  disabled
+                />
+              </Box>
+            )}
             <Box display={'flex'} alignItems={'center'}>
               <Typography mr={4}>出庫場所</Typography>
               <TextField

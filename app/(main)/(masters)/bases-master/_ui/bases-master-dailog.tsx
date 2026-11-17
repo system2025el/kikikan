@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Grid2 } from '@mui/material';
+import { Grid2, Snackbar } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { TextFieldElement, useForm } from 'react-hook-form-mui';
 
@@ -185,62 +185,72 @@ export const BasesMasterDialog = ({
   if (error) throw error;
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <MasterDialogTitle
-        user={user}
-        editable={editable}
-        handleEditable={() => setEditable(true)}
-        handleClose={handleClickClose}
-        dialogTitle="所属マスタ登録"
-        isDirty={isDirty}
-        isNew={isNew}
-        push={isLoading}
-        setAction={setAction}
-        isDeleted={isDeleted!}
+    <>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <MasterDialogTitle
+          user={user}
+          editable={editable}
+          handleEditable={() => setEditable(true)}
+          handleClose={handleClickClose}
+          dialogTitle="所属マスタ登録"
+          isDirty={isDirty}
+          isNew={isNew}
+          push={isLoading}
+          setAction={setAction}
+          isDeleted={isDeleted!}
+        />
+        {isLoading ? (
+          <Loading />
+        ) : (
+          <>
+            <Grid2 container spacing={1} p={5} direction={'column'} justifyContent={'center'} width={'100%'}>
+              <FormBox formItem={formItems[0]} required>
+                <TextFieldElement
+                  name="shozokuNam"
+                  control={control}
+                  label={editable ? formItems[0].exsample : ''}
+                  fullWidth
+                  sx={{ maxWidth: '90%' }}
+                  disabled={editable ? false : true}
+                />
+              </FormBox>
+              <FormBox formItem={formItems[2]}>
+                <TextFieldElement
+                  multiline
+                  name="mem"
+                  control={control}
+                  label={editable ? formItems[2].exsample : ''}
+                  fullWidth
+                  minRows={3}
+                  maxRows={3}
+                  sx={{ maxWidth: '90%' }}
+                  disabled={editable ? false : true}
+                />
+              </FormBox>
+            </Grid2>
+            <IsDirtyAlertDialog
+              open={dirtyOpen}
+              handleCloseDirty={() => setDirtyOpen(false)}
+              handleCloseAll={handleCloseDialog}
+            />
+            <WillDeleteAlertDialog
+              open={deleteOpen}
+              data={name}
+              push={isLoading}
+              handleCloseDelete={() => setDeleteOpen(false)}
+              handleConfirmDelete={handleConfirmDelete}
+            />
+          </>
+        )}
+      </form>
+      <Snackbar
+        open={snackBarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackBarOpen(false)}
+        message={snackBarMessage}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        sx={{ marginTop: '65px' }}
       />
-      {isLoading ? (
-        <Loading />
-      ) : (
-        <>
-          <Grid2 container spacing={1} p={5} direction={'column'} justifyContent={'center'} width={'100%'}>
-            <FormBox formItem={formItems[0]} required>
-              <TextFieldElement
-                name="shozokuNam"
-                control={control}
-                label={editable ? formItems[0].exsample : ''}
-                fullWidth
-                sx={{ maxWidth: '90%' }}
-                disabled={editable ? false : true}
-              />
-            </FormBox>
-            <FormBox formItem={formItems[2]}>
-              <TextFieldElement
-                multiline
-                name="mem"
-                control={control}
-                label={editable ? formItems[2].exsample : ''}
-                fullWidth
-                minRows={3}
-                maxRows={3}
-                sx={{ maxWidth: '90%' }}
-                disabled={editable ? false : true}
-              />
-            </FormBox>
-          </Grid2>
-          <IsDirtyAlertDialog
-            open={dirtyOpen}
-            handleCloseDirty={() => setDirtyOpen(false)}
-            handleCloseAll={handleCloseDialog}
-          />
-          <WillDeleteAlertDialog
-            open={deleteOpen}
-            data={name}
-            push={isLoading}
-            handleCloseDelete={() => setDeleteOpen(false)}
-            handleConfirmDelete={handleConfirmDelete}
-          />
-        </>
-      )}
-    </form>
+    </>
   );
 };

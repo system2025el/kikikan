@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Grid2 } from '@mui/material';
+import { Grid2, Snackbar } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { TextFieldElement, useForm } from 'react-hook-form-mui';
 
@@ -44,6 +44,10 @@ export const SectionsMasterDialog = ({
   const [deleteOpen, setDeleteOpen] = useState(false);
   /* submit時のactions (save, delete) */
   const [action, setAction] = useState<'save' | 'delete' | 'restore' | undefined>(undefined);
+  // スナックバー制御
+  const [snackBarOpen, setSnackBarOpen] = useState(false);
+  // スナックバーメッセージ
+  const [snackBarMessage, setSnackBarMessage] = useState('');
 
   /* useForm ----------------------------------------- */
   const {
@@ -69,17 +73,31 @@ export const SectionsMasterDialog = ({
     setIsLoading(true);
     if (sectionId === FAKE_NEW_ID) {
       // 新規の時
-      await addNewSection(data, user?.name ?? '');
+      try {
+        await addNewSection(data, user?.name ?? '');
+      } catch (e) {
+        setSnackBarMessage('保存に失敗しました');
+        setSnackBarOpen(true);
+        return;
+      } finally {
+        setIsLoading(false);
+      }
       handleCloseDialog();
-      setIsLoading(false);
       refetchSections();
     } else {
       // 更新の時
       if (action === 'save') {
         // 保存終了ボタン押したとき
-        await updateSection(data, sectionId, user?.name ?? '');
+        try {
+          await updateSection(data, sectionId, user?.name ?? '');
+        } catch (e) {
+          setSnackBarMessage('保存に失敗しました');
+          setSnackBarOpen(true);
+          return;
+        } finally {
+          setIsLoading(false);
+        }
         handleCloseDialog();
-        setIsLoading(false);
         refetchSections();
       } else if (action === 'delete') {
         setIsLoading(false);
@@ -89,9 +107,16 @@ export const SectionsMasterDialog = ({
       } else if (action === 'restore') {
         // 有効化ボタン
         const values = await getValues();
-        await updateSection({ ...values, delFlg: false }, sectionId, user?.name ?? '');
+        try {
+          await updateSection({ ...values, delFlg: false }, sectionId, user?.name ?? '');
+        } catch (e) {
+          setSnackBarMessage('有効化に失敗しました');
+          setSnackBarOpen(true);
+          return;
+        } finally {
+          setIsLoading(false);
+        }
         handleCloseDialog();
-        setIsLoading(false);
         refetchSections();
       }
     }
@@ -117,10 +142,17 @@ export const SectionsMasterDialog = ({
   const handleConfirmDelete = async () => {
     setIsLoading(true);
     const values = await getValues();
-    await updateSection({ ...values, delFlg: true }, sectionId, user?.name ?? '');
-    setDeleteOpen(false);
+    try {
+      await updateSection({ ...values, delFlg: true }, sectionId, user?.name ?? '');
+    } catch (e) {
+      setSnackBarMessage('無効化に失敗しました');
+      setSnackBarOpen(true);
+      return;
+    } finally {
+      setDeleteOpen(false);
+      setIsLoading(false);
+    }
     handleCloseDialog();
-    setIsLoading(false);
     await refetchSections();
   };
 
@@ -213,6 +245,14 @@ export const SectionsMasterDialog = ({
           </>
         )}
       </form>
+      <Snackbar
+        open={snackBarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackBarOpen(false)}
+        message={snackBarMessage}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        sx={{ marginTop: '65px' }}
+      />
     </>
   );
 };

@@ -1,4 +1,4 @@
-'use server';
+import 'server-only';
 
 import dayjs from 'dayjs';
 
@@ -728,12 +728,13 @@ export const selectUnbilledCusts = async (queries: UnbilledCustsSearchValues) =>
       default:
         break;
     }
-
-    if (kokyaku && kokyaku.trim() !== '') {
-      const escapedQuery = escapeLikeString(kokyaku);
-      builder.ilike('kokyaku_nam', `%${escapedQuery}%`);
-    }
   }
+
+  if (kokyaku && kokyaku.trim() !== '') {
+    const escapedQuery = escapeLikeString(kokyaku);
+    builder.ilike('kokyaku_nam', `%${escapedQuery}%`);
+  }
+
   try {
     return await builder;
   } catch (e) {

@@ -110,6 +110,23 @@ export const sagyoKbnColors = {
   ido: 'rgba(171, 71, 188, 1)',
 };
 
+/**
+ * 課の色（入出庫明細の機材名の背景。キーは m_section.section_id = m_kizai.section_num）
+ * 所属無し（0）・未設定・ここに無い課は色なし（行の背景のまま）
+ */
+export const sectionColors: Record<number, string> = {
+  /** Ⅰ課 */
+  1: '#FFBCD9',
+  /** Ⅱ課 */
+  2: '#FDFD96',
+  /** Ⅲ課 */
+  3: '#DCD0FF',
+  /** Ⅳ課 */
+  4: '#80D2CB',
+  /** Ⅴ課 */
+  5: '#92B5F2',
+};
+
 export const weeklyColors = {
   /**
    * 積み

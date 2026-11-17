@@ -23,10 +23,8 @@ import { RadioButtonGroup, SelectElement, TextFieldElement } from 'react-hook-fo
 import { permission } from '../../_lib/permission';
 import { FormDateX } from '../../_ui/date';
 import { SelectTypes } from '../../_ui/form-box';
-import { getCustomerSelection } from '../../(masters)/_lib/funcs';
-import { getLocsSelection } from '../../(masters)/locations-master/_lib/funcs';
 import { DEFAULT_SEARCH_VALUES, radioData } from '../_lib/datas';
-import { getFilteredOrderList, getUsersSelection } from '../_lib/funcs';
+import { getFilteredOrderList } from '../_lib/funcs';
 import { EqptOrderListTableValues, EqptOrderSearchValues } from '../_lib/types';
 import { EqptOrderTable } from './eqpt-order-table';
 
@@ -43,7 +41,18 @@ const RADIO_TO_SORT: Record<string, string> = {
  * @param param0
  * @returns {JSX.Element} 受注明細一覧画面コンポーネント
  */
-export const EqptOrderList = () => {
+export const EqptOrderList = ({
+  customers,
+  locs,
+  users,
+}: {
+  /** 顧客の選択肢（page.tsx で取得） */
+  customers: SelectTypes[];
+  /** 公演場所の選択肢（page.tsx で取得） */
+  locs: SelectTypes[];
+  /** 入力者の選択肢（page.tsx で取得） */
+  users: SelectTypes[];
+}) => {
   /* useState -------------------------------------------- */
   /* 受注一覧 */
   const [orderList, setOrderList] = useState<EqptOrderListTableValues[]>([]);
@@ -51,12 +60,6 @@ export const EqptOrderList = () => {
   const [page, setPage] = useState(1);
   /* ローディングかどうか */
   const [isLoading, setIsLoading] = useState(true);
-  /** */
-  const [customers, setCustomers] = useState<SelectTypes[] | undefined>([]);
-  /** */
-  const [locs, setLocs] = useState<SelectTypes[] | undefined>([]);
-  /** 入力者選択肢 */
-  const [users, setUsers] = useState<SelectTypes[] | undefined>([]);
   // エラーハンドリング
   const [error, setError] = useState<Error | null>(null);
 
@@ -95,16 +98,8 @@ export const EqptOrderList = () => {
 
     const getList = async (data: EqptOrderSearchValues) => {
       try {
-        const [o, c, l, u] = await Promise.all([
-          getFilteredOrderList(data),
-          getCustomerSelection(),
-          getLocsSelection(),
-          getUsersSelection(),
-        ]);
+        const o = await getFilteredOrderList(data);
         setOrderList(o);
-        setCustomers(c);
-        setLocs(l);
-        setUsers(u);
         setIsLoading(false);
       } catch (e) {
         setError(e instanceof Error ? e : new Error(String(e)));

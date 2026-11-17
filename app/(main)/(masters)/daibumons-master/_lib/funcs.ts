@@ -121,7 +121,10 @@ export const updateDaibumon = async (rawData: DaibumonsMasterDialogValues, id: n
     upd_user: user,
   };
   try {
-    await updateDaibumonDB(updateData);
+    const { error } = await updateDaibumonDB(updateData);
+    if (error) {
+      throw new Error('[updateDaibumonDB] DBエラー:', { cause: error });
+    }
     await revalidatePath('/bumons-master');
     await revalidatePath('/daibumons-master');
     await revalidatePath('/eqpt-master');

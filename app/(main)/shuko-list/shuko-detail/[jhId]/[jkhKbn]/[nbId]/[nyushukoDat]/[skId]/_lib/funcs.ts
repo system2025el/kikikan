@@ -218,6 +218,7 @@ const toShukoDetailTableValues = (data: Awaited<ReturnType<typeof selectNyushuko
       mem2: d.mem2 ?? '',
       juchuMeisaiDelFlg: d.juchu_meisai_del_flg ?? 0,
       planChgFlg: d.plan_chg_flg ?? 0,
+      sectionNum: d.section_num,
       saveFlag: true,
       delFlag: false,
     })

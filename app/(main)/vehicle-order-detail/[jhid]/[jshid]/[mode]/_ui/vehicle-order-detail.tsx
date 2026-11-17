@@ -53,7 +53,6 @@ import { DateTime } from '@/app/(main)/_ui/date';
 import { IsDirtyAlertDialog, useDirty } from '@/app/(main)/_ui/dirty-context';
 import { selectNone, SelectTypes } from '@/app/(main)/_ui/form-box';
 import { LoadingOverlay } from '@/app/(main)/_ui/loading';
-import { getDetailJuchuHead } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
 import { DetailOerValues } from '@/app/(main)/(eq-order-detail)/_lib/types';
 import {
   IdoJuchuKizaiMeisaiValues,
@@ -63,7 +62,6 @@ import {
   JuchuKizaiMeisaiValues,
 } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
-import { getBasesSelections } from '@/app/(main)/(masters)/bases-master/_lib/funcs';
 import { StockTableValues } from '@/app/(main)/stock/_lib/types';
 import {
   JuchuSharyoHeadSchema,
@@ -73,15 +71,22 @@ import {
 import {
   addNewJuchuSharyoHead,
   getChosenJuchuSharyoMeisais,
-  getVehsSelections,
+  getVehicleLockReloadData,
   updateJuchuSharyoHead,
 } from '../_lib/funcs';
+
+/** 入出庫区分の選択肢 */
+const KBN_OPTIONS: SelectTypes[] = [
+  { id: 'shuko', label: '出庫' },
+  { id: 'nyuko', label: '入庫' },
+];
 
 const VehicleOrderDetail = ({
   user,
   juchuHeadData,
   sharyoHeadId,
   edit,
+  options: optionsProp,
 }: {
   user: User;
   juchuHeadData: DetailOerValues;
@@ -95,6 +100,8 @@ const VehicleOrderDetail = ({
   juchuHonbanbiData: JuchuKizaiHonbanbiValues[] | undefined;
   edit: boolean;
   fixFlag: boolean;
+  /** 選択肢（車両・入出庫場所。page.tsx で取得） */
+  options: { vehs: SelectTypes[]; basho: SelectTypes[] };
 }) => {
   /** ルーター */
   const router = useRouter();
@@ -104,12 +111,8 @@ const VehicleOrderDetail = ({
   /* useState ----------------------------------------------------- */
   /** 受注ヘッダーデータ */
   const [juchuHead, setJuchuHead] = useState(juchuHeadData);
-  /** 選択肢 */
-  const [options, setOptions] = useState<{ kbn: SelectTypes[]; basho: SelectTypes[]; vehs: SelectTypes[] }>({
-    kbn: [],
-    basho: [],
-    vehs: [],
-  });
+  /** 選択肢（車両・入出庫場所は page.tsx で取得） */
+  const options = { ...optionsProp, kbn: KBN_OPTIONS };
   /** 受注ヘッダーアコーディオン制御 */
   const [juchuExpanded, setJuchuExpanded] = useState<boolean>(false);
   /** 受注車両ヘッダーアコーディオン制御 */
@@ -191,17 +194,14 @@ const VehicleOrderDetail = ({
       setLockOpen(true);
       setIsLoading(true);
 
-      /** 受注ヘッダーデータ */
-      const juchuHead = await getDetailJuchuHead(getValues('juchuHeadId'));
+      // 受注ヘッダーデータ、受注車両明細（1回の Server Action で取る。選択肢は page.tsx で取得済み）
+      const { juchuHead, meisais } = await getVehicleLockReloadData(getValues('juchuHeadId'), sharyoHeadId);
       if (!juchuHead) {
         return <div>受注情報が見つかりません。</div>;
       }
-      // データ取得実行
-      getOptions();
       setJuchuHead(juchuHead);
 
-      if (sharyoHeadId > 0) {
-        const meisais = await getChosenJuchuSharyoMeisais(juchuHead.juchuHeadId, sharyoHeadId);
+      if (sharyoHeadId > 0 && meisais) {
         reset(meisais);
         setCurrentMeisai(meisais);
       } else {
@@ -242,24 +242,6 @@ const VehicleOrderDetail = ({
       return false;
     } catch (e) {
       throw e;
-    }
-  };
-
-  /** 選択肢の取得 */
-  const getOptions = async () => {
-    try {
-      const v = await getVehsSelections();
-      const base = await getBasesSelections();
-      setOptions({
-        kbn: [
-          { id: 'shuko', label: '出庫' },
-          { id: 'nyuko', label: '入庫' },
-        ],
-        basho: base,
-        vehs: v,
-      });
-    } catch (e) {
-      setIsError(e instanceof Error ? e : new Error(String(e)));
     }
   };
 
@@ -420,9 +402,7 @@ const VehicleOrderDetail = ({
     //   asyncProcess();
     // }
 
-    // データ取得実行
-    getOptions();
-    // 新規以外はデータ取得してフォームにresetする
+    // 新規以外はデータ取得してフォームにresetする（選択肢は page.tsx で取得済み）
     if (sharyoHeadId > 0) {
       getMeisais();
       // setTimeout(() => {

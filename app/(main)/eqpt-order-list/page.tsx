@@ -4,6 +4,9 @@ import { redirect } from 'next/navigation';
 
 import { getCurrentUser } from '../_lib/funcs';
 import { permission } from '../_lib/permission';
+import { getCustomerSelection } from '../(masters)/_lib/funcs';
+import { getLocsSelection } from '../(masters)/locations-master/_lib/funcs';
+import { getUsersSelection } from './_lib/funcs';
 import { EqptOrderList } from './_ui/eqpt-order-list';
 
 export const metadata: Metadata = {
@@ -27,7 +30,11 @@ const Page = async () => {
   if (!hasPermission) {
     return <Typography>このページを閲覧する権限がありません。</Typography>;
   }
-  return <EqptOrderList />;
+
+  // 検索条件の選択肢はサーバー側で取って渡す（画面から取ると Server Action の往復が一覧の取得の前に並ぶため）
+  const [customers, locs, users] = await Promise.all([getCustomerSelection(), getLocsSelection(), getUsersSelection()]);
+
+  return <EqptOrderList customers={customers} locs={locs} users={users} />;
 };
 
 export default Page;

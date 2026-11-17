@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { LoanList } from '@/app/(main)/loan-situation/_ui/loan-list';
 
 import { getCurrentUser } from '../_lib/funcs';
+import { getSectionShortSelections } from '../(masters)/sections-master/_lib/funcs';
 
 export const metadata: Metadata = {
   title: '貸出状況一覧',
@@ -16,7 +17,10 @@ const Page = async () => {
     await redirect('/login');
     return;
   }
-  return <LoanList />;
+  // 検索条件の選択肢（課）はサーバー側で取って渡す（画面から取ると Server Action の往復が一覧の取得と順番に並ぶため）
+  const sect = await getSectionShortSelections();
+
+  return <LoanList options={{ sect }} />;
 };
 
 export default Page;

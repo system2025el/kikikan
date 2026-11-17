@@ -1,4 +1,4 @@
-'use server';
+import 'server-only';
 
 import { count } from 'console';
 import { PoolClient } from 'pg';

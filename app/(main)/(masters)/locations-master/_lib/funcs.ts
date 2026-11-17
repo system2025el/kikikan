@@ -167,7 +167,10 @@ export const updateLoc = async (data: LocsMasterDialogValues, id: number, user: 
     upd_user: user,
   };
   try {
-    await upDateLocDB(updateData);
+    const { error } = await upDateLocDB(updateData);
+    if (error) {
+      throw new Error('[upDateLocDB] DBエラー:', { cause: error });
+    }
     await revalidatePath('/locations-master');
   } catch (e) {
     if (e instanceof Error) {

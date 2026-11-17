@@ -10,7 +10,6 @@ import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
-  Autocomplete,
   Box,
   Button,
   Container,
@@ -32,6 +31,7 @@ import { toJapanTimeString, toJapanYMDString } from '@/app/(main)/_lib/date-conv
 import { FormDateX } from '@/app/(main)/_ui/date';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { LoadingOverlay } from '@/app/(main)/_ui/loading';
+import { PrefilledAutocomplete } from '@/app/(main)/_ui/prefilled-autocomplete';
 
 import { addLock, delLock, getLock } from '../../_lib/funcs';
 import { useUnsavedChangesWarning } from '../../_lib/hook';
@@ -39,8 +39,6 @@ import { permission } from '../../_lib/permission';
 import { LockValues, User } from '../../_lib/types';
 import { IsDirtyAlertDialog, useDirty } from '../../_ui/dirty-context';
 import { FAKE_NEW_ID } from '../../(masters)/_lib/constants';
-import { getCustomerSelection } from '../../(masters)/_lib/funcs';
-import { getMituStsSelection, getUsersSelection } from '../_lib/funcs';
 import { usePdf } from '../_lib/hooks/usePdf';
 import { JuchuValues, QuotHeadSchema, QuotHeadValues } from '../_lib/types';
 import { addQuot } from '../create/_lib/funcs';
@@ -138,19 +136,22 @@ export const Quotation = ({
   order,
   isNew,
   quot,
+  options,
 }: {
   user: User;
   order: JuchuValues;
   isNew: boolean;
   quot: QuotHeadValues;
+  /** 選択肢（page.tsx で取得） */
+  options: { users: SelectTypes[]; mituSts: SelectTypes[]; custs: SelectTypes[] };
 }) => {
   /** ページのルーター */
   const router = useRouter();
   /** 全体の編集状態 */
   const editable = !!((user?.permission.juchu ?? 0) & permission.juchu_upd);
   /* useState ----------------------------------------------------------------- */
-  /** ローディング中かどうか */
-  const [isLoading, setIsLoading] = useState(true);
+  /** ローディング中かどうか（選択肢は page.tsx で取得済みなので、開いた時点では読み込み中ではない） */
+  const [isLoading, setIsLoading] = useState(false);
   /** 処理中かどうか */
   const [isProcessing, setIsProcessing] = useState(false);
   // エラーハンドリング
@@ -159,12 +160,6 @@ export const Quotation = ({
   const [juchuExpanded, setJuchuExpanded] = useState(false);
   /** 見積ヘッダアコーディオン制御 */
   const [mitsuExpanded, setMitsuExpanded] = useState(true);
-  /** 選択肢 */
-  const [options, setOptions] = useState<{ users: SelectTypes[]; mituSts: SelectTypes[]; custs: SelectTypes[] }>({
-    users: [],
-    mituSts: [],
-    custs: [],
-  });
   /** テーブル追加ダイアログ開閉 */
   const [kizaiMeisaiaddDialogOpen, setKizaimeisaiaddDialogOpen] = useState(false);
   /** テーブル自動生成ダイアログ開閉 */
@@ -185,7 +180,9 @@ export const Quotation = ({
     mode: 'onChange',
     reValidateMode: 'onChange',
     resolver: zodResolver(QuotHeadSchema),
-    defaultValues: { ...quot },
+    // 新規（コピーを含む）なら入力者はログインアカウント。
+    // 表示後に setValue すると、開いた直後に入力者が切り替わって見えるので初期値に入れる
+    defaultValues: isNew && user?.name ? { ...quot, nyuryokuUser: user.name } : { ...quot },
   });
   const {
     control,
@@ -216,8 +213,15 @@ export const Quotation = ({
       if (isNew) {
         // 登録された見積ヘッダID
         const id = await addQuot(data, user?.name ?? '');
-        //setIsLoading(true);
+        setSnackBarMessage('保存しました');
+        setSnackBarOpen(true);
+        reset(data);
+        // router.replace は移動を始めるだけで、編集画面が出るまで待たない。
+        // ここでローディングを消すと、切り替わるまでの間に作成画面を触れてしまい、
+        // もう一度保存すると二重に登録される。ローディングは消さずに抜ける
+        // （作成画面と編集画面は別ページなので、切り替わると作成画面ごと消える）
         router.replace(`/quotation-list/edit/${id}`);
+        return;
       } else {
         const result = await updateQuot(data, user?.name ?? '');
       }
@@ -232,44 +236,6 @@ export const Quotation = ({
   };
 
   /* useEffect ------------------------------------------------------------ */
-  /** 初期表示とログインユーザを取得とセット */
-  useEffect(() => {
-    let cancelled = false;
-
-    const getOptions = async () => {
-      try {
-        // 選択肢取得
-        const [users, mituSts, custs] = await Promise.all([
-          getUsersSelection(),
-          getMituStsSelection(),
-          getCustomerSelection(),
-        ]);
-        if (cancelled) return;
-        setOptions({ users: users, mituSts: mituSts, custs: custs });
-      } catch (e) {
-        if (cancelled) return;
-        setIsError(e instanceof Error ? e : new Error(String(e)));
-      } finally {
-        if (!cancelled) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    if (isNew) {
-      // 新規なら入力者をログインアカウントから取得する
-      if (user?.name) {
-        setValue('nyuryokuUser', user.name);
-      }
-    }
-
-    getOptions();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [user, isNew, quot, setValue]);
-
   // 変更あるかどうか
   useEffect(() => {
     const dirty = isDirty;
@@ -577,7 +543,7 @@ export const Quotation = ({
                       control={control}
                       disabled={!editable}
                       render={({ field }) => (
-                        <Autocomplete
+                        <PrefilledAutocomplete
                           {...field}
                           options={options.users}
                           // getOptionLabel={(option) => option.label}
@@ -608,7 +574,7 @@ export const Quotation = ({
                       control={control}
                       disabled={!editable}
                       render={({ field, fieldState }) => (
-                        <Autocomplete
+                        <PrefilledAutocomplete
                           {...field}
                           onChange={(_, value) => {
                             const label = typeof value === 'string' ? value : (value?.label ?? '');

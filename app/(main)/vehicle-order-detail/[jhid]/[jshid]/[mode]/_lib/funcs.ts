@@ -21,8 +21,10 @@ import { selectJuchuSharyoHeadList } from '@/app/_lib/db/tables/v-juchu-sharyo-h
 import { JuchuSharyoHeadDBValues } from '@/app/_lib/db/types/t-juchu-sharyo-head-type';
 import { JuchuSharyoMeisaiDBValues } from '@/app/_lib/db/types/t-juchu-sharyo-meisai-type';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
+import { getDetailJuchuHead } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 import { fakeToNull, nullToFake } from '@/app/(main)/(masters)/_lib/value-converters';
+import { getBasesSelections } from '@/app/(main)/(masters)/bases-master/_lib/funcs';
 import { VehicleTableValues } from '@/app/(main)/order/[juchuHeadId]/[mode]/_lib/types';
 
 import { JuchuSharyoHeadValues } from './types';
@@ -99,6 +101,33 @@ export const getChosenJuchuSharyoMeisais = async (
   } catch (e) {
     throw e;
   }
+};
+
+/**
+ * 車両明細画面の選択肢（車両・入出庫場所）をまとめて取得する
+ * page.tsx（サーバー側）から呼び、画面には props で渡す
+ * （エラーの記録は中で呼ぶ各取得関数が行う）
+ * @returns vehs 車両の選択肢、basho 入出庫場所の選択肢
+ */
+export const getVehicleOrderOptions = async () => {
+  const [vehs, basho] = await Promise.all([getVehsSelections(), getBasesSelections()]);
+  return { vehs, basho };
+};
+
+/**
+ * ほかの人が編集中で編集に入れなかったときに、車両明細画面を最新の内容に読み直すためのデータを取得する
+ * （受注ヘッダー・受注車両明細）
+ * Server Action は1本ずつ順番に処理されるので、画面からは1回の呼び出しで済ませ、サーバー側で同時に取る
+ * @param juchuHeadId 受注ヘッダーid
+ * @param sharyoHeadId 受注車両ヘッダーid（0 以下は新規なので、受注車両明細は取らない）
+ * @returns juchuHead 受注ヘッダー、meisais 受注車両明細（新規のときは null）
+ */
+export const getVehicleLockReloadData = async (juchuHeadId: number, sharyoHeadId: number) => {
+  const [juchuHead, meisais] = await Promise.all([
+    getDetailJuchuHead(juchuHeadId),
+    sharyoHeadId > 0 ? getChosenJuchuSharyoMeisais(juchuHeadId, sharyoHeadId) : null,
+  ]);
+  return { juchuHead, meisais };
 };
 
 /**

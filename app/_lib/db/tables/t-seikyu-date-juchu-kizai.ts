@@ -1,4 +1,4 @@
-'use server';
+import 'server-only';
 
 import { connect } from 'http2';
 import { PoolClient } from 'pg';

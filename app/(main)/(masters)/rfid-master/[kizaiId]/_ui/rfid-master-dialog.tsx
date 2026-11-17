@@ -24,17 +24,15 @@ import {
   useForm,
 } from 'react-hook-form-mui';
 
-import { selectElNumExists, selectOneRfid } from '@/app/_lib/db/tables/v-rfid';
 import { User } from '@/app/(main)/_lib/types';
 
 import { FormBox, selectNone, SelectTypes } from '../../../../_ui/form-box';
 import { Loading } from '../../../../_ui/loading';
 import { FAKE_NEW_ID } from '../../../_lib/constants';
-import { getRfidKizaiStsSelection, getShozokuSelection } from '../../../_lib/funcs';
 import { MasterDialogTitle } from '../../../_ui/dialog-title';
 import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../../_ui/dialogs';
 import { emptyRfid, formItems } from '../_lib/datas';
-import { addNewRfid, getChosenRfid, updateRfid, updRfidDelFlg } from '../_lib/funcs';
+import { addNewRfid, getChosenRfid, getRfidTagExists, updateRfid, updRfidDelFlg } from '../_lib/funcs';
 import { RfidsMasterDialogSchema, RfidsMasterDialogValues } from '../_lib/types';
 
 export const RfidMasterDialog = ({
@@ -43,12 +41,15 @@ export const RfidMasterDialog = ({
   kizaiId,
   handleClose,
   refetchRfids,
+  selectOptions,
 }: {
   user: User;
   rfidId: string;
   kizaiId: number;
   handleClose: () => void;
   refetchRfids: () => Promise<void>;
+  /** フォーム内のセレクトの選択肢（所属・状態。RFIDマスタの page.tsx で取得） */
+  selectOptions: { shozoku: SelectTypes[]; sts: SelectTypes[] };
 }) => {
   /* useState --------------------- */
   /* rfid更新前の */
@@ -67,11 +68,6 @@ export const RfidMasterDialog = ({
   const [memOpen, setMemOpen] = useState(false);
   /* submit時のactions (save, delete) */
   const [action, setAction] = useState<'save' | 'delete' | 'restore' | undefined>(undefined);
-  /* フォーム内のセレクトoptions */
-  const [selectOptions, setSelectOptions] = useState<{
-    shozoku: SelectTypes[];
-    sts: SelectTypes[];
-  }>({ shozoku: [], sts: [] });
   /* タグID重複メッセージ */
   const [tagMessage, setTagMessage] = useState<string>('');
   /* ELナンバー重複メッセージ */
@@ -114,8 +110,8 @@ export const RfidMasterDialog = ({
         // 新規登録 -----------------------------
         //const [tagResult, elNumResult] = await Promise.all([selectOneRfid(data.tagId), selectElNumExists(data.elNum!)]);
         try {
-          const tagResult = await selectOneRfid(data.tagId);
-          if (tagResult.data) {
+          const tagExists = await getRfidTagExists(data.tagId);
+          if (tagExists) {
             setTagMessage('このRFIDはすでに存在しています');
           } else {
             setTagMessage('');
@@ -125,7 +121,7 @@ export const RfidMasterDialog = ({
           // } else {
           //   setElMessage('');
           // }
-          if (!tagResult.data /* && !elNumResult.data*/) {
+          if (!tagExists /* && !elNumResult.data*/) {
             await addNewRfid(data, kizaiId, user?.name ?? '');
             handleCloseDialog();
             refetchRfids();
@@ -218,8 +214,7 @@ export const RfidMasterDialog = ({
   /* useEffect --------------------------------------- */
   useEffect(() => {
     const getThatOneRfid = async () => {
-      const [shozoku, sts] = await Promise.all([getShozokuSelection(), getRfidKizaiStsSelection()]);
-      setSelectOptions({ shozoku: shozoku, sts: sts });
+      // 選択肢（所属・状態）は page.tsx で取得済みなので、編集のときにタグだけ取る
       if (rfidId === String(FAKE_NEW_ID)) {
         // 新規追加モード
         reset(emptyRfid); // フォーム初期化

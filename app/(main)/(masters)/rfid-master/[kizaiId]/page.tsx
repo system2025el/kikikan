@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/app/(main)/_lib/funcs';
 
 import { getRfidKizaiStsSelection, getShozokuSelection } from '../../_lib/funcs';
-import { getEqptNam, getRfidsOfTheKizai } from './_lib/funcs';
+import { getEqptNam } from './_lib/funcs';
 import { RfidMaster } from './_ui/rfid-master';
 
 export const metadata: Metadata = {
@@ -21,7 +21,17 @@ const Page = async ({ params }: { params: Promise<{ kizaiId: string }> }) => {
   }
 
   // RFIDマスタは意図的にmasters権限による閲覧制御を行わない
-  return <RfidMaster user={user} kizaiId={Number(param.kizaiId)} />;
+
+  // 機材名と選択肢（状態・所属）はサーバー側で取って渡す
+  // （画面から取ると Server Action の往復がRFID一覧の取得と順番に並ぶため。所属は登録・編集ダイアログで使う）
+  const kizaiId = Number(param.kizaiId);
+  const [kizaiNam, sts, shozoku] = await Promise.all([
+    getEqptNam(kizaiId),
+    getRfidKizaiStsSelection(),
+    getShozokuSelection(),
+  ]);
+
+  return <RfidMaster user={user} kizaiId={kizaiId} kizaiNam={kizaiNam} options={{ sts, shozoku }} />;
 };
 
 export default Page;

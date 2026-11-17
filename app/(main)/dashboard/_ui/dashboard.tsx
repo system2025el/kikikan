@@ -5,7 +5,7 @@ import { alpha, Box, Button, CircularProgress, Divider, Paper, Stack, Typography
 import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
 
-import { getMinusZaikoList, getShukoList, getVehiclesList } from '../_lib/funcs';
+import { getDashboardData } from '../_lib/funcs';
 import { DashboardTableValues, MinusZaikoValues } from '../_lib/types';
 import { EqptTable } from './eqpt-table';
 import { ShukoTable } from './shuko-table';
@@ -33,11 +33,12 @@ export const Dashboard = () => {
     setDateRange({ today: currentToday, nextWeek: currentNextWeek });
 
     try {
-      const [shukoData, ordersData, shortageData] = await Promise.all([
-        getShukoList(currentToday, 7),
-        getVehiclesList(currentToday, 7),
-        getMinusZaikoList(currentToday, 7),
-      ]);
+      // 3つの表を1回の Server Action で取得する
+      const {
+        shukoData,
+        vehiclesData: ordersData,
+        minusZaikoData: shortageData,
+      } = await getDashboardData(currentToday, 7);
 
       if (shukoData) {
         setUnsetShukoTimeOrders(shukoData);

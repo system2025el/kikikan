@@ -1,4 +1,4 @@
-'use server';
+import 'server-only';
 
 import { escapeLikeString, escapeOrLikeString } from '@/app/(main)/_lib/escape-string';
 import { CustomersMasterDialogValues } from '@/app/(main)/(masters)/customers-master/_lib/types';
@@ -149,7 +149,7 @@ export const insertNewCustomer = async (data: CustomersMasterDialogValues, user:
 export const upDateCustomerDB = async (data: MKokyakuDBValues) => {
   const supabase = await createClient();
   try {
-    await supabase
+    return await supabase
       .schema(SCHEMA)
       .from('m_kokyaku')
       .update({ ...data })

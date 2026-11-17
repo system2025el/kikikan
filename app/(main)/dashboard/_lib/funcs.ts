@@ -90,6 +90,24 @@ export const getVehiclesList = async (startDate: string, totalDays: number) => {
 };
 
 /**
+ * ダッシュボードの3つの表（出庫時刻未設定・車両未設定・マイナス在庫）をまとめて取得する (Server Action)
+ * Server Action は1本ずつ順番に処理され、1往復ごとに時間が上乗せされるので、
+ * 画面からは1回の呼び出しで済ませ、サーバー側で3つを同時に取る
+ * （エラーの記録は中で呼ぶ各取得関数が行う）
+ * @param startDate スケジュール開始日
+ * @param totalDays 取得する合計日数
+ * @returns 出庫時刻未設定・車両未設定・マイナス在庫の各リスト
+ */
+export const getDashboardData = async (startDate: string, totalDays: number) => {
+  const [shukoData, vehiclesData, minusZaikoData] = await Promise.all([
+    getShukoList(startDate, totalDays),
+    getVehiclesList(startDate, totalDays),
+    getMinusZaikoList(startDate, totalDays),
+  ]);
+  return { shukoData, vehiclesData, minusZaikoData };
+};
+
+/**
  * スケジュール期間内にマイナス在庫となる機材リストを取得する (Server Action)
  * @param startDate スケジュール開始日
  * @param totalDays 取得する合計日数

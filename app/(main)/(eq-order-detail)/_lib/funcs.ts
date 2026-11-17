@@ -815,6 +815,22 @@ export const getNyushukoFixFlag = async (juchuHeadId: number, juchuKizaiHeadId: 
 };
 
 /**
+ * 出発（出庫確定）・到着（入庫確定）の両方のフラグを取得する
+ * Server Action は1本ずつ順番に処理されるので、画面からは1回の呼び出しで済ませ、サーバー側で2つを同時に取る
+ * （エラーの記録は中で呼ぶ getNyushukoFixFlag が行う）
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @returns 出発・到着のフラグ
+ */
+export const getNyushukoFixFlags = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
+  const [shukoFixFlag, nyukoFixFlag] = await Promise.all([
+    getNyushukoFixFlag(juchuHeadId, juchuKizaiHeadId, SAGYO_KBN_ID.shukoConfirmed),
+    getNyushukoFixFlag(juchuHeadId, juchuKizaiHeadId, SAGYO_KBN_ID.nyukoConfirmed),
+  ]);
+  return { shukoFixFlag, nyukoFixFlag };
+};
+
+/**
  * ダミー入庫伝票追加
  * @param juchuHeadId 受注ヘッダーid
  * @param juchuKizaiHeadId 受注機材ヘッダーid

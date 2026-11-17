@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 
 import { getCurrentUser } from '../../_lib/funcs';
 import { permission } from '../../_lib/permission';
-import { getMaxHonbanbiQty, getOrderForQuotation } from '../_lib/funcs';
+import { getMaxHonbanbiQty, getOrderForQuotation, getQuotOptions } from '../_lib/funcs';
 import { JuchuValues, QuotHeadValues } from '../_lib/types';
 import { Quotation } from '../_ui/quotation';
 
@@ -29,14 +29,12 @@ const Page = async ({ searchParams }: { searchParams: Promise<{ [key: string]: s
     return <Typography>このページを閲覧する権限がありません。</Typography>;
   }
 
-  let order: JuchuValues | null = null;
-  let honbanbiQty: number | null = null;
-
-  if (juchuId) {
-    // もし受注IDがあれば、DBから関連データを取得して初期値とする
-    order = await getOrderForQuotation(juchuId);
-    honbanbiQty = await getMaxHonbanbiQty(juchuId);
-  }
+  // もし受注IDがあれば、DBから関連データを取得して初期値とする（選択肢と同時に取る）
+  const [order, honbanbiQty, options] = await Promise.all([
+    juchuId ? getOrderForQuotation(juchuId) : null,
+    juchuId ? getMaxHonbanbiQty(juchuId) : null,
+    getQuotOptions(),
+  ]);
 
   /** 見積初期値 */
   const quot: QuotHeadValues = order
@@ -105,6 +103,7 @@ const Page = async ({ searchParams }: { searchParams: Promise<{ [key: string]: s
         }
       }
       quot={quot}
+      options={options}
     />
   );
 };

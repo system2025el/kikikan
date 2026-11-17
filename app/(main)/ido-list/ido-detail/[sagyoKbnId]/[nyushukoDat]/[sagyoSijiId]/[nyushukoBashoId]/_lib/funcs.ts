@@ -671,6 +671,17 @@ export const getIdoEqptsForEqptSelection = async (query: string = ''): Promise<I
 };
 
 /**
+ * 移動機材選択ダイアログを開いたときのデータ（機材一覧・部門一覧）を取得する
+ * Server Action は1本ずつ順番に処理されるので、画面からは1回の呼び出しで済ませ、サーバー側で2つを同時に取る
+ * （エラーの記録は中で呼ぶ各取得関数が行う。受注機材明細・見積の機材選択ダイアログと同じ形）
+ * @returns eqpts 機材一覧（検索キーワードなし）、bumons 部門一覧
+ */
+export const getIdoEqptSelectionDialogData = async () => {
+  const [eqpts, bumons] = await Promise.all([getIdoEqptsForEqptSelection(''), getIdoBumonsForEqptSelection()]);
+  return { eqpts, bumons };
+};
+
+/**
  * 最終的に選ばれたすべの機材IDから、機材の配列を取得する関数
  * @param idList 最終的に選ばれたすべの機材IDの配列
  * @returns {IdoEqptSelection[]} 表に渡す機材の配列

@@ -9,11 +9,10 @@ import { Loading } from '@/app/(main)/_ui/loading';
 
 import { FormBox, selectNone, SelectTypes } from '../../../_ui/form-box';
 import { FAKE_NEW_ID } from '../../_lib/constants';
-import { getAllBumonDSSelections } from '../../_lib/funcs';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
 import { emptyBumon, formItems } from '../_lib/datas';
-import { addNewBumon, getChosenbumon, updateBumon } from '../_lib/funcs';
+import { addNewBumon, getBumonMasterDialogData, updateBumon } from '../_lib/funcs';
 import { BumonsMasterDialogSchema, BumonsMasterDialogValues } from '../_lib/types';
 
 /**
@@ -169,7 +168,8 @@ export const BumonsMasterDialog = ({
   useEffect(() => {
     const getThatOnebumon = async () => {
       try {
-        const a = await getAllBumonDSSelections();
+        // 選択肢と部門を1回の Server Action で取る（新規のときは部門は null）
+        const { selections: a, bumon: bumon1 } = await getBumonMasterDialogData(bumonId);
         setSelectOptions(a!);
         if (bumonId === FAKE_NEW_ID) {
           // 新規追加モード
@@ -178,7 +178,6 @@ export const BumonsMasterDialog = ({
           setIsLoading(false);
           setIsNew(true);
         } else {
-          const bumon1 = await getChosenbumon(bumonId);
           if (bumon1) {
             reset(bumon1); // 取得したデータでフォーム初期化
           }

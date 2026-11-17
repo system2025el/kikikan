@@ -28,9 +28,14 @@ import { TextFieldElement } from 'react-hook-form-mui';
 
 import { Loading } from '@/app/(main)/_ui/loading';
 
-import { checkSetoptions, getIdoEqptsForEqptSelection, getIdoSelectedEqpts } from '../_lib/funcs';
+import {
+  checkSetoptions,
+  getIdoEqptSelectionDialogData,
+  getIdoEqptsForEqptSelection,
+  getIdoSelectedEqpts,
+} from '../_lib/funcs';
 import { IdoEqptSelection, SelectedIdoEqptsValues } from '../_lib/types';
-import { IdoEqptBumonsTable } from './ido-equipment-bumons-table';
+import { IdoEqptBumon, IdoEqptBumonsTable } from './ido-equipment-bumons-table';
 import { IdoEqptTable } from './ido-equipments-table';
 
 export const IdoEqptSelectionDialog = ({
@@ -49,6 +54,8 @@ export const IdoEqptSelectionDialog = ({
   const [selectedBumon, setSelectedBumon] = useState(-100);
   /* 機材リスト全体 */
   const [theEqpts, setTheEqpts] = useState<IdoEqptSelection[]>([]);
+  /* 部門一覧 */
+  const [bumons, setBumons] = useState<IdoEqptBumon[]>([]);
   /* 検索中かどうか */
   const [searching, setSearching] = useState<boolean>(false);
   /* Loadingかどうか */
@@ -145,8 +152,10 @@ export const IdoEqptSelectionDialog = ({
     setSearching(false);
     const getEqpts = async () => {
       try {
-        const a = await getIdoEqptsForEqptSelection('');
-        setTheEqpts(a!);
+        // 機材一覧と部門一覧を1回の Server Action で取る（以前は部門の表が別に取っていた）
+        const { eqpts, bumons } = await getIdoEqptSelectionDialogData();
+        setTheEqpts(eqpts!);
+        setBumons(bumons);
       } catch (e) {
         setSnackBarMessage('データ取得に失敗しました');
         setSnackBarOpen(true);
@@ -209,7 +218,7 @@ export const IdoEqptSelectionDialog = ({
 
         <Grid2 container display={'flex'} pb={2} spacing={1} justifyContent={'space-between'}>
           <Grid2 size={5}>
-            <IdoEqptBumonsTable selected={selectedBumon} handleClick={handleClickBumon} />
+            <IdoEqptBumonsTable bumons={bumons} selected={selectedBumon} handleClick={handleClickBumon} />
           </Grid2>
           <Grid2 size={7}>
             <IdoEqptTable

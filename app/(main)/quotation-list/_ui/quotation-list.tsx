@@ -23,12 +23,18 @@ import { FormDateX } from '../../_ui/date';
 import { selectNone, SelectTypes } from '../../_ui/form-box';
 import { LoadingOverlay } from '../../_ui/loading';
 import { FAKE_NEW_ID } from '../../(masters)/_lib/constants';
-import { getCustomerSelection } from '../../(masters)/_lib/funcs';
-import { getFilteredQuotList, getMituStsSelection, getUsersSelection } from '../_lib/funcs';
+import { getFilteredQuotList } from '../_lib/funcs';
 import { QuotSearchValues, QuotTableValues } from '../_lib/types';
 import { QuotationListTable } from './quotation-list-table';
 
-export const QuotationList = ({ user }: { user: User }) => {
+export const QuotationList = ({
+  user,
+  options,
+}: {
+  user: User;
+  /** 検索条件の選択肢（page.tsx で取得） */
+  options: { sts: SelectTypes[]; custs: SelectTypes[]; nyuryokuUser: SelectTypes[] };
+}) => {
   /* useState -------------------------------------------- */
   /* 受注一覧 */
   const [quotList, setQuotList] = useState<QuotTableValues[]>([]);
@@ -40,12 +46,6 @@ export const QuotationList = ({ user }: { user: User }) => {
   const [isError, setIsError] = useState<Error | null>(null);
   /* テーブル初期表示 */
   const [isFirst, setIsFirst] = useState<boolean>(true);
-  /* 選択肢 */
-  const [options, setOptions] = useState<{ sts: SelectTypes[]; custs: SelectTypes[]; nyuryokuUser: SelectTypes[] }>({
-    sts: [],
-    custs: [],
-    nyuryokuUser: [],
-  });
 
   /* useForm ------------------------------------------- */
   const { control, reset, handleSubmit, getValues } = useForm<QuotSearchValues>({
@@ -103,23 +103,6 @@ export const QuotationList = ({ user }: { user: User }) => {
       }
       setIsLoading(false);
     };
-
-    const getOptions = async () => {
-      try {
-        // 選択肢取得
-        const [sts, custs, nyuryokuUser] = await Promise.all([
-          getMituStsSelection(),
-          getCustomerSelection(),
-          getUsersSelection(),
-        ]);
-        setOptions({ sts: sts, custs: custs, nyuryokuUser: nyuryokuUser });
-      } catch (e) {
-        setIsError(e instanceof Error ? e : new Error(String(e)));
-      }
-    };
-
-    // 選択肢取得
-    getOptions();
 
     // メモリ上に検索条件があれば実行
     if (searchParams) {

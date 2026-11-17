@@ -15,6 +15,8 @@ export type ShukoDetailValues = {
   kokyakuNam: string | null;
   juchuDat: string | null;
   memv: string | null;
+  /** 事前明細のときだけ：本番の出庫日時（同じ機材ヘッダー・作業場所の出庫） */
+  honbanShukoDat?: string | null;
 };
 
 export type ShukoDetailTableValues = {
@@ -46,6 +48,8 @@ export type ShukoDetailTableValues = {
   juchuMeisaiDelFlg: number;
   /** 読取実績のある状態で受注側の数量が変わり、まだ 予定数 = 読取数＋補正数 になっていない行（1のとき） */
   planChgFlg: number;
+  /** 機材の課（m_kizai.section_num。機材名の背景色に使う） */
+  sectionNum: number | null;
   /** 保存済み（false は画面で追加したまだ保存していないコンテナ） */
   saveFlag: boolean;
   /** 画面で削除したコンテナ（保存すると削除される） */

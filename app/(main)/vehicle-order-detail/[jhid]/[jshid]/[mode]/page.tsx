@@ -8,6 +8,7 @@ import { permission } from '@/app/(main)/_lib/permission';
 import { LoadingOverlay } from '@/app/(main)/_ui/loading';
 import { getDetailJuchuHead } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
 
+import { getVehicleOrderOptions } from './_lib/funcs';
 import VehicleOrderDetail from './_ui/vehicle-order-detail';
 
 export const metadata: Metadata = {
@@ -24,8 +25,12 @@ const Page = async (props: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) => {
   const params = await props.params;
-  /** 受注ヘッダーデータ */
-  const juchuHeadData = await getDetailJuchuHead(Number(params.jhid));
+  // 受注ヘッダーデータと選択肢（車両・入出庫場所）を同時に取る
+  // （選択肢を画面から取ると Server Action の往復が車両明細・ロック確認の前に並ぶため、サーバー側で取って渡す）
+  const [juchuHeadData, options] = await Promise.all([
+    getDetailJuchuHead(Number(params.jhid)),
+    getVehicleOrderOptions(),
+  ]);
   if (!juchuHeadData) {
     return <div>受注情報が見つかりません。</div>;
   }
@@ -62,6 +67,7 @@ const Page = async (props: {
         juchuHonbanbiData={undefined}
         edit={edit}
         fixFlag={false}
+        options={options}
       />
     </Suspense>
   );

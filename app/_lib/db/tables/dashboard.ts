@@ -1,4 +1,5 @@
-'use server';
+import 'server-only';
+
 import { BASHO_ID, NYUSHUKO_SHUBETU_ID } from '@/app/_lib/constants';
 
 import pool from '../postgres';

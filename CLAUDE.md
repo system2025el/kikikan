@@ -15,13 +15,15 @@ npm run fix             # prettier --write + eslint --fix（コミット前に�
 
 このリポジトリにテストランナーは導入されていません（jest/vitest/playwright等なし）。存在しないテストコマンドを作り出さないこと。
 
-**Windowsでは `npm run lint` / `npm run fix` をリポジトリ全体にかけないこと**（2026-08-27 確認）。`core.autocrlf = true` で作業ツリーがCRLFなのに対しprettierは `endOfLine: lf` を期待するため、**未変更の状態でも462ファイルがチェックに落ちる**。この状態で `npm run fix` を実行すると全ファイルが書き換わり、レビュー不能な差分になる。自分が触ったファイルだけを対象にすること。
+**Windowsでは `npm run lint` / `npm run fix` をリポジトリ全体にかけないこと**（2026-08-27 確認）。`core.autocrlf = true` で作業ツリーがCRLFなのに対しprettierは `endOfLine: lf` を期待するため、**未変更の状態でも数百ファイルがチェックに落ちる**（2026-08-27 は462、2026-11-16 は213。数は変動する）。この状態で `npm run fix` を実行すると全ファイルが書き換わり、レビュー不能な差分になる。自分が触ったファイルだけを対象にすること。
 
 ```bash
 npx prettier --check <触ったファイル...>
 npx next lint --file <触ったファイル> --file ...
 npx tsc --noEmit          # 型チェックは全体で問題なく通る
 ```
+
+**パッケージの追加・更新は `yarn add` で行う**（lockfile は `yarn.lock`（yarn 1）だけで `package-lock.json` は無い）。`npm install` は既存のピア依存の食い違い（`@mui/icons-material@7` が `@mui/material@^7` を要求するが入っているのは6）で ERESOLVE になり、`--legacy-peer-deps` で通すと `yarn.lock` を大量に書き換えて `package-lock.json` まで作るので使わない。
 
 `npm run build` は**開発サーバーを止めてから**実行する（起動したままだと `.next/trace` の EPERM で失敗し、複数のビルドが `.next` を奪い合うと進行しなくなる）。
 
@@ -32,9 +34,9 @@ npx tsc --noEmit          # 型チェックは全体で問題なく通る
 
 ## アーキテクチャ
 
-**技術スタック**: Next.js 15（App Router）/ React 19 / TypeScript / MUI v6。UIライブラリはMUIに統一しているが、**日付ピッカーだけ rsuite** を使っている（`app/(main)/_ui/date.tsx` と、そのロケール設定のための `layout.tsx` の `CustomProvider` のみ。他では使わない）。PDF生成は `pdf-lib` + `@pdf-lib/fontkit`、Excel入出力は `xlsx`。**`xlsx` は npm レジストリではなく SheetJS のCDN tarball から入れている**（`package.json` のURL指定）ので、オフライン環境やレジストリをミラーしている環境では `npm ci` が失敗する。
+**技術スタック**: Next.js 15（App Router）/ React 19 / TypeScript / MUI v6。UIライブラリはMUIに統一しているが、**日付ピッカーだけ rsuite** を使っている（`app/(main)/_ui/date.tsx` と、そのロケール設定のための `layout.tsx` の `CustomProvider` のみ。他では使わない）。PDF生成は `pdf-lib` + `@pdf-lib/fontkit`、Excel入出力は `xlsx`。**`xlsx` は npm レジストリではなく SheetJS のCDN tarball から入れている**（`package.json` のURL指定）ので、オフライン環境やレジストリをミラーしている環境ではインストール（`yarn install`）が失敗する。
 
-**ルーティング**: `app/` 配下の Next.js App Router。`app/(main)/` が認証済みユーザー向けのアプリ本体で、`login`・`signup` は認証不要のトップレベルルート。`auth/callback` は Supabase の認証コールバック用 Route Handler（後述のとおりここだけ例外的にRoute Handlerを使う）。`app/test` は動作確認用の置き場で本番導線からは辿れない。
+**ルーティング**: `app/` 配下の Next.js App Router。`app/(main)/` が認証済みユーザー向けのアプリ本体で、`login`・`signup` は認証不要のトップレベルルート。`auth/callback` は Supabase の認証コールバック用 Route Handler（後述のとおりここだけ例外的にRoute Handlerを使う）。
 
 `(main)` の中では、関連するページを整理目的のみでルートグループ（括弧付きフォルダ）にまとめている。例：`(masters)` は `*-master` 系のCRUDページ、`(bill)` は請求関連ページ、`(eq-order-detail)` は受注明細（機材）のメイン・返却・キープ3画面。ルートグループはURLには影響しない。
 
@@ -47,10 +49,11 @@ npx tsc --noEmit          # 型チェックは全体で問題なく通る
   - `app/_lib/db/supabase-server.ts` — サーバー用（`createServerClient` + `next/headers` の `cookies`）。`tables/*.ts` などサーバー側は基本これを使う。`await createClient()` と非同期。
   - `app/_lib/db/supabase-client.ts` — ブラウザ用（`createBrowserClient`）。
 - `app/_lib/db/schema.ts` — `SCHEMA` 定数（現在は `'public'`）。各所で `.schema(SCHEMA)` や生SQLの `${SCHEMA}.テーブル名` として利用している。スキーマ名を直書きせずこの定数を切り替えることで、アプリ全体を別のPostgresスキーマ（例：開発用スキーマ）に向けられる。
-- `app/_lib/db/supabase-admin.ts` — service-role クライアント。サーバー専用。クライアントコンポーネントに絶対にimportしないこと。
-- `app/_lib/db/tables/*.ts` — テーブル/ビューごとにクエリ関数をまとめたファイル（`'use server'`）。ファイル名の接頭辞が種別を表す：`m-*` はマスタテーブル、`t-*` はトランザクションテーブル、`v-*` はビュー。
+- `app/_lib/db/supabase-admin.ts` — service-role クライアント。サーバー専用。クライアントコンポーネントに絶対にimportしないこと。使っているのは Storage（`storage/juchu-tempu.ts`）と、ユーザーマスタの `auth.admin` 操作（`users-master/_lib/funcs.ts`）の2か所だけ。
+- `app/_lib/db/tables/*.ts` — テーブル/ビューごとにクエリ関数をまとめたファイル。ファイル名の接頭辞が種別を表す：`m-*` はマスタテーブル、`t-*` はトランザクションテーブル、`v-*` はビュー。
+  - **先頭は `import 'server-only';` で、`'use server'` は付けない**（2026-11-16 に全80ファイルを切り替え）。`'use server'` を付けると export がすべて外から直接叩ける Server Action になり、feature 側の `funcs.ts` のエラーチェック（と、今後入れる権限チェック）を通らずにDBを操作できてしまう。画面からは必ず feature 側の `_lib/funcs.ts`（`'use server'`）を経由して呼ぶこと。誤って画面（クライアントコンポーネント）から import すると `server-only` がビルドエラーで止める。新しいファイルを足すときも1行目に `import 'server-only';`、その次に空行を入れる（空行がないと `simple-import-sort` のエラーになる）。
 - `app/_lib/db/types/*.ts` — テーブルごとに手動管理している行の型定義、および Supabase の `Database` 型を自動生成した `types.ts`。`types.ts` は手動編集せず、スキーマ変更時は Supabase CLI で再生成すること（`npx supabase login` が必要。未ログインだと再生成できない）。
-  - **`types.ts` には手書きで追加したブロックがある**（CLI未ログインのため）。いずれも生成物と同じ形式に揃えてあり型チェック・ビルドは通るが、**次に誰かがCLIで再生成できる状況になったら、まずこのファイルを再生成して差分が出ないことを確認してほしい**。なお冒頭の `public /*dev7*/ :` も手作業で入ったマーカーなので、素朴に再生成すると消える点に注意。
+  - **`types.ts` には手書きで追加したブロックがある**（CLI未ログインのため）。いずれも生成物と同じ形式に揃えてあり型チェック・ビルドは通るが、**次に誰かがCLIで再生成できる状況になったら、まずこのファイルを再生成して差分が出ないことを確認してほしい**。なお冒頭の `public /*dev7*/ :` と末尾の `Constants` 内の `public /*dev7*/:` も手作業で入ったマーカーなので、素朴に再生成すると消える点に注意。
     - 2026-08-27: `t_juchu_tempu`
     - 2026-09-24: `t_ido_den` / `t_ido_result` / `t_ido_ctn_result` の `juchu_head_id`・`juchu_kizai_head_id`、`v_ido_den3_lst`（列の入れ替え）、`v_ido_den3_result`（4列追加）、`v_ido_den2_meisai_lst`（新規ビュー）
     - 2026-09-30: `t_nyushuko_den` の `nyuko_fix_qty`、`v_nyushuko_den` / `v_nyushuko_den2` の `nyuko_fix_sts`・`shuko_fix_sts`
@@ -82,18 +85,20 @@ npx tsc --noEmit          # 型チェックは全体で問題なく通る
 - **ルートの保護は `middleware.ts`**（ルート直下）。全リクエストで `supabase.auth.getUser()` を呼んでトークンを検証・リフレッシュし、未ログインなら `/login` にリダイレクトする。公開パスは `/`・`/login`・`/error` のみで、`signup`・`auth`・静的ファイルは matcher 側で除外している。招待直後（`user_metadata.setup_completed === false`）は `/signup` へ、ログイン済みで `/login` を開いたら `/dashboard` へ飛ばす。リダイレクト時もリフレッシュ済みcookieを引き継ぐ実装になっているので、この関数を触るときは `redirectWithCookies` を経由すること。
 - **ユーザー情報の受け渡し**: `app/(main)/layout.tsx` が `getCurrentUser()`（`app/(main)/_lib/funcs.ts`）でユーザーを解決し、`UserProvider`（`app/(main)/_ui/user-context.tsx`）で配下に渡す。クライアントコンポーネントは `useUser()` で参照する。`getCurrentUser` は Supabase authユーザーのメールアドレスで `m_user` を引き、ビットマスク権限を含む `User` 型を返す（`react`の`cache`でリクエスト単位にメモ化）。**`getCurrentUser` 自身はリダイレクトせず `null` を返す**ので、`/login` へ飛ばすのは呼び出し側の責務（`layout.tsx` は `null` と例外の両方で `redirect('/login')` する）。
 - Server Component 側では `getCurrentUser()` を直接呼んでチェックしているページもある（受注機材明細など）。`(main)` 配下の新規ページで権限判定が必要なら、propsで受け取るか `getCurrentUser()` を呼ぶ。
-- **layout のユーザー情報（サイドバーのログイン名・メニュー）は画面遷移では更新しない**（2026-11-09 決定）。App Router の layout は遷移で作り直されないので、権限変更はそのタブを再読み込み（F5）するか別タブで開くまでサイドバーに出ない。権限変更はまれなので運用で再読み込みしてもらう。以前は遷移のたびに `router.refresh()` していたが、layout とページのサーバー処理を丸ごとやり直し、遷移先のデータ取得（Server Action）を待たせていたので外した。**ページの中身の権限は page.tsx が開くたびに `getCurrentUser()` で確かめる**（`(main)` の page.tsx は `order-list` 以外すべて）ので、サイドバーが古くても権限の無い画面は表示されない。
+- **layout のユーザー情報（サイドバーのログイン名・メニュー）は画面遷移では更新しない**（2026-11-09 決定）。App Router の layout は遷移で作り直されないので、権限変更はそのタブを再読み込み（F5）するか別タブで開くまでサイドバーに出ない。権限変更はまれなので運用で再読み込みしてもらう。以前は遷移のたびに `router.refresh()` していたが、layout とページのサーバー処理を丸ごとやり直し、遷移先のデータ取得（Server Action）を待たせていたので外した。**ページの中身の権限は page.tsx が開くたびに `getCurrentUser()` で確かめる**（`(main)` の page.tsx はすべて）ので、サイドバーが古くても権限の無い画面は表示されない。
 - 権限は `app/(main)/_lib/permission.ts` のビットマスクとビットAND演算で判定する。`User.permission` は `juchu`・`nyushuko`・`masters`・`loginSetting`・`ht`・`schedule` の6カテゴリに分かれた数値で、定数側は `juchu_ref: 1`／`juchu_upd: 2`／`nyushuko_*: 4,8`／`mst_*: 16,32`／`ht: 64`／`login: 128`／`sche_upd: 256`／`system: 65535`。`*_full` の定数は `*_ref` と `*_upd` のビットOR。
 
-**排他ロック**: `app/(main)/_lib/lock.ts` は、`t-lock` テーブルを使った編集画面向けの排他制御（悲観的ロック）を実装している（受注・見積の明細画面など）。`lockCheck` は10分間有効なロックを新規作成/更新するか、他ユーザーが保持中であれば既存ロック情報を返す。`lockRelease` はロックを解除する。複数ユーザーが同時に開き得る編集画面を新規追加する際は、この仕組みを使うこと。
+**排他ロック**: `app/(main)/_lib/lock.ts` は、`t-lock` テーブルを使った編集画面向けの排他制御（悲観的ロック）を実装している。ロック種別は `LOCK_SHUBETU.juchuHead`（`app/_lib/constants.ts`）の1種類だけで、**受注ヘッダー単位**でロックする。使っているのは受注画面・受注機材明細（メイン・返却・キープ）・受注車両明細の5画面で、どれも同じ受注ヘッダーのロックを取り合う（見積にはロックが無い）。`lockCheck` は10分間有効なロックを新規作成/更新するか、他ユーザーが保持中であれば既存ロック情報を返す。`lockRelease` はロックを解除する。複数ユーザーが同時に開き得る編集画面を新規追加する際は、この仕組みを使うこと。
 
-**画面遷移と未保存ガード（`DirtyProvider`）**: `app/(main)/_ui/dirty-context.tsx` が `(main)` 全体を包んでいる。編集画面は `useDirty()` の `setIsDirty(true)` で「未保存あり」を立て、**遷移は `router.push` / `router.back` ではなく `requestNavigation(path)` / `requestBack()` を使う**（未保存なら「入力内容を破棄しますか？」の確認ダイアログを挟む）。20以上の画面がこの仕組みに乗っているので、新しい編集画面でも揃えること。
+**画面遷移と未保存ガード（`DirtyProvider`）**: `app/(main)/_ui/dirty-context.tsx` が `(main)` 全体を包んでいる。編集画面は `useDirty()` の `setIsDirty(true)` で「未保存あり」を立て、**遷移は `router.push` / `router.back` ではなく `requestNavigation(path)` / `requestBack()` を使う**（未保存なら「入力内容を破棄しますか？」の確認ダイアログを挟む）。共通の戻るボタン `BackButton`（`_ui/buttons.tsx`。`requestBack()` を呼ぶ）とサイドバーのメニュー（`_ui/links.tsx`）がこの仕組みを使い、`setIsDirty` を立てている編集画面は12画面ある。新しい編集画面でも揃えること。
+
+- **例外**：受注機材明細（メイン・返却・キープ）の3画面は、フォームの `isDirty` と画面内の `otherDirty` を合わせて自前の確認ダイアログを出し、確認後に `router.push` で受注画面へ戻る（Provider の `setIsDirty` も併せて立てるので、サイドバーからの遷移はProviderが止める）。出庫・入庫・移動の明細→機材詳細や一覧→明細の遷移にも `router.push` が残っている（未保存を持たない画面からの遷移）。
 
 - **ログアウトもこのProvider経由**（`requestNavigation('/login')`）。ログアウト時は `BroadcastChannel` で他タブにも伝播し、全タブがログイン画面へ飛ぶ。
 - ブラウザの「閉じる・リロード」に対する警告は別で、`app/(main)/_lib/hook.ts` の `useUnsavedChangesWarning(isDirty)` を使う。
 - 同ファイルの `useStableCallback` は、`React.memo` した子に渡すコールバックの参照を固定しつつ常に最新のクロージャを実行するためのもの。行数の多い明細テーブルで使っている。
 
-**複数タブ前提の画面構成**: 一覧から詳細へは**別タブで開く**のが基本で、`app/(main)/_lib/tab-focus.ts` の `openOrFocusTab()` を使う（28ファイルが利用）。同じURLを既に開いているタブがあれば新規に開かず、`BroadcastChannel` のping/pongでそのタブに `window.focus()` させる（ブラウザの制限で切り替わらない場合は「既に別タブで開いています」のSnackbarを出す）。`eq-*-order-detail` 系は末尾の編集/閲覧モードのsegmentを無視して同一画面と判定する。
+**複数タブ前提の画面構成**: 一覧から詳細へは**別タブで開く**のが基本で、`app/(main)/_lib/tab-focus.ts` の `openOrFocusTab()` を使う（27ファイルが利用）。受け手側は `layout.tsx` に置いた `TabFocusResponder`（`_ui/tab-focus-responder.tsx`）。同じURLを既に開いているタブがあれば新規に開かず、`BroadcastChannel` のping/pongでそのタブに `window.focus()` させる（ブラウザの制限で切り替わらない場合は「既に別タブで開いています」のSnackbarを出す）。`eq-*-order-detail` 系は末尾の編集/閲覧モードのsegmentを無視して同一画面と判定する。
 
 `BroadcastChannel` は現在3チャンネル使っている。タブをまたぐ状態を新たに足すときはこの作法に合わせること。
 
@@ -120,10 +125,10 @@ npx tsc --noEmit          # 型チェックは全体で問題なく通る
 - **伝票**：保存時に `t_nyushuko_den` に 80/90 の2行を作る（日時＝事前日時、場所＝明細の `shozoku_id`、予定数＝事前数。`saveJuchuKizai` 内の事前準備の保存）。事前準備だけの変更では明細・本番の伝票・入庫伝票の処理を通さない（`withoutJizen` / `getJizenChangedRows` で分けて判定）。
 - **変更・削除**：事前日を消すと、実績・補正のある事前の伝票は同じ明細IDのまま予定0で残る（事前だけ受注削除。判定は「事前準備の行が無い、または明細の出庫場所が伝票の場所と違う」で、`v_nyushuko_den2_lst` と `deleteEmptyNyushukoDen` が同じ判定）。出庫場所を変えると変更前の場所の事前の伝票・実績は削除する（本番は受注削除として残る）。明細の削除では事前は削除。分離は本番と同じ（全数なら削除、一部なら元の明細に残し事前数を合計数まで下げる）。事前日時の設定・変更・解除で事前の実績があると作業中確認を出す（事前数だけの変更では出さない）。
 - **本番との連動**：送信RPC が事前の読取を本番（80→10、90→20。同じ明細・場所）にコピーする（タグの状態値は本番と同じ12/22）。Web の事前詳細でのタグ削除と補正は**事前→本番の片方向**で反映する（`deleteHonbanResultByJizenTags`、補正は本番を上書きする `updateHonbanAdjFromJizen`）。本番で消した・入れたものは事前に影響しない。事前には出発が無く、**本番が出発済みなら事前の送信・補正・タグ削除はできない**（ビューが事前の行に本番の出発済みを返す）。
-- **画面**：出庫一覧に入出庫種別 3（`NYUSHUKO_SHUBETU_ID.jizen`）として**機材ヘッダーごとに1行**（合体しない）で混ぜる。日付は事前日時、明細名は `dispColors.jizen` の文字色、チェックボックスは無い。事前明細・事前詳細は出庫明細・出庫詳細の画面を流用し、作業区分 80/90 と `?jkhId=機材ヘッダーid` で開く（サーバー側は `shuko-detail/_lib/jizen-funcs.ts`）。80/90 を本番の作業区分として扱う判定は `isJizenSagyoKbn` / `toHonbanSagyoKbn`（`app/_lib/constants.ts`）を使う。メイン受注機材明細の事前日時・事前数の列は初期非表示で、「事前準備」ボタンで開閉する（明細を選んでいれば一括設定のダイアログ）。
+- **画面**：出庫一覧に入出庫種別 3（`NYUSHUKO_SHUBETU_ID.jizen`）として**機材ヘッダーごとに1行**（合体しない）で混ぜる。日付は事前日時、明細名は `dispColors.jizen` の文字色、チェックボックスは無い。事前明細・事前詳細は出庫明細・出庫詳細の画面を流用し、作業区分 80/90 と `?jkhId=機材ヘッダーid` で開く（サーバー側は `shuko-list/shuko-detail/[jhId]/[jkhKbn]/[nbId]/[nyushukoDat]/[skId]/_lib/jizen-funcs.ts`）。80/90 を本番の作業区分として扱う判定は `isJizenSagyoKbn` / `toHonbanSagyoKbn`（`app/_lib/constants.ts`）を使う。メイン受注機材明細の事前日時・事前数の列は初期非表示で、「事前準備」ボタンで開閉する（明細を選んでいれば一括設定のダイアログ）。
 - **在庫と色**：下の「在庫数の算出」を参照。色は本番日色マスタの `clolor_id = 4`（`HONBANBI_SHUBETU_ID.jizen`）。
 
-**検索条件の文字列エスケープ**: PostgREST の `.like()` / `.ilike()` / `.or()` にユーザー入力を渡すときは、`app/(main)/_lib/escape-string.ts` を必ず通す（17ファイルが利用）。`escapeLikeString` は `%` `_` `\` をエスケープ、`escapeOrLikeString` はさらに `.or()` のダブルクォートを閉じてしまわないよう2段階でエスケープする。素通しすると検索が壊れるだけでなく、`.or()` ではフィルタ式を注入できてしまう。
+**検索条件の文字列エスケープ**: PostgREST の `.like()` / `.ilike()` / `.or()` にユーザー入力を渡すときは、`app/(main)/_lib/escape-string.ts` を必ず通す（16ファイルが利用。**呼んでいるのはすべて `app/_lib/db/tables/*.ts` 側**で、画面や `funcs.ts` は生の入力を渡し、クエリを組み立てる層でエスケープする）。`escapeLikeString` は `%` `_` `\` をエスケープ、`escapeOrLikeString` はさらに `.or()` のダブルクォートを閉じてしまわないよう2段階でエスケープする。素通しすると検索が壊れるだけでなく、`.or()` ではフィルタ式を注入できてしまう。
 
 **行数の多い明細画面はクライアント取得**: 受注明細（機材）と移動明細は、ヘッダー情報だけ `page.tsx` のServer Componentで取り、**明細リスト（100行を超える）は `useEffect` でクライアントから取得している**。SSRで全部取ると一覧からの遷移が目に見えて遅くなるための意図的な選択で、SSRに寄せ直さないこと。
 
@@ -165,6 +170,8 @@ npx tsc --noEmit          # 型チェックは全体で問題なく通る
 
 **新テーブル・新関数では `GRANT` を必ず書くこと**（本番の `public` の default privileges では anon に SELECT しか付かず、`CREATE TABLE` だけでは 42501 になる。ステージングは 2026-11-09 時点で全スキーマ向けの default privileges があり書き忘れても動いてしまうので、ステージングの動作で判断しないこと）。**RLSを有効化しないこと**（既存テーブルはすべて `relrowsecurity = false`）。適用は「DB → 型再生成 → コードデプロイ」の順。ただし**列を削るときや別名にするときはコードが先**。
 
+**手でSQLを流すときはセッションに状態を残さない**：`.env.local` の `DATABASE_URL` は本番・ステージングとも Supavisor のトランザクションモード（6543）で、トランザクションの外の `SET`（LOCALなし）・`CREATE TEMP`・`PREPARE` はプールの接続に残り、Web・HT・ゲートの処理に効いてしまう（2026-11-09 に `SET default_transaction_read_only=on` で本番のプール接続を読取専用にした事故がある）。読み取り専用にしたいなら `BEGIN READ ONLY`、設定は `BEGIN; SET LOCAL ...`。DDL の予行・適用では `SET LOCAL lock_timeout = '5s'` と短い `statement_timeout` を付け、作り直しと同じトランザクションの中で重い集計をしない（ビューの排他ロックを持ったまま画面が開けなくなる）。ファイル自身が `BEGIN`/`COMMIT` を持つ件など、リハーサルの作法は `scripts/README.md` を参照。
+
 **関数の中の `row(...)::<テーブル名>` は列の個数と物理順に依存する**ので、テーブルに列を足すときは依存ビューだけでなく `pg_get_functiondef` の全文検索も行うこと（移動の送信RPC3本がこれで壊れた）。
 
 **`t_nyushuko_den` には BEFORE UPDATE トリガー（`trg_nyushuko_den_plan_chg`）がある**（このDBで唯一）。`plan_chg_flg` しか書き換えないが、トリガーが落ちると `t_nyushuko_den` への UPDATE がすべて失敗する。トリガー関数を変えるときは `scripts/db-tables/` のファイルを更新し、ステージングでトランザクション内の確認をしてから当てること。
@@ -189,6 +196,6 @@ npx tsc --noEmit          # 型チェックは全体で問題なく通る
   - ただし**`Asia/Tokyo` はこのファイル専用ではない**。「今日・明日・今月」といった**検索条件の日付範囲を組み立てる側**（`app/_lib/db/tables/v-juchu-lst.ts`・`v-juchu-kizai-head-lst.ts`・`v-nyushuko-den2.ts`・`v-seikyu-date-lst.ts` など）では `dayjs().tz('Asia/Tokyo')` を直に書いている。日付の境界（`startOf('day')`）がJSTでないと一覧の絞り込みが1日ずれるため、**範囲条件を書くときはタイムゾーン指定を省略しないこと**。
 - 一覧テーブルは各featureで `<feature>-table.tsx` として MUI の `Table`/`TableContainer` を直接使って実装する。固定ヘッダーは `<TableContainer sx={{ maxHeight: '86vh' }}><Table stickyHeader size="small" padding="none">` の組み合わせ、ページングは `MuiTablePagination`（`_ui/table-pagination.tsx`）、セルのはみ出し表示は `LightTooltipWithText`（`(masters)/_ui/tables.tsx`）、ヘッダー固定時の高さ維持は末尾の空行（emptyRows）を使う。
   - 共通コンポーネントの `app/(main)/_ui/gridtable.tsx` は**どこからも参照されていない**ので使わないこと。`_ui/table.tsx` も一覧用途では使わない（`SelectTable` だけが受注画面の1箇所で使われている）。
-- **色はハードコードせず `app/(main)/_lib/colors.ts` から取る**（20ファイルが参照）。`statusColors`（過剰・不足・済・コンテナ・未保存は背景色、受注削除 `deleted` と数量変更 `planChanged` は**文字色**）、`fixStsColors`（到着・出発の全部済／一部済）、`sagyoKbnColors`（出庫ピッキング・出庫最終確認・入庫カウント・移動。明細/詳細画面のタイトルとテーブルヘッダーの背景に使い、出庫・入庫はハンディアプリと色を合わせている。事前の画面も本番と同じ作業区分の色）、`dispColors`（キープ・返却・事前 `jizen` の明細名の文字色など）、`weeklyColors`。在庫表・貸出状況の色（本番日・使用期間・事前準備）はコードではなく本番日色マスタ `m_honbanbi_color` から取る。
+- **色はハードコードせず `app/(main)/_lib/colors.ts` から取る**（18ファイルが参照）。`statusColors`（過剰・不足・済・コンテナ・未保存は背景色、受注削除 `deleted` と数量変更 `planChanged` は**文字色**）、`fixStsColors`（到着・出発の全部済／一部済）、`sagyoKbnColors`（出庫ピッキング・出庫最終確認・入庫カウント・移動。明細/詳細画面のタイトルとテーブルヘッダーの背景に使い、出庫・入庫はハンディアプリと色を合わせている。事前の画面も本番と同じ作業区分の色）、`dispColors`（キープ・返却・事前 `jizen` の明細名の文字色など）、`weeklyColors`。在庫表・貸出状況の色（本番日・使用期間・事前準備）はコードではなく本番日色マスタ `m_honbanbi_color` から取る。
 
 **ファイル・コンポーネント命名**: 各featureの `_ui/` 内は `<feature>.tsx`（ルートに対応するトップレベルのクライアントコンポーネント）、`<feature>-table.tsx`（一覧テーブル）、`*-dialog.tsx`（モーダル）という命名パターンに揃える。

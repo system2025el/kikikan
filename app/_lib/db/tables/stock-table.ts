@@ -1,4 +1,4 @@
-'use server';
+import 'server-only';
 
 import pool from '../postgres';
 import { SCHEMA } from '../schema';

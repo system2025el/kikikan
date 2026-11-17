@@ -26,9 +26,8 @@ import { FormDateX } from '@/app/(main)/_ui/date';
 import { selectNone, SelectTypes } from '@/app/(main)/_ui/form-box';
 import { LoadingOverlay } from '@/app/(main)/_ui/loading';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
-import { getCustomerSelection } from '@/app/(main)/(masters)/_lib/funcs';
 
-import { getBillingStsSelection, getFilteredBills } from '../_lib/funcs';
+import { getFilteredBills } from '../_lib/funcs';
 import { BillSearchValues, BillsListTableValues } from '../_lib/types';
 import { BillListTable } from './bill-list-table';
 
@@ -36,7 +35,14 @@ import { BillListTable } from './bill-list-table';
  * 請求一画面の検索部のUI
  * @returns {JSX.Element} 請求一覧コンポーネント
  */
-export const BillList = ({ user }: { user: User }) => {
+export const BillList = ({
+  user,
+  options,
+}: {
+  user: User;
+  /** 検索条件の選択肢（page.tsx で取得） */
+  options: { custs: SelectTypes[]; sts: SelectTypes[] };
+}) => {
   /* useState ---------------------------------------------------- */
   /* 初期表示用 */
   const [isFirst, setIsFirst] = useState<boolean>(true);
@@ -46,8 +52,6 @@ export const BillList = ({ user }: { user: User }) => {
   const [isError, setIsError] = useState<Error | null>(null);
   /* ページ  */
   const [page, setPage] = useState<number>(1);
-  /** 選択肢一覧 */
-  const [options, setOptions] = useState<{ custs: SelectTypes[]; sts: SelectTypes[] }>({ custs: [], sts: [] });
   /** 請求一覧 */
   const [bills, setBills] = useState<BillsListTableValues[]>([]);
 
@@ -107,19 +111,6 @@ export const BillList = ({ user }: { user: User }) => {
       }
       setIsLoading(false);
     };
-
-    const getOptions = async () => {
-      try {
-        // 選択肢取得
-        const [custs, sts] = await Promise.all([getCustomerSelection(), getBillingStsSelection()]);
-        setOptions({ custs: custs, sts: sts });
-      } catch (e) {
-        setIsError(e instanceof Error ? e : new Error(String(e)));
-      }
-    };
-
-    // 選択肢取得
-    getOptions();
 
     // メモリ上に検索条件があればセットして実行
     if (searchParams) {

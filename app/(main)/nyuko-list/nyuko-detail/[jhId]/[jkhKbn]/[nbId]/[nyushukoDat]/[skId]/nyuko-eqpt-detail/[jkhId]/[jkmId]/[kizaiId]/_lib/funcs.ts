@@ -252,7 +252,10 @@ export const updNyukoResultAdjQty = async (
     upd_user: userNam,
   };
   try {
-    await updateResultAdjQty(updateData);
+    const { error } = await updateResultAdjQty(updateData);
+    if (error) {
+      throw new Error('[updateResultAdjQty] DBエラー:', { cause: error });
+    }
 
     revalidatePath(
       `nyuko-list/nyuko-detail/${nyukoEqptDetailData.juchuHeadId}/${nyukoEqptDetailData.nyushukoBashoId}/${nyukoEqptDetailData.nyushukoDat}/${nyukoEqptDetailData.sagyoKbnId}`

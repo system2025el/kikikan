@@ -29,9 +29,8 @@ import { FormDateX } from '@/app/(main)/_ui/date';
 import { selectNone, SelectTypes } from '@/app/(main)/_ui/form-box';
 import { LoadingOverlay } from '@/app/(main)/_ui/loading';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
-import { getCustomerSelection } from '@/app/(main)/(masters)/_lib/funcs';
 
-import { EXCLUDED_KOKYAKU_ID, radioData } from '../_lib/datas';
+import { radioData } from '../_lib/datas';
 import { getFilteredBillingSituations } from '../_lib/funcs';
 import { BillingStsSearchValues, BillingStsTableValues } from '../_lib/types';
 import { BillingStsListTable } from './billing-sts-list-table';
@@ -42,7 +41,14 @@ import { UnbilledCustsDialog } from './unbilled-Custs-dialog';
  * @param param0
  * @returns {JAX.Element} 受注請求状況一覧画面のコンポーネント
  */
-export const BillingStsList = ({ user }: { user: User }) => {
+export const BillingStsList = ({
+  user,
+  custs,
+}: {
+  user: User;
+  /** 検索条件の顧客の選択肢（page.tsx で取得。(株)エンジニア・ライティングは除外済み） */
+  custs: SelectTypes[];
+}) => {
   /* useState --------------------------------------------------------------- */
   /* ローディング */
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -54,8 +60,6 @@ export const BillingStsList = ({ user }: { user: User }) => {
   const [billSts, setBillSts] = useState<BillingStsTableValues[]>([]);
   /* テーブル初期表示 */
   const [isFirst, setIsFirst] = useState<boolean>(true);
-  /** 顧客選択肢 */
-  const [custs, setCusts] = useState<SelectTypes[]>([]);
   // /** 未請求顧客 */
   // const [unbilledCusts, setUnbilledCusts] = useState<string[]>([]);
   /** 未請求顧客ダイアログ開閉 */
@@ -144,19 +148,7 @@ export const BillingStsList = ({ user }: { user: User }) => {
       setIsLoading(false);
     };
 
-    const getOptions = async () => {
-      try {
-        // 選択肢取得（(株)エンジニア・ライティングは対象外）
-        const [clist] = await Promise.all([getCustomerSelection()]);
-        setCusts(clist.filter((c) => c.id !== EXCLUDED_KOKYAKU_ID));
-      } catch (e) {
-        setIsError(e instanceof Error ? e : new Error(String(e)));
-      }
-    };
-
-    // 選択肢取得
-    getOptions();
-
+    // 顧客の選択肢は page.tsx で取得済み
     // メモリ上に検索条件があれば実行
     if (searchParams) {
       reset(searchParams);

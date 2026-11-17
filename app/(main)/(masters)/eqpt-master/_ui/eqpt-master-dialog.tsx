@@ -17,11 +17,10 @@ import { User } from '@/app/(main)/_lib/types';
 import { FormBox, selectNone, SelectTypes } from '../../../_ui/form-box';
 import { Loading } from '../../../_ui/loading';
 import { FAKE_NEW_ID } from '../../_lib/constants';
-import { getAllSelections } from '../../_lib/funcs';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
 import { emptyEqpt, formItems } from '../_lib/datas';
-import { addNewEqpt, getChosenEqpt, updateEqpt } from '../_lib/funcs';
+import { addNewEqpt, getEqptMasterDialogData, updateEqpt } from '../_lib/funcs';
 import { EqptsMasterDialogSchema, EqptsMasterDialogValues } from '../_lib/types';
 
 export const EqMasterDialog = ({
@@ -178,7 +177,8 @@ export const EqMasterDialog = ({
   useEffect(() => {
     const getThatOneEqpt = async () => {
       try {
-        const a = await getAllSelections();
+        // 選択肢と機材を1回の Server Action で取る（新規のときは機材は null）
+        const { selections: a, eqpt: eqpt1 } = await getEqptMasterDialogData(eqptId);
         setSelectOptions(a);
         if (eqptId === FAKE_NEW_ID) {
           // 新規追加モード
@@ -187,7 +187,6 @@ export const EqMasterDialog = ({
           setIsLoading(false);
           setIsNew(true);
         } else {
-          const eqpt1 = await getChosenEqpt(eqptId);
           if (eqpt1) {
             setKizaiQty(eqpt1.qty);
             setCurrentEqpt(eqpt1.data);

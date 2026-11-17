@@ -93,7 +93,7 @@ export const DeleteAlertDialog = ({
     }
   }, [open]);
   return (
-    <Dialog open={open}>
+    <Dialog open={open} maxWidth="md">
       <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
         <WarningIcon color="error" />
         <Box>削除</Box>
@@ -102,9 +102,9 @@ export const DeleteAlertDialog = ({
         {selectedLength}件の機材を削除してもよろしいでしょうか？
         {shukoResultCount > 0 && (
           <Box component="span" display="block" mt={2} color="error.main">
-            うち{shukoResultCount}件は既に実績があります。
+            うち{shukoResultCount}件は出庫準備中です。
             <br />
-            出庫明細に「受注削除」として残るので、現物を取り除いてください。
+            出庫明細に「受注削除」として残りますが、入出庫担当に連絡をしてください。
           </Box>
         )}
       </DialogContentText>
