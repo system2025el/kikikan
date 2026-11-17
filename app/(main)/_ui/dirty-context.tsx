@@ -2,7 +2,7 @@
 
 import WarningIcon from '@mui/icons-material/Warning';
 import { Box, Button, Dialog, DialogActions, DialogContentText, DialogTitle } from '@mui/material';
-import { usePathname, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { createContext, useContext, useEffect, useRef, useState, useTransition } from 'react';
 
 import { serverErrorLog } from '@/app/_lib/funcs';

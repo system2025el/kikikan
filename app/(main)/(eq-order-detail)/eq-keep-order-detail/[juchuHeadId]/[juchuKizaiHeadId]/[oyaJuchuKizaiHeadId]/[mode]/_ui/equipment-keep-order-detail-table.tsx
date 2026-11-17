@@ -1,16 +1,8 @@
 'use client';
 
-import Delete from '@mui/icons-material/Delete';
 import {
-  Box,
   Button,
   Checkbox,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  IconButton,
-  Paper,
   Table,
   TableBody,
   TableCell,
@@ -18,13 +10,12 @@ import {
   TableHead,
   TableRow,
   TextField,
-  Tooltip,
-  Typography,
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useRef } from 'react';
 
 import { BASHO_ID } from '@/app/_lib/constants';
+import { dispColors } from '@/app/(main)/_lib/colors';
 import { openOrFocusTab } from '@/app/(main)/_lib/tab-focus';
 import { MemoTooltip } from '@/app/(main)/(eq-order-detail)/_ui/memo-tooltip';
 
@@ -101,7 +92,7 @@ const KeepEqTableComponent: React.FC<KeepEqTableProps> = ({
               align="center"
               size="small"
               style={styles.header}
-              sx={{ position: 'sticky', top: 0, zIndex: 2, bgcolor: 'green' }}
+              sx={{ position: 'sticky', top: 0, zIndex: 2, bgcolor: dispColors.keep }}
               rowSpan={2}
             >
               キープ
@@ -622,7 +613,7 @@ const KeepContainerTableComponent = (props: {
               align="center"
               size="small"
               style={styles.header}
-              sx={{ position: 'sticky', top: 0, zIndex: 2, bgcolor: 'green' }}
+              sx={{ position: 'sticky', top: 0, zIndex: 2, bgcolor: dispColors.keep }}
               colSpan={2}
             >
               キープ

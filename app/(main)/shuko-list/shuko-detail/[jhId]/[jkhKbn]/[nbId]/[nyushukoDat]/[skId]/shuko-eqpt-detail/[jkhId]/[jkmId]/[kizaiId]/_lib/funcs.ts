@@ -1,8 +1,6 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
-import { QueryResult } from 'pg';
 
 import { isJizenSagyoKbn, toHonbanSagyoKbn } from '@/app/_lib/constants';
 import pool from '@/app/_lib/db/postgres';

@@ -9,7 +9,6 @@ import { permission } from '@/app/(main)/_lib/permission';
 import { NyushukoDetailNotFound } from '@/app/(main)/_ui/nyushuko-not-found';
 
 import { getNyukoDetail, getNyukoDetailTable } from './_lib/funcs';
-import { NyukoDetailValues } from './_lib/types';
 import { NyukoDetail } from './_ui/nyuko-detail';
 
 export const generateMetadata = async (props: {

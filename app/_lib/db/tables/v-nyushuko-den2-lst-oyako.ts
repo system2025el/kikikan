@@ -4,7 +4,6 @@ import { PoolClient } from 'pg';
 
 import { JUCHU_KIZAI_HEAD_KBN, SAGYO_KBN_ID } from '@/app/_lib/constants';
 
-import pool from '../postgres';
 import { SCHEMA } from '../schema';
 
 /**

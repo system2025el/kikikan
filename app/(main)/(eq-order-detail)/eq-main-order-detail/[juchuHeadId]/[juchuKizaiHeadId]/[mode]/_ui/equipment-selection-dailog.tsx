@@ -28,7 +28,6 @@ import { TextFieldElement } from 'react-hook-form-mui';
 
 import { Loading } from '@/app/(main)/_ui/loading';
 
-import { bundleData } from '../_lib/eqdata';
 import {
   checkSetoptions,
   getEqptSelectionDialogData,
@@ -60,8 +59,6 @@ export const EqptSelectionDialog = ({
   handleCloseDialog: () => void;
   lock: () => Promise<boolean | React.JSX.Element | undefined>;
 }) => {
-  /** 機材明細画面に渡す機材の配列 */
-  const selectedEqptList: SelectedEqptsValues[] = [];
   /* useState ------------------------- */
   /* 選ばれている機材の配列 */
   const [selectedEqptIds, setSelectedEqptIds] = useState<number[]>([]);
@@ -89,7 +86,7 @@ export const EqptSelectionDialog = ({
   const [snackBarMessage, setSnackBarMessage] = useState('');
 
   /* useform ------------------------------- */
-  const { handleSubmit, control, watch, getValues } = useForm({ defaultValues: { query: '' } });
+  const { handleSubmit, control } = useForm({ defaultValues: { query: '' } });
 
   /* methods ------------------------------ */
   /* 確定ボタン押下時 */
@@ -315,7 +312,6 @@ const BundleDialog = ({
   // rank,
   handleConfirmAll,
   handleCloseDialog,
-  setEqpts,
 }: {
   open: boolean;
   /** セット有機材のID配列 */

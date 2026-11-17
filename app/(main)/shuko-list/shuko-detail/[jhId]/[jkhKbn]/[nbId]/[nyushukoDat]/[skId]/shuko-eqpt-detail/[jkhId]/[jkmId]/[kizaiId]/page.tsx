@@ -9,7 +9,6 @@ import { NyushukoEqptDetailNotFound } from '@/app/(main)/_ui/nyushuko-not-found'
 
 import { getHonbanShukoFixed } from '../../../../_lib/jizen-funcs';
 import { getShukoEqptDetail, getShukoEqptDetailTable, getShukoFixFlag } from './_lib/funcs';
-import { ShukoEqptDetailTableValues, ShukoEqptDetailValues } from './_lib/types';
 import { ShukoEqptDetail } from './_ui/shuko-eqpt-detail';
 
 export const metadata: Metadata = {

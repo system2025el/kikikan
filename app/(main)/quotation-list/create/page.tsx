@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
 import { getCurrentUser } from '../../_lib/funcs';
 import { permission } from '../../_lib/permission';
 import { getMaxHonbanbiQty, getOrderForQuotation, getQuotOptions } from '../_lib/funcs';
-import { JuchuValues, QuotHeadValues } from '../_lib/types';
+import { QuotHeadValues } from '../_lib/types';
 import { Quotation } from '../_ui/quotation';
 
 export const metadata: Metadata = {

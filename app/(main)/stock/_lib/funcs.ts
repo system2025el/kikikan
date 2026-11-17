@@ -48,7 +48,7 @@ export const getBumonsData = async () => {
  * @param bumonId 部門id
  * @returns 機材データ
  */
-export const getEqData = async (bumonId: number, keyword: string) => {
+const getEqData = async (bumonId: number, keyword: string) => {
   try {
     const { data, error } = await selectStockKizai(bumonId, keyword);
 

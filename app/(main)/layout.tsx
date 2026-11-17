@@ -2,15 +2,10 @@
 
 import 'rsuite/dist/rsuite-no-reset.min.css';
 
-import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
-import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import React, { Suspense } from 'react';
 import { CustomProvider } from 'rsuite';
 import { jaJP } from 'rsuite/esm/locales';
-
-import { notoSansJp } from '@/app/_ui/fonts';
-import ThemeProvider from '@/app/_ui/theme-provider';
 
 import { getCurrentUser } from './_lib/funcs';
 import { DirtyProvider } from './_ui/dirty-context';

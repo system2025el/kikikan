@@ -1,7 +1,5 @@
 import { z } from 'zod';
 
-import { validationMessages } from '@/app/(main)/_lib/validation-messages';
-
 export const EqptSetsMasterDialogSchema = z.object({
   eqptId: z.number(),
   setEqptList: z.array(z.object({ id: z.number(), nam: z.string(), mem: z.string().nullish() })),

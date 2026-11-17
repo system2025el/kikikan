@@ -3,10 +3,9 @@
 import { DIC_ID, JUCHU_KIZAI_HEAD_KBN, toFixSts } from '@/app/_lib/constants';
 import { selectOneCustomer } from '@/app/_lib/db/tables/m-kokyaku';
 import { selectNyukoPdfJuchuKizaiMeisai } from '@/app/_lib/db/tables/nyushuko-pdf';
-import { selectSagyoIdFilterNyushukoFixFlag } from '@/app/_lib/db/tables/t-nyushuko-fix';
 import { selectPdfJuchuKizaiHead } from '@/app/_lib/db/tables/v-juchu-kizai-head-lst';
 import { selectPdfJuchuHead } from '@/app/_lib/db/tables/v-juchu-lst';
-import { selectFilteredNyukoList, selectFilteredShukoList } from '@/app/_lib/db/tables/v-nyushuko-den2';
+import { selectFilteredNyukoList } from '@/app/_lib/db/tables/v-nyushuko-den2';
 
 import { toJapanYMDString } from '../../_lib/date-conversion';
 import { getDic } from '../../_lib/funcs';
@@ -63,7 +62,7 @@ export const getNyukoList = async (queries: NyukoListSearchValues) => {
  * @param kokyakuId 顧客id
  * @returns
  */
-export const getKeisho = async (kokyakuId: number) => {
+const getKeisho = async (kokyakuId: number) => {
   try {
     const { data, error } = await selectOneCustomer(kokyakuId);
     if (error) {

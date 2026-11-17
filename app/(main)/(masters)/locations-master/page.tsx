@@ -4,7 +4,6 @@ import { redirect } from 'next/navigation';
 
 import { getCurrentUser } from '../../_lib/funcs';
 import { permission } from '../../_lib/permission';
-import { getFilteredLocs } from './_lib/funcs';
 import { LocationsMaster } from './_ui/locations-master';
 
 export const metadata: Metadata = {

@@ -74,7 +74,7 @@ export const getEqptSetMasterDialogData = async (oyaId: number) => {
  * @param id 選択した機材セットマスタID
  * @returns {Promise<EqptSetsMasterDialogValues>} - 機材セットの詳細情報。取得失敗時は空オブジェクトを返します。
  */
-export const getChosenEqptSet = async (id: number) => {
+const getChosenEqptSet = async (id: number) => {
   try {
     const { rows } = await selectOneEqptSet(id);
 

@@ -1,6 +1,5 @@
 'use client';
 
-import AutorenewIcon from '@mui/icons-material/Autorenew';
 import SearchIcon from '@mui/icons-material/Search';
 import {
   Autocomplete,
@@ -20,7 +19,6 @@ import {
 import { useEffect, useState } from 'react';
 import { CheckboxButtonGroup, Controller, RadioButtonGroup, TextFieldElement, useForm } from 'react-hook-form-mui';
 
-import { toJapanTimeStampString } from '../../_lib/date-conversion';
 import { permission } from '../../_lib/permission';
 import { User } from '../../_lib/types';
 import { FormDateX } from '../../_ui/date';
@@ -29,7 +27,7 @@ import { Loading } from '../../_ui/loading';
 import { radioData } from '../_lib/datas';
 import { getPdfData, getShukoList } from '../_lib/funcs';
 import { buildShukoListQuery, parseShukoListQuery } from '../_lib/search-params';
-import { ShukoKizai, ShukoListSearchValues, ShukoTableValues } from '../_lib/types';
+import { ShukoListSearchValues, ShukoTableValues } from '../_lib/types';
 import { ShukoPdfModel, usePdf } from '../shuko/_lib/hooks/usePdf';
 import { ShukoListTable } from './shuko-list-table';
 

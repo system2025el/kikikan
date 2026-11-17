@@ -1,7 +1,6 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
 
 import pool from '@/app/_lib/db/postgres';
 import { SCHEMA } from '@/app/_lib/db/schema';

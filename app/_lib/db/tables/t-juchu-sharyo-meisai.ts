@@ -3,7 +3,6 @@ import 'server-only';
 import { PoolClient } from 'pg';
 
 import { SCHEMA } from '../schema';
-import { JuchuSharyoHeadDBValues } from '../types/t-juchu-sharyo-head-type';
 import { JuchuSharyoMeisaiDBValues } from '../types/t-juchu-sharyo-meisai-type';
 
 /**

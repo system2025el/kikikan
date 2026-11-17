@@ -3,7 +3,6 @@
 import { revalidatePath } from 'next/cache';
 
 import pool, { refreshVRfid } from '@/app/_lib/db/postgres';
-import { SCHEMA } from '@/app/_lib/db/schema';
 import { selectOneEqpt } from '@/app/_lib/db/tables/m-kizai';
 import { updateMasterUpdates } from '@/app/_lib/db/tables/m-master-update';
 import {

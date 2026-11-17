@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Grid2, MenuItem, Select, Snackbar } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import { useEffect, useState } from 'react';
-import { Controller, TextareaAutosizeElement, TextFieldElement, useForm } from 'react-hook-form-mui';
+import { Controller, TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { User } from '@/app/(main)/_lib/types';
 import { Loading } from '@/app/(main)/_ui/loading';

@@ -11,7 +11,6 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import React from 'react';
 
 import { JUCHU_KIZAI_HEAD_KBN } from '@/app/_lib/constants';
 

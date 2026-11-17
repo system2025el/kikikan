@@ -22,7 +22,7 @@ import { Loading } from '@/app/(main)/_ui/loading';
 
 import { FAKE_NEW_ID } from '../../_lib/constants';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
-import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
+import { IsDirtyAlertDialog } from '../../_ui/dialogs';
 import {
   emptyUser,
   formItems,
@@ -31,8 +31,6 @@ import {
   loginSettingRadio,
   mastersRadio,
   nyushukoRadio,
-  radioPair,
-  radioTrio,
   scheduleRadio,
 } from '../_lib/datas';
 import {

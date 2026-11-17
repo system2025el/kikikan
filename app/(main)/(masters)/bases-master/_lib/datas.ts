@@ -1,6 +1,6 @@
 import { FormItemsType } from '@/app/(main)/_ui/form-box';
 
-import { BasesMasterDialogValues, BasesMasterTableValues } from './types';
+import { BasesMasterDialogValues } from './types';
 
 /* 拠点マスタテーブルヘッダー */
 export const bMHeader = [

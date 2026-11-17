@@ -11,7 +11,6 @@ import {
   ListItem,
   ListItemButton,
   ListItemText,
-  Snackbar,
   Stack,
   Typography,
 } from '@mui/material';
@@ -19,6 +18,7 @@ import { useEffect, useRef, useState } from 'react';
 import { UseFieldArrayReturn } from 'react-hook-form-mui';
 
 import { JUCHU_KIZAI_HEAD_KBN } from '@/app/_lib/constants';
+import { dispColors } from '@/app/(main)/_lib/colors';
 import { CloseMasterDialogButton } from '@/app/(main)/_ui/buttons';
 import { Loading } from '@/app/(main)/_ui/loading';
 
@@ -193,7 +193,9 @@ export const SecondDialogPage = ({
                         handleClickHeadNam(l.juchuHeadId, l.juchuKizaiHeadId, l.headNam, l.nebikiAmt, checked);
                       }}
                       dense
-                      sx={{ color: l.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.return ? 'red' : 'primary.main' }}
+                      sx={{
+                        color: l.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.return ? dispColors.return : 'primary.main',
+                      }}
                     >
                       <ListItemText primary={l.headNam} />
                     </ListItemButton>

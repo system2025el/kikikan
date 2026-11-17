@@ -30,23 +30,3 @@ export const login = async (data: UserValues) => {
     throw e;
   }
 };
-
-/**
- * supabase セッションのセット処理
- * @param {string} access_token
- * @param {string} refresh_token
- */
-export const setSession = async (access_token: string, refresh_token: string) => {
-  const supabase = await createClient();
-  supabase.auth.setSession({ access_token, refresh_token }).then(({ data, error }) => {
-    if (data.session) {
-      return data.session;
-    }
-  });
-};
-
-/* ログアウトクリック時 */
-export const handleLogout = async () => {
-  const supabase = await createClient();
-  await supabase.auth.signOut();
-};

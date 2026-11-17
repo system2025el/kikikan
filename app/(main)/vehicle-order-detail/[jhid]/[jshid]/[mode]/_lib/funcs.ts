@@ -1,10 +1,7 @@
 'use server';
 
-import { redirect } from 'next/navigation';
-
 import { MEMO_MAX_LENGTH } from '@/app/_lib/constants';
 import pool from '@/app/_lib/db/postgres';
-import { SCHEMA } from '@/app/_lib/db/schema';
 import { selectActiveVehs } from '@/app/_lib/db/tables/m-sharyou';
 import {
   deleteJuchuSharyoHead,
@@ -17,7 +14,6 @@ import {
   insertJuchuSharyoMeisai,
   upsertJuchuSharyoMeisai,
 } from '@/app/_lib/db/tables/t-juchu-sharyo-meisai';
-import { selectJuchuSharyoHeadList } from '@/app/_lib/db/tables/v-juchu-sharyo-head-lst';
 import { JuchuSharyoHeadDBValues } from '@/app/_lib/db/types/t-juchu-sharyo-head-type';
 import { JuchuSharyoMeisaiDBValues } from '@/app/_lib/db/types/t-juchu-sharyo-meisai-type';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
@@ -25,7 +21,6 @@ import { getDetailJuchuHead } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 import { fakeToNull, nullToFake } from '@/app/(main)/(masters)/_lib/value-converters';
 import { getBasesSelections } from '@/app/(main)/(masters)/bases-master/_lib/funcs';
-import { VehicleTableValues } from '@/app/(main)/order/[juchuHeadId]/[mode]/_lib/types';
 
 import { JuchuSharyoHeadValues } from './types';
 
@@ -33,7 +28,7 @@ import { JuchuSharyoHeadValues } from './types';
  * 車両の選択肢を取得する関数
  * @returns {SelectTypes[]} 選択肢配列
  */
-export const getVehsSelections = async (): Promise<SelectTypes[]> => {
+const getVehsSelections = async (): Promise<SelectTypes[]> => {
   try {
     const { data, error } = await selectActiveVehs();
     if (error) {
@@ -198,7 +193,7 @@ export const addNewJuchuSharyoHead = async (data: JuchuSharyoHeadValues, user: s
     }));
 
     if (sharyoMeisai && sharyoMeisai.length > 0) {
-      const { rows } = await insertJuchuSharyoMeisai(sharyoMeisai, connection);
+      await insertJuchuSharyoMeisai(sharyoMeisai, connection);
     }
     await connection.query('COMMIT');
     return sharyoHeadId;

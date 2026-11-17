@@ -15,15 +15,13 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  TextField,
   Typography,
 } from '@mui/material';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 
-import { validationMessages } from '@/app/(main)/_lib/validation-messages';
-import { Loading, LoadingOverlay } from '@/app/(main)/_ui/loading';
+import { LoadingOverlay } from '@/app/(main)/_ui/loading';
 
 import { DialogSchema, DialogValues, JuchuContainerMeisaiValues, JuchuKizaiMeisaiValues } from '../_lib/types';
 

@@ -1,13 +1,13 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { Box, Button, Grid2, Snackbar, Stack, Typography } from '@mui/material';
+import { Box, Button, Grid2, Stack, Typography } from '@mui/material';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 
 import { permission } from '@/app/(main)/_lib/permission';
 import { User } from '@/app/(main)/_lib/types';
-import { FormBox, SelectTypes } from '@/app/(main)/_ui/form-box';
+import { FormBox } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
 
 import { FAKE_NEW_ID } from '../../_lib/constants';

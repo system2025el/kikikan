@@ -3,7 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Grid2, Snackbar } from '@mui/material';
 import { useEffect, useState } from 'react';
-import { CheckboxElement, TextareaAutosizeElement, TextFieldElement, useForm } from 'react-hook-form-mui';
+import { CheckboxElement, TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { User } from '@/app/(main)/_lib/types';
 import { FormBox } from '@/app/(main)/_ui/form-box';
@@ -355,6 +355,3 @@ export const LocationsMasterDialog = ({
     </>
   );
 };
-
-/** ---------------------------スタイル----------------------------- */
-const styles: { [key: string]: React.CSSProperties } = {};

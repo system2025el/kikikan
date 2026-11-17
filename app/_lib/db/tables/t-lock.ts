@@ -57,17 +57,3 @@ export const updateLock = async (data: Lock) => {
     throw new Error('[updateLock] DBエラー:', { cause: e });
   }
 };
-
-/**
- * ロック情報削除
- * @param lockShubetu ロック種別
- * @param headId ヘッダーid
- */
-export const deleteLock = async (lockShubetu: number, headId: number) => {
-  const supabase = await createClient();
-  try {
-    return await supabase.schema(SCHEMA).from('t_lock').delete().eq('lock_shubetu', lockShubetu).eq('head_id', headId);
-  } catch (e) {
-    throw new Error('[deleteLock] DBエラー:', { cause: e });
-  }
-};

@@ -107,7 +107,7 @@ export const getEqptMasterDialogData = async (eqptId: number) => {
  * @returns {Promise<{data: EqptsMasterDialogValues, qty: } | undefined>}
  *  data: 機材情報, qty: 保有数
  */
-export const getChosenEqpt = async (id: number) => {
+const getChosenEqpt = async (id: number) => {
   try {
     const [kizai, qty] = await Promise.all([selectOneEqpt(id), getEqptsQty(id)]);
     const { data, error } = kizai;
@@ -257,7 +257,7 @@ export const updateEqpt = async (
  * @param id 機材ID
  * @returns idの機材の保有数とNG数
  */
-export const getEqptsQty = async (id: number) => {
+const getEqptsQty = async (id: number) => {
   try {
     const { data, error } = await selectCountOfTheEqpt(id);
     if (error) {

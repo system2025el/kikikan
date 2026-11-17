@@ -1,6 +1,6 @@
 import { FormItemsType } from '@/app/(main)/_ui/form-box';
 
-import { ShukeibumonsMasterDialogValues, ShukeibumonsMasterTableValues } from './types';
+import { ShukeibumonsMasterDialogValues } from './types';
 
 /* 集計部門マスタテーブルヘッダー */
 export const shukeibumonMHeader = [

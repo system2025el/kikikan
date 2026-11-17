@@ -4,7 +4,6 @@ import { redirect } from 'next/navigation';
 
 import { getCurrentUser } from '../../_lib/funcs';
 import { permission } from '../../_lib/permission';
-import { getFilteredBumons } from './_lib/funcs';
 import { BumonsMaster } from './_ui/bumons-master';
 
 export const metadata: Metadata = {

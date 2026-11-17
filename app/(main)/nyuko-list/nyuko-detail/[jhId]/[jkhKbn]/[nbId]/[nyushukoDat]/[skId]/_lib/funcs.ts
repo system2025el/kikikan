@@ -5,8 +5,8 @@ import { PoolClient } from 'pg';
 
 import { BASHO_ID, JUCHU_KIZAI_HEAD_KBN, NYUSHUKO_SHUBETU_ID, SAGYO_KBN_ID } from '@/app/_lib/constants';
 import pool, { refreshVRfid } from '@/app/_lib/db/postgres';
-import { selectJuchuContainerMeisaiMaxId, upsertJuchuContainerMeisai } from '@/app/_lib/db/tables/t-juchu-ctn-meisai';
-import { selectJuchuKizaiMeisaiMaxId, upsertJuchuKizaiMeisai } from '@/app/_lib/db/tables/t-juchu-kizai-meisai';
+import { upsertJuchuContainerMeisai } from '@/app/_lib/db/tables/t-juchu-ctn-meisai';
+import { upsertJuchuKizaiMeisai } from '@/app/_lib/db/tables/t-juchu-kizai-meisai';
 import {
   selectJuchuKizaiNyushukoConfirmSingle,
   selectOyaJuchuKizaiNyushukoConfirm,
@@ -23,7 +23,6 @@ import {
   deleteNyushukoFix,
   insertNyushukoFix,
   selectFixedJuchuKizaiHeadIdsTx,
-  updateNyushukoFix,
 } from '@/app/_lib/db/tables/t-nyushuko-fix';
 import { selectJuchuContainerMeisai } from '@/app/_lib/db/tables/v-juchu-ctn-meisai';
 import { selectNyushukoOne } from '@/app/_lib/db/tables/v-nyushuko-den2-head';
@@ -330,7 +329,7 @@ const reflectOyaNyukoDen = async (
  * @param userNam ユーザー名
  * @param connection
  */
-export const updMainNyukoDetail = async (
+const updMainNyukoDetail = async (
   nyukoDetailData: NyukoDetailValues,
   unfixedJuchuKizaiHeadIds: number[],
   userNam: string,
@@ -355,7 +354,7 @@ export const updMainNyukoDetail = async (
  * @param userNam ユーザー名
  * @param connection
  */
-export const updReturnNyukoDetail = async (
+const updReturnNyukoDetail = async (
   nyukoDetailData: NyukoDetailValues,
   nyukoDetailTableData: NyukoDetailTableValues[],
   juchuKizaiHeadIds: number[],
@@ -407,7 +406,7 @@ export const updReturnNyukoDetail = async (
  * @param userNam ユーザー名
  * @param connection
  */
-export const updKeepNyukoDetail = async (
+const updKeepNyukoDetail = async (
   nyukoDetailData: NyukoDetailValues,
   nyukoDetailTableData: NyukoDetailTableValues[],
   unfixedJuchuKizaiHeadIds: number[],
@@ -466,7 +465,7 @@ export const updKeepNyukoDetail = async (
  * @param userNam ユーザー名
  * @param connection
  */
-export const upsJuchuKizaiMeisai = async (
+const upsJuchuKizaiMeisai = async (
   nyukoDetailTableData: NyukoDetailTableValues[],
   userNam: string,
   connection: PoolClient
@@ -503,7 +502,7 @@ export const upsJuchuKizaiMeisai = async (
  * @param userNam ユーザー名
  * @param connection
  */
-export const upsJuchuCtnMeisai = async (
+const upsJuchuCtnMeisai = async (
   nyukoDetailTableData: NyukoDetailTableValues[],
   userNam: string,
   connection: PoolClient
@@ -539,7 +538,7 @@ export const upsJuchuCtnMeisai = async (
  * @param withNyukoFixQty true のとき「到着で親から引いた読取数」（nyuko_fix_qty）も今回の読取数にする（返却の到着のみ）
  * @returns
  */
-export const updNyukoDen = async (
+const updNyukoDen = async (
   nyukoDetailTableData: NyukoDetailTableValues[],
   userNam: string,
   connection: PoolClient,
@@ -589,7 +588,7 @@ export const updNyukoDen = async (
  * @param connection
  * @returns
  */
-export const upsShukoDen = async (
+const upsShukoDen = async (
   nyukoDetailTableData: NyukoDetailTableValues[],
   shukoDat: string,
   userNam: string,
@@ -655,7 +654,7 @@ export const upsShukoDen = async (
  * @param userNam ユーザー名
  * @param connection
  */
-export const updOyaKizaiNyukoDen = async (items: OyaNyukoReflectItem[], userNam: string, connection: PoolClient) => {
+const updOyaKizaiNyukoDen = async (items: OyaNyukoReflectItem[], userNam: string, connection: PoolClient) => {
   const updateNyukoData: NyushukoDen[] = items
     .filter(({ before, after }) => after !== before)
     .map(({ data: d, before, after }) => ({
@@ -726,7 +725,7 @@ const calcOyaCtnQty = (
  * @param connection
  * @returns
  */
-export const updOyaCtnNyukoDen = async (
+const updOyaCtnNyukoDen = async (
   items: OyaNyukoReflectItem[],
   oyaJuchuContainerMeisaiData: {
     juchuHeadId: number;
@@ -794,7 +793,7 @@ export const updOyaCtnNyukoDen = async (
  * @param userNam ユーザー名
  * @param connection
  */
-export const addNyukoFix = async (
+const addNyukoFix = async (
   nyukoDetailData: NyukoDetailValues,
   juchuKizaiHeadIds: number[],
   userNam: string,
@@ -829,7 +828,7 @@ export const addNyukoFix = async (
  * @param juchuKizaiHeadId 受注機材ヘッダーid
  * @returns 返却受注コンテナ明細データ
  */
-export const getOyaJuchuContainerMeisai = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
+const getOyaJuchuContainerMeisai = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
   try {
     const { data: containerData, error: containerError } = await selectJuchuContainerMeisai(
       juchuHeadId,

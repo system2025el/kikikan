@@ -14,25 +14,6 @@ export type BillsListTableValues = {
 };
 
 /**
- * 見積書画面に表示する受注のタイプ
- */
-export type JuchuValues = {
-  juchuHeadId: number | undefined | null;
-  delFlg?: number;
-  juchuSts: string | undefined | null;
-  juchuDat: Date | undefined | null;
-  juchuRange: { strt: Date | undefined | null; end: Date | undefined | null };
-  nyuryokuUser: string | undefined | null;
-  koenNam: string | undefined | null;
-  koenbashoNam: string | undefined | null;
-  kokyaku: { id: number | undefined | null; name: string | undefined | null };
-  kokyakuTantoNam: string | undefined | null;
-  mem: string | undefined | null;
-  nebikiAmt: number | undefined | null;
-  zeiKbn?: string | undefined | null;
-};
-
-/**
  * 請求明細ヘッドのzodSchema
  */
 const billMeisaiHeadSchema = z

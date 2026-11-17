@@ -1,7 +1,5 @@
 import 'server-only';
 
-import { PoolClient } from 'pg';
-
 import { SCHEMA } from '../schema';
 import { createClient } from '../supabase-server';
 import { IdoFix } from '../types/t-ido-fix-type';

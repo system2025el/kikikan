@@ -4,7 +4,6 @@ import { revalidatePath } from 'next/cache';
 
 import pool from '@/app/_lib/db/postgres';
 import { createAdminClient } from '@/app/_lib/db/supabase-admin';
-import { createClient } from '@/app/_lib/db/supabase-server';
 // import { supabase /*supabaseAdmin*/ } from '@/app/_lib/db/supabase';
 // import { supabaseAdmin } from '@/app/_lib/db/supabase-admin';
 import {
@@ -22,7 +21,6 @@ import { getUrl } from '@/app/_lib/url';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { permission } from '@/app/(main)/_lib/permission';
 
-import { emptyUser, htRadio, juchuRadio, loginSettingRadio, mastersRadio, nyushukoRadio } from './datas';
 import { UsersMasterDialogValues, UsersMasterTableValues } from './types';
 
 /**
@@ -195,7 +193,7 @@ export const addNewUser = async (data: UsersMasterDialogValues, user: string) =>
   try {
     await connection.query('BEGIN');
     // 担当者マスタ更新
-    const result = await insertNewUser(insertData, connection);
+    await insertNewUser(insertData, connection);
 
     // const { error } = await supabase.auth.signUp({
     //   email: data.mailAdr,

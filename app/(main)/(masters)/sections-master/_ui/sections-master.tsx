@@ -8,19 +8,15 @@ import {
   Dialog,
   Divider,
   Grid2,
-  MenuItem,
   Paper,
-  Select,
   Stack,
   TableContainer,
   Typography,
 } from '@mui/material';
-import { grey } from '@mui/material/colors';
 import { useEffect, useRef, useState } from 'react';
-import { Controller, TextFieldElement, useForm } from 'react-hook-form-mui';
+import { TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { User } from '@/app/(main)/_lib/types';
-import { selectNone, SelectTypes } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
 import { MuiTablePagination } from '@/app/(main)/_ui/table-pagination';
 
@@ -82,7 +78,6 @@ export const SectionsMaster = ({ user }: { user: User }) => {
   /** 情報が変わったときに更新される */
   const refetchSections = async () => {
     setIsLoading(true);
-    const searchParams = getValues();
     const updated = await getFilteredSections(getValues().query);
     setSections(updated);
     setIsLoading(false);

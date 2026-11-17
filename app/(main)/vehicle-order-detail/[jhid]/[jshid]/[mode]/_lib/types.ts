@@ -1,7 +1,6 @@
 import z from 'zod';
 
 import { MEMO_MAX_LENGTH } from '@/app/_lib/constants';
-import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 
 import { validationMessages } from '../../../../../_lib/validation-messages';
 

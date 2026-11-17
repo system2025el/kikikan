@@ -1,17 +1,8 @@
 'use client';
 
-import Delete from '@mui/icons-material/Delete';
 import {
-  Box,
   Button,
   Checkbox,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  IconButton,
-  Paper,
-  Stack,
   Table,
   TableBody,
   TableCell,
@@ -19,23 +10,18 @@ import {
   TableHead,
   TableRow,
   TextField,
-  Tooltip,
-  Typography,
 } from '@mui/material';
 import { grey, lightBlue } from '@mui/material/colors';
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useRef } from 'react';
 
 import { BASHO_ID } from '@/app/_lib/constants';
+import { dispColors } from '@/app/(main)/_lib/colors';
 import { toJapanMDString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { openOrFocusTab } from '@/app/(main)/_lib/tab-focus';
 import { MemoTooltip } from '@/app/(main)/(eq-order-detail)/_ui/memo-tooltip';
-import { getStockRowBackgroundColor } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/colorselect';
-import {
-  JuchuKizaiHonbanbiValues,
-  StockTableValues,
-} from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';
+import { StockTableValues } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';
 
-import { getDateHeaderBackgroundColor, getDateRowBackgroundColor } from '../_lib/colorselect';
+import { getDateHeaderBackgroundColor } from '../_lib/colorselect';
 import { ReturnJuchuContainerMeisaiValues, ReturnJuchuKizaiMeisaiValues } from '../_lib/types';
 
 type ReturnStockTableProps = {
@@ -120,8 +106,7 @@ export type ReturnStockTableRowProps = {
 };
 
 const ReturnStockTableRow = React.memo(
-  ({ row, index, dateRange }: ReturnStockTableRowProps) => {
-    const test: JuchuKizaiHonbanbiValues[] = [];
+  ({ row }: ReturnStockTableRowProps) => {
     return (
       <TableRow>
         {row.map((cell, colIndex) => {
@@ -132,7 +117,7 @@ const ReturnStockTableRow = React.memo(
               style={styles.row}
               sx={{
                 borderLeft: colIndex === 0 ? '1px solid rgba(0, 0, 0, 0.12)' : 'none',
-                color: cell.zaikoQty < 0 ? 'red' : 'black',
+                color: cell.zaikoQty < 0 ? dispColors.minusZaiko : 'black',
               }}
               size="small"
             >
@@ -255,7 +240,7 @@ const ReturnEqTableComponent: React.FC<ReturnEqTableProps> = ({
               align="center"
               size="small"
               style={styles.header}
-              sx={{ position: 'sticky', top: 0, zIndex: 2, bgcolor: 'red' }}
+              sx={{ position: 'sticky', top: 0, zIndex: 2, bgcolor: dispColors.return }}
               rowSpan={2}
             >
               返却
@@ -368,13 +353,11 @@ const ReturnEqTableRow = React.memo(
     nyukoFixFlag,
     returnNyukoDate,
     handleOrderRef,
-    handleYobiRef,
     handleEqSelect,
     handleMemoChange,
     handleMemo2Change,
     handleCellChange,
     handleOrderKeyDown,
-    handleYobiKeyDown,
   }: ReturnEqTableRowProps) => {
     return (
       <TableRow hover>
@@ -452,7 +435,7 @@ const ReturnEqTableRow = React.memo(
                 textAlign: 'right',
                 padding: 0,
                 fontSize: 'small',
-                color: 'red',
+                color: dispColors.return,
               },
               '& input[type=number]': {
                 MozAppearance: 'textfield',
@@ -466,7 +449,7 @@ const ReturnEqTableRow = React.memo(
                 margin: 0,
               },
               '.MuiInput-input.Mui-disabled': {
-                WebkitTextFillColor: 'red',
+                WebkitTextFillColor: dispColors.return,
               },
             }}
             slotProps={{
@@ -602,7 +585,7 @@ const ReturnContainerTableRow = React.memo(
                 padding: 0,
                 fontSize: 'small',
                 width: 60,
-                color: 'red',
+                color: dispColors.return,
               },
               '& input[type=number]': {
                 MozAppearance: 'textfield',
@@ -616,7 +599,7 @@ const ReturnContainerTableRow = React.memo(
                 margin: 0,
               },
               '.MuiInput-input.Mui-disabled': {
-                WebkitTextFillColor: 'red',
+                WebkitTextFillColor: dispColors.return,
               },
             }}
             slotProps={{
@@ -654,7 +637,7 @@ const ReturnContainerTableRow = React.memo(
                 padding: 0,
                 fontSize: 'small',
                 width: 60,
-                color: 'red',
+                color: dispColors.return,
               },
               '& input[type=number]': {
                 MozAppearance: 'textfield',
@@ -668,7 +651,7 @@ const ReturnContainerTableRow = React.memo(
                 margin: 0,
               },
               '.MuiInput-input.Mui-disabled': {
-                WebkitTextFillColor: 'red',
+                WebkitTextFillColor: dispColors.return,
               },
             }}
             slotProps={{
@@ -686,7 +669,12 @@ const ReturnContainerTableRow = React.memo(
             disabled={!edit || nyukoFixFlag}
           />
         </TableCell>
-        <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: lightBlue[100], color: 'red' }}>
+        <TableCell
+          style={styles.row}
+          align="right"
+          size="small"
+          sx={{ bgcolor: lightBlue[100], color: dispColors.return }}
+        >
           {row.planQty}
         </TableCell>
         <TableCell style={styles.row} align="center" size="small">
@@ -798,7 +786,7 @@ const ReturnContainerTableComponent = (props: {
               align="center"
               size="small"
               style={styles.header}
-              sx={{ position: 'sticky', top: 0, zIndex: 2, bgcolor: 'red' }}
+              sx={{ position: 'sticky', top: 0, zIndex: 2, bgcolor: dispColors.return }}
               colSpan={3}
             >
               返却

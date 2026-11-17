@@ -1,39 +1,10 @@
 'use client';
-import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
 import BlockIcon from '@mui/icons-material/Block';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
-import DeleteIcon from '@mui/icons-material/Delete';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import SaveAsIcon from '@mui/icons-material/SaveAs';
-import { Box, Button, IconButton } from '@mui/material';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
-
-import { useDirty } from './dirty-context';
-
-/**
- * ブラウザバックするボタン
- * @param スタイルオブジェクトとボタンの表示文字
- * @returns 戻るボタン
- */
-export const BackButton = ({ sx, label }: { sx?: object; label: string }) => {
-  //const router = useRouter();
-  const { requestBack } = useDirty();
-
-  const handleBack = async () => {
-    await requestBack();
-  };
-
-  return (
-    <Button sx={{ ...sx }} onClick={() => handleBack()}>
-      <Box display={'flex'} alignItems={'center'}>
-        <ArrowLeftIcon fontSize="small" />
-        {label}
-      </Box>
-    </Button>
-  );
-};
+import { Button, IconButton } from '@mui/material';
 
 /**
  * ダイアログを閉じるボタン

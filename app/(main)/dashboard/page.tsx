@@ -1,5 +1,4 @@
 import { Container } from '@mui/material';
-import { grey } from '@mui/material/colors';
 import { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 

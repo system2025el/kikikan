@@ -11,6 +11,8 @@ import { FocusEvent, useMemo, useRef, useState } from 'react';
 import { Noop } from 'react-hook-form';
 import { DateRangePicker } from 'rsuite';
 
+import { readonlyColors } from '@/app/(main)/_lib/colors';
+
 import { toJapanYMDString } from '../_lib/date-conversion';
 //import { DateRange } from 'rsuite/esm/DateRangePicker';
 
@@ -342,7 +344,7 @@ export const FormDateX = ({
             ...clearButtonSx(!!value),
             pointerEvents: readonly ? 'none' : undefined,
             backgroundColor: readonly ? grey[200] : undefined,
-            color: readonly ? '#888' : undefined,
+            color: readonly ? readonlyColors.text : undefined,
             ...sx,
           },
           inputProps: readonly

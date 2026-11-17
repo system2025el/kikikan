@@ -127,7 +127,7 @@ export const getUsersSelection = async () => {
  * 見積ステータス選択肢を取得する関数
  * @returns {SelectTypes[]} 見積ステータスの配列
  */
-export const getMituStsSelection = async () => {
+const getMituStsSelection = async () => {
   try {
     const { data, error } = await selectActiveMituSts();
     if (error) {
@@ -517,7 +517,7 @@ export const updQuotDelFlg = async (ids: number[]) => {
  * 機材選択画面に表示するための、無効化フラグなし・表示順の部門の配列を取得する関数
  * @returns 無効化フラグなし、表示順部門の配列
  */
-export const getBumonsForEqptSelection = async () => {
+const getBumonsForEqptSelection = async () => {
   try {
     const { data, error } = await selectActiveBumons();
     if (error) {
@@ -635,7 +635,7 @@ export const getSelectedEqpts = async (idList: number[]) => {
  * @param kizaiId セットオプション付き機材の機材ID
  * @returns {EqptSelection[]} セットオプションの配列
  */
-export const getSetOptions = async (kizaiId: number) => {
+const getSetOptions = async (kizaiId: number) => {
   try {
     let setList: EqptSelection[];
 

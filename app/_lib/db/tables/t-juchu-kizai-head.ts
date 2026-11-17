@@ -3,10 +3,7 @@ import 'server-only';
 import { PoolClient } from 'pg';
 
 import { JUCHU_KIZAI_HEAD_KBN } from '@/app/_lib/constants';
-import { KeepJuchuKizaiHeadValues } from '@/app/(main)/(eq-order-detail)/eq-keep-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[oyaJuchuKizaiHeadId]/[mode]/_lib/types';
-import { JuchuKizaiHeadValues } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';
 
-import pool from '../postgres';
 import { SCHEMA } from '../schema';
 import { createClient } from '../supabase-server';
 import { JuchuKizaiHead } from '../types/t-juchu-kizai-head-type';
@@ -176,27 +173,6 @@ export const selectChildJuchuKizaiHeadCountTx = async (
     return rows[0]?.cnt ?? 0;
   } catch (e) {
     throw new Error('[selectChildJuchuKizaiHeadCountTx] DBエラー:', { cause: e });
-  }
-};
-
-/**
- * 受注本番日数取得
- * @param juchuHeadId 受注ヘッダーid
- * @param juchuKizaiHeadId 受注機材ヘッダーid
- * @returns
- */
-export const selectJuchuHonbanbiQty = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
-  const supabase = await createClient();
-  try {
-    return await supabase
-      .schema(SCHEMA)
-      .from('t_juchu_kizai_head')
-      .select('juchu_honbanbi_qty')
-      .eq('juchu_head_id', juchuHeadId)
-      .eq('juchu_kizai_head_id', juchuKizaiHeadId)
-      .single();
-  } catch (e) {
-    throw new Error('[selectJuchuHonbanbiQty] DBエラー:', { cause: e });
   }
 };
 

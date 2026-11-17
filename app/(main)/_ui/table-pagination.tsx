@@ -1,6 +1,6 @@
 'use client';
-import { Box, Grid2, Pagination as MuiPagination, Stack, styled, Typography } from '@mui/material';
-import { JSX, useCallback } from 'react';
+import { Pagination as MuiPagination, Stack, styled, Typography } from '@mui/material';
+import { useCallback } from 'react';
 
 /** テーブルページネイション */
 type MuiTablePaginationProps = {

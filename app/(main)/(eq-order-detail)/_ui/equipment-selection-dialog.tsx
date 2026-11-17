@@ -17,9 +17,8 @@ import {
 import { useEffect, useState } from 'react';
 
 import { Loading } from '../../_ui/loading';
-import { getJuchuContainerMeisai, getOyaJuchuContainerMeisai, getOyaJuchuKizaiMeisai } from '../_lib/funcs';
+import { getOyaJuchuContainerMeisai, getOyaJuchuKizaiMeisai } from '../_lib/funcs';
 import { OyaJuchuContainerMeisaiValues, OyaJuchuKizaiMeisaiValues } from '../_lib/types';
-import { JuchuContainerMeisaiValues } from '../eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';
 
 export const OyaEqSelectionDialog = ({
   juchuHeadId,

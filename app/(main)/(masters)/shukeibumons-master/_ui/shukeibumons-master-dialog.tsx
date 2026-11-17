@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Grid2, Snackbar } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { CheckboxElement, TextareaAutosizeElement, TextFieldElement } from 'react-hook-form-mui';
+import { TextFieldElement } from 'react-hook-form-mui';
 
 import { User } from '@/app/(main)/_lib/types';
 import { FormBox } from '@/app/(main)/_ui/form-box';

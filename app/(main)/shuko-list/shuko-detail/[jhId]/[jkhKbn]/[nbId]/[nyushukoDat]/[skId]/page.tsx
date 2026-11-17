@@ -10,7 +10,6 @@ import { NyushukoDetailNotFound } from '@/app/(main)/_ui/nyushuko-not-found';
 
 import { getShukoDetail, getShukoDetailTable } from './_lib/funcs';
 import { getHonbanShukoFixed } from './_lib/jizen-funcs';
-import { ShukoDetailValues } from './_lib/types';
 import { ShukoDetail } from './_ui/shuko-detail';
 
 export const generateMetadata = async (props: {

@@ -1,15 +1,8 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Box, Button, Grid2, MenuItem, Select, Snackbar, TextField, Typography } from '@mui/material';
+import { Box, Button, Grid2, MenuItem, Select, Snackbar, TextField } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import { useEffect, useState } from 'react';
-import {
-  CheckboxElement,
-  Controller,
-  SelectElement,
-  TextareaAutosizeElement,
-  TextFieldElement,
-  useForm,
-} from 'react-hook-form-mui';
+import { CheckboxElement, Controller, SelectElement, TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { openOrFocusTab } from '@/app/(main)/_lib/tab-focus';
 import { User } from '@/app/(main)/_lib/types';

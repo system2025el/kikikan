@@ -7,26 +7,16 @@ import {
   DialogContentText,
   DialogTitle,
   Grid2,
-  MenuItem,
-  Select,
   Snackbar,
-  TextField,
   Typography,
 } from '@mui/material';
-import { grey } from '@mui/material/colors';
 import { useEffect, useState } from 'react';
-import {
-  CheckboxElement,
-  Controller,
-  SelectElement,
-  TextareaAutosizeElement,
-  TextFieldElement,
-  useForm,
-} from 'react-hook-form-mui';
+import { SelectElement, TextFieldElement, useForm } from 'react-hook-form-mui';
 
+import { readonlyColors } from '@/app/(main)/_lib/colors';
 import { User } from '@/app/(main)/_lib/types';
 
-import { FormBox, selectNone, SelectTypes } from '../../../../_ui/form-box';
+import { FormBox, SelectTypes } from '../../../../_ui/form-box';
 import { Loading } from '../../../../_ui/loading';
 import { FAKE_NEW_ID } from '../../../_lib/constants';
 import { MasterDialogTitle } from '../../../_ui/dialog-title';
@@ -262,8 +252,8 @@ export const RfidMasterDialog = ({
                   sx={{
                     width: 300,
                     pointerEvents: !isNew ? 'none' : undefined, // クリック不可にする
-                    backgroundColor: !isNew ? '#f5f5f5' : undefined, // グレー背景で無効っぽく
-                    color: !isNew ? '#888' : undefined,
+                    backgroundColor: !isNew ? readonlyColors.bg : undefined, // グレー背景で無効っぽく
+                    color: !isNew ? readonlyColors.text : undefined,
                   }}
                   disabled={editable ? false : true}
                   error={!!tagMessage}

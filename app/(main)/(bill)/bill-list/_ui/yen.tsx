@@ -3,6 +3,8 @@
 import { TextField } from '@mui/material';
 import { Controller, FieldPath, useFormContext } from 'react-hook-form';
 
+import { readonlyColors } from '@/app/(main)/_lib/colors';
+
 import { BillHeadValues } from '../_lib/types';
 
 /**
@@ -70,8 +72,8 @@ export const ReadOnlyYenNumberElement = <TFieldName extends FieldPath<BillHeadVa
               margin: 0,
             },
             pointerEvents: 'none', // クリック不可にする
-            backgroundColor: '#f5f5f5', // グレー背景で無効っぽく
-            color: '#888',
+            backgroundColor: readonlyColors.bg, // グレー背景で無効っぽく
+            color: readonlyColors.text,
           })}
           slotProps={{ input: { readOnly: true, onFocus: (e) => e.target.blur() } }}
           helperText={fieldState.error?.message}

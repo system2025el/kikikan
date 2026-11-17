@@ -3,14 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Grid2, Snackbar, TextField, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
-import {
-  CheckboxElement,
-  Controller,
-  SelectElement,
-  TextareaAutosizeElement,
-  TextFieldElement,
-  useForm,
-} from 'react-hook-form-mui';
+import { CheckboxElement, Controller, TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { User } from '@/app/(main)/_lib/types';
 import { FormBox } from '@/app/(main)/_ui/form-box';
@@ -400,6 +393,3 @@ export const CustomersMasterDialog = ({
     </>
   );
 };
-
-/** ---------------------------スタイル----------------------------- */
-const styles: { [key: string]: React.CSSProperties } = {};

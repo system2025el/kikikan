@@ -309,16 +309,3 @@ export const NyukoIdoDenTable = (props: { datas: IdoDetailTableValues[] }) => {
 
 /* style
 ---------------------------------------------------------------------------------------------------- */
-/** @type {{ [key: string]: React.CSSProperties }} style */
-const styles: { [key: string]: React.CSSProperties } = {
-  // 行
-  row: {
-    border: '1px solid black',
-    whiteSpace: 'nowrap',
-    height: '26px',
-    paddingTop: 0,
-    paddingBottom: 0,
-    paddingLeft: 1,
-    paddingRight: 1,
-  },
-};

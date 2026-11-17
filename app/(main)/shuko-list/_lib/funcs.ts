@@ -65,7 +65,7 @@ export const getShukoList = async (queries: ShukoListSearchValues) => {
  * @param kokyakuId 顧客id
  * @returns
  */
-export const getKeisho = async (kokyakuId: number) => {
+const getKeisho = async (kokyakuId: number) => {
   try {
     const { data, error } = await selectOneCustomer(kokyakuId);
     if (error) {

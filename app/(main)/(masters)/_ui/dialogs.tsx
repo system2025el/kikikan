@@ -1,5 +1,5 @@
 import WarningIcon from '@mui/icons-material/Warning';
-import { Box, Button, Dialog, DialogActions, DialogContentText, DialogTitle, Typography } from '@mui/material';
+import { Box, Button, Dialog, DialogActions, DialogContentText, DialogTitle } from '@mui/material';
 
 export const IsDirtyAlertDialog = ({
   open,

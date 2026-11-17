@@ -23,7 +23,7 @@ import { IdoDetailTableValues, IdoEqptSelection, SelectedIdoEqptsValues } from '
  * 移動伝票id最大値取得
  * @returns
  */
-export const getIdoDenMaxId = async () => {
+const getIdoDenMaxId = async () => {
   try {
     const { data, error } = await selectIdoDenMaxId();
     if (error) {
@@ -144,7 +144,7 @@ export const getIdoMem = async (sagyoDenDat: string, sagyoSijiId: number) => {
  * @param connection
  * @returns
  */
-export const getConfirmIdoDen = async (
+const getConfirmIdoDen = async (
   sagyoKbnId: number,
   sagyoSijiId: number,
   sagyoDenDat: string,
@@ -185,7 +185,7 @@ export const getConfirmIdoDen = async (
  * @param userNam ユーザー名
  * @param connection
  */
-export const addIdoDen = async (addIdoDenData: IdoDetailTableValues[], userNam: string, connection: PoolClient) => {
+const addIdoDen = async (addIdoDenData: IdoDetailTableValues[], userNam: string, connection: PoolClient) => {
   const newIdoShukoData: IdoDen[] = addIdoDenData.map((d) => ({
     ido_den_id: d.idoDenId,
     kizai_id: d.kizaiId,
@@ -229,7 +229,7 @@ export const addIdoDen = async (addIdoDenData: IdoDetailTableValues[], userNam: 
  * @param userNam ユーザー名
  * @param connection
  */
-export const updIdoDen = async (updIdoDenData: IdoDetailTableValues[], userNam: string, connection: PoolClient) => {
+const updIdoDen = async (updIdoDenData: IdoDetailTableValues[], userNam: string, connection: PoolClient) => {
   const updateIdoShukoData: IdoDen[] = updIdoDenData.map((d) => ({
     ido_den_id: d.idoDenId,
     kizai_id: d.kizaiId,
@@ -274,7 +274,7 @@ export const updIdoDen = async (updIdoDenData: IdoDetailTableValues[], userNam: 
  * @param deleteIds 削除移動伝票id
  * @param connection
  */
-export const delIdoDen = async (
+const delIdoDen = async (
   deleteData: {
     sagyo_siji_id: number;
     sagyo_den_dat: string;
@@ -297,7 +297,7 @@ export const delIdoDen = async (
  * 移動確定id最大値取得
  * @returns
  */
-export const getIdoFixMaxId = async () => {
+const getIdoFixMaxId = async () => {
   try {
     const { data, error } = await selectIdoFixMaxId();
     if (error) {
@@ -584,7 +584,7 @@ export const saveIdoDen = async (
  * 移動機材選択で使う部門リストを取得する関数
  * @returns 無効化フラグなし、表示順部門の配列
  */
-export const getIdoBumonsForEqptSelection = async () => {
+const getIdoBumonsForEqptSelection = async () => {
   try {
     const { data, error } = await selectActiveBumons();
     if (error) {

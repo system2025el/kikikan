@@ -1,5 +1,5 @@
 import fontkit from '@pdf-lib/fontkit';
-import { PDFDocument, PDFFont, rgb } from 'pdf-lib';
+import { PDFDocument, rgb } from 'pdf-lib';
 import { useEffect, useState } from 'react';
 
 import { BillHeadValues } from '../types';
@@ -49,7 +49,6 @@ export const usePdf = (): [(param: BillHeadValues, keisho: string) => Promise<Bl
     const page = pdfDoc.addPage();
 
     // ページの高さと幅
-    const { width, height } = page.getSize();
 
     // ------------------------------------------------------------------/
 
@@ -409,7 +408,7 @@ export const usePdf = (): [(param: BillHeadValues, keisho: string) => Promise<Bl
     let currentPage = page;
 
     // 各明細ヘッダを処理
-    param.meisaiHeads.forEach((meisai, meisaiIndex) => {
+    param.meisaiHeads.forEach((meisai) => {
       // 明細がなくてもヘッダ情報を出すように変更
       const meisaiList = meisai?.meisai ?? [];
       // --- 公演情報テーブル ---

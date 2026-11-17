@@ -1,24 +1,12 @@
-import {
-  Autocomplete,
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogTitle,
-  Grid2,
-  TextField,
-  Typography,
-} from '@mui/material';
-import { useEffect, useState } from 'react';
+import { Autocomplete, Button, Dialog, DialogActions, DialogTitle, Grid2, TextField, Typography } from '@mui/material';
 import { Controller, useForm } from 'react-hook-form';
-import { CheckboxElement, SelectElement, TextFieldElement } from 'react-hook-form-mui';
+import { CheckboxElement, TextFieldElement } from 'react-hook-form-mui';
 
 import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { openOrFocusTab } from '@/app/(main)/_lib/tab-focus';
 import { CloseMasterDialogButton } from '@/app/(main)/_ui/buttons';
 import { FormDateX } from '@/app/(main)/_ui/date';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
-import { Loading } from '@/app/(main)/_ui/loading';
 
 export const CreateBillDialog = ({
   //kokyakuId,
@@ -34,7 +22,7 @@ export const CreateBillDialog = ({
   setDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
   /* useForm ------------------------------------------------------------ */
-  const { control, handleSubmit, reset, getValues } = useForm<{
+  const { control, handleSubmit, reset } = useForm<{
     kokyaku: number | null;
     tantouNam: string | null;
     date: Date | null;

@@ -7,7 +7,6 @@ import { Box, Button, Grid2, Stack, TextField, Typography } from '@mui/material'
 import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import {
   CheckboxElement,
-  Control,
   Controller,
   TextFieldElement,
   UseFieldArrayReturn,
@@ -15,7 +14,6 @@ import {
   useWatch,
 } from 'react-hook-form-mui';
 
-import { FAKE_NEW_ID } from '../../(masters)/_lib/constants';
 import { QuotHeadValues } from '../_lib/types';
 import { ReadOnlyYenNumberElement } from './yen';
 

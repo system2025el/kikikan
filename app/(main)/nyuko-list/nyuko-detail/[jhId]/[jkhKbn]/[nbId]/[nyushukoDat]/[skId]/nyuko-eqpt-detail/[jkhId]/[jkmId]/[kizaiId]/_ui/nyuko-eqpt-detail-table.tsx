@@ -2,11 +2,9 @@
 
 import { Checkbox, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import { grey } from '@mui/material/colors';
-import { Dispatch, SetStateAction } from 'react';
 
-import { BASHO_ID } from '@/app/_lib/constants';
 import { sagyoKbnColors } from '@/app/(main)/_lib/colors';
-import { toJapanTimeString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
 import { NyukoEqptDetailTableValues } from '../_lib/types';
 

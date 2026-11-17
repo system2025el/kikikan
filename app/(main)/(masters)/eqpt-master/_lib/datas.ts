@@ -1,9 +1,7 @@
-import { Label } from '@mui/icons-material';
-
 import { FormItemsType } from '@/app/(main)/_ui/form-box';
 
 import { FAKE_NEW_ID } from '../../_lib/constants';
-import { EqptsMasterDialogValues, EqptsMasterTableValues } from './types';
+import { EqptsMasterDialogValues } from './types';
 
 /* 機材マスタヘッダー */
 export const eqptMHeader = [

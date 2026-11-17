@@ -1,6 +1,6 @@
 import { FormItemsType } from '@/app/(main)/_ui/form-box';
 
-import { VehsMasterDialogValues, VehsMasterTableValues } from './types';
+import { VehsMasterDialogValues } from './types';
 /**
  * 車両マスタテーブルのヘッダー
  */

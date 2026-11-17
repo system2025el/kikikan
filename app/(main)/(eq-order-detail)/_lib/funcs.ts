@@ -9,14 +9,10 @@ import { selectColor } from '@/app/_lib/db/tables/m-honbanbi-color';
 import { selectMeisaiEqts } from '@/app/_lib/db/tables/m-kizai';
 import { selectKokyaku } from '@/app/_lib/db/tables/m-kokyaku';
 import { selectDetailStockListBulk } from '@/app/_lib/db/tables/stock-table';
-import { selectJuchuContainerMeisaiMaxId } from '@/app/_lib/db/tables/t-juchu-ctn-meisai';
 import { selectJuchuHead } from '@/app/_lib/db/tables/t-juchu-head';
 import { selectJuchuKizaiHeadMaxId } from '@/app/_lib/db/tables/t-juchu-kizai-head';
 import { deleteSiyouHonbanbi, insertAllHonbanbi } from '@/app/_lib/db/tables/t-juchu-kizai-honbanbi';
-import {
-  selectJuchuKizaiMeisaiKizaiTanka,
-  selectJuchuKizaiMeisaiMaxId,
-} from '@/app/_lib/db/tables/t-juchu-kizai-meisai';
+import { selectJuchuKizaiMeisaiKizaiTanka } from '@/app/_lib/db/tables/t-juchu-kizai-meisai';
 import {
   deleteJuchuKizaiNyushuko,
   insertJuchuKizaiNyushuko,
@@ -27,23 +23,16 @@ import {
 } from '@/app/_lib/db/tables/t-juchu-kizai-nyushuko';
 import {
   deleteAllNyukoCtnResult,
-  deleteAllNyushukoCtnResult,
   deleteAllShukoCtnResult,
   deleteKizaiIdNyushukoCtnResult,
 } from '@/app/_lib/db/tables/t-nyushuko-ctn-result';
 import {
   deleteAllKicsOrYardNyukoDen,
   deleteAllKicsOrYardShukoCtnDen,
-  deleteAllKicsOrYardShukoDen,
-  deleteAllNyushukoDen,
   insertNyushukoDen,
 } from '@/app/_lib/db/tables/t-nyushuko-den';
 import { selectFixedSagyoIdsTx, selectNyushukoFixFlag } from '@/app/_lib/db/tables/t-nyushuko-fix';
-import {
-  deleteAllNyukoResult,
-  deleteAllNyushukoResult,
-  deleteAllShukoResult,
-} from '@/app/_lib/db/tables/t-nyushuko-result';
+import { deleteAllNyukoResult } from '@/app/_lib/db/tables/t-nyushuko-result';
 import {
   selectJuchuContainerMeisai,
   selectJuchuContainerMeisaiTx,
@@ -465,64 +454,6 @@ export const getOyaJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHead
 };
 
 /**
- * 受注機材明細id最大値取得
- * @param juchuHeadId 受注ヘッダーid
- * @param juchuKizaiHeadId 受注機材ヘッダーid
- * @returns 受注機材明細id最大値
- */
-export const getJuchuKizaiMeisaiMaxId = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
-  try {
-    const { data, error } = await selectJuchuKizaiMeisaiMaxId(juchuHeadId, juchuKizaiHeadId);
-    if (error) {
-      if (error.code === 'PGRST116') {
-        return null;
-      }
-      throw error;
-    }
-    return data;
-  } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
-    throw e;
-  }
-};
-
-/**
- * 受注コンテナ明細id最大値取得
- * @param juchuHeadId 受注ヘッダーid
- * @param juchuKizaiHeadId 受注機材ヘッダーid
- * @returns 受注コンテナ明細id最大値
- */
-export const getJuchuContainerMeisaiMaxId = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
-  try {
-    const { data, error } = await selectJuchuContainerMeisaiMaxId(juchuHeadId, juchuKizaiHeadId);
-    if (error) {
-      if (error.code === 'PGRST116') {
-        return null;
-      }
-      throw error;
-    }
-    return data;
-  } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
-    throw e;
-  }
-};
-
-/**
  * 受注コンテナ明細リスト取得（トランザクション内。同じトランザクションで変更した内容を反映して読む）
  * @param juchuHeadId 受注ヘッダーid
  * @param juchuKizaiHeadId 受注機材ヘッダーid
@@ -880,56 +811,6 @@ export const addDummyNyushukoDen = async (
   }
 };
 
-/**
- * 入出庫伝票全削除
- * @param juchuHeadId 受注ヘッダーid
- * @param juchuKizaiHeadId 受注機材ヘッダーid
- * @param connection
- */
-export const delAllNyushukoDen = async (juchuHeadId: number, juchuKizaiHeadId: number, connection: PoolClient) => {
-  try {
-    await deleteAllNyushukoDen(juchuHeadId, juchuKizaiHeadId, connection);
-  } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
-    throw e;
-  }
-};
-
-/**
- * KICS/YARD出庫伝票全削除
- * @param juchuHeadId 受注ヘッダーid
- * @param juchuKizaiHeadId 受注機材ヘッダーid
- * @param sagyoId 作業id
- * @param connection
- */
-export const delAllKicsOrYardShukoDen = async (
-  juchuHeadId: number,
-  juchuKizaiHeadId: number,
-  sagyoId: number,
-  connection: PoolClient
-) => {
-  try {
-    await deleteAllKicsOrYardShukoDen(juchuHeadId, juchuKizaiHeadId, sagyoId, connection);
-  } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
-    throw e;
-  }
-};
-
 export const delAllKicsOrYardShukoCtnDen = async (
   juchuHeadId: number,
   juchuKizaiHeadId: number,
@@ -981,35 +862,6 @@ export const delAllKicsOrYardNyukoDen = async (
 };
 
 /**
- * 入出庫実績全削除
- * @param juchuHeadId 受注ヘッダーid
- * @param sagyoDenDat 作業日時
- * @param sagyoId 作業id
- * @param connection
- */
-export const delAllNyushukoResult = async (
-  juchuHeadId: number,
-  juchuKizaiHeadId: number,
-  sagyoId: number,
-  connection: PoolClient
-) => {
-  try {
-    await deleteAllNyushukoResult(juchuHeadId, juchuKizaiHeadId, sagyoId, connection);
-    await deleteAllNyushukoCtnResult(juchuHeadId, juchuKizaiHeadId, sagyoId, connection);
-  } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
-    throw e;
-  }
-};
-
-/**
  * コンテナ入出庫実績削除
  * @param juchuHeadId 受注ヘッダーid
  * @param sagyoDenDat 作業日時
@@ -1026,36 +878,6 @@ export const delNyushukoCtnResult = async (
 ) => {
   try {
     await deleteKizaiIdNyushukoCtnResult(juchuHeadId, juchuKizaiHeadId, kizaiIds, connection);
-  } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
-    throw e;
-  }
-};
-
-/**
- * 出庫実績全削除
- * @param juchuHeadId 受注ヘッダーid
- * @param juchuKizaiHeadId 受注機材ヘッダーid
- * @param sagyoId 作業区分id
- * @param connection
- * @returns
- */
-export const delAllShukoResult = async (
-  juchuHeadId: number,
-  juchuKizaiHeadId: number,
-  sagyoId: number,
-  connection: PoolClient
-) => {
-  try {
-    await deleteAllShukoResult(juchuHeadId, juchuKizaiHeadId, sagyoId, connection);
-    await deleteAllShukoCtnResult(juchuHeadId, juchuKizaiHeadId, sagyoId, connection);
   } catch (e) {
     if (e instanceof Error) {
       console.error(`[ERROR] ${e.message}`);

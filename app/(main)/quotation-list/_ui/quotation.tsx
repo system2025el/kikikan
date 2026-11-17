@@ -27,17 +27,17 @@ import { useEffect, useMemo, useState } from 'react';
 import { Controller, FormProvider, useFieldArray, useForm, useFormContext, useWatch } from 'react-hook-form';
 import { SelectElement, TextFieldElement } from 'react-hook-form-mui';
 
-import { toJapanTimeString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
+import { readonlyColors } from '@/app/(main)/_lib/colors';
+import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { FormDateX } from '@/app/(main)/_ui/date';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { LoadingOverlay } from '@/app/(main)/_ui/loading';
 import { PrefilledAutocomplete } from '@/app/(main)/_ui/prefilled-autocomplete';
 
-import { addLock, delLock, getLock } from '../../_lib/funcs';
 import { useUnsavedChangesWarning } from '../../_lib/hook';
 import { permission } from '../../_lib/permission';
-import { LockValues, User } from '../../_lib/types';
-import { IsDirtyAlertDialog, useDirty } from '../../_ui/dirty-context';
+import { User } from '../../_lib/types';
+import { useDirty } from '../../_ui/dirty-context';
 import { FAKE_NEW_ID } from '../../(masters)/_lib/constants';
 import { usePdf } from '../_lib/hooks/usePdf';
 import { JuchuValues, QuotHeadSchema, QuotHeadValues } from '../_lib/types';
@@ -155,7 +155,7 @@ export const Quotation = ({
   /** 処理中かどうか */
   const [isProcessing, setIsProcessing] = useState(false);
   // エラーハンドリング
-  const [isError, setIsError] = useState<Error | null>(null);
+  const [isError] = useState<Error | null>(null);
   /** 受注選択アコーディオン制御 */
   const [juchuExpanded, setJuchuExpanded] = useState(false);
   /** 見積ヘッダアコーディオン制御 */
@@ -223,7 +223,7 @@ export const Quotation = ({
         router.replace(`/quotation-list/edit/${id}`);
         return;
       } else {
-        const result = await updateQuot(data, user?.name ?? '');
+        await updateQuot(data, user?.name ?? '');
       }
       setSnackBarMessage('保存しました');
       setSnackBarOpen(true);
@@ -490,8 +490,8 @@ export const Quotation = ({
                         sx={{
                           width: 120,
                           pointerEvents: 'none', // クリック不可にする
-                          backgroundColor: '#f5f5f5', // グレー背景で無効っぽく
-                          color: '#888',
+                          backgroundColor: readonlyColors.bg, // グレー背景で無効っぽく
+                          color: readonlyColors.text,
                           '& .MuiInputBase-input': {
                             textAlign: 'right',
                           },

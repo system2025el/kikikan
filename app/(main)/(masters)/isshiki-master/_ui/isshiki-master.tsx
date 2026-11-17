@@ -25,7 +25,7 @@ import { Loading } from '@/app/(main)/_ui/loading';
 import { MuiTablePagination } from '@/app/(main)/_ui/table-pagination';
 
 import { FAKE_NEW_ID, ROWS_PER_MASTER_TABLE_PAGE } from '../../_lib/constants';
-import { MasterTable, MasterTableOfIsshiki } from '../../_ui/tables';
+import { MasterTableOfIsshiki } from '../../_ui/tables';
 import { isshikiMHeader } from '../_lib/datas';
 import { delIsshikiMaster, getFilteredIsshikis } from '../_lib/funcs';
 import { IsshikisMasterTableValues } from '../_lib/types';

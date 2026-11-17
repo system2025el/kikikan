@@ -7,7 +7,6 @@ import {
   Divider,
   Grid2,
   Paper,
-  Stack,
   Table,
   TableBody,
   TableCell,
@@ -20,7 +19,6 @@ import { grey } from '@mui/material/colors';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { CheckboxButtonGroup, TextFieldElement, useForm } from 'react-hook-form-mui';
 
-import { permission } from '../../_lib/permission';
 import { openOrFocusTab } from '../../_lib/tab-focus';
 import { SelectTypes } from '../../_ui/form-box';
 import { Loading } from '../../_ui/loading';

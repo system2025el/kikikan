@@ -1,9 +1,7 @@
 import 'server-only';
 
-import { connect } from 'http2';
 import { PoolClient } from 'pg';
 
-import pool from '../postgres';
 import { SCHEMA } from '../schema';
 import { createClient } from '../supabase-server';
 import { SeikyuDatJuchuKizai } from '../types/t-seikyu-date-juchu-kizai-type';

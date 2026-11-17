@@ -8,13 +8,13 @@ import { memo, useEffect, useRef, useState } from 'react';
 import {
   CheckboxElement,
   Controller,
-  FieldPath,
   TextFieldElement,
   UseFieldArrayReturn,
   useFormContext,
   useWatch,
 } from 'react-hook-form-mui';
 
+import { readonlyColors } from '@/app/(main)/_lib/colors';
 import { FormDateX } from '@/app/(main)/_ui/date';
 
 import { BillHeadValues } from '../_lib/types';
@@ -166,8 +166,8 @@ const MeisaiTblHeaderComponent = ({
             sx={{
               width: 120,
               pointerEvents: 'none', // クリック不可にする
-              backgroundColor: '#f5f5f5', // グレー背景で無効っぽく
-              color: '#888',
+              backgroundColor: readonlyColors.bg, // グレー背景で無効っぽく
+              color: readonlyColors.text,
               '& .MuiInputBase-input': {
                 textAlign: 'right',
               },
@@ -188,8 +188,8 @@ const MeisaiTblHeaderComponent = ({
             sx={{
               width: 120,
               pointerEvents: 'none', // クリック不可にする
-              backgroundColor: '#f5f5f5', // グレー背景で無効っぽく
-              color: '#888',
+              backgroundColor: readonlyColors.bg, // グレー背景で無効っぽく
+              color: readonlyColors.text,
               '& .MuiInputBase-input': {
                 textAlign: 'right',
               },

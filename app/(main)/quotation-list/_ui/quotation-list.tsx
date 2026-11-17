@@ -17,7 +17,6 @@ import { grey } from '@mui/material/colors';
 import { useEffect, useState } from 'react';
 import { Controller, TextFieldElement, useForm } from 'react-hook-form-mui';
 
-import { permission } from '../../_lib/permission';
 import { User } from '../../_lib/types';
 import { FormDateX } from '../../_ui/date';
 import { selectNone, SelectTypes } from '../../_ui/form-box';

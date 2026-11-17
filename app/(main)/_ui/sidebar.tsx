@@ -10,7 +10,6 @@ import {
   Drawer as MuiDrawer,
   IconButton,
   styled,
-  useTheme,
 } from '@mui/material';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
@@ -18,11 +17,9 @@ import Typography from '@mui/material/Typography';
 import * as React from 'react';
 import { useState } from 'react';
 
-import { BreadCrumbs } from '@/app/(main)/_lib/breadcrumbs';
 import NavLinks from '@/app/(main)/_ui/links';
 
 import { User } from '../_lib/types';
-import { useUser } from './user-context';
 
 const drawerWidth = 240;
 
@@ -48,7 +45,7 @@ const AppBar = styled(MuiAppBar, {
   }),
 }));
 
-const Drawer = styled(MuiDrawer)(({ theme }) => ({
+const Drawer = styled(MuiDrawer)(() => ({
   '& .MuiDrawer-paper': {
     width: drawerWidth,
   },
@@ -86,7 +83,6 @@ type Props = {
 
 const Sidebar = ({ children, user }: Props) => {
   const [open, setOpen] = useState(true);
-  const theme = useTheme();
   // const user = useUserStore((state) => state.user);
 
   const toggleDrawer = () => {

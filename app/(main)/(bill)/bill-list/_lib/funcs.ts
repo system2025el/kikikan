@@ -311,7 +311,6 @@ export const getJuchuKizaiMeisaiHeadForBill = async (juchuHeadId: number, kizaiH
     if (!data) {
       console.error('例外が発生');
     }
-    const d = data.rows[0];
     return data.rows.map((j) => ({
       juchuHeadId: j.juchu_head_id,
       juchuKizaiHeadId: j.juchu_kizai_head_id,

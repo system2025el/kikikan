@@ -16,11 +16,10 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { useEffect, useState, useTransition } from 'react';
+import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { RadioButtonGroup, SelectElement, TextFieldElement } from 'react-hook-form-mui';
 
-import { permission } from '../../_lib/permission';
 import { FormDateX } from '../../_ui/date';
 import { SelectTypes } from '../../_ui/form-box';
 import { DEFAULT_SEARCH_VALUES, radioData } from '../_lib/datas';
@@ -64,7 +63,7 @@ export const EqptOrderList = ({
   const [error, setError] = useState<Error | null>(null);
 
   /* useForm ------------------------------------------ */
-  const { control, handleSubmit, reset, getValues, watch, setValue } = useForm<EqptOrderSearchValues>({
+  const { control, handleSubmit, reset, watch, setValue } = useForm<EqptOrderSearchValues>({
     defaultValues: DEFAULT_SEARCH_VALUES,
   });
   /** 検索条件の種別の監視 */

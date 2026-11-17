@@ -71,30 +71,6 @@ export const deleteKizaiIdNyushukoCtnResult = async (
   }
 };
 
-export const deleteAllNyushukoCtnResult = async (
-  juchuHeadId: number,
-  juchuKizaiHeadId: number,
-  sagyoId: number,
-  connection: PoolClient
-) => {
-  const query = `
-      DELETE FROM
-        ${SCHEMA}.t_nyushuko_ctn_result
-      WHERE
-        juchu_head_id = $1
-        AND juchu_kizai_head_id = $2
-        AND sagyo_id = $3
-    `;
-
-  const values = [juchuHeadId, juchuKizaiHeadId, sagyoId];
-
-  try {
-    await connection.query(query, values);
-  } catch (e) {
-    throw new Error('[deleteAllNyushukoCtnResult] DBエラー:', { cause: e });
-  }
-};
-
 export const deleteAllShukoCtnResult = async (
   juchuHeadId: number,
   juchuKizaiHeadId: number,

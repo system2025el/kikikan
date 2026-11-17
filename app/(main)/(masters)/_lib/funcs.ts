@@ -1,10 +1,6 @@
 'use server';
 
-import pool from '@/app/_lib/db/postgres';
-import { SCHEMA } from '@/app/_lib/db/schema';
 import { selectActiveDaibumons } from '@/app/_lib/db/tables/m-daibumon';
-import { selectBundledEqpts } from '@/app/_lib/db/tables/m-kizai';
-import { selectBundledEqptIds } from '@/app/_lib/db/tables/m-kizai-set';
 import { selectActiveCustomers } from '@/app/_lib/db/tables/m-kokyaku';
 import { selectActiveSagyoSts } from '@/app/_lib/db/tables/m-sagyo-sts';
 import { selectActiveShozokus } from '@/app/_lib/db/tables/m-shozoku';
@@ -12,7 +8,7 @@ import { selectActiveShukeibumons } from '@/app/_lib/db/tables/m-shukeibumon';
 import { selectActiveBumons } from '@/app/_lib/db/tables/v_bumon_lst';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 
-import { getSectionSelections, getSectionShortSelections } from '../sections-master/_lib/funcs';
+import { getSectionSelections } from '../sections-master/_lib/funcs';
 
 /**
  * 選択肢に使う大部門リストを取得する関数
@@ -174,36 +170,6 @@ export const getAllSelections = async (): Promise<{
     }
     throw e;
     //return { d: [], s: [], b: [], shozoku: [], section: [] };
-  }
-};
-
-/**
- * 全部門の選択肢をまとめて取得する関数
- * @returns {{SelectTypes[]}} d:大部門, s:集計部門, b:部門
- */
-export const getAllBumonSelections = async (): Promise<{
-  d: SelectTypes[];
-  s: SelectTypes[];
-  b: SelectTypes[];
-}> => {
-  try {
-    const [daibumons, shukeibumons, bumons] = await Promise.all([
-      getDaibumonsSelection(),
-      getShukeibumonsSelection(),
-      getBumonsSelection(),
-    ]);
-
-    return { d: daibumons!, s: shukeibumons!, b: bumons! };
-  } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
-    return { d: [], s: [], b: [] };
   }
 };
 

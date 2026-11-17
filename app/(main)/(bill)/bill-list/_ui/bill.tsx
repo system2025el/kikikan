@@ -28,15 +28,12 @@ import { Controller, FormProvider, useFieldArray, useForm, useFormContext, useWa
 import { SelectElement, TextFieldElement } from 'react-hook-form-mui';
 
 import { serverErrorLog } from '@/app/_lib/funcs';
-import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
-import { addLock, delLock, getLock } from '@/app/(main)/_lib/funcs';
+import { readonlyColors } from '@/app/(main)/_lib/colors';
 import { useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
 import { permission } from '@/app/(main)/_lib/permission';
-import { LockValues, User } from '@/app/(main)/_lib/types';
-import { validationMessages } from '@/app/(main)/_lib/validation-messages';
-import { BackButton } from '@/app/(main)/_ui/buttons';
+import { User } from '@/app/(main)/_lib/types';
 import { FormDateX } from '@/app/(main)/_ui/date';
-import { IsDirtyAlertDialog, useDirty } from '@/app/(main)/_ui/dirty-context';
+import { useDirty } from '@/app/(main)/_ui/dirty-context';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { LoadingOverlay } from '@/app/(main)/_ui/loading';
 import { PrefilledAutocomplete } from '@/app/(main)/_ui/prefilled-autocomplete';
@@ -126,7 +123,7 @@ export const Bill = ({
   /** 処理中かどうか */
   const [isProcessing, setIsProcessing] = useState(false);
   /* エラーハンドリング */
-  const [isError, setIsError] = useState<Error | null>(null);
+  const [isError] = useState<Error | null>(null);
   // 請求ヘッダアコーディオン制御
   const [seikyuExpanded, setSeikyuExpanded] = useState(true);
 
@@ -312,8 +309,8 @@ export const Bill = ({
                         sx={{
                           width: 120,
                           pointerEvents: 'none', // クリック不可にする
-                          backgroundColor: '#f5f5f5', // グレー背景で無効っぽく
-                          color: '#888',
+                          backgroundColor: readonlyColors.bg, // グレー背景で無効っぽく
+                          color: readonlyColors.text,
                           '& .MuiInputBase-input': {
                             textAlign: 'right',
                           },

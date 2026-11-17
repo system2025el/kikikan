@@ -1,11 +1,8 @@
 'use client';
 
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import { Box, Button, Paper, Typography } from '@mui/material';
 import { useRouter } from 'next/navigation';
-import { startTransition, useEffect, useState } from 'react';
-
-import { LoadingOverlay } from './_ui/loading';
+import { startTransition, useEffect } from 'react';
 
 const Error = ({ error, reset }: { error: Error; reset: () => void }) => {
   const router = useRouter();

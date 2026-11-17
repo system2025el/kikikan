@@ -21,9 +21,7 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useForm } from 'react-hook-form-mui';
 
 import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { permission } from '@/app/(main)/_lib/permission';
@@ -47,7 +45,6 @@ export const BillListTable = ({
   searchParams,
   setBillList,
   setIsLoading,
-  setIsFirst,
   setPage,
 }: {
   user: User;
@@ -94,15 +91,6 @@ export const BillListTable = ({
   }, [page]);
 
   /* useForm ------------------------------------------------------------ */
-  const { control, handleSubmit, reset } = useForm<{
-    kokyaku: number | null;
-    dat: Date | null;
-    showDetailFlg: boolean;
-  }>({
-    mode: 'onSubmit',
-    reValidateMode: 'onChange',
-    defaultValues: { showDetailFlg: false },
-  });
 
   /* methods ------------------------------------------------------------- */
   /** 削除ボタン押下時処理 */

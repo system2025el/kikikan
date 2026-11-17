@@ -3,7 +3,6 @@ import 'server-only';
 import { PoolClient } from 'pg';
 
 import { escapeLikeString } from '@/app/(main)/_lib/escape-string';
-import { UsersMasterDialogValues } from '@/app/(main)/(masters)/users-master/_lib/types';
 
 import pool from '../postgres';
 import { SCHEMA } from '../schema';

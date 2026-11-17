@@ -73,7 +73,7 @@ export const getBumonMasterDialogData = async (bumonId: number) => {
  * @param id 部門マスタID
  * @returns {Promise<bumonsMasterDialogValues>} - 部門の詳細情報。取得失敗時は空オブジェクトを返します。
  */
-export const getChosenbumon = async (id: number) => {
+const getChosenbumon = async (id: number) => {
   try {
     const { data, error } = await selectOneBumon(id);
     if (error) {

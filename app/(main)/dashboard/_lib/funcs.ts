@@ -9,7 +9,7 @@ import { DashboardTableValues, MinusZaikoValues } from './types';
  * @param totalDays 取得する合計日数
  * @returns
  */
-export const getShukoList = async (startDate: string, totalDays: number) => {
+const getShukoList = async (startDate: string, totalDays: number) => {
   try {
     const result = await selectshukoTimeList(startDate, totalDays);
     const data = result.rows;
@@ -52,7 +52,7 @@ export const getShukoList = async (startDate: string, totalDays: number) => {
  * @param totalDays 取得する合計日数
  * @returns
  */
-export const getVehiclesList = async (startDate: string, totalDays: number) => {
+const getVehiclesList = async (startDate: string, totalDays: number) => {
   try {
     const result = await selectVehiclesList(startDate, totalDays);
 
@@ -114,7 +114,7 @@ export const getDashboardData = async (startDate: string, totalDays: number) => 
  * @returns
  */
 
-export const getMinusZaikoList = async (startDate: string, totalDays: number): Promise<MinusZaikoValues[]> => {
+const getMinusZaikoList = async (startDate: string, totalDays: number): Promise<MinusZaikoValues[]> => {
   try {
     const result = await selectMinusZaikoList(startDate, totalDays);
     const data = result.rows;

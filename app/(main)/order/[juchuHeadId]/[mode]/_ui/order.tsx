@@ -4,7 +4,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import AddIcon from '@mui/icons-material/Add';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
-import CheckIcon from '@mui/icons-material/Check';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CreateIcon from '@mui/icons-material/Create';
 import Delete from '@mui/icons-material/Delete';
@@ -25,37 +24,31 @@ import {
   FormHelperText,
   Grid2,
   MenuItem,
-  Modal,
   Paper,
   Select,
-  SelectChangeEvent,
   Snackbar,
   TextField,
   Typography,
 } from '@mui/material';
-import { redirect, useRouter } from 'next/navigation';
-import { use, useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
-import { set } from 'zod';
 
 import { JUCHU_KIZAI_HEAD_KBN, LOCK_SHUBETU } from '@/app/_lib/constants';
+import { dispColors } from '@/app/(main)/_lib/colors';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
-import { addLock, getLock } from '@/app/(main)/_lib/funcs';
 import { lockCheck, lockRelease } from '@/app/(main)/_lib/lock';
 import { permission } from '@/app/(main)/_lib/permission';
 import { openOrFocusTab } from '@/app/(main)/_lib/tab-focus';
 import { LockValues, User } from '@/app/(main)/_lib/types';
-import { BackButton } from '@/app/(main)/_ui/buttons';
 import { FormDateX, RSuiteDateRangePicker } from '@/app/(main)/_ui/date';
 import { IsDirtyAlertDialog, useDirty } from '@/app/(main)/_ui/dirty-context';
 import { HonbanbiCalendar } from '@/app/(main)/_ui/honbanbi-calendar';
 import { Loading, LoadingOverlay } from '@/app/(main)/_ui/loading';
-import { SelectTable } from '@/app/(main)/_ui/table';
 import { getOyaShukoFixed } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
 import { HonbanbiColorValues } from '@/app/(main)/(eq-order-detail)/eq-keep-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[oyaJuchuKizaiHeadId]/[mode]/_lib/types';
 import { WillDeleteAlertDialog } from '@/app/(main)/(masters)/_ui/dialogs';
-import { equipmentRows, users, vehicleHeaders, vehicleRows } from '@/app/(main)/order/[juchuHeadId]/[mode]/_lib/data';
 import { delJuchuSharyoMeisais } from '@/app/(main)/vehicle-order-detail/[jhid]/[jshid]/[mode]/_lib/funcs';
 
 import { useUnsavedChangesWarning } from '../../../../_lib/hook';
@@ -68,7 +61,6 @@ import {
   getJuchuHead,
   getJuchuKizaiHeadList,
   getJuchuSharyoHeadList,
-  getMaxId,
   getOrderReloadData,
   updJuchuHead,
 } from '../_lib/funcs';
@@ -167,7 +159,7 @@ export const Order = (props: {
   // 車両テーブル選択ID配列
   const [selectedVehs, setSelectedVehs] = useState<number[]>([]);
   // 遷移先path
-  const [path, setPath] = useState<string | null>(null);
+  const [, setPath] = useState<string | null>(null);
 
   // context
   const { setIsDirty, requestNavigation } = useDirty();
@@ -197,7 +189,7 @@ export const Order = (props: {
     setValue,
     clearErrors,
     watch,
-    formState: { isDirty, errors, defaultValues },
+    formState: { isDirty, errors },
   } = useForm({
     mode: 'onChange',
     reValidateMode: 'onChange',
@@ -1300,7 +1292,7 @@ export const Order = (props: {
                     handleAddKeep();
                   }}
                   disabled={!edit}
-                  sx={{ bgcolor: 'green' }}
+                  sx={{ bgcolor: dispColors.keep }}
                 >
                   <AddIcon fontSize="small" />
                   キープ入力
