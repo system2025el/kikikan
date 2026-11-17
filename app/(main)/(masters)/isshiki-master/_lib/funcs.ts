@@ -221,7 +221,10 @@ export const updateIsshiki = async (
         upd_dat: now,
         upd_user: user,
       };
-      await updateIsshikiDB(updData);
+      const { error } = await updateIsshikiDB(updData);
+      if (error) {
+        throw new Error('[updateIsshikiDB] DBエラー:', { cause: error });
+      }
     }
     if (delList && delList.length > 0) {
       // 削除実行
@@ -309,7 +312,10 @@ export const checkExistingIsshiki = async (isshikiId: number, kizaiIds: number[]
 export const updIsshikiDelFlg = async (id: number, flg: boolean, user: string) => {
   const data = { del_flg: flg ? 1 : 0, upd_user: user, upd_dat: new Date().toISOString() };
   try {
-    await updIsshikiDelFlgDB(id, data);
+    const { error } = await updIsshikiDelFlgDB(id, data);
+    if (error) {
+      throw new Error('[updIsshikiDelFlgDB] DBエラー:', { cause: error });
+    }
     await revalidatePath('/isshiki-master');
   } catch (e) {
     if (e instanceof Error) {

@@ -146,7 +146,10 @@ export const updateBumon = async (rawData: BumonsMasterDialogValues, id: number,
   };
 
   try {
-    await upDateBumonDB(updateDate);
+    const { error } = await upDateBumonDB(updateDate);
+    if (error) {
+      throw new Error('[upDateBumonDB] DBエラー:', { cause: error });
+    }
     await revalidatePath('/bumons-master');
     await revalidatePath('/daibumons-master');
     await revalidatePath('/shukeibumons-master');

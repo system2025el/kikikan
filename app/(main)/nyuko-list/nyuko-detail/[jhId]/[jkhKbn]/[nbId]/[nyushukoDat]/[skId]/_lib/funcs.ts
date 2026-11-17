@@ -437,7 +437,9 @@ export const updKeepNyukoDetail = async (
       });
 
       if (shukoDat.data) {
-        await upsShukoDen(nyukoDetailTableData, shukoDat.data.nyushuko_dat, userNam, connection);
+        // 合体している他の受注機材ヘッダーの行に、このヘッダーの出庫日で伝票を作らないよう絞る
+        const headRows = nyukoDetailTableData.filter((d) => d.juchuKizaiHeadId === juchuKizaiHeadId);
+        await upsShukoDen(headRows, shukoDat.data.nyushuko_dat, userNam, connection);
       }
     }
 
@@ -477,7 +479,7 @@ export const upsJuchuKizaiMeisai = async (
     kizai_id: d.kizaiId,
     plan_kizai_qty:
       d.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.return ? -1 * ((d.resultQty ?? 0) + (d.resultAdjQty ?? 0)) : null,
-    shozoku_id: d.nyushukoShubetuId ?? 0,
+    shozoku_id: d.nyushukoBashoId ?? 0,
     dsp_ord_num: d.dspOrdNumMeisai,
     indent_num: d.indentNum,
     add_dat: new Date().toISOString(),

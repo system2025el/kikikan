@@ -105,7 +105,7 @@ export const insertNewDaibumon = async (data: DaibumonsMasterDialogValues, user:
 export const updateDaibumonDB = async (data: MDaibumonDBValues) => {
   const supabase = await createClient();
   try {
-    await supabase
+    return await supabase
       .schema(SCHEMA)
       .from('m_dai_bumon')
       .update({ ...data })

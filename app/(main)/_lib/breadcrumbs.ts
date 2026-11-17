@@ -15,7 +15,6 @@ export const BreadCrumbs = () => {
     { path: '/order/', name: '受注管理＞受注' },
     { path: '/order/(order-detail)/equipment-order-detail', name: '受注管理＞受注＞受注明細（機材）' },
     { path: '/order/(order-detail)/vehicle-order-detail', name: '受注管理＞受注＞受注明細（車両）' },
-    { path: '/order-list', name: '受注管理＞受注一覧' },
     { path: '/quotation-list', name: '受注管理＞見積一覧' },
     { path: '/quotation-list/quotation', name: '受注管理＞見積一覧＞見積書' },
     { path: '/stock', name: '受注管理＞在庫確認' },

@@ -149,7 +149,7 @@ export const insertNewCustomer = async (data: CustomersMasterDialogValues, user:
 export const upDateCustomerDB = async (data: MKokyakuDBValues) => {
   const supabase = await createClient();
   try {
-    await supabase
+    return await supabase
       .schema(SCHEMA)
       .from('m_kokyaku')
       .update({ ...data })

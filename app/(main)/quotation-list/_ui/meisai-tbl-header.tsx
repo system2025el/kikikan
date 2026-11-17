@@ -57,6 +57,10 @@ const MeisaiTblShokeiCalculator = ({
     if (shokeiSum !== (Number(currentShokeiAmt) || 0)) {
       setValue(`meisaiHeads.${sectionNam}.${index}.shokeiAmt`, shokeiSum, { shouldDirty: true });
     }
+    // 請求側（bill-list）の `(Number(x) || 0)` とはわざと揃えていない。
+    // 優先順位で `(nebikiAft !== Number(x)) || 0` と解釈されるため、新規追加直後の明細ヘッダー
+    // （nebikiAftAmt が undefined → Number が NaN）では値引後金額が 0 でも必ず setValue され、0 が保存される。
+    // 請求側の書き方にすると 0 のときセットされず null で保存され、見積PDF（usePdf の drawShokei）で空欄になる。
     if (nebikiAft !== Number(currentNebikiAftAmt) || 0) {
       setValue(`meisaiHeads.${sectionNam}.${index}.nebikiAftAmt`, nebikiAft, { shouldDirty: true });
     }

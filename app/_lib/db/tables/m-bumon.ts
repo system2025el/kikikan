@@ -119,7 +119,7 @@ export const insertNewBumon = async (data: BumonsMasterDialogValues, user: strin
 export const upDateBumonDB = async (data: MBumonDBValues) => {
   const supabase = await createClient();
   try {
-    await supabase
+    return await supabase
       .schema(SCHEMA)
       .from('m_bumon')
       .update({ ...data })
