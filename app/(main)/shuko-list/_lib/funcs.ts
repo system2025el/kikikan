@@ -6,6 +6,7 @@ import { selectPdfJuchuKizaiMeisai } from '@/app/_lib/db/tables/nyushuko-pdf';
 import { selectPdfJuchuKizaiHead } from '@/app/_lib/db/tables/v-juchu-kizai-head-lst';
 import { selectPdfJuchuHead } from '@/app/_lib/db/tables/v-juchu-lst';
 import { selectFilteredShukoList } from '@/app/_lib/db/tables/v-nyushuko-den2';
+import { logError } from '@/app/_lib/log-error';
 
 import { toJapanYMDString } from '../../_lib/date-conversion';
 import { ShukoPdfModel } from '../shuko/_lib/hooks/usePdf';
@@ -48,14 +49,7 @@ export const getShukoList = async (queries: ShukoListSearchValues) => {
 
     return shukoList;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -73,14 +67,7 @@ const getKeisho = async (kokyakuId: number) => {
     }
     return data.keisho ?? '';
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -156,14 +143,7 @@ export const getPdfData = async (
     };
     return pdjData;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };

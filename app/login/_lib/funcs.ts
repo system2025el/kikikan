@@ -1,6 +1,7 @@
 'use server';
 
 import { createClient } from '@/app/_lib/db/supabase-server';
+import { logError } from '@/app/_lib/log-error';
 
 // import { supabase } from '@/app/_lib/db/supabase-server';
 import { UserValues } from './types';
@@ -19,14 +20,7 @@ export const login = async (data: UserValues) => {
       password: data.password,
     });
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };

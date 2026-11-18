@@ -6,6 +6,7 @@ import { HONBANBI_SHUBETU_ID } from '@/app/_lib/constants';
 import { selectJuchuHonbanbi } from '@/app/_lib/db/tables/t-juchu-honbanbi';
 import { updateJuchuHonbanbiQty } from '@/app/_lib/db/tables/t-juchu-kizai-head';
 import { deleteEventHonbanbi, insertAllHonbanbi } from '@/app/_lib/db/tables/t-juchu-kizai-honbanbi';
+import { logError } from '@/app/_lib/log-error';
 
 import { toJapanYMDString } from './date-conversion';
 import { HonbanbiValues } from './types';
@@ -32,14 +33,7 @@ export const getHonbanbiTemplate = async (juchuHeadId: number) => {
 
     return template;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };

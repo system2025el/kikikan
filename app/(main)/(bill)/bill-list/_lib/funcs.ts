@@ -19,6 +19,7 @@ import {
 import { selectFilteredBills } from '@/app/_lib/db/tables/v-seikyu-lst';
 import { SeikyuMeisaiHead } from '@/app/_lib/db/types/t-seikyu-meisai-head-type';
 import { SeikyuMeisai } from '@/app/_lib/db/types/t-seikyu-meisai-type';
+import { logError } from '@/app/_lib/log-error';
 import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { getDic } from '@/app/(main)/_lib/funcs';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
@@ -46,14 +47,7 @@ export const getBillingStsSelection = async (): Promise<SelectTypes[]> => {
     }
     return data.map((d) => ({ id: d.sts_id, label: d.sts_nam }));
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -99,14 +93,7 @@ export const getFilteredBills = async (
       seikyuDat: d.seikyu_dat,
     }));
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -250,14 +237,7 @@ export const getChosenBill = async (seikyuId: number) => {
     };
     return allData;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -286,14 +266,7 @@ export const getJuchuKizaiHeadNamListForBill = async (queries: {
       headNam: d.head_nam ?? '',
     }));
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -348,14 +321,7 @@ export const getJuchuKizaiMeisaiHeadForBill = async (juchuHeadId: number, kizaiH
         : [],
     }));
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -423,14 +389,7 @@ export const getJuchuKizaiMeisaiDetailsForBill = async (juchuHeadId: number, kiz
     // reduceの結果はオブジェクトなので、最後にObject.values()で配列に変換します
     return Object.values(groupedResult);
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -444,14 +403,7 @@ export const updBillDelFlg = async (ids: number[]) => {
     await updBillHeadDelFlg(ids);
     await revalidatePath('/bill-list');
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -469,14 +421,7 @@ export const getKeisho = async (kokyakuId: number) => {
     }
     return data.keisho ?? '';
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };

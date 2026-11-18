@@ -44,6 +44,7 @@ import { selectCtnNyushukoDetail, selectNyushukoDetail } from '@/app/_lib/db/tab
 import { JuchuCtnMeisai } from '@/app/_lib/db/types/t_juchu_ctn_meisai-type';
 import { NyushukoDen } from '@/app/_lib/db/types/t-nyushuko-den-type';
 import { NyushukoFix } from '@/app/_lib/db/types/t-nyushuko-fix-type';
+import { logError } from '@/app/_lib/log-error';
 import { syncNyukoCtnAfterDelete } from '@/app/(main)/_lib/ctn-nyuko-funcs';
 import {
   NYUSHUKO_FIX_ERROR,
@@ -127,14 +128,7 @@ export const getShukoDetail = async (
 
     return nyukoDetailData;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -166,14 +160,7 @@ export const getShukoDetailTable = async (
 
     return toShukoDetailTableValues(data);
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -449,14 +436,7 @@ export const updShukoDetail = async (
 
     return { ok: true };
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     await connection.query('ROLLBACK');
     return { ok: false, reason: toNyushukoFixErrorReason(e) };
   } finally {
@@ -531,14 +511,7 @@ const upsShukoDen = async (shukoDetailTableData: ShukoDetailTableValues[], userN
 
     return true;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -578,14 +551,7 @@ const upsNyukoDen = async (
 
     return true;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -692,14 +658,7 @@ export const delShukoFix = async (
 
     return { ok: true };
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     await connection.query('ROLLBACK');
     return { ok: false, reason: toNyushukoFixErrorReason(e) };
   } finally {
@@ -722,14 +681,7 @@ export const confirmChildJuchuKizaiHead = async (juchuHeadId: number, juchuKizai
 
     return count;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -767,14 +719,7 @@ export const updShukoAdjust = async (adjustData: ShukoDetailTableValues[], userN
 
     await connection.query('COMMIT');
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     await connection.query('ROLLBACK');
     throw e;
   } finally {
@@ -801,14 +746,7 @@ export const getShukoCtnSelection = async (): Promise<ShukoCtnSelectionValues[]>
       .filter((d) => d.ctnFlg === 1)
       .map((d) => ({ kizaiId: d.kizaiId as number, kizaiNam: (d.kizaiNam as string) ?? '' }));
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -1031,14 +969,7 @@ export const saveShukoCtn = async (
 
     return { ok: true, data };
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     await connection.query('ROLLBACK');
     return { ok: false, message: e instanceof ShukoCtnSaveError ? e.message : '保存に失敗しました' };
   } finally {

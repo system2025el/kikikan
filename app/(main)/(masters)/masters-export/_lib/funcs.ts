@@ -6,6 +6,7 @@ import utc from 'dayjs/plugin/utc';
 import { utils } from 'xlsx';
 
 import { selectAllRfidWithKizai } from '@/app/_lib/db/tables/m-rfid';
+import { logError } from '@/app/_lib/log-error';
 
 // .tz()を使う準備
 dayjs.extend(utc);
@@ -100,14 +101,7 @@ export const getAllEqptAndRfid = async () => {
       return { workbook, date };
     }
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };

@@ -31,6 +31,7 @@ import { JuchuCtnMeisai } from '@/app/_lib/db/types/t_juchu_ctn_meisai-type';
 import { JuchuKizaiMeisai } from '@/app/_lib/db/types/t-juchu-kizai-meisai-type';
 import { NyushukoDen } from '@/app/_lib/db/types/t-nyushuko-den-type';
 import { NyushukoFix } from '@/app/_lib/db/types/t-nyushuko-fix-type';
+import { logError } from '@/app/_lib/log-error';
 import {
   NYUSHUKO_FIX_ERROR,
   NyushukoFixError,
@@ -83,14 +84,7 @@ export const getNyukoDetail = async (
 
     return nyukoDetailData;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -140,14 +134,7 @@ export const getNyukoDetailTable = async (
 
     return nyukoDetailTableData;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -569,14 +556,7 @@ const updNyukoDen = async (
 
     return true;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -635,14 +615,7 @@ const upsShukoDen = async (
 
     return true;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -677,14 +650,7 @@ const updOyaKizaiNyukoDen = async (items: OyaNyukoReflectItem[], userNam: string
       await updateOyaKizaiNyukoDen(data, connection);
     }
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -772,14 +738,7 @@ const updOyaCtnNyukoDen = async (
       await updateOyaCtnNyukoDen(data, connection);
     }
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -848,14 +807,7 @@ const getOyaJuchuContainerMeisai = async (juchuHeadId: number, juchuKizaiHeadId:
     }));
     return oyaJuchuContainerMeisaiData;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -923,14 +875,7 @@ export const updNyukoDetail = async (
 
     return { ok: true };
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     await connection.query('ROLLBACK');
     return { ok: false, reason: toNyushukoFixErrorReason(e) };
   } finally {
@@ -1018,14 +963,7 @@ export const delNyukoFix = async (
 
     return { ok: true };
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     await connection.query('ROLLBACK');
     return { ok: false, reason: toNyushukoFixErrorReason(e) };
   } finally {

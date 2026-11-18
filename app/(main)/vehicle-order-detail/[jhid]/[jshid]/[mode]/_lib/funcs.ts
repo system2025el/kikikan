@@ -16,6 +16,7 @@ import {
 } from '@/app/_lib/db/tables/t-juchu-sharyo-meisai';
 import { JuchuSharyoHeadDBValues } from '@/app/_lib/db/types/t-juchu-sharyo-head-type';
 import { JuchuSharyoMeisaiDBValues } from '@/app/_lib/db/types/t-juchu-sharyo-meisai-type';
+import { logError } from '@/app/_lib/log-error';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { getDetailJuchuHead } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
@@ -39,14 +40,7 @@ const getVehsSelections = async (): Promise<SelectTypes[]> => {
     }
     return data.map((d) => ({ id: d.sharyo_id, label: d.sharyo_nam }));
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };

@@ -8,6 +8,7 @@ import {
   selectOneCustomer,
   upDateCustomerDB,
 } from '@/app/_lib/db/tables/m-kokyaku';
+import { logError } from '@/app/_lib/log-error';
 
 import { FAKE_NEW_ID } from '../../_lib/constants';
 import { emptyCustomer } from './datas';
@@ -42,14 +43,7 @@ export const getFilteredCustomers = async (query: string | undefined = '') => {
     }));
     return filteredCustomers;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -91,14 +85,7 @@ export const getChosenCustomer = async (id: number) => {
     };
     return CustomerDetails;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -160,14 +147,7 @@ export const getChosenCustomerIdAndName = async (id: number) => {
     };
     return CustomerDetails;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -181,14 +161,7 @@ export const addNewCustomer = async (data: CustomersMasterDialogValues, user: st
     await insertNewCustomer(data, user);
     await revalidatePath('/customers-master');
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -231,14 +204,7 @@ export const updateCustomer = async (rawData: CustomersMasterDialogValues, id: n
     }
     await revalidatePath('/customer-master');
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };

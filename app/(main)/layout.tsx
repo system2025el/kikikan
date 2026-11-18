@@ -11,7 +11,6 @@ import { getCurrentUser } from './_lib/funcs';
 import { DirtyProvider } from './_ui/dirty-context';
 import Sidebar from './_ui/sidebar';
 import { TabFocusResponder } from './_ui/tab-focus-responder';
-import { UserProvider } from './_ui/user-context';
 
 // /** @type {Metadata} metadata */
 // export const metadata: Metadata = {
@@ -71,9 +70,7 @@ const Layout = async ({ children }: Readonly<{ children: React.ReactNode }>) => 
         <Suspense fallback={null}>
           <TabFocusResponder />
         </Suspense>
-        <UserProvider user={userData}>
-          <Sidebar user={userData}>{children}</Sidebar>
-        </UserProvider>
+        <Sidebar user={userData}>{children}</Sidebar>
       </DirtyProvider>
     </CustomProvider>
   );

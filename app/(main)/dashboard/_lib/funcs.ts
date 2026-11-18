@@ -1,5 +1,6 @@
 'use server';
 import { selectMinusZaikoList, selectshukoTimeList, selectVehiclesList } from '@/app/_lib/db/tables/dashboard';
+import { logError } from '@/app/_lib/log-error';
 
 import { DashboardTableValues, MinusZaikoValues } from './types';
 
@@ -34,14 +35,7 @@ const getShukoList = async (startDate: string, totalDays: number) => {
     }));
     return EqTableData;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -77,14 +71,7 @@ const getVehiclesList = async (startDate: string, totalDays: number) => {
     }));
     return EqTableData;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -139,14 +126,7 @@ const getMinusZaikoList = async (startDate: string, totalDays: number): Promise<
 
     return MinusZikoData;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };

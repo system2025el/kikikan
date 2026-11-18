@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 
 import { insertNewBumon, selectOneBumon, upDateBumonDB } from '@/app/_lib/db/tables/m-bumon';
 import { selectFilteredBumons } from '@/app/_lib/db/tables/v_bumon_lst';
+import { logError } from '@/app/_lib/log-error';
 
 import { FAKE_NEW_ID } from '../../_lib/constants';
 import { getAllBumonDSSelections, getDaibumonsSelection, getShukeibumonsSelection } from '../../_lib/funcs';
@@ -41,14 +42,7 @@ export const getFilteredBumons = async (
     }));
     return { data: filteredbumons, options: options };
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -91,14 +85,7 @@ const getChosenbumon = async (id: number) => {
     };
     return bumonDetails;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -115,14 +102,7 @@ export const addNewBumon = async (data: BumonsMasterDialogValues, user: string) 
     await revalidatePath('/shukeibumons-master');
     await revalidatePath('/eqpt-master');
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -155,14 +135,7 @@ export const updateBumon = async (rawData: BumonsMasterDialogValues, id: number,
     await revalidatePath('/shukeibumons-master');
     await revalidatePath('/eqpt-master');
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };

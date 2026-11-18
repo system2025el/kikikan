@@ -44,6 +44,7 @@ import { selectShukoStateConfirm } from '@/app/_lib/db/tables/v-nyushuko-den2';
 import { JuchuKizaiHonbanbi } from '@/app/_lib/db/types/t-juchu-kizai-honbanbi-type';
 import { JuchuKizaiNyushuko } from '@/app/_lib/db/types/t-juchu-kizai-nyushuko-type';
 import { NyushukoDen } from '@/app/_lib/db/types/t-nyushuko-den-type';
+import { logError } from '@/app/_lib/log-error';
 
 import { toJapanYMDString } from '../../_lib/date-conversion';
 import { HonbanbiColorValues } from '../eq-keep-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[oyaJuchuKizaiHeadId]/[mode]/_lib/types';
@@ -133,14 +134,7 @@ export const getChildJuchuKizaiHead = async (juchuHeadId: number, juchuKizaiHead
     }
     return data;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -185,14 +179,7 @@ export const getOyaShukoFixed = async (juchuHeadId: number, oyaJuchuKizaiHeadId:
   try {
     return await isOyaShukoFixedTx(juchuHeadId, oyaJuchuKizaiHeadId, connection);
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   } finally {
     connection.release();
@@ -210,14 +197,7 @@ export const getJuchuKizaiHeadMaxId = async (juchuHeadId: number) => {
     }
     return data;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -259,14 +239,7 @@ export const getJuchuKizaiNyushuko = async (juchuHeadId: number, juchuKizaiHeadI
 
     return juchuKizaiNyushukoData;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -305,14 +278,7 @@ export const addJuchuKizaiNyushuko = async (
     try {
       await insertJuchuKizaiNyushuko(newData, connection);
     } catch (e) {
-      if (e instanceof Error) {
-        console.error(`[ERROR] ${e.message}`);
-        if (e.cause) {
-          console.error(`[CAUSE]`, e.cause);
-        }
-      } else {
-        console.error(e);
-      }
+      logError(e);
       throw e;
     }
   }
@@ -370,14 +336,7 @@ export const updJuchuKizaiNyushuko = async (
         await insertJuchuKizaiNyushuko({ ...data, add_dat: new Date().toISOString(), add_user: userNam }, connection);
       }
     } catch (e) {
-      if (e instanceof Error) {
-        console.error(`[ERROR] ${e.message}`);
-        if (e.cause) {
-          console.error(`[CAUSE]`, e.cause);
-        }
-      } else {
-        console.error(e);
-      }
+      logError(e);
       throw e;
     }
   }
@@ -441,14 +400,7 @@ export const getOyaJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHead
     }));
     return juchuKizaiMeisaiData;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -485,14 +437,7 @@ export const getJuchuContainerMeisaiTx = async (
       selected: false,
     }));
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -533,14 +478,7 @@ export const getJuchuContainerMeisai = async (juchuHeadId: number, juchuKizaiHea
 
     return juchuContainerMeisaiData;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -577,14 +515,7 @@ export const getOyaJuchuContainerMeisai = async (juchuHeadId: number, juchuKizai
 
     return oyaJuchuContainerMeisaiData;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -642,14 +573,7 @@ export const getALLStockList = async (
     const data: StockTableValues[] = result.rows;
     return data;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -682,14 +606,7 @@ export const addAllHonbanbi = async (
   try {
     await insertAllHonbanbi(newData, connection);
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -704,14 +621,7 @@ export const delSiyouHonbanbi = async (juchuHeadId: number, juchuKizaiHeadId: nu
   try {
     await deleteSiyouHonbanbi(juchuHeadId, juchuKizaiHeadId, connection);
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -733,14 +643,7 @@ export const getNyushukoFixFlag = async (juchuHeadId: number, juchuKizaiHeadId: 
     const result = data.find((d) => d.sagyo_fix_flg === 1) ? true : false;
     return result;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -799,14 +702,7 @@ export const addDummyNyushukoDen = async (
   try {
     await insertNyushukoDen(dummyData, connection);
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -821,14 +717,7 @@ export const delAllKicsOrYardShukoCtnDen = async (
   try {
     await deleteAllKicsOrYardShukoCtnDen(juchuHeadId, juchuKizaiHeadId, kizaiIds, sagyoId, connection);
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -849,14 +738,7 @@ export const delAllKicsOrYardNyukoDen = async (
   try {
     await deleteAllKicsOrYardNyukoDen(juchuHeadId, juchuKizaiHeadId, sagyoId, connection);
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -879,14 +761,7 @@ export const delNyushukoCtnResult = async (
   try {
     await deleteKizaiIdNyushukoCtnResult(juchuHeadId, juchuKizaiHeadId, kizaiIds, connection);
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -900,14 +775,7 @@ export const delAllKicsOrYardShukoCtnResult = async (
   try {
     await deleteAllShukoCtnResult(juchuHeadId, juchuKizaiHeadId, sagyoId, connection);
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -930,14 +798,7 @@ export const delAllNyukoResult = async (
     await deleteAllNyukoResult(juchuHeadId, juchuKizaiHeadId, sagyoId, connection);
     await deleteAllNyukoCtnResult(juchuHeadId, juchuKizaiHeadId, sagyoId, connection);
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -959,14 +820,7 @@ export const getColor = async () => {
     }));
     return honbanbiColor;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -982,14 +836,7 @@ export const checkShukoStatus = async (juchuHeadId: number, juchuKizaiHeadId: nu
     const confirmData = await selectShukoStateConfirm(juchuHeadId, juchuKizaiHeadId);
     return confirmData.length === 0 ? false : true;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };

@@ -8,6 +8,7 @@ import { insertEqptHistory } from '@/app/_lib/db/tables/m-kizai-his';
 import { updateMasterUpdates } from '@/app/_lib/db/tables/m-master-update';
 import { selectCountOfTheEqpt } from '@/app/_lib/db/tables/m-rfid';
 import { selectFilteredEqpts } from '@/app/_lib/db/tables/v-kizai-list';
+import { logError } from '@/app/_lib/log-error';
 
 import { FAKE_NEW_ID } from '../../_lib/constants';
 import {
@@ -74,14 +75,7 @@ export const getFilteredEqpts = async (
     }));
     return { data: filteredEqpts, options: options };
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -148,14 +142,7 @@ const getChosenEqpt = async (id: number) => {
 
     return { data: EqptDetails, qty: qty };
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -176,14 +163,7 @@ export const addNewEqpt = async (data: EqptsMasterDialogValues, user: string) =>
   } catch (e) {
     await connection.query('ROLLBACK');
 
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   } finally {
     connection.release();
@@ -238,14 +218,7 @@ export const updateEqpt = async (
     await connection.query('COMMIT');
   } catch (e) {
     await connection.query('ROLLBACK');
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   } finally {
     await connection.release();
@@ -265,14 +238,7 @@ const getEqptsQty = async (id: number) => {
     }
     return { yuko: data.kizai_qty ?? 0, ng: data.kizai_ng_qty ?? 0 };
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };

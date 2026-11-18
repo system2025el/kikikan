@@ -8,6 +8,7 @@ import {
   selectOneShukeibumon,
   upDateShukeibumonDB,
 } from '@/app/_lib/db/tables/m-shukeibumon';
+import { logError } from '@/app/_lib/log-error';
 
 import { emptyShukeibumon } from './datas';
 import { ShukeibumonsMasterDialogValues, ShukeibumonsMasterTableValues } from './types';
@@ -36,14 +37,7 @@ export const getFilteredShukeibumons = async (query: string = '') => {
     }));
     return filteredShukeibumons;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -70,14 +64,7 @@ export const getChosenShukeibumon = async (id: number) => {
     };
     return ShukeibumonDetails;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -93,14 +80,7 @@ export const addNewShukeibumon = async (data: ShukeibumonsMasterDialogValues, us
     await revalidatePath('/shukeibumons-master');
     await revalidatePath('/eqpt-master');
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -129,14 +109,7 @@ export const updateShukeibumon = async (rawData: ShukeibumonsMasterDialogValues,
     await revalidatePath('/shukeibumons-master');
     await revalidatePath('/eqpt-master');
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };

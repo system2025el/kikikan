@@ -76,21 +76,21 @@ npx tsc --noEmit          # 型チェックは全体で問題なく通る
 
 - `tables/*.ts` の各関数は必ずtry/catchで囲み、`throw new Error('[関数名] DBエラー:', { cause: e })` という形式で例外を投げる（角括弧内は関数自身の名前と一致させる）。この層ではSupabaseの `{data, error}` はチェックせずそのまま返す。
 - エラーチェックは1つ上の `funcs.ts` 層の責務。`if (error) throw new Error('[呼び出し元の関数名] DBエラー:', { cause: error })` という形でSupabaseの `error` を手動チェックしてから `data` を使う。
-- `funcs.ts` 層は共通のcatch-log-rethrowパターンを使う：`e instanceof Error` かを見て `[ERROR]` メッセージと（あれば）`[CAUSE]` を `console.error` してからrethrowする。
+- `funcs.ts` 層の catch は `logError(e)`（`app/_lib/log-error.ts`）でログを出してから rethrow する（`catch (e) { logError(e); throw e; }`。2026-11-17 に約330か所の手書きの定型ブロックを置き換えた）。出力は `[ERROR]` メッセージと（あれば）`[CAUSE]`、`{ stack: true }` で `[STACK]` も出る。`ROLLBACK` や `return false` など、ログ以外の後始末は呼び出し側に書く。
 - 命名で層を判別できる：`tables/*.ts` は `select*`/`insert*`/`update*`/`delete*`/`upsert*`/`check*`（get/fetchは使わない）、`funcs.ts` は逆に `get*` が使われる。
 - pgでの書き込みは `BEGIN` → 処理 → `updateMasterUpdates()` → `COMMIT`（catchで`ROLLBACK`、finallyで`connection.release()`）というトランザクションパターンを使う。`updateMasterUpdates` はマスタ更新のたびに呼ぶ。
 
 **認証・権限**: 認証は `@supabase/ssr` によるcookieベースのサーバーサイド認証。クライアント側にセッションを保持する仕組み（`localStorage` やZustandストア）は使っていない。
 
 - **ルートの保護は `middleware.ts`**（ルート直下）。全リクエストで `supabase.auth.getUser()` を呼んでトークンを検証・リフレッシュし、未ログインなら `/login` にリダイレクトする。公開パスは `/`・`/login`・`/error` のみで、`signup`・`auth`・静的ファイルは matcher 側で除外している。招待直後（`user_metadata.setup_completed === false`）は `/signup` へ、ログイン済みで `/login` を開いたら `/dashboard` へ飛ばす。リダイレクト時もリフレッシュ済みcookieを引き継ぐ実装になっているので、この関数を触るときは `redirectWithCookies` を経由すること。
-- **ユーザー情報の受け渡し**: `app/(main)/layout.tsx` が `getCurrentUser()`（`app/(main)/_lib/funcs.ts`）でユーザーを解決し、`UserProvider`（`app/(main)/_ui/user-context.tsx`）で配下に渡す（ただし 2026-11-17 時点で context を読むフック `useUser()` は使われていなかったので削除した。クライアントコンポーネントはユーザーを props で受け取っている）。`getCurrentUser` は Supabase authユーザーのメールアドレスで `m_user` を引き、ビットマスク権限を含む `User` 型を返す（`react`の`cache`でリクエスト単位にメモ化）。**`getCurrentUser` 自身はリダイレクトせず `null` を返す**ので、`/login` へ飛ばすのは呼び出し側の責務（`layout.tsx` は `null` と例外の両方で `redirect('/login')` する）。
+- **ユーザー情報の受け渡し**: `app/(main)/layout.tsx` が `getCurrentUser()`（`app/(main)/_lib/funcs.ts`）でユーザーを解決してサイドバーに props で渡し、各 `page.tsx` も `getCurrentUser()` を呼んで画面に props で渡す。React の context でユーザーを配る仕組みは無い（以前の `UserProvider` / `useUser()` は一度も使われていなかったので 2026-11-18 に削除した）。`getCurrentUser` は Supabase authユーザーのメールアドレスで `m_user` を引き、ビットマスク権限を含む `User` 型を返す（`react`の`cache`でリクエスト単位にメモ化）。**`getCurrentUser` 自身はリダイレクトせず `null` を返す**ので、`/login` へ飛ばすのは呼び出し側の責務（`layout.tsx` は `null` と例外の両方で `redirect('/login')` する）。
 - Server Component 側では `getCurrentUser()` を直接呼んでチェックしているページもある（受注機材明細など）。`(main)` 配下の新規ページで権限判定が必要なら、propsで受け取るか `getCurrentUser()` を呼ぶ。
 - **layout のユーザー情報（サイドバーのログイン名・メニュー）は画面遷移では更新しない**（2026-11-09 決定）。App Router の layout は遷移で作り直されないので、権限変更はそのタブを再読み込み（F5）するか別タブで開くまでサイドバーに出ない。権限変更はまれなので運用で再読み込みしてもらう。以前は遷移のたびに `router.refresh()` していたが、layout とページのサーバー処理を丸ごとやり直し、遷移先のデータ取得（Server Action）を待たせていたので外した。**ページの中身の権限は page.tsx が開くたびに `getCurrentUser()` で確かめる**（`(main)` の page.tsx はすべて）ので、サイドバーが古くても権限の無い画面は表示されない。
 - 権限は `app/(main)/_lib/permission.ts` のビットマスクとビットAND演算で判定する。`User.permission` は `juchu`・`nyushuko`・`masters`・`loginSetting`・`ht`・`schedule` の6カテゴリに分かれた数値で、定数側は `juchu_ref: 1`／`juchu_upd: 2`／`nyushuko_*: 4,8`／`mst_*: 16,32`／`ht: 64`／`login: 128`／`sche_upd: 256`／`system: 65535`。`*_full` の定数は `*_ref` と `*_upd` のビットOR。
 
 **排他ロック**: `app/(main)/_lib/lock.ts` は、`t-lock` テーブルを使った編集画面向けの排他制御（悲観的ロック）を実装している。ロック種別は `LOCK_SHUBETU.juchuHead`（`app/_lib/constants.ts`）の1種類だけで、**受注ヘッダー単位**でロックする。使っているのは受注画面・受注機材明細（メイン・返却・キープ）・受注車両明細の5画面で、どれも同じ受注ヘッダーのロックを取り合う（見積にはロックが無い）。`lockCheck` は10分間有効なロックを新規作成/更新するか、他ユーザーが保持中であれば既存ロック情報を返す。`lockRelease` はロックを解除する。複数ユーザーが同時に開き得る編集画面を新規追加する際は、この仕組みを使うこと。
 
-**画面遷移と未保存ガード（`DirtyProvider`）**: `app/(main)/_ui/dirty-context.tsx` が `(main)` 全体を包んでいる。編集画面は `useDirty()` の `setIsDirty(true)` で「未保存あり」を立て、**遷移は `router.push` / `router.back` ではなく `requestNavigation(path)` / `requestBack()` を使う**（未保存なら「入力内容を破棄しますか？」の確認ダイアログを挟む）。サイドバーのメニュー（`_ui/links.tsx`）と各画面の戻る処理がこの仕組みを使い（共通の戻るボタン `BackButton` はどこからも使われていなかったので 2026-11-17 に削除。`requestBack()` は今は呼び出し元が無い）、`setIsDirty` を立てている編集画面は12画面ある。新しい編集画面でも揃えること。
+**画面遷移と未保存ガード（`DirtyProvider`）**: `app/(main)/_ui/dirty-context.tsx` が `(main)` 全体を包んでいる。編集画面は `useDirty()` の `setIsDirty(true)` で「未保存あり」を立て、**遷移は `router.push` ではなく `requestNavigation(path)` を使う**（未保存なら「入力内容を破棄しますか？」の確認ダイアログを挟む）。サイドバーのメニュー（`_ui/links.tsx`）と各画面の戻る処理がこの仕組みを使い（ブラウザ履歴で戻る `requestBack()` と共通の戻るボタン `BackButton` は呼び出し元が無かったので 2026-11-17〜18 に削除した。戻り先は `requestNavigation` にパスで渡す）、`setIsDirty` を立てている編集画面は12画面ある。新しい編集画面でも揃えること。
 
 - **例外**：受注機材明細（メイン・返却・キープ）の3画面は、フォームの `isDirty` と画面内の `otherDirty` を合わせて自前の確認ダイアログを出し、確認後に `router.push` で受注画面へ戻る（Provider の `setIsDirty` も併せて立てるので、サイドバーからの遷移はProviderが止める）。出庫・入庫・移動の明細→機材詳細や一覧→明細の遷移にも `router.push` が残っている（未保存を持たない画面からの遷移）。
 

@@ -6,6 +6,7 @@ import { selectColor } from '@/app/_lib/db/tables/m-honbanbi-color';
 import { selectMergeUseListBulk, selectStockList, selectUseListBulk } from '@/app/_lib/db/tables/stock-table';
 import { selectLoanJuchuData, selectLoanJuchuReturnData } from '@/app/_lib/db/tables/v-juchu-kizai-den';
 import { selectLoanKizai } from '@/app/_lib/db/tables/v-kizai-list';
+import { logError } from '@/app/_lib/log-error';
 import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { getNyukoDate, getShukoDate } from '@/app/(main)/_lib/date-funcs';
 
@@ -33,14 +34,7 @@ export const getLoanKizaiData = async (kizaiId: number) => {
     };
     return kizaiData;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -78,15 +72,7 @@ export const getLoanJuchuData = async (kizaiId: number, strDat: Date) => {
 
     return loanJuchuData;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      console.error(`[STACK]`, e.stack);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e, { stack: true });
     throw e;
   }
 };
@@ -124,15 +110,7 @@ export const getLoanJuchuReturnData = async (kizaiId: number, strDat: Date) => {
 
     return loanJuchuData;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      console.error(`[STACK]`, e.stack);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e, { stack: true });
     throw e;
   }
 };
@@ -174,14 +152,7 @@ export const getAllLoanUseData = async (
     const data: LoanUseTableValues[] = result.rows;
     return data;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -204,14 +175,7 @@ const getAllMergeLoanUseData = async (
     const data: LoanUseTableValues[] = result.rows;
     return data;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -264,14 +228,7 @@ export const getLoanStockData = async (kizaiId: number, date: Date) => {
     const data: LoanStockTableValues[] = result.rows;
     return data;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -293,14 +250,7 @@ export const getColor = async () => {
     }));
     return honbanbiColor;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };

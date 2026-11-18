@@ -6,6 +6,7 @@ import utc from 'dayjs/plugin/utc';
 
 import { selectActiveUsers } from '@/app/_lib/db/tables/m-user';
 import { selectFilteredKizaiHead } from '@/app/_lib/db/tables/v-juchu-kizai-head-lst';
+import { logError } from '@/app/_lib/log-error';
 
 import { toJapanTimeString, toJapanYMDString } from '../../_lib/date-conversion';
 import { permission } from '../../_lib/permission';
@@ -58,14 +59,7 @@ export const getFilteredOrderList = async (
       addDat: d.add_dat ? toJapanYMDString(d.add_dat) : '',
     }));
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   } finally {
   }
@@ -88,14 +82,7 @@ export const getUsersSelection = async (): Promise<SelectTypes[]> => {
         label: d.user_nam,
       }));
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };

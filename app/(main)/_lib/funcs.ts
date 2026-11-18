@@ -6,6 +6,7 @@ import { cache } from 'react';
 import { createClient } from '@/app/_lib/db/supabase-server';
 import { selectDic } from '@/app/_lib/db/tables/m-dic';
 import { insertLock, selectLock, updateLock } from '@/app/_lib/db/tables/t-lock';
+import { logError } from '@/app/_lib/log-error';
 
 // import { User } from '@/app/_lib/stores/usestore';
 import { getChosenUser } from '../(masters)/users-master/_lib/funcs';
@@ -29,14 +30,7 @@ export const getDic = async (dicId: number) => {
 
     return data.dic_val as string;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -66,14 +60,7 @@ export const getLock = async (lockShubetu: number, headId: number) => {
     };
     return lockData;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -99,14 +86,7 @@ export const addLock = async (lockShubetu: number, headId: number, date: string,
       throw new Error('[insertLock] DBエラー:', { cause: error });
     }
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -133,14 +113,7 @@ export const updLock = async (lockShubetu: number, headId: number, date: string,
       throw new Error('[updateLock] DBエラー:', { cause: error });
     }
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };

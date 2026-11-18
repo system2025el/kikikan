@@ -20,6 +20,7 @@ import { selectKizaiHeadListWithIsshikiForMitu } from '@/app/_lib/db/tables/v-mi
 import { selectFilteredQuot } from '@/app/_lib/db/tables/v-mitu-lst';
 import { MituMeisaiHead } from '@/app/_lib/db/types/t-mitu-meisai-head-type';
 import { MituMeisai } from '@/app/_lib/db/types/t-mitu-meisai-type';
+import { logError } from '@/app/_lib/log-error';
 import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 
@@ -75,14 +76,7 @@ export const getFilteredQuotList = async (
       mituRange: `${d.mitu_str_dat ? toJapanYMDString(d.mitu_str_dat) : ''} ${d.mitu_str_dat || d.mitu_end_dat ? ' ～ ' : ''} ${d.mitu_end_dat ? toJapanYMDString(d.mitu_end_dat) : ''}`,
     }));
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -111,14 +105,7 @@ export const getUsersSelection = async () => {
       }));
     return selectElements;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -143,14 +130,7 @@ const getMituStsSelection = async () => {
     }));
     return selectElements;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -203,14 +183,7 @@ export const getOrderForQuotation = async (id: number): Promise<JuchuValues | nu
     };
     return order;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -227,14 +200,7 @@ export const getMaxHonbanbiQty = async (juchuId: number) => {
     }
     return data[0].juchu_honbanbi_qty ?? null;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -380,14 +346,7 @@ export const getChosenQuot = async (mituId: number) => {
     };
     return { m: allData, j: juchus };
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -414,14 +373,7 @@ export const getJuchuKizaiHeadNamListForQuot = async (juchuId: number) => {
       nebikiAmt: d.nebiki_amt,
     }));
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -451,14 +403,7 @@ export const getJuchuKizaiMeisaiList = async (juchuId: number, kizaiHeadId: numb
       ),
     }));
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -488,14 +433,7 @@ export const getJuchuIsshikiMeisai = async (juchuId: number, kizaiHeadId: number
       ),
     }));
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -532,14 +470,7 @@ const getBumonsForEqptSelection = async () => {
       tblDspNum: index,
     }));
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -555,14 +486,7 @@ export const checkSetoptions = async (idList: number[]): Promise<number[]> => {
     if (!setIdList || setIdList.length === 0) return [];
     return Array.from(new Set(setIdList.map((d) => d.kizai_id)));
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -580,14 +504,7 @@ export const getEqptsForEqptSelection = async (query: string = ''): Promise<Eqpt
     }
     return data.rows;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -618,14 +535,7 @@ export const getSelectedEqpts = async (idList: number[]) => {
     }));
     return selectedEqpts;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -657,14 +567,7 @@ const getSetOptions = async (kizaiId: number) => {
 
     return { setList: setList, eqptNam: eqptNam.data.kizai_nam ?? '' };
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };

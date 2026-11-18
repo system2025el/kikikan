@@ -16,6 +16,7 @@ import { selectChosenIdoEqptsDetails } from '@/app/_lib/db/tables/v-kizai-list';
 import { selectActiveEqpts } from '@/app/_lib/db/tables/v-kizai-lst-sel';
 import { IdoDen } from '@/app/_lib/db/types/t-ido-den-type';
 import { IdoFix } from '@/app/_lib/db/types/t-ido-fix-type';
+import { logError } from '@/app/_lib/log-error';
 
 import { IdoDetailTableValues, IdoEqptSelection, SelectedIdoEqptsValues } from './types';
 
@@ -34,14 +35,7 @@ const getIdoDenMaxId = async () => {
     }
     return data.ido_den_id;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -89,14 +83,7 @@ export const getIdoDen = async (sagyoKbnId: number, sagyoSijiId: number, sagyoDe
 
     return idoDetailTableList;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -117,14 +104,7 @@ export const getIdoMem = async (sagyoDenDat: string, sagyoSijiId: number) => {
     }
     return data?.mem ?? '';
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -167,14 +147,7 @@ const getConfirmIdoDen = async (
     );
     return data;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -308,14 +281,7 @@ const getIdoFixMaxId = async () => {
     }
     return data.ido_den_id;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -340,14 +306,7 @@ export const getIdoFix = async (sagyoKbnId: number, sagyoSijiId: number, sagyoDe
 
     return true;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -388,14 +347,7 @@ export const addIdoFix = async (
     }
     return true;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     return false;
   } finally {
     refreshVRfid().catch((err) => {
@@ -420,14 +372,7 @@ export const delIdoFix = async (sagyoKbnId: number, sagyoSijiId: number, sagyoDe
     }
     return true;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     return false;
   }
 };
@@ -453,14 +398,7 @@ export const saveIdoMem = async (sagyoDenDat: string, sagyoSijiId: number, idoMe
 
     return true;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     await connection.query('ROLLBACK');
     return false;
   } finally {
@@ -565,14 +503,7 @@ export const saveIdoDen = async (
     const updateIdoDenData = saveIdoDenData.filter((d) => !d.delFlag).map((d) => ({ ...d, saveFlag: true }));
     return updateIdoDenData;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     await connection.query('ROLLBACK');
     return null;
   } finally {
@@ -600,14 +531,7 @@ const getIdoBumonsForEqptSelection = async () => {
     }));
     return selectElements;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -633,14 +557,7 @@ export const checkSetoptions = async (idList: number[]) => {
     }
     return data.rows;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -658,14 +575,7 @@ export const getIdoEqptsForEqptSelection = async (query: string = ''): Promise<I
     }
     return data.rows;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -706,14 +616,7 @@ export const getIdoSelectedEqpts = async (idList: number[]) => {
     }));
     return selectedEqpts;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };

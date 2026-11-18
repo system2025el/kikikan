@@ -13,6 +13,7 @@ import {
   updateEqptSetDB,
 } from '@/app/_lib/db/tables/m-kizai-set';
 import { selectActiveEqpts } from '@/app/_lib/db/tables/v-kizai-lst-sel';
+import { logError } from '@/app/_lib/log-error';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { EqptSelection } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';
 
@@ -45,14 +46,7 @@ export const getFilteredEqptSets = async (query: string = '') => {
     }));
     return filteredEqptSets;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -91,14 +85,7 @@ const getChosenEqptSet = async (id: number) => {
     };
     return eqptSetDetails;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -122,14 +109,7 @@ export const addNewEqptSet = async (data: EqptSetsMasterDialogValues, user: stri
       await revalidatePath('/eqpt-set-master');
     }
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   } finally {
     connection.release();
@@ -197,14 +177,7 @@ export const updateEqptSet = async (newData: EqptSetsMasterDialogValues, current
       // await revalidatePath('/eqpt-set-master');
       await connection.query('COMMIT');
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     await connection.query('ROLLBACK');
     throw e;
   } finally {
@@ -223,14 +196,7 @@ export const delEqptSets = async (oyaId: number) => {
       throw new Error('[delEqptSets] DBエラー:', { cause: error });
     }
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -262,14 +228,7 @@ export const getEqptsForOyaEqptSelection = async (): Promise<SelectTypes[]> => {
         return (a.grpId ?? 0) - (b.grpId ?? 0);
       });
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -286,14 +245,7 @@ export const getEqptsForSetEqptSelection = async (): Promise<EqptSelection[]> =>
     }
     return data.rows;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };

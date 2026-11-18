@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 
 import { deleteSeikyuDat, upsertSeikyuDat } from '@/app/_lib/db/tables/t-seikyu-date-juchu-kizai';
 import { selectFilteredBillingSituations, selectUnbilledCusts } from '@/app/_lib/db/tables/v-seikyu-date-lst';
+import { logError } from '@/app/_lib/log-error';
 import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 
@@ -56,14 +57,7 @@ export const getFilteredBillingSituations = async (
       heads: heads.filter((h) => d.juchu_head_id === h.juchuId).map((h, i) => ({ ...h, ordNum: i + 1 })),
     }));
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -100,14 +94,7 @@ export const changeSeikyuDat = async (
     }
     await revalidatePath('/billing-sts-list');
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -132,14 +119,7 @@ export const getUnbilledCusts = async (
 
     return uniqueCusts;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
