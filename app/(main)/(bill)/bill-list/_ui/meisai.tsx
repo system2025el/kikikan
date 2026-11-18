@@ -2,13 +2,14 @@ import AddIcon from '@mui/icons-material/Add';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { Box, Button, Grid2, IconButton, TextField } from '@mui/material';
-import { memo, useEffect, useState } from 'react';
-import { Controller, useFieldArray, useFormContext, useWatch } from 'react-hook-form';
+import { Box, Button, Grid2, IconButton } from '@mui/material';
+import { memo, useEffect } from 'react';
+import { useFieldArray, useFormContext, useWatch } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 
+import { ReadOnlyYenField, YenInputField } from '@/app/(main)/_ui/yen-field';
+
 import { BillHeadValues } from '../_lib/types';
-import { ReadOnlyYenNumberElement } from './yen';
 
 /**
  * 明細1行分の小計金額を計算してフォームへ反映する非表示コンポーネント。
@@ -40,89 +41,6 @@ const MeisaiRowShokeiCalculator = ({ index, rowIndex }: { index: number; rowInde
   }, [qty, honbanbiQty, tankaAmt, currentShokeiAmt, index, rowIndex, setValue]);
 
   return null;
-};
-
-/**
- * 明細1行分の単価セル。
- * フォーカス中かどうかの状態を行単位で持つことで、1つのセルにフォーカス／
- * フォーカスアウトした際に同じテーブル内の他の行まで再レンダリングされるのを防ぐ。
- */
-const MeisaiRowTankaAmtField = ({
-  index,
-  rowIndex,
-  editable,
-}: {
-  index: number;
-  rowIndex: number;
-  editable: boolean;
-}) => {
-  const { control } = useFormContext<BillHeadValues>();
-  const [isEditing, setIsEditing] = useState(false);
-
-  return (
-    <Controller
-      name={`meisaiHeads.${index}.meisai.${rowIndex}.tankaAmt`}
-      control={control}
-      render={({ field, fieldState }) => (
-        <TextField
-          {...field}
-          value={
-            isEditing
-              ? (field.value ?? '')
-              : typeof field.value === 'number' && !isNaN(field.value)
-                ? `¥${Math.abs(field.value).toLocaleString()}`
-                : `¥0`
-          }
-          type="text"
-          onFocus={(e) => {
-            setIsEditing(true);
-            const rawValue = String(field.value ?? '');
-            e.target.value = rawValue;
-          }}
-          onBlur={(e) => {
-            const rawValue = e.target.value.replace(/[¥,]/g, '');
-            // 空欄のまま何も入力されなかった場合は 0 ではなく null に戻し、
-            // 未編集の値が誤って dirty 扱いになるのを防ぐ
-            const numericValue = rawValue === '' ? null : Math.abs(Number(rawValue));
-            field.onChange(numericValue);
-            setIsEditing(false);
-          }}
-          onChange={(e) => {
-            const raw = e.target.value.replace(/[^\d]/g, '');
-            if (/^\d*$/.test(raw)) {
-              // 空欄になった場合は 0 ではなく null にし、値が0の状態から
-              // バックスペースで消しても表示が0に戻ってしまわないようにする
-              field.onChange(raw === '' ? null : Number(raw));
-              e.target.value = raw;
-            }
-          }}
-          sx={(theme) => ({
-            '.MuiOutlinedInput-notchedOutline': {
-              borderColor: fieldState.error?.message && theme.palette.error.main,
-            },
-            '.Mui-focused .MuiOutlinedInput-notchedOutline': {
-              borderColor: fieldState.error?.message && theme.palette.error.main,
-            },
-            '&:hover .MuiOutlinedInput-notchedOutline': {
-              borderColor: fieldState.error?.message && theme.palette.error.main,
-            },
-            '& .MuiInputBase-input': {
-              textAlign: 'right',
-            },
-            '.MuiFormHelperText-root': {
-              color: theme.palette.error.main,
-            },
-            '& input[type=number]::-webkit-inner-spin-button': {
-              WebkitAppearance: 'none',
-              margin: 0,
-            },
-          })}
-          helperText={fieldState.error?.message}
-          disabled={!editable}
-        />
-      )}
-    />
-  );
 };
 
 /**
@@ -198,10 +116,11 @@ const MeisaiLinesComponent = ({ index, editable }: { index: number; editable: bo
               />
             </Grid2>
             <Grid2 size={1.5}>
-              <MeisaiRowTankaAmtField index={index} rowIndex={i} editable={editable} />
+              {/* 入力中かどうかの状態は欄の中で持つので、1つの単価を入力しても他の行は再描画されない */}
+              <YenInputField control={control} name={`meisaiHeads.${index}.meisai.${i}.tankaAmt`} editable={editable} />
             </Grid2>
             <Grid2 size={2}>
-              <ReadOnlyYenNumberElement name={`meisaiHeads.${index}.meisai.${i}.shokeiAmt`} />
+              <ReadOnlyYenField control={control} name={`meisaiHeads.${index}.meisai.${i}.shokeiAmt`} />
             </Grid2>
             <Grid2 size={1}>
               <IconButton

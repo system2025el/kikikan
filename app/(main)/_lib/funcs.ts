@@ -5,6 +5,7 @@ import { cache } from 'react';
 
 import { createClient } from '@/app/_lib/db/supabase-server';
 import { selectDic } from '@/app/_lib/db/tables/m-dic';
+import { selectOneCustomer } from '@/app/_lib/db/tables/m-kokyaku';
 import { insertLock, selectLock, updateLock } from '@/app/_lib/db/tables/t-lock';
 import { logError } from '@/app/_lib/log-error';
 
@@ -29,6 +30,25 @@ export const getDic = async (dicId: number) => {
     }
 
     return data.dic_val as string;
+  } catch (e) {
+    logError(e);
+    throw e;
+  }
+};
+
+/**
+ * PDF出力の際に、顧客（請求先）の敬称を取得する
+ * 出庫・入庫・請求のPDFで使う（請求の画面からは Server Action として直接呼ぶ）
+ * @param kokyakuId 顧客id
+ * @returns 敬称（未設定なら空文字）
+ */
+export const getKeisho = async (kokyakuId: number) => {
+  try {
+    const { data, error } = await selectOneCustomer(kokyakuId);
+    if (error) {
+      throw new Error('[selectOneCustomer] DBエラー:', { cause: error });
+    }
+    return data.keisho ?? '';
   } catch (e) {
     logError(e);
     throw e;

@@ -152,7 +152,7 @@ export const IsDirtyAlertDialog = ({ open, onClick }: { open: boolean; onClick: 
         入力内容を破棄しますか？
       </DialogContentText>
       <DialogActions>
-        <Button onClick={() => handleClick(true)} loading={isSave}>
+        <Button color="error" onClick={() => handleClick(true)} loading={isSave}>
           破棄
         </Button>
         <Button onClick={() => onClick(false)} disabled={isSave}>

@@ -8,10 +8,11 @@ import { Controller, useFieldArray, useFormContext, useWatch } from 'react-hook-
 import { TextFieldElement } from 'react-hook-form-mui';
 
 import { PrefilledAutocomplete } from '../../_ui/prefilled-autocomplete';
+import { ReadOnlyYenField, YenInputField } from '../../_ui/yen-field';
 import { quotationLaborSelectItems } from '../_lib/datas';
+import { mergeMeisaiInto } from '../_lib/merge-meisai';
 import { QuotHeadValues, SelectedEqptsValues } from '../_lib/types';
 import { QuotEqptSelectionDialog } from './equipment-selection-dialog';
-import { ReadOnlyYenNumberElement } from './yen';
 
 /**
  * 明細1行分の小計金額を計算してフォームへ反映する非表示コンポーネント。
@@ -57,91 +58,6 @@ const MeisaiRowShokeiCalculator = ({
   }, [qty, honbanbiQty, tankaAmt, currentShokeiAmt, sectionNam, index, rowIndex, setValue]);
 
   return null;
-};
-
-/**
- * 明細1行分の単価セル。
- * フォーカス中かどうかの状態を行単位で持つことで、1つのセルにフォーカス／
- * フォーカスアウトした際に同じテーブル内の他の行まで再レンダリングされるのを防ぐ。
- */
-const MeisaiRowTankaAmtField = ({
-  sectionNam,
-  index,
-  rowIndex,
-  editable,
-}: {
-  sectionNam: 'kizai' | 'labor' | 'other';
-  index: number;
-  rowIndex: number;
-  editable: boolean;
-}) => {
-  const { control } = useFormContext<QuotHeadValues>();
-  const [isEditing, setIsEditing] = useState(false);
-
-  return (
-    <Controller
-      name={`meisaiHeads.${sectionNam}.${index}.meisai.${rowIndex}.tankaAmt`}
-      control={control}
-      render={({ field, fieldState }) => (
-        <TextField
-          {...field}
-          value={
-            isEditing
-              ? (field.value ?? '')
-              : typeof field.value === 'number' && !isNaN(field.value)
-                ? `¥${Math.abs(field.value).toLocaleString()}`
-                : `¥0`
-          }
-          type="text"
-          onFocus={(e) => {
-            setIsEditing(true);
-            const rawValue = String(field.value ?? '');
-            e.target.value = rawValue;
-          }}
-          onBlur={(e) => {
-            const rawValue = e.target.value.replace(/[¥,]/g, '');
-            // 空欄のまま何も入力されなかった場合は 0 ではなく null に戻し、
-            // 未編集の値が誤って dirty 扱いになるのを防ぐ
-            const numericValue = rawValue === '' ? null : Math.abs(Number(rawValue));
-            field.onChange(numericValue);
-            setIsEditing(false);
-          }}
-          onChange={(e) => {
-            const raw = e.target.value.replace(/[^\d]/g, '');
-            if (/^\d*$/.test(raw)) {
-              // 空欄になった場合は 0 ではなく null にし、値が0の状態から
-              // バックスペースで消しても表示が0に戻ってしまわないようにする
-              field.onChange(raw === '' ? null : Number(raw));
-              e.target.value = raw;
-            }
-          }}
-          sx={(theme) => ({
-            '.MuiOutlinedInput-notchedOutline': {
-              borderColor: fieldState.error?.message && theme.palette.error.main,
-            },
-            '.Mui-focused .MuiOutlinedInput-notchedOutline': {
-              borderColor: fieldState.error?.message && theme.palette.error.main,
-            },
-            '&:hover .MuiOutlinedInput-notchedOutline': {
-              borderColor: fieldState.error?.message && theme.palette.error.main,
-            },
-            '& .MuiInputBase-input': {
-              textAlign: 'right',
-            },
-            '.MuiFormHelperText-root': {
-              color: theme.palette.error.main,
-            },
-            '& input[type=number]::-webkit-inner-spin-button': {
-              WebkitAppearance: 'none',
-              margin: 0,
-            },
-          })}
-          helperText={fieldState.error?.message}
-          disabled={!editable}
-        />
-      )}
-    />
-  );
 };
 
 /**
@@ -195,122 +111,7 @@ const MeisaiLinesComponent = ({
 
     if (!target || !currentItem) return;
 
-    const newTargetMeisai = [...target];
-    const targetIndex = newTargetMeisai.findIndex((d) => d.nam === currentItem.nam);
-
-    if (targetIndex !== -1) {
-      const targetQty = Number(newTargetMeisai[targetIndex].qty) || 0;
-      const targetHonbanbiQty = Number(newTargetMeisai[targetIndex].honbanbiQty) || 0;
-      const targetTankaAmt = Number(newTargetMeisai[targetIndex].tankaAmt) || 0;
-
-      // 返却明細
-      if ((currentItem.qty ?? 0) < 0) {
-        // 単価一致
-        if (targetTankaAmt === (currentItem.tankaAmt ?? 0)) {
-          if (targetQty === -1 * (currentItem.qty ?? 0) && targetHonbanbiQty === (currentItem.honbanbiQty ?? 0)) {
-            // 数量、本番日数一致対象から削除
-            newTargetMeisai.splice(targetIndex, 1);
-          } else if (
-            targetQty === -1 * (currentItem.qty ?? 0) &&
-            targetHonbanbiQty !== (currentItem.honbanbiQty ?? 0)
-          ) {
-            // 数量一致、本番日数不一致なら本番日数のみ減らす
-            newTargetMeisai[targetIndex] = {
-              ...newTargetMeisai[targetIndex],
-              honbanbiQty: targetHonbanbiQty - (currentItem.honbanbiQty ?? 0),
-            };
-          } else if (
-            targetQty !== -1 * (currentItem.qty ?? 0) &&
-            targetHonbanbiQty === (currentItem.honbanbiQty ?? 0)
-          ) {
-            // 数量不一致、本番日数一致なら数量のみ減らす
-            newTargetMeisai[targetIndex] = {
-              ...newTargetMeisai[targetIndex],
-              qty: targetQty + (currentItem.qty ?? 0),
-            };
-          } else if (
-            targetQty !== -1 * (currentItem.qty ?? 0) &&
-            targetHonbanbiQty !== (currentItem.honbanbiQty ?? 0)
-          ) {
-            // 数量不一致、本番日数不一致なら本番日数を減らし、数量を減らして本番日数が返却分の項目を追加
-            newTargetMeisai[targetIndex] = {
-              ...newTargetMeisai[targetIndex],
-              honbanbiQty: targetHonbanbiQty - (currentItem.honbanbiQty ?? 0),
-            };
-            newTargetMeisai.push({
-              ...currentItem,
-              id: null,
-              qty: targetQty + (currentItem.qty ?? 0),
-              honbanbiQty: currentItem.honbanbiQty,
-            });
-          }
-          // 単価不一致
-        } else {
-          if (targetQty === -1 * (currentItem.qty ?? 0) && targetHonbanbiQty === (currentItem.honbanbiQty ?? 0)) {
-            // 数量、本番日数一致なら単価のみ減らす
-            newTargetMeisai[targetIndex] = {
-              ...newTargetMeisai[targetIndex],
-              tankaAmt: targetTankaAmt - (currentItem.tankaAmt ?? 0),
-            };
-          } else if (
-            targetQty === -1 * (currentItem.qty ?? 0) &&
-            targetHonbanbiQty !== (currentItem.honbanbiQty ?? 0)
-          ) {
-            // 数量一致、本番日数不一致なら本番日数を減らし、単価を減らした返却分の本番日数で項目追加
-            newTargetMeisai[targetIndex] = {
-              ...newTargetMeisai[targetIndex],
-              honbanbiQty: targetHonbanbiQty - (currentItem.honbanbiQty ?? 0),
-            };
-            newTargetMeisai.push({
-              ...newTargetMeisai[targetIndex],
-              id: null,
-              honbanbiQty: currentItem.honbanbiQty,
-              tankaAmt: targetTankaAmt - (currentItem.tankaAmt ?? 0),
-            });
-          } else if (targetQty !== -1 * (currentItem.qty ?? 0)) {
-            // 数量不一致なら項目追加
-            newTargetMeisai.push({ ...currentItem, id: null });
-          }
-        }
-
-        // 追加明細
-      } else {
-        // 単価一致
-        if (targetTankaAmt === (currentItem.tankaAmt ?? 0)) {
-          if (targetHonbanbiQty === (currentItem.honbanbiQty ?? 0)) {
-            // 本番日数一致なら数量のみ増やす
-            newTargetMeisai[targetIndex] = {
-              ...newTargetMeisai[targetIndex],
-              qty: targetQty + (currentItem.qty ?? 0),
-            };
-          } else if (targetQty === (currentItem.qty ?? 0)) {
-            // 数量一致なら本番日数のみ増やす
-            newTargetMeisai[targetIndex] = {
-              ...newTargetMeisai[targetIndex],
-              honbanbiQty: targetHonbanbiQty + (currentItem.honbanbiQty ?? 0),
-            };
-          } else {
-            // 数量、本番日数不一致なら項目追加
-            newTargetMeisai.push({ ...currentItem, id: null });
-          }
-          // 単価不一致
-        } else {
-          if (targetQty === (currentItem.qty ?? 0) && targetHonbanbiQty === (currentItem.honbanbiQty ?? 0)) {
-            // 数量、本番日数一致なら単価のみ増やす
-            newTargetMeisai[targetIndex] = {
-              ...newTargetMeisai[targetIndex],
-              tankaAmt: targetTankaAmt + (currentItem.tankaAmt ?? 0),
-            };
-          } else {
-            // 数量または本番日数不一致なら項目追加
-            newTargetMeisai.push({ ...currentItem, id: null });
-          }
-        }
-      }
-    } else {
-      // 一致する名称がない場合は、新しく追加
-      newTargetMeisai.push({ ...currentItem, id: null });
-    }
+    const newTargetMeisai = mergeMeisaiInto(target, currentItem);
 
     setValue(targetPath, newTargetMeisai, {
       shouldDirty: true,
@@ -400,10 +201,15 @@ const MeisaiLinesComponent = ({
               />
             </Grid2>
             <Grid2 size={1.5}>
-              <MeisaiRowTankaAmtField sectionNam={sectionNam} index={index} rowIndex={i} editable={editable} />
+              {/* 入力中かどうかの状態は欄の中で持つので、1つの単価を入力しても他の行は再描画されない */}
+              <YenInputField
+                control={control}
+                name={`meisaiHeads.${sectionNam}.${index}.meisai.${i}.tankaAmt`}
+                editable={editable}
+              />
             </Grid2>
             <Grid2 size={2}>
-              <ReadOnlyYenNumberElement name={`meisaiHeads.${sectionNam}.${index}.meisai.${i}.shokeiAmt`} />
+              <ReadOnlyYenField control={control} name={`meisaiHeads.${sectionNam}.${index}.meisai.${i}.shokeiAmt`} />
             </Grid2>
             <Grid2 size={1}>
               <IconButton

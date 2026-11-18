@@ -43,6 +43,16 @@ export const statusColors = {
 };
 
 /**
+ * 差異セルの背景色（出庫明細・入庫明細・移動明細で共通）
+ * 差異 = 読取数 + 補正数 - 予定数。0なら済、多ければ過剰、少なければ不足
+ * （コンテナかどうかは見ない。差異は必ずこの3つのどれかになるので、コンテナの色は行の背景だけで付ける）
+ * @param diff 差異
+ * @returns 背景色
+ */
+export const getDiffColor = (diff: number): string =>
+  diff === 0 ? statusColors.completed : diff > 0 ? statusColors.excess : statusColors.lack;
+
+/**
  * 到着・出発の確定状況の色（入出庫一覧の行、入出庫明細の「済」表示）
  * 同じ日時・場所に合体している受注機材ヘッダーのうち、全部確定済み／一部確定済み。確定なしは色なし（白）
  */

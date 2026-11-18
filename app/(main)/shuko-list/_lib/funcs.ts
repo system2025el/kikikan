@@ -1,7 +1,6 @@
 'use server';
 
 import { JUCHU_KIZAI_HEAD_KBN, NYUSHUKO_SHUBETU_ID, toFixSts } from '@/app/_lib/constants';
-import { selectOneCustomer } from '@/app/_lib/db/tables/m-kokyaku';
 import { selectPdfJuchuKizaiMeisai } from '@/app/_lib/db/tables/nyushuko-pdf';
 import { selectPdfJuchuKizaiHead } from '@/app/_lib/db/tables/v-juchu-kizai-head-lst';
 import { selectPdfJuchuHead } from '@/app/_lib/db/tables/v-juchu-lst';
@@ -9,6 +8,7 @@ import { selectFilteredShukoList } from '@/app/_lib/db/tables/v-nyushuko-den2';
 import { logError } from '@/app/_lib/log-error';
 
 import { toJapanYMDString } from '../../_lib/date-conversion';
+import { getKeisho } from '../../_lib/funcs';
 import { ShukoPdfModel } from '../shuko/_lib/hooks/usePdf';
 import { ShukoKizai, ShukoListSearchValues, ShukoTableValues } from './types';
 
@@ -48,24 +48,6 @@ export const getShukoList = async (queries: ShukoListSearchValues) => {
     }));
 
     return shukoList;
-  } catch (e) {
-    logError(e);
-    throw e;
-  }
-};
-
-/**
- * PDF出力の際に、顧客の敬称を取得する関数
- * @param kokyakuId 顧客id
- * @returns
- */
-const getKeisho = async (kokyakuId: number) => {
-  try {
-    const { data, error } = await selectOneCustomer(kokyakuId);
-    if (error) {
-      throw new Error('[selectOneCustomer] DBエラー:', { cause: error });
-    }
-    return data.keisho ?? '';
   } catch (e) {
     logError(e);
     throw e;

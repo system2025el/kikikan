@@ -47,6 +47,7 @@ import { IsDirtyAlertDialog, useDirty } from '@/app/(main)/_ui/dirty-context';
 import { HonbanbiCalendar } from '@/app/(main)/_ui/honbanbi-calendar';
 import { Loading, LoadingOverlay } from '@/app/(main)/_ui/loading';
 import { getOyaShukoFixed } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
+import { AlertDialog } from '@/app/(main)/(eq-order-detail)/_ui/caveat-dialog';
 import { HonbanbiColorValues } from '@/app/(main)/(eq-order-detail)/eq-keep-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[oyaJuchuKizaiHeadId]/[mode]/_lib/types';
 import { WillDeleteAlertDialog } from '@/app/(main)/(masters)/_ui/dialogs';
 import { delJuchuSharyoMeisais } from '@/app/(main)/vehicle-order-detail/[jhid]/[jshid]/[mode]/_lib/funcs';
@@ -75,7 +76,7 @@ import {
   UsersValue,
   VehicleTableValues,
 } from '../_lib/types';
-import { AlertDialog, HeadDeleteConfirmDialog, KizaiHeadDeleteConfirmDialog } from './caveat-dialog';
+import { HeadDeleteConfirmDialog, KizaiHeadDeleteConfirmDialog } from './caveat-dialog';
 import { CopyDialog } from './copy-dialog';
 import { CustomerSelectionDialog } from './customer-selection';
 import { LocationSelectDialog } from './location-selection';

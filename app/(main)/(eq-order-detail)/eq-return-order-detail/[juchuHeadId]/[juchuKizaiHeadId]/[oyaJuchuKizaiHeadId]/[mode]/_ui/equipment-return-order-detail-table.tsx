@@ -19,9 +19,9 @@ import { dispColors } from '@/app/(main)/_lib/colors';
 import { toJapanMDString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { openOrFocusTab } from '@/app/(main)/_lib/tab-focus';
 import { MemoTooltip } from '@/app/(main)/(eq-order-detail)/_ui/memo-tooltip';
+import { getDateHeaderBackgroundColor } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/colorselect';
 import { StockTableValues } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';
 
-import { getDateHeaderBackgroundColor } from '../_lib/colorselect';
 import { ReturnJuchuContainerMeisaiValues, ReturnJuchuKizaiMeisaiValues } from '../_lib/types';
 
 type ReturnStockTableProps = {

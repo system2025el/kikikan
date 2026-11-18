@@ -29,6 +29,7 @@ import { SelectElement, TextFieldElement } from 'react-hook-form-mui';
 
 import { serverErrorLog } from '@/app/_lib/funcs';
 import { readonlyColors } from '@/app/(main)/_lib/colors';
+import { getKeisho } from '@/app/(main)/_lib/funcs';
 import { useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
 import { permission } from '@/app/(main)/_lib/permission';
 import { User } from '@/app/(main)/_lib/types';
@@ -37,9 +38,9 @@ import { useDirty } from '@/app/(main)/_ui/dirty-context';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { LoadingOverlay } from '@/app/(main)/_ui/loading';
 import { PrefilledAutocomplete } from '@/app/(main)/_ui/prefilled-autocomplete';
+import { ReadOnlyYenField } from '@/app/(main)/_ui/yen-field';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 
-import { getKeisho } from '../_lib/funcs';
 import { usePdf } from '../_lib/hooks/usePdf';
 import { BillHeadSchema, BillHeadValues } from '../_lib/types';
 import { addBill } from '../create/_lib/funcs';
@@ -47,7 +48,6 @@ import { updateBill } from '../edit/[id]/_lib/funcs';
 import { FirstDialogPage, SecondDialogPage } from './create-tbl-dialogs';
 import { MeisaiLines } from './meisai';
 import { MeisaiTblHeader } from './meisai-tbl-header';
-import { ReadOnlyYenNumberElement } from './yen';
 
 /**
  * 請求の中計・合計金額を計算してフォームへ反映する非表示コンポーネント。
@@ -518,13 +518,13 @@ export const Bill = ({
                     <Typography>中計</Typography>
                   </Grid2>
                   <Grid2 size={2}>
-                    <ReadOnlyYenNumberElement name="chukeiAmt" />
+                    <ReadOnlyYenField control={control} name="chukeiAmt" />
                   </Grid2>
                   <Grid2 size={1.5} justifyItems={'end'}>
                     <Typography>消費税対象合計</Typography>
                   </Grid2>
                   <Grid2 size={2}>
-                    <ReadOnlyYenNumberElement name="preTaxGokeiAmt" />
+                    <ReadOnlyYenField control={control} name="preTaxGokeiAmt" />
                   </Grid2>
                 </Grid2>
                 <Grid2 container display={'flex'} alignItems={'center'} spacing={1} my={0.5}>
@@ -533,7 +533,7 @@ export const Bill = ({
                     <Typography>消費税</Typography>
                   </Grid2>
                   <Grid2 size={2}>
-                    <ReadOnlyYenNumberElement name="zeiAmt" />
+                    <ReadOnlyYenField control={control} name="zeiAmt" />
                   </Grid2>
                   <Grid2 size={1} display={'flex'}>
                     <TextFieldElement
@@ -560,7 +560,7 @@ export const Bill = ({
                     <Typography>請求金額</Typography>
                   </Grid2>
                   <Grid2 size={2}>
-                    <ReadOnlyYenNumberElement name="gokeiAmt" />
+                    <ReadOnlyYenField control={control} name="gokeiAmt" />
                   </Grid2>
                   <Grid2 size={1} />
                 </Grid2>

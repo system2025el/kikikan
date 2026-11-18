@@ -33,6 +33,7 @@ import { FormDateX } from '@/app/(main)/_ui/date';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { LoadingOverlay } from '@/app/(main)/_ui/loading';
 import { PrefilledAutocomplete } from '@/app/(main)/_ui/prefilled-autocomplete';
+import { ReadOnlyYenField, YenInputField } from '@/app/(main)/_ui/yen-field';
 
 import { useUnsavedChangesWarning } from '../../_lib/hook';
 import { permission } from '../../_lib/permission';
@@ -46,7 +47,6 @@ import { updateQuot } from '../edit/[id]/_lib/funcs';
 import { FirstDialogPage, SecondDialogPage } from './create-tbl-dialogs';
 import { MeisaiLines } from './meisai';
 import { MeisaiTblHeader } from './meisai-tbl-header';
-import { ReadOnlyYenNumberElement } from './yen';
 
 /**
  * 見積の中計・合計金額を計算してフォームへ反映する非表示コンポーネント。
@@ -169,11 +169,6 @@ export const Quotation = ({
   const [snackBarOpen, setSnackBarOpen] = useState(false);
   /** スナックバーのメッセージ */
   const [snackBarMessage, setSnackBarMessage] = useState('');
-
-  /** 値引きの編集状態 */
-  const [nebikiEditing, setNebikiEditing] = useState(false);
-  /** 税の編集状態 */
-  const [zeiEditing, setZeiEditing] = useState(false);
 
   /* useForm -------------------------------------------------------------- */
   const quotForm = useForm<QuotHeadValues>({
@@ -763,7 +758,7 @@ export const Quotation = ({
                     <TextFieldElement name="kizaiChukeiMei" control={control} disabled={!editable} />
                   </Grid2>
                   <Grid2 size={2}>
-                    <ReadOnlyYenNumberElement name="kizaiChukeiAmt" />
+                    <ReadOnlyYenField control={control} name="kizaiChukeiAmt" />
                   </Grid2>
                   <Grid2 size={1} />
                 </Grid2>
@@ -857,7 +852,7 @@ export const Quotation = ({
                   <TextFieldElement name="chukeiMei" control={control} disabled={!editable} />
                 </Grid2>
                 <Grid2 size={2}>
-                  <ReadOnlyYenNumberElement name="chukeiAmt" />
+                  <ReadOnlyYenField control={control} name="chukeiAmt" />
                 </Grid2>
                 <Grid2 size={1} />
               </Grid2>
@@ -867,70 +862,7 @@ export const Quotation = ({
                   <TextFieldElement name="tokuNebikiMei" control={control} disabled={!editable} />
                 </Grid2>
                 <Grid2 size={2}>
-                  <Controller
-                    name={'tokuNebikiAmt'}
-                    control={control}
-                    render={({ field, fieldState }) => (
-                      <TextField
-                        {...field}
-                        value={
-                          nebikiEditing
-                            ? (field.value ?? '')
-                            : typeof field.value === 'number' && !isNaN(field.value)
-                              ? `¥-${Math.abs(field.value).toLocaleString()}`
-                              : `¥0`
-                        }
-                        type="text"
-                        onFocus={(e) => {
-                          setNebikiEditing(true);
-                          const rawValue = String(field.value ?? '');
-                          setTimeout(() => {
-                            e.target.value = rawValue;
-                          }, 1);
-                        }}
-                        onBlur={(e) => {
-                          const rawValue = e.target.value.replace(/[¥,]/g, '');
-                          // 空欄のまま何も入力されなかった場合は 0 ではなく null に戻し、
-                          // 未編集の値が誤って dirty 扱いになるのを防ぐ
-                          const numericValue = rawValue === '' ? null : Math.abs(Number(rawValue));
-                          field.onChange(numericValue);
-                          setNebikiEditing(false);
-                        }}
-                        onChange={(e) => {
-                          const raw = e.target.value.replace(/[^\d]/g, '');
-                          if (/^\d*$/.test(raw)) {
-                            // 空欄になった場合は 0 ではなく null にし、値が0の状態から
-                            // バックスペースで消しても表示が0に戻ってしまわないようにする
-                            field.onChange(raw === '' ? null : Number(raw));
-                            e.target.value = raw;
-                          }
-                        }}
-                        sx={(theme) => ({
-                          '.MuiOutlinedInput-notchedOutline': {
-                            borderColor: fieldState.error?.message && theme.palette.error.main,
-                          },
-                          '.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                            borderColor: fieldState.error?.message && theme.palette.error.main,
-                          },
-                          '&:hover .MuiOutlinedInput-notchedOutline': {
-                            borderColor: fieldState.error?.message && theme.palette.error.main,
-                          },
-                          '& .MuiInputBase-input': {
-                            textAlign: 'right',
-                          },
-                          '.MuiFormHelperText-root': {
-                            color: theme.palette.error.main,
-                          },
-                          '& input[type=number]::-webkit-inner-spin-button': {
-                            WebkitAppearance: 'none',
-                            margin: 0,
-                          },
-                        })}
-                        helperText={fieldState.error?.message}
-                        disabled={!editable}
-                      />
-                    )}
-                  />
+                  <YenInputField control={control} name="tokuNebikiAmt" editable={editable} minus />
                 </Grid2>
                 <Grid2 size={1} />
               </Grid2>
@@ -940,7 +872,7 @@ export const Quotation = ({
                   <Typography>合計</Typography>
                 </Grid2>
                 <Grid2 size={2}>
-                  <ReadOnlyYenNumberElement name="preTaxGokeiAmt" />
+                  <ReadOnlyYenField control={control} name="preTaxGokeiAmt" />
                 </Grid2>
                 <Grid2 size={1} />
               </Grid2>
@@ -950,68 +882,8 @@ export const Quotation = ({
                   <Typography>消費税</Typography>
                 </Grid2>
                 <Grid2 size={2}>
-                  <Controller
-                    name="zeiAmt"
-                    control={control}
-                    render={({ field, fieldState }) => (
-                      <TextField
-                        {...field}
-                        value={
-                          zeiEditing
-                            ? (field.value ?? '')
-                            : typeof field.value === 'number' && !isNaN(field.value)
-                              ? `¥${Math.abs(field.value).toLocaleString()}`
-                              : `¥0`
-                        }
-                        type="text"
-                        onFocus={(e) => {
-                          setZeiEditing(true);
-                          const rawValue = String(field.value ?? '');
-                          e.target.value = rawValue;
-                        }}
-                        onBlur={(e) => {
-                          const rawValue = e.target.value.replace(/[¥,]/g, '');
-                          // 空欄のまま何も入力されなかった場合は 0 ではなく null に戻し、
-                          // 未編集の値が誤って dirty 扱いになるのを防ぐ
-                          const numericValue = rawValue === '' ? null : Math.abs(Number(rawValue));
-                          field.onChange(numericValue);
-                          setZeiEditing(false);
-                        }}
-                        onChange={(e) => {
-                          const raw = e.target.value.replace(/[^\d]/g, '');
-                          if (/^\d*$/.test(raw)) {
-                            // 空欄になった場合は 0 ではなく null にし、値が0の状態から
-                            // バックスペースで消しても表示が0に戻ってしまわないようにする
-                            field.onChange(raw === '' ? null : Number(raw));
-                            e.target.value = raw;
-                          }
-                        }}
-                        sx={(theme) => ({
-                          '.MuiOutlinedInput-notchedOutline': {
-                            borderColor: fieldState.error?.message && theme.palette.error.main,
-                          },
-                          '.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                            borderColor: fieldState.error?.message && theme.palette.error.main,
-                          },
-                          '&:hover .MuiOutlinedInput-notchedOutline': {
-                            borderColor: fieldState.error?.message && theme.palette.error.main,
-                          },
-                          '& .MuiInputBase-input': {
-                            textAlign: 'right',
-                          },
-                          '.MuiFormHelperText-root': {
-                            color: theme.palette.error.main,
-                          },
-                          '& input[type=number]::-webkit-inner-spin-button': {
-                            WebkitAppearance: 'none',
-                            margin: 0,
-                          },
-                        })}
-                        helperText={fieldState.error?.message}
-                        disabled={!editable}
-                      />
-                    )}
-                  />
+                  {/* 税率から自動計算する（入力しても計算値で上書きされるため、請求と同じく読み取り専用） */}
+                  <ReadOnlyYenField control={control} name="zeiAmt" />
                 </Grid2>
                 <Grid2 size={1} display={'flex'}>
                   <TextFieldElement
@@ -1038,7 +910,7 @@ export const Quotation = ({
                   <Typography>合計金額</Typography>
                 </Grid2>
                 <Grid2 size={2}>
-                  <ReadOnlyYenNumberElement name="gokeiAmt" />
+                  <ReadOnlyYenField control={control} name="gokeiAmt" />
                 </Grid2>
                 <Grid2 size={1} />
               </Grid2>

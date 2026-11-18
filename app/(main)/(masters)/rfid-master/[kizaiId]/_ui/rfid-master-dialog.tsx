@@ -15,12 +15,13 @@ import { SelectElement, TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { readonlyColors } from '@/app/(main)/_lib/colors';
 import { User } from '@/app/(main)/_lib/types';
+import { IsDirtyAlertDialog } from '@/app/(main)/_ui/dirty-context';
 
 import { FormBox, SelectTypes } from '../../../../_ui/form-box';
 import { Loading } from '../../../../_ui/loading';
 import { FAKE_NEW_ID } from '../../../_lib/constants';
 import { MasterDialogTitle } from '../../../_ui/dialog-title';
-import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../../_ui/dialogs';
+import { WillDeleteAlertDialog } from '../../../_ui/dialogs';
 import { emptyRfid, formItems } from '../_lib/datas';
 import { addNewRfid, getChosenRfid, getRfidTagExists, updateRfid, updRfidDelFlg } from '../_lib/funcs';
 import { RfidsMasterDialogSchema, RfidsMasterDialogValues } from '../_lib/types';
@@ -335,8 +336,7 @@ export const RfidMasterDialog = ({
             </Grid2>
             <IsDirtyAlertDialog
               open={dirtyOpen}
-              handleCloseDirty={() => setDirtyOpen(false)}
-              handleCloseAll={handleCloseDialog}
+              onClick={(result) => (result ? handleCloseDialog() : setDirtyOpen(false))}
             />
             <WillDeleteAlertDialog
               open={deleteOpen}

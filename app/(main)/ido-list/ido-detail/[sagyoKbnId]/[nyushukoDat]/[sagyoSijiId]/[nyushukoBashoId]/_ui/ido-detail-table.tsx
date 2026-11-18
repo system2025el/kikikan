@@ -6,7 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { memo, useState } from 'react';
 
 import { BASHO_ID } from '@/app/_lib/constants';
-import { dispColors, sagyoKbnColors, statusColors } from '@/app/(main)/_lib/colors';
+import { dispColors, getDiffColor, sagyoKbnColors, statusColors } from '@/app/(main)/_lib/colors';
 import { permission } from '@/app/(main)/_lib/permission';
 import { openOrFocusTab } from '@/app/(main)/_lib/tab-focus';
 import { User } from '@/app/(main)/_lib/types';
@@ -97,7 +97,7 @@ export const ShukoIdoDenTable = memo(function ShukoIdoDenTable(props: {
                 sx={{
                   whiteSpace: 'nowrap',
                   // 未保存を「済」より先に判定すること。未保存行は移動数0・読取0だと
-                  // 差異0になり、そのままでは「済」として緑になってしまう
+                  // 差異0になり、そのままでは「済」としてグレーになってしまう
                   backgroundColor: !row.saveFlag
                     ? statusColors.unsaved
                     : row.diffQty === 0 /*&& row.planQty !== 0*/
@@ -192,16 +192,7 @@ export const ShukoIdoDenTable = memo(function ShukoIdoDenTable(props: {
                 <TableCell
                   align="right"
                   sx={{
-                    backgroundColor:
-                      row.diffQty === 0 /*&& row.planQty !== 0*/
-                        ? statusColors.completed
-                        : row.diffQty > 0
-                          ? statusColors.excess
-                          : row.diffQty < 0
-                            ? statusColors.lack
-                            : row.ctnFlg
-                              ? statusColors.ctn
-                              : undefined,
+                    backgroundColor: getDiffColor(row.diffQty),
                   }}
                 >
                   {row.diffQty}
@@ -249,11 +240,12 @@ export const NyukoIdoDenTable = (props: { datas: IdoDetailTableValues[] }) => {
               sx={{
                 whiteSpace: 'nowrap',
                 // 出庫側と同じく未保存を最優先にする
+                // （入庫側は予定数0の行をビューが出さないので、予定数の条件は付けない）
                 backgroundColor: !row.saveFlag
                   ? statusColors.unsaved
-                  : row.diffQty === 0 && row.planQty !== 0 //&& row.ctnFlg !== 1
+                  : row.diffQty === 0
                     ? statusColors.completed
-                    : row.diffQty === 1
+                    : row.ctnFlg
                       ? statusColors.ctn
                       : 'white',
               }}
@@ -285,16 +277,7 @@ export const NyukoIdoDenTable = (props: { datas: IdoDetailTableValues[] }) => {
               <TableCell
                 align="right"
                 sx={{
-                  backgroundColor:
-                    row.diffQty === 0 && row.planQty !== 0
-                      ? statusColors.completed
-                      : row.diffQty > 0
-                        ? statusColors.excess
-                        : row.diffQty < 0
-                          ? statusColors.lack
-                          : row.ctnFlg
-                            ? statusColors.ctn
-                            : undefined,
+                  backgroundColor: getDiffColor(row.diffQty),
                 }}
               >
                 {row.diffQty}

@@ -17,12 +17,12 @@ import { useEffect, useState } from 'react';
 import { RadioButtonGroup, TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { User } from '@/app/(main)/_lib/types';
+import { IsDirtyAlertDialog } from '@/app/(main)/_ui/dirty-context';
 import { FormBox } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
 
 import { FAKE_NEW_ID } from '../../_lib/constants';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
-import { IsDirtyAlertDialog } from '../../_ui/dialogs';
 import {
   emptyUser,
   formItems,
@@ -458,8 +458,7 @@ export const UsersMasterDialog = ({
             </Grid2>
             <IsDirtyAlertDialog
               open={dirtyOpen}
-              handleCloseDirty={() => setDirtyOpen(false)}
-              handleCloseAll={handleCloseDialog}
+              onClick={(result) => (result ? handleCloseDialog() : setDirtyOpen(false))}
             />
             {/* 無効化・認証情報削除確認ダイアログ */}
             <Dialog open={deleteOpen}>

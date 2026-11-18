@@ -543,10 +543,10 @@ const updNyukoDen = async (
     sagyo_kbn_id: SAGYO_KBN_ID.nyukoCount,
     dsp_ord_num: d.dspOrdNumMeisai,
     indent_num: d.indentNum,
-    add_dat: new Date().toISOString(),
-    add_user: userNam,
-    upd_dat: null,
-    upd_user: null,
+    // 既存の入庫伝票の UPDATE なので更新日時・更新者だけを入れる
+    // （updateNyushukoDen はキー以外の項目をすべて SET するため、add_dat・add_user を渡すと登録日時・登録者が上書きされる）
+    upd_dat: new Date().toISOString(),
+    upd_user: userNam,
   }));
 
   try {

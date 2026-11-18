@@ -6,12 +6,13 @@ import { useEffect, useState } from 'react';
 import { CheckboxElement, TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { User } from '@/app/(main)/_lib/types';
+import { IsDirtyAlertDialog } from '@/app/(main)/_ui/dirty-context';
 import { FormBox } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
 
 import { FAKE_NEW_ID } from '../../_lib/constants';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
-import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
+import { WillDeleteAlertDialog } from '../../_ui/dialogs';
 import { emptyLoc, formItems } from '../_lib/datas';
 import { addNewLoc, getChosenLoc, updateLoc } from '../_lib/funcs';
 import { LocsMasterDialogSchema, LocsMasterDialogValues } from '../_lib/types';
@@ -331,8 +332,7 @@ export const LocationsMasterDialog = ({
             </Grid2>
             <IsDirtyAlertDialog
               open={dirtyOpen}
-              handleCloseDirty={() => setDirtyOpen(false)}
-              handleCloseAll={handleCloseDialog}
+              onClick={(result) => (result ? handleCloseDialog() : setDirtyOpen(false))}
             />
             <WillDeleteAlertDialog
               open={deleteOpen}
