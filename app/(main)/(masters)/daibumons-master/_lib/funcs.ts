@@ -8,6 +8,7 @@ import {
   selectOneDaibumon,
   updateDaibumonDB,
 } from '@/app/_lib/db/tables/m-daibumon';
+import { logError } from '@/app/_lib/log-error';
 
 import { emptyDaibumon } from './datas';
 import { DaibumonsMasterDialogValues, DaibumonsMasterTableValues } from './types';
@@ -36,14 +37,7 @@ export const getFilteredDaibumons = async (query: string = '') => {
     }));
     return filteredDaibumons;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -70,14 +64,7 @@ export const getChosenDaibumon = async (id: number) => {
     };
     return daibumonDetails;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -93,14 +80,7 @@ export const addNewDaibumon = async (data: DaibumonsMasterDialogValues, user: st
     await revalidatePath('/daibumons-master');
     await revalidatePath('/eqpt-master');
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -129,14 +109,7 @@ export const updateDaibumon = async (rawData: DaibumonsMasterDialogValues, id: n
     await revalidatePath('/daibumons-master');
     await revalidatePath('/eqpt-master');
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };

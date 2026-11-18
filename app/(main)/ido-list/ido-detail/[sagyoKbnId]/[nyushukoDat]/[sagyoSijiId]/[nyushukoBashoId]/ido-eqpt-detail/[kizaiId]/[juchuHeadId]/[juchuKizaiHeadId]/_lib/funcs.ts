@@ -10,6 +10,7 @@ import { deleteIdoResult } from '@/app/_lib/db/tables/t-ido-result';
 import { selectIdoDenOne } from '@/app/_lib/db/tables/v-ido-den3-lst';
 import { selectIdoEqptDetail } from '@/app/_lib/db/tables/v-ido-den3-result';
 import { IdoDen } from '@/app/_lib/db/types/t-ido-den-type';
+import { logError } from '@/app/_lib/log-error';
 
 import { IdoEqptDetailTableValues, IdoEqptDetailValues } from './types';
 
@@ -61,14 +62,7 @@ export const getIdoDenDetail = async (
 
     return idoEqptDetailData;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -111,14 +105,7 @@ export const getIdoEqptDetail = async (
 
     return idoEqptDetailData;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -176,14 +163,7 @@ export const delIdoResult = async (idoDenDetailData: IdoEqptDetailValues, delete
     );
     return true;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     await connection.query('ROLLBACK');
     return false;
   } finally {
@@ -219,14 +199,7 @@ export const updIdoResultAdjQty = async (
     );
     return true;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     return false;
   } finally {
     connection.release();
@@ -253,14 +226,7 @@ export const getIdoFix = async (sagyoKbnId: number, sagyoSijiId: number, sagyoDe
 
     return true;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };

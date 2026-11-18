@@ -15,7 +15,6 @@ import {
   Grid2,
   Paper,
   Snackbar,
-  Stack,
   Table,
   TableBody,
   TableCell,
@@ -24,7 +23,6 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import { useRouter } from 'next/navigation';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import { permission } from '../../_lib/permission';
@@ -51,7 +49,6 @@ export const QuotationListTable = ({
   searchParams,
   setIsLoading,
   setQuotList,
-  setIsFirst,
   setPage,
 }: {
   user: User;
@@ -67,8 +64,6 @@ export const QuotationListTable = ({
 }) => {
   /** テーブル1ページの行数 */
   const rowsPerPage = ROWS_PER_MASTER_TABLE_PAGE;
-  /** ページ遷移用router */
-  const router = useRouter();
   /** ダイアログ開いたときにフォーカス管理するRef */
   const inputRef = useRef<HTMLInputElement>(null);
 

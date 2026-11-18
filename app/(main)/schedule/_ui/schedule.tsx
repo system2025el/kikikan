@@ -21,7 +21,6 @@ import {
 import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
-import { TextFieldElement } from 'react-hook-form-mui';
 
 import { BASHO_ID, NYUSHUKO_SHUBETU_ID } from '@/app/_lib/constants';
 
@@ -69,7 +68,7 @@ export const Schedule = ({ user }: { user: User }) => {
   const [snackBarMessage, setSnackBarMessage] = useState('');
 
   /* useForm ------------------------------------------------------------- */
-  const { handleSubmit, control, reset, getValues, setValue } = useForm<WeeklySearchValues>({
+  const { handleSubmit, control, reset, getValues } = useForm<WeeklySearchValues>({
     mode: 'onBlur',
     defaultValues: {
       startDate: new Date(new Date().setHours(0, 0, 0, 0)),
@@ -277,7 +276,7 @@ export const Schedule = ({ user }: { user: User }) => {
             <TableRow>
               {scheList &&
                 scheList.length > 0 &&
-                scheList.map((date, index) => (
+                scheList.map((date) => (
                   <TableCell
                     key={date.calDat}
                     sx={{

@@ -1,6 +1,7 @@
 'use server';
 
 import { selectFilteredEqpts } from '@/app/_lib/db/tables/v-kizai-list';
+import { logError } from '@/app/_lib/log-error';
 
 import { LoanEqTableValues } from './types';
 
@@ -37,14 +38,7 @@ export const getFilteredEqpts = async (query: string = '', section: string[] = [
     }));
     return filteredEqpts;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };

@@ -1,11 +1,10 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Box, Button, Dialog, DialogTitle, Grid2, Stack, Typography } from '@mui/material';
+import { Box, Button, Dialog, DialogTitle, Grid2, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { CheckboxElement, TextFieldElement, useForm } from 'react-hook-form-mui';
 
-import { toJapanYMDAndDayString } from '../../_lib/date-conversion';
 import { permission } from '../../_lib/permission';
 import { User } from '../../_lib/types';
 import { CloseMasterDialogButton } from '../../_ui/buttons';
@@ -39,7 +38,7 @@ export const TantoDialog = ({
     reset,
     handleSubmit,
     control,
-    formState: { isDirty, errors },
+    formState: { isDirty },
   } = useForm<WeeklyValues>({
     mode: 'onChange',
     reValidateMode: 'onChange',

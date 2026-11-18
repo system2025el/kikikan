@@ -4,7 +4,6 @@ import { revalidatePath } from 'next/cache';
 
 import pool from '@/app/_lib/db/postgres';
 import { createAdminClient } from '@/app/_lib/db/supabase-admin';
-import { createClient } from '@/app/_lib/db/supabase-server';
 // import { supabase /*supabaseAdmin*/ } from '@/app/_lib/db/supabase';
 // import { supabaseAdmin } from '@/app/_lib/db/supabase-admin';
 import {
@@ -18,11 +17,11 @@ import {
   updMUserDelFlgAndShainCod,
 } from '@/app/_lib/db/tables/m-user';
 import { MUserDBValues } from '@/app/_lib/db/types/m-use-type';
+import { logError } from '@/app/_lib/log-error';
 import { getUrl } from '@/app/_lib/url';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { permission } from '@/app/(main)/_lib/permission';
 
-import { emptyUser, htRadio, juchuRadio, loginSettingRadio, mastersRadio, nyushukoRadio } from './datas';
 import { UsersMasterDialogValues, UsersMasterTableValues } from './types';
 
 /**
@@ -47,14 +46,7 @@ export const getFilteredUsers = async (query: string = '') => {
     }));
     return filteredUsers;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -109,14 +101,7 @@ export const getChosenUser = async (mailAdr: string) => {
     };
     return UserDetails;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -134,14 +119,7 @@ export const getMailAdrExists = async (mailAdr: string) => {
     }
     return !!data;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -159,14 +137,7 @@ export const getShainCodExists = async (shainCod: string) => {
     }
     return !!data;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -195,7 +166,7 @@ export const addNewUser = async (data: UsersMasterDialogValues, user: string) =>
   try {
     await connection.query('BEGIN');
     // 担当者マスタ更新
-    const result = await insertNewUser(insertData, connection);
+    await insertNewUser(insertData, connection);
 
     // const { error } = await supabase.auth.signUp({
     //   email: data.mailAdr,
@@ -231,14 +202,7 @@ export const addNewUser = async (data: UsersMasterDialogValues, user: string) =>
     }
     await connection.query('COMMIT');
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     await connection.query('ROLLBACK');
     throw e;
   } finally {
@@ -276,14 +240,7 @@ export const updateUser = async (currentEmail: string, data: UsersMasterDialogVa
     await upDateUserDB(updateData, connection);
     await connection.query('COMMIT');
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     await connection.query('ROLLBACK');
     throw e;
   } finally {

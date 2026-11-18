@@ -4,9 +4,6 @@ import { Box, Button, Container, Divider, Grid2, Paper, Snackbar, Stack, Typogra
 import { useState } from 'react';
 import { writeFileXLSX } from 'xlsx';
 
-import { permission } from '@/app/(main)/_lib/permission';
-import { BackButton } from '@/app/(main)/_ui/buttons';
-
 import { getAllEqptAndRfid } from '../_lib/funcs';
 
 /**

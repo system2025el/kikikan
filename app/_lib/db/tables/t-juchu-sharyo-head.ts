@@ -1,11 +1,6 @@
 import 'server-only';
 
-import { count } from 'console';
 import { PoolClient } from 'pg';
-import { set } from 'zod';
-
-import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
-import { WeeklySearchValues } from '@/app/(main)/schedule/_lib/types';
 
 import pool from '../postgres';
 import { SCHEMA } from '../schema';

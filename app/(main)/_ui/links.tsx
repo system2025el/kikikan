@@ -13,7 +13,7 @@ import {
   ListItemText,
   useTheme,
 } from '@mui/material';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { Fragment, useState } from 'react';
 
 import { permission } from '@/app/(main)/_lib/permission';
@@ -80,9 +80,7 @@ export default function NavLinks({ user }: { user: User }) {
   /* 現在のページのpath */
   const pathname = usePathname();
   /*  */
-  const router = useRouter();
   //const user = useUserStore((state) => state.user);
-  const { isDirty } = useDirty();
   const { requestNavigation, isPending } = useDirty();
 
   // /** 検索条件保持削除処理 */
@@ -99,7 +97,6 @@ export default function NavLinks({ user }: { user: User }) {
   /* 在庫管理開閉 */
   const [stockOpen, setStockOpen] = useState<boolean>(true);
   /* プリントアウト開閉 */
-  const [printOpen, setprintOpen] = useState<boolean>(true);
   /* マスタ管理開閉 */
   const [masterOpen, setmasterOpen] = useState<boolean>(true);
   /* 設定開閉 */
@@ -108,8 +105,6 @@ export default function NavLinks({ user }: { user: User }) {
   const [stockIOOpen, setStockIOOpen] = useState<boolean>(true);
   /* ログアウト開閉 */
   // const [loginOpen, setroginOpen] = useState(true);
-  /** 連打制御 */
-  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   /* methods ----------------------------------------- */
   /** 現ページとのpath比較 */
@@ -126,10 +121,6 @@ export default function NavLinks({ user }: { user: User }) {
   /** 受注管理クリック時 */
   const stockClick = () => {
     setStockOpen(!stockOpen);
-  };
-  /** プリントクリック時 */
-  const printClick = () => {
-    setprintOpen(!printOpen);
   };
   /** マスタ管理クリック時 */
   const masterClick = () => {
@@ -426,10 +417,3 @@ export default function NavLinks({ user }: { user: User }) {
     </List>
   );
 }
-
-/** ------------------------スタイル----------------------------------- */
-const styles: { [key: string]: React.CSSProperties } = {
-  colorWhite: {
-    color: undefined,
-  },
-};

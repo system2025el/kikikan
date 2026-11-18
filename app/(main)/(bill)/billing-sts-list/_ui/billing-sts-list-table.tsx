@@ -5,7 +5,6 @@ import AddIcon from '@mui/icons-material/Add';
 import {
   Box,
   Button,
-  Checkbox,
   Collapse,
   Dialog,
   DialogActions,

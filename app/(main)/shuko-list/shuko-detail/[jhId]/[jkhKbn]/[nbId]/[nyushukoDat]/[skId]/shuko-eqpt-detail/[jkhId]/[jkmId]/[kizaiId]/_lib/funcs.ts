@@ -1,8 +1,6 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
-import { QueryResult } from 'pg';
 
 import { isJizenSagyoKbn, toHonbanSagyoKbn } from '@/app/_lib/constants';
 import pool from '@/app/_lib/db/postgres';
@@ -20,6 +18,7 @@ import { deleteHonbanResultByJizenTags, deleteNyushukoResult } from '@/app/_lib/
 import { selectNyushukoDetailOne } from '@/app/_lib/db/tables/v-nyushuko-den2-lst';
 import { selectNyushukoEqptDetail } from '@/app/_lib/db/tables/v-nyushuko-den2-result';
 import { NyushukoDen } from '@/app/_lib/db/types/t-nyushuko-den-type';
+import { logError } from '@/app/_lib/log-error';
 
 import { ShukoEqptDetailTableValues, ShukoEqptDetailValues } from './types';
 
@@ -85,14 +84,7 @@ export const getShukoEqptDetail = async (
 
     return shukoEqptDetaildata;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -146,14 +138,7 @@ export const getShukoEqptDetailTable = async (
 
     return shukoEqptDetailTableData;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -291,14 +276,7 @@ export const delshukoResult = async (
     );
     return true;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     await connection.query('ROLLBACK');
     return false;
   } finally {
@@ -359,14 +337,7 @@ export const updShukoResultAdjQty = async (
     );
     return true;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     return false;
   }
 };

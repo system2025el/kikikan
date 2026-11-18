@@ -13,6 +13,7 @@ import {
 } from '@/app/_lib/db/tables/t-mitu-meisai-head';
 import { MituHead } from '@/app/_lib/db/types/t-mitu-head-types';
 import { MituMeisai } from '@/app/_lib/db/types/t-mitu-meisai-type';
+import { logError } from '@/app/_lib/log-error';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 
@@ -284,14 +285,7 @@ export const updateQuot = async (data: QuotHeadValues, user: string): Promise<nu
     }
     return null;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     // エラーでロールバック
     await connection.query('ROLLBACK');
     throw e;

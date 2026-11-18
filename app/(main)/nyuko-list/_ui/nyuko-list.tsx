@@ -18,7 +18,6 @@ import {
 import { useEffect, useState } from 'react';
 import { CheckboxButtonGroup, Controller, RadioButtonGroup, TextFieldElement, useForm } from 'react-hook-form-mui';
 
-import { toJapanTimeStampString } from '../../_lib/date-conversion';
 import { User } from '../../_lib/types';
 import { FormDateX } from '../../_ui/date';
 import { SelectTypes } from '../../_ui/form-box';

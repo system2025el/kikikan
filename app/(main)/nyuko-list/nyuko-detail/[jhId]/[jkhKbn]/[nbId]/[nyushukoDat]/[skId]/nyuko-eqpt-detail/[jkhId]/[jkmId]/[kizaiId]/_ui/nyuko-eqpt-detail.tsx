@@ -22,13 +22,11 @@ import {
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { TextFieldElement } from 'react-hook-form-mui';
 
 import { sagyoKbnColors } from '@/app/(main)/_lib/colors';
 import { useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
 import { permission } from '@/app/(main)/_lib/permission';
 import { User } from '@/app/(main)/_lib/types';
-import { BackButton } from '@/app/(main)/_ui/buttons';
 import { useDirty } from '@/app/(main)/_ui/dirty-context';
 import { Loading } from '@/app/(main)/_ui/loading';
 
@@ -73,7 +71,7 @@ export const NyukoEqptDetail = (props: {
     control,
     handleSubmit,
     reset,
-    formState: { isDirty, defaultValues },
+    formState: { isDirty },
   } = useForm({
     mode: 'onChange',
     reValidateMode: 'onChange',

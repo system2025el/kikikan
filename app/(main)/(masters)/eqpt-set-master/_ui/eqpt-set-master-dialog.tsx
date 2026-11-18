@@ -24,12 +24,12 @@ import { TextFieldElement } from 'react-hook-form-mui';
 
 import { permission } from '@/app/(main)/_lib/permission';
 import { User } from '@/app/(main)/_lib/types';
-import { CloseMasterDialogButton, DeleteButton, MakeEditModeButton, SubmitButton } from '@/app/(main)/_ui/buttons';
+import { CloseMasterDialogButton, MakeEditModeButton, SubmitButton } from '@/app/(main)/_ui/buttons';
+import { IsDirtyAlertDialog } from '@/app/(main)/_ui/dirty-context';
 import { FormBox, SelectTypes } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
 
 import { FAKE_NEW_ID } from '../../_lib/constants';
-import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
 import { emptyEqptSet, formItems } from '../_lib/datas';
 import {
   addNewEqptSet,
@@ -330,8 +330,7 @@ export const EqptSetsMasterDialog = ({
             </Grid2>
             <IsDirtyAlertDialog
               open={dirtyOpen}
-              handleCloseDirty={() => setDirtyOpen(false)}
-              handleCloseAll={handleCloseDialog}
+              onClick={(result) => (result ? handleCloseDialog() : setDirtyOpen(false))}
             />
             <Dialog open={deleteOpen}>
               <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>

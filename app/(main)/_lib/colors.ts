@@ -43,6 +43,16 @@ export const statusColors = {
 };
 
 /**
+ * 差異セルの背景色（出庫明細・入庫明細・移動明細で共通）
+ * 差異 = 読取数 + 補正数 - 予定数。0なら済、多ければ過剰、少なければ不足
+ * （コンテナかどうかは見ない。差異は必ずこの3つのどれかになるので、コンテナの色は行の背景だけで付ける）
+ * @param diff 差異
+ * @returns 背景色
+ */
+export const getDiffColor = (diff: number): string =>
+  diff === 0 ? statusColors.completed : diff > 0 ? statusColors.excess : statusColors.lack;
+
+/**
  * 到着・出発の確定状況の色（入出庫一覧の行、入出庫明細の「済」表示）
  * 同じ日時・場所に合体している受注機材ヘッダーのうち、全部確定済み／一部確定済み。確定なしは色なし（白）
  */
@@ -83,6 +93,76 @@ export const dispColors = {
    * #E8D5B7 より少し濃くしている
    */
   jizen: '#D2B48C',
+  /**
+   * 在庫マイナス（文字色）。在庫表・貸出状況で在庫数が0未満のセル
+   */
+  minusZaiko: 'red',
+  /**
+   * 在庫表の日付見出しのうち、出庫日〜入庫日の範囲に入る日（文字色）
+   */
+  dateInRange: 'blue',
+  /**
+   * 在庫表の日付見出しの範囲外の日（文字色）
+   */
+  dateOutOfRange: 'black',
+};
+
+/**
+ * 読み取り専用の入力欄（見積・請求の金額欄、RFIDマスタのタグIDなど）。グレー背景で無効っぽく見せる
+ */
+export const readonlyColors = {
+  /**
+   * 背景
+   */
+  bg: '#f5f5f5',
+  /**
+   * 文字
+   */
+  text: '#888',
+};
+
+/**
+ * 出庫一覧の行の背景（ピッキングと最終確認の作業状況）。到着・出発の確定状況（fixStsColors）が優先
+ */
+export const shukoListStsColors = {
+  /**
+   * ピッキング△・最終確認未（lavenderblush）
+   */
+  pickingPartial: '#fff0f5',
+  /**
+   * ピッキング〇・最終確認未（azure）
+   */
+  pickingDone: '#f0ffff',
+  /**
+   * ピッキング〇・最終確認△（lightskyblue）
+   */
+  confirmPartial: '#87cefa',
+  /**
+   * ピッキング〇・最終確認〇（mediumaquamarine）
+   */
+  confirmDone: '#66cdaa',
+  /**
+   * ピッキングが未or△なのに、最終確認が△or〇（黄）
+   */
+  confirmBeforePicking: '#ffff00',
+};
+
+/**
+ * 在庫表のセル背景の既定色。本番日色マスタ（m_honbanbi_color）に該当の種別が無いときだけ使う
+ */
+export const honbanbiFallbackColors = {
+  /**
+   * 使用中（種別1）
+   */
+  use: '#ACB9CA',
+  /**
+   * 出庫日（種別2）
+   */
+  shuko: 'lightblue',
+  /**
+   * 入庫日（種別3）
+   */
+  nyuko: 'yellow',
 };
 
 /**

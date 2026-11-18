@@ -5,7 +5,9 @@ import { cache } from 'react';
 
 import { createClient } from '@/app/_lib/db/supabase-server';
 import { selectDic } from '@/app/_lib/db/tables/m-dic';
-import { deleteLock, insertLock, selectLock, updateLock } from '@/app/_lib/db/tables/t-lock';
+import { selectOneCustomer } from '@/app/_lib/db/tables/m-kokyaku';
+import { insertLock, selectLock, updateLock } from '@/app/_lib/db/tables/t-lock';
+import { logError } from '@/app/_lib/log-error';
 
 // import { User } from '@/app/_lib/stores/usestore';
 import { getChosenUser } from '../(masters)/users-master/_lib/funcs';
@@ -29,14 +31,26 @@ export const getDic = async (dicId: number) => {
 
     return data.dic_val as string;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
+    logError(e);
+    throw e;
+  }
+};
+
+/**
+ * PDF出力の際に、顧客（請求先）の敬称を取得する
+ * 出庫・入庫・請求のPDFで使う（請求の画面からは Server Action として直接呼ぶ）
+ * @param kokyakuId 顧客id
+ * @returns 敬称（未設定なら空文字）
+ */
+export const getKeisho = async (kokyakuId: number) => {
+  try {
+    const { data, error } = await selectOneCustomer(kokyakuId);
+    if (error) {
+      throw new Error('[selectOneCustomer] DBエラー:', { cause: error });
     }
+    return data.keisho ?? '';
+  } catch (e) {
+    logError(e);
     throw e;
   }
 };
@@ -66,14 +80,7 @@ export const getLock = async (lockShubetu: number, headId: number) => {
     };
     return lockData;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -99,14 +106,7 @@ export const addLock = async (lockShubetu: number, headId: number, date: string,
       throw new Error('[insertLock] DBエラー:', { cause: error });
     }
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -133,53 +133,9 @@ export const updLock = async (lockShubetu: number, headId: number, date: string,
       throw new Error('[updateLock] DBエラー:', { cause: error });
     }
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
-};
-
-/**
- * ロック情報削除
- * @param lockShubetu ロック種別
- * @param headId ヘッダーid
- */
-export const delLock = async (lockShubetu: number, headId: number) => {
-  try {
-    const { error } = await deleteLock(lockShubetu, headId);
-
-    if (error) {
-      throw new Error('[deleteLock] DBエラー:', { cause: error });
-    }
-  } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
-    throw e;
-  }
-};
-
-/**
- * セッション情報確認
- * @returns
- */
-export const sessionCheck = async () => {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  return user;
 };
 
 /**

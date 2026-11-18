@@ -64,8 +64,3 @@ export type ShukoCtnSelectionValues = {
 
 /** コンテナ保存の結果（失敗したときは画面に出す文言） */
 export type ShukoCtnSaveResult = { ok: true; data: ShukoDetailTableValues[] } | { ok: false; message: string };
-
-export type NyukoValues = {
-  juchuKizaiHeadId: number;
-  nyushukoDat: string;
-};

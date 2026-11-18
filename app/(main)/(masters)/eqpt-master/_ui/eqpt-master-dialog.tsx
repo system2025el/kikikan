@@ -1,24 +1,18 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Box, Button, Grid2, MenuItem, Select, Snackbar, TextField, Typography } from '@mui/material';
+import { Box, Button, Grid2, MenuItem, Select, Snackbar, TextField } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import { useEffect, useState } from 'react';
-import {
-  CheckboxElement,
-  Controller,
-  SelectElement,
-  TextareaAutosizeElement,
-  TextFieldElement,
-  useForm,
-} from 'react-hook-form-mui';
+import { CheckboxElement, Controller, SelectElement, TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { openOrFocusTab } from '@/app/(main)/_lib/tab-focus';
 import { User } from '@/app/(main)/_lib/types';
+import { IsDirtyAlertDialog } from '@/app/(main)/_ui/dirty-context';
 
 import { FormBox, selectNone, SelectTypes } from '../../../_ui/form-box';
 import { Loading } from '../../../_ui/loading';
 import { FAKE_NEW_ID } from '../../_lib/constants';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
-import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
+import { WillDeleteAlertDialog } from '../../_ui/dialogs';
 import { emptyEqpt, formItems } from '../_lib/datas';
 import { addNewEqpt, getEqptMasterDialogData, updateEqpt } from '../_lib/funcs';
 import { EqptsMasterDialogSchema, EqptsMasterDialogValues } from '../_lib/types';
@@ -457,8 +451,7 @@ export const EqMasterDialog = ({
             </Grid2>
             <IsDirtyAlertDialog
               open={dirtyOpen}
-              handleCloseDirty={() => setDirtyOpen(false)}
-              handleCloseAll={handleCloseDialog}
+              onClick={(result) => (result ? handleCloseDialog() : setDirtyOpen(false))}
             />
             <WillDeleteAlertDialog
               open={deleteOpen}

@@ -14,6 +14,7 @@ import {
   selectJuchuTempuList,
   updateJuchuTempuDelFlg,
 } from '@/app/_lib/db/tables/t-juchu-tempu';
+import { logError } from '@/app/_lib/log-error';
 import { getCurrentUser } from '@/app/(main)/_lib/funcs';
 import { permission } from '@/app/(main)/_lib/permission';
 
@@ -29,14 +30,7 @@ import { TempuValues } from './types';
 
 /** エラーをログに出して再スローする（funcs.ts と同じ形） */
 const logAndThrow = (e: unknown): never => {
-  if (e instanceof Error) {
-    console.error(`[ERROR] ${e.message}`);
-    if (e.cause) {
-      console.error(`[CAUSE]`, e.cause);
-    }
-  } else {
-    console.error(e);
-  }
+  logError(e);
   throw e;
 };
 

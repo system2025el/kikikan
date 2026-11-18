@@ -9,6 +9,7 @@ import {
   selectOneShozoku,
   upDateShozokuDB,
 } from '@/app/_lib/db/tables/m-shozoku';
+import { logError } from '@/app/_lib/log-error';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 
 import { emptyBase } from './datas';
@@ -30,14 +31,7 @@ export const getBasesSelections = async (): Promise<SelectTypes[]> => {
     }
     return data.map((d) => ({ id: d.shozoku_id, label: d.shozoku_nam }));
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -65,14 +59,7 @@ export const getFilteredBases = async (query: string = '') => {
     }));
     return filteredBases;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -99,14 +86,7 @@ export const getChosenBase = async (id: number) => {
     };
     return baseDetails;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -120,14 +100,7 @@ export const addNewBase = async (data: BasesMasterDialogValues, user: string) =>
     await insertNewShozoku(data, user);
     await revalidatePath('/bases-master');
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -156,14 +129,7 @@ export const updateBase = async (rawData: BasesMasterDialogValues, id: number, u
     }
     await revalidatePath('/bases-master');
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };

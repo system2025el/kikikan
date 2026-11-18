@@ -3,7 +3,6 @@
 import { revalidatePath } from 'next/cache';
 
 import pool, { refreshVRfid } from '@/app/_lib/db/postgres';
-import { SCHEMA } from '@/app/_lib/db/schema';
 import { selectOneEqpt } from '@/app/_lib/db/tables/m-kizai';
 import { updateMasterUpdates } from '@/app/_lib/db/tables/m-master-update';
 import {
@@ -17,6 +16,7 @@ import { insertNewRfidSts, updateRfidTagStsDB } from '@/app/_lib/db/tables/t-rfi
 import { selectOneRfid, selectRfidsOfTheKizai } from '@/app/_lib/db/tables/v-rfid';
 import { MRfidDBValues } from '@/app/_lib/db/types/m-rfid-type';
 import { RfidStatusResultValues } from '@/app/_lib/db/types/t-rfid-status-result-type';
+import { logError } from '@/app/_lib/log-error';
 
 import { FAKE_NEW_ID } from '../../../_lib/constants';
 import { nullToFake } from '../../../_lib/value-converters';
@@ -52,14 +52,7 @@ export const getRfidsOfTheKizai = async (kizaiId: number) => {
     }));
     return filteredRfids;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -77,14 +70,7 @@ export const getEqptNam = async (id: number): Promise<string> => {
     }
     return data.kizai_nam ?? '';
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -114,14 +100,7 @@ export const getChosenRfid = async (id: string) => {
     };
     return RfidDetails;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -139,14 +118,7 @@ export const getRfidTagExists = async (tagId: string) => {
     }
     return !!data;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -183,14 +155,7 @@ export const addNewRfid = async (data: RfidsMasterDialogValues, kizaiId: number,
     await revalidatePath(`/rfid-master/${kizaiId}`);
     await revalidatePath('/eqpt-master');
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     await connection.query('ROLLBACK');
 
     throw e;
@@ -267,14 +232,7 @@ export const updateRfid = async (
     await revalidatePath(`/rfid-master/${kizaiId}`);
     await revalidatePath('/eqpt-master');
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     await connection.query('ROLLBACK');
     throw e;
   } finally {
@@ -321,14 +279,7 @@ export const updateRfidTagSts = async (
     await revalidatePath('/eqpt-master');
     await connection.query('COMMIT');
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     await connection.query('ROLLBACK');
     throw e;
   } finally {
@@ -355,14 +306,7 @@ export const updRfidDelFlg = async (tagId: string, flg: boolean, user: string) =
     await revalidatePath('/rfid-master');
     await revalidatePath('/eqpt-master');
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   } finally {
     refreshVRfid().catch((err) => {
@@ -387,14 +331,7 @@ export const deleteRfidTags = async (tagIds: string[], kizaiId: number) => {
     await revalidatePath(`/rfid-master/${kizaiId}`);
     await revalidatePath('/eqpt-master');
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     await connection.query('ROLLBACK');
     throw e;
   } finally {

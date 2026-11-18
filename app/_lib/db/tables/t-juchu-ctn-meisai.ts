@@ -2,36 +2,8 @@ import 'server-only';
 
 import { PoolClient } from 'pg';
 
-import { JuchuContainerMeisaiValues } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';
-
 import { SCHEMA } from '../schema';
-import { createClient } from '../supabase-server';
 import { JuchuCtnMeisai } from '../types/t_juchu_ctn_meisai-type';
-
-/**
- * 受注コンテナ明細id最大値取得
- * @param juchuHeadId 受注ヘッダーid
- * @param juchuKizaiHeadId 受注機材ヘッダーid
- * @returns
- */
-export const selectJuchuContainerMeisaiMaxId = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
-  const supabase = await createClient();
-  try {
-    return await supabase
-      .schema(SCHEMA)
-      .from('t_juchu_ctn_meisai')
-      .select('juchu_kizai_meisai_id')
-      .eq('juchu_head_id', juchuHeadId)
-      .eq('juchu_kizai_head_id', juchuKizaiHeadId)
-      .order('juchu_kizai_meisai_id', {
-        ascending: false,
-      })
-      .limit(1)
-      .single();
-  } catch (e) {
-    throw new Error('[selectJuchuContainerMeisaiMaxId] DBエラー:', { cause: e });
-  }
-};
 
 /**
  * 受注コンテナ明細新規追加

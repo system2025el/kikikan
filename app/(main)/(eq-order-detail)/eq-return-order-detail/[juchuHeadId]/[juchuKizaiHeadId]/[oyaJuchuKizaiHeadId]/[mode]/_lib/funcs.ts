@@ -26,22 +26,12 @@ import {
   updateJuchuKizaiMeisai,
 } from '@/app/_lib/db/tables/t-juchu-kizai-meisai';
 import {
-  deleteContainerNyushukoDen,
   deleteKicsOrYardNyukoDen,
   deleteNyukoDen,
   deleteNyushukoDen,
-  insertNyushukoDen,
-  selectContainerNyushukoDenConfirm,
   selectNyukoDenWithoutMeisaiTx,
-  updateNyushukoDen,
   upsertNyushukoDen,
 } from '@/app/_lib/db/tables/t-nyushuko-den';
-import {
-  deleteNyushukoFix,
-  insertNyushukoFix,
-  selectNyushukoFixConfirm,
-  updateNyushukoFix,
-} from '@/app/_lib/db/tables/t-nyushuko-fix';
 import { deleteKizaiIdNyushukoResult, deleteNyukoResult } from '@/app/_lib/db/tables/t-nyushuko-result';
 import { selectJuchuContainerMeisai } from '@/app/_lib/db/tables/v-juchu-ctn-meisai';
 import { selectOyaJuchuKizaiMeisai, selectReturnJuchuKizaiMeisai } from '@/app/_lib/db/tables/v-juchu-kizai-meisai';
@@ -49,6 +39,7 @@ import { JuchuCtnMeisai } from '@/app/_lib/db/types/t_juchu_ctn_meisai-type';
 import { JuchuKizaiHead } from '@/app/_lib/db/types/t-juchu-kizai-head-type';
 import { JuchuKizaiMeisai } from '@/app/_lib/db/types/t-juchu-kizai-meisai-type';
 import { NyushukoDen } from '@/app/_lib/db/types/t-nyushuko-den-type';
+import { logError } from '@/app/_lib/log-error';
 import { getNyukoDate, getShukoDate } from '@/app/(main)/_lib/date-funcs';
 import { expandHonbanbiTemplate, getHonbanbiTemplate } from '@/app/(main)/_lib/honbanbi-funcs';
 import {
@@ -57,7 +48,6 @@ import {
   addJuchuKizaiNyushuko,
   delAllKicsOrYardNyukoDen,
   delAllNyukoResult,
-  delAllNyushukoDen,
   delNyushukoCtnResult,
   delSiyouHonbanbi,
   getALLStockList,
@@ -171,14 +161,7 @@ export const saveNewReturnJuchuKizaiHead = async (
 
     return { ok: true, juchuKizaiHeadId: newJuchuKizaiHeadId };
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     await connection.query('ROLLBACK');
     throw e;
   } finally {
@@ -620,14 +603,7 @@ export const saveReturnJuchuKizai = async (
 
     return true;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     await connection.query('ROLLBACK');
     throw e;
   } finally {
@@ -675,14 +651,7 @@ export const getReturnJuchuKizaiHead = async (juchuHeadId: number, juchuKizaiHea
 
     return returnJucuKizaiHeadData;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -694,7 +663,7 @@ export const getReturnJuchuKizaiHead = async (juchuHeadId: number, juchuKizaiHea
  * @param userNam ユーザー名
  * @returns
  */
-export const addReturnJuchuKizaiHead = async (
+const addReturnJuchuKizaiHead = async (
   returnJuchuKizaiHeadId: number,
   returnJuchuKizaiHeadData: ReturnJuchuKizaiHeadValues,
   userNam: string,
@@ -716,14 +685,7 @@ export const addReturnJuchuKizaiHead = async (
   try {
     await insertReturnJuchuKizaiHead(newData, connection);
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -734,7 +696,7 @@ export const addReturnJuchuKizaiHead = async (
  * @param userNam ユーザー名
  * @returns
  */
-export const updReturnJuchuKizaiHead = async (
+const updReturnJuchuKizaiHead = async (
   juchuKizaiHeadData: ReturnJuchuKizaiHeadValues,
   userNam: string,
   connection: PoolClient
@@ -756,14 +718,7 @@ export const updReturnJuchuKizaiHead = async (
   try {
     await updateReturnJuchuKizaiHead(updateData, connection);
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -774,7 +729,7 @@ export const updReturnJuchuKizaiHead = async (
  * @param juchuKizaiHeadId 受注機材ヘッダーid
  * @returns 返却受注機材明細
  */
-export const getReturnJuchuKizaiMeisai = async (
+const getReturnJuchuKizaiMeisai = async (
   juchuHeadId: number,
   juchuKizaiHeadId: number,
   oyaJuchuKizaiHeadId: number
@@ -830,14 +785,7 @@ export const getReturnJuchuKizaiMeisai = async (
     }));
     return returnJuchuKizaiMeisaiData;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -848,7 +796,7 @@ export const getReturnJuchuKizaiMeisai = async (
  * @param userNam ユーザー名
  * @returns
  */
-export const addReturnJuchuKizaiMeisai = async (
+const addReturnJuchuKizaiMeisai = async (
   returnJuchuKizaiMeisaiData: ReturnJuchuKizaiMeisaiValues[],
   userNam: string,
   connection: PoolClient
@@ -871,14 +819,7 @@ export const addReturnJuchuKizaiMeisai = async (
   try {
     await insertJuchuKizaiMeisai(newData, connection);
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -889,7 +830,7 @@ export const addReturnJuchuKizaiMeisai = async (
  * @param userNam ユーザー名
  * @returns
  */
-export const updReturnJuchuKizaiMeisai = async (
+const updReturnJuchuKizaiMeisai = async (
   returnJuchuKizaiMeisaiData: ReturnJuchuKizaiMeisaiValues[],
   userNam: string,
   connection: PoolClient
@@ -915,14 +856,7 @@ export const updReturnJuchuKizaiMeisai = async (
       await updateJuchuKizaiMeisai(data, connection);
     }
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -933,7 +867,7 @@ export const updReturnJuchuKizaiMeisai = async (
  * @param juchuKizaiHeadId 受注機材ヘッダーid
  * @param kizaiId 機材id
  */
-export const delReturnJuchuKizaiMeisai = async (
+const delReturnJuchuKizaiMeisai = async (
   returnJuchuKizaiMeisaiData: ReturnJuchuKizaiMeisaiValues[],
   connection: PoolClient
 ) => {
@@ -948,14 +882,7 @@ export const delReturnJuchuKizaiMeisai = async (
       await deleteJuchuKizaiMeisai(data, connection);
     }
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -1004,14 +931,7 @@ export const getReturnJuchuContainerMeisai = async (
     }));
     return returnJuchuContainerMeisaiData;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -1105,7 +1025,7 @@ export const getReturnJuchuKizaiLockReloadData = async (
  * @param userNam ユーザー名
  * @returns
  */
-export const addReturnJuchuContainerMeisai = async (
+const addReturnJuchuContainerMeisai = async (
   returnJuchuContainerMeisaiData: ReturnJuchuContainerMeisaiValues[],
   userNam: string,
   connection: PoolClient
@@ -1143,14 +1063,7 @@ export const addReturnJuchuContainerMeisai = async (
   try {
     await insertJuchuContainerMeisai(mergeData, connection);
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -1161,7 +1074,7 @@ export const addReturnJuchuContainerMeisai = async (
  * @param userNam ユーザー名
  * @returns
  */
-export const updReturnJuchuContainerMeisai = async (
+const updReturnJuchuContainerMeisai = async (
   returnJuchuContainerMeisaiData: ReturnJuchuContainerMeisaiValues[],
   userNam: string,
   connection: PoolClient
@@ -1201,14 +1114,7 @@ export const updReturnJuchuContainerMeisai = async (
       await updateJuchuContainerMeisai(data, connection);
     }
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -1219,7 +1125,7 @@ export const updReturnJuchuContainerMeisai = async (
  * @param juchuKizaiHeadId 受注機材ヘッダーid
  * @param deleteJuchuContainerMeisaiIds 受注コンテナ明細id
  */
-export const delReturnJuchuContainerMeisai = async (
+const delReturnJuchuContainerMeisai = async (
   juchuHeadId: number,
   juchuKizaiHeadId: number,
   kizaiId: number[],
@@ -1228,110 +1134,7 @@ export const delReturnJuchuContainerMeisai = async (
   try {
     await deleteJuchuContainerMeisai(juchuHeadId, juchuKizaiHeadId, kizaiId, connection);
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
-    throw e;
-  }
-};
-
-/**
- * 返却入出庫伝票新規追加
- * @param juchuKizaiHeadData 返却受注機材ヘッダーデータ
- * @param juchuKizaiMeisaiData 返却受注機材明細データ
- * @param userNam ユーザー名
- * @returns
- */
-export const addReturnNyushukoDen = async (
-  returnJuchuKizaiHeadData: ReturnJuchuKizaiHeadValues,
-  returnJuchuKizaiMeisaiData: ReturnJuchuKizaiMeisaiValues[],
-  userNam: string,
-  connection: PoolClient
-) => {
-  const newReturnNyukoCheckData: NyushukoDen[] = returnJuchuKizaiMeisaiData.map((d) => ({
-    juchu_head_id: d.juchuHeadId,
-    juchu_kizai_head_id: d.juchuKizaiHeadId,
-    juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
-    sagyo_kbn_id: SAGYO_KBN_ID.nyukoCount,
-    sagyo_den_dat:
-      d.shozokuId === BASHO_ID.kics
-        ? returnJuchuKizaiHeadData.kicsNyukoDat!.toISOString()
-        : returnJuchuKizaiHeadData.yardNyukoDat!.toISOString(),
-    sagyo_id: d.shozokuId,
-    kizai_id: d.kizaiId,
-    plan_qty: d.planQty,
-    dsp_ord_num: d.dspOrdNum,
-    indent_num: d.indentNum,
-    add_dat: new Date().toISOString(),
-    add_user: userNam,
-  }));
-
-  try {
-    await insertNyushukoDen(newReturnNyukoCheckData, connection);
-    return true;
-  } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
-    throw e;
-  }
-};
-
-/**
- * 返却入出庫伝票更新
- * @param returnJuchuKizaiHeadData 返却受注機材ヘッダーデータ
- * @param returnJuchuKizaiMeisaiData 返却受注機材明細データ
- * @param userNam ユーザー名
- * @returns
- */
-export const updReturnNyushukoDen = async (
-  returnJuchuKizaiHeadData: ReturnJuchuKizaiHeadValues,
-  returnJuchuKizaiMeisaiData: ReturnJuchuKizaiMeisaiValues[],
-  userNam: string,
-  connection: PoolClient
-) => {
-  const updateReturnNyukoCheckData: NyushukoDen[] = returnJuchuKizaiMeisaiData.map((d) => ({
-    juchu_head_id: d.juchuHeadId,
-    juchu_kizai_head_id: d.juchuKizaiHeadId,
-    juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
-    sagyo_kbn_id: SAGYO_KBN_ID.nyukoCount,
-    sagyo_den_dat:
-      d.shozokuId === BASHO_ID.kics
-        ? returnJuchuKizaiHeadData.kicsNyukoDat!.toISOString()
-        : returnJuchuKizaiHeadData.yardNyukoDat!.toISOString(),
-    sagyo_id: d.shozokuId,
-    kizai_id: d.kizaiId,
-    plan_qty: d.planQty,
-    dsp_ord_num: d.dspOrdNum,
-    indent_num: d.indentNum,
-    add_dat: new Date().toISOString(),
-    add_user: userNam,
-  }));
-
-  try {
-    for (const data of updateReturnNyukoCheckData) {
-      await updateNyushukoDen(data, connection);
-    }
-    return true;
-  } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -1344,7 +1147,7 @@ export const updReturnNyushukoDen = async (
  * @param userNam
  * @param connection
  */
-export const upsNyukoDen = async (
+const upsNyukoDen = async (
   juchuKizaiMeisaiData: ReturnJuchuKizaiMeisaiValues[],
   nyukoDat: Date,
   sagyoId: number,
@@ -1369,14 +1172,7 @@ export const upsNyukoDen = async (
   try {
     await upsertNyushukoDen(newData, connection);
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -1387,7 +1183,7 @@ export const upsNyukoDen = async (
  * @param juchuKizaiHeadId 受注機材ヘッダーid
  * @param kizaiId 機材id
  */
-export const delReturnNyushukoDen = async (
+const delReturnNyushukoDen = async (
   returnJuchuKizaiMeisaiData: ReturnJuchuKizaiMeisaiValues[],
   connection: PoolClient
 ) => {
@@ -1402,14 +1198,7 @@ export const delReturnNyushukoDen = async (
       await deleteNyushukoDen(data, connection);
     }
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -1420,7 +1209,7 @@ export const delReturnNyushukoDen = async (
  * @param sagyoId
  * @param connection
  */
-export const delReturnKicsOrYardNyukoDen = async (
+const delReturnKicsOrYardNyukoDen = async (
   juchuKizaiMeisaiData: ReturnJuchuKizaiMeisaiValues[],
   sagyoId: number,
   connection: PoolClient
@@ -1438,108 +1227,7 @@ export const delReturnKicsOrYardNyukoDen = async (
       await deleteKicsOrYardNyukoDen(data, connection);
     }
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
-    throw e;
-  }
-};
-
-/**
- * コンテナ入庫伝票新規追加
- * @param juchuCtnMeisaiData 受注コンテナ明細データ
- * @param nyukoDat 入庫日
- * @param sagyoId 作業id
- * @param userNam ユーザー名
- * @param connection
- * @returns
- */
-export const addCtnNyukoDen = async (
-  juchuCtnMeisaiData: ReturnJuchuContainerMeisaiValues[],
-  nyukoDat: Date,
-  sagyoId: number,
-  userNam: string,
-  connection: PoolClient
-) => {
-  const newCtnNyukoCheckData: NyushukoDen[] = juchuCtnMeisaiData.map((d) => ({
-    juchu_head_id: d.juchuHeadId,
-    juchu_kizai_head_id: d.juchuKizaiHeadId,
-    juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
-    sagyo_kbn_id: SAGYO_KBN_ID.nyukoCount,
-    sagyo_den_dat: nyukoDat.toISOString(),
-    sagyo_id: sagyoId,
-    kizai_id: d.kizaiId,
-    plan_qty: sagyoId === BASHO_ID.kics ? d.planKicsKizaiQty : d.planYardKizaiQty,
-    dsp_ord_num: d.dspOrdNum,
-    indent_num: d.indentNum,
-    add_dat: new Date().toISOString(),
-    add_user: userNam,
-  }));
-
-  try {
-    await insertNyushukoDen(newCtnNyukoCheckData, connection);
-  } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
-    throw e;
-  }
-};
-
-/**
- * コンテナ入庫伝票更新
- * @param juchuCtnMeisaiData 受注コンテナ明細データ
- * @param nyukoDat 入庫日
- * @param sagyoId 作業id
- * @param userNam ユーザー名
- * @param connection
- * @returns
- */
-export const updCtnNyukoDen = async (
-  juchuCtnMeisaiData: ReturnJuchuContainerMeisaiValues[],
-  nyukoDat: Date,
-  sagyoId: number,
-  userNam: string,
-  connection: PoolClient
-) => {
-  const updCtnNyukoCheckData: NyushukoDen[] = juchuCtnMeisaiData.map((d) => ({
-    juchu_head_id: d.juchuHeadId,
-    juchu_kizai_head_id: d.juchuKizaiHeadId,
-    juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
-    sagyo_kbn_id: SAGYO_KBN_ID.nyukoCount,
-    sagyo_den_dat: nyukoDat.toISOString(),
-    sagyo_id: sagyoId,
-    kizai_id: d.kizaiId,
-    plan_qty: sagyoId === BASHO_ID.kics ? d.planKicsKizaiQty : d.planYardKizaiQty,
-    dsp_ord_num: d.dspOrdNum,
-    indent_num: d.indentNum,
-    upd_dat: new Date().toISOString(),
-    upd_user: userNam,
-  }));
-
-  try {
-    for (const data of updCtnNyukoCheckData) {
-      await updateNyushukoDen(data, connection);
-    }
-  } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -1552,7 +1240,7 @@ export const updCtnNyukoDen = async (
  * @param userNam
  * @param connection
  */
-export const upsCtnNyukoDen = async (
+const upsCtnNyukoDen = async (
   juchuContainerMeisaiData: ReturnJuchuContainerMeisaiValues[],
   nyukoDat: Date,
   sagyoId: number,
@@ -1579,14 +1267,7 @@ export const upsCtnNyukoDen = async (
   try {
     await upsertNyushukoDen(upsertCtnNyukoData, connection);
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -1597,7 +1278,7 @@ export const upsCtnNyukoDen = async (
  * @param connection
  * @returns
  */
-export const delCtnNyukoDen = async (
+const delCtnNyukoDen = async (
   returnJuchuContainerMeisaiData: ReturnJuchuContainerMeisaiValues[],
   connection: PoolClient
 ) => {
@@ -1612,14 +1293,7 @@ export const delCtnNyukoDen = async (
       await deleteNyukoDen(data, connection);
     }
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -1630,10 +1304,7 @@ export const delCtnNyukoDen = async (
  * @param connection
  * @returns
  */
-export const delNyushukoResult = async (
-  juchuKizaiMeisaiData: ReturnJuchuKizaiMeisaiValues[],
-  connection: PoolClient
-) => {
+const delNyushukoResult = async (juchuKizaiMeisaiData: ReturnJuchuKizaiMeisaiValues[], connection: PoolClient) => {
   const deleteData = juchuKizaiMeisaiData.map((d) => ({
     juchuHeadId: d.juchuHeadId,
     juchuKizaiHeadId: d.juchuKizaiHeadId,
@@ -1651,14 +1322,7 @@ export const delNyushukoResult = async (
       );
     }
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -1669,7 +1333,7 @@ export const delNyushukoResult = async (
  * @param connection
  * @returns
  */
-export const delNyukoResult = async (
+const delNyukoResult = async (
   juchuKizaiMeisaiData: ReturnJuchuKizaiMeisaiValues[],
   sagyoId: number,
   connection: PoolClient
@@ -1693,14 +1357,7 @@ export const delNyukoResult = async (
       );
     }
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };

@@ -6,7 +6,6 @@ import utc from 'dayjs/plugin/utc';
 import { revalidatePath } from 'next/cache';
 
 import { DIC_ID } from '@/app/_lib/constants';
-import { selectOneCustomer } from '@/app/_lib/db/tables/m-kokyaku';
 import { selectActiveSeikyuSts } from '@/app/_lib/db/tables/m-seikyu-sts';
 import { selectChosenSeikyu, updBillHeadDelFlg } from '@/app/_lib/db/tables/t-seikyu-head';
 import { selectBillMeisai } from '@/app/_lib/db/tables/t-seikyu-meisai';
@@ -19,6 +18,7 @@ import {
 import { selectFilteredBills } from '@/app/_lib/db/tables/v-seikyu-lst';
 import { SeikyuMeisaiHead } from '@/app/_lib/db/types/t-seikyu-meisai-head-type';
 import { SeikyuMeisai } from '@/app/_lib/db/types/t-seikyu-meisai-type';
+import { logError } from '@/app/_lib/log-error';
 import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { getDic } from '@/app/(main)/_lib/funcs';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
@@ -46,14 +46,7 @@ export const getBillingStsSelection = async (): Promise<SelectTypes[]> => {
     }
     return data.map((d) => ({ id: d.sts_id, label: d.sts_nam }));
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -99,14 +92,7 @@ export const getFilteredBills = async (
       seikyuDat: d.seikyu_dat,
     }));
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -250,14 +236,7 @@ export const getChosenBill = async (seikyuId: number) => {
     };
     return allData;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -286,14 +265,7 @@ export const getJuchuKizaiHeadNamListForBill = async (queries: {
       headNam: d.head_nam ?? '',
     }));
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -311,7 +283,6 @@ export const getJuchuKizaiMeisaiHeadForBill = async (juchuHeadId: number, kizaiH
     if (!data) {
       console.error('例外が発生');
     }
-    const d = data.rows[0];
     return data.rows.map((j) => ({
       juchuHeadId: j.juchu_head_id,
       juchuKizaiHeadId: j.juchu_kizai_head_id,
@@ -349,14 +320,7 @@ export const getJuchuKizaiMeisaiHeadForBill = async (juchuHeadId: number, kizaiH
         : [],
     }));
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -424,14 +388,7 @@ export const getJuchuKizaiMeisaiDetailsForBill = async (juchuHeadId: number, kiz
     // reduceの結果はオブジェクトなので、最後にObject.values()で配列に変換します
     return Object.values(groupedResult);
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -445,39 +402,7 @@ export const updBillDelFlg = async (ids: number[]) => {
     await updBillHeadDelFlg(ids);
     await revalidatePath('/bill-list');
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
-    throw e;
-  }
-};
-
-/**
- * PDF出力の際に、請求先の敬称を取得する関数
- * @param kokyakuId 顧客id
- * @returns
- */
-export const getKeisho = async (kokyakuId: number) => {
-  try {
-    const { data, error } = await selectOneCustomer(kokyakuId);
-    if (error) {
-      throw new Error('[selectOneCustomer] DBエラー:', { cause: error });
-    }
-    return data.keisho ?? '';
-  } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };

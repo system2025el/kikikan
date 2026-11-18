@@ -3,22 +3,16 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Grid2, Snackbar, TextField, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
-import {
-  CheckboxElement,
-  Controller,
-  SelectElement,
-  TextareaAutosizeElement,
-  TextFieldElement,
-  useForm,
-} from 'react-hook-form-mui';
+import { CheckboxElement, Controller, TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { User } from '@/app/(main)/_lib/types';
+import { IsDirtyAlertDialog } from '@/app/(main)/_ui/dirty-context';
 import { FormBox } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
 
 import { FAKE_NEW_ID } from '../../_lib/constants';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
-import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
+import { WillDeleteAlertDialog } from '../../_ui/dialogs';
 import { emptyCustomer, formItems } from '../_lib/datas';
 import { addNewCustomer, getChosenCustomer, updateCustomer } from '../_lib/funcs';
 import { CustomersMasterDialogValues, CustomersMaterDialogSchema } from '../_lib/types';
@@ -376,8 +370,7 @@ export const CustomersMasterDialog = ({
             </Grid2>
             <IsDirtyAlertDialog
               open={dirtyOpen}
-              handleCloseDirty={() => setDirtyOpen(false)}
-              handleCloseAll={handleCloseDialog}
+              onClick={(result) => (result ? handleCloseDialog() : setDirtyOpen(false))}
             />
             <WillDeleteAlertDialog
               open={deleteOpen}
@@ -400,6 +393,3 @@ export const CustomersMasterDialog = ({
     </>
   );
 };
-
-/** ---------------------------スタイル----------------------------- */
-const styles: { [key: string]: React.CSSProperties } = {};

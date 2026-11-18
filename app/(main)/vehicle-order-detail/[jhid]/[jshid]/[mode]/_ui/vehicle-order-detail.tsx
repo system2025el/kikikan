@@ -1,11 +1,8 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { DialerSip } from '@mui/icons-material';
-import AddIcon from '@mui/icons-material/Add';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import PrintIcon from '@mui/icons-material/Print';
 import SaveAsIcon from '@mui/icons-material/SaveAs';
 import WarningIcon from '@mui/icons-material/Warning';
 import {
@@ -25,13 +22,10 @@ import {
   FormControl,
   FormHelperText,
   Grid2,
-  ListItem,
   MenuItem,
   Paper,
   Select,
-  SelectChangeEvent,
   Snackbar,
-  Stack,
   TextField,
   Typography,
 } from '@mui/material';
@@ -43,12 +37,11 @@ import { SelectElement, TextFieldElement } from 'react-hook-form-mui';
 
 import { LOCK_SHUBETU } from '@/app/_lib/constants';
 import { toJapanTimeString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
-import { addLock, delLock, getLock } from '@/app/(main)/_lib/funcs';
 import { useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
 import { lockCheck, lockRelease } from '@/app/(main)/_lib/lock';
 import { permission } from '@/app/(main)/_lib/permission';
 import { LockValues, User } from '@/app/(main)/_lib/types';
-import { BackButton, CloseMasterDialogButton } from '@/app/(main)/_ui/buttons';
+import { CloseMasterDialogButton } from '@/app/(main)/_ui/buttons';
 import { DateTime } from '@/app/(main)/_ui/date';
 import { IsDirtyAlertDialog, useDirty } from '@/app/(main)/_ui/dirty-context';
 import { selectNone, SelectTypes } from '@/app/(main)/_ui/form-box';
@@ -57,9 +50,7 @@ import { DetailOerValues } from '@/app/(main)/(eq-order-detail)/_lib/types';
 import {
   IdoJuchuKizaiMeisaiValues,
   JuchuContainerMeisaiValues,
-  JuchuKizaiHeadValues,
   JuchuKizaiHonbanbiValues,
-  JuchuKizaiMeisaiValues,
 } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 import { StockTableValues } from '@/app/(main)/stock/_lib/types';
@@ -149,7 +140,6 @@ const VehicleOrderDetail = ({
     setValue,
     getValues,
     reset,
-    trigger,
     formState: { isDirty, errors: sharyoError },
   } = useForm<JuchuSharyoHeadValues>({
     mode: 'onChange',

@@ -1,6 +1,6 @@
 import { FormItemsType } from '@/app/(main)/_ui/form-box';
 
-import { DaibumonsMasterDialogValues, DaibumonsMasterTableValues } from './types';
+import { DaibumonsMasterDialogValues } from './types';
 
 /* 大部門マスタテーブルヘッダー */
 export const daibumonMHeader = [

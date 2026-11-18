@@ -26,18 +26,18 @@ import {
   Typography,
 } from '@mui/material';
 import { useRouter } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Controller, SubmitErrorHandler, useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 
 import { BASHO_ID, JUCHU_KIZAI_HEAD_KBN, LOCK_SHUBETU } from '@/app/_lib/constants';
+import { dispColors } from '@/app/(main)/_lib/colors';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { getNyukoDate, getShukoDate } from '@/app/(main)/_lib/date-funcs';
 import { useStableCallback, useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
 import { lockCheck, lockRelease } from '@/app/(main)/_lib/lock';
 import { permission } from '@/app/(main)/_lib/permission';
 import { LockValues, User } from '@/app/(main)/_lib/types';
-import { BackButton } from '@/app/(main)/_ui/buttons';
 import { DateTime, FormDateX } from '@/app/(main)/_ui/date';
 import { IsDirtyAlertDialog, useDirty } from '@/app/(main)/_ui/dirty-context';
 import { Loading, LoadingOverlay } from '@/app/(main)/_ui/loading';
@@ -141,9 +141,9 @@ export const EquipmentKeepOrderDetail = (props: {
   // 親入庫日
   const [oyaNyukoDate, setOyaNyukoDate] = useState<Date | null>(props.oyaNyukoDate);
   // キープ出庫日
-  const [keepShukoDate, setKeepShukoDate] = useState<Date | null>(/*props.keepShukoDate*/ null);
+  const [, setKeepShukoDate] = useState<Date | null>(/*props.keepShukoDate*/ null);
   // キープ入庫日
-  const [keepNyukoDate, setKeepNyukoDate] = useState<Date | null>(/*props.keepNyukoDate*/ null);
+  const [, setKeepNyukoDate] = useState<Date | null>(/*props.keepNyukoDate*/ null);
 
   // 警告ダイアログ制御
   const [alertOpen, setAlertOpen] = useState(false);
@@ -186,7 +186,7 @@ export const EquipmentKeepOrderDetail = (props: {
     setError,
     trigger,
     clearErrors,
-    formState: { isDirty, dirtyFields, errors, defaultValues },
+    formState: { isDirty, dirtyFields },
   } = useForm({
     mode: 'onChange',
     reValidateMode: 'onChange',
@@ -643,7 +643,7 @@ export const EquipmentKeepOrderDetail = (props: {
    * @param result
    * @returns
    */
-  const handleDeleteExecute = async (result: boolean) => {
+  const handleDeleteExecute = async () => {
     if (isProcessing) return;
     setIsProcessing(true);
 
@@ -1360,7 +1360,7 @@ export const EquipmentKeepOrderDetail = (props: {
                     minHeight: '30px',
                     maxHeight: '30px',
                   },
-                  bgcolor: 'green',
+                  bgcolor: dispColors.keep,
                   color: 'white',
                 }}
               >

@@ -30,12 +30,11 @@ import {
   Popper,
   Select,
   Snackbar,
-  Stack,
   TextField,
   Typography,
 } from '@mui/material';
-import { addDays, addMonths, set, setDate, subDays, subMonths } from 'date-fns';
-import { redirect, useRouter } from 'next/navigation';
+import { addDays, subDays } from 'date-fns';
+import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import React from 'react';
 import { Controller, SubmitErrorHandler, useForm } from 'react-hook-form';
@@ -52,14 +51,13 @@ import {
 } from '@/app/_lib/constants';
 import { toJapanTimeString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { getNyukoDate, getRange, getShukoDate } from '@/app/(main)/_lib/date-funcs';
-import { addLock, getDic, getLock } from '@/app/(main)/_lib/funcs';
+import { getDic } from '@/app/(main)/_lib/funcs';
 import { useStableCallback, useSyncScroll, useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
 import { lockCheck, lockRelease } from '@/app/(main)/_lib/lock';
 import { useNyushukoFixChanged } from '@/app/(main)/_lib/nyushuko-fix-notify';
 import { permission } from '@/app/(main)/_lib/permission';
 import { openOrFocusTab } from '@/app/(main)/_lib/tab-focus';
 import { LockValues, User } from '@/app/(main)/_lib/types';
-import { BackButton } from '@/app/(main)/_ui/buttons';
 import { Calendar, CalendarView, DateTime, FormDateX } from '@/app/(main)/_ui/date';
 import { IsDirtyAlertDialog, useDirty } from '@/app/(main)/_ui/dirty-context';
 import { HonbanbiCalendar } from '@/app/(main)/_ui/honbanbi-calendar';
@@ -352,7 +350,7 @@ const EquipmentOrderDetail = (props: {
     setError,
     trigger,
     clearErrors,
-    formState: { isDirty, dirtyFields, errors, defaultValues },
+    formState: { isDirty, dirtyFields, defaultValues },
   } = useForm({
     mode: 'onChange',
     reValidateMode: 'onChange',
@@ -1132,7 +1130,7 @@ const EquipmentOrderDetail = (props: {
             .map((d, index) => (dateRange.includes(toJapanYMDString(d.calDat)) ? index : -1))
             .filter((index) => index !== -1);
 
-          const subUpdatedEqStockData = updatedEqStockData.map((data, index) =>
+          const subUpdatedEqStockData = updatedEqStockData.map((data) =>
             data.map((d, i) =>
               targetIndex.includes(i)
                 ? {
@@ -1862,9 +1860,6 @@ const EquipmentOrderDetail = (props: {
   };
 
   // ぺージトップへ戻る
-  const scrollTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
 
   // // アコーディオン開閉
   // const handleExpansion = () => {

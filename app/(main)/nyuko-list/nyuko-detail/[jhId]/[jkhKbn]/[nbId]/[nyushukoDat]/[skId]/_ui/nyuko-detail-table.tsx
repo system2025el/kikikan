@@ -1,23 +1,10 @@
 'use client';
 
-import {
-  Box,
-  Button,
-  Link,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography,
-} from '@mui/material';
-import { grey } from '@mui/material/colors';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-import { dispColors, sagyoKbnColors, sectionColors, statusColors } from '@/app/(main)/_lib/colors';
+import { dispColors, getDiffColor, sagyoKbnColors, sectionColors, statusColors } from '@/app/(main)/_lib/colors';
 
 import { NyukoDetailTableValues } from '../_lib/types';
 
@@ -93,16 +80,7 @@ export const NyukoDetailTable = (props: { datas: NyukoDetailTableValues[] }) => 
                 align="right"
                 sx={{
                   pr: 1,
-                  backgroundColor:
-                    row.diff === 0 /*&& row.planQty !== 0*/
-                      ? statusColors.completed
-                      : row.diff > 0
-                        ? statusColors.excess
-                        : row.diff < 0
-                          ? statusColors.lack
-                          : row.ctnFlg === 1
-                            ? statusColors.ctn
-                            : undefined,
+                  backgroundColor: getDiffColor(row.diff),
                 }}
               >
                 {row.diff}

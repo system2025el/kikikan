@@ -4,7 +4,6 @@ import { redirect } from 'next/navigation';
 
 import { getCurrentUser } from '../../_lib/funcs';
 import { permission } from '../../_lib/permission';
-import { getFilteredDaibumons } from './_lib/funcs';
 import { DaibumonsMaster } from './_ui/daibumons-master';
 
 export const metadata: Metadata = {

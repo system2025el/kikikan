@@ -4,7 +4,6 @@ import { redirect } from 'next/navigation';
 
 import { getCurrentUser } from '../../_lib/funcs';
 import { permission } from '../../_lib/permission';
-import { getFilteredVehs } from './_lib/funcs';
 import { VehiclesMaster } from './_ui/vehicles-master';
 // import { shiori } from '@/app/_lib/postgres/funcs';
 

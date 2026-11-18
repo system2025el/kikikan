@@ -6,7 +6,6 @@ import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
-import CheckIcon from '@mui/icons-material/Check';
 import Delete from '@mui/icons-material/Delete';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import SaveAsIcon from '@mui/icons-material/SaveAs';
@@ -16,7 +15,6 @@ import {
   AccordionSummary,
   Box,
   Button,
-  Checkbox,
   ClickAwayListener,
   Container,
   Dialog,
@@ -24,36 +22,28 @@ import {
   Fab,
   FormControl,
   Grid2,
-  IconButton,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
   MenuItem,
   Paper,
   Popper,
   Select,
-  SelectChangeEvent,
   Snackbar,
   TextField,
   Typography,
 } from '@mui/material';
-import { addDays, addMonths, endOfMonth, set, subDays, subMonths } from 'date-fns';
+import { addDays, subDays } from 'date-fns';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
-import { Controller, SubmitErrorHandler, useForm, useWatch } from 'react-hook-form';
+import { Controller, SubmitErrorHandler, useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 
 import { BASHO_ID, JUCHU_KIZAI_HEAD_KBN, LOCK_SHUBETU } from '@/app/_lib/constants';
+import { dispColors } from '@/app/(main)/_lib/colors';
 import { toJapanTimeString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { getNyukoDate, getRange, getShukoDate } from '@/app/(main)/_lib/date-funcs';
-import { addLock, getLock } from '@/app/(main)/_lib/funcs';
 import { useStableCallback, useSyncScroll, useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
 import { lockCheck, lockRelease } from '@/app/(main)/_lib/lock';
 import { permission } from '@/app/(main)/_lib/permission';
 import { LockValues, User } from '@/app/(main)/_lib/types';
-import { BackButton } from '@/app/(main)/_ui/buttons';
 import { Calendar, CalendarView, DateTime, FormDateX } from '@/app/(main)/_ui/date';
 import { IsDirtyAlertDialog, useDirty } from '@/app/(main)/_ui/dirty-context';
 import { Loading, LoadingOverlay } from '@/app/(main)/_ui/loading';
@@ -68,12 +58,7 @@ import {
 import { AlertDialog, DeleteAlertDialog } from '@/app/(main)/(eq-order-detail)/_ui/caveat-dialog';
 import { OyaEqSelectionDialog } from '@/app/(main)/(eq-order-detail)/_ui/equipment-selection-dialog';
 import { toEqStockList } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/stock-list';
-import {
-  JuchuContainerMeisaiValues,
-  JuchuKizaiMeisaiValues,
-  StockTableValues,
-} from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';
-import { getJuchuKizaiMeisaiList } from '@/app/(main)/quotation-list/_lib/funcs';
+import { StockTableValues } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';
 
 import {
   getReturnJuchuContainerMeisai,
@@ -223,7 +208,7 @@ export const EquipmentReturnOrderDetail = (props: {
     setError,
     trigger,
     clearErrors,
-    formState: { isDirty, dirtyFields, defaultValues },
+    formState: { isDirty, dirtyFields },
   } = useForm({
     mode: 'onChange',
     reValidateMode: 'onChange',
@@ -741,7 +726,7 @@ export const EquipmentReturnOrderDetail = (props: {
             .map((d, index) => (dateRange.includes(toJapanYMDString(d.calDat)) ? index : -1))
             .filter((index) => index !== -1);
 
-          const subUpdatedEqStockData = updatedEqStockData.map((data, index) =>
+          const subUpdatedEqStockData = updatedEqStockData.map((data) =>
             data.map((d, i) =>
               targetIndex.includes(i)
                 ? {
@@ -825,7 +810,7 @@ export const EquipmentReturnOrderDetail = (props: {
 
           // 機材明細から選択されているindex取得
           const indexes = returnJuchuKizaiMeisaiList
-            .filter((data, index) => !data.delFlag)
+            .filter((data) => !data.delFlag)
             .map((data, index) => (data.selected ? index : null))
             .filter((index) => index !== null) as number[];
 
@@ -1610,7 +1595,7 @@ export const EquipmentReturnOrderDetail = (props: {
                     minHeight: '30px',
                     maxHeight: '30px',
                   },
-                  bgcolor: 'red',
+                  bgcolor: dispColors.return,
                   color: 'white',
                 }}
               >

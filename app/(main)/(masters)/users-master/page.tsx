@@ -4,7 +4,6 @@ import { redirect } from 'next/navigation';
 
 import { getCurrentUser } from '../../_lib/funcs';
 import { permission } from '../../_lib/permission';
-import { getFilteredUsers } from './_lib/funcs';
 import { UsersMaster } from './_ui/users-master';
 
 export const metadata: Metadata = {

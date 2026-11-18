@@ -2,6 +2,7 @@
 
 import { calcFixSts, FIX_STS, FixSts } from '@/app/_lib/constants';
 import { selectFixedJuchuKizaiHeadIds } from '@/app/_lib/db/tables/t-nyushuko-fix';
+import { logError } from '@/app/_lib/log-error';
 
 /**
  * 入出庫明細画面の確定状況
@@ -43,14 +44,7 @@ export const getNyushukoFixState = async (
     const fixedJuchuKizaiHeadIds = [...new Set(data.map((d) => d.juchu_kizai_head_id))];
     return { fixSts: calcFixSts(fixedJuchuKizaiHeadIds.length, ids.length), fixedJuchuKizaiHeadIds };
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };

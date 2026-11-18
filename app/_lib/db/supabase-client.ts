@@ -1,4 +1,4 @@
-import { type CookieOptions, createBrowserClient, createServerClient } from '@supabase/ssr';
+import { createBrowserClient } from '@supabase/ssr';
 
 //import { cookies } from 'next/headers';
 import { Database } from './types/types';

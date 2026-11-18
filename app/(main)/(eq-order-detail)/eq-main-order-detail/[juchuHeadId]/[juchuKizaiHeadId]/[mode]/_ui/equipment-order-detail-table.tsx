@@ -1,16 +1,9 @@
 'use client';
 
-import Delete from '@mui/icons-material/Delete';
 import {
   Box,
   Button,
   Checkbox,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  IconButton,
-  Paper,
   Table,
   TableBody,
   TableCell,
@@ -18,13 +11,13 @@ import {
   TableHead,
   TableRow,
   TextField,
-  Tooltip,
   Typography,
 } from '@mui/material';
-import { blue, grey, lightBlue } from '@mui/material/colors';
+import { grey, lightBlue } from '@mui/material/colors';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { BASHO_ID, SAGYO_SIJI_ID } from '@/app/_lib/constants';
+import { dispColors } from '@/app/(main)/_lib/colors';
 import { toJapanMDString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { openOrFocusTab } from '@/app/(main)/_lib/tab-focus';
 import { DateTime, FormDateX } from '@/app/(main)/_ui/date';
@@ -40,7 +33,6 @@ import { getJizenRowError, getMeisaiShukoDat } from '../_lib/jizen';
 import {
   IdoJuchuKizaiMeisaiValues,
   JuchuContainerMeisaiValues,
-  JuchuKizaiHonbanbiValues,
   JuchuKizaiMeisaiValues,
   StockTableValues,
 } from '../_lib/types';
@@ -171,7 +163,10 @@ const StockTableRow = React.memo(
           // 事前準備の期間は、本番日・出入庫日・使用期間の色が無い日だけ塗る
           const bgcolor = getBaseColor(dateKey) ?? (jizenRange.includes(dateKey) ? jizenColor : 'white');
           return (
-            <td key={colIndex} style={{ backgroundColor: bgcolor, color: cell.zaikoQty < 0 ? 'red' : 'black' }}>
+            <td
+              key={colIndex}
+              style={{ backgroundColor: bgcolor, color: cell.zaikoQty < 0 ? dispColors.minusZaiko : 'black' }}
+            >
               {cell.zaikoQty}
             </td>
           );

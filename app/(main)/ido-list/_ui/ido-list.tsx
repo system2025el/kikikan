@@ -1,13 +1,11 @@
 'use client';
 
 import SearchIcon from '@mui/icons-material/Search';
-import { Box, Button, Dialog, Divider, Grid2, Paper, Typography } from '@mui/material';
+import { Box, Button, Divider, Grid2, Paper, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
 import { toJapanYMDString } from '../../_lib/date-conversion';
-import { permission } from '../../_lib/permission';
-import { User } from '../../_lib/types';
 import { FormDateX } from '../../_ui/date';
 import { Loading } from '../../_ui/loading';
 import { getIdoList } from '../_lib/funcs';

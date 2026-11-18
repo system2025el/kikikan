@@ -7,31 +7,6 @@ import { createClient } from '../supabase-server';
 import { JuchuKizaiMeisai } from '../types/t-juchu-kizai-meisai-type';
 
 /**
- * 受注機材明細id最大値取得
- * @param juchuHeadId 受注ヘッダーid
- * @param juchuKizaiHeadId 受注機材ヘッダーid
- * @returns 受注機材明細id最大値
- */
-export const selectJuchuKizaiMeisaiMaxId = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
-  const supabase = await createClient();
-  try {
-    return await supabase
-      .schema(SCHEMA)
-      .from('t_juchu_kizai_meisai')
-      .select('juchu_kizai_meisai_id')
-      .eq('juchu_head_id', juchuHeadId)
-      .eq('juchu_kizai_head_id', juchuKizaiHeadId)
-      .order('juchu_kizai_meisai_id', {
-        ascending: false,
-      })
-      .limit(1)
-      .single();
-  } catch (e) {
-    throw new Error('[selectJuchuKizaiMeisaiMaxId] DBエラー:', { cause: e });
-  }
-};
-
-/**
  * 受注機材明細の採番に使う明細idの最大値取得（トランザクション内）
  * 受注機材明細に加えて入出庫伝票の明細idも見る。メイン受注機材明細で実績のある機材を削除すると、
  * 出庫伝票を予定数0（受注削除）で残すため、受注機材明細だけで採番すると同じ明細idを使い回して

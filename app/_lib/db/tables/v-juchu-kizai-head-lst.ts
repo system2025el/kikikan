@@ -6,7 +6,6 @@ import utc from 'dayjs/plugin/utc';
 
 import { JUCHU_KIZAI_HEAD_KBN } from '@/app/_lib/constants';
 import { escapeLikeString } from '@/app/(main)/_lib/escape-string';
-import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 import { EqptOrderSearchValues } from '@/app/(main)/eqpt-order-list/_lib/types';
 
 import { SCHEMA } from '../schema';

@@ -7,6 +7,7 @@ import { updateHonbanAdjFromJizen, updateNyushukoDenAdjustToPlan } from '@/app/_
 import { selectHonbanShukoFixed } from '@/app/_lib/db/tables/t-nyushuko-fix';
 import { selectJizenNyushukoOne } from '@/app/_lib/db/tables/v-nyushuko-den2-head';
 import { selectJizenNyushukoDetail } from '@/app/_lib/db/tables/v-nyushuko-den2-lst';
+import { logError } from '@/app/_lib/log-error';
 
 import { calcShukoDiff } from './shuko-diff';
 import { ShukoDetailTableValues, ShukoDetailValues } from './types';
@@ -61,14 +62,7 @@ export const getJizenDetail = async (
     };
     return jizenDetailData;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -131,14 +125,7 @@ export const getJizenDetailTable = async (
       })
     );
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -155,14 +142,7 @@ export const getHonbanShukoFixed = async (juchuHeadId: number, juchuKizaiHeadId:
   try {
     return await selectHonbanShukoFixed(juchuHeadId, juchuKizaiHeadId, nyushukoBashoId);
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -222,14 +202,7 @@ export const updJizenAdjust = async (adjustData: ShukoDetailTableValues[], userN
     await connection.query('COMMIT');
     return true;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     await connection.query('ROLLBACK');
     throw e;
   } finally {

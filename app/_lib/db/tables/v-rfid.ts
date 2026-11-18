@@ -61,18 +61,3 @@ export const selectRfidsOfTheKizai = async (kizaiId: number) => {
     throw new Error('[selectRfidsOfTheKizai] DBエラー:', { cause: e });
   }
 };
-
-/**
- * elNumが一致するRFIDを取得する関数
- * @param {number} elNum el No. el_num
- * @returns {{}[]}
- */
-export const selectElNumExists = async (elNum: number) => {
-  const supabase = await createClient();
-  const builder = supabase.schema(SCHEMA).from('v_rfid').select('*').eq('el_num', elNum).maybeSingle();
-  try {
-    return await builder;
-  } catch (e) {
-    throw new Error('[selectElNumExists] DBエラー:', { cause: e });
-  }
-};

@@ -8,24 +8,6 @@ import { createClient } from '../supabase-server';
 import { MIsshikiDBValues } from '../types/m-issiki-type';
 
 /**
- * DBから有効な一式を取得する関数
- * @returns 有効な一式のidと名前の配列
- */
-export const selectActiveIsshikis = async () => {
-  const supabase = await createClient();
-  try {
-    return await supabase
-      .schema(SCHEMA)
-      .from('m_issiki')
-      .select('issiki_id, issiki_nam')
-      .neq('del_flg', 1)
-      .order('issiki_nam');
-  } catch (e) {
-    throw new Error('[selectActiveIsshikis] DBエラー:', { cause: e });
-  }
-};
-
-/**
  * issiki_namが一致する一式を取得する関数
  * @param {string} query 一式名
  * @returns issiki_nameで検索された一式マスタの配列 検索無しなら全件

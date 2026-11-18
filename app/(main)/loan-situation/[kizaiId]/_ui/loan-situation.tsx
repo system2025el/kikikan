@@ -6,12 +6,10 @@ import UpdateIcon from '@mui/icons-material/Update';
 import {
   Box,
   Button,
-  Checkbox,
   ClickAwayListener,
   Divider,
   FormControl,
   FormControlLabel,
-  FormLabel,
   Grid2,
   Paper,
   Popper,
@@ -21,15 +19,12 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { addDays, addMonths, set, subDays, subMonths } from 'date-fns';
+import { addMonths, subDays, subMonths } from 'date-fns';
 import { useEffect, useRef, useState } from 'react';
 
 import { HONBANBI_SHUBETU_ID } from '@/app/_lib/constants';
-import { toJapanMDString } from '@/app/(main)/_lib/date-conversion';
 import { useSyncScroll } from '@/app/(main)/_lib/hook';
-import { permission } from '@/app/(main)/_lib/permission';
 import { User } from '@/app/(main)/_lib/types';
-import { BackButton } from '@/app/(main)/_ui/buttons';
 import { Calendar, CalendarView } from '@/app/(main)/_ui/date';
 import { Loading } from '@/app/(main)/_ui/loading';
 
@@ -73,7 +68,7 @@ export const LoanSituation = (props: {
   // ラジオボタン選択値
   const [sortValue, setSortValue] = useState<string>('shuko');
   // 分割表示フラグ(現状合体のみ)
-  const [divisionFlag, setDivisionFlag] = useState<boolean>(false);
+  const [divisionFlag] = useState<boolean>(false);
 
   // スナックバー制御
   const [snackBarOpen, setSnackBarOpen] = useState(false);
@@ -551,13 +546,3 @@ export const LoanSituation = (props: {
 
 /* style
 ---------------------------------------------------------------------------------------------------- */
-/** @type {{ [key: string]: React.CSSProperties }} style */
-const styles: { [key: string]: React.CSSProperties } = {
-  // コンテナ
-  container: {
-    display: 'flex',
-    alignItems: 'center',
-    margin: 1,
-    marginLeft: 2,
-  },
-};

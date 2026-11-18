@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 
 import { insertNewVeh, SelectFilteredVehs, selectOneVeh, upDateVehDB } from '@/app/_lib/db/tables/m-sharyou';
+import { logError } from '@/app/_lib/log-error';
 
 import { emptyVeh } from './datas';
 import { VehsMasterDialogValues, VehsMasterTableValues } from './types';
@@ -32,14 +33,7 @@ export const getFilteredVehs = async (query: string = '') => {
     }));
     return filteredVehs;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -66,14 +60,7 @@ export const getChosenVeh = async (id: number) => {
     };
     return VehDetails;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -87,14 +74,7 @@ export const addNewVeh = async (data: VehsMasterDialogValues, user: string) => {
     await insertNewVeh(data, user);
     await revalidatePath('/vehicles-master');
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -122,14 +102,7 @@ export const updateVeh = async (data: VehsMasterDialogValues, id: number, user: 
     }
     await revalidatePath('/vehicles-master');
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };

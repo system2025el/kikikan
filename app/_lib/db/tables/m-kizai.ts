@@ -2,8 +2,6 @@ import 'server-only';
 
 import { PoolClient } from 'pg';
 
-import { escapeLikeString } from '@/app/(main)/_lib/escape-string';
-import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 import { fakeToNull } from '@/app/(main)/(masters)/_lib/value-converters';
 import { EqptsMasterDialogValues } from '@/app/(main)/(masters)/eqpt-master/_lib/types';
 
@@ -206,55 +204,6 @@ export const selectKizaiRegAmts = async (ids: number[]) => {
     return await supabase.schema(SCHEMA).from('m_kizai').select('kizai_id, reg_amt').in('kizai_id', ids);
   } catch (e) {
     throw new Error('[selectKizaiRegAmts] DBエラー:', { cause: e });
-  }
-};
-
-/**
- * 有効な機材を取得する関数
- * @param query kizai_nam
- * @returns 有効な機材の配列（機材選択用）
- */
-export const selectActiveEqptsForIsshiki = async (query: number | null) => {
-  let sqlQuery = `
-    SELECT
-      k.kizai_id as "kizaiId",
-      k.kizai_nam as "kizaiNam",
-      s.shozoku_nam as "shozokuNam",
-      k.bumon_id as "bumonId",
-      k.kizai_grp_cod as "kizaiGrpCod",
-      k.ctn_flg as "ctnFlg"
-    FROM
-      ${SCHEMA}.m_kizai as k
-    LEFT JOIN
-      ${SCHEMA}.m_shozoku as s
-    ON
-      k.shozoku_id = s.shozoku_id
-    LEFT JOIN
-      ${SCHEMA}.m_issiki_set as i
-    ON
-      k.kizai_id = i.kizai_id
-    WHERE
-      k.del_flg <> 1
-    AND
-      k.dsp_flg <> 0
-   
-  `;
-
-  // queryチェック
-  if (query && query !== FAKE_NEW_ID) {
-    sqlQuery += ` AND (i.issiki_id IS NULL OR i.issiki_id = ${query})`;
-  } else {
-    sqlQuery += ` AND (i.issiki_id IS NULL)`;
-  }
-
-  // ORDER BY
-  sqlQuery += `
-     ORDER BY k.kizai_grp_cod, k.dsp_ord_num;
-  `;
-  try {
-    return await pool.query(sqlQuery);
-  } catch (e) {
-    throw new Error('[selectActiveEqptsForIsshiki] DBエラー:', { cause: e });
   }
 };
 

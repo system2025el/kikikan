@@ -1,6 +1,6 @@
 import { FormItemsType } from '@/app/(main)/_ui/form-box';
 
-import { CustomersMasterDialogValues, CustomersMasterTableValues } from './types';
+import { CustomersMasterDialogValues } from './types';
 
 /* 顧客マスタテーブルのヘッダー */
 export const cMHeader = [

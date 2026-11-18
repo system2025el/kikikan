@@ -7,7 +7,6 @@ import { permission } from '@/app/(main)/_lib/permission';
 import { NyushukoEqptDetailNotFound } from '@/app/(main)/_ui/nyushuko-not-found';
 
 import { getNyukoEqptDetail, getNyukoEqptDetailTable, getNyukoFixFlag } from './_lib/funcs';
-import { NyukoEqptDetailTableValues, NyukoEqptDetailValues } from './_lib/types';
 import { NyukoEqptDetail } from './_ui/nyuko-eqpt-detail';
 
 export const metadata: Metadata = {

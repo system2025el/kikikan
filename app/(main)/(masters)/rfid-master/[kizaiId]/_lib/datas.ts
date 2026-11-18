@@ -1,6 +1,6 @@
 import { FormItemsType } from '@/app/(main)/_ui/form-box';
 
-import { RfidsMasterDialogValues, RfidsMasterTableValues } from './types';
+import { RfidsMasterDialogValues } from './types';
 
 /*  */
 export const emptyRfid: RfidsMasterDialogValues = {

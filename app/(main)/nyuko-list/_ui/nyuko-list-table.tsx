@@ -36,9 +36,8 @@ export const NyukoListTable = (props: {
   const router = useRouter();
 
   // ローディング
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading] = useState(false);
   // 処理中制御
-  const [isProcessing, setIsProcessing] = useState(false);
 
   const [selected, setSelected] = useState<number[]>([]);
 

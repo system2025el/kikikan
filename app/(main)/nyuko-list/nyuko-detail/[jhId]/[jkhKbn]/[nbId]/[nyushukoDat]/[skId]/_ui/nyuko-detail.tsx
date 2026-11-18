@@ -1,6 +1,5 @@
 'use client';
 
-import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
 import WarningIcon from '@mui/icons-material/Warning';
 import {
   Box,
@@ -16,8 +15,6 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { grey } from '@mui/material/colors';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 import { BASHO_ID, FIX_STS, FixSts, JUCHU_KIZAI_HEAD_KBN } from '@/app/_lib/constants';
@@ -29,7 +26,6 @@ import {
 } from '@/app/(main)/_lib/nyushuko-fix-error';
 import { permission } from '@/app/(main)/_lib/permission';
 import { User } from '@/app/(main)/_lib/types';
-import { BackButton } from '@/app/(main)/_ui/buttons';
 import { DateTime } from '@/app/(main)/_ui/date';
 
 import { delNyukoFix, updNyukoDetail } from '../_lib/funcs';
@@ -47,8 +43,6 @@ export const NyukoDetail = (props: {
 
   // user情報
   const user = props.user;
-
-  const router = useRouter();
 
   const [fixSts, setFixSts] = useState<FixSts>(props.fixSts);
   // 処理中制御

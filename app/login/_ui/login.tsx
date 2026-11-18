@@ -1,6 +1,6 @@
 'use client';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Alert, AlertTitle, Box, Button, Stack, TextField, Typography } from '@mui/material';
+import { Alert, AlertTitle, Box, Button, Stack, Typography } from '@mui/material';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { TextFieldElement, useForm } from 'react-hook-form-mui';
@@ -76,24 +76,6 @@ const Login = () => {
       setError(`ログインに失敗しました。`);
       setIsLoading(false);
     }
-  };
-
-  const handleMockClick = () => {
-    const mockUser = {
-      id: '1',
-      name: 'test_user',
-      email: 'test@example,com',
-      permission: {
-        juchu: 3,
-        nyushuko: 12,
-        masters: 48,
-        loginSetting: 128,
-        ht: 64,
-        schedule: 256,
-      },
-    };
-
-    router.push('/dashboard');
   };
 
   useEffect(() => {

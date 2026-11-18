@@ -15,13 +15,11 @@ import {
   Typography,
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
-import { SetStateAction, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { CheckboxButtonGroup, TextFieldElement } from 'react-hook-form-mui';
+import { TextFieldElement } from 'react-hook-form-mui';
 
-import { permission } from '@/app/(main)/_lib/permission';
 import { User } from '@/app/(main)/_lib/types';
-import { BackButton } from '@/app/(main)/_ui/buttons';
 import { FormDateX } from '@/app/(main)/_ui/date';
 import { selectNone, SelectTypes } from '@/app/(main)/_ui/form-box';
 import { LoadingOverlay } from '@/app/(main)/_ui/loading';
@@ -56,7 +54,7 @@ export const BillList = ({
   const [bills, setBills] = useState<BillsListTableValues[]>([]);
 
   /* useForm ----------------------------------------------------- */
-  const { control, reset, handleSubmit, getValues, setValue } = useForm<BillSearchValues>({
+  const { control, reset, handleSubmit, getValues } = useForm<BillSearchValues>({
     defaultValues: {
       billId: null,
       billingSts: FAKE_NEW_ID,

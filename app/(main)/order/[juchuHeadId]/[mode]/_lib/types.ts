@@ -275,22 +275,6 @@ export type CopyIdoJuchuKizaiMeisaiValues = {
   saveFlag: boolean;
 };
 
-export type CopyJuchuContainerMeisaiValues = {
-  juchuHeadId: number;
-  juchuKizaiHeadId: number;
-  juchuKizaiMeisaiId: number;
-  kizaiId: number;
-  kizaiNam: string;
-  planKicsKizaiQty: number;
-  planYardKizaiQty: number;
-  planQty: number;
-  mem: string | null;
-  dspOrdNum: number;
-  indentNum: number;
-  delFlag: boolean;
-  saveFlag: boolean;
-};
-
 export type UsersValue = {
   tantouNam: string;
   mailAdr: string;

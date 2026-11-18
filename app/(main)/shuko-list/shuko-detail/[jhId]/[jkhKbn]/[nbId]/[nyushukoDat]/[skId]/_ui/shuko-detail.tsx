@@ -1,7 +1,6 @@
 'use client';
 
 import AddIcon from '@mui/icons-material/Add';
-import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import SaveAsIcon from '@mui/icons-material/SaveAs';
 import WarningIcon from '@mui/icons-material/Warning';
@@ -20,10 +19,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { grey } from '@mui/material/colors';
-import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
-import { set } from 'zod';
 
 import {
   BASHO_ID,
@@ -44,7 +40,6 @@ import {
 import { notifyNyushukoFixChanged } from '@/app/(main)/_lib/nyushuko-fix-notify';
 import { permission } from '@/app/(main)/_lib/permission';
 import { User } from '@/app/(main)/_lib/types';
-import { BackButton } from '@/app/(main)/_ui/buttons';
 import { DateTime, FormDateX } from '@/app/(main)/_ui/date';
 import { useDirty } from '@/app/(main)/_ui/dirty-context';
 import { LoadingOverlay } from '@/app/(main)/_ui/loading';
@@ -52,7 +47,6 @@ import { LoadingOverlay } from '@/app/(main)/_ui/loading';
 import {
   confirmChildJuchuKizaiHead,
   delShukoFix,
-  getShukoDetail,
   getShukoDetailTable,
   saveShukoCtn,
   updShukoAdjust,
@@ -87,8 +81,6 @@ export const ShukoDetail = (props: {
 
   // user情報
   const user = props.user;
-
-  const router = useRouter();
 
   // 事前（事前ピッキング・事前最終確認）の画面か。事前は機材ヘッダーごとに開き、出発もコンテナも無い
   // （出発・コンテナの操作は最終確認(20)のときだけ出すので、事前最終確認(90)では出ない）

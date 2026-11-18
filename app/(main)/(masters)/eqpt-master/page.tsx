@@ -2,7 +2,6 @@ import { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
 import { getCurrentUser } from '../../_lib/funcs';
-import { getFilteredEqpts } from './_lib/funcs';
 import { EqptMaster } from './_ui/eqpt-master';
 
 export const metadata: Metadata = {

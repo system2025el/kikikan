@@ -4,21 +4,21 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Box, Button, Grid2, Stack, TextField, Typography } from '@mui/material';
-import { memo, useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useRef } from 'react';
 import {
   CheckboxElement,
   Controller,
-  FieldPath,
   TextFieldElement,
   UseFieldArrayReturn,
   useFormContext,
   useWatch,
 } from 'react-hook-form-mui';
 
+import { readonlyColors } from '@/app/(main)/_lib/colors';
 import { FormDateX } from '@/app/(main)/_ui/date';
+import { ReadOnlyYenField, YenInputField } from '@/app/(main)/_ui/yen-field';
 
 import { BillHeadValues } from '../_lib/types';
-import { ReadOnlyYenNumberElement } from './yen';
 
 /**
  * テーブル1つ分の小計・値引後金額を計算してフォームへ反映する非表示コンポーネント。
@@ -66,7 +66,6 @@ const MeisaiTblHeaderComponent = ({
   children: React.ReactNode;
   editable: boolean;
 }) => {
-  const [isEditing, setIsEditing] = useState(false);
   /* 明細テーブルの順番を変えるボタン押下時 */
   const moveRow = (index: number, direction: number) => {
     fields.move(index, index + direction);
@@ -166,8 +165,8 @@ const MeisaiTblHeaderComponent = ({
             sx={{
               width: 120,
               pointerEvents: 'none', // クリック不可にする
-              backgroundColor: '#f5f5f5', // グレー背景で無効っぽく
-              color: '#888',
+              backgroundColor: readonlyColors.bg, // グレー背景で無効っぽく
+              color: readonlyColors.text,
               '& .MuiInputBase-input': {
                 textAlign: 'right',
               },
@@ -188,8 +187,8 @@ const MeisaiTblHeaderComponent = ({
             sx={{
               width: 120,
               pointerEvents: 'none', // クリック不可にする
-              backgroundColor: '#f5f5f5', // グレー背景で無効っぽく
-              color: '#888',
+              backgroundColor: readonlyColors.bg, // グレー背景で無効っぽく
+              color: readonlyColors.text,
               '& .MuiInputBase-input': {
                 textAlign: 'right',
               },
@@ -311,7 +310,7 @@ const MeisaiTblHeaderComponent = ({
           <Typography textAlign="end">小計</Typography>
         </Grid2>
         <Grid2 size={2}>
-          <ReadOnlyYenNumberElement name={`meisaiHeads.${index}.shokeiAmt`} />
+          <ReadOnlyYenField control={control} name={`meisaiHeads.${index}.shokeiAmt`} />
         </Grid2>
         <Grid2 size={1} />
       </Grid2>
@@ -321,71 +320,12 @@ const MeisaiTblHeaderComponent = ({
           <Typography textAlign="end">値引き</Typography>
         </Grid2>
         <Grid2 size={2}>
-          <Controller
-            name={`meisaiHeads.${index}.nebikiAmt`}
+          <YenInputField
             control={control}
-            render={({ field, fieldState }) => (
-              <TextField
-                {...field}
-                value={
-                  isEditing
-                    ? (field.value ?? '')
-                    : typeof field.value === 'number' && !isNaN(field.value)
-                      ? `¥-${Math.abs(field.value).toLocaleString()}`
-                      : `¥0`
-                }
-                type="text"
-                onFocus={(e) => {
-                  setIsEditing(true);
-                  const target = e.target;
-                  const rawValue = String(field.value ?? '');
-                  setTimeout(() => {
-                    target.value = rawValue;
-                    target.select();
-                  }, 1);
-                }}
-                onBlur={(e) => {
-                  const rawValue = e.target.value.replace(/[¥,]/g, '');
-                  // 空欄のまま何も入力されなかった場合は 0 ではなく null に戻し、
-                  // 未編集の値が誤って dirty 扱いになるのを防ぐ
-                  const numericValue = rawValue === '' ? null : Math.abs(Number(rawValue));
-                  field.onChange(numericValue);
-                  setIsEditing(false);
-                }}
-                onChange={(e) => {
-                  const raw = e.target.value.replace(/[^\d]/g, '');
-                  if (/^\d*$/.test(raw)) {
-                    // 空欄になった場合は 0 ではなく null にし、値が0の状態から
-                    // バックスペースで消しても表示が0に戻ってしまわないようにする
-                    field.onChange(raw === '' ? null : Number(raw));
-                    e.target.value = raw;
-                  }
-                }}
-                sx={(theme) => ({
-                  '.MuiOutlinedInput-notchedOutline': {
-                    borderColor: fieldState.error?.message && theme.palette.error.main,
-                  },
-                  '.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                    borderColor: fieldState.error?.message && theme.palette.error.main,
-                  },
-                  '&:hover .MuiOutlinedInput-notchedOutline': {
-                    borderColor: fieldState.error?.message && theme.palette.error.main,
-                  },
-                  '& .MuiInputBase-input': {
-                    textAlign: 'right',
-                  },
-                  '.MuiFormHelperText-root': {
-                    color: theme.palette.error.main,
-                  },
-                  '& input[type=number]::-webkit-inner-spin-button': {
-                    WebkitAppearance: 'none',
-                    margin: 0,
-                  },
-                })}
-                helperText={fieldState.error?.message}
-                disabled={!editable}
-              />
-            )}
+            name={`meisaiHeads.${index}.nebikiAmt`}
+            editable={editable}
+            minus
+            selectOnFocus
           />
         </Grid2>
         <Grid2 size={1} />
@@ -396,7 +336,7 @@ const MeisaiTblHeaderComponent = ({
           <Typography textAlign="end">伝票計</Typography>
         </Grid2>
         <Grid2 size={2}>
-          <ReadOnlyYenNumberElement name={`meisaiHeads.${index}.nebikiAftAmt`} />
+          <ReadOnlyYenField control={control} name={`meisaiHeads.${index}.nebikiAftAmt`} />
         </Grid2>
         <Grid2 size={1} />
       </Grid2>

@@ -7,7 +7,7 @@ import { getCurrentUser } from '@/app/(main)/_lib/funcs';
 import { permission } from '@/app/(main)/_lib/permission';
 
 import { getIdoDen, getIdoFix, getIdoMem } from './_lib/funcs';
-import { IdoDetailTableValues, IdoDetailValues } from './_lib/types';
+import { IdoDetailValues } from './_lib/types';
 import { IdoDetail } from './_ui/ido-detail';
 
 export const metadata: Metadata = {

@@ -14,16 +14,14 @@ import {
   Paper,
   Popper,
   Select,
-  TextField,
   Typography,
 } from '@mui/material';
-import { addDays, addMonths, set, subDays, subMonths } from 'date-fns';
+import { addMonths, subDays, subMonths } from 'date-fns';
 import { useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 
 import { useSyncScroll } from '../../_lib/hook';
-import { permission } from '../../_lib/permission';
 import { Calendar, CalendarView } from '../../_ui/date';
 import { Loading } from '../../_ui/loading';
 import { FAKE_NEW_ID } from '../../(masters)/_lib/constants';

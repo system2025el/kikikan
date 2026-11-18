@@ -13,11 +13,11 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import { grey } from '@mui/material/colors';
 import { useRouter } from 'next/navigation';
-import { Dispatch, SetStateAction, use, useState } from 'react';
+import { Dispatch, SetStateAction, useState } from 'react';
 
 import { BASHO_ID, FIX_STS, JUCHU_KIZAI_HEAD_KBN, SAGYO_KBN_ID } from '@/app/_lib/constants';
+import { shukoListStsColors } from '@/app/(main)/_lib/colors';
 
 import { dispColors, fixStsColors } from '../../_lib/colors';
 import { toJapanTimeString } from '../../_lib/date-conversion';
@@ -38,9 +38,8 @@ export const ShukoListTable = (props: {
   const router = useRouter();
 
   // ローディング
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading] = useState(false);
   // 処理中制御
-  const [isProcessing, setIsProcessing] = useState(false);
 
   const [selected, setSelected] = useState<number[]>([]);
 
@@ -121,15 +120,15 @@ export const ShukoListTable = (props: {
                     : row.shukoFixSts === FIX_STS.partial
                       ? fixStsColors.partial
                       : row.sstbSagyoStsId === 11 && row.schkSagyoStsId === 0
-                        ? '#fff0f5' // ピッキング△・最終確認未 lavenderblush
+                        ? shukoListStsColors.pickingPartial // ピッキング△・最終確認未 lavenderblush
                         : row.sstbSagyoStsId === 12 && row.schkSagyoStsId === 0
-                          ? '#f0ffff' // ピッキング〇・最終確認未 azure
+                          ? shukoListStsColors.pickingDone // ピッキング〇・最終確認未 azure
                           : row.sstbSagyoStsId === 12 && row.schkSagyoStsId === 21
-                            ? '#87cefa' // ピッキング〇・最終確認△ lightskyblue
+                            ? shukoListStsColors.confirmPartial // ピッキング〇・最終確認△ lightskyblue
                             : row.sstbSagyoStsId === 12 && row.schkSagyoStsId === 22
-                              ? '#66cdaa' // ピッキング〇・最終確認〇 mediumaquamarine
+                              ? shukoListStsColors.confirmDone // ピッキング〇・最終確認〇 mediumaquamarine
                               : row.sstbSagyoStsId < 12 && row.schkSagyoStsId > 20
-                                ? '#ffff00' // ピッキングが未or△の時に、最終確認が△or〇 黄色
+                                ? shukoListStsColors.confirmBeforePicking // ピッキングが未or△の時に、最終確認が△or〇 黄色
                                 : 'white',
               }}
             >

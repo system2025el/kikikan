@@ -1,12 +1,7 @@
 'use client';
 
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
-import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { Box, Button, Collapse, IconButton, Typography } from '@mui/material';
+import { Button } from '@mui/material';
 import Checkbox from '@mui/material/Checkbox';
-import { grey } from '@mui/material/colors';
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -14,10 +9,10 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import { useRouter } from 'next/navigation';
 import * as React from 'react';
 
 import { JUCHU_KIZAI_HEAD_KBN } from '@/app/_lib/constants';
+import { dispColors } from '@/app/(main)/_lib/colors';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { openOrFocusTab } from '@/app/(main)/_lib/tab-focus';
 
@@ -49,16 +44,11 @@ type OrderEqTableProps = {
 
 export const OrderEqTable: React.FC<OrderEqTableProps> = ({
   orderEqRows,
-  edit,
   selectedEqs,
   onEqSelectionChange,
   handleClickEqOrderName,
 }) => {
-  const router = useRouter();
-
   const rows = orderEqRows;
-
-  const mode = edit ? 'edit' : 'view';
 
   const handleSelect = (id: number) => {
     const newSelected = selectedEqs.includes(id) ? selectedEqs.filter((item) => item !== id) : [...selectedEqs, id];
@@ -129,9 +119,9 @@ export const OrderEqTable: React.FC<OrderEqTableProps> = ({
                         row.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.normal
                           ? 'primary'
                           : row.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.return
-                            ? 'red'
+                            ? dispColors.return
                             : row.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.keep
-                              ? 'green'
+                              ? dispColors.keep
                               : 'primary',
                       whiteSpace: 'nowrap',
                       justifyContent: 'start',

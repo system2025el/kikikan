@@ -14,6 +14,7 @@ import {
 } from '@mui/material';
 
 import { JUCHU_KIZAI_HEAD_KBN } from '@/app/_lib/constants';
+import { dispColors } from '@/app/(main)/_lib/colors';
 import { toJapanMDString } from '@/app/(main)/_lib/date-conversion';
 import { permission } from '@/app/(main)/_lib/permission';
 import { openOrFocusTab } from '@/app/(main)/_lib/tab-focus';
@@ -129,7 +130,7 @@ export const LoanSituationTable = (props: LoanSituationTableProps) => {
                     m: 0,
                     minWidth: 0,
                     width: 1,
-                    color: row.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.return ? 'red' : 'primary',
+                    color: row.juchuKizaiHeadKbn === JUCHU_KIZAI_HEAD_KBN.return ? dispColors.return : 'primary',
                     justifyContent: 'start',
                   }}
                   onClick={() => {
@@ -268,7 +269,7 @@ export const UseTable = (props: UseTableProps) => {
                     height: 25,
                     lineHeight: '1rem',
                     padding: '4px',
-                    color: cell.zaikoQty < 0 ? 'red' : 'black',
+                    color: cell.zaikoQty < 0 ? dispColors.minusZaiko : 'black',
                     bgcolor: 'white',
                     fontWeight: 400,
                     minWidth: 0,
@@ -338,7 +339,7 @@ export const UseTable = (props: UseTableProps) => {
                     lineHeight: '1rem',
                     fontSize: '0.875rem',
                     padding: '4px',
-                    color: cell.zaikoQty < 0 ? 'red' : 'black',
+                    color: cell.zaikoQty < 0 ? dispColors.minusZaiko : 'black',
                     bgcolor: 'white',
                     minWidth: 0,
                   }}

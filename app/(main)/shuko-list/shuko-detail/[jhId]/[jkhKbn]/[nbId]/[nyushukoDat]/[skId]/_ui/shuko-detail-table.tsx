@@ -18,7 +18,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { Dispatch, SetStateAction, useState } from 'react';
 
 import { isJizenSagyoKbn, JUCHU_KIZAI_HEAD_KBN, SAGYO_KBN_ID, toHonbanSagyoKbn } from '@/app/_lib/constants';
-import { dispColors, sagyoKbnColors, sectionColors, statusColors } from '@/app/(main)/_lib/colors';
+import { dispColors, getDiffColor, sagyoKbnColors, sectionColors, statusColors } from '@/app/(main)/_lib/colors';
 import { User } from '@/app/(main)/_lib/types';
 
 import { ShukoDetailTableValues } from '../_lib/types';
@@ -268,16 +268,7 @@ export const ShukoDetailTable = (props: {
                   align="right"
                   sx={{
                     pr: 1,
-                    backgroundColor:
-                      row.diff === 0 /*&& row.planQty !== 0*/
-                        ? statusColors.completed
-                        : row.diff > 0
-                          ? statusColors.excess
-                          : row.diff < 0
-                            ? statusColors.lack
-                            : isCtn
-                              ? statusColors.ctn
-                              : undefined,
+                    backgroundColor: getDiffColor(row.diff),
                     borderLeft: '1px solid',
                     borderLeftColor: grey[500],
                   }}

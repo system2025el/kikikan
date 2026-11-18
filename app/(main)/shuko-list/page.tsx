@@ -2,13 +2,10 @@ import { Typography } from '@mui/material';
 import { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
-import { toJapanTimeStampString } from '../_lib/date-conversion';
 import { getCurrentUser } from '../_lib/funcs';
 import { permission } from '../_lib/permission';
 import { getCustomerSelection } from '../(masters)/_lib/funcs';
 import { getSectionShortSelections } from '../(masters)/sections-master/_lib/funcs';
-import { getShukoList } from './_lib/funcs';
-import { ShukoListSearchValues } from './_lib/types';
 import { ShukoList } from './_ui/shuko-list';
 
 export const metadata: Metadata = {
