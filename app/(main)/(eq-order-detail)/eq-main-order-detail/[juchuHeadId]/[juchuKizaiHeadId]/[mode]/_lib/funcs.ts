@@ -39,7 +39,6 @@ import {
 import { updateShukoCtnResultDat } from '@/app/_lib/db/tables/t-nyushuko-ctn-result';
 import {
   deleteAllShukoCtnDenBasho,
-  deleteJizenDen,
   deleteKicsOrYardNyukoDen,
   deleteNyushukoDen,
   deleteNyushukoDenKeepResulted,
@@ -57,7 +56,6 @@ import {
 } from '@/app/_lib/db/tables/t-nyushuko-den';
 import { selectFixedSagyoIdsTx } from '@/app/_lib/db/tables/t-nyushuko-fix';
 import {
-  deleteJizenResult,
   deleteKizaiIdNyushukoResult,
   deleteKizaiIdNyushukoResultKeepDen,
   deleteNyukoResult,
@@ -1137,10 +1135,9 @@ const upsShukoDenBasho = async (
  * 事前準備の保存（t_juchu_kizai_jizen と事前の伝票・実績 80/90）
  * 明細の保存（明細の追加・削除・明細idの採番・本番の出庫伝票）の後に呼ぶ。明細ごとに変更前と比べて次を行う。
  * - 明細の削除：事前準備の行を消す（事前の伝票・実績は deleteNyushukoDenKeepResulted・deleteKizaiIdNyushukoResultKeepDen で
- *   削除済み。80/90 は受注削除として残さない）
- * - 出庫場所の変更：変更前の場所の事前の伝票・実績をすべて削除し、事前準備が残っていれば新しい場所で作り直す
- *   （事前の読取は本番にコピー済みで、本番側は keepShozokuChangedShukoDen が受注削除として残す）。
- *   準備日を消して受注削除として残っていた事前の伝票も、このとき削除する（本番にも関わる変更なので、受注削除は本番側だけ）
+ *   整理済み。実績・補正のある 80/90 は本番と同じく予定数0で受注削除として残る）
+ * - 出庫場所の変更：変更前の場所の事前の伝票を、準備日の削除と同じ形で整理し（実績・補正があれば受注削除として残す）、
+ *   事前準備が残っていれば新しい場所で作り直す（本番側も keepShozokuChangedShukoDen が受注削除として残す。両方に出る）
  * - 準備日の削除：実績・補正のある事前の伝票は、明細idを変えずに予定数0で残す（事前側だけ受注削除）。
  *   残す条件は本番と同じ（最終確認に実績があれば最終確認だけ）。それ以外の伝票と、伝票が無くなった実績は削除し、
  *   事前準備の行も消す。事前の受注削除の判定は「事前準備の行（t_juchu_kizai_jizen）が無い」で行う
@@ -1182,30 +1179,26 @@ const syncJizen = async (
       continue;
     }
 
-    // 出庫場所を変えたときは、変更前の場所の事前の伝票・実績をすべて削除する（準備日があれば新しい場所で作り直す）
-    // 出庫場所の変更は本番にも関わるので、受注削除は本番側（keepShozokuChangedShukoDen）だけに残す。
-    // 準備日を消して受注削除として残っていた事前の伝票（準備日が無い明細）も、このとき削除する
-    // （事前日の削除だけなら事前側だけ受注削除、場所の変更なら本番側だけ受注削除。保存を分けても同じ結果になる）
+    // 出庫場所を変えたとき・準備日を消したときは、変更前の場所の事前の伝票のうち実績・補正のあるものを予定数0で残し
+    // （受注削除）、それ以外の伝票と、伝票が無くなった実績を削除する（準備日があれば新しい場所で作り直す）。
+    // 出庫場所の変更では本番側（keepShozokuChangedShukoDen）にも受注削除が残る（両方に出す。2026-11-19）
     const shozokuChanged = !!origin && origin.shozokuId !== d.shozokuId;
-    if (shozokuChanged) {
-      await deleteJizenDen(key, connection, origin.shozokuId);
-      await deleteJizenResult(key, connection, origin.shozokuId);
+    const jizenRemoved = !d.jizenDat && !!origin?.jizenDat;
+    if (origin && (shozokuChanged || jizenRemoved)) {
+      await deleteShukoDenBashoKeepResulted(key, origin.shozokuId, now, userNam, connection, true);
+      await deleteShukoResultBashoKeepDen(
+        d.juchuHeadId,
+        d.juchuKizaiHeadId,
+        d.juchuKizaiMeisaiId,
+        d.kizaiId,
+        origin.shozokuId,
+        connection,
+        true
+      );
     }
 
     if (!d.jizenDat) {
-      if (origin?.jizenDat) {
-        if (!shozokuChanged) {
-          await deleteShukoDenBashoKeepResulted(key, origin.shozokuId, now, userNam, connection, true);
-          await deleteShukoResultBashoKeepDen(
-            d.juchuHeadId,
-            d.juchuKizaiHeadId,
-            d.juchuKizaiMeisaiId,
-            d.kizaiId,
-            origin.shozokuId,
-            connection,
-            true
-          );
-        }
+      if (jizenRemoved) {
         await deleteJuchuKizaiJizen(key, connection);
       }
       continue;

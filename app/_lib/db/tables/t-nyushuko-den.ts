@@ -958,8 +958,9 @@ const shukoKeepCondition = (jizen = false) => {
  * 同じ明細idのままでも受注削除として扱われる（v_nyushuko_den2_lst・deleteEmptyNyushukoDen・updateDeletedShukoDenDat）。
  * 実績は deleteShukoResultBashoKeepDen で、伝票が無くなった分だけ削除する（この関数の後に呼ぶ）。
  *
- * 事前（jizen = true）では、準備日を消したときに事前の伝票（80/90）を同じ形で整理する。準備日を消しても明細は同じ場所に
- * 残るので、事前の受注削除は「事前準備の行（t_juchu_kizai_jizen）が無い」で判定する（v_nyushuko_den2_lst・deleteEmptyNyushukoDen）。
+ * 事前（jizen = true）では、準備日を消したとき・出庫場所を変えたときに事前の伝票（80/90）を同じ形で整理する。
+ * 事前の受注削除は「事前準備の行（t_juchu_kizai_jizen）が無い、または明細の出庫場所が伝票の場所と違う」で判定する
+ * （v_nyushuko_den2_lst・deleteEmptyNyushukoDen）。
  *
  * @param data 対象の明細（受注ヘッダーid・受注機材ヘッダーid・明細id・機材id）
  * @param oldSagyoId 変更前の出庫場所（事前では事前の伝票の作業場所＝明細の出庫場所）
@@ -1085,6 +1086,10 @@ export const upsertShukoDenBasho = async (data: NyushukoDen, connection: PoolCli
  * 現物は最終確認まで進んでいるので、最終確認の段階で取り除けば足りる（ピッキングと最終確認の
  * 両方に残すと、それぞれで実績をクリアする二度手間になり、出発後もピッキングの△が残るため）。
  *
+ * 事前（80/90）も同じ条件で予定数0にして残す（事前明細にも受注削除として出す。2026-11-19）。
+ * 事前でタグ削除・補正を0にすると本番の同じ明細にも反映され、両方の伝票が空になれば消える。
+ * 事前の受注削除の判定は「事前準備の行が無い」なので、明細の削除で事前準備の行を消せば受注削除になる。
+ *
  * @param data 入出庫伝票削除データ
  * @param updDat 更新日時
  * @param updUser 更新者
@@ -1097,7 +1102,7 @@ export const deleteNyushukoDenKeepResulted = async (
   connection: PoolClient
 ) => {
   const keys = [data.juchu_head_id, data.juchu_kizai_head_id, data.juchu_kizai_meisai_id, data.kizai_id];
-  const keepCondition = shukoKeepCondition();
+  const keepCondition = `((${shukoKeepCondition()}) OR (${shukoKeepCondition(true)}))`;
 
   // 残す行は予定数0にする
   const updateQuery = `
@@ -1177,7 +1182,7 @@ export const selectShukoResultDenKizaiCount = async (
     juchuKizaiHeadIds,
     juchuKizaiMeisaiIds,
     kizaiIds,
-    // 事前（80/90）の実績・補正も含める（事前の伝票は明細の削除で消える）
+    // 事前（80/90）の実績・補正も含める（事前の伝票も受注削除として残る）
     [
       SAGYO_KBN_ID.shukoPicking,
       SAGYO_KBN_ID.shukoConfirmation,
@@ -1657,46 +1662,6 @@ export const selectShukoResultExistsBasho = async (
 };
 
 /**
- * 事前の伝票（80/90）を明細1件分削除する
- * 出庫場所の変更で使う（変更前の場所の分だけ消す。ほかの場所に残っている事前の受注削除の行は残す）
- * @param data 明細のキー
- * @param connection
- * @param sagyoId 作業場所（省略すると作業場所を問わず全部）
- */
-export const deleteJizenDen = async (
-  data: { juchu_head_id: number; juchu_kizai_head_id: number; juchu_kizai_meisai_id: number; kizai_id: number },
-  connection: PoolClient,
-  sagyoId?: number
-) => {
-  const query = `
-    DELETE FROM
-      ${SCHEMA}.t_nyushuko_den
-    WHERE
-      juchu_head_id = $1
-      AND juchu_kizai_head_id = $2
-      AND juchu_kizai_meisai_id = $3
-      AND kizai_id = $4
-      AND sagyo_kbn_id = ANY($5)
-      AND ($6::integer IS NULL OR sagyo_id = $6)
-  `;
-
-  const values = [
-    data.juchu_head_id,
-    data.juchu_kizai_head_id,
-    data.juchu_kizai_meisai_id,
-    data.kizai_id,
-    [SAGYO_KBN_ID.jizenPicking, SAGYO_KBN_ID.jizenConfirmation],
-    sagyoId ?? null,
-  ];
-
-  try {
-    await connection.query(query, values);
-  } catch (e) {
-    throw new Error('[deleteJizenDen] DBエラー:', { cause: e });
-  }
-};
-
-/**
  * 出庫伝票削除
  * @param data 出庫伝票削除データ
  * @param connection
@@ -1970,12 +1935,66 @@ export const recountNyushukoDenResult = async (
 };
 
 /**
- * 事前で入れた補正を、本番（同じ明細・機材・作業場所の 10/20 の伝票）に上書きする
- * 本番で入れた補正は消え、更新者は事前で入れた人になる（本番の詳細画面の「最終作業(補正)者」に出る）
+ * 伝票1行の今の補正数を取得し、行をロックする（トランザクション内で使う）
+ * 事前の補正を変える前の値を読み、本番に足し引きする差分を求めるために使う（updateHonbanAdjFromJizen）
+ * @param data 伝票の主キー
+ * @param connection
+ * @returns 補正数（伝票が無ければ null）
+ */
+export const selectNyushukoDenAdjQtyForUpdate = async (
+  data: {
+    juchu_head_id: number;
+    juchu_kizai_head_id: number;
+    juchu_kizai_meisai_id: number;
+    sagyo_kbn_id: number;
+    sagyo_den_dat: string;
+    sagyo_id: number;
+    kizai_id: number;
+  },
+  connection: PoolClient
+) => {
+  const query = `
+    SELECT
+      COALESCE(result_adj_qty, 0) AS result_adj_qty
+    FROM
+      ${SCHEMA}.t_nyushuko_den
+    WHERE
+      juchu_head_id = $1
+      AND juchu_kizai_head_id = $2
+      AND juchu_kizai_meisai_id = $3
+      AND sagyo_kbn_id = $4
+      AND sagyo_den_dat = $5
+      AND sagyo_id = $6
+      AND kizai_id = $7
+    FOR UPDATE
+  `;
+
+  try {
+    const { rows } = await connection.query<{ result_adj_qty: number }>(query, [
+      data.juchu_head_id,
+      data.juchu_kizai_head_id,
+      data.juchu_kizai_meisai_id,
+      data.sagyo_kbn_id,
+      data.sagyo_den_dat,
+      data.sagyo_id,
+      data.kizai_id,
+    ]);
+    return rows.length > 0 ? rows[0].result_adj_qty : null;
+  } catch (e) {
+    throw new Error('[selectNyushukoDenAdjQtyForUpdate] DBエラー:', { cause: e });
+  }
+};
+
+/**
+ * 事前で変えた補正の差分を、本番（同じ明細・機材・作業場所の 10/20 の伝票）の補正に足し引きする
+ * 上書きではなく差分にするのは、本番で入れた補正を残すため（2026-11-19。事前 1→0 で本番 2 が 0 になり、
+ * 受注削除の伝票ごと消えてしまっていた）。0 未満にはしない（補正数は0以上）。
+ * 補正は個数なのでタグのように同じ物かを見分けられず、本番で先に数えた物を事前で後から足すと二重に数える。
+ * 更新者は事前で入れた人になる（本番の詳細画面の「最終作業(補正)者」に出る）
  * @param data 明細のキー
  * @param honbanSagyoKbnId 本番の作業区分（10/20）
  * @param sagyoId 作業場所
- * @param resultAdjQty 補正数
+ * @param adjQtyDiff 事前の補正数の差分（新しい値 − 変える前の値）。0 なら何もしない
  * @param userNam 更新者
  * @param connection
  */
@@ -1983,15 +2002,16 @@ export const updateHonbanAdjFromJizen = async (
   data: { juchu_head_id: number; juchu_kizai_head_id: number; juchu_kizai_meisai_id: number; kizai_id: number },
   honbanSagyoKbnId: number,
   sagyoId: number,
-  resultAdjQty: number,
+  adjQtyDiff: number,
   userNam: string,
   connection: PoolClient
 ) => {
+  if (adjQtyDiff === 0) return;
   const query = `
     UPDATE
       ${SCHEMA}.t_nyushuko_den
     SET
-      result_adj_qty = $7
+      result_adj_qty = GREATEST(0, COALESCE(result_adj_qty, 0) + $7::integer)
       ,upd_dat = now()
       ,upd_user = $8
     WHERE
@@ -2011,7 +2031,7 @@ export const updateHonbanAdjFromJizen = async (
       data.kizai_id,
       honbanSagyoKbnId,
       sagyoId,
-      resultAdjQty,
+      adjQtyDiff,
       userNam,
     ]);
   } catch (e) {
