@@ -41,7 +41,7 @@ import { LockValues, User } from '@/app/(main)/_lib/types';
 import { DateTime, FormDateX } from '@/app/(main)/_ui/date';
 import { IsDirtyAlertDialog, useDirty } from '@/app/(main)/_ui/dirty-context';
 import { Loading, LoadingOverlay } from '@/app/(main)/_ui/loading';
-import { checkShukoStatus } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
+import { checkShukoStatus, getPlanChangedResultCount } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
 import {
   DetailOerValues,
   OyaJuchuContainerMeisaiValues,
@@ -158,8 +158,11 @@ export const EquipmentKeepOrderDetail = (props: {
   // 削除ダイアログ制御
   const [deleteOpen, setDeleteOpen] = useState(false);
   // 出庫作業中警告ダイアログ制御
+  // isWorking: 出庫日時の変更で実績が消える、planChangedCount: 実績のある機材のキープ数を変えた件数
   const [workingConfirmState, setWorkingConfirmState] = useState<{
     isOpen: boolean;
+    isWorking: boolean;
+    planChangedCount: number;
     resolve: (value: boolean) => void;
   } | null>(null);
 
@@ -377,11 +380,13 @@ export const EquipmentKeepOrderDetail = (props: {
 
   /**
    * 出庫作業中警告ダイアログ開
+   * @param isWorking 出庫日時の変更で実績が消えるか
+   * @param planChangedCount 実績のある機材のキープ数を変えた件数
    * @returns
    */
-  const handleWorkingConfirmOpen = () => {
+  const handleWorkingConfirmOpen = (isWorking: boolean, planChangedCount: number) => {
     return new Promise<boolean>((resolve) => {
-      setWorkingConfirmState({ isOpen: true, resolve });
+      setWorkingConfirmState({ isOpen: true, isWorking, planChangedCount, resolve });
     });
   };
 
@@ -394,7 +399,9 @@ export const EquipmentKeepOrderDetail = (props: {
       // awaitの待機を解除し、結果を返す
       workingConfirmState.resolve(isConfirmed);
     }
-    setWorkingConfirmState(null);
+    // null にせず isOpen だけ落とす（閉じるアニメーションの間も同じ文言のまま消えるように。
+    // null にすると isWorking・件数が既定値に戻り、別の文言が一瞬見える）
+    setWorkingConfirmState((prev) => (prev ? { ...prev, isOpen: false } : null));
   };
 
   /**
@@ -518,13 +525,34 @@ export const EquipmentKeepOrderDetail = (props: {
         JSON.stringify(originKeepJuchuContainerMeisaiList) !==
         JSON.stringify(keepJuchuContainerMeisaiList.filter((data) => !data.delFlag));
 
-      if (checkKicsShukoDat || checkYardShukoDat) {
-        try {
-          const isWorking = await checkShukoStatus(data.juchuHeadId, data.juchuKizaiHeadId);
+      // キープ数を変えた明細（保存済みで出庫場所を変えていない明細のみ。出庫場所を変えた明細は元の伝票・実績を削除して作り直す）
+      // 出庫の伝票の予定数はキープ数なので、実績があれば出庫明細の数量が変わる（数量変更）ので警告する
+      const originKeepMeisaiMap = new Map(
+        originKeepJuchuKizaiMeisaiList.map((d) => [`${d.juchuKizaiMeisaiId}_${d.kizaiId}`, d])
+      );
+      const planChangedTargets = keepJuchuKizaiMeisaiList.flatMap((d) => {
+        const origin =
+          d.saveFlag && !d.delFlag ? originKeepMeisaiMap.get(`${d.juchuKizaiMeisaiId}_${d.kizaiId}`) : undefined;
+        return origin && origin.shozokuId === d.shozokuId && origin.keepQty !== d.keepQty
+          ? [{ juchuKizaiMeisaiId: d.juchuKizaiMeisaiId, kizaiId: d.kizaiId, shozokuId: d.shozokuId, jizen: false }]
+          : [];
+      });
 
-          if (isWorking) {
+      // 出庫日時の変更、または実績のある明細のキープ数の変更があれば作業中チェック（1つのダイアログで警告する）
+      if (checkKicsShukoDat || checkYardShukoDat || planChangedTargets.length > 0) {
+        try {
+          const isWorking =
+            (checkKicsShukoDat || checkYardShukoDat) &&
+            (await checkShukoStatus(data.juchuHeadId, data.juchuKizaiHeadId));
+          const planChangedCount = await getPlanChangedResultCount(
+            data.juchuHeadId,
+            data.juchuKizaiHeadId,
+            planChangedTargets
+          );
+
+          if (isWorking || planChangedCount > 0) {
             // ダイアログを表示し、ユーザーが「保存」か「キャンセル」を押すまでここで待機する
-            const isConfirmed = await handleWorkingConfirmOpen();
+            const isConfirmed = await handleWorkingConfirmOpen(isWorking, planChangedCount);
 
             if (!isConfirmed) {
               setIsLoading(false);
@@ -640,11 +668,18 @@ export const EquipmentKeepOrderDetail = (props: {
 
   /**
    * 明細削除処理
-   * @param result
+   * @param result 削除を押したら true、戻るを押したら false
    * @returns
    */
-  const handleDeleteExecute = async () => {
+  const handleDeleteExecute = async (result: boolean) => {
     if (isProcessing) return;
+
+    // 戻るを押したときは削除しない（ダイアログを閉じるだけ）
+    if (!result) {
+      setDeleteOpen(false);
+      return;
+    }
+
     setIsProcessing(true);
 
     try {
@@ -1668,7 +1703,12 @@ export const EquipmentKeepOrderDetail = (props: {
       )}
       <AlertDialog open={alertOpen} title={alertTitle} message={alertMessage} onClick={() => setAlertOpen(false)} />
       <IsDirtyAlertDialog open={dirtyOpen} onClick={handleResultDialog} />
-      <WorkingConfirmDialog open={!!workingConfirmState?.isOpen} onClose={handleWorkingConfirmClose} />
+      <WorkingConfirmDialog
+        open={!!workingConfirmState?.isOpen}
+        onClose={handleWorkingConfirmClose}
+        isWorking={workingConfirmState?.isWorking ?? true}
+        planChangedCount={workingConfirmState?.planChangedCount ?? 0}
+      />
       <DeleteAlertDialog
         selectedLength={
           keepJuchuKizaiMeisaiList.filter((data) => !data.delFlag && data.selected).length +

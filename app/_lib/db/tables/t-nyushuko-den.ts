@@ -1194,6 +1194,67 @@ export const selectShukoResultDenKizaiCount = async (
 };
 
 /**
+ * 数量を変えた明細のうち、出庫の伝票に実績または補正数がある機材の件数を取得
+ *
+ * 受注機材明細（メイン・キープ）の保存前に「出庫準備中です」の警告を出すために使う。
+ * 数量変更（plan_chg_flg）のトリガーが立てる条件（変える前の読取数＋補正数が1以上）と同じ条件で数える。
+ * 明細ごとに、本番の数量（受注数・予備数・キープ数）を変えたならピッキング(10)・最終確認(20)、
+ * 事前数を変えたなら事前ピッキング(80)・事前最終確認(90)の伝票を見る。
+ * 伝票の場所は明細の出庫場所と照合する（出庫場所を変えて元の場所に残した受注削除の行を数えないため）。
+ * 5つの配列は同じ長さで、同じ添字が1つの対象を表す（同じ明細を本番・事前の両方で渡してもよい。1件と数える）。
+ *
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadIds 受注機材ヘッダーidの配列
+ * @param juchuKizaiMeisaiIds 受注機材明細idの配列
+ * @param kizaiIds 機材idの配列
+ * @param shozokuIds 明細の出庫場所の配列
+ * @param jizenFlgs 事前の伝票を見るか（false は本番）の配列
+ * @returns 実績または補正数がある機材の件数
+ */
+export const selectPlanChangedResultKizaiCount = async (
+  juchuHeadId: number,
+  juchuKizaiHeadIds: number[],
+  juchuKizaiMeisaiIds: number[],
+  kizaiIds: number[],
+  shozokuIds: number[],
+  jizenFlgs: boolean[]
+) => {
+  const query = `
+    SELECT
+      COUNT(DISTINCT (d.juchu_kizai_head_id, d.juchu_kizai_meisai_id, d.kizai_id))::integer AS kizai_cnt
+    FROM
+      ${SCHEMA}.t_nyushuko_den AS d
+      JOIN unnest($2::integer[], $3::integer[], $4::integer[], $5::integer[], $6::boolean[])
+        AS k(juchu_kizai_head_id, juchu_kizai_meisai_id, kizai_id, shozoku_id, jizen_flg)
+        ON d.juchu_kizai_head_id = k.juchu_kizai_head_id
+        AND d.juchu_kizai_meisai_id = k.juchu_kizai_meisai_id
+        AND d.kizai_id = k.kizai_id
+        AND d.sagyo_id = k.shozoku_id
+    WHERE
+      d.juchu_head_id = $1
+      AND d.sagyo_kbn_id = ANY(CASE WHEN k.jizen_flg THEN $8::integer[] ELSE $7::integer[] END)
+      AND COALESCE(d.result_qty, 0) + COALESCE(d.result_adj_qty, 0) > 0
+  `;
+
+  const values = [
+    juchuHeadId,
+    juchuKizaiHeadIds,
+    juchuKizaiMeisaiIds,
+    kizaiIds,
+    shozokuIds,
+    jizenFlgs,
+    [SAGYO_KBN_ID.shukoPicking, SAGYO_KBN_ID.shukoConfirmation],
+    [SAGYO_KBN_ID.jizenPicking, SAGYO_KBN_ID.jizenConfirmation],
+  ];
+
+  try {
+    return (await pool.query(query, values)).rows;
+  } catch (e) {
+    throw new Error('[selectPlanChangedResultKizaiCount] DBエラー:', { cause: e });
+  }
+};
+
+/**
  * 受注明細が存在せず、実績数・補正数が0になった入出庫伝票を削除
  *
  * 受注明細が無く実績も補正も0の伝票行は、どこからも参照されず表示する意味も無いので削除する。

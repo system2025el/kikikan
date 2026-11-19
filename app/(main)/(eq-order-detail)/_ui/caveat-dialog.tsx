@@ -128,15 +128,26 @@ const WORKING_DELETE_ITEMS_DEFAULT = ['入庫実績', 'コンテナ実績', '出
  */
 export const WORKING_DELETE_ITEMS_MAIN = ['入庫実績', '出庫場所をなくした場合の、その場所のコンテナ実績'];
 
+/**
+ * 保存前の作業中の確認
+ * 日時・場所の変更で実績が消える場合（isWorking）と、実績のある明細の数量を変えた場合（planChangedCount）の
+ * どちらか、または両方を1つのダイアログで出す
+ */
 export const WorkingConfirmDialog = ({
   open,
   onClose,
   deleteItems = WORKING_DELETE_ITEMS_DEFAULT,
+  isWorking = true,
+  planChangedCount = 0,
 }: {
   open: boolean;
   onClose: (isConfirmed: boolean) => void;
   /** 削除される実績の説明（画面によって違うため） */
   deleteItems?: string[];
+  /** 日時・場所の変更で実績が削除されるか（false なら数量変更の警告だけを出す） */
+  isWorking?: boolean;
+  /** 数量を変えた明細のうち出庫の実績・補正数がある機材の件数 */
+  planChangedCount?: number;
 }) => {
   return (
     <Dialog open={open} onClose={() => onClose(false)}>
@@ -147,19 +158,81 @@ export const WorkingConfirmDialog = ({
       <DialogContent>
         <DialogContentText>
           出庫作業が開始されています。
-          <br />
-          {deleteItems.map((item) => (
-            <Fragment key={item}>
-              ・{item}
+          {isWorking && (
+            <>
               <br />
-            </Fragment>
-          ))}
-          日時を変更するとこれらの実績は削除されますがよろしいですか？
+              {deleteItems.map((item) => (
+                <Fragment key={item}>
+                  ・{item}
+                  <br />
+                </Fragment>
+              ))}
+              日時を変更するとこれらの実績は削除されますがよろしいですか？
+            </>
+          )}
+          {planChangedCount > 0 && (
+            <Box component="span" display="block" mt={isWorking ? 2 : 0} color="error.main">
+              数量を変更した機材のうち{planChangedCount}件は出庫準備中です。
+              <br />
+              出庫明細の数量が変わりますので、入出庫担当に連絡をしてください。
+            </Box>
+          )}
         </DialogContentText>
       </DialogContent>
       <DialogActions>
         <Button onClick={() => onClose(true)} color="error" variant="contained" autoFocus>
-          実績を削除して保存
+          {isWorking ? '実績を削除して保存' : '保存'}
+        </Button>
+        <Button onClick={() => onClose(false)}>戻る</Button>
+      </DialogActions>
+    </Dialog>
+  );
+};
+
+/**
+ * 分離の前の確認（分離する明細に出庫の実績・補正数があるとき）
+ * 一部の分離は元の明細の予定数が減り（出庫明細に数量変更として出る）、全数の分離は元の明細の伝票・実績が削除される
+ */
+export const SeparationConfirmDialog = ({
+  open,
+  partialCount,
+  allCount,
+  onClose,
+}: {
+  open: boolean;
+  /** 一部を分離する明細のうち、実績・補正数がある機材の件数 */
+  partialCount: number;
+  /** 全数を分離する明細のうち、実績・補正数がある機材の件数 */
+  allCount: number;
+  onClose: (isConfirmed: boolean) => void;
+}) => {
+  return (
+    <Dialog open={open} onClose={() => onClose(false)}>
+      <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
+        <WarningIcon color="error" />
+        <Box>作業中</Box>
+      </DialogTitle>
+      <DialogContent>
+        <DialogContentText>
+          分離する機材のうち{partialCount + allCount}件は出庫準備中です。
+          {partialCount > 0 && (
+            <Box component="span" display="block" mt={2} color="error.main">
+              一部を分離する{partialCount}件は、分離元の出庫明細の数量が変わります。
+            </Box>
+          )}
+          {allCount > 0 && (
+            <Box component="span" display="block" mt={2} color="error.main">
+              全数を分離する{allCount}件は、分離元の読取の実績が削除されます。
+            </Box>
+          )}
+          <Box component="span" display="block" mt={2}>
+            分離してよろしいですか？入出庫担当に連絡をしてください。
+          </Box>
+        </DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => onClose(true)} color="error" variant="contained" autoFocus>
+          分離
         </Button>
         <Button onClick={() => onClose(false)}>戻る</Button>
       </DialogActions>

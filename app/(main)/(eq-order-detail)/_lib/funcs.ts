@@ -30,6 +30,7 @@ import {
   deleteAllKicsOrYardNyukoDen,
   deleteAllKicsOrYardShukoCtnDen,
   insertNyushukoDen,
+  selectPlanChangedResultKizaiCount,
 } from '@/app/_lib/db/tables/t-nyushuko-den';
 import { selectFixedSagyoIdsTx, selectNyushukoFixFlag } from '@/app/_lib/db/tables/t-nyushuko-fix';
 import { deleteAllNyukoResult } from '@/app/_lib/db/tables/t-nyushuko-result';
@@ -835,6 +836,35 @@ export const checkShukoStatus = async (juchuHeadId: number, juchuKizaiHeadId: nu
   try {
     const confirmData = await selectShukoStateConfirm(juchuHeadId, juchuKizaiHeadId);
     return confirmData.length === 0 ? false : true;
+  } catch (e) {
+    logError(e);
+    throw e;
+  }
+};
+
+/**
+ * 数量を変えた明細のうち、出庫の実績・補正数がある機材の件数を取得（メイン・キープの保存前の警告用）
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param targets 数量を変えた明細（明細id・機材id・出庫場所・事前の伝票を見るか）
+ * @returns 実績・補正数がある機材の件数
+ */
+export const getPlanChangedResultCount = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  targets: { juchuKizaiMeisaiId: number; kizaiId: number; shozokuId: number; jizen: boolean }[]
+) => {
+  if (targets.length === 0) return 0;
+  try {
+    const rows = await selectPlanChangedResultKizaiCount(
+      juchuHeadId,
+      targets.map(() => juchuKizaiHeadId),
+      targets.map((d) => d.juchuKizaiMeisaiId),
+      targets.map((d) => d.kizaiId),
+      targets.map((d) => d.shozokuId),
+      targets.map((d) => d.jizen)
+    );
+    return (rows[0]?.kizai_cnt as number | undefined) ?? 0;
   } catch (e) {
     logError(e);
     throw e;
