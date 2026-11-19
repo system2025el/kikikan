@@ -8,6 +8,7 @@ import { deleteNyushukoCtnResult } from '@/app/_lib/db/tables/t-nyushuko-ctn-res
 import {
   deleteEmptyNyushukoDen,
   deleteEmptyNyushukoDenMatching,
+  deleteJizenDeletedDenAfterHonban,
   recountNyushukoDenResult,
   selectNyushukoDenAdjQtyForUpdate,
   updateHonbanAdjFromJizen,
@@ -218,7 +219,7 @@ export const delshukoResult = async (
     // 受注明細が無い伝票（受注から削除された行・ハンディが予定外に読み取った行）は、
     // 実績・補正が0になった時点で不要になるので消す
     // 受注明細がある行は対象外なので、コンテナ片側0のような正当な数量0の行は残る
-    await deleteEmptyNyushukoDen(
+    const denDeleted = await deleteEmptyNyushukoDen(
       {
         juchu_head_id: shukoEqptDetailData.juchuHeadId,
         juchu_kizai_head_id: shukoEqptDetailData.juchuKizaiHeadId,
@@ -230,6 +231,19 @@ export const delshukoResult = async (
       },
       connection
     );
+    // 本番の受注削除が空になって消えたら、事前の受注削除も消す（本番→事前の反映はこの片付けだけ）
+    if (!jizen && denDeleted) {
+      await deleteJizenDeletedDenAfterHonban(
+        {
+          juchu_head_id: shukoEqptDetailData.juchuHeadId,
+          juchu_kizai_head_id: shukoEqptDetailData.juchuKizaiHeadId,
+          juchu_kizai_meisai_id: shukoEqptDetailData.juchuKizaiMeisaiId,
+          kizai_id: shukoEqptDetailData.kizaiId,
+        },
+        shukoEqptDetailData.nyushukoBashoId,
+        connection
+      );
+    }
 
     // 事前で削除したタグは本番（80→10、90→20）からも削除し、本番の伝票の読取数を数え直す
     // （本番で削除したタグは事前に影響しない。片方向）
@@ -320,7 +334,7 @@ export const updShukoResultAdjQty = async (
     }
 
     // 補正数を0に戻したことで、受注明細が無い伝票が空になる場合は消す
-    await deleteEmptyNyushukoDen(
+    const denDeleted = await deleteEmptyNyushukoDen(
       {
         juchu_head_id: shukoEqptDetailData.juchuHeadId,
         juchu_kizai_head_id: shukoEqptDetailData.juchuKizaiHeadId,
@@ -332,6 +346,19 @@ export const updShukoResultAdjQty = async (
       },
       pool
     );
+    // 本番の受注削除が空になって消えたら、事前の受注削除も消す（本番→事前の反映はこの片付けだけ）
+    if (denDeleted) {
+      await deleteJizenDeletedDenAfterHonban(
+        {
+          juchu_head_id: shukoEqptDetailData.juchuHeadId,
+          juchu_kizai_head_id: shukoEqptDetailData.juchuKizaiHeadId,
+          juchu_kizai_meisai_id: shukoEqptDetailData.juchuKizaiMeisaiId,
+          kizai_id: shukoEqptDetailData.kizaiId,
+        },
+        shukoEqptDetailData.nyushukoBashoId,
+        pool
+      );
+    }
 
     revalidatePath(
       `shuko-list/shuko-detail/${shukoEqptDetailData.juchuHeadId}/${shukoEqptDetailData.juchuKizaiHeadKbnId}/${shukoEqptDetailData.nyushukoBashoId}/${shukoEqptDetailData.nyushukoDat}/${shukoEqptDetailData.sagyoKbnId}`

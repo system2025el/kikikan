@@ -1373,6 +1373,100 @@ export const deleteEmptyNyushukoDen = async (
 };
 
 /**
+ * 本番の受注削除の伝票が空になって消えたあと、同じ明細・機材・作業場所の事前の受注削除の伝票（80/90）と実績を削除する
+ * 本番の受注削除が空になった＝その明細の現物（事前で準備した物も含む）をすべて取り除いたので、事前側も残す理由が無い
+ * （2026-11-19。本番→事前の反映は受注削除のこの片付けだけ。タグ・補正の個別の反映はしない）。
+ * 次のどちらかに当たると何もしない
+ * - 同じ明細・機材・作業場所に本番（10/20）の伝票がまだある（ピッキング・最終確認の片方だけ空になった、受注削除でない等）
+ * - 事前の伝票が受注削除でない（事前準備の行があり、明細の出庫場所が伝票の場所と同じ。v_nyushuko_den2_lst と同じ判定）
+ * 伝票と実績を1文で消すので、トランザクションの外（Pool）から呼んでもよい
+ * @param data 明細のキー
+ * @param sagyoId 作業場所
+ * @param connection トランザクション中の PoolClient、または Pool
+ */
+export const deleteJizenDeletedDenAfterHonban = async (
+  data: { juchu_head_id: number; juchu_kizai_head_id: number; juchu_kizai_meisai_id: number; kizai_id: number },
+  sagyoId: number,
+  connection: PoolClient | Pool
+) => {
+  const query = `
+    WITH del_den AS (
+      DELETE FROM
+        ${SCHEMA}.t_nyushuko_den AS d
+      WHERE
+        d.juchu_head_id = $1
+        AND d.juchu_kizai_head_id = $2
+        AND d.juchu_kizai_meisai_id = $3
+        AND d.kizai_id = $4
+        AND d.sagyo_id = $5
+        AND d.sagyo_kbn_id IN (${SAGYO_KBN_ID.jizenPicking}, ${SAGYO_KBN_ID.jizenConfirmation})
+        AND NOT EXISTS (
+          SELECT
+            1
+          FROM
+            ${SCHEMA}.t_nyushuko_den AS h
+          WHERE
+            h.juchu_head_id = d.juchu_head_id
+            AND h.juchu_kizai_head_id = d.juchu_kizai_head_id
+            AND h.juchu_kizai_meisai_id = d.juchu_kizai_meisai_id
+            AND h.kizai_id = d.kizai_id
+            AND h.sagyo_id = d.sagyo_id
+            AND h.sagyo_kbn_id IN (${SAGYO_KBN_ID.shukoPicking}, ${SAGYO_KBN_ID.shukoConfirmation})
+        )
+        AND NOT EXISTS (
+          SELECT
+            1
+          FROM
+            ${SCHEMA}.t_juchu_kizai_jizen AS j
+            JOIN ${SCHEMA}.t_juchu_kizai_meisai AS m
+              ON m.juchu_head_id = j.juchu_head_id
+              AND m.juchu_kizai_head_id = j.juchu_kizai_head_id
+              AND m.juchu_kizai_meisai_id = j.juchu_kizai_meisai_id
+              AND m.kizai_id = j.kizai_id
+          WHERE
+            j.juchu_head_id = d.juchu_head_id
+            AND j.juchu_kizai_head_id = d.juchu_kizai_head_id
+            AND j.juchu_kizai_meisai_id = d.juchu_kizai_meisai_id
+            AND j.kizai_id = d.kizai_id
+            AND m.shozoku_id = d.sagyo_id
+        )
+      RETURNING
+        d.juchu_head_id
+        ,d.juchu_kizai_head_id
+        ,d.juchu_kizai_meisai_id
+        ,d.kizai_id
+        ,d.sagyo_kbn_id
+        ,d.sagyo_den_dat
+        ,d.sagyo_id
+    )
+    DELETE FROM
+      ${SCHEMA}.t_nyushuko_result AS r
+    USING
+      del_den AS x
+    WHERE
+      r.juchu_head_id = x.juchu_head_id
+      AND r.juchu_kizai_head_id = x.juchu_kizai_head_id
+      AND r.juchu_kizai_meisai_id = x.juchu_kizai_meisai_id
+      AND r.kizai_id = x.kizai_id
+      AND r.sagyo_kbn_id = x.sagyo_kbn_id
+      AND r.sagyo_den_dat = x.sagyo_den_dat
+      AND r.sagyo_id = x.sagyo_id
+  `;
+
+  try {
+    await connection.query(query, [
+      data.juchu_head_id,
+      data.juchu_kizai_head_id,
+      data.juchu_kizai_meisai_id,
+      data.kizai_id,
+      sagyoId,
+    ]);
+  } catch (e) {
+    throw new Error('[deleteJizenDeletedDenAfterHonban] DBエラー:', { cause: e });
+  }
+};
+
+/**
  * 受注明細が無く、実績数・補正数が0になった入出庫伝票を、条件に合う伝票すべてについて削除する
  * 事前でのタグ削除・補正を本番（10/20）に反映したあと、本番側の受注削除の伝票が空になったら消すために使う
  * （本番のタグは機材単位で消すので、合体ヘッダーで別の明細の伝票が空になることもある）。
