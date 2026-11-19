@@ -856,8 +856,8 @@ const EquipmentOrderDetail = (props: {
       });
       const checkShozokuChanged = shozokuChangedRows.length > 0;
 
-      // 事前日時を設定・変更・解除した明細。事前数だけの変更は、受注数・予備数の変更と同じく確認を出さない
-      // （実績は消えず、変わったことは出庫側の数量変更の表示で分かる）
+      // 事前日時を設定・変更・解除した明細。事前数だけの変更は実績が消えないので作業中確認には含めず、
+      // 受注数・予備数の変更と同じく下の数量変更の警告（planChangedTargets）で見る
       const jizenDatChangedRows = jizenChangedRows.filter(
         (d) =>
           (originMeisaiMap.get(`${d.juchuKizaiMeisaiId}_${d.kizaiId}`)?.jizenDat?.getTime() ?? null) !==
