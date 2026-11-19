@@ -9,6 +9,7 @@ import {
   deleteEmptyNyushukoDen,
   deleteEmptyNyushukoDenMatching,
   recountNyushukoDenResult,
+  selectNyushukoDenAdjQtyForUpdate,
   updateHonbanAdjFromJizen,
   updateNyushukoDen,
   updateResultAdjQty,
@@ -308,7 +309,7 @@ export const updShukoResultAdjQty = async (
     upd_user: userNam,
   };
   try {
-    // 事前の補正は本番（80→10、90→20）の補正を上書きする（本番で入れた補正は事前に影響しない。片方向）
+    // 事前の補正は差分を本番（80→10、90→20）の補正に足す（本番で入れた補正は事前に影響しない。片方向）
     if (isJizenSagyoKbn(shukoEqptDetailData.sagyoKbnId)) {
       return await updJizenResultAdjQty(shukoEqptDetailData, resultAdjQty, updateData, userNam);
     }
@@ -344,7 +345,7 @@ export const updShukoResultAdjQty = async (
 
 /**
  * 事前（80/90）の補正数更新
- * 事前の伝票の補正を更新し、本番（同じ明細・機材・作業場所の 10/20 の伝票）の補正を同じ値で上書きする。
+ * 事前の伝票の補正を更新し、本番（同じ明細・機材・作業場所の 10/20 の伝票）の補正に差分（新しい値 − 変える前の値）を足す。
  * 本番が出発済みなら更新しない（補正数の上限は通常の出庫と同じく設けない）
  * @param shukoEqptDetailData 事前の機材詳細
  * @param resultAdjQty 補正数
@@ -371,6 +372,19 @@ const updJizenResultAdjQty = async (
   const connection = await pool.connect();
   try {
     await connection.query('BEGIN');
+    // 本番には差分を足すので、変える前の事前の補正数を読んでおく（行をロックする）
+    const beforeAdjQty = await selectNyushukoDenAdjQtyForUpdate(
+      {
+        juchu_head_id: shukoEqptDetailData.juchuHeadId,
+        juchu_kizai_head_id: shukoEqptDetailData.juchuKizaiHeadId,
+        juchu_kizai_meisai_id: shukoEqptDetailData.juchuKizaiMeisaiId,
+        sagyo_kbn_id: shukoEqptDetailData.sagyoKbnId,
+        sagyo_den_dat: shukoEqptDetailData.nyushukoDat,
+        sagyo_id: shukoEqptDetailData.nyushukoBashoId,
+        kizai_id: shukoEqptDetailData.kizaiId,
+      },
+      connection
+    );
     await updateNyushukoDen(updateData, connection);
     await updateHonbanAdjFromJizen(
       {
@@ -381,11 +395,11 @@ const updJizenResultAdjQty = async (
       },
       toHonbanSagyoKbn(shukoEqptDetailData.sagyoKbnId),
       shukoEqptDetailData.nyushukoBashoId,
-      resultAdjQty,
+      resultAdjQty - (beforeAdjQty ?? 0),
       userNam,
       connection
     );
-    // 本番側も、補正を上書きしたことで受注削除の伝票が空になる場合は消す
+    // 本番側も、補正を反映したことで受注削除の伝票が空になる場合は消す
     await deleteEmptyNyushukoDenMatching(
       {
         juchu_head_id: shukoEqptDetailData.juchuHeadId,
