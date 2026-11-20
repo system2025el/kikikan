@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, Button, Checkbox, styled, Tooltip, tooltipClasses, TooltipProps, Typography } from '@mui/material';
+import { Box, Button, Checkbox, styled, Tooltip, tooltipClasses, TooltipProps } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -35,7 +35,7 @@ export const MasterTable = ({
   rowsPerPage: number;
   handleOpenDialog: (id: number) => void;
 }) => {
-  const [rows, setRows] = useState(datas);
+  const [rows] = useState(datas);
 
   // const moveRow = (index: number, direction: number) => {
   //   const newIndex = index + direction;
@@ -273,7 +273,7 @@ export const MasterTableOfIsshiki = ({
   handleSelectAllClick: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handleSelect: (id: number) => void;
 }) => {
-  const [rows, setRows] = useState(datas);
+  const [rows] = useState(datas);
 
   /* 表示するリスト */
   const list = useMemo(

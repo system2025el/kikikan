@@ -3,7 +3,6 @@ import 'server-only';
 import { PoolClient } from 'pg';
 
 import { SCHEMA } from '../schema';
-import { createClient } from '../supabase-server';
 import { RfidStatusResultValues } from '../types/t-rfid-status-result-type';
 
 /**
@@ -66,24 +65,5 @@ export const insertNewRfidSts = async (data: RfidStatusResultValues, connection:
     await connection.query(query, values);
   } catch (e) {
     throw new Error('[insertNewRfidSts] DBエラー:', { cause: e });
-  }
-};
-
-/**
- * タグIDが一致するRFIDタグの情報を取得する関数
- * @param id RFIDタグID
- * @returns {{}}
- */
-export const selectOneRfidStatusResult = async (id: string) => {
-  const supabase = await createClient();
-  try {
-    return await supabase
-      .schema(SCHEMA)
-      .from('t_rfid_status_result')
-      .select('shozoku_id, rfid_kizai_sts')
-      .eq('rfid_tag_id', id)
-      .maybeSingle();
-  } catch (e) {
-    throw new Error('[selectOneRfidStatusResult] DBエラー:', { cause: e });
   }
 };

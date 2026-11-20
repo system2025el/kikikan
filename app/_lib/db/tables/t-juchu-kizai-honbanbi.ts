@@ -31,35 +31,6 @@ export const selectHonbanbi = async (juchuHeadId: number, juchuKizaiHeadId: numb
 };
 
 /**
- * 受注機材本番日データの存在確認
- * @param juchuHeadId 受注ヘッダーid
- * @param juchuKizaiHeadId 受注機材ヘッダーid
- * @param juchuHonbanbiData 受注機材本番日データ
- * @returns あり：true　なし：false
- */
-export const selectHonbanbiConfirm = async (
-  juchuHeadId: number,
-  juchuKizaiHeadId: number,
-  juchuHonbanbiShubetuId: number,
-  juchuHonbanbiDat: string
-) => {
-  const supabase = await createClient();
-  try {
-    return await supabase
-      .schema(SCHEMA)
-      .from('t_juchu_kizai_honbanbi')
-      .select('juchu_head_id, juchu_kizai_head_id, juchu_honbanbi_shubetu_id, juchu_honbanbi_dat, mem')
-      .eq('juchu_head_id', juchuHeadId)
-      .eq('juchu_kizai_head_id', juchuKizaiHeadId)
-      .eq('juchu_honbanbi_shubetu_id', juchuHonbanbiShubetuId)
-      .eq('juchu_honbanbi_dat', juchuHonbanbiDat)
-      .single();
-  } catch (e) {
-    throw new Error('[selectHonbanbiConfirm] DBエラー:', { cause: e });
-  }
-};
-
-/**
  * 受注機材本番日新規追加(1件)
  * @param juchuHeadId 受注ヘッダーid
  * @param juchuKizaiHeadId 受注機材ヘッダーid
@@ -174,94 +145,6 @@ export const updateNyushukoHonbanbi = async (data: JuchuKizaiHonbanbi, connectio
     await connection.query(query, allValues);
   } catch (e) {
     throw new Error('[updateNyushukoHonbanbi] DBエラー:', { cause: e });
-  }
-};
-
-/**
- * 受注機材本番日更新
- * @param juchuHeadId 受注ヘッダーid
- * @param juchuKizaiHeadId 受注機材ヘッダーid
- * @param juchuHonbanbiData 受注機材本番日データ
- * @param userNam ユーザー名
- * @returns
- */
-export const updateHonbanbi = async (data: JuchuKizaiHonbanbi, connection: PoolClient) => {
-  const whereKeys = [
-    'juchu_head_id',
-    'juchu_kizai_head_id',
-    'juchu_honbanbi_shubetu_id',
-    'juchu_honbanbi_dat',
-  ] as const;
-
-  const allKeys = Object.keys(data) as (keyof typeof data)[];
-
-  const updateKeys = allKeys.filter((key) => !(whereKeys as readonly string[]).includes(key));
-
-  if (updateKeys.length === 0) {
-    throw new Error('No columns to update.');
-  }
-
-  const allValues: (string | number | null | undefined)[] = [];
-  let placeholderIndex = 1;
-
-  const setClause = updateKeys
-    .map((key) => {
-      allValues.push(data[key]);
-      return `${key} = $${placeholderIndex++}`;
-    })
-    .join(', ');
-
-  const whereClause = whereKeys
-    .map((key) => {
-      allValues.push(data[key]);
-      return `${key} = $${placeholderIndex++}`;
-    })
-    .join(' AND ');
-
-  const query = `
-      UPDATE
-        ${SCHEMA}.t_juchu_kizai_honbanbi
-      SET
-        ${setClause}
-      WHERE
-        ${whereClause}
-    `;
-  try {
-    await connection.query(query, allValues);
-  } catch (e) {
-    throw new Error('[updateHonbanbi] DBエラー:', { cause: e });
-  }
-};
-
-/**
- * 受注機材本番日削除
- * @param juchuHeadId 受注ヘッダーid
- * @param juchuKizaiHeadId 受注機材ヘッダーid
- * @param juchuHonbanbiData 受注機材本番日データ
- */
-export const deleteHonbanbi = async (
-  juchuHeadId: number,
-  juchuKizaiHeadId: number,
-  juchuHonbanbiShubetuId: number,
-  juchuHonbanbiDat: string,
-  connection: PoolClient
-) => {
-  const query = `
-    DELETE FROM
-      ${SCHEMA}.t_juchu_kizai_honbanbi
-    WHERE
-      juchu_head_id = $1
-      AND juchu_kizai_head_id = $2
-      AND juchu_honbanbi_shubetu_id = $3
-      AND juchu_honbanbi_dat = $4
-  `;
-
-  const values = [juchuHeadId, juchuKizaiHeadId, juchuHonbanbiShubetuId, juchuHonbanbiDat];
-
-  try {
-    await connection.query(query, values);
-  } catch (e) {
-    throw new Error('[deleteHonbanbi] DBエラー:', { cause: e });
   }
 };
 

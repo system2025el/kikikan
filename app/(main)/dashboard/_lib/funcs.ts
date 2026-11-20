@@ -1,5 +1,6 @@
 'use server';
 import { selectMinusZaikoList, selectshukoTimeList, selectVehiclesList } from '@/app/_lib/db/tables/dashboard';
+import { logError } from '@/app/_lib/log-error';
 
 import { DashboardTableValues, MinusZaikoValues } from './types';
 
@@ -9,7 +10,7 @@ import { DashboardTableValues, MinusZaikoValues } from './types';
  * @param totalDays 取得する合計日数
  * @returns
  */
-export const getShukoList = async (startDate: string, totalDays: number) => {
+const getShukoList = async (startDate: string, totalDays: number) => {
   try {
     const result = await selectshukoTimeList(startDate, totalDays);
     const data = result.rows;
@@ -34,14 +35,7 @@ export const getShukoList = async (startDate: string, totalDays: number) => {
     }));
     return EqTableData;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -52,7 +46,7 @@ export const getShukoList = async (startDate: string, totalDays: number) => {
  * @param totalDays 取得する合計日数
  * @returns
  */
-export const getVehiclesList = async (startDate: string, totalDays: number) => {
+const getVehiclesList = async (startDate: string, totalDays: number) => {
   try {
     const result = await selectVehiclesList(startDate, totalDays);
 
@@ -77,14 +71,7 @@ export const getVehiclesList = async (startDate: string, totalDays: number) => {
     }));
     return EqTableData;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -114,7 +101,7 @@ export const getDashboardData = async (startDate: string, totalDays: number) => 
  * @returns
  */
 
-export const getMinusZaikoList = async (startDate: string, totalDays: number): Promise<MinusZaikoValues[]> => {
+const getMinusZaikoList = async (startDate: string, totalDays: number): Promise<MinusZaikoValues[]> => {
   try {
     const result = await selectMinusZaikoList(startDate, totalDays);
     const data = result.rows;
@@ -139,14 +126,7 @@ export const getMinusZaikoList = async (startDate: string, totalDays: number): P
 
     return MinusZikoData;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };

@@ -2,6 +2,7 @@
 
 import { SAGYO_SIJI_ID } from '@/app/_lib/constants';
 import { selectFilteredIdoList } from '@/app/_lib/db/tables/v-ido-den3';
+import { logError } from '@/app/_lib/log-error';
 
 import { IdoTableValues } from './types';
 
@@ -52,14 +53,7 @@ export const getIdoList = async (sagyoDenDat: string) => {
 
     return idoData;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };

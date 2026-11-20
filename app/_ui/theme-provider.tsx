@@ -1,6 +1,6 @@
 'use client';
 
-import { blue, grey } from '@mui/material/colors';
+import { grey } from '@mui/material/colors';
 import CssBaseline from '@mui/material/CssBaseline';
 import { jaJP } from '@mui/material/locale';
 import type { Palette } from '@mui/material/styles';

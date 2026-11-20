@@ -1,7 +1,7 @@
 'use client';
 
 import UpdateIcon from '@mui/icons-material/Update';
-import { alpha, Box, Button, CircularProgress, Divider, Paper, Stack, Typography, useTheme } from '@mui/material';
+import { Box, Button, CircularProgress, Divider, Paper, Stack, Typography } from '@mui/material';
 import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
 
@@ -133,13 +133,3 @@ export const Dashboard = () => {
 };
 /* style
 ---------------------------------------------------------------------------------------------------- */
-/** @type {{ [key: string]: React.CSSProperties }} style */
-const styles: { [key: string]: React.CSSProperties } = {
-  // コンテナ
-  container: {
-    display: 'flex',
-    alignItems: 'center',
-    margin: 1,
-    marginLeft: 2,
-  },
-};

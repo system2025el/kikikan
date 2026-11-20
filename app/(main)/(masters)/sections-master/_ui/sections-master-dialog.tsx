@@ -4,12 +4,13 @@ import { useEffect, useState } from 'react';
 import { TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { User } from '@/app/(main)/_lib/types';
+import { IsDirtyAlertDialog } from '@/app/(main)/_ui/dirty-context';
 import { Loading } from '@/app/(main)/_ui/loading';
 
 import { FormBox } from '../../../_ui/form-box';
 import { FAKE_NEW_ID } from '../../_lib/constants';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
-import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
+import { WillDeleteAlertDialog } from '../../_ui/dialogs';
 import { emptySection, formItems } from '../_lib/datas';
 import { addNewSection, getChosenSection, updateSection } from '../_lib/funcs';
 import { SectionsMasterDialogSchema, SectionsMasterDialogValues } from '../_lib/types';
@@ -232,8 +233,7 @@ export const SectionsMasterDialog = ({
             </Grid2>
             <IsDirtyAlertDialog
               open={dirtyOpen}
-              handleCloseDirty={() => setDirtyOpen(false)}
-              handleCloseAll={handleCloseDialog}
+              onClick={(result) => (result ? handleCloseDialog() : setDirtyOpen(false))}
             />
             <WillDeleteAlertDialog
               open={deleteOpen}

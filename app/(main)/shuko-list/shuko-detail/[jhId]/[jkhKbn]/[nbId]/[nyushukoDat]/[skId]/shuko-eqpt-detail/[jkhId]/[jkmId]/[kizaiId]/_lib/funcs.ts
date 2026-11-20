@@ -1,8 +1,6 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
-import { QueryResult } from 'pg';
 
 import { isJizenSagyoKbn, toHonbanSagyoKbn } from '@/app/_lib/constants';
 import pool from '@/app/_lib/db/postgres';
@@ -10,7 +8,9 @@ import { deleteNyushukoCtnResult } from '@/app/_lib/db/tables/t-nyushuko-ctn-res
 import {
   deleteEmptyNyushukoDen,
   deleteEmptyNyushukoDenMatching,
+  deleteJizenDeletedDenAfterHonban,
   recountNyushukoDenResult,
+  selectNyushukoDenAdjQtyForUpdate,
   updateHonbanAdjFromJizen,
   updateNyushukoDen,
   updateResultAdjQty,
@@ -20,6 +20,7 @@ import { deleteHonbanResultByJizenTags, deleteNyushukoResult } from '@/app/_lib/
 import { selectNyushukoDetailOne } from '@/app/_lib/db/tables/v-nyushuko-den2-lst';
 import { selectNyushukoEqptDetail } from '@/app/_lib/db/tables/v-nyushuko-den2-result';
 import { NyushukoDen } from '@/app/_lib/db/types/t-nyushuko-den-type';
+import { logError } from '@/app/_lib/log-error';
 
 import { ShukoEqptDetailTableValues, ShukoEqptDetailValues } from './types';
 
@@ -85,14 +86,7 @@ export const getShukoEqptDetail = async (
 
     return shukoEqptDetaildata;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -146,14 +140,7 @@ export const getShukoEqptDetailTable = async (
 
     return shukoEqptDetailTableData;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -232,7 +219,7 @@ export const delshukoResult = async (
     // 受注明細が無い伝票（受注から削除された行・ハンディが予定外に読み取った行）は、
     // 実績・補正が0になった時点で不要になるので消す
     // 受注明細がある行は対象外なので、コンテナ片側0のような正当な数量0の行は残る
-    await deleteEmptyNyushukoDen(
+    const denDeleted = await deleteEmptyNyushukoDen(
       {
         juchu_head_id: shukoEqptDetailData.juchuHeadId,
         juchu_kizai_head_id: shukoEqptDetailData.juchuKizaiHeadId,
@@ -244,6 +231,19 @@ export const delshukoResult = async (
       },
       connection
     );
+    // 本番の受注削除が空になって消えたら、事前の受注削除も消す（本番→事前の反映はこの片付けだけ）
+    if (!jizen && denDeleted) {
+      await deleteJizenDeletedDenAfterHonban(
+        {
+          juchu_head_id: shukoEqptDetailData.juchuHeadId,
+          juchu_kizai_head_id: shukoEqptDetailData.juchuKizaiHeadId,
+          juchu_kizai_meisai_id: shukoEqptDetailData.juchuKizaiMeisaiId,
+          kizai_id: shukoEqptDetailData.kizaiId,
+        },
+        shukoEqptDetailData.nyushukoBashoId,
+        connection
+      );
+    }
 
     // 事前で削除したタグは本番（80→10、90→20）からも削除し、本番の伝票の読取数を数え直す
     // （本番で削除したタグは事前に影響しない。片方向）
@@ -291,14 +291,7 @@ export const delshukoResult = async (
     );
     return true;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     await connection.query('ROLLBACK');
     return false;
   } finally {
@@ -330,7 +323,7 @@ export const updShukoResultAdjQty = async (
     upd_user: userNam,
   };
   try {
-    // 事前の補正は本番（80→10、90→20）の補正を上書きする（本番で入れた補正は事前に影響しない。片方向）
+    // 事前の補正は差分を本番（80→10、90→20）の補正に足す（本番で入れた補正は事前に影響しない。片方向）
     if (isJizenSagyoKbn(shukoEqptDetailData.sagyoKbnId)) {
       return await updJizenResultAdjQty(shukoEqptDetailData, resultAdjQty, updateData, userNam);
     }
@@ -341,7 +334,7 @@ export const updShukoResultAdjQty = async (
     }
 
     // 補正数を0に戻したことで、受注明細が無い伝票が空になる場合は消す
-    await deleteEmptyNyushukoDen(
+    const denDeleted = await deleteEmptyNyushukoDen(
       {
         juchu_head_id: shukoEqptDetailData.juchuHeadId,
         juchu_kizai_head_id: shukoEqptDetailData.juchuKizaiHeadId,
@@ -353,27 +346,33 @@ export const updShukoResultAdjQty = async (
       },
       pool
     );
+    // 本番の受注削除が空になって消えたら、事前の受注削除も消す（本番→事前の反映はこの片付けだけ）
+    if (denDeleted) {
+      await deleteJizenDeletedDenAfterHonban(
+        {
+          juchu_head_id: shukoEqptDetailData.juchuHeadId,
+          juchu_kizai_head_id: shukoEqptDetailData.juchuKizaiHeadId,
+          juchu_kizai_meisai_id: shukoEqptDetailData.juchuKizaiMeisaiId,
+          kizai_id: shukoEqptDetailData.kizaiId,
+        },
+        shukoEqptDetailData.nyushukoBashoId,
+        pool
+      );
+    }
 
     revalidatePath(
       `shuko-list/shuko-detail/${shukoEqptDetailData.juchuHeadId}/${shukoEqptDetailData.juchuKizaiHeadKbnId}/${shukoEqptDetailData.nyushukoBashoId}/${shukoEqptDetailData.nyushukoDat}/${shukoEqptDetailData.sagyoKbnId}`
     );
     return true;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     return false;
   }
 };
 
 /**
  * 事前（80/90）の補正数更新
- * 事前の伝票の補正を更新し、本番（同じ明細・機材・作業場所の 10/20 の伝票）の補正を同じ値で上書きする。
+ * 事前の伝票の補正を更新し、本番（同じ明細・機材・作業場所の 10/20 の伝票）の補正に差分（新しい値 − 変える前の値）を足す。
  * 本番が出発済みなら更新しない（補正数の上限は通常の出庫と同じく設けない）
  * @param shukoEqptDetailData 事前の機材詳細
  * @param resultAdjQty 補正数
@@ -400,6 +399,19 @@ const updJizenResultAdjQty = async (
   const connection = await pool.connect();
   try {
     await connection.query('BEGIN');
+    // 本番には差分を足すので、変える前の事前の補正数を読んでおく（行をロックする）
+    const beforeAdjQty = await selectNyushukoDenAdjQtyForUpdate(
+      {
+        juchu_head_id: shukoEqptDetailData.juchuHeadId,
+        juchu_kizai_head_id: shukoEqptDetailData.juchuKizaiHeadId,
+        juchu_kizai_meisai_id: shukoEqptDetailData.juchuKizaiMeisaiId,
+        sagyo_kbn_id: shukoEqptDetailData.sagyoKbnId,
+        sagyo_den_dat: shukoEqptDetailData.nyushukoDat,
+        sagyo_id: shukoEqptDetailData.nyushukoBashoId,
+        kizai_id: shukoEqptDetailData.kizaiId,
+      },
+      connection
+    );
     await updateNyushukoDen(updateData, connection);
     await updateHonbanAdjFromJizen(
       {
@@ -410,11 +422,11 @@ const updJizenResultAdjQty = async (
       },
       toHonbanSagyoKbn(shukoEqptDetailData.sagyoKbnId),
       shukoEqptDetailData.nyushukoBashoId,
-      resultAdjQty,
+      resultAdjQty - (beforeAdjQty ?? 0),
       userNam,
       connection
     );
-    // 本番側も、補正を上書きしたことで受注削除の伝票が空になる場合は消す
+    // 本番側も、補正を反映したことで受注削除の伝票が空になる場合は消す
     await deleteEmptyNyushukoDenMatching(
       {
         juchu_head_id: shukoEqptDetailData.juchuHeadId,

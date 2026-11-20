@@ -5,7 +5,7 @@ import { grey } from '@mui/material/colors';
 import { Dispatch, SetStateAction } from 'react';
 
 import { sagyoKbnColors } from '@/app/(main)/_lib/colors';
-import { toJapanTimeString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
 import { IdoEqptDetailTableValues } from '../_lib/types';
 

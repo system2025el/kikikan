@@ -22,7 +22,7 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import React, { SetStateAction, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 

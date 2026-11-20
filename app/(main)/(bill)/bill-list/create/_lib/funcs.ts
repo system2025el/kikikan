@@ -17,6 +17,7 @@ import { SeikyuDatJuchuKizai } from '@/app/_lib/db/types/t-seikyu-date-juchu-kiz
 import { SeikyuHead } from '@/app/_lib/db/types/t-seikyu-head-type';
 import { SeikyuMeisaiHead } from '@/app/_lib/db/types/t-seikyu-meisai-head-type';
 import { SeikyuMeisai } from '@/app/_lib/db/types/t-seikyu-meisai-type';
+import { logError } from '@/app/_lib/log-error';
 import { toJapanTimeString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { getDic } from '@/app/(main)/_lib/funcs';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
@@ -144,14 +145,7 @@ export const getJuchusForBill = async (queries: {
       }));
     }
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -276,14 +270,7 @@ export const addBill = async (data: BillHeadValues, user: string): Promise<numbe
     }
     return null;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     // エラーでロールバック
     await connection.query('ROLLBACK');
     throw e;

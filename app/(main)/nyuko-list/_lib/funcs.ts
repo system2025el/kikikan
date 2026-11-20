@@ -1,15 +1,14 @@
 'use server';
 
 import { DIC_ID, JUCHU_KIZAI_HEAD_KBN, toFixSts } from '@/app/_lib/constants';
-import { selectOneCustomer } from '@/app/_lib/db/tables/m-kokyaku';
 import { selectNyukoPdfJuchuKizaiMeisai } from '@/app/_lib/db/tables/nyushuko-pdf';
-import { selectSagyoIdFilterNyushukoFixFlag } from '@/app/_lib/db/tables/t-nyushuko-fix';
 import { selectPdfJuchuKizaiHead } from '@/app/_lib/db/tables/v-juchu-kizai-head-lst';
 import { selectPdfJuchuHead } from '@/app/_lib/db/tables/v-juchu-lst';
-import { selectFilteredNyukoList, selectFilteredShukoList } from '@/app/_lib/db/tables/v-nyushuko-den2';
+import { selectFilteredNyukoList } from '@/app/_lib/db/tables/v-nyushuko-den2';
+import { logError } from '@/app/_lib/log-error';
 
 import { toJapanYMDString } from '../../_lib/date-conversion';
-import { getDic } from '../../_lib/funcs';
+import { getDic, getKeisho } from '../../_lib/funcs';
 import { NyukoPdfModel } from '../nyuko/_lib/hooks/usePdf';
 import { EqptGroup, NyukoKizai, NyukoListSearchValues, NyukoTableValues } from './types';
 
@@ -46,39 +45,7 @@ export const getNyukoList = async (queries: NyukoListSearchValues) => {
 
     return nyukoList;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
-    throw e;
-  }
-};
-
-/**
- * PDF出力の際に、顧客の敬称を取得する関数
- * @param kokyakuId 顧客id
- * @returns
- */
-export const getKeisho = async (kokyakuId: number) => {
-  try {
-    const { data, error } = await selectOneCustomer(kokyakuId);
-    if (error) {
-      throw new Error('[selectOneCustomer] DBエラー:', { cause: error });
-    }
-    return data.keisho ?? '';
-  } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -249,14 +216,7 @@ export const getPdfData = async (
 
     return pdjData;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };

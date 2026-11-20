@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { escapeLikeString, escapeOrLikeString } from '@/app/(main)/_lib/escape-string';
+import { escapeOrLikeString } from '@/app/(main)/_lib/escape-string';
 import { LocsMasterDialogValues } from '@/app/(main)/(masters)/locations-master/_lib/types';
 
 import pool from '../postgres';

@@ -1,7 +1,5 @@
 'use server';
 
-import { ZodError, ZodIssue } from 'zod';
-
 import pool, { refreshVRfid } from '@/app/_lib/db/postgres';
 import {
   checkBumon,
@@ -119,15 +117,15 @@ export const ImportEqptRfidData = async (data: EqptImportType[], user: string) =
     // トランザクション開始
     await connection.query('BEGIN');
 
-    const tanabans = await checkTanaban(tanabanList, connection, user, now);
+    await checkTanaban(tanabanList, connection, user, now);
 
-    const daibumons = await checkDaibumon(daibumonNamList, connection, user, now);
+    await checkDaibumon(daibumonNamList, connection, user, now);
 
-    const shukeibumons = await checkShukeibumon(shukeibumonNamList, connection, user, now);
+    await checkShukeibumon(shukeibumonNamList, connection, user, now);
 
-    const bumons = await checkBumon(bumonNamList, connection, user, now);
+    await checkBumon(bumonNamList, connection, user, now);
 
-    const kizais = await checkKizai(kizaiMasterList, connection, user, now);
+    await checkKizai(kizaiMasterList, connection, user, now);
 
     await checkRfid(rfidList, connection, user, now);
     // すべて成功でコミット
@@ -145,13 +143,4 @@ export const ImportEqptRfidData = async (data: EqptImportType[], user: string) =
     // なんにしてもpool解放
     connection.release();
   }
-};
-
-/**
- * エラー出力関数
- * @param index エラーのある行番
- * @param error エラー内容
- */
-export const sendLogServer = async (index: number, error: ZodIssue[]) => {
-  console.log(`${index} 行目でバリデーションエラー:`, error);
 };

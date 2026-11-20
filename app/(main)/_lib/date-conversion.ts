@@ -56,15 +56,6 @@ export const toJapanHHmmString = (input: Date | string | number = new Date()): s
 };
 
 /**
- * 日本時間のtimestamp型 文字列に変換する関数
- * @param input 引数無なら現在時刻 Date string number
- * @returns {string} 日本時間の文字列 YYYY-MM-DD HH:mm:ss
- */
-export const toJapanTimeStampString = (input: Date | string | number = new Date()): string => {
-  return dayjs(input).tz('Asia/Tokyo').format(`YYYY-MM-DD HH:mm:ss`);
-};
-
-/**
  * 日本時間のその日の0時0分のDateに変換する関数
  * @param {Date | string | number} input 引数無なら現在時刻 Date string number
  * @returns {Date} 日本時間の00:00のDate

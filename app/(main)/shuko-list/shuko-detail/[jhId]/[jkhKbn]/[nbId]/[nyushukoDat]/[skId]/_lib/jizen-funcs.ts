@@ -3,10 +3,15 @@
 import { JUCHU_KIZAI_HEAD_KBN, NYUSHUKO_SHUBETU_ID, toHonbanSagyoKbn } from '@/app/_lib/constants';
 import pool, { refreshVRfid } from '@/app/_lib/db/postgres';
 import { selectJuchuKizaiNyushuko } from '@/app/_lib/db/tables/t-juchu-kizai-nyushuko';
-import { updateHonbanAdjFromJizen, updateNyushukoDenAdjustToPlan } from '@/app/_lib/db/tables/t-nyushuko-den';
+import {
+  selectNyushukoDenAdjQtyForUpdate,
+  updateHonbanAdjFromJizen,
+  updateNyushukoDenAdjustToPlan,
+} from '@/app/_lib/db/tables/t-nyushuko-den';
 import { selectHonbanShukoFixed } from '@/app/_lib/db/tables/t-nyushuko-fix';
 import { selectJizenNyushukoOne } from '@/app/_lib/db/tables/v-nyushuko-den2-head';
 import { selectJizenNyushukoDetail } from '@/app/_lib/db/tables/v-nyushuko-den2-lst';
+import { logError } from '@/app/_lib/log-error';
 
 import { calcShukoDiff } from './shuko-diff';
 import { ShukoDetailTableValues, ShukoDetailValues } from './types';
@@ -61,14 +66,7 @@ export const getJizenDetail = async (
     };
     return jizenDetailData;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -131,14 +129,7 @@ export const getJizenDetailTable = async (
       })
     );
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -155,14 +146,7 @@ export const getHonbanShukoFixed = async (juchuHeadId: number, juchuKizaiHeadId:
   try {
     return await selectHonbanShukoFixed(juchuHeadId, juchuKizaiHeadId, nyushukoBashoId);
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -170,7 +154,7 @@ export const getHonbanShukoFixed = async (juchuHeadId: number, juchuKizaiHeadId:
 /**
  * 事前明細の一括補正（画面で不足の行の補正数を 画面の準備数 − 読取数 にする）
  * 出庫明細の一括補正（updShukoAdjust）から、作業区分が 80/90 のときに呼ばれる
- * 本番（80→10、90→20 の同じ明細・機材・作業場所の伝票）の補正も同じ値で上書きする（片方向）。
+ * 本番（80→10、90→20 の同じ明細・機材・作業場所の伝票）の補正には、事前の補正の差分を足す（片方向）。
  * 本番が出発済みなら何もしない
  * @param adjustData 補正する行（不足の行）
  * @param userNam ユーザー名
@@ -187,22 +171,20 @@ export const updJizenAdjust = async (adjustData: ShukoDetailTableValues[], userN
 
     await connection.query('BEGIN');
     for (const d of adjustData) {
+      const denKey = {
+        juchu_head_id: d.juchuHeadId,
+        juchu_kizai_head_id: d.juchuKizaiHeadId,
+        juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
+        sagyo_kbn_id: d.sagyoKbnId ?? 0,
+        sagyo_den_dat: d.nyushukoDat,
+        sagyo_id: d.nyushukoBashoId,
+        kizai_id: d.kizaiId,
+      };
+      // 本番には差分を足すので、変える前の事前の補正数を読んでおく（行をロックする）
+      const beforeAdjQty = await selectNyushukoDenAdjQtyForUpdate(denKey, connection);
       // 補正は画面に出ている準備数までにとどめ、準備数は書かない（開いたあとに準備数が変わっていれば、補正後の再表示で
       // 数量変更の強調と差が出る）。読取数は DB の今の値を使う（読み足された分まで補正しない）
-      const resultAdjQty = await updateNyushukoDenAdjustToPlan(
-        {
-          juchu_head_id: d.juchuHeadId,
-          juchu_kizai_head_id: d.juchuKizaiHeadId,
-          juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
-          sagyo_kbn_id: d.sagyoKbnId ?? 0,
-          sagyo_den_dat: d.nyushukoDat,
-          sagyo_id: d.nyushukoBashoId,
-          kizai_id: d.kizaiId,
-        },
-        d.planQty ?? 0,
-        userNam,
-        connection
-      );
+      const resultAdjQty = await updateNyushukoDenAdjustToPlan(denKey, d.planQty ?? 0, userNam, connection);
       // 開いたあとに一致・過剰になっていて補正しなかった行は、本番にも反映しない
       if (resultAdjQty === null) continue;
       await updateHonbanAdjFromJizen(
@@ -214,7 +196,7 @@ export const updJizenAdjust = async (adjustData: ShukoDetailTableValues[], userN
         },
         toHonbanSagyoKbn(d.sagyoKbnId ?? 0),
         d.nyushukoBashoId,
-        resultAdjQty,
+        resultAdjQty - (beforeAdjQty ?? 0),
         userNam,
         connection
       );
@@ -222,14 +204,7 @@ export const updJizenAdjust = async (adjustData: ShukoDetailTableValues[], userN
     await connection.query('COMMIT');
     return true;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     await connection.query('ROLLBACK');
     throw e;
   } finally {

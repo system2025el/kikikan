@@ -159,46 +159,6 @@ export const updateJizenResultDat = async (
 };
 
 /**
- * 事前の実績（80/90）を明細1件分削除する
- * deleteJizenDen と組で使う。本番（10/20）にコピーした実績は消さない
- * @param data 明細のキー
- * @param connection
- * @param sagyoId 作業場所（省略すると作業場所を問わず全部）
- */
-export const deleteJizenResult = async (
-  data: { juchu_head_id: number; juchu_kizai_head_id: number; juchu_kizai_meisai_id: number; kizai_id: number },
-  connection: PoolClient,
-  sagyoId?: number
-) => {
-  const query = `
-    DELETE FROM
-      ${SCHEMA}.t_nyushuko_result
-    WHERE
-      juchu_head_id = $1
-      AND juchu_kizai_head_id = $2
-      AND juchu_kizai_meisai_id = $3
-      AND kizai_id = $4
-      AND sagyo_kbn_id = ANY($5)
-      AND ($6::integer IS NULL OR sagyo_id = $6)
-  `;
-
-  const values = [
-    data.juchu_head_id,
-    data.juchu_kizai_head_id,
-    data.juchu_kizai_meisai_id,
-    data.kizai_id,
-    [SAGYO_KBN_ID.jizenPicking, SAGYO_KBN_ID.jizenConfirmation],
-    sagyoId ?? null,
-  ];
-
-  try {
-    await connection.query(query, values);
-  } catch (e) {
-    throw new Error('[deleteJizenResult] DBエラー:', { cause: e });
-  }
-};
-
-/**
  * 受注削除で残した機材の出庫実績（ピッキング・最終確認）の作業日時を更新（作業場所単位）
  * updateDeletedShukoDenDat と組で使い、伝票と同じ新しい日時に移す
  * （その作業場所の受注明細が無い実績が対象。明細はあっても出庫場所が違う＝送信とのすれ違いで残ったものも含む）
@@ -370,55 +330,6 @@ export const deleteKizaiIdNyushukoResultKeepDen = async (
   }
 };
 
-export const deleteAllNyushukoResult = async (
-  juchuHeadId: number,
-  juchuKizaiHeadId: number,
-  sagyoId: number,
-  connection: PoolClient
-) => {
-  const query = `
-      DELETE FROM
-        ${SCHEMA}.t_nyushuko_result
-      WHERE
-        juchu_head_id = $1
-        AND juchu_kizai_head_id = $2
-        AND sagyo_id = $3
-    `;
-
-  const values = [juchuHeadId, juchuKizaiHeadId, sagyoId];
-
-  try {
-    await connection.query(query, values);
-  } catch (e) {
-    throw new Error('[deleteAllNyushukoResult] DBエラー:', { cause: e });
-  }
-};
-
-export const deleteAllShukoResult = async (
-  juchuHeadId: number,
-  juchuKizaiHeadId: number,
-  sagyoId: number,
-  connection: PoolClient
-) => {
-  const query = `
-      DELETE FROM
-        ${SCHEMA}.t_nyushuko_result
-      WHERE
-        juchu_head_id = $1
-        AND juchu_kizai_head_id = $2
-        AND sagyo_id = $3
-        AND sagyo_kbn_id = ANY($4)
-    `;
-
-  const values = [juchuHeadId, juchuKizaiHeadId, sagyoId, [10, 20]];
-
-  try {
-    await connection.query(query, values);
-  } catch (e) {
-    throw new Error('[deleteAllShukoResult] DBエラー:', { cause: e });
-  }
-};
-
 export const deleteAllNyukoResult = async (
   juchuHeadId: number,
   juchuKizaiHeadId: number,
@@ -441,60 +352,6 @@ export const deleteAllNyukoResult = async (
     await connection.query(query, values);
   } catch (e) {
     throw new Error('[deleteAllNyukoResult] DBエラー:', { cause: e });
-  }
-};
-
-export const deleteKizaiIdShukoResult = async (
-  juchuHeadId: number,
-  juchuKizaiHeadId: number,
-  juchuKizaiMeisaiId: number,
-  kizaiId: number,
-  connection: PoolClient
-) => {
-  const query = `
-      DELETE FROM
-        ${SCHEMA}.t_nyushuko_result
-      WHERE
-        juchu_head_id = $1
-        AND juchu_kizai_head_id = $2
-        AND juchu_kizai_meisai_id = $3
-        AND kizai_id = $4
-        AND sagyo_kbn_id = ANY($5)
-    `;
-
-  const values = [juchuHeadId, juchuKizaiHeadId, juchuKizaiMeisaiId, kizaiId, [10, 20]];
-
-  try {
-    await connection.query(query, values);
-  } catch (e) {
-    throw new Error('[deleteKizaiIdShukoResult] DBエラー:', { cause: e });
-  }
-};
-
-export const deleteKizaiIdNyukoResult = async (
-  juchuHeadId: number,
-  juchuKizaiHeadId: number,
-  juchuKizaiMeisaiId: number,
-  kizaiId: number,
-  connection: PoolClient
-) => {
-  const query = `
-      DELETE FROM
-        ${SCHEMA}.t_nyushuko_result
-      WHERE
-        juchu_head_id = $1
-        AND juchu_kizai_head_id = $2
-        AND juchu_kizai_meisai_id = $3
-        AND kizai_id = $4
-        AND sagyo_kbn_id = $5
-    `;
-
-  const values = [juchuHeadId, juchuKizaiHeadId, juchuKizaiMeisaiId, kizaiId, 30];
-
-  try {
-    await connection.query(query, values);
-  } catch (e) {
-    throw new Error('[deleteKizaiIdNyukoResult] DBエラー:', { cause: e });
   }
 };
 

@@ -1,23 +1,14 @@
 import { Typography } from '@mui/material';
-import { subDays } from 'date-fns';
 import { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
 import { JUCHU_KIZAI_HEAD_KBN, SAGYO_KBN_ID } from '@/app/_lib/constants';
-import { getNyukoDate, getRange, getShukoDate } from '@/app/(main)/_lib/date-funcs';
 import { getCurrentUser } from '@/app/(main)/_lib/funcs';
 import { permission } from '@/app/(main)/_lib/permission';
 
-import { getColor, getDetailJuchuHead, getJuchuContainerMeisai, getNyushukoFixFlag } from '../../../../_lib/funcs';
-import { getHonbanbi, getIdoJuchuKizaiMeisai, getJuchuKizaiHead, getJuchuKizaiMeisai } from './_lib/funcs';
-import {
-  IdoJuchuKizaiMeisaiValues,
-  JuchuContainerMeisaiValues,
-  JuchuKizaiHeadValues,
-  JuchuKizaiHonbanbiValues,
-  JuchuKizaiMeisaiValues,
-  StockTableValues,
-} from './_lib/types';
+import { getColor, getDetailJuchuHead, getNyushukoFixFlag } from '../../../../_lib/funcs';
+import { getHonbanbi, getJuchuKizaiHead } from './_lib/funcs';
+import { JuchuKizaiHeadValues, JuchuKizaiHonbanbiValues } from './_lib/types';
 import EquipmentOrderDetail from './_ui/equipment-order-detail';
 
 export const generateMetadata = async (props: {

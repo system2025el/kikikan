@@ -1,8 +1,6 @@
 'use client';
 
 import { Button, DialogActions, DialogTitle, Stack, Typography } from '@mui/material';
-import { useRouter } from 'next/navigation';
-import { useRef, useState } from 'react';
 import { TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { openOrFocusTab } from '../../_lib/tab-focus';

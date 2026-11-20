@@ -1,8 +1,5 @@
 'use server';
 
-import dayjs from 'dayjs';
-
-import { toJapanTimeStampString } from './date-conversion';
 import { addLock, getLock, updLock } from './funcs';
 
 /**

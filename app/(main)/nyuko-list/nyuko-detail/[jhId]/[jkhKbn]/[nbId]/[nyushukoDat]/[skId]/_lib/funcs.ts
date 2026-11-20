@@ -5,8 +5,8 @@ import { PoolClient } from 'pg';
 
 import { BASHO_ID, JUCHU_KIZAI_HEAD_KBN, NYUSHUKO_SHUBETU_ID, SAGYO_KBN_ID } from '@/app/_lib/constants';
 import pool, { refreshVRfid } from '@/app/_lib/db/postgres';
-import { selectJuchuContainerMeisaiMaxId, upsertJuchuContainerMeisai } from '@/app/_lib/db/tables/t-juchu-ctn-meisai';
-import { selectJuchuKizaiMeisaiMaxId, upsertJuchuKizaiMeisai } from '@/app/_lib/db/tables/t-juchu-kizai-meisai';
+import { upsertJuchuContainerMeisai } from '@/app/_lib/db/tables/t-juchu-ctn-meisai';
+import { upsertJuchuKizaiMeisai } from '@/app/_lib/db/tables/t-juchu-kizai-meisai';
 import {
   selectJuchuKizaiNyushukoConfirmSingle,
   selectOyaJuchuKizaiNyushukoConfirm,
@@ -23,7 +23,6 @@ import {
   deleteNyushukoFix,
   insertNyushukoFix,
   selectFixedJuchuKizaiHeadIdsTx,
-  updateNyushukoFix,
 } from '@/app/_lib/db/tables/t-nyushuko-fix';
 import { selectJuchuContainerMeisai } from '@/app/_lib/db/tables/v-juchu-ctn-meisai';
 import { selectNyushukoOne } from '@/app/_lib/db/tables/v-nyushuko-den2-head';
@@ -32,6 +31,7 @@ import { JuchuCtnMeisai } from '@/app/_lib/db/types/t_juchu_ctn_meisai-type';
 import { JuchuKizaiMeisai } from '@/app/_lib/db/types/t-juchu-kizai-meisai-type';
 import { NyushukoDen } from '@/app/_lib/db/types/t-nyushuko-den-type';
 import { NyushukoFix } from '@/app/_lib/db/types/t-nyushuko-fix-type';
+import { logError } from '@/app/_lib/log-error';
 import {
   NYUSHUKO_FIX_ERROR,
   NyushukoFixError,
@@ -84,14 +84,7 @@ export const getNyukoDetail = async (
 
     return nyukoDetailData;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -141,14 +134,7 @@ export const getNyukoDetailTable = async (
 
     return nyukoDetailTableData;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -330,7 +316,7 @@ const reflectOyaNyukoDen = async (
  * @param userNam ユーザー名
  * @param connection
  */
-export const updMainNyukoDetail = async (
+const updMainNyukoDetail = async (
   nyukoDetailData: NyukoDetailValues,
   unfixedJuchuKizaiHeadIds: number[],
   userNam: string,
@@ -355,7 +341,7 @@ export const updMainNyukoDetail = async (
  * @param userNam ユーザー名
  * @param connection
  */
-export const updReturnNyukoDetail = async (
+const updReturnNyukoDetail = async (
   nyukoDetailData: NyukoDetailValues,
   nyukoDetailTableData: NyukoDetailTableValues[],
   juchuKizaiHeadIds: number[],
@@ -407,7 +393,7 @@ export const updReturnNyukoDetail = async (
  * @param userNam ユーザー名
  * @param connection
  */
-export const updKeepNyukoDetail = async (
+const updKeepNyukoDetail = async (
   nyukoDetailData: NyukoDetailValues,
   nyukoDetailTableData: NyukoDetailTableValues[],
   unfixedJuchuKizaiHeadIds: number[],
@@ -466,7 +452,7 @@ export const updKeepNyukoDetail = async (
  * @param userNam ユーザー名
  * @param connection
  */
-export const upsJuchuKizaiMeisai = async (
+const upsJuchuKizaiMeisai = async (
   nyukoDetailTableData: NyukoDetailTableValues[],
   userNam: string,
   connection: PoolClient
@@ -503,7 +489,7 @@ export const upsJuchuKizaiMeisai = async (
  * @param userNam ユーザー名
  * @param connection
  */
-export const upsJuchuCtnMeisai = async (
+const upsJuchuCtnMeisai = async (
   nyukoDetailTableData: NyukoDetailTableValues[],
   userNam: string,
   connection: PoolClient
@@ -539,7 +525,7 @@ export const upsJuchuCtnMeisai = async (
  * @param withNyukoFixQty true のとき「到着で親から引いた読取数」（nyuko_fix_qty）も今回の読取数にする（返却の到着のみ）
  * @returns
  */
-export const updNyukoDen = async (
+const updNyukoDen = async (
   nyukoDetailTableData: NyukoDetailTableValues[],
   userNam: string,
   connection: PoolClient,
@@ -557,10 +543,10 @@ export const updNyukoDen = async (
     sagyo_kbn_id: SAGYO_KBN_ID.nyukoCount,
     dsp_ord_num: d.dspOrdNumMeisai,
     indent_num: d.indentNum,
-    add_dat: new Date().toISOString(),
-    add_user: userNam,
-    upd_dat: null,
-    upd_user: null,
+    // 既存の入庫伝票の UPDATE なので更新日時・更新者だけを入れる
+    // （updateNyushukoDen はキー以外の項目をすべて SET するため、add_dat・add_user を渡すと登録日時・登録者が上書きされる）
+    upd_dat: new Date().toISOString(),
+    upd_user: userNam,
   }));
 
   try {
@@ -570,14 +556,7 @@ export const updNyukoDen = async (
 
     return true;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -589,7 +568,7 @@ export const updNyukoDen = async (
  * @param connection
  * @returns
  */
-export const upsShukoDen = async (
+const upsShukoDen = async (
   nyukoDetailTableData: NyukoDetailTableValues[],
   shukoDat: string,
   userNam: string,
@@ -636,14 +615,7 @@ export const upsShukoDen = async (
 
     return true;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -655,7 +627,7 @@ export const upsShukoDen = async (
  * @param userNam ユーザー名
  * @param connection
  */
-export const updOyaKizaiNyukoDen = async (items: OyaNyukoReflectItem[], userNam: string, connection: PoolClient) => {
+const updOyaKizaiNyukoDen = async (items: OyaNyukoReflectItem[], userNam: string, connection: PoolClient) => {
   const updateNyukoData: NyushukoDen[] = items
     .filter(({ before, after }) => after !== before)
     .map(({ data: d, before, after }) => ({
@@ -678,14 +650,7 @@ export const updOyaKizaiNyukoDen = async (items: OyaNyukoReflectItem[], userNam:
       await updateOyaKizaiNyukoDen(data, connection);
     }
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -726,7 +691,7 @@ const calcOyaCtnQty = (
  * @param connection
  * @returns
  */
-export const updOyaCtnNyukoDen = async (
+const updOyaCtnNyukoDen = async (
   items: OyaNyukoReflectItem[],
   oyaJuchuContainerMeisaiData: {
     juchuHeadId: number;
@@ -773,14 +738,7 @@ export const updOyaCtnNyukoDen = async (
       await updateOyaCtnNyukoDen(data, connection);
     }
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -794,7 +752,7 @@ export const updOyaCtnNyukoDen = async (
  * @param userNam ユーザー名
  * @param connection
  */
-export const addNyukoFix = async (
+const addNyukoFix = async (
   nyukoDetailData: NyukoDetailValues,
   juchuKizaiHeadIds: number[],
   userNam: string,
@@ -829,7 +787,7 @@ export const addNyukoFix = async (
  * @param juchuKizaiHeadId 受注機材ヘッダーid
  * @returns 返却受注コンテナ明細データ
  */
-export const getOyaJuchuContainerMeisai = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
+const getOyaJuchuContainerMeisai = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
   try {
     const { data: containerData, error: containerError } = await selectJuchuContainerMeisai(
       juchuHeadId,
@@ -849,14 +807,7 @@ export const getOyaJuchuContainerMeisai = async (juchuHeadId: number, juchuKizai
     }));
     return oyaJuchuContainerMeisaiData;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -924,14 +875,7 @@ export const updNyukoDetail = async (
 
     return { ok: true };
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     await connection.query('ROLLBACK');
     return { ok: false, reason: toNyushukoFixErrorReason(e) };
   } finally {
@@ -1019,14 +963,7 @@ export const delNyukoFix = async (
 
     return { ok: true };
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     await connection.query('ROLLBACK');
     return { ok: false, reason: toNyushukoFixErrorReason(e) };
   } finally {

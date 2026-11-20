@@ -17,6 +17,7 @@ import {
 import { useState } from 'react';
 import { Controller, TextFieldElement, UseFieldArrayReturn, useForm } from 'react-hook-form-mui';
 
+import { readonlyColors } from '@/app/(main)/_lib/colors';
 import { CloseMasterDialogButton } from '@/app/(main)/_ui/buttons';
 import { FormDateX } from '@/app/(main)/_ui/date';
 import { Loading } from '@/app/(main)/_ui/loading';
@@ -93,7 +94,7 @@ export const SecondDialogPage = ({
   >([]);
 
   /* useForm -------------------------------------- */
-  const { control, handleSubmit, setValue } = useForm({
+  const { control, handleSubmit } = useForm({
     mode: 'onSubmit',
     reValidateMode: 'onSubmit',
     defaultValues: {
@@ -163,8 +164,8 @@ export const SecondDialogPage = ({
             control={control}
             sx={{
               pointerEvents: 'none', // クリック不可にする
-              backgroundColor: '#f5f5f5', // グレー背景で無効っぽく
-              color: '#888',
+              backgroundColor: readonlyColors.bg, // グレー背景で無効っぽく
+              color: readonlyColors.text,
               width: 400,
             }}
             slotProps={{ input: { readOnly: true, onFocus: (e) => e.target.blur() } }}

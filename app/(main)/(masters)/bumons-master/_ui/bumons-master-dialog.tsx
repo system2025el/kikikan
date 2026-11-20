@@ -2,15 +2,16 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Grid2, MenuItem, Select, Snackbar } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import { useEffect, useState } from 'react';
-import { Controller, TextareaAutosizeElement, TextFieldElement, useForm } from 'react-hook-form-mui';
+import { Controller, TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { User } from '@/app/(main)/_lib/types';
+import { IsDirtyAlertDialog } from '@/app/(main)/_ui/dirty-context';
 import { Loading } from '@/app/(main)/_ui/loading';
 
 import { FormBox, selectNone, SelectTypes } from '../../../_ui/form-box';
 import { FAKE_NEW_ID } from '../../_lib/constants';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
-import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
+import { WillDeleteAlertDialog } from '../../_ui/dialogs';
 import { emptyBumon, formItems } from '../_lib/datas';
 import { addNewBumon, getBumonMasterDialogData, updateBumon } from '../_lib/funcs';
 import { BumonsMasterDialogSchema, BumonsMasterDialogValues } from '../_lib/types';
@@ -280,8 +281,7 @@ export const BumonsMasterDialog = ({
             </Grid2>
             <IsDirtyAlertDialog
               open={dirtyOpen}
-              handleCloseDirty={() => setDirtyOpen(false)}
-              handleCloseAll={handleCloseDialog}
+              onClick={(result) => (result ? handleCloseDialog() : setDirtyOpen(false))}
             />
             <WillDeleteAlertDialog
               open={deleteOpen}

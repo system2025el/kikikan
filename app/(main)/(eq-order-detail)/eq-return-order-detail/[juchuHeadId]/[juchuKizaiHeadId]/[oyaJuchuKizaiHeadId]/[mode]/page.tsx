@@ -1,5 +1,4 @@
 import { Typography } from '@mui/material';
-import { subDays } from 'date-fns';
 import { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
@@ -7,15 +6,10 @@ import { JUCHU_KIZAI_HEAD_KBN, SAGYO_KBN_ID } from '@/app/_lib/constants';
 import { getNyukoDate, getRange, getShukoDate } from '@/app/(main)/_lib/date-funcs';
 import { getCurrentUser } from '@/app/(main)/_lib/funcs';
 import { permission } from '@/app/(main)/_lib/permission';
-import { StockTableValues } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';
 
 import { getDetailJuchuHead, getJuchuKizaiNyushuko, getNyushukoFixFlag } from '../../../../../_lib/funcs';
-import { getReturnJuchuContainerMeisai, getReturnJuchuKizaiHead, getReturnJuchuKizaiMeisai } from './_lib/funcs';
-import {
-  ReturnJuchuContainerMeisaiValues,
-  ReturnJuchuKizaiHeadValues,
-  ReturnJuchuKizaiMeisaiValues,
-} from './_lib/types';
+import { getReturnJuchuKizaiHead } from './_lib/funcs';
+import { ReturnJuchuKizaiHeadValues } from './_lib/types';
 import { EquipmentReturnOrderDetail } from './_ui/equipment-return-order-detail';
 
 export const generateMetadata = async (props: {

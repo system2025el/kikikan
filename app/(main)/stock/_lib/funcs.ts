@@ -5,6 +5,7 @@ import { QueryResult } from 'pg';
 import { selectStockListBulk } from '@/app/_lib/db/tables/stock-table';
 import { selectActiveBumons } from '@/app/_lib/db/tables/v_bumon_lst';
 import { selectStockKizai } from '@/app/_lib/db/tables/v-kizai-list';
+import { logError } from '@/app/_lib/log-error';
 
 import { toJapanYMDString } from '../../_lib/date-conversion';
 import { Bumon, EqTableValues, StockTableValues } from './types';
@@ -31,14 +32,7 @@ export const getBumonsData = async () => {
 
     return bumons;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     return [];
   }
 };
@@ -48,7 +42,7 @@ export const getBumonsData = async () => {
  * @param bumonId 部門id
  * @returns 機材データ
  */
-export const getEqData = async (bumonId: number, keyword: string) => {
+const getEqData = async (bumonId: number, keyword: string) => {
   try {
     const { data, error } = await selectStockKizai(bumonId, keyword);
 
@@ -66,14 +60,7 @@ export const getEqData = async (bumonId: number, keyword: string) => {
 
     return eqList;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -126,14 +113,7 @@ export const getAllStockData = async (kizaiIds: number[], date: Date) => {
     const data: StockTableValues[] = result.rows;
     return data;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };

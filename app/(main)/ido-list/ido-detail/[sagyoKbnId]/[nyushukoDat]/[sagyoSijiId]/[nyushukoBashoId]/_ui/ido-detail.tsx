@@ -21,16 +21,14 @@ import {
   Typography,
 } from '@mui/material';
 import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { BASHO_ID, SAGYO_KBN_ID, SAGYO_SIJI_ID } from '@/app/_lib/constants';
 import { sagyoKbnColors, statusColors } from '@/app/(main)/_lib/colors';
-import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
 import { permission } from '@/app/(main)/_lib/permission';
 import { User } from '@/app/(main)/_lib/types';
 import { validationMessages } from '@/app/(main)/_lib/validation-messages';
-import { BackButton } from '@/app/(main)/_ui/buttons';
 import { FormDateX } from '@/app/(main)/_ui/date';
 import { useDirty } from '@/app/(main)/_ui/dirty-context';
 import { LoadingOverlay } from '@/app/(main)/_ui/loading';

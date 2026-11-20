@@ -6,7 +6,6 @@ import {
   DialogContent,
   DialogTitle,
   Divider,
-  Paper,
   Snackbar,
   Stack,
   Table,

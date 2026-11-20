@@ -15,6 +15,7 @@ import {
 import { SeikyuDatJuchuKizai } from '@/app/_lib/db/types/t-seikyu-date-juchu-kizai-type';
 import { SeikyuHead } from '@/app/_lib/db/types/t-seikyu-head-type';
 import { SeikyuMeisai } from '@/app/_lib/db/types/t-seikyu-meisai-type';
+import { logError } from '@/app/_lib/log-error';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 
@@ -292,14 +293,7 @@ export const updateBill = async (data: BillHeadValues, user: string): Promise<nu
     }
     return null;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     // エラーでロールバック
     await connection.query('ROLLBACK');
     throw e;

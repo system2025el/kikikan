@@ -30,12 +30,11 @@ import {
   Popper,
   Select,
   Snackbar,
-  Stack,
   TextField,
   Typography,
 } from '@mui/material';
-import { addDays, addMonths, set, setDate, subDays, subMonths } from 'date-fns';
-import { redirect, useRouter } from 'next/navigation';
+import { addDays, subDays } from 'date-fns';
+import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import React from 'react';
 import { Controller, SubmitErrorHandler, useForm } from 'react-hook-form';
@@ -52,14 +51,13 @@ import {
 } from '@/app/_lib/constants';
 import { toJapanTimeString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { getNyukoDate, getRange, getShukoDate } from '@/app/(main)/_lib/date-funcs';
-import { addLock, getDic, getLock } from '@/app/(main)/_lib/funcs';
+import { getDic } from '@/app/(main)/_lib/funcs';
 import { useStableCallback, useSyncScroll, useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
 import { lockCheck, lockRelease } from '@/app/(main)/_lib/lock';
 import { useNyushukoFixChanged } from '@/app/(main)/_lib/nyushuko-fix-notify';
 import { permission } from '@/app/(main)/_lib/permission';
 import { openOrFocusTab } from '@/app/(main)/_lib/tab-focus';
 import { LockValues, User } from '@/app/(main)/_lib/types';
-import { BackButton } from '@/app/(main)/_ui/buttons';
 import { Calendar, CalendarView, DateTime, FormDateX } from '@/app/(main)/_ui/date';
 import { IsDirtyAlertDialog, useDirty } from '@/app/(main)/_ui/dirty-context';
 import { HonbanbiCalendar } from '@/app/(main)/_ui/honbanbi-calendar';
@@ -70,6 +68,7 @@ import {
   getALLStockList,
   getJuchuContainerMeisai,
   getNyushukoFixFlags,
+  getPlanChangedResultCount,
 } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
 import { DetailOerValues } from '@/app/(main)/(eq-order-detail)/_lib/types';
 import { HonbanbiColorValues } from '@/app/(main)/(eq-order-detail)/eq-keep-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[oyaJuchuKizaiHeadId]/[mode]/_lib/types';
@@ -78,6 +77,7 @@ import {
   AlertDialog,
   DeleteAlertDialog,
   MoveAlertDialog,
+  SeparationConfirmDialog,
   WORKING_DELETE_ITEMS_MAIN,
   WorkingConfirmDialog,
 } from '../../../../../_ui/caveat-dialog';
@@ -258,8 +258,18 @@ const EquipmentOrderDetail = (props: {
   // 削除対象のうちピッキング済みの機材件数
   const [deleteShukoResultCount, setDeleteShukoResultCount] = useState(0);
   // 出庫作業中警告ダイアログ制御
+  // isWorking: 日時・場所の変更で実績が消える、planChangedCount: 実績のある機材の数量を変えた件数
   const [workingConfirmState, setWorkingConfirmState] = useState<{
     isOpen: boolean;
+    isWorking: boolean;
+    planChangedCount: number;
+    resolve: (value: boolean) => void;
+  } | null>(null);
+  // 分離前の確認ダイアログ制御（分離する機材のうち実績・補正数がある件数。一部分離・全数分離）
+  const [separationConfirmState, setSeparationConfirmState] = useState<{
+    isOpen: boolean;
+    partialCount: number;
+    allCount: number;
     resolve: (value: boolean) => void;
   } | null>(null);
 
@@ -352,7 +362,7 @@ const EquipmentOrderDetail = (props: {
     setError,
     trigger,
     clearErrors,
-    formState: { isDirty, dirtyFields, errors, defaultValues },
+    formState: { isDirty, dirtyFields, defaultValues },
   } = useForm({
     mode: 'onChange',
     reValidateMode: 'onChange',
@@ -641,12 +651,36 @@ const EquipmentOrderDetail = (props: {
 
   /**
    * 出庫作業中警告ダイアログ開
+   * @param isWorking 日時・場所の変更で実績が消えるか
+   * @param planChangedCount 実績のある機材の数量を変えた件数
    * @returns
    */
-  const handleWorkingConfirmOpen = () => {
+  const handleWorkingConfirmOpen = (isWorking: boolean, planChangedCount: number) => {
     return new Promise<boolean>((resolve) => {
-      setWorkingConfirmState({ isOpen: true, resolve });
+      setWorkingConfirmState({ isOpen: true, isWorking, planChangedCount, resolve });
     });
+  };
+
+  /**
+   * 分離前の確認ダイアログ開
+   * @param partialCount 一部を分離する機材のうち実績・補正数がある件数
+   * @param allCount 全数を分離する機材のうち実績・補正数がある件数
+   * @returns
+   */
+  const handleSeparationConfirmOpen = (partialCount: number, allCount: number) => {
+    return new Promise<boolean>((resolve) => {
+      setSeparationConfirmState({ isOpen: true, partialCount, allCount, resolve });
+    });
+  };
+
+  /**
+   * 分離前の確認ダイアログ閉
+   * @param isConfirmed
+   */
+  const handleSeparationConfirmClose = (isConfirmed: boolean) => {
+    separationConfirmState?.resolve(isConfirmed);
+    // null にせず isOpen だけ落とす（閉じるアニメーションの間に件数が0の文言が見えないように）
+    setSeparationConfirmState((prev) => (prev ? { ...prev, isOpen: false } : null));
   };
 
   /**
@@ -658,7 +692,9 @@ const EquipmentOrderDetail = (props: {
       // awaitの待機を解除し、結果を返す
       workingConfirmState.resolve(isConfirmed);
     }
-    setWorkingConfirmState(null);
+    // null にせず isOpen だけ落とす（閉じるアニメーションの間も同じ文言のまま消えるように。
+    // null にすると isWorking・件数が既定値に戻り、別の文言が一瞬見える）
+    setWorkingConfirmState((prev) => (prev ? { ...prev, isOpen: false } : null));
   };
 
   /**
@@ -820,17 +856,45 @@ const EquipmentOrderDetail = (props: {
       });
       const checkShozokuChanged = shozokuChangedRows.length > 0;
 
-      // 事前日時を設定・変更・解除した明細。事前数だけの変更は、受注数・予備数の変更と同じく確認を出さない
-      // （実績は消えず、変わったことは出庫側の数量変更の表示で分かる）
+      // 事前日時を設定・変更・解除した明細。事前数だけの変更は実績が消えないので作業中確認には含めず、
+      // 受注数・予備数の変更と同じく下の数量変更の警告（planChangedTargets）で見る
       const jizenDatChangedRows = jizenChangedRows.filter(
         (d) =>
           (originMeisaiMap.get(`${d.juchuKizaiMeisaiId}_${d.kizaiId}`)?.jizenDat?.getTime() ?? null) !==
           (d.jizenDat?.getTime() ?? null)
       );
 
+      // 数量を変えた明細（保存済みで出庫場所を変えていない明細のみ。出庫場所を変えた明細は上の作業中チェックで見る）
+      // 本番：受注数・予備数を変えた明細はピッキング・最終確認、事前：事前日時はそのままで事前数を変えた明細は事前の伝票を見る
+      // （事前日時を変えた明細は上の作業中チェックで見る）。実績があれば出庫明細の数量が変わる（数量変更）ので警告する
+      const planChangedTargets = juchuKizaiMeisaiList.flatMap((d) => {
+        const origin =
+          d.saveFlag && !d.delFlag ? originMeisaiMap.get(`${d.juchuKizaiMeisaiId}_${d.kizaiId}`) : undefined;
+        if (!origin || origin.shozokuId !== d.shozokuId) return [];
+        const target = { juchuKizaiMeisaiId: d.juchuKizaiMeisaiId, kizaiId: d.kizaiId, shozokuId: d.shozokuId };
+        // 伝票の予定数は合計数（受注数＋予備数）なので、合計が変わったときだけ（受注5・予備1 → 4・2 は変わらない）
+        const honbanChanged = origin.planKizaiQty + origin.planYobiQty !== d.planKizaiQty + d.planYobiQty;
+        const jizenQtyChanged =
+          !!origin.jizenDat &&
+          !!d.jizenDat &&
+          origin.jizenDat.getTime() === d.jizenDat.getTime() &&
+          (origin.jizenQty ?? 0) !== (d.jizenQty ?? 0);
+        return [
+          ...(honbanChanged ? [{ ...target, jizen: false }] : []),
+          ...(jizenQtyChanged ? [{ ...target, jizen: true }] : []),
+        ];
+      });
+
       // 出庫時間に変更があった場合、事前の実績がある明細の事前日時を変えた場合、
       // または実績がある明細の出庫場所を変えた場合は作業中チェック
-      if (checkKicsShukoDat || checkYardShukoDat || jizenDatChangedRows.length > 0 || checkShozokuChanged) {
+      // 実績がある明細の数量を変えた場合も、同じダイアログで警告する
+      if (
+        checkKicsShukoDat ||
+        checkYardShukoDat ||
+        jizenDatChangedRows.length > 0 ||
+        checkShozokuChanged ||
+        planChangedTargets.length > 0
+      ) {
         try {
           const isWorking =
             ((checkKicsShukoDat || checkYardShukoDat) &&
@@ -843,10 +907,15 @@ const EquipmentOrderDetail = (props: {
               ))) ||
             (checkShozokuChanged &&
               (await getShozokuChangedResultExists(data.juchuHeadId, data.juchuKizaiHeadId, shozokuChangedRows)));
+          const planChangedCount = await getPlanChangedResultCount(
+            data.juchuHeadId,
+            data.juchuKizaiHeadId,
+            planChangedTargets
+          );
 
-          if (isWorking) {
+          if (isWorking || planChangedCount > 0) {
             // ダイアログを表示し、ユーザーが「保存」か「キャンセル」を押すまでここで待機する
-            const isConfirmed = await handleWorkingConfirmOpen();
+            const isConfirmed = await handleWorkingConfirmOpen(isWorking, planChangedCount);
 
             if (!isConfirmed) {
               setIsLoading(false);
@@ -1132,7 +1201,7 @@ const EquipmentOrderDetail = (props: {
             .map((d, index) => (dateRange.includes(toJapanYMDString(d.calDat)) ? index : -1))
             .filter((index) => index !== -1);
 
-          const subUpdatedEqStockData = updatedEqStockData.map((data, index) =>
+          const subUpdatedEqStockData = updatedEqStockData.map((data) =>
             data.map((d, i) =>
               targetIndex.includes(i)
                 ? {
@@ -1862,9 +1931,6 @@ const EquipmentOrderDetail = (props: {
   };
 
   // ぺージトップへ戻る
-  const scrollTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
 
   // // アコーディオン開閉
   // const handleExpansion = () => {
@@ -2241,6 +2307,53 @@ const EquipmentOrderDetail = (props: {
     } catch (e) {
       setIsProcessing(false);
       setSnackBarMessage('サーバー接続エラー');
+      setSnackBarOpen(true);
+      return;
+    }
+
+    // 分離する機材に出庫の実績・補正数があれば、分離前に警告する
+    // 一部の分離は分離元の予定数が減り（出庫明細に数量変更として出る）、全数の分離は分離元の伝票・実績が削除される
+    try {
+      const separateRows = selectEq
+        .filter((eq) => eq.planKizaiQty !== 0 || eq.planYobiQty !== 0)
+        .flatMap((eq) => {
+          const moto = juchuKizaiMeisaiList.find((d) => d.dspOrdNum === eq.dspOrdNum);
+          return moto ? [{ eq, moto, remainQty: moto.planQty - eq.planQty }] : [];
+        });
+      // 全数の分離：分離元の伝票（全作業区分・全場所）と実績がまとめて削除されるので、場所を問わず数える
+      const allTargets = separateRows
+        .filter((r) => r.moto.planKizaiQty - r.eq.planKizaiQty === 0 && r.moto.planYobiQty - r.eq.planYobiQty === 0)
+        .map((r) => r.eq);
+      // 一部の分離：予定数が変わるのは今の出庫場所の本番の伝票と、事前数を合計数まで下げる場合の事前の伝票だけ
+      const partialTargets = separateRows
+        .filter((r) => !allTargets.includes(r.eq))
+        .flatMap(({ moto, remainQty }) => {
+          const target = {
+            juchuKizaiMeisaiId: moto.juchuKizaiMeisaiId,
+            kizaiId: moto.kizaiId,
+            shozokuId: moto.shozokuId,
+          };
+          return [
+            { ...target, jizen: false },
+            ...(moto.jizenDat && (moto.jizenQty ?? 0) > remainQty ? [{ ...target, jizen: true }] : []),
+          ];
+        });
+      const [partialCount, allCount] = await Promise.all([
+        getPlanChangedResultCount(juchuHeadData.juchuHeadId, getValues('juchuKizaiHeadId'), partialTargets),
+        getShukoResultKizaiCount(allTargets),
+      ]);
+
+      if (partialCount > 0 || allCount > 0) {
+        // ダイアログを表示し、ユーザーが「分離」か「戻る」を押すまでここで待機する
+        const isConfirmed = await handleSeparationConfirmOpen(partialCount, allCount);
+        if (!isConfirmed) {
+          setIsProcessing(false);
+          return;
+        }
+      }
+    } catch (e) {
+      setIsProcessing(false);
+      setSnackBarMessage('作業確認に失敗しました');
       setSnackBarOpen(true);
       return;
     }
@@ -3574,6 +3687,14 @@ const EquipmentOrderDetail = (props: {
         open={!!workingConfirmState?.isOpen}
         onClose={handleWorkingConfirmClose}
         deleteItems={WORKING_DELETE_ITEMS_MAIN}
+        isWorking={workingConfirmState?.isWorking ?? true}
+        planChangedCount={workingConfirmState?.planChangedCount ?? 0}
+      />
+      <SeparationConfirmDialog
+        open={!!separationConfirmState?.isOpen}
+        partialCount={separationConfirmState?.partialCount ?? 0}
+        allCount={separationConfirmState?.allCount ?? 0}
+        onClose={handleSeparationConfirmClose}
       />
       <DeleteAlertDialog
         selectedLength={

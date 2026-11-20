@@ -4,7 +4,6 @@ import { Container, Snackbar, Stack } from '@mui/material';
 import { useState } from 'react';
 import { read, utils } from 'xlsx';
 
-import { permission } from '@/app/(main)/_lib/permission';
 import { User } from '@/app/(main)/_lib/types';
 
 import { ImportEqptRfidData } from '../_lib/funcs';
@@ -21,7 +20,7 @@ export const ImportMaster = ({ user }: { user: User }) => {
   /** インポートした機材RFIDマスタファイル名 */
   const [eqptFileName, setEqptFileName] = useState<string>('ファイルが選択されていません');
   /** インポートした顧客マスタファイル名 */
-  const [customerFileName, setCustomerFileName] = useState<string>('ファイルが選択されていません');
+  const [, setCustomerFileName] = useState<string>('ファイルが選択されていません');
   /** 機材RFIDデータ */
   const [eqptData, setEqptData] = useState<EqptImportType[]>([]);
   /** 顧客データ */

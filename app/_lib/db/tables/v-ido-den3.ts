@@ -1,7 +1,5 @@
 import 'server-only';
 
-import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
-
 import pool from '../postgres';
 import { SCHEMA } from '../schema';
 

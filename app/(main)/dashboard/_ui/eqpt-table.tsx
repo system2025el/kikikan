@@ -11,7 +11,6 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import React from 'react';
 
 import { openOrFocusTab } from '../../_lib/tab-focus';
 import { MinusZaikoValues } from '../_lib/types';

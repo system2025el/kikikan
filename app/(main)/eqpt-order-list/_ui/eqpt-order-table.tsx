@@ -3,7 +3,6 @@
 import {
   Box,
   Button,
-  Checkbox,
   Divider,
   Grid2,
   Paper,
@@ -15,8 +14,7 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import { useRouter } from 'next/navigation';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 
 import { dispColors } from '../../_lib/colors';
 import { openOrFocusTab } from '../../_lib/tab-focus';
@@ -24,7 +22,7 @@ import { Loading } from '../../_ui/loading';
 import { MuiTablePagination } from '../../_ui/table-pagination';
 import { FAKE_NEW_ID, ROWS_PER_MASTER_TABLE_PAGE } from '../../(masters)/_lib/constants';
 import { LightTooltipWithText } from '../../(masters)/_ui/tables';
-import { EqptOrderListTableValues, EqptOrderSearchValues } from '../_lib/types';
+import { EqptOrderListTableValues } from '../_lib/types';
 
 /**
  * 受注一覧用テーブル
@@ -46,8 +44,6 @@ export const EqptOrderTable = ({
 }) => {
   /** テーブル1ページの行数 */
   const rowsPerPage = ROWS_PER_MASTER_TABLE_PAGE;
-  /** ページルーター */
-  const router = useRouter();
 
   /** 表示するデータ */
   const list = useMemo(() => {

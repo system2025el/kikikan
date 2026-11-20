@@ -2,8 +2,6 @@ import 'server-only';
 
 import { PoolClient } from 'pg';
 
-import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
-
 import { SCHEMA } from '../schema';
 import { createClient } from '../supabase-server';
 import { MituMeisai } from '../types/t-mitu-meisai-type';

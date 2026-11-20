@@ -2,11 +2,8 @@ import { Typography } from '@mui/material';
 import { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
-import { toJapanYMDString } from '../_lib/date-conversion';
 import { getCurrentUser } from '../_lib/funcs';
 import { permission } from '../_lib/permission';
-import { getIdoList } from './_lib/funcs';
-import { IdoTableValues } from './_lib/types';
 import { IdoList } from './_ui/ido-list';
 
 export const metadata: Metadata = {

@@ -1,6 +1,7 @@
 'use server';
 
 import { createClient } from '@/app/_lib/db/supabase-server';
+import { logError } from '@/app/_lib/log-error';
 
 // import { supabase } from '@/app/_lib/db/supabase-server';
 import { UserValues } from './types';
@@ -19,34 +20,7 @@ export const login = async (data: UserValues) => {
       password: data.password,
     });
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
-};
-
-/**
- * supabase セッションのセット処理
- * @param {string} access_token
- * @param {string} refresh_token
- */
-export const setSession = async (access_token: string, refresh_token: string) => {
-  const supabase = await createClient();
-  supabase.auth.setSession({ access_token, refresh_token }).then(({ data, error }) => {
-    if (data.session) {
-      return data.session;
-    }
-  });
-};
-
-/* ログアウトクリック時 */
-export const handleLogout = async () => {
-  const supabase = await createClient();
-  await supabase.auth.signOut();
 };

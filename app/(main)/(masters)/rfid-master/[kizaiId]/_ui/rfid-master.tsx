@@ -35,9 +35,8 @@ import { permission } from '@/app/(main)/_lib/permission';
 import { User } from '@/app/(main)/_lib/types';
 import { selectNone, SelectTypes } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
-import { MuiTablePagination } from '@/app/(main)/_ui/table-pagination';
 
-import { FAKE_NEW_ID, ROWS_PER_MASTER_TABLE_PAGE } from '../../../_lib/constants';
+import { FAKE_NEW_ID } from '../../../_lib/constants';
 import { LightTooltipWithText } from '../../../_ui/tables';
 import { getRfidsOfTheKizai, updateRfidTagSts } from '../_lib/funcs';
 import { RfidsMasterTableValues } from '../_lib/types';
@@ -57,9 +56,6 @@ export const RfidMaster = ({
   /** 選択肢（状態・所属。page.tsx で取得。所属は登録・編集ダイアログで使う） */
   options: { sts: SelectTypes[]; shozoku: SelectTypes[] };
 }) => {
-  /** テーブル1ページの行数 */
-  const rowsPerPage = ROWS_PER_MASTER_TABLE_PAGE;
-
   /** useState ------------------------------------------------- */
   /** 表示されるRFIDリスト */
   const [theRfids, setTheRfids] = useState<RfidsMasterTableValues[] | undefined>([]);
@@ -67,8 +63,6 @@ export const RfidMaster = ({
   const [currentRfids, setCurrentRfids] = useState<RfidsMasterTableValues[] | undefined>([]);
   /** 状態の選択肢 */
   const stsOption = options.sts;
-  /** 今開いてるテーブルのページ数 */
-  const [page, setPage] = useState(1);
   /** DBのローディング */
   const [isLoading, setIsLoading] = useState(true);
   /** 選択された機材のidのリスト */

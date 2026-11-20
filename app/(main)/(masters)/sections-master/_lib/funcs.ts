@@ -9,6 +9,7 @@ import {
   selectOneSection,
   upDateSectionDB,
 } from '@/app/_lib/db/tables/m-section';
+import { logError } from '@/app/_lib/log-error';
 
 import { emptySection } from './datas';
 import { SectionsMasterDialogValues, SectionsMasterTableValues } from './types';
@@ -29,14 +30,7 @@ export const getSectionShortSelections = async () => {
 
     return data.map((d) => ({ id: d.section_nam_short, label: d.section_nam_short }));
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -57,14 +51,7 @@ export const getSectionSelections = async () => {
 
     return data.map((d) => ({ id: d.section_id, label: d.section_nam }));
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -93,14 +80,7 @@ export const getFilteredSections = async (query: string = '') => {
     }));
     return filteredSections;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -127,14 +107,7 @@ export const getChosenSection = async (id: number) => {
     };
     return sectionDetails;
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -148,14 +121,7 @@ export const addNewSection = async (data: SectionsMasterDialogValues, user: stri
     await insertNewSection(data, user);
     await revalidatePath('/sections-master');
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };
@@ -184,14 +150,7 @@ export const updateSection = async (rawData: SectionsMasterDialogValues, id: num
     }
     await revalidatePath('/sections-master');
   } catch (e) {
-    if (e instanceof Error) {
-      console.error(`[ERROR] ${e.message}`);
-      if (e.cause) {
-        console.error(`[CAUSE]`, e.cause);
-      }
-    } else {
-      console.error(e);
-    }
+    logError(e);
     throw e;
   }
 };

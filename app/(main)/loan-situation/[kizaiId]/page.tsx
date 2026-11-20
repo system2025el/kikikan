@@ -1,10 +1,8 @@
-import { addDays, subDays } from 'date-fns';
 import { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
 import { getCurrentUser } from '../../_lib/funcs';
-import { getColor, getLoanJuchuData, getLoanKizaiData } from './_lib/funcs';
-import { LoanStockTableValues, LoanUseTableValues } from './_lib/types';
+import { getColor, getLoanKizaiData } from './_lib/funcs';
 import { LoanSituation } from './_ui/loan-situation';
 
 export const metadata: Metadata = {
